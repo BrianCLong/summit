@@ -99,7 +99,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { page, pageSize, status, category, search } = req.query;
+      const { page, pageSize, status, category, search } = req.query as any;
 
       const envelope = await policyService.listPolicies(
         principal.tenantId,

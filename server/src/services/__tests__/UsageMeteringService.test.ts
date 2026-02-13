@@ -1,55 +1,79 @@
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { UsageKind } from '../../types/usage.js';
+
+// Track calls for assertions
+let queryCallCount = 0;
+let releaseCallCount = 0;
+
+// Mock modules before imports
+jest.mock('../../config/database.js', () => ({
+  getPostgresPool: () => ({
+    connect: () => Promise.resolve({
+      query: () => {
+        queryCallCount++;
+        return Promise.resolve({ rowCount: 1 });
+      },
+      release: () => {
+        releaseCallCount++;
+      },
+    }),
+  }),
+}));
+
+jest.mock('../../utils/logger.js', () => ({
+  default: {
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+  },
+  error: jest.fn(),
+}));
+
+jest.mock('../../utils/metrics.js', () => ({
+  PrometheusMetrics: class {
+    createCounter(): void {}
+    incrementCounter(): void {}
+  }
+}));
+
+// Import after mocks
 import { UsageMeteringService } from '../UsageMeteringService.js';
 
 describe('UsageMeteringService', () => {
   let service: UsageMeteringService;
 
   beforeEach(() => {
-    service = new UsageMeteringService();
+    // Reset call counts
+    queryCallCount = 0;
+    releaseCallCount = 0;
+
+    // Reset singleton
+    (UsageMeteringService as any).instance = null;
+
+    // Get fresh instance
+    service = UsageMeteringService.getInstance();
   });
 
   it('should record a usage event', async () => {
     await service.record({
-      id: '1',
       tenantId: 't1',
-      dimension: 'api_calls',
+      kind: 'custom' as UsageKind,
       quantity: 10,
-      unit: 'calls',
-      source: 'test',
-      occurredAt: new Date().toISOString(),
-      recordedAt: new Date().toISOString()
+      unit: 'calls'
     });
 
-    const events = await service.getEvents('t1');
-    expect(events).toHaveLength(1);
-    expect(events[0].quantity).toBe(10);
+    expect(queryCallCount).toBeGreaterThan(0);
+    expect(releaseCallCount).toBeGreaterThan(0);
   });
 
-  it('should aggregate events', async () => {
-    const now = new Date().toISOString();
-    await service.record({
-      id: '1',
-      tenantId: 't1',
-      dimension: 'api_calls',
-      quantity: 10,
-      unit: 'calls',
-      source: 'test',
-      occurredAt: now,
-      recordedAt: now
-    });
-    await service.record({
-      id: '2',
-      tenantId: 't1',
-      dimension: 'api_calls',
-      quantity: 5,
-      unit: 'calls',
-      source: 'test',
-      occurredAt: now,
-      recordedAt: now
-    });
+  it('should record a batch of events', async () => {
+    await service.recordBatch([
+      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 1, unit: 'u' },
+      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 2, unit: 'u' }
+    ]);
 
-    const aggregation = await service.getAggregation('t1', 'api_calls', new Date(Date.now() - 10000).toISOString(), new Date(Date.now() + 10000).toISOString());
-    expect(aggregation.totalQuantity).toBe(15);
-    expect(aggregation.eventCount).toBe(2);
+    // BEGIN + 2 inserts + COMMIT = 4 calls
+    expect(queryCallCount).toBe(4);
+    expect(releaseCallCount).toBeGreaterThan(0);
   });
 });

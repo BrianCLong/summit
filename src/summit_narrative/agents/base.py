@@ -8,10 +8,10 @@ from typing import Any, Dict, Protocol
 class AgentMeta:
     name: str
     version: str
-    capabilities: dict[str, Any]
+    capabilities: Dict[str, Any]
 
 
 class Agent(Protocol):
     meta: AgentMeta
 
-    def run(self, inputs: dict[str, Any]) -> dict[str, Any]: ...
+    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]: ...

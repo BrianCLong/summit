@@ -1,10 +1,8 @@
 import argparse
 import json
 import sys
-from pathlib import Path
-
 import jsonschema
-
+from pathlib import Path
 
 def validate(instance_path, schema_path, is_jsonl=False):
     try:
@@ -15,7 +13,7 @@ def validate(instance_path, schema_path, is_jsonl=False):
 
     try:
         if is_jsonl:
-            with open(instance_path, encoding="utf-8") as f:
+            with open(instance_path, "r", encoding="utf-8") as f:
                 for i, line in enumerate(f):
                     if not line.strip(): continue
                     try:

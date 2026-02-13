@@ -161,7 +161,7 @@ export function mountAssistant(app: Express, io?: any) {
       const started = Date.now();
       const reqId = (req as any).reqId;
       const userId = req.user?.sub || null;
-      let input = (req.query.q ?? '').toString(); // Changed to `let`
+      let input = ((req.query.q as any) ?? '').toString(); // Changed to `let`
       const focusIds = (req.query.focusIds as string[] | undefined) || []; // Assuming focusIds in query
       if (isSuspicious(input)) {
         httpErrors.inc();

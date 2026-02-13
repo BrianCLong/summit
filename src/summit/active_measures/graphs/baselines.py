@@ -7,7 +7,7 @@ from .model import Graph, NodeId
 
 
 def out_weight(g: Graph) -> dict[NodeId, float]:
-    s: defaultdict[NodeId, float] = defaultdict(float)
+    s: DefaultDict[NodeId, float] = defaultdict(float)
     for (src, _dst, _k), w in g.edges.items():
         s[src] += w
     return dict(s)

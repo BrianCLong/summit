@@ -8,9 +8,8 @@ import argparse
 import json
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
-
 
 def run_git(args):
     """Run a git command and return the output as a string."""
@@ -86,7 +85,7 @@ def main():
         # Use a stable format for ISO8601
         try:
             from datetime import timezone
-            manifest["timestamp"] = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+            manifest["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         except ImportError:
             # Fallback for older python
             manifest["timestamp"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")

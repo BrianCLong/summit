@@ -1,7 +1,6 @@
+import yaml
 import sys
 from pathlib import Path
-
-import yaml
 
 ALLOWLIST_PATH = Path("mcp/allowlist.yaml")
 

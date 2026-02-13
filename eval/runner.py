@@ -4,14 +4,14 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 
-def load_json(path: Path) -> dict[str, Any]:
+def load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text())
 
 
 def evaluate_output(
-    promptspec_id: str, output: dict[str, Any], rubric: dict[str, Any]
-) -> dict[str, Any]:
-    required_fields: list[str] = rubric.get("required_fields", [])
+    promptspec_id: str, output: Dict[str, Any], rubric: Dict[str, Any]
+) -> Dict[str, Any]:
+    required_fields: List[str] = rubric.get("required_fields", [])
     missing_fields = [field for field in required_fields if field not in output]
     completeness_score = 1.0 if not missing_fields else 0.0
 
@@ -32,7 +32,7 @@ def evaluate_output(
     }
 
 
-def run_eval(fixture_path: Path, rubric_path: Path) -> dict[str, Any]:
+def run_eval(fixture_path: Path, rubric_path: Path) -> Dict[str, Any]:
     fixture = load_json(fixture_path)
     rubric_bundle = load_json(rubric_path)
 

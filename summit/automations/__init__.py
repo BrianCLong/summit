@@ -1,3 +1,3 @@
-from summit.automations.runner import automations_enabled, run
+from summit.automations.runner import run, automations_enabled
 
 __all__ = ["automations_enabled", "run"]

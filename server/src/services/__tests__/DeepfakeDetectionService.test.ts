@@ -1,5 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { DeepfakeDetectionService } from '../DeepfakeDetectionService.js';
+
+// Use dynamic imports
+const { DeepfakeDetectionService } = await import('../DeepfakeDetectionService.js');
 
 describe('DeepfakeDetectionService', () => {
     let service: any;

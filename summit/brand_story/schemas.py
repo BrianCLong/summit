@@ -1,15 +1,14 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
-
+from typing import List, Optional, Dict, Any
 
 @dataclass
 class BrandStoryInput:
     platform: str
     audience_archetype: str
     goal: str
-    defining_moments: list[str]
+    defining_moments: List[str]
     mission: str
-    quirks: list[str] = field(default_factory=list)
+    quirks: List[str] = field(default_factory=list)
 
 @dataclass
 class Episode:
@@ -25,6 +24,6 @@ class Episode:
 @dataclass
 class SeriesPlan:
     mission: str
-    episodes: list[Episode]
+    episodes: List[Episode]
     enabled: bool = True
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)

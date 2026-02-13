@@ -115,7 +115,7 @@ router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Re
 router.get('/correlation', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const { kpiA, kpiB } = req.query;
+    const { kpiA, kpiB } = req.query as any;
 
     if (!kpiA || !kpiB) {
         return res.status(400).json({ error: 'kpiA and kpiB are required' });

@@ -1,7 +1,5 @@
 import pytest
-
-from summit.features.osint_watch.engine import generate_stamp, parse_markdown
-
+from summit.features.osint_watch.engine import parse_markdown, generate_stamp
 
 def test_parse_markdown():
     content = """

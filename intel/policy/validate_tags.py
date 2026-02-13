@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import json
-import os
 import sys
-
+import os
 
 def load_json(path):
-    with open(path) as f:
+    with open(path, "r") as f:
         return json.load(f)
 
 def validate_item_tags(item_path, policy_path):

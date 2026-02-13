@@ -14,7 +14,7 @@ def _get_schema_path(schema_name: str) -> str:
 
 def _load_schema(schema_name: str) -> dict:
     path = _get_schema_path(schema_name)
-    with open(path) as f:
+    with open(path, "r") as f:
         return json.load(f)
 
 def validate_artifact(data: Any, schema_name: str) -> None:

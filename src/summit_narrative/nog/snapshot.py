@@ -7,7 +7,7 @@ from typing import Any, Dict
 from .model import NarrativeOperatingGraph, normalize_edges, normalize_nodes
 
 
-def canonical_payload(nog: NarrativeOperatingGraph) -> dict[str, Any]:
+def canonical_payload(nog: NarrativeOperatingGraph) -> Dict[str, Any]:
     return {
         "version": nog.version,
         "nodes": normalize_nodes(nog.nodes),

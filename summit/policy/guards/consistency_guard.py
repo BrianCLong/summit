@@ -1,6 +1,5 @@
 import re
-from typing import Dict, List
-
+from typing import List, Dict
 
 class ConsistencyGuard:
     """
@@ -8,7 +7,7 @@ class ConsistencyGuard:
     temporal contradictions, or mixed language hallucinations.
     """
 
-    def check(self, transcript: list[dict[str, str]]) -> bool:
+    def check(self, transcript: List[Dict[str, str]]) -> bool:
         """
         Returns True if the transcript passes consistency checks.
         Returns False if a heuristic triggers a consistency violation.

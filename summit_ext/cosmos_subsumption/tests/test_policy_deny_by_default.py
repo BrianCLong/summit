@@ -1,10 +1,8 @@
 import json
 from pathlib import Path
-
 import pytest
-
-from summit_ext.cosmos_subsumption.policy.eval import PolicyError, validate
-from summit_ext.cosmos_subsumption.policy.model import AuthPolicy, ExposureRule
+from summit_ext.cosmos_subsumption.policy.model import ExposureRule, AuthPolicy
+from summit_ext.cosmos_subsumption.policy.eval import validate, PolicyError
 
 FIX = Path("summit_ext/cosmos_subsumption/policy/fixtures")
 

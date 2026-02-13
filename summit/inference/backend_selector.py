@@ -1,13 +1,11 @@
 from __future__ import annotations
-
 from typing import List, Literal, Set
-
-from summit.inference.model_preflight import Preflight
 from summit.policy.model_loading import ModelLoadingPolicy
+from summit.inference.model_preflight import Preflight
 
 Backend = Literal["vllm_native", "vllm_transformers", "hf_transformers", "blocked"]
 
-def select_backend(p: Preflight, policy: ModelLoadingPolicy, vllm_supported_arches: set[str]) -> Backend:
+def select_backend(p: Preflight, policy: ModelLoadingPolicy, vllm_supported_arches: Set[str]) -> Backend:
     """
     Select the best inference backend based on model preflight and policy.
     """

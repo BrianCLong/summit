@@ -1,8 +1,7 @@
 from typing import List, Tuple
 
-
-def check(changed_files: list[str]) -> tuple[bool, list[str]]:
-    errs: list[str] = []
+def check(changed_files: List[str]) -> Tuple[bool, List[str]]:
+    errs: List[str] = []
     has_lockfile_change = any(f.endswith("lock.json") or f.endswith("lock.yaml") or f == "go.sum" or f.endswith("lock") for f in changed_files)
     has_delta_doc = "docs/dependency_delta.md" in changed_files or "dependency-delta.md" in changed_files
 

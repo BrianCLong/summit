@@ -1,9 +1,7 @@
-import os
 import unittest
+import os
 from unittest import mock
-
 from modules.cost_breaker import breaker
-
 
 class TestCostBreaker(unittest.TestCase):
 

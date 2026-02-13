@@ -2,8 +2,7 @@ import hashlib
 import json
 from typing import Any, Dict, List, Union
 
-
-def hash_data(data: Union[str, bytes, dict, list]) -> str:
+def hash_data(data: Union[str, bytes, Dict, List]) -> str:
     """Computes SHA256 hash of data deterministically."""
     if isinstance(data, (dict, list)):
         # Serialize to JSON with sorted keys
@@ -17,7 +16,7 @@ def hash_data(data: Union[str, bytes, dict, list]) -> str:
 
     return hashlib.sha256(data).hexdigest()
 
-def compute_merkle_root(hashes: list[str]) -> str:
+def compute_merkle_root(hashes: List[str]) -> str:
     """Computes a Merkle root from a list of hashes."""
     if not hashes:
         return hash_data("")

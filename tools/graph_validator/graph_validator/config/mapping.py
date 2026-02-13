@@ -30,7 +30,7 @@ def _require(value: Any, message: str) -> Any:
     return value
 
 
-def _load_yaml(path: Path) -> dict[str, Any]:
+def _load_yaml(path: Path) -> Dict[str, Any]:
     try:
         content = path.read_text(encoding='utf-8')
     except FileNotFoundError as exc:
@@ -44,18 +44,18 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return data
 
 
-def _stringify_keys(raw: dict[Any, Any]) -> dict[str, Any]:
-    result: dict[str, Any] = {}
+def _stringify_keys(raw: Dict[Any, Any]) -> Dict[str, Any]:
+    result: Dict[str, Any] = {}
     for key, value in raw.items():
         normalized_key = 'null' if key is None else str(key)
         result[normalized_key] = value
     return result
 
 
-def _parse_entities(raw: Any) -> list[EntityMapping]:
+def _parse_entities(raw: Any) -> List[EntityMapping]:
     if not isinstance(raw, list):
         raise MappingError('entities must be a list')
-    entities: list[EntityMapping] = []
+    entities: List[EntityMapping] = []
     for entry in raw:
         if not isinstance(entry, dict):
             raise MappingError('each entity entry must be a mapping')
@@ -76,12 +76,12 @@ def _parse_entities(raw: Any) -> list[EntityMapping]:
     return entities
 
 
-def _parse_links(raw: Any) -> list[LinkMapping]:
+def _parse_links(raw: Any) -> List[LinkMapping]:
     if raw is None:
         return []
     if not isinstance(raw, list):
         raise MappingError('links must be a list')
-    links: list[LinkMapping] = []
+    links: List[LinkMapping] = []
     for entry in raw:
         if not isinstance(entry, dict):
             raise MappingError('each link entry must be a mapping')
@@ -137,6 +137,6 @@ def load_mapping(path: Path, tenant: Optional[str] = None) -> Mapping:
     )
 
 
-def mapping_to_dict(mapping: Mapping) -> dict[str, Any]:
+def mapping_to_dict(mapping: Mapping) -> Dict[str, Any]:
     result = asdict(mapping)
     return result

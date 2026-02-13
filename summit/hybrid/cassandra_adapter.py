@@ -1,6 +1,5 @@
 import os
 
-
 class CassandraAdapter:
     def __init__(self):
         self.enabled = os.getenv("HYBRID_SOURCES", "off") == "on"

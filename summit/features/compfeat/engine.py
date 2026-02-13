@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-
 @dataclass(frozen=True)
 class CompFeatInput:
   # TODO: replace with real schema once ITEM is provided

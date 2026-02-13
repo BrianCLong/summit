@@ -52,7 +52,7 @@ router.post('/share-links', (req, res) => {
 });
 
 router.get('/share-links', (req, res) => {
-  const scope = req.query.scope ? JSON.parse(String(req.query.scope)) : undefined;
+  const scope = (req.query.scope as any) ? JSON.parse(String((req.query.scope as any))) : undefined;
   const list = listShareLinksByScope(scope as SharingScope | undefined);
   res.json(list);
 });
@@ -69,7 +69,7 @@ router.post('/share-links/:id/revoke', (req, res) => {
 router.get('/share/:token', (req, res) => {
   try {
     const link = accessViaToken(req.params.token);
-    if (req.query.download) {
+    if ((req.query.download as any)) {
       ensureDownloadAllowed(link);
       applyDownloadHeaders(res, link);
       res.status(200).send(`download:${link.resourceId}`);
@@ -158,7 +158,7 @@ router.post('/reviewers/invite/:id/accept', (req, res) => {
 });
 
 router.get('/reviewers/invites', (req, res) => {
-  const scope = req.query.scope ? JSON.parse(String(req.query.scope)) : undefined;
+  const scope = (req.query.scope as any) ? JSON.parse(String((req.query.scope as any))) : undefined;
   res.json(listInvites(scope as SharingScope | undefined));
 });
 
@@ -175,7 +175,7 @@ router.post('/sharing/labels', (req, res) => {
 });
 
 router.get('/sharing/labels', (req, res) => {
-  const scope = req.query.scope ? JSON.parse(String(req.query.scope)) : undefined;
+  const scope = (req.query.scope as any) ? JSON.parse(String((req.query.scope as any))) : undefined;
   res.json(listLabelsByScope(scope as SharingScope));
 });
 

@@ -1,6 +1,5 @@
-import sys
 import unittest
-
+import sys
 
 class TestNoUnapprovedDeps(unittest.TestCase):
     def test_pure_python_stdlib_only(self):
@@ -14,10 +13,10 @@ class TestNoUnapprovedDeps(unittest.TestCase):
         import our own modules without crashing.
         """
         try:
-            import modules.backfill.planner
-            import modules.cost_breaker.breaker
-            import modules.reconciler.reconcile
             import modules.snowflake_operability.policy
+            import modules.reconciler.reconcile
+            import modules.cost_breaker.breaker
+            import modules.backfill.planner
         except ImportError as e:
             self.fail(f"Failed to import new modules: {e}")
 

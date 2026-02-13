@@ -1,8 +1,6 @@
 import pytest
-
-from summit.main import app
 from summit.services.shared.core_verification import CoreVerificationService
-
+from summit.main import app
 
 def test_health_endpoints(client):
     endpoints = [

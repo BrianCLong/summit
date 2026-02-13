@@ -1,8 +1,8 @@
-import dataclasses
 import json
+import dataclasses
 from typing import Any
 
-from .model import AgentDefinition, Capability, RegistryDocument, RiskTier
+from .model import Capability, RegistryDocument, AgentDefinition, RiskTier
 
 
 def _dict_to_agent(d: dict) -> AgentDefinition:

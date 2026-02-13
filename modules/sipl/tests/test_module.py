@@ -1,7 +1,5 @@
 import unittest
-
 from modules.sipl.module import SIPLConfig, run_sipl
-
 
 class TestSIPL(unittest.TestCase):
     def test_config_default(self):

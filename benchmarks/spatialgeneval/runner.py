@@ -2,18 +2,17 @@ import argparse
 import json
 import os
 import sys
-from datetime import UTC, datetime, timezone
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import List, Dict, Any
 
 # Ensure we can import from the current directory if needed
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from benchmarks.spatialgeneval.io import PromptBundle, load_prompt_bundle
+from benchmarks.spatialgeneval.io import load_prompt_bundle, PromptBundle
 from benchmarks.spatialgeneval.judge.base import DummyJudge, JudgeAdapter
 
-
-def aggregate_scores(results: list[dict[str, Any]]) -> dict[str, Any]:
+def aggregate_scores(results: List[Dict[str, Any]]) -> Dict[str, Any]:
     total = len(results)
     if total == 0:
         return {"accuracy": 0.0, "total": 0}
@@ -40,7 +39,7 @@ def aggregate_scores(results: list[dict[str, Any]]) -> dict[str, Any]:
         "accuracy_by_subdomain": sd_accuracy
     }
 
-def compute_robustness(results1: list[dict[str, Any]], results2: list[dict[str, Any]]) -> dict[str, Any]:
+def compute_robustness(results1: List[Dict[str, Any]], results2: List[Dict[str, Any]]) -> Dict[str, Any]:
     """Computes agreement between two judges."""
     agreement_count = 0
     total = min(len(results1), len(results2))
@@ -56,7 +55,7 @@ def compute_robustness(results1: list[dict[str, Any]], results2: list[dict[str, 
         "total": total
     }
 
-def run_eval(bundle: PromptBundle, images_dir: Path, judge: JudgeAdapter) -> list[dict[str, Any]]:
+def run_eval(bundle: PromptBundle, images_dir: Path, judge: JudgeAdapter) -> List[Dict[str, Any]]:
     results = []
     for qa in bundle.questions:
         image_path = images_dir / f"{qa.prompt_id}.png"
@@ -90,7 +89,7 @@ def main():
         print(f"Error: manifest.json not found at {manifest_path}")
         sys.exit(1)
 
-    with open(manifest_path) as f:
+    with open(manifest_path, 'r') as f:
         manifest = json.load(f)
 
     flags = manifest.get("default_flags", {})
@@ -135,7 +134,7 @@ def main():
     stamp = {
         "benchmark_id": "spatialgeneval",
         "run_id": run_id,
-        "generated_at": datetime.now(UTC).isoformat()
+        "generated_at": datetime.now(timezone.utc).isoformat()
     }
 
     with open(output_dir / "report.json", 'w') as f:

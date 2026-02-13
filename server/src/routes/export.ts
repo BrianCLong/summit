@@ -66,20 +66,20 @@ exportRouter.use(tenantHeader());
 
 exportRouter.get('/provenance', async (req, res) => {
   try {
-    const scope = String(req.query.scope || '');
-    const id = String(req.query.id || '');
-    const format = String(req.query.format || 'json').toLowerCase();
-    const ts = Number(req.query.ts || 0);
-    const sig = String(req.query.sig || '');
-    const reasonCodeIn = String(req.query.reasonCodeIn || '');
+    const scope = String((req.query.scope as any) || '');
+    const id = String((req.query.id as any) || '');
+    const format = String((req.query.format as any) || 'json').toLowerCase();
+    const ts = Number((req.query.ts as any) || 0);
+    const sig = String((req.query.sig as any) || '');
+    const reasonCodeIn = String((req.query.reasonCodeIn as any) || '');
     const kindIn = String((req.query as any).kindIn || '');
     const sourceIn = String((req.query as any).sourceIn || '');
     const tenant = String((req.query as any).tenant || '');
     const headerTenant = String((req as any).tenantId || '');
-    const from = req.query.from ? String(req.query.from) : undefined;
-    const to = req.query.to ? String(req.query.to) : undefined;
-    const contains = req.query.contains
-      ? String(req.query.contains)
+    const from = (req.query.from as any) ? String((req.query.from as any)) : undefined;
+    const to = (req.query.to as any) ? String((req.query.to as any)) : undefined;
+    const contains = (req.query.contains as any)
+      ? String((req.query.contains as any))
       : undefined;
 
     if (!['incident', 'investigation'].includes(scope) || !id) {
@@ -131,8 +131,8 @@ exportRouter.get('/provenance', async (req, res) => {
     if (from) filter.from = from;
     if (to) filter.to = to;
     if (contains) filter.contains = contains;
-    const first = Math.min(Number(req.query.first || 1000), 5000);
-    const offset = Math.max(Number(req.query.offset || 0), 0);
+    const first = Math.min(Number((req.query.first as any) || 1000), 5000);
+    const offset = Math.max(Number((req.query.offset as any) || 0), 0);
 
     // Cache JSON responses 60s
     const cacheKey = `exp:${crypto

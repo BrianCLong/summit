@@ -269,10 +269,10 @@ router.get(
       }
 
       const period = (req.query.period as 'daily' | 'weekly' | 'monthly') || 'weekly';
-      const startDate = req.query.startDate
+      const startDate = (req.query.startDate as any)
         ? new Date(req.query.startDate as string)
         : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const endDate = req.query.endDate
+      const endDate = (req.query.endDate as any)
         ? new Date(req.query.endDate as string)
         : new Date();
 

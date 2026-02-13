@@ -3,16 +3,14 @@ import argparse
 import datetime
 import os
 import sys
-from typing import Any, Dict
-
 import yaml
+from typing import Dict, Any
 
-from .evidence import EvidenceStamp, EvidenceWriter
+from .evidence import EvidenceWriter, EvidenceStamp
 from .hashutil import sha256_str, stable_json_dumps
 
-
-def load_registry(path: str) -> dict[str, Any]:
-    with open(path) as f:
+def load_registry(path: str) -> Dict[str, Any]:
+    with open(path, "r") as f:
         return yaml.safe_load(f)
 
 def main():
@@ -25,7 +23,7 @@ def main():
     args = parser.parse_args()
 
     # Generate evidence ID if not provided
-    timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d-%H%M%SZ")
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d-%H%M%SZ")
     evidence_id = args.evidence_id or f"EVID-graphci-{timestamp}"
 
     # Initialize EvidenceWriter
@@ -63,7 +61,7 @@ def main():
     # Write Stamp
     stamp = EvidenceStamp(
         evidence_id=evidence_id,
-        created_utc=datetime.datetime.now(datetime.UTC).isoformat(),
+        created_utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
         input_tree_sha256=sha256_str(stable_json_dumps(registry)),
         tool_version="0.1.0",
         git_sha=os.environ.get("GITHUB_SHA", "local")

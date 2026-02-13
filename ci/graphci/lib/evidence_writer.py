@@ -1,9 +1,8 @@
-import datetime
 import json
-import subprocess
+import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
+from typing import Dict, Any, List, Optional
+import subprocess
 
 class EvidenceWriter:
     def __init__(self, evidence_id: str, output_dir: Path):
@@ -19,13 +18,13 @@ class EvidenceWriter:
             json.dump(data, f, indent=2, sort_keys=True)
         self.artifacts.append(filename)
 
-    def write_stamp(self, input_hash: Optional[dict[str, str]] = None, tool_versions: Optional[dict[str, str]] = None):
+    def write_stamp(self, input_hash: Optional[Dict[str, str]] = None, tool_versions: Optional[Dict[str, str]] = None):
         try:
             commit = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("utf-8").strip()
         except Exception:
             commit = "unknown"
 
-        now = datetime.datetime.now(datetime.UTC).isoformat()
+        now = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         # Schema evidence/schemas/stamp.schema.json properties:
         # evidence_id, timestamp, commit, input_hash_tree, tool_versions
@@ -42,7 +41,7 @@ class EvidenceWriter:
 
         self.write_json("stamp.json", stamp_data)
 
-    def write_metrics(self, metrics: dict[str, Any]):
+    def write_metrics(self, metrics: Dict[str, Any]):
         # Schema evidence/schemas/metrics.schema.json properties:
         # evidence_id, metrics (object)
         data = {
@@ -51,7 +50,7 @@ class EvidenceWriter:
         }
         self.write_json("metrics.json", data)
 
-    def write_report(self, summary: str, inputs: list[str] = None):
+    def write_report(self, summary: str, inputs: List[str] = None):
         # Schema evidence/schemas/report.schema.json properties:
         # evidence_id, summary, inputs, outputs, notes
 

@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from pathlib import Path
-
 
 def lint_policy(skill_root: Path) -> list[str]:
     # Placeholder for policy linting

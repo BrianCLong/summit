@@ -9,7 +9,7 @@ from ..agents.scout_stub import ScoutStub
 from ..agents.strategist_stub import StrategistStub
 
 
-def default_agents() -> dict[str, object]:
+def default_agents() -> Dict[str, object]:
     return {
         "scout": ScoutStub(),
         "cartographer": CartographerStub(),

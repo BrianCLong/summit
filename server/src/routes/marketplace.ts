@@ -4,8 +4,8 @@ import { installStep } from '../marketplace.js';
 const router = express.Router();
 
 router.post('/install', async (req, res) => {
-  const name = String(req.query.name || '');
-  const version = String(req.query.version || '');
+  const name = String((req.query.name as any) || '');
+  const version = String((req.query.version as any) || '');
   if (!name || !version)
     return res.status(400).json({ error: 'name and version required' });
   try {

@@ -1,12 +1,11 @@
-import os
-import sys
 import unittest
+import sys
+import os
 
 # Ensure src is in path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 from narrative_intel.pipeline.extract_skeleton import NarrativeSkeletonExtractor
-
 
 class TestNarrativeSkeletonExtractor(unittest.TestCase):
     def test_determinism(self):

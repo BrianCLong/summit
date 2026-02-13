@@ -1,10 +1,8 @@
-from typing import List, Optional
-
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
-
-from services.graphrag_api.middleware.budget_enforcer import BudgetEnforcer, TraceContext
+from typing import List, Optional
 from services.graphrag_api.models.reasoning_budget import ReasoningBudget
+from services.graphrag_api.middleware.budget_enforcer import BudgetEnforcer, TraceContext
 
 router = APIRouter()
 enforcer = BudgetEnforcer()
@@ -16,7 +14,7 @@ class ChatRequest(BaseModel):
 
 class EvidencePath(BaseModel):
     id: str
-    nodes: list[str]
+    nodes: List[str]
 
 class BudgetUsage(BaseModel):
     nodes_visited: int
@@ -24,7 +22,7 @@ class BudgetUsage(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
-    evidence_paths: list[EvidencePath]
+    evidence_paths: List[EvidencePath]
     explanation_grade: str
     stop_reason: str
     budget_used: BudgetUsage

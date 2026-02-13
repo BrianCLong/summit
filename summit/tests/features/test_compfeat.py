@@ -1,7 +1,5 @@
 import pytest
-
-from summit.features.compfeat.engine import CompFeatInput, run_compfeat
-
+from summit.features.compfeat.engine import run_compfeat, CompFeatInput
 
 def test_run_compfeat_returns_placeholder():
     input_data = CompFeatInput(raw={"some": "data"})

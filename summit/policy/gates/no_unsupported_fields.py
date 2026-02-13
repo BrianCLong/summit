@@ -6,8 +6,8 @@ ALLOWED_FIELDS = {
     "solution", "mechanism", "claims", "trust_tier", "assumptions"
 }
 
-def check(profile: dict) -> tuple[bool, list[str]]:
-    errs: list[str] = []
+def check(profile: Dict) -> Tuple[bool, List[str]]:
+    errs: List[str] = []
     extra_fields = set(profile.keys()) - ALLOWED_FIELDS
     if extra_fields:
         errs.append(f"Unsupported fields found: {extra_fields}")

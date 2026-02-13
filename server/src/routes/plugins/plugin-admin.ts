@@ -124,7 +124,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { category, status, search, page, pageSize } = req.query;
+      const { category, status, search, page, pageSize } = req.query as any;
 
       const envelope = await pluginRegistry.listPlugins(
         {

@@ -1,12 +1,10 @@
 import argparse
-import datetime
+import yaml
 import json
 import os
 import sys
-from typing import Any, Dict
-
-import yaml
-
+import datetime
+from typing import Dict, Any
 
 # Mock provider for testing
 class MockStepFunProvider:
@@ -31,8 +29,8 @@ class MockStepFunProvider:
             }
         }
 
-async def run_case(case_path: str, provider: Any) -> dict[str, Any]:
-    with open(case_path) as f:
+async def run_case(case_path: str, provider: Any) -> Dict[str, Any]:
+    with open(case_path, 'r') as f:
         case_def = yaml.safe_load(f)
 
     print(f"Running case: {case_def.get('name', 'Unknown')}")

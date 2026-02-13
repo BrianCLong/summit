@@ -1,9 +1,9 @@
 import json
 import time
-from typing import Any, Dict, List
+from typing import List, Dict, Any
 
-from summit.evals.retriever.backends.faiss_backend import FAISSBackend
 from summit.evals.retriever.datasets.esci_loader import ESCILoader
+from summit.evals.retriever.backends.faiss_backend import FAISSBackend
 from summit.ingest.flatten import StructuredFlattener
 from summit.ingest.flatten_policy import FlatteningPolicy
 
@@ -18,7 +18,7 @@ class EvalRunner:
         self.policy = FlatteningPolicy(enabled=True)
         self.flattener = StructuredFlattener(self.policy)
 
-    def mock_embed(self, texts: list[str]) -> list[list[float]]:
+    def mock_embed(self, texts: List[str]) -> List[List[float]]:
         """Stub for embedding model."""
         # Just return dummy vectors based on length and first chars
         return [[(len(t) % 100) / 100.0] * 384 for t in texts]
@@ -62,7 +62,7 @@ class EvalRunner:
 
         return results
 
-    def compute_metrics(self, hits: list[list[str]], queries: list[dict[str, Any]]):
+    def compute_metrics(self, hits: List[List[str]], queries: List[Dict[str, Any]]):
         # In a real eval, we'd check hits against ground truth relevance
         # Here we just produce dummy metrics for the harness skeleton
         return {

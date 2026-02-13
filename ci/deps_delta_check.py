@@ -10,7 +10,7 @@ def _load_allowlist(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
-def _git_diff_names(base_ref: str, head_ref: str) -> list[str]:
+def _git_diff_names(base_ref: str, head_ref: str) -> List[str]:
     try:
         result = subprocess.run(
             ["git", "diff", "--name-only", f"{base_ref}...{head_ref}"],
@@ -23,9 +23,9 @@ def _git_diff_names(base_ref: str, head_ref: str) -> list[str]:
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
 
 
-def _filter_ignored(paths: Iterable[str], ignore_patterns: Iterable[str]) -> list[str]:
+def _filter_ignored(paths: Iterable[str], ignore_patterns: Iterable[str]) -> List[str]:
     ignore = list(ignore_patterns)
-    filtered: list[str] = []
+    filtered: List[str] = []
     for path in paths:
         if any(fnmatch(path, pattern) for pattern in ignore):
             continue
@@ -50,8 +50,8 @@ def main() -> int:
         print("deps-delta: no changes detected")
         return 0
 
-    dependency_files: set[str] = set(allowlist.get("dependency_files", []))
-    deps_delta_files: set[str] = set(allowlist.get("deps_delta_files", []))
+    dependency_files: Set[str] = set(allowlist.get("dependency_files", []))
+    deps_delta_files: Set[str] = set(allowlist.get("deps_delta_files", []))
 
     touched_dependency_files = [
         path for path in changed if _matches_any(path, dependency_files)

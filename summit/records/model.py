@@ -8,6 +8,6 @@ class Record:
     record_id: str
     owner: str
     classification: str  # e.g. public|internal|confidential|restricted
-    permissions: dict[str, list[Action]]  # principal -> allowed actions
-    provenance: list[dict]
+    permissions: Dict[str, List[Action]]  # principal -> allowed actions
+    provenance: List[dict]
     payload_ref: str

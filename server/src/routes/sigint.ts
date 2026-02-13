@@ -46,7 +46,7 @@ router.get('/emitters', (req: Request, res: Response) => {
  * Get recent raw signal logs.
  */
 router.get('/signals', (req: Request, res: Response) => {
-  const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+  const limit = (req.query.limit as any) ? parseInt(req.query.limit as string) : 50;
   const signals = sigIntManager.getRecentSignals(limit);
   res.json({ count: signals.length, signals });
 });

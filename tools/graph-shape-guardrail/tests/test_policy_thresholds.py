@@ -1,7 +1,6 @@
 import pytest
 from graph_shape_guardrail.policy import PolicyEngine
 
-
 def test_policy_pass():
     engine = PolicyEngine({'skew_threshold': 0.5, 'top1p_threshold': 0.05})
     current = {'skew_deg': 1.1, 'top1p_mass': 0.20}

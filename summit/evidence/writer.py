@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import hashlib
 import json
+import hashlib
 import os
 from dataclasses import dataclass
 from datetime import UTC, datetime, timezone
@@ -133,7 +133,7 @@ def write_bundle(run_ctx: dict, out_dir: str) -> None:
     (root / "metrics.json").write_bytes(metrics_bytes)
 
     # Timestamps ONLY here
-    stamp = {"generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z")}
+    stamp = {"generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}
     with open(root / "stamp.json", "w", encoding="utf-8") as f:
         json.dump(stamp, f, sort_keys=True, indent=2)
 

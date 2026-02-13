@@ -4,6 +4,7 @@ from typing import Any, Dict, List
 
 from .decisions import PolicyDecision
 
+
 DEFAULT_POLICY_REFS = {
     "human_approval": "policy.external_publish.human_approval",
     "simulate_only": "policy.simulate_only.allow",
@@ -11,9 +12,9 @@ DEFAULT_POLICY_REFS = {
 }
 
 
-def evaluate_intervention(intervention: dict[str, Any]) -> PolicyDecision:
-    explanations: list[str] = []
-    policy_refs: list[str] = []
+def evaluate_intervention(intervention: Dict[str, Any]) -> PolicyDecision:
+    explanations: List[str] = []
+    policy_refs: List[str] = []
 
     channel = intervention.get("channel")
     if channel == "external_publish" and not intervention.get("human_approval"):

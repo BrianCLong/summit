@@ -121,7 +121,7 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
 
   // CSRF / State Validation
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.body.RelayState || req.body.state || req.query.state || req.query.RelayState;
+  const stateParam = req.body.RelayState || req.body.state || (req.query.state as any) || (req.query.RelayState as any);
 
   // In SAML, RelayState is passed back. In OIDC, state is passed back.
   // Note: Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),
@@ -167,7 +167,7 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.query.state || req.query.RelayState;
+  const stateParam = (req.query.state as any) || (req.query.RelayState as any);
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);

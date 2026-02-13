@@ -52,7 +52,7 @@ router.use(ensureFinOpsAccess);
  */
 router.get('/dashboard', async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
-  const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
+  const tenantId = (authReq.user?.tenantId || (req.query.tenantId as any)) as string;
 
   if (!tenantId) {
     return res.status(400).json({ error: 'Tenant ID required' });
@@ -141,7 +141,7 @@ router.get('/dashboard', async (req: Request, res: Response) => {
 // Returns cost optimization recommendations
 router.get('/recommendations', async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
-  const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
+  const tenantId = (authReq.user?.tenantId || (req.query.tenantId as any)) as string;
 
   try {
     const opportunities = await costOptimizer.identifyOptimizationOpportunities(tenantId);
@@ -156,7 +156,7 @@ router.get('/recommendations', async (req: Request, res: Response) => {
 // Executes a specific recommendation
 router.post('/recommendations/:id/execute', async (req: Request, res: Response) => {
   const authReq = req as AuthenticatedRequest;
-  const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
+  const tenantId = (authReq.user?.tenantId || (req.query.tenantId as any)) as string;
   const opportunityId = req.params.id;
 
   try {
@@ -179,7 +179,7 @@ router.post('/recommendations/:id/execute', async (req: Request, res: Response) 
 // Returns active FinOps policies
 router.get('/policies', async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
-    const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
+    const tenantId = (authReq.user?.tenantId || (req.query.tenantId as any)) as string;
     try {
         const policies = await policyService.getPolicies(tenantId);
         res.json({ policies });
@@ -193,7 +193,7 @@ router.get('/policies', async (req: Request, res: Response) => {
 // Creates or updates a policy
 router.post('/policies', async (req: Request, res: Response) => {
     const authReq = req as AuthenticatedRequest;
-    const tenantId = (authReq.user?.tenantId || req.query.tenantId) as string;
+    const tenantId = (authReq.user?.tenantId || (req.query.tenantId as any)) as string;
     const policy = req.body;
 
     // Basic validation

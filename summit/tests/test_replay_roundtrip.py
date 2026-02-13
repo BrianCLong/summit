@@ -1,7 +1,6 @@
 from summit.evidence.run_bundle import RunBundle
 from summit.replay.replayer import Replayer
 
-
 def test_roundtrip():
     events = [{"type": "message", "content": "hi"}]
     bundle = RunBundle(run_id="run-1", events=events)

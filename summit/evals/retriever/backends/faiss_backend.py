@@ -21,7 +21,7 @@ class FAISSBackend:
     def is_available(self):
         return FAISS_AVAILABLE
 
-    def add_vectors(self, vectors: Any, ids: list[str]):
+    def add_vectors(self, vectors: Any, ids: List[str]):
         if not FAISS_AVAILABLE:
             raise RuntimeError("FAISS is not installed.")
 

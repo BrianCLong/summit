@@ -1,9 +1,6 @@
 from __future__ import annotations
-
 import os
-
 from ..evidence.emit import emit
-
 
 class SmartShield:
     def __init__(self):

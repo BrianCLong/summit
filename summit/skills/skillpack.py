@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from pathlib import Path
-
-from summit.skills.frontmatter import SkillFrontmatter, normalize_frontmatter, split_frontmatter
-
+from summit.skills.frontmatter import split_frontmatter, normalize_frontmatter, SkillFrontmatter
 
 @dataclass(frozen=True)
 class SkillPack:

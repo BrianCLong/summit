@@ -54,8 +54,8 @@ router.get('/tickets', async (req, res) => {
       category: req.query.category as any,
       reporter_id: req.query.reporter_id as string,
       assignee_id: req.query.assignee_id as string,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+      limit: (req.query.limit as any) ? parseInt(req.query.limit as string, 10) : 50,
+      offset: (req.query.offset as any) ? parseInt(req.query.offset as string, 10) : 0,
     };
 
     const [tickets, count] = await Promise.all([
@@ -154,7 +154,7 @@ router.post('/tickets/:id/comments', express.json(), async (req, res) => {
 /** GET /api/support/tickets/:id/comments - Get comments for a ticket */
 router.get('/tickets/:id/comments', async (req, res) => {
   try {
-    const includeDeleted = req.query.includeDeleted === 'true';
+    const includeDeleted = (req.query.includeDeleted as any) === 'true';
     const comments = await getComments(req.params.id, { includeDeleted });
     res.json(comments);
   } catch (error: any) {

@@ -1,11 +1,10 @@
-import datetime
-import hashlib
-import json
 import os
-import random
-import subprocess
+import json
 import time
-
+import hashlib
+import datetime
+import subprocess
+import random
 
 def get_git_sha():
     try:
@@ -14,7 +13,7 @@ def get_git_sha():
         return "0000000"
 
 def generate_evidence_id(slug="transform_search"):
-    date_str = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d")
+    date_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
     git_sha = get_git_sha()
     return f"osintplatint_{date_str}_{slug}_{git_sha}"
 
@@ -69,7 +68,7 @@ def main():
     # 3. Generate Stamp
     stamp = {
         "evidence_id": evidence_id,
-        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
+        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "git_commit": get_git_sha(),
         "actor": os.environ.get("USER", "jules"),
         "version": "1.0.0"
@@ -89,7 +88,7 @@ def main():
     index_path = os.path.join("evidence", "index.json")
     if os.path.exists(index_path):
         try:
-            with open(index_path) as f:
+            with open(index_path, "r") as f:
                 index = json.load(f)
 
             # Use 'items' list format as per memory
@@ -103,7 +102,7 @@ def main():
                     "type": "eval"
                 })
             else:
-                 print("Warning: 'items' in index.json is not a list. Skipping update.")
+                 print(f"Warning: 'items' in index.json is not a list. Skipping update.")
 
             if isinstance(index["items"], list):
                 with open(index_path, "w") as f:

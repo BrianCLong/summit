@@ -1,8 +1,6 @@
 from __future__ import annotations
-
 import json
 from pathlib import Path
-
 import jsonschema
 
 SCHEMA_PATH = Path(__file__).parent / "spp_schema.json"
@@ -21,7 +19,7 @@ def validate_spp(manifest_path: str | Path) -> list[str]:
         return [f"invalid json: {e}"]
 
     try:
-        with open(SCHEMA_PATH, encoding="utf-8") as f:
+        with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
             schema = json.load(f)
         jsonschema.validate(instance=data, schema=schema)
     except jsonschema.ValidationError as e:

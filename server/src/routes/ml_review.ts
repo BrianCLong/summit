@@ -119,7 +119,7 @@ router.post('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (
 router.get('/queues/:queueId/items', ensureAuthenticated, ensureTenant, async (req: any, res, next) => {
     try {
         const { queueId } = req.params;
-        let limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+        let limit = (req.query.limit as any) ? parseInt(req.query.limit as string) : 10;
         if (isNaN(limit) || limit < 1) limit = 10;
         if (limit > 100) limit = 100; // Cap limit
 

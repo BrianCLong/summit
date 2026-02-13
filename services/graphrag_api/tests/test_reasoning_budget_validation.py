@@ -1,12 +1,6 @@
 import pytest
 from pydantic import ValidationError
-
-from services.graphrag_api.models.reasoning_budget import (
-    ExplorationBudget,
-    ReasoningBudget,
-    StopCondition,
-)
-
+from services.graphrag_api.models.reasoning_budget import ReasoningBudget, ExplorationBudget, StopCondition
 
 def test_default_values():
     budget = ReasoningBudget()

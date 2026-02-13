@@ -1,9 +1,7 @@
-from typing import Any, Dict, List
-
+from typing import Dict, Any, List
 from summit.slopguard.scoring import get_slop_score
 
-
-def validate_dataset_provenance(dataset_meta: dict[str, Any], policy: dict[str, Any]) -> dict[str, Any]:
+def validate_dataset_provenance(dataset_meta: Dict[str, Any], policy: Dict[str, Any]) -> Dict[str, Any]:
     """
     Ensures datasets have required provenance tags and checks for slop infiltration.
     """

@@ -4,14 +4,13 @@ Narrative Node Definitions for Streaming Intelligence.
 Maps to CLAIM-01: Narrative intelligence measures dominant sensemaking stories.
 """
 
-from typing import Any, Dict, Optional
-
+from typing import Dict, Optional, Any
 
 class NarrativeNode:
     """
     Represents a distinct narrative cluster or theme in the streaming graph.
     """
-    def __init__(self, narrative_id: str, strength: float = 0.0, attributes: Optional[dict[str, Any]] = None):
+    def __init__(self, narrative_id: str, strength: float = 0.0, attributes: Optional[Dict[str, Any]] = None):
         """
         Initialize a NarrativeNode.
 
@@ -31,7 +30,7 @@ class NarrativeNode:
         self.strength += delta
         return self.strength
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """
         Serialize the node for evidence bundles.
         """

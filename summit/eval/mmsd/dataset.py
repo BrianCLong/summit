@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List, Union
 
-
 class MMSD2Dataset:
     """
     Adapter for MMSD2.0 Dataset.
@@ -18,7 +17,7 @@ class MMSD2Dataset:
         self.images_dir = self.root_dir / "images"
         self.data_file = self.root_dir / f"{split}.json"
 
-        self._data: list[dict[str, Any]] = []
+        self._data: List[Dict[str, Any]] = []
         self._load_data()
 
     def _load_data(self) -> None:
@@ -37,7 +36,7 @@ class MMSD2Dataset:
                 raise FileNotFoundError(f"Data file not found: {self.data_file}")
 
         try:
-            with open(self.data_file, encoding="utf-8") as f:
+            with open(self.data_file, "r", encoding="utf-8") as f:
                 content = json.load(f)
                 if isinstance(content, list):
                     self._data = content
@@ -53,7 +52,7 @@ class MMSD2Dataset:
     def __len__(self) -> int:
         return len(self._data)
 
-    def __getitem__(self, idx: int) -> dict[str, Any]:
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
         item = self._data[idx]
 
         # Normalize fields

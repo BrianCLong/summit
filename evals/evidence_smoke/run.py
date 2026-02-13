@@ -1,11 +1,9 @@
-import hashlib
-import json
 import os
 import shutil
-
-from libs.evidence.artifacts import save_metrics, save_report, save_stamp
+import hashlib
+import json
 from libs.evidence.eid import compute_eid
-
+from libs.evidence.artifacts import save_report, save_metrics, save_stamp
 
 def get_file_hash(path):
     with open(path, "rb") as f:

@@ -1,7 +1,6 @@
 import hashlib
 import heapq
 
-
 def bottom_k_sample_stream(stream, k, seed="v1"):
     """
     Performs deterministic bottom-k hash sampling over a stream of (key, degree) tuples.

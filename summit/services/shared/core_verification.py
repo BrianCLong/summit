@@ -1,8 +1,6 @@
-from typing import Any, Dict, Optional
-
+from typing import Optional, Dict, Any
 from summit.services.cache import CacheService
 from summit.services.vector_search import VectorSearch
-
 
 class CoreVerificationService:
     """Shared verification logic for all 7 products"""
@@ -18,7 +16,7 @@ class CoreVerificationService:
         claim: str,
         context: Optional[str] = None,
         product: str = "generic"
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         Universal verification method
         Returns: {verdict, confidence, evidence, reasoning}

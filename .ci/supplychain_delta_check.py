@@ -3,8 +3,8 @@
 Supply-chain delta gate.
 Fails if dependency files (package.json, requirements.in) changed without a delta doc update.
 """
-import pathlib
 import sys
+import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DELTA_DOC = ROOT / "docs" / "supplychain" / "dependency_delta.md"
@@ -19,7 +19,7 @@ def main() -> int:
     # and ensure DELTA_DOC was also modified in the same PR.
     # For this implementation, we ensure the file exists and has content.
 
-    with open(DELTA_DOC) as f:
+    with open(DELTA_DOC, 'r') as f:
         content = f.read()
 
     if "Rationale" not in content or "Delta Log" not in content:

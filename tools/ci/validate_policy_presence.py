@@ -1,5 +1,5 @@
-import sys
 from pathlib import Path
+import sys
 
 REQUIRED = [
     "policy/ai-coding/prompt-packet.md",

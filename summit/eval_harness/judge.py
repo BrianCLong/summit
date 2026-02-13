@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 import json
 from pathlib import Path
 from typing import Any
-
 
 class Judge:
     def __init__(self, rubric_path: str = "summit/eval_harness/judge_prompts/rubric_v1.txt"):

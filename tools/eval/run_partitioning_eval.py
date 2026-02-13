@@ -1,16 +1,15 @@
+import sys
 import json
 import os
-import sys
 import time
-from typing import Any, Dict, List
+from typing import Dict, Any, List
 
 # Add root to sys.path
 sys.path.insert(0, ".")
 
-from summit.partitioning.neo4j_shard_exec import Neo4jShardExecutor
-from summit.partitioning.router import NoopRouter
 from summit.partitioning.shard_plan import ShardPlan
-
+from summit.partitioning.router import NoopRouter
+from summit.partitioning.neo4j_shard_exec import Neo4jShardExecutor
 
 def run_eval():
     # Simulate eval run

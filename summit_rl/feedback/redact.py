@@ -1,6 +1,5 @@
 import re
-from typing import Any, Dict, List, Optional
-
+from typing import List, Dict, Any, Optional
 from .types import RichFeedback
 
 SECRET_PATTERNS = [

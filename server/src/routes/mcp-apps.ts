@@ -101,7 +101,7 @@ const INVESTIGATION_CANVAS_HTML = `
 `;
 
 router.get('/render', (req, res) => {
-  const { uri, signature } = req.query;
+  const { uri, signature } = req.query as any;
 
   // Audit Log: Record access to MCP App resources
   // This serves as the start of the Interaction Ledger for UI loading

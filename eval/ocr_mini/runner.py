@@ -1,12 +1,9 @@
 from __future__ import annotations
-
 import argparse
 import json
 import os
 from pathlib import Path
-
-from summit.evidence import default_paths, init_evidence, write_json
-
+from summit.evidence import init_evidence, default_paths, write_json
 
 def run_eval(backend: str, smoke: bool = False):
     print(f"Running OCR mini-eval with backend: {backend}")
@@ -41,7 +38,7 @@ def main():
     init_evidence(paths, args.run_id, "deepseek-ocr-mini-eval", evidence_id=evidence_id)
 
     # Update metrics with results
-    with open(paths.metrics) as f:
+    with open(paths.metrics, "r") as f:
         metrics_data = json.load(f)
     metrics_data["metrics"] = results
     write_json(paths.metrics, metrics_data)

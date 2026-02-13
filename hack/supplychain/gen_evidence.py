@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-import argparse
 import json
 import os
 import sys
-
+import argparse
 
 def generate_evidence(evidence_id, output_dir):
     os.makedirs(output_dir, exist_ok=True)

@@ -6,7 +6,6 @@ sys.path.append(os.getcwd())
 
 from maestro.checks import check_run_policy_gate
 
-
 def test_policy_fallback():
     os.environ["COMPANYOS_BASE_URL"] = "http://invalid-pdp"
     os.environ["COMPANYOS_ENFORCE"] = "1"

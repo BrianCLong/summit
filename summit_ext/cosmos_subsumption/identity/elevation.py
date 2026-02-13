@@ -1,10 +1,7 @@
 from __future__ import annotations
-
 import time
-
-from ..evidence.emit import emit
 from .adapter import IdentityAdapter
-
+from ..evidence.emit import emit
 
 class AdminElevation:
     def __init__(self, adapter: IdentityAdapter):

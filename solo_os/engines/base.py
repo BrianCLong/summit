@@ -1,18 +1,17 @@
 from dataclasses import dataclass
-from typing import Any, Dict, Protocol
-
+from typing import Dict, Any, Protocol
 
 @dataclass(frozen=True)
 class RunRequest:
     engine: str
     mode: str  # "dry_run" | "execute"
-    payload: dict[str, Any]
+    payload: Dict[str, Any]
 
 @dataclass(frozen=True)
 class RunResult:
     ok: bool
     evidence_path: str
-    summary: dict[str, Any]
+    summary: Dict[str, Any]
 
 class Engine(Protocol):
     name: str

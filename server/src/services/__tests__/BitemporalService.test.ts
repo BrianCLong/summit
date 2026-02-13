@@ -1,8 +1,6 @@
+
 import { describe, it, expect, beforeAll } from '@jest/globals';
 import { bitemporalService } from '../BitemporalService.js';
-
-// Mock DB connection if needed or assume integration test setup handled globally
-// Given the error was type error in service code, we just fix inputs here.
 
 describe('Bitemporal Service (Task #109)', () => {
   const tenantId = 'test-tenant';
@@ -16,7 +14,7 @@ describe('Bitemporal Service (Task #109)', () => {
       tenantId,
       kind: 'Person',
       props: { name: 'John Doe', status: 'Active' },
-      validFrom: validFrom, // Pass Date object
+      validFrom: validFrom.toISOString(),
       createdBy: 'test-user'
     });
 
@@ -35,7 +33,7 @@ describe('Bitemporal Service (Task #109)', () => {
     const transactionBeforeCorrection = new Date();
 
     // Small delay to ensure timestamp separation
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r => setTimeout(r, 1000));
 
     // Record a correction (e.g. name was actually Jane)
     await bitemporalService.recordFact({
@@ -43,7 +41,7 @@ describe('Bitemporal Service (Task #109)', () => {
       tenantId,
       kind: 'Person',
       props: { name: 'Jane Doe', status: 'Active' },
-      validFrom: validFrom, // Pass Date object
+      validFrom: validFrom.toISOString(),
       createdBy: 'corrector'
     });
 

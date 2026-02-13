@@ -1,8 +1,8 @@
-import json
 import re
+import json
 
 try:
-    with open("evidence/index.json") as f:
+    with open("evidence/index.json", "r") as f:
         data = json.load(f)
 
     data["version"] = 1.0

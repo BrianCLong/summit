@@ -163,7 +163,7 @@ const LINEAGE_UI_CONTRACT = process.env.LINEAGE_UI_CONTRACT === 'true';
 
 if (LINEAGE_UI_CONTRACT) {
   lineageRouter.get('/graph', (req, res) => {
-    const { entityId, fieldPath, collapse } = req.query;
+    const { entityId, fieldPath, collapse } = req.query as any;
 
     if (!entityId || !fieldPath) {
       return res.status(400).json({

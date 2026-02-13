@@ -33,7 +33,7 @@ auditAccessRouter.get('/cases/:caseId', async (req, res) => {
     }
 
     const { caseId } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+    const limit = (req.query.limit as any) ? parseInt(req.query.limit as string) : 100;
 
     const pg = getPostgresPool();
     const repo = new AuditAccessLogRepo(pg);
@@ -71,7 +71,7 @@ auditAccessRouter.get('/users/:userId', async (req, res) => {
     }
 
     const { userId } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+    const limit = (req.query.limit as any) ? parseInt(req.query.limit as string) : 100;
 
     const pg = getPostgresPool();
     const repo = new AuditAccessLogRepo(pg);

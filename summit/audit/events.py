@@ -1,13 +1,11 @@
 from __future__ import annotations
-
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
-
+from typing import List, Optional, Dict
 
 @dataclass(frozen=True)
 class PolicyDecision:
     action: str  # allow|deny|redact
-    reasons: list[str]
+    reasons: List[str]
 
 @dataclass(frozen=True)
 class PromptEvent:
@@ -20,6 +18,6 @@ class PromptEvent:
     session_id: Optional[str] = None
     inputs_redacted: str = ""
     outputs_redacted: str = ""
-    tools_called: Optional[list[str]] = None
+    tools_called: Optional[List[str]] = None
     policy_decision: Optional[PolicyDecision] = None
-    meta: Optional[dict[str, str]] = None
+    meta: Optional[Dict[str, str]] = None

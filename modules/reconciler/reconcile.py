@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple
 
-
-def reconcile_expected_vs_actual(expected: list[dict[str, Any]], actual: list[dict[str, Any]]) -> tuple[bool, list[str]]:
+def reconcile_expected_vs_actual(expected: List[Dict[str, Any]], actual: List[Dict[str, Any]]) -> Tuple[bool, List[str]]:
     """
     Semantic reconciliation to catch 'load succeeded but values are wrong/null' cases.
     This is crucial for detecting 'silent JSON ingestion failures' where the database
     might successfully load rows but with NULLs or default values instead of the real data.
     """
-    problems: list[str] = []
+    problems: List[str] = []
     if len(expected) != len(actual):
         problems.append(f"ROWCOUNT expected={len(expected)} actual={len(actual)}")
         return False, problems

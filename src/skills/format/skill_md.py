@@ -1,8 +1,8 @@
 from __future__ import annotations
-
-import re
 from dataclasses import dataclass
 from typing import Optional, Tuple
+
+import re
 
 _FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---\n(.*)$", re.S)
 
@@ -11,7 +11,7 @@ class SkillMetadata:
     name: str
     description: str
 
-def parse_skill_md(raw: str) -> tuple[SkillMetadata, str]:
+def parse_skill_md(raw: str) -> Tuple[SkillMetadata, str]:
     """
     Parse SKILL.md using YAML-frontmatter-like delimiters.
     Required keys: name, description

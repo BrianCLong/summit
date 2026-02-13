@@ -1,7 +1,5 @@
 from __future__ import annotations
-
 from pathlib import Path
-
 
 def build_template_deck(out_dir: Path) -> Path:
     """

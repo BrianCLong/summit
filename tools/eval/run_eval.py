@@ -1,6 +1,6 @@
+from pathlib import Path
 import json
 import sys
-from pathlib import Path
 
 FIXTURES_DIR = Path("eval/ai_assist/fixtures/no-extra-features")
 

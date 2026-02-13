@@ -1,11 +1,8 @@
-import json
-from pathlib import Path
-
 import pytest
 import yaml
-
+import json
+from pathlib import Path
 from eval.finance.run_eval import run_eval
-
 
 def test_run_eval_success(tmp_path):
     config_path = tmp_path / "config.yaml"

@@ -1,12 +1,11 @@
-import datetime
-import hashlib
 import json
 import os
 import sys
+import datetime
+import hashlib
 import uuid
-
 try:
-    from jsonschema import ValidationError, validate
+    from jsonschema import validate, ValidationError
 except ImportError:
     print("jsonschema not installed. Please install it using: pip install jsonschema")
     sys.exit(1)
@@ -24,7 +23,7 @@ def generate_evidence_id():
 
 def load_schema(filename):
     path = os.path.join(SCHEMA_DIR, filename)
-    with open(path) as f:
+    with open(path, 'r') as f:
         return json.load(f)
 
 def generate_sample_data(schema_name):
@@ -100,7 +99,7 @@ def main():
             schema = load_schema(schema_file)
             data = generate_sample_data(schema_file)
             validate(instance=data, schema=schema)
-            print("  OK")
+            print(f"  OK")
             metrics["valid_schemas"] += 1
             report["items"].append({
                 "schema": schema_file,

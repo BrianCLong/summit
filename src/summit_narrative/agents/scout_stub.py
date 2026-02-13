@@ -12,6 +12,6 @@ class ScoutStub:
         capabilities={"role": "ingest", "outputs": ["candidates"]},
     )
 
-    def run(self, inputs: dict[str, Any]) -> dict[str, Any]:
+    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         inputs.setdefault("candidates", [])
         return inputs

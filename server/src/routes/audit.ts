@@ -198,7 +198,7 @@ auditRouter.get(
         correlationIds,
         limit,
         offset,
-      } = req.query;
+      } = req.query as any;
 
       const events = await advancedAuditSystem.queryEvents({
         startTime: startTime ? new Date(startTime as string) : undefined,
@@ -232,7 +232,7 @@ auditRouter.get(
   requirePermission('audit:report'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { framework, startTime, endTime } = req.query;
+      const { framework, startTime, endTime } = req.query as any;
 
       if (!framework || !startTime || !endTime) {
         return res.status(400).json({ error: 'Missing required parameters' });
@@ -259,7 +259,7 @@ auditRouter.get(
   requirePermission('audit:verify'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { startTime, endTime } = req.query;
+      const { startTime, endTime } = req.query as any;
 
       const result = await advancedAuditSystem.verifyIntegrity(
         startTime ? new Date(startTime as string) : undefined,

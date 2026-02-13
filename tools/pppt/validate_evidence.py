@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 import json
-import pathlib
 import sys
-
+import pathlib
 
 def main():
     root = pathlib.Path(__file__).resolve().parents[2]

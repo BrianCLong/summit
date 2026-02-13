@@ -1,12 +1,10 @@
-import os
 import unittest
-
+import os
 from summit.policy.guards.consistency_guard import ConsistencyGuard
-
 
 def parse_transcript(filepath):
     transcript = []
-    with open(filepath) as f:
+    with open(filepath, 'r') as f:
         for line in f:
             if line.startswith("User: "):
                 transcript.append({"role": "user", "content": line[6:].strip()})

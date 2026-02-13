@@ -1,9 +1,8 @@
-import datetime
-import hashlib
 import json
 import os
+import hashlib
+import datetime
 import sys
-
 
 def deterministic_hash(data):
     # Sort keys for deterministic JSON string

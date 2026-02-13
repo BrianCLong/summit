@@ -17,7 +17,7 @@ def is_safe_test_file(path: str) -> bool:
         return False
 
     try:
-        with open(path, encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             content = f.read()
         tree = ast.parse(content, filename=path)
     except Exception:
@@ -62,7 +62,7 @@ def is_safe_test_file(path: str) -> bool:
     return True
 
 
-def find_test_files(root_dir: str, max_cost_ms: int) -> list[str]:
+def find_test_files(root_dir: str, max_cost_ms: int) -> List[str]:
     """
     Finds safe test files in the given directory tree.
     Respects the time limit.

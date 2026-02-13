@@ -1,9 +1,7 @@
-import os
 import unittest
+import os
 from unittest import mock
-
 from modules.backfill import planner
-
 
 class TestBackfillPlanner(unittest.TestCase):
 

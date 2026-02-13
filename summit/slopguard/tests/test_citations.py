@@ -1,7 +1,5 @@
 import pytest
-
 from summit.slopguard.citations import extract_citations, validate_citations
-
 
 def test_extract_citations():
     text = "Check 10.1000/123456 and https://example.com/test"

@@ -39,7 +39,7 @@ class PerformanceConfig:
 @dataclass(frozen=True)
 class RedactionConfig:
     sample_diff_max_rows: int = 200
-    redact_props: list[str] = field(default_factory=list)
+    redact_props: List[str] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -57,7 +57,7 @@ class EntityMapping:
     pg_pk: str
     neo4j_label: str
     neo4j_key: str
-    props: list[str]
+    props: List[str]
 
 
 @dataclass(frozen=True)
@@ -69,7 +69,7 @@ class LinkMapping:
     neo4j_rel_type: str
     from_label: str
     to_label: str
-    props: list[str]
+    props: List[str]
 
 
 @dataclass(frozen=True)
@@ -81,7 +81,7 @@ class Mapping:
     performance: PerformanceConfig
     redaction: RedactionConfig
     slo: SloConfig
-    entities: list[EntityMapping]
-    links: list[LinkMapping]
-    metadata: dict[str, Any] = field(default_factory=dict)
+    entities: List[EntityMapping]
+    links: List[LinkMapping]
+    metadata: Dict[str, Any] = field(default_factory=dict)
     tenant: Optional[str] = None

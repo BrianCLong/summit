@@ -1,10 +1,7 @@
 import json
 import os
-
 import pytest
-
 from summit_rl.feedback import RichFeedback, sanitize_feedback
-
 
 def load_fixture(name):
     path = os.path.join(os.path.dirname(__file__), "fixtures", name)

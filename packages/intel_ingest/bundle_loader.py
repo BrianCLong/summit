@@ -34,9 +34,9 @@ def load_source_documents(
     provenance_uri: str,
     publisher: str = "unknown",
     provenance_confidence: str = "unknown",
-) -> list[SourceDocument]:
+) -> List[SourceDocument]:
     bundle_path = Path(bundle_path)
-    documents: list[SourceDocument] = []
+    documents: List[SourceDocument] = []
 
     if not bundle_path.exists():
         raise FileNotFoundError(f"Bundle path not found: {bundle_path}")

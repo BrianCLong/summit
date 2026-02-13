@@ -1,12 +1,9 @@
 from __future__ import annotations
-
 import json
-from dataclasses import asdict
 from pathlib import Path
-from typing import List, Optional
-
+from typing import Optional, List
+from dataclasses import asdict
 from summit.review.models import DecisionPacket
-
 
 class FileReviewQueue:
     def __init__(self, storage_path: Path):

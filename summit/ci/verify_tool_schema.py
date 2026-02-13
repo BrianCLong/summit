@@ -1,9 +1,7 @@
+import sys
 import json
 import os
-import sys
-
 from summit.tools.registry import ToolRegistry
-
 
 def verify_tool_schema(expected_hash: str, tools_file: str):
     """
@@ -13,7 +11,7 @@ def verify_tool_schema(expected_hash: str, tools_file: str):
         print(f"Tools file not found: {tools_file}")
         sys.exit(1)
 
-    with open(tools_file) as f:
+    with open(tools_file, 'r') as f:
         tools = json.load(f)
 
     registry = ToolRegistry()

@@ -1,10 +1,7 @@
-import os
-
 import pytest
-
+import os
 from summit.agentloop.prompt_builder import PromptBuilder
 from summit.context.agents_ingest import ingest_agents_instructions
-
 
 def test_prompt_determinism(tmp_path):
     # Setup

@@ -1,13 +1,11 @@
-import asyncio
-import os
 import sys
+import os
+import asyncio
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
-
+from unittest.mock import MagicMock, AsyncMock, patch
 from summit.evidence.writer import init_evidence_bundle, write_json
-from summit.providers.azure_foundry.auth import AzureAuthProvider
 from summit.providers.azure_foundry.client import AzureFoundryProvider
-
+from summit.providers.azure_foundry.auth import AzureAuthProvider
 
 # Mocking external calls since we don't have real credentials/endpoint
 async def run_simulated_eval():

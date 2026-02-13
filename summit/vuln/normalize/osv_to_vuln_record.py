@@ -1,16 +1,14 @@
 import hashlib
-from typing import Any, Dict
+from typing import Dict, Any
+from summit.vuln.types import VulnRecord, Aliases, Affected, Severity, Reference, Provenance
 
-from summit.vuln.types import Affected, Aliases, Provenance, Reference, Severity, VulnRecord
-
-
-def osv_to_vuln_record(osv_data: dict[str, Any], evidence_id: str) -> VulnRecord:
+def osv_to_vuln_record(osv_data: Dict[str, Any], evidence_id: str) -> VulnRecord:
     """Normalizes an OSV record into a Summit VulnRecord."""
 
     osv_id = osv_data["id"]
 
     # Deterministic record_id
-    hash_input = f"osv:{osv_id}".encode()
+    hash_input = f"osv:{osv_id}".encode("utf-8")
     record_hash = hashlib.sha256(hash_input).hexdigest()[:16]
     record_id = f"VULNREC-{record_hash}"
 

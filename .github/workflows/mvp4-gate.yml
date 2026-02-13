@@ -32,7 +32,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - name: Setup Node
-      - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -52,13 +51,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup Node
-      - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
       - name: Setup Node
-      - uses: pnpm/action-setup@v4
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"

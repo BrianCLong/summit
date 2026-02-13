@@ -1,11 +1,9 @@
 from __future__ import annotations
-
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict
 
-from ..format.skill_md import SkillMetadata, parse_skill_md
-
+from ..format.skill_md import parse_skill_md, SkillMetadata
 
 @dataclass(frozen=True)
 class InstalledSkill:
@@ -15,7 +13,7 @@ class InstalledSkill:
 
 class SkillRegistry:
     def __init__(self) -> None:
-        self._skills: dict[str, InstalledSkill] = {}
+        self._skills: Dict[str, InstalledSkill] = {}
 
     def install_from_folder(self, slug: str, root: Path) -> InstalledSkill:
         raw = (root / "SKILL.md").read_text(encoding="utf-8")
@@ -24,5 +22,5 @@ class SkillRegistry:
         self._skills[slug] = skill
         return skill
 
-    def list_metadata(self) -> dict[str, SkillMetadata]:
+    def list_metadata(self) -> Dict[str, SkillMetadata]:
         return {k: v.metadata for k, v in self._skills.items()}

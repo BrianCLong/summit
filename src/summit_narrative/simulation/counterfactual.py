@@ -12,10 +12,10 @@ from .transition import apply_intervention
 class SimResult:
     input_snapshot: str
     hypothetical_snapshot: str
-    metrics: dict[str, Any]
+    metrics: Dict[str, Any]
 
 
-def simulate(nog: NarrativeOperatingGraph, intervention: dict[str, Any]) -> SimResult:
+def simulate(nog: NarrativeOperatingGraph, intervention: Dict[str, Any]) -> SimResult:
     base_hash = canonical_hash(nog)
     hypothetical = apply_intervention(nog, intervention)
     hypothetical_hash = canonical_hash(hypothetical)

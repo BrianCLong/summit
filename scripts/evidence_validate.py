@@ -2,20 +2,18 @@ import argparse
 import json
 import os
 import sys
-from typing import Any, Dict
-
 import jsonschema
-
+from typing import Any, Dict
 
 def load_json(path: str) -> Any:
     try:
-        with open(path) as f:
+        with open(path, 'r') as f:
             return json.load(f)
     except Exception as e:
         print(f"Error loading {path}: {e}")
         return None
 
-def validate_schema(data: Any, schema: dict, name: str) -> bool:
+def validate_schema(data: Any, schema: Dict, name: str) -> bool:
     try:
         jsonschema.validate(instance=data, schema=schema)
         return True
@@ -26,7 +24,7 @@ def validate_schema(data: Any, schema: dict, name: str) -> bool:
 def check_deterministic_formatting(path: str) -> bool:
     """Check if file is deterministically formatted (indent=2, sort_keys=True)."""
     try:
-        with open(path) as f:
+        with open(path, 'r') as f:
             content = f.read()
 
         if not content.strip():

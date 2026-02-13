@@ -3,13 +3,11 @@ import json
 import os
 import sys
 
-from compute import compute_metrics
 from fetch import fetch_runs
+from ingest import ingest_from_file, ingest_directory
+from compute import compute_metrics
 from render import render_markdown, render_report_json
 from stamp import generate_stamp
-
-from ingest import ingest_directory, ingest_from_file
-
 
 def main():
     parser = argparse.ArgumentParser(description="CI/CD Observer")

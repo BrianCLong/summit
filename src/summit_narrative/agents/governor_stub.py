@@ -12,6 +12,6 @@ class GovernorStub:
         capabilities={"role": "governance", "outputs": ["decisions"]},
     )
 
-    def run(self, inputs: dict[str, Any]) -> dict[str, Any]:
+    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         inputs.setdefault("decisions", [])
         return inputs

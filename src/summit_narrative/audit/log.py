@@ -30,7 +30,7 @@ def _hash_event(event: AuditEvent) -> str:
 @dataclass
 class AuditLog:
     innovation_enabled: bool = False
-    events: list[AuditEvent] = field(default_factory=list)
+    events: List[AuditEvent] = field(default_factory=list)
 
     def append(self, event: AuditEvent) -> AuditEvent:
         if self.innovation_enabled:
@@ -63,7 +63,7 @@ class AuditLog:
         self.events.append(event)
         return event
 
-    def by_intervention_id(self, intervention_id: str) -> list[AuditEvent]:
+    def by_intervention_id(self, intervention_id: str) -> List[AuditEvent]:
         return [event for event in self.events if event.intervention_id == intervention_id]
 
     def verify_chain(self) -> bool:

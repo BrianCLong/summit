@@ -12,6 +12,6 @@ class StrategistStub:
         capabilities={"role": "strategy", "outputs": ["interventions"]},
     )
 
-    def run(self, inputs: dict[str, Any]) -> dict[str, Any]:
+    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
         inputs.setdefault("interventions", [])
         return inputs

@@ -5,7 +5,7 @@ const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 const r = Router();
 
 r.get('/replicate', async (req, res) => {
-  const since = Number(req.query.since || 0);
+  const since = Number((req.query.since as any) || 0);
   res.setHeader('content-type', 'application/x-ndjson');
   const { rows } = await pg.query(
     `SELECT seq, region, site_id, run_id, event, payload, lamport, ts

@@ -1,7 +1,8 @@
-import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
+import { jest } from '@jest/globals';
+import { NarrativePrioritizationService } from '../NarrativePrioritizationService.js';
 
-// Define mocks before imports
-const mockRun = jest.fn();
+// Mock dependencies
+const mockRun = jest.fn() as jest.Mock;
 const mockSession = {
   run: mockRun,
   close: jest.fn(),
@@ -13,9 +14,6 @@ const mockDriver = {
 jest.mock('../../db/neo4j.js', () => ({
   getNeo4jDriver: () => mockDriver,
 }));
-
-// Import service after mocking
-import { NarrativePrioritizationService } from '../NarrativePrioritizationService.js';
 
 describe('NarrativePrioritizationService', () => {
   let service: NarrativePrioritizationService;
@@ -30,7 +28,7 @@ describe('NarrativePrioritizationService', () => {
 
   it('should prioritize a critical narrative correctly', async () => {
     // Mock Neo4j response for high graph score
-    mockRun.mockResolvedValueOnce({
+    (mockRun as any).mockResolvedValueOnce({
       records: [
         {
           get: (key: string) => (key === 'graphScore' ? 4.5 : null),
@@ -49,7 +47,9 @@ describe('NarrativePrioritizationService', () => {
     expect(result).toBeDefined();
     expect(result.priority).toBeDefined();
     expect(result.score).toBeGreaterThan(0);
-    // Expect mockRun to be called
+    // Text score should be high due to "urgent", "attack", "infrastructure"
+    // Graph score should be high (4.5/5 -> 0.9)
+    // History score is deterministic 0-1
     expect(mockRun).toHaveBeenCalledTimes(1);
   });
 
@@ -67,7 +67,7 @@ describe('NarrativePrioritizationService', () => {
   });
 
   it('should handle graph query errors gracefully', async () => {
-    mockRun.mockRejectedValueOnce(new Error('Neo4j error'));
+    (mockRun as any).mockRejectedValueOnce(new Error('Neo4j error'));
 
     const input = {
       text: 'Test',

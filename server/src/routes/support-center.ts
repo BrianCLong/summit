@@ -117,7 +117,7 @@ router.get(
       const query = req.query.q as string;
       const category = req.query.category as string | undefined;
       const locale = req.query.locale as string | undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const limit = (req.query.limit as any) ? parseInt(req.query.limit as string) : undefined;
 
       if (!query) {
         res.status(400).json({ error: 'Search query is required' });
@@ -149,8 +149,8 @@ router.get(
     try {
       const category = req.query.category as string | undefined;
       const locale = req.query.locale as string | undefined;
-      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-      const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+      const limit = (req.query.limit as any) ? parseInt(req.query.limit as string) : undefined;
+      const offset = (req.query.offset as any) ? parseInt(req.query.offset as string) : undefined;
 
       const result = await supportCenterService.getArticles({
         category: category as any,
