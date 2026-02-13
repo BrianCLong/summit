@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-08-20 - [Batched Risk Signal Insertion]
+**Learning:** Inserting risk signals individually in a loop for each risk score results in $1+N$ database round-trips. Using a single batched `INSERT` with multiple value sets and `RETURNING *` reduces this to 2 round-trips (one for the score, one for all signals).
+**Action:** Use multi-row `INSERT` for signals in `RiskRepository` and similar patterns where a parent entity has many child records created simultaneously.
