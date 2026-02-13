@@ -313,6 +313,10 @@
       "hono": ">=4.11.7",
       "multer": ">=2.0.2",
       "busboy": ">=1.6.0"
+    },
+    "patchedDependencies": {
+      "@types/hapi__catbox@12.1.0": "patches/@types__hapi__catbox@12.1.0.patch",
+      "@types/hapi__shot@6.0.0": "patches/@types__hapi__shot@6.0.0.patch"
     }
   }
 }

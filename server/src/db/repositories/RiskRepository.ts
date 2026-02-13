@@ -33,17 +33,14 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals in batches of 100 to optimize performance
       if (input.signals && input.signals.length > 0) {
-        // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
         const chunkSize = 100;
         for (let i = 0; i < input.signals.length; i += chunkSize) {
           const chunk = input.signals.slice(i, i + chunkSize);
           const values: any[] = [];
-          const placeholders: string[] = [];
-          let paramIndex = 1;
-
-          for (const sig of chunk) {
+          const placeholders = chunk.map((sig, index) => {
+            const base = index * 8;
             values.push(
               savedScore.id,
               sig.type,
@@ -52,25 +49,19 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(),
+              sig.detectedAt || new Date()
             );
-            placeholders.push(
-              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
-            );
-            paramIndex += 8;
-          }
+            return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+          }).join(', ');
 
           const sigRows = await tx.query(
             `INSERT INTO risk_signals (
               risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ${placeholders.join(', ')}
+            ) VALUES ${placeholders}
             RETURNING *`,
-            values,
+            values
           );
-
-          for (const row of sigRows) {
-            savedSignals.push(this.mapSignal(row));
-          }
+          savedSignals.push(...sigRows.map((r: any) => this.mapSignal(r)));
         }
       }
 
