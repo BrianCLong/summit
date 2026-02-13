@@ -1,3 +1,11 @@
+---
+Owner: Agency Team
+Last-Reviewed: 2026-02-13
+Evidence-IDs: EVD-composer15-EVIDENCE-001, EVD-composer15-EVIDENCE-002
+Status: active
+Classification: Public
+---
+
 # Evidence System (Composer 1.5 Era)
 
 This document describes the evidence system used for governance, compliance, and auditing of agentic workflows.

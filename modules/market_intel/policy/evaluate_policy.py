@@ -2,6 +2,7 @@ import json
 import sys
 from pathlib import Path
 
+
 def evaluate_signal(signal_data):
     """
     Evaluates a signal against the Market Intel policy.

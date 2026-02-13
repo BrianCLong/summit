@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+import argparse
 import json
 import sys
-import argparse
+
 
 def verify_shape(filepath):
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             data = json.load(f)
 
         if isinstance(data, dict):

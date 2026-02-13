@@ -6,7 +6,7 @@ import argparse
 import json
 import os
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from time import perf_counter
 
@@ -188,7 +188,7 @@ def _write_report(results: list[dict], out_dir: Path) -> Path:
     lines = [
         '# Attention Lab Benchmark Report',
         '',
-        f"Generated: {datetime.now(timezone.utc).isoformat()}",
+        f"Generated: {datetime.now(UTC).isoformat()}",
         '',
         '| Suite | Latency (ms) | Throughput (tok/s) | Peak VRAM (MB) | Agreement | Imputed Intention (23rd) |',
         '| --- | --- | --- | --- | --- | --- |',
@@ -267,7 +267,7 @@ def main() -> None:
     parser.add_argument('--feature-map', default='elu+1')
     args = parser.parse_args()
 
-    timestamp = datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')
+    timestamp = datetime.now(UTC).strftime('%Y%m%d-%H%M%S')
     out_dir = Path(args.out) / timestamp / args.attn
 
     summary = run_benchmarks(

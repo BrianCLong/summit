@@ -3,14 +3,19 @@
 Entropy Guard
 Runs narrow, explicit rules to counter architecture drift.
 """
-import os, sys, re, yaml
+import os
+import re
+import sys
+
+import yaml
+
 
 def main() -> int:
     flag = os.getenv("SUMMIT_ENTROPY_GUARD", "on").lower()
     rules_path = os.getenv("SUMMIT_ENTROPY_RULES", "policies/entropy_guard/rules.v1.yaml")
 
     try:
-        with open(rules_path, "r", encoding="utf-8") as f:
+        with open(rules_path, encoding="utf-8") as f:
             rules_config = yaml.safe_load(f) or {}
             rules = rules_config.get("rules", [])
     except FileNotFoundError:
@@ -28,7 +33,7 @@ def main() -> int:
             if file.endswith((".py", ".js", ".ts", ".tsx", ".example")):
                 path = os.path.join(root, file)
                 try:
-                    with open(path, "r", encoding="utf-8") as f:
+                    with open(path, encoding="utf-8") as f:
                         content = f.read()
                         for rule in rules:
                             regex = rule.get("match", {}).get("regex")

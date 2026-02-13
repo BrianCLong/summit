@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import Optional
-from pydantic import BaseModel, Field, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, Field
+
 
 class StopCondition(str, Enum):
     FIRST_PROOF = "first_proof"

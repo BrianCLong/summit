@@ -1,6 +1,8 @@
 from __future__ import annotations
-from pathlib import Path
+
 import json
+from pathlib import Path
+
 
 def write_evidence_bundle(out_dir: Path, report: dict, metrics: dict, stamp: dict) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)

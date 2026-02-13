@@ -1,5 +1,34 @@
+import { jest, describe, it, expect, beforeAll } from '@jest/globals';
 import { FcrService } from '../fcr/fcr-service.js';
 import { FcrSignal } from '../fcr/types.js';
+
+// Mock fs to return a valid schema
+const mockSchema = JSON.stringify({
+  type: "object",
+  properties: {
+    entity_id: { type: "string" },
+    tenant_id: { type: "string" },
+    observed_at: { type: "string" },
+    signal_type: { type: "string" },
+    narrative_claim_hash: { type: "string" },
+    confidence_local: { type: "number" },
+    privacy_budget_cost: {
+      type: "object",
+      properties: {
+        epsilon: { type: "number" },
+        delta: { type: "number" }
+      }
+    },
+    version: { type: "string" }
+  },
+  required: ["entity_id", "tenant_id", "observed_at", "signal_type"]
+});
+
+jest.mock('fs', () => ({
+  promises: {
+    readFile: jest.fn().mockResolvedValue(mockSchema)
+  }
+}));
 
 const baseSignal = (overrides: Partial<FcrSignal> = {}): FcrSignal => ({
   entity_id: '11111111-1111-1111-1111-111111111111',

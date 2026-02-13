@@ -1,11 +1,12 @@
 import shlex
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class ShellTool:
     def __init__(self):
         pass
 
-    def get_definition(self) -> Dict[str, Any]:
+    def get_definition(self) -> dict[str, Any]:
          return {
             "type": "function",
             "function": {

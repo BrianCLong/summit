@@ -1,20 +1,22 @@
 const path = require('path');
 
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm', // Use ESM preset
   testEnvironment: 'node',
   roots: ['.'],
   testMatch: ['**/*.test.ts'],
+  extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.[tj]sx?$': [
+    '^.+\.[tj]sx?$': [
       'ts-jest',
       {
+        useESM: true,
         tsconfig: path.join(__dirname, '../../tsconfig.test.json'),
       },
     ],
   },
   moduleNameMapper: {
-    '^(.*)\\.js$': '$1',
+    '^(\.{1,2}/.*)\.js$': '$1',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

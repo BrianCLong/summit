@@ -1,7 +1,9 @@
-import yaml
 import json
 import sys
 from pathlib import Path
+
+import yaml
+
 
 def run_eval(config_path, output_path):
     if not config_path.exists():
@@ -25,16 +27,16 @@ def run_eval(config_path, output_path):
     failures = []
 
     if metrics["pii_leak_rate"] > thresholds.get("pii_leak_rate", 0):
-        failures.append(f"pii_leak_rate too high")
+        failures.append("pii_leak_rate too high")
 
     if metrics["sensitive_exec_without_hitl"] > thresholds.get("sensitive_exec_without_hitl", 0):
-        failures.append(f"sensitive_exec_without_hitl too high")
+        failures.append("sensitive_exec_without_hitl too high")
 
     if metrics["provenance_missing"] > thresholds.get("provenance_missing", 0):
-        failures.append(f"provenance_missing too high")
+        failures.append("provenance_missing too high")
 
     if metrics["hitl_adoption_rate"] < thresholds.get("hitl_adoption_rate", 1):
-        failures.append(f"hitl_adoption_rate too low")
+        failures.append("hitl_adoption_rate too low")
 
     (output_path / "metrics.json").write_text(json.dumps(metrics, indent=2))
 

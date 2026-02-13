@@ -1,6 +1,7 @@
 import subprocess
 import sys
 
+
 def run(cmd):
     print(f"Running: {cmd}")
     res = subprocess.run(cmd, shell=True)

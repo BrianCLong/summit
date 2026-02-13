@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 import json
 import os
-import sys
 import re
-from typing import List, Dict, Any
+import sys
+from typing import Any, Dict, List
 
 # Try to import jsonschema, but don't fail immediately if missing (CI might install it)
 try:
@@ -19,7 +19,7 @@ INDEX_PATH = os.path.join(EVIDENCE_DIR, "index.json")
 SCHEMAS_DIR = os.path.join(EVIDENCE_DIR, "schemas")
 
 def load_json(path: str) -> Any:
-    with open(path, 'r') as f:
+    with open(path) as f:
         return json.load(f)
 
 def validate_schema(instance: Any, schema_name: str) -> None:
@@ -32,7 +32,7 @@ def validate_schema(instance: Any, schema_name: str) -> None:
     schema = load_json(schema_path)
     validate(instance=instance, schema=schema)
 
-def check_no_timestamps(data: Any, path: str = "") -> List[str]:
+def check_no_timestamps(data: Any, path: str = "") -> list[str]:
     errors = []
     if isinstance(data, dict):
         for k, v in data.items():
