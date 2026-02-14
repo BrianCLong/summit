@@ -4,7 +4,6 @@
   "type": "object",
   "required": ["mappings"],
   "properties": {
-<<<<<<< HEAD
     "version": {
       "type": "string"
     },
@@ -30,9 +29,6 @@
       }
     },
     "map": {
-=======
-    "mappings": {
->>>>>>> origin/main
       "type": "object",
       "additionalProperties": {
         "type": "object",

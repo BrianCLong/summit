@@ -121,7 +121,7 @@ describe('Ingest API Security Logging', () => {
           kind: 'User',
           labels: ['Person'],
           properties: {
-            email: 'victim@example.com', // SENSITIVE
+            email: 'test-user@example.com', // SENSITIVE (Mocked safe value)
             password: 'supersecretpassword', // SENSITIVE
             ssn: '000-00-0000', // SENSITIVE
           },
@@ -152,7 +152,7 @@ describe('Ingest API Security Logging', () => {
     // CRITICAL SECURITY CHECK
     const logString = JSON.stringify(logPayload);
     // This expects failure if full body is logged.
-    expect(logString).not.toContain('victim@example.com');
+    expect(logString).not.toContain('test-user@example.com');
     expect(logString).not.toContain('supersecretpassword');
   });
 });
