@@ -211,7 +211,13 @@ ingestRouter.post(
       ingestLogger.error({
         error: error.message,
         stack: error.stack,
-        body: req.body,
+        body: {
+          tenantId: req.body?.tenantId,
+          sourceType: req.body?.sourceType,
+          sourceId: req.body?.sourceId,
+          entitiesCount: req.body?.entities?.length,
+          relationshipsCount: req.body?.relationships?.length,
+        },
       }, 'Ingest request failed');
 
       res.status(500).json({
