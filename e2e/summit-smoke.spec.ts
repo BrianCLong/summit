@@ -36,4 +36,24 @@ test.describe('Summit Smoke Tests', () => {
     await expect(drawer.getByText('Search')).toBeVisible();
     await expect(drawer.getByText('Graph Explorer')).toBeVisible();
   });
+
+  test('should navigate to search page', async ({ page }) => {
+    await page.goto('/');
+
+    // Open drawer
+    const menuButton = page.getByLabel('Open navigation menu');
+    await expect(menuButton).toBeVisible();
+    await menuButton.click();
+
+    // Click Search
+    const drawer = page.locator('.MuiDrawer-paper');
+    await drawer.getByText('Search').click();
+
+    // Verify URL
+    await expect(page).toHaveURL(/.*\/search/);
+
+    // Verify search page content (generic check)
+    // Assuming there is a heading or input
+    // Just verifying URL is a good start for smoke test
+  });
 });
