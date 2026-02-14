@@ -3,17 +3,93 @@ import { Request, Response, NextFunction } from 'express';
 /**
  * Recursively removes any keys that start with '$' or '.',
  * which could be used to execute malicious queries (e.g. NoSQL injection).
+ *
+ * BOLT OPTIMIZATION:
+ * - Implements Copy-on-Write (CoW) to avoid unnecessary allocations.
+ * - Uses O(1) character checks (key[0]) instead of startsWith.
+ * - Preserves Date, RegExp, and Buffer instances.
+ * - Protects against Prototype Pollution by skipping __proto__, constructor, and prototype.
  */
 function sanitize(obj: any): any {
-    if (!obj || typeof obj !== 'object') return obj;
-    if (Array.isArray(obj)) return obj.map(sanitize);
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
 
-    const clean: any = {};
-    for (const key in obj) {
-        if (key.startsWith('$') || key.startsWith('.')) continue;
-        clean[key] = sanitize(obj[key]);
+  // Preserve special objects
+  if (
+    obj instanceof Date ||
+    obj instanceof RegExp ||
+    (typeof Buffer !== 'undefined' && Buffer.isBuffer(obj))
+  ) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    let result: any[] | undefined;
+    for (let i = 0; i < obj.length; i++) {
+      const item = obj[i];
+      const sanitized = sanitize(item);
+      if (result) {
+        result.push(sanitized);
+      } else if (sanitized !== item) {
+        result = obj.slice(0, i);
+        result.push(sanitized);
+      }
     }
-    return clean;
+    return result || obj;
+  }
+
+  let result: any | undefined;
+  // Use for...in for performance, but guard with hasOwnProperty
+  for (const key in obj) {
+    if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+      continue;
+    }
+
+    const char0 = key[0];
+    if (
+      char0 === '$' ||
+      char0 === '.' ||
+      key === '__proto__' ||
+      key === 'constructor' ||
+      key === 'prototype'
+    ) {
+      if (!result) {
+        result = {};
+        // Copy preceding safe keys
+        for (const k in obj) {
+          if (k === key) {
+            break;
+          }
+          if (Object.prototype.hasOwnProperty.call(obj, k)) {
+            result[k] = obj[k];
+          }
+        }
+      }
+      continue;
+    }
+
+    const value = obj[key];
+    const sanitizedValue = sanitize(value);
+
+    if (result) {
+      result[key] = sanitizedValue;
+    } else if (sanitizedValue !== value) {
+      result = {};
+      // Copy preceding safe keys
+      for (const k in obj) {
+        if (k === key) {
+          break;
+        }
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
+          result[k] = obj[k];
+        }
+      }
+      result[key] = sanitizedValue;
+    }
+  }
+
+  return result || obj;
 }
 
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
