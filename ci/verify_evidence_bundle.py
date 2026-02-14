@@ -30,18 +30,21 @@ def main():
 
     # Requirement: only stamp.json can have timestamps
     evidence_dir = pathlib.Path("evidence")
-    for evd_id, rel_path in data["evidence"].items():
-        fpath = evidence_dir.parent / rel_path
-        if fpath.name != "stamp.json" and fpath.suffix == ".json":
-            try:
-                content = json.loads(fpath.read_text())
-                scan_for_timestamps(content, path=str(rel_path))
-            except ValueError as e:
-                print(f"Validation Error for {evd_id}: {e}")
-                sys.exit(1)
-            except Exception as e:
-                print(f"Error reading {rel_path}: {e}")
-                sys.exit(1)
+    for evd_id, entry in data["evidence"].items():
+        if not isinstance(entry, dict) or "files" not in entry:
+            continue
+        for file_key, rel_path in entry["files"].items():
+            fpath = evidence_dir.parent / rel_path
+            if fpath.name != "stamp.json" and fpath.suffix == ".json":
+                try:
+                    content = json.loads(fpath.read_text())
+                    scan_for_timestamps(content, path=str(rel_path))
+                except ValueError as e:
+                    print(f"Validation Error for {evd_id} ({file_key}): {e}")
+                    sys.exit(1)
+                except Exception as e:
+                    print(f"Error reading {rel_path}: {e}")
+                    sys.exit(1)
 
     print("OK: evidence/index.json and artifacts validated")
 
