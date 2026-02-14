@@ -99,7 +99,7 @@
       },
       "targets": [
         {
-          "expr": "rate(http_requests_total[1m])",
+          "expr": "rate(http_requests_total{service=\"$service\"}[1m])",
           "legendFormat": "{{method}} {{route}}",
           "refId": "A"
         }
@@ -179,7 +179,7 @@
       },
       "targets": [
         {
-          "expr": "rate(http_requests_total{status_code=~\"5..\"}[1m])",
+          "expr": "rate(http_requests_total{status_code=~\"5..\", service=\"$service\"}[1m])",
           "legendFormat": "{{method}} {{route}}",
           "refId": "A"
         }
@@ -255,7 +255,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m])) by (le, route))",
           "legendFormat": "P95 {{route}}",
           "refId": "A"
         }
@@ -344,7 +344,7 @@
       },
       "targets": [
         {
-          "expr": "sum(business_user_signups_total)",
+          "expr": "sum(business_user_signups_total{service=\"$service\"})",
           "legendFormat": "Total Signups",
           "refId": "A"
         }
@@ -420,7 +420,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(business_api_calls_total[1m])) by (tenant)",
+          "expr": "sum(rate(business_api_calls_total{service=\"$service\"}[1m])) by (tenant)",
           "legendFormat": "{{tenant}}",
           "refId": "A"
         }
@@ -437,7 +437,30 @@
     "observability"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {},
+        "datasource": "Prometheus",
+        "definition": "label_values(service)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Service",
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": "label_values(service)",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-6h",
