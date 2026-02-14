@@ -9,6 +9,7 @@ import { exec } from 'child_process';
 import { createWriteStream } from 'fs';
 import zlib from 'zlib';
 import { PrometheusMetrics } from '../utils/metrics.js';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const execAsync = promisify(exec);
 
@@ -67,11 +68,28 @@ export class BackupService {
 
       try {
           if (process.env.USE_AWS_CLI === 'true') {
+             // Use CLI if explicitly requested
              await execAsync(`aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region}`);
           } else {
-              // Simulating upload delay
-              await new Promise(r => setTimeout(r, 500));
-              logger.info('Simulated S3 upload complete.');
+              // Use AWS SDK
+              const client = new S3Client({
+                  region: this.s3Config.region,
+                  credentials: (this.s3Config.accessKeyId && this.s3Config.secretAccessKey) ? {
+                      accessKeyId: this.s3Config.accessKeyId,
+                      secretAccessKey: this.s3Config.secretAccessKey
+                  } : undefined,
+                  endpoint: this.s3Config.endpoint
+              });
+
+              const fileContent = await fs.readFile(filepath);
+              const command = new PutObjectCommand({
+                  Bucket: this.s3Config.bucket,
+                  Key: key,
+                  Body: fileContent
+              });
+
+              await client.send(command);
+              logger.info('S3 upload complete via SDK.');
           }
       } catch (error: any) {
           logger.error('Failed to upload to S3', error);
@@ -243,7 +261,7 @@ export class BackupService {
        if (!client) throw new Error('Redis client not available');
 
        // Check if cluster or standalone
-       const isCluster = (client as any).constructor.name === 'Cluster';
+       const isCluster = (client as any).constructor.name === 'Cluster' || (client as any).isCluster;
 
        if (isCluster) {
           // @ts-ignore

@@ -33,7 +33,11 @@ export class RestoreService {
     }
   }
 
-  async restoreNeo4j(filepath: string): Promise<void> {
+  async restoreNeo4j(filepath: string, force: boolean = false): Promise<void> {
+    if (!force) {
+      throw new Error('Neo4j restore requires force=true as it wipes the database. Pass true as the second argument.');
+    }
+
     logger.info(`Starting Neo4j restore from ${filepath}...`);
     const driver = getNeo4jDriver();
     const session = driver.session();
@@ -133,6 +137,7 @@ export class RestoreService {
       }
 
       for (const [type, items] of batchesByType.entries()) {
+          // Note: This relies on nodes having an 'id' property that matches startId/endId from export
           await session.run(
               `
               UNWIND $items AS item
