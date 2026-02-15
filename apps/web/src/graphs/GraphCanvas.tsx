@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, useMemo } from 'react'
 // Tree-shaken D3 imports for better bundle size
-import { select } from 'd3-selection'
+import { select, type Selection, type BaseType } from 'd3-selection'
 import {
   forceSimulation,
   forceLink,
@@ -47,7 +47,35 @@ interface GraphLink extends SimulationLinkDatum<GraphNode> {
   target: GraphNode
 }
 
-export function GraphCanvas({
+// Entity type to color mapping
+const ENTITY_COLORS: Record<string, string> = {
+  PERSON: '#3b82f6',
+  ORGANIZATION: '#8b5cf6',
+  LOCATION: '#10b981',
+  IP_ADDRESS: '#f59e0b',
+  DOMAIN: '#06b6d4',
+  EMAIL: '#ec4899',
+  FILE: '#ef4444',
+  PROJECT: '#84cc16',
+  SYSTEM: '#6b7280',
+}
+const DEFAULT_COLOR = '#6b7280'
+
+// Entity type to icon mapping
+const ENTITY_ICONS: Record<string, string> = {
+  PERSON: '👤',
+  ORGANIZATION: '🏢',
+  LOCATION: '📍',
+  IP_ADDRESS: '🌐',
+  DOMAIN: '🔗',
+  EMAIL: '📧',
+  FILE: '📄',
+  PROJECT: '📊',
+  SYSTEM: '⚙️',
+}
+const DEFAULT_ICON = '📊'
+
+function SVGGraphRenderer({
   entities,
   relationships,
   layout,
@@ -55,32 +83,28 @@ export function GraphCanvas({
   selectedEntityId,
   className,
 }: GraphCanvasProps) {
-  // Use canvas renderer for large graphs
-  const PERFORMANCE_THRESHOLD = 500
-  if (entities.length > PERFORMANCE_THRESHOLD) {
-    return (
-      <CanvasGraphRenderer
-        entities={entities}
-        relationships={relationships}
-        layout={layout}
-        onEntitySelect={onEntitySelect}
-        selectedEntityId={selectedEntityId}
-        className={className}
-      />
-    )
-  }
-
   const svgRef = useRef<SVGSVGElement>(null)
+  const nodeSelectionRef = useRef<Selection<SVGGElement, GraphNode, BaseType, unknown> | null>(null)
+  const linkSelectionRef = useRef<Selection<SVGLineElement, GraphLink, BaseType, unknown> | null>(null)
+  // Store callback in ref to avoid stale closures in event handlers
+  const onEntitySelectRef = useRef(onEntitySelect)
+
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
   const [fps, setFps] = useState(0)
   const [debugMode, setDebugMode] = useState(false)
   const frameCountRef = useRef(0)
-  const lastTimeRef = useRef(performance.now())
+  const lastTimeRef = useRef(0)
+
+  // Update callback ref
+  useEffect(() => {
+    onEntitySelectRef.current = onEntitySelect
+  }, [onEntitySelect])
 
   // Calculate FPS
   useEffect(() => {
     if (!debugMode) return
 
+    lastTimeRef.current = performance.now()
     let animationFrameId: number
 
     const renderLoop = (time: number) => {
@@ -113,32 +137,41 @@ export function GraphCanvas({
     return () => window.removeEventListener('resize', updateDimensions)
   }, [])
 
-  useEffect(() => {
-    if (!svgRef.current || entities.length === 0) {return}
-
-    const svg = select(svgRef.current)
-    svg.selectAll('*').remove()
-
-    const { width, height } = dimensions
-
-    // Create nodes and links
-    const nodes: GraphNode[] = entities.map(entity => ({
+  // Memoize nodes and links creation
+  const { nodes, links } = useMemo(() => {
+    const nodesData: GraphNode[] = entities.map(entity => ({
       id: entity.id,
       entity,
     }))
 
-    const links: GraphLink[] = relationships
+    const linksData: GraphLink[] = relationships
       .filter(rel => {
-        const sourceNode = nodes.find(n => n.id === rel.sourceId)
-        const targetNode = nodes.find(n => n.id === rel.targetId)
+        const sourceNode = nodesData.find(n => n.id === rel.sourceId)
+        const targetNode = nodesData.find(n => n.id === rel.targetId)
         return sourceNode && targetNode
       })
       .map(rel => ({
         id: rel.id,
         relationship: rel,
-        source: nodes.find(n => n.id === rel.sourceId)!,
-        target: nodes.find(n => n.id === rel.targetId)!,
+        source: nodesData.find(n => n.id === rel.sourceId)!,
+        target: nodesData.find(n => n.id === rel.targetId)!,
       }))
+
+    return { nodes: nodesData, links: linksData }
+  }, [entities, relationships])
+
+  // Simulation setup effect
+  useEffect(() => {
+    if (!svgRef.current || nodes.length === 0) {
+        nodeSelectionRef.current = null
+        linkSelectionRef.current = null
+        return
+    }
+
+    const svg = select(svgRef.current)
+    svg.selectAll('*').remove()
+
+    const { width, height } = dimensions
 
     // Create simulation based on layout type
     let simulation: Simulation<GraphNode, GraphLink>
@@ -221,6 +254,8 @@ export function GraphCanvas({
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', d => Math.sqrt(d.relationship.confidence * 3))
 
+    linkSelectionRef.current = link
+
     // Draw link labels
     const linkLabel = linksGroup
       .selectAll<SVGTextElement, GraphLink>('text')
@@ -232,38 +267,6 @@ export function GraphCanvas({
       .attr('fill', '#666')
       .attr('text-anchor', 'middle')
       .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
-
-    // Entity type to color mapping
-    const getEntityColor = (type: string) => {
-      const colors: Record<string, string> = {
-        PERSON: '#3b82f6',
-        ORGANIZATION: '#8b5cf6',
-        LOCATION: '#10b981',
-        IP_ADDRESS: '#f59e0b',
-        DOMAIN: '#06b6d4',
-        EMAIL: '#ec4899',
-        FILE: '#ef4444',
-        PROJECT: '#84cc16',
-        SYSTEM: '#6b7280',
-      }
-      return colors[type] || '#6b7280'
-    }
-
-    // Entity type to icon mapping
-    const getEntityIcon = (type: string) => {
-      const icons: Record<string, string> = {
-        PERSON: '👤',
-        ORGANIZATION: '🏢',
-        LOCATION: '📍',
-        IP_ADDRESS: '🌐',
-        DOMAIN: '🔗',
-        EMAIL: '📧',
-        FILE: '📄',
-        PROJECT: '📊',
-        SYSTEM: '⚙️',
-      }
-      return icons[type] || '📊'
-    }
 
     // Draw nodes
     const node = nodesGroup
@@ -291,20 +294,14 @@ export function GraphCanvas({
           })
       )
 
+    nodeSelectionRef.current = node
+
     // Node circles
     node
       .append('circle')
       .attr('r', d => 15 + d.entity.confidence * 10)
-      .attr('fill', d => getEntityColor(d.entity.type))
-      .attr('stroke', d =>
-        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
-      )
-      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
-      .style('filter', d =>
-        selectedEntityId === d.entity.id
-          ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
-          : 'none'
-      )
+      .attr('fill', d => ENTITY_COLORS[d.entity.type] || DEFAULT_COLOR)
+      // Note: Stroke and filter are now handled in the styling effect
 
     // Node icons (using text for simplicity)
     node
@@ -312,7 +309,7 @@ export function GraphCanvas({
       .attr('text-anchor', 'middle')
       .attr('dy', '.35em')
       .attr('font-size', '12px')
-      .text(d => getEntityIcon(d.entity.type))
+      .text(d => ENTITY_ICONS[d.entity.type] || DEFAULT_ICON)
 
     // Node labels
     node
@@ -342,12 +339,12 @@ export function GraphCanvas({
     // Click handler for nodes
     node.on('click', (event, d) => {
       event.stopPropagation()
-      onEntitySelect?.(d.entity)
+      onEntitySelectRef.current?.(d.entity)
     })
 
     // Hover effects
-    node.on('mouseenter', function (this: SVGGElement, event, d) {
-      select(this)
+    node.on('mouseenter', (event, d) => {
+      select(event.currentTarget as SVGGElement)
         .select('circle')
         .transition()
         .duration(200)
@@ -359,8 +356,8 @@ export function GraphCanvas({
       )
     })
 
-    node.on('mouseleave', function (this: SVGGElement, event, d) {
-      select(this)
+    node.on('mouseleave', (event, d) => {
+      select(event.currentTarget as SVGGElement)
         .select('circle')
         .transition()
         .duration(200)
@@ -396,13 +393,27 @@ export function GraphCanvas({
       simulation.stop()
     }
   }, [
-    entities,
-    relationships,
+    nodes,
+    links,
     layout,
     dimensions,
-    selectedEntityId,
-    onEntitySelect,
   ])
+
+  // Styling effect - runs when selection changes without restarting simulation
+  useEffect(() => {
+    if (!nodeSelectionRef.current) return
+
+    nodeSelectionRef.current.select('circle')
+      .attr('stroke', d =>
+        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
+      )
+      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
+      .style('filter', d =>
+        selectedEntityId === d.entity.id
+          ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
+          : 'none'
+      )
+  }, [selectedEntityId, nodes])
 
   return (
     <div className={cn('relative w-full h-full', className)}>
@@ -463,20 +474,7 @@ export function GraphCanvas({
               <div
                 className="w-3 h-3 rounded-full border"
                 style={{
-                  backgroundColor: (() => {
-                    const colors: Record<string, string> = {
-                      PERSON: '#3b82f6',
-                      ORGANIZATION: '#8b5cf6',
-                      LOCATION: '#10b981',
-                      IP_ADDRESS: '#f59e0b',
-                      DOMAIN: '#06b6d4',
-                      EMAIL: '#ec4899',
-                      FILE: '#ef4444',
-                      PROJECT: '#84cc16',
-                      SYSTEM: '#6b7280',
-                    }
-                    return colors[type] || '#6b7280'
-                  })(),
+                  backgroundColor: ENTITY_COLORS[type] || DEFAULT_COLOR,
                 }}
               />
               <span>{type.replace('_', ' ')}</span>
@@ -486,4 +484,20 @@ export function GraphCanvas({
       </div>
     </div>
   )
+}
+
+export function GraphCanvas(props: GraphCanvasProps) {
+  const { entities } = props
+
+  // Use canvas renderer for large graphs
+  const PERFORMANCE_THRESHOLD = 500
+  if (entities.length > PERFORMANCE_THRESHOLD) {
+    return (
+      <CanvasGraphRenderer
+        {...props}
+      />
+    )
+  }
+
+  return <SVGGraphRenderer {...props} />
 }
