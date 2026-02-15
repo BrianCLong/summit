@@ -90,7 +90,7 @@ class TestSamplerScout(Scout):
     def name(self) -> str:
         return "test_sampler"
 
-    def run(self, ctx: Any, cfg: Config) -> Result:
+    def _run(self, ctx: Any, cfg: Config) -> Result:
         # Attempt to get root directory from context, default to current working directory
         root_dir = "."
         if hasattr(ctx, "path"):
