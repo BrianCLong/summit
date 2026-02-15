@@ -35,24 +35,69 @@ export class RiskRepository {
 
       // 2. Insert Risk Signals
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
+        const chunkSize = 100;
+        for (let i = 0; i < input.signals.length; i += chunkSize) {
+          const chunk = input.signals.slice(i, i + chunkSize);
+          const values: any[] = [];
+          const placeholders: string[] = [];
+          let paramIndex = 1;
+
+          for (const sig of chunk) {
+            values.push(
               savedScore.id,
               sig.type,
-              sig.source,
+              sig.source || null,
               sig.value,
               sig.weight,
               sig.contributionScore,
-              sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
-          );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+              sig.description || null,
+              sig.detectedAt || new Date(),
+            );
+            placeholders.push(
+              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
+            );
+            paramIndex += 8;
+          }
+
+          const batchSql = `
+            INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders.join(', ')}
+            RETURNING *`;
+
+          try {
+            const result = await tx.query(batchSql, values);
+            for (const row of result) {
+              savedSignals.push(this.mapSignal(row));
+            }
+          } catch (e: any) {
+            // BOLT: Fallback to individual inserts if batch fails to ensure reliability.
+            for (const sig of chunk) {
+              try {
+                const sigRows = await tx.query(
+                  `INSERT INTO risk_signals (
+                    risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+                  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                  RETURNING *`,
+                  [
+                    savedScore.id,
+                    sig.type,
+                    sig.source || null,
+                    sig.value,
+                    sig.weight,
+                    sig.contributionScore,
+                    sig.description || null,
+                    sig.detectedAt || new Date(),
+                  ]
+                );
+                savedSignals.push(this.mapSignal(sigRows[0]));
+              } catch (innerErr: any) {
+                // If even individual fails, we rethrow to rollback the transaction
+                throw innerErr;
+              }
+            }
+          }
         }
       }
 

@@ -15,6 +15,10 @@
 **Learning:** Inserting many records individually in a loop is a major performance bottleneck. Using multi-row `INSERT INTO ... VALUES (), (), ...` reduces round-trips from N to 1. However, PostgreSQL has a parameter limit (65,535), so large batches must be chunked (e.g., 100 records per batch) to avoid runtime errors.
 **Action:** Use multi-row `VALUES` for batched PostgreSQL inserts and always implement chunking to handle arbitrarily large input arrays safely.
 
+## 2026-10-14 - [PostgreSQL Transaction Abort on Error]
+**Learning:** In PostgreSQL, any query failure within a transaction block (BEGIN...COMMIT) immediately marks the entire transaction as aborted. Subsequent queries (even valid ones) will fail with 'current transaction is aborted, commands ignored until end of transaction block' until a ROLLBACK or COMMIT is issued. This means in-transaction try-catch blocks that attempt to "continue" with other queries will fail unless SAVEPOINTs are used.
+**Action:** When implementing fallback logic within a transaction (like batch -> individual), ensure that you either use SAVEPOINTs or accept that a failure might require a full transaction rollback if the state becomes inconsistent. In simple cases like batched inserts, if the fallback queries also fail, rethrow to trigger a full rollback.
+
 ## 2026-05-22 - [Optimized Supernode Detection]
 **Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
 **Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
