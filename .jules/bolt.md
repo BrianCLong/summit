@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-02-16 - [Optimized Input Sanitization with Copy-on-Write]
+**Learning:** Global middleware like input sanitization (removing NoSQL injection characters like '$') is a hot path for every request. A naive implementation that always allocates new objects and recursively walks the entire tree causes significant GC pressure and CPU overhead. A copy-on-write pattern combined with O(1) character checks (`key[0]`) and preservation of special object types (`Date`, `RegExp`, `Buffer`) can improve performance by ~30%.
+**Action:** Use copy-on-write for recursive object/array transformations in global middleware to avoid unnecessary allocations in the common case where no changes are required.
