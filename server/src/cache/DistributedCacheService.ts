@@ -12,6 +12,7 @@
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
+import zlib from 'zlib';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -469,13 +470,13 @@ export class DistributedCacheService {
   // --------------------------------------------------------------------------
 
   private compress(value: unknown): string {
-    // Simple base64 encoding for now
-    // In production, use zlib or similar
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+    const json = JSON.stringify(value);
+    return zlib.gzipSync(json).toString('base64');
   }
 
   private decompress(compressed: string): unknown {
-    return JSON.parse(Buffer.from(compressed, 'base64').toString('utf-8'));
+    const buffer = Buffer.from(compressed, 'base64');
+    return JSON.parse(zlib.gunzipSync(buffer).toString('utf-8'));
   }
 
   // --------------------------------------------------------------------------
@@ -503,10 +504,14 @@ export class DistributedCacheService {
   async clear(): Promise<DataEnvelope<boolean>> {
     try {
       this.l1Cache.clear();
-      const keys = await this.redis.keys(`${this.config.keyPrefix}*`);
-      if (keys.length > 0) {
-        await this.redis.del(...keys);
+      const stream = this.redis.scanStream({ match: `${this.config.keyPrefix}*` });
+
+      for await (const keys of stream) {
+        if (keys.length > 0) {
+          await this.redis.del(...keys);
+        }
       }
+
       logger.info('All caches cleared');
       return createDataEnvelope(true, {
         source: 'DistributedCacheService',
