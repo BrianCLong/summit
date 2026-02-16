@@ -860,8 +860,10 @@ router.post(
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { insight, feedbackType, user, timestamp, originalPrediction } =
-        req.body;
+      const { insight, feedbackType, timestamp, originalPrediction } = req.body;
+      // 🛡️ Sentinel: Prevent user spoofing by using authenticated user ID
+      const user = req.user?.id || req.user?.email || 'unknown';
+
       logger.info('AI Feedback received:', {
         insight,
         feedbackType,
@@ -948,7 +950,10 @@ router.post(
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { text, label, user, timestamp, deceptionScore } = req.body;
+      const { text, label, timestamp, deceptionScore } = req.body;
+      // 🛡️ Sentinel: Prevent user spoofing by using authenticated user ID
+      const user = req.user?.id || req.user?.email || 'unknown';
+
       await enforceBackgroundThrottle(req, 'ai-feedback');
       await feedbackQueue.add('logDeceptionFeedback', {
         insight: { text, deceptionScore },
