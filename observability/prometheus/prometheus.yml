@@ -22,6 +22,11 @@ scrape_configs:
     static_configs:
       - targets: ['server:4000']
 
+  - job_name: 'summit-ai'
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['summit-ai-worker:8000']
+
   - job_name: 'gateway'
     static_configs:
       - targets: ['gateway:9464']
