@@ -111,7 +111,6 @@ describe('IngestService', () => {
             labels: ['Person'],
             properties: {
               name: 'Alice Smith',
-              email: 'alice@example.com',
             },
           },
           {
