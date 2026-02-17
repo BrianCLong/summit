@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-08-14 - [Batching Neo4j Synchronization with UNWIND and Grouping]
+**Learning:** Sequential Neo4j synchronization calls in a loop are a major bottleneck ($O(N)$ round-trips). Grouping items by their type (labels or relationship types) and using Cypher's `UNWIND` clause reduces this to $O(K)$ round-trips, where $K$ is the number of unique types.
+**Action:** Always group heterogeneous items by type before performing batched Neo4j writes to leverage `UNWIND` while maintaining correct schema labels. Use backticks (e.g., `n:\`${kind}\``) to safely escape dynamic labels.
