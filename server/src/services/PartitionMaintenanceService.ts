@@ -1,12 +1,8 @@
 import { CronJob } from 'cron';
-import { getPostgresPool } from '../db/postgres.js';
 import { logger as baseLogger } from '../config/logger.js';
+import { partitionManager } from '../db/partitioning.js';
 
 const logger = baseLogger.child({ service: 'PartitionMaintenanceService' });
-
-const TABLES_TO_MAINTAIN = [
-  'provenance_ledger_v2',
-];
 
 export class PartitionMaintenanceService {
   private job: CronJob;
@@ -35,60 +31,12 @@ export class PartitionMaintenanceService {
 
   public async maintainPartitions() {
     logger.info('Starting partition maintenance');
-    const pool = getPostgresPool();
-
-    // Outbox Events (using DB function)
     try {
-      await pool.write('SELECT ensure_outbox_partition($1, $2)', [2, 6]);
-      logger.info({ tableName: 'outbox_events' }, 'Partition maintenance successful');
+        // Delegates logic to PartitionManager which handles time-series tables and outbox
+        await partitionManager.maintainPartitions();
+        logger.info('Partition maintenance completed successfully');
     } catch (error) {
-      logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain partitions for table');
-    }
-
-    // Other tables (manual logic)
-    for (const tableName of TABLES_TO_MAINTAIN) {
-      try {
-        await this.ensureNextMonthPartition(pool, tableName);
-      } catch (error) {
-        logger.error({ tableName, error }, 'Failed to maintain partitions for table');
-      }
-    }
-  }
-
-  private async ensureNextMonthPartition(pool: any, tableName: string) {
-    // Calculate dates for next month
-    const now = new Date();
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    const nextNextMonth = new Date(now.getFullYear(), now.getMonth() + 2, 1);
-
-    const partitionName = `${tableName}_y${nextMonth.getFullYear()}m${String(nextMonth.getMonth() + 1).padStart(2, '0')}`;
-    const startStr = nextMonth.toISOString().split('T')[0];
-    const endStr = nextNextMonth.toISOString().split('T')[0];
-
-    logger.debug({ tableName, partitionName }, 'Checking partition existence');
-
-    const checkSql = `
-      SELECT EXISTS (
-        SELECT FROM pg_tables
-        WHERE tablename = $1
-      );
-    `;
-
-    const result = await pool.read(checkSql, [partitionName]);
-    const exists = result.rows[0].exists;
-
-    if (!exists) {
-      logger.info({ tableName, partitionName }, 'Creating new partition');
-      const createSql = `
-        CREATE TABLE IF NOT EXISTS ${partitionName}
-        PARTITION OF ${tableName}
-        FOR VALUES FROM ('${startStr}') TO ('${endStr}');
-      `;
-      // Use write pool
-      await pool.write(createSql);
-      logger.info({ tableName, partitionName }, 'Partition created successfully');
-    } else {
-      logger.debug({ tableName, partitionName }, 'Partition already exists');
+        logger.error({ error }, 'Partition maintenance failed');
     }
   }
 }
