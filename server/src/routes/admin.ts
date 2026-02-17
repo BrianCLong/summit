@@ -9,6 +9,7 @@ import { authorize } from '../middleware/authorization.js';
 import GAEnrollmentService from '../services/GAEnrollmentService.js';
 import { getPostgresPool } from '../config/database.js';
 import { clearShadowCache } from '../middleware/ShadowTrafficMiddleware.js';
+import { validateSafeURL } from '../utils/input-sanitization.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -304,6 +305,14 @@ router.post('/shadow/configs', express.json(), async (req, res) => {
   if (!tenantId || !targetUrl) {
     return res.status(400).json({ ok: false, error: 'tenantId and targetUrl are required' });
   }
+
+  let validatedUrl: string;
+  try {
+    validatedUrl = await validateSafeURL(targetUrl);
+  } catch (error: any) {
+    return res.status(400).json({ ok: false, error: error.message });
+  }
+
   try {
     const pool = getPostgresPool();
     await pool.query(
@@ -314,7 +323,7 @@ router.post('/shadow/configs', express.json(), async (req, res) => {
            sampling_rate = EXCLUDED.sampling_rate, 
            compare_responses = EXCLUDED.compare_responses,
            updated_at = CURRENT_TIMESTAMP`,
-      [tenantId, targetUrl, samplingRate ?? 0, compareResponses ?? false]
+      [tenantId, validatedUrl, samplingRate ?? 0, compareResponses ?? false]
     );
     clearShadowCache(tenantId);
     res.json({ ok: true, message: 'Shadow traffic config updated' });
