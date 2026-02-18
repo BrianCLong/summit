@@ -4,9 +4,8 @@
   "type": "object",
   "required": ["mappings"],
   "properties": {
-<<<<<<< HEAD
     "version": {
-      "type": "string"
+      "type": ["string", "integer"]
     },
     "items": {
       "type": "object",
@@ -29,10 +28,11 @@
         "additionalProperties": true
       }
     },
-    "map": {
-=======
+    "evidence": {
+      "type": "object",
+      "additionalProperties": true
+    },
     "mappings": {
->>>>>>> origin/main
       "type": "object",
       "additionalProperties": {
         "type": "object",
