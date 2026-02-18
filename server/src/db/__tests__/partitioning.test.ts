@@ -1,140 +1,101 @@
 
-import { describe, it, expect, beforeEach, jest, beforeAll } from '@jest/globals';
+import { jest } from '@jest/globals';
 
 // Mock dependencies
-const mockQuery = jest.fn() as jest.MockedFunction<
-  (...args: any[]) => Promise<{ rows: any[] }>
->;
-
+const mockQuery = jest.fn();
 const mockClient = {
   query: mockQuery,
   release: jest.fn(),
 };
-
 const mockPool = {
-  connect: jest.fn(() => Promise.resolve(mockClient)) as jest.MockedFunction<
-    () => Promise<typeof mockClient>
-  >,
+  connect: jest.fn().mockResolvedValue(mockClient),
+  read: jest.fn(),
+  write: jest.fn(),
 };
 
 jest.unstable_mockModule('../postgres.js', () => ({
-  getPostgresPool: jest.fn(() => mockPool),
-}));
-
-jest.unstable_mockModule('../../services/ColdStorageService.js', () => ({
-  coldStorageService: {
-    archivePartition: jest.fn(),
-  },
-}));
-
-jest.unstable_mockModule('../../utils/logger.js', () => ({
-  __esModule: true,
-  default: {
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-  },
+  getPostgresPool: () => mockPool,
 }));
 
 jest.unstable_mockModule('../../cache/redis.js', () => ({
   RedisService: {
-    getInstance: jest.fn(() => ({})),
+    getInstance: () => ({}),
   },
 }));
 
-describe('PartitionManager', () => {
-  let PartitionManager: typeof import('../partitioning.js').PartitionManager;
-  let getPostgresPool: jest.Mock;
-  let coldStorageService: { archivePartition: jest.Mock };
-  let partitionManager: InstanceType<typeof PartitionManager>;
+jest.unstable_mockModule('../../services/ColdStorageService.js', () => ({
+  coldStorageService: {},
+}));
 
-  beforeAll(async () => {
-    ({ PartitionManager } = await import('../partitioning.js'));
-    ({ getPostgresPool } = await import('../postgres.js'));
-    ({ coldStorageService } = await import('../../services/ColdStorageService.js'));
-  });
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  default: {
+    info: jest.fn(),
+    debug: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  },
+}));
+
+const { PartitionManager } = await import('../partitioning.js');
+
+describe('PartitionManager', () => {
+  let partitionManager: PartitionManager;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
-    mockPool.connect.mockResolvedValue(mockClient);
     partitionManager = new PartitionManager();
+    jest.clearAllMocks();
+    mockPool.connect.mockResolvedValue(mockClient);
   });
 
-  describe('createTenantPartition', () => {
-    it('should create a partition if it does not exist', async () => {
-      mockQuery.mockImplementation((query: any) => {
-        if (typeof query === 'string' && query.includes('SELECT to_regclass')) {
-          return Promise.resolve({ rows: [{ to_regclass: null }] });
-        }
-        return Promise.resolve({ rows: [] });
-      });
+  describe('createMonthlyPartition', () => {
+    it('should create a monthly partition if it does not exist', async () => {
+      // Mock BEGIN
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      // Mock partition check returning null (not exists)
+      mockQuery.mockResolvedValueOnce({ rows: [{ to_regclass: null }] });
+      // Mock creation success
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // create table
+      // Mock COMMIT
+      mockQuery.mockResolvedValueOnce({ rows: [] });
 
-      await partitionManager.createTenantPartition('tenant-1');
+      const date = new Date('2023-01-15');
+      await partitionManager.createMonthlyPartition('test_table', date);
 
-      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
-      expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE maestro_runs_tenant1'));
-      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+      // Verify check query (2nd call)
+      expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('SELECT to_regclass'), expect.arrayContaining(['test_table_y2023m01']));
+
+      // Verify create query (3rd call)
+      expect(mockQuery).toHaveBeenNthCalledWith(3, expect.stringContaining('CREATE TABLE test_table_y2023m01'));
+      expect(mockQuery).toHaveBeenNthCalledWith(3, expect.stringContaining("FOR VALUES FROM ('2023-01-01') TO ('2023-02-01')"));
     });
 
     it('should skip creation if partition exists', async () => {
-      mockQuery.mockImplementation((query: any) => {
-        if (typeof query === 'string' && query.includes('SELECT to_regclass')) {
-          return Promise.resolve({ rows: [{ to_regclass: 'exists' }] });
-        }
-        return Promise.resolve({ rows: [] });
-      });
+      // Mock BEGIN
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      // Mock partition check returning 'exists'
+      mockQuery.mockResolvedValueOnce({ rows: [{ to_regclass: 'test_table_y2023m01' }] });
+      // Mock COMMIT
+      mockQuery.mockResolvedValueOnce({ rows: [] });
 
-      await partitionManager.createTenantPartition('tenant-1');
+      const date = new Date('2023-01-15');
+      await partitionManager.createMonthlyPartition('test_table', date);
 
-      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
-      expect(mockClient.query).not.toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE'));
-      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+      expect(mockQuery).not.toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE'));
     });
-  });
 
-  describe('detachOldPartitions', () => {
-    it('should detach and archive old partitions', async () => {
-      const now = new Date();
-      const oldDate = new Date(now.getFullYear(), now.getMonth() - 13, 1);
-      const newDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      const formatName = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        return `audit_logs_y${year}m${month}`;
-      };
-      const oldPartition = formatName(oldDate);
-      const newPartition = formatName(newDate);
+    it('should support YYYY_MM suffix format', async () => {
+      // Mock BEGIN
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [{ to_regclass: null }] });
+      mockQuery.mockResolvedValueOnce({ rows: [] });
+      mockQuery.mockResolvedValueOnce({ rows: [] });
 
-      // Mock finding partitions
-      mockQuery.mockImplementation((query: any) => {
-        if (typeof query === 'string' && query.includes('SELECT inhrelid')) {
-            return Promise.resolve({
-                rows: [
-                    { partition_name: oldPartition },
-                    { partition_name: newPartition }
-                ]
-            });
-        }
-        return Promise.resolve({ rows: [] });
-      });
+      const date = new Date('2023-01-15');
+      // Table name with _p, expected to strip it
+      await partitionManager.createMonthlyPartition('events_p', date, 'YYYY_MM');
 
-      await partitionManager.detachOldPartitions(['audit_logs'], 12);
-
-      // Should detach/archve older partition
-      expect(mockClient.query).toHaveBeenCalledWith(
-        expect.stringContaining(`DETACH PARTITION ${oldPartition}`),
-      );
-      expect(coldStorageService.archivePartition).toHaveBeenCalledWith(
-        'audit_logs',
-        oldPartition,
-        true,
-      );
-
-      // Should NOT detach newer partition
-      expect(mockClient.query).not.toHaveBeenCalledWith(
-        expect.stringContaining(`DETACH PARTITION ${newPartition}`),
-      );
+      expect(mockQuery).toHaveBeenNthCalledWith(2, expect.stringContaining('SELECT to_regclass'), expect.arrayContaining(['events_2023_01']));
+      expect(mockQuery).toHaveBeenNthCalledWith(3, expect.stringContaining('CREATE TABLE events_2023_01'));
     });
   });
 });

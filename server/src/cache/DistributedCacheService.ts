@@ -12,6 +12,7 @@
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
+import zlib from 'zlib';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -316,16 +317,16 @@ export class DistributedCacheService {
         });
       }
 
-      // Delete all tagged keys
+      // Delete all tagged keys from L1 and send invalidation
       for (const key of keys) {
         this.l1Cache.delete(key);
-      }
-      await this.redis.del(...keys, tagKey);
-
-      // Broadcast invalidation for all keys
-      for (const key of keys) {
+        // We can optimize invalidation by sending just the tag, but existing logic relies on key invalidation
         await this.broadcastInvalidation(key);
       }
+
+      // Delete keys from Redis and the tag set itself
+      // We pass all keys plus the tagKey to del
+      await this.redis.del(...keys, tagKey);
 
       this.stats.invalidations += keys.length;
       logger.info({ tag, count: keys.length }, 'Cache invalidated by tag');
@@ -469,13 +470,15 @@ export class DistributedCacheService {
   // --------------------------------------------------------------------------
 
   private compress(value: unknown): string {
-    // Simple base64 encoding for now
-    // In production, use zlib or similar
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+    const json = JSON.stringify(value);
+    const buffer = zlib.gzipSync(json);
+    return buffer.toString('base64');
   }
 
   private decompress(compressed: string): unknown {
-    return JSON.parse(Buffer.from(compressed, 'base64').toString('utf-8'));
+    const buffer = Buffer.from(compressed, 'base64');
+    const json = zlib.gunzipSync(buffer).toString();
+    return JSON.parse(json);
   }
 
   // --------------------------------------------------------------------------

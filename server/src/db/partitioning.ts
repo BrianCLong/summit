@@ -27,7 +27,7 @@ export class PartitionManager {
       );
 
       if (checkRes.rows[0].to_regclass) {
-        logger.info(`Partition ${partitionName} already exists.`);
+        logger.debug(`Partition ${partitionName} already exists.`);
         await client.query('COMMIT');
         return;
       }
@@ -52,13 +52,29 @@ export class PartitionManager {
   }
 
   /**
-   * Creates a monthly partition for a time-series table (e.g., audit_logs, metrics).
+   * Creates a monthly partition for a time-series table.
    * Range Partitioning: FOR VALUES FROM ('2023-01-01') TO ('2023-02-01')
+   *
+   * @param tableName The parent table name
+   * @param date The date falling within the desired month (usually first day of month)
+   * @param suffixFormat 'yNmN' (e.g. _y2023m01) or 'YYYY_MM' (e.g. _2023_01, stripping _p suffix from table name)
    */
-  async createMonthlyPartition(tableName: string, date: Date): Promise<void> {
+  async createMonthlyPartition(
+    tableName: string,
+    date: Date,
+    suffixFormat: 'yNmN' | 'YYYY_MM' = 'yNmN'
+  ): Promise<void> {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const partitionName = `${tableName}_y${year}m${month}`;
+    let partitionName = '';
+
+    if (suffixFormat === 'YYYY_MM') {
+      // Remove '_p' suffix if present for the base name
+      const baseName = tableName.replace(/_p$/, '');
+      partitionName = `${baseName}_${year}_${month}`;
+    } else {
+      partitionName = `${tableName}_y${year}m${month}`;
+    }
 
     // Calculate range start and end
     const startObj = new Date(year, date.getMonth(), 1);
@@ -78,7 +94,7 @@ export class PartitionManager {
       );
 
       if (checkRes.rows[0].to_regclass) {
-        logger.info(`Partition ${partitionName} already exists.`);
+        logger.debug(`Partition ${partitionName} already exists.`);
         await client.query('COMMIT');
         return;
       }
@@ -108,8 +124,14 @@ export class PartitionManager {
   }
 
   /**
+   * Helper to ensure partition for a specific month exists
+   */
+  async ensurePartitionForMonth(tableName: string, date: Date, suffixFormat: 'yNmN' | 'YYYY_MM' = 'yNmN'): Promise<void> {
+    return this.createMonthlyPartition(tableName, date, suffixFormat);
+  }
+
+  /**
    * Maintenance job to ensure upcoming partitions exist and detach/archive old ones.
-   * Can be scheduled via pg-boss or node-cron.
    */
   async maintainPartitions(tables: string[] = ['audit_logs', 'metrics', 'provenance_ledger_v2']): Promise<void> {
     const now = new Date();
@@ -117,15 +139,21 @@ export class PartitionManager {
     const monthAfterNext = new Date(now.getFullYear(), now.getMonth() + 2, 1);
 
     for (const table of tables) {
-        // Ensure current month exists
+        // Use default suffix format for standard tables
         await this.createMonthlyPartition(table, now);
-        // Ensure next month exists (pre-creation)
         await this.createMonthlyPartition(table, nextMonth);
-        // Ensure month after next exists (buffer)
         await this.createMonthlyPartition(table, monthAfterNext);
     }
 
-    // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
+    // Specifically handle orchestrator tables with 'YYYY_MM' format
+    const orchestratorTables = ['orchestrator_events_p', 'orchestrator_outbox_p'];
+    for (const table of orchestratorTables) {
+      await this.createMonthlyPartition(table, now, 'YYYY_MM');
+      await this.createMonthlyPartition(table, nextMonth, 'YYYY_MM');
+      await this.createMonthlyPartition(table, monthAfterNext, 'YYYY_MM');
+    }
+
+    // Future: Logic to detach old partitions and move to cold storage
   }
 
   async detachOldPartitions(
@@ -145,7 +173,15 @@ export class PartitionManager {
 
         for (const row of result.rows ?? []) {
           const partitionName = row.partition_name as string;
-          const match = partitionName.match(/_y(\d{4})m(\d{2})$/);
+
+          // Match standard format
+          let match = partitionName.match(/_y(\d{4})m(\d{2})$/);
+
+          // Fallback to YYYY_MM format if standard didn't match
+          if (!match) {
+             match = partitionName.match(/_(\d{4})_(\d{2})$/);
+          }
+
           if (!match) continue;
 
           const year = Number(match[1]);
