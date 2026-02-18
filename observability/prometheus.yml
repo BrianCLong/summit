@@ -113,6 +113,15 @@ scrape_configs:
         target_label: instance
         replacement: 'predictive-suite'
 
+  # Summit AI API server
+  - job_name: 'summit-api'
+    static_configs:
+      - targets: ['summit-ai-worker:8000']
+        labels:
+          service: 'summit-api'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
 # Recording rules for pre-computed metrics
 recording_rules:
   - name: conductor.recording_rules
