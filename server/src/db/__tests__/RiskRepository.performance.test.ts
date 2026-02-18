@@ -1,52 +1,67 @@
-
-import { jest } from '@jest/globals';
 import { RiskRepository } from '../repositories/RiskRepository.js';
-import { pg } from '../pg.js';
+import { pg } from '../../db/pg.js';
+import { jest } from '@jest/globals';
 
 describe('RiskRepository Performance', () => {
-  let repository: RiskRepository;
+  let riskRepository: RiskRepository;
+  let mockTx: any;
 
   beforeEach(() => {
-    repository = new RiskRepository();
-    jest.clearAllMocks();
+    riskRepository = new RiskRepository();
+    mockTx = {
+      query: jest.fn().mockImplementation((query: string) => {
+        if (query.includes('INSERT INTO risk_scores')) {
+          return Promise.resolve([{ id: 'test-score-id' }]);
+        }
+        return Promise.resolve([]);
+      }),
+    };
+    // Mock pg.transaction to execute the callback with our mockTx
+    jest.spyOn(pg, 'transaction').mockImplementation((cb: any) => {
+      return cb(mockTx);
+    });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should use batched insertion for signals', async () => {
-    const input = {
-      tenantId: 'tenant-1',
-      entityId: 'entity-1',
+    const signals = Array.from({ length: 20 }, (_, i) => ({
+      type: `type-${i}`,
+      source: 'test',
+      value: i,
+      weight: 1,
+      contributionScore: i,
+      description: `desc-${i}`,
+    }));
+
+    await riskRepository.saveRiskScore({
+      tenantId: 't1',
+      entityId: 'e1',
       entityType: 'user',
-      score: 0.8,
-      level: 'high' as any,
-      window: '24h' as any,
+      score: 50,
+      level: 'medium',
+      window: '24h',
       modelVersion: '1.0.0',
-      signals: [
-        { type: 'login', value: 1, weight: 0.5, contributionScore: 0.4 },
-        { type: 'ip_change', value: 1, weight: 0.3, contributionScore: 0.24 },
-        { type: 'location', value: 1, weight: 0.2, contributionScore: 0.16 },
-      ],
-    };
-
-    const mockTx = {
-      query: jest.fn()
-        .mockResolvedValueOnce([{ id: 'score-1', ...input }]) // insert risk_score
-        .mockResolvedValue([{ id: 'sig-id' }]), // batch insert signals
-    };
-
-    const transactionSpy = jest.spyOn(pg, 'transaction').mockImplementation(async (cb: any) => {
-      return cb(mockTx);
+      rationale: 'test',
+      signals,
     });
 
-    await repository.saveRiskScore(input);
+    // Verify INSERT INTO risk_scores was called once
+    expect(mockTx.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO risk_scores'),
+      expect.any(Array)
+    );
 
-    // Optimized behavior: 1 for score + 1 for batch signals = 2 calls
-    // BOLT: This reduces round-trips from O(N) to O(1) for signals.
-    expect(mockTx.query).toHaveBeenCalledTimes(2);
+    // Verify INSERT INTO risk_signals was called once (since 20 < 100)
+    // instead of 20 times.
+    const signalInserts = (mockTx.query as jest.Mock).mock.calls.filter((call: any) =>
+      call[0].includes('INSERT INTO risk_signals')
+    );
 
-    // The second call should be a batch insert
-    expect(mockTx.query.mock.calls[1][0]).toContain('INSERT INTO risk_signals');
-    expect(mockTx.query.mock.calls[1][0]).toContain('VALUES ($1, $2, $3, $4, $5, $6, $7, $8), ($9');
-
-    transactionSpy.mockRestore();
+    expect(signalInserts.length).toBe(1);
+    // 20 signals * 8 params = 160 values
+    expect(signalInserts[0][1].length).toBe(160);
   });
 });

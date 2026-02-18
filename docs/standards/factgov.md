@@ -15,14 +15,6 @@
 | **Exports** | Marketplace Entities | Agencies, Vendors, Validators exposed via GraphQL. |
 | **Exports** | Artifacts | deterministic award recommendation JSONs. |
 
-## Module Structure (`server/src/modules/factgov/`)
-
-*   `types.ts`: TypeScript interfaces mirroring the DB schema.
-*   `repo.ts`: Data access layer. SQL queries reside here.
-*   `service.ts`: Business logic (matching, rules).
-*   `resolvers.ts`: GraphQL resolvers.
-*   `schema.ts`: GraphQL type definitions (SDL).
-
 ## Data Classification
 
 | Data Type | Classification | Notes |
@@ -32,6 +24,14 @@
 | Vendor Compliance Docs | **Highly Sensitive** | Financial/Legal data |
 | Attestation Summaries | **Sensitive** | Public verification status |
 | Audit Logs | **Sensitive** | Immutable chain |
+
+## Module Structure (`server/src/modules/factgov/`)
+
+*   `types.ts`: TypeScript interfaces mirroring the DB schema.
+*   `repo.ts`: Data access layer. SQL queries reside here.
+*   `service.ts`: Business logic (matching, rules).
+*   `resolvers.ts`: GraphQL resolvers.
+*   `schema.ts`: GraphQL type definitions (SDL).
 
 ## Retention Policy
 
@@ -50,14 +50,9 @@ The following fields must **NEVER** appear in application logs (use redaction):
 - API Keys
 - Payment Instrument Details
 
-## Auditability & Determinism
+## Determinism & Auditability
 
 - All state changes (status transitions) must emit an immutable audit event.
-- All artifacts (award recommendations, audit trails) must be generated deterministically.
 - Audit packs must be deterministic (same input = same output bytes).
-- Timestamps in audit packs must be isolated to `stamp.json` or a `runtime_meta` field, not embedded in the hashable content.
-
-## Non-goals (MWS)
-*   No full Stripe billing implementation.
-*   No cooperative contract API sync.
-*   No real-time "chat" features (use standard Summit messaging if needed).
+- Timestamps in audit packs must be isolated to `stamp.json` or a `runtime_meta` field/file.
+- All artifacts (award recommendations, audit trails) must be generated deterministically.
