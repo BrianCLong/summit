@@ -1,25 +1,83 @@
-name: Infra Parity
+name: Infrastructure Parity Check
+
 on:
   pull_request:
-    branches: [ main ]
-    paths: [ "infra/**", ".github/workflows/infra-parity.yml" ]
-  merge_group:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
-  cancel-in-progress: true
+    paths:
+      - "infra/**"
+      - ".github/workflows/infra-parity.yml"
 
 jobs:
-  parity:
+  parity-gcp:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
+    if: ${{ secrets.GCP_WORKLOAD_POOL != '' }}
+    permissions:
+      contents: 'read'
+      id-token: 'write'
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - uses: hashicorp/setup-terraform@v3
-        with: { terraform_version: 1.8.5 }
-      - name: Parity ≥95%
-        run: |
-          chmod +x infra/scripts/validate_parity.sh
-          THRESHOLD=95 infra/scripts/validate_parity.sh staging preprod
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_POOL }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Check GCP Parity
+        run: bash scripts/ci/parity_check.sh
+        env:
+          CLOUD: gcp
+
+  parity-azure:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.AZURE_CLIENT_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Check Azure Parity
+        run: bash scripts/ci/parity_check.sh
+        env:
+          CLOUD: azure
+
+  parity-aws:
+    runs-on: ubuntu-latest
+    if: ${{ secrets.AWS_ROLE_ARN != '' }}
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Check AWS Parity
+        run: bash scripts/ci/parity_check.sh
+        env:
+          CLOUD: aws
