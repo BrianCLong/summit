@@ -1,10 +1,24 @@
 import * as React from 'react'
-import { AlertCircle, FileX, Search, Plus } from 'lucide-react'
+import {
+  AlertCircle,
+  FileX,
+  Search,
+  Plus,
+  BarChart3,
+  Activity,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from './Button'
 
 interface EmptyStateProps {
-  icon?: 'search' | 'file' | 'alert' | 'plus' | React.ReactNode
+  icon?:
+    | 'search'
+    | 'file'
+    | 'alert'
+    | 'plus'
+    | 'chart'
+    | 'activity'
+    | React.ReactNode
   title: string
   description?: string
   action?: {
@@ -20,6 +34,8 @@ const iconMap = {
   file: FileX,
   alert: AlertCircle,
   plus: Plus,
+  chart: BarChart3,
+  activity: Activity,
 }
 
 export function EmptyState({
@@ -40,7 +56,10 @@ export function EmptyState({
     >
       <div className="mb-4 rounded-full bg-muted p-4">
         {IconComponent ? (
-          <IconComponent className="h-8 w-8 text-muted-foreground" />
+          <IconComponent
+            className="h-8 w-8 text-muted-foreground"
+            aria-hidden="true"
+          />
         ) : (
           icon
         )}
