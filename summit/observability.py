@@ -12,6 +12,58 @@ from opentelemetry.semconv.resource import ResourceAttributes
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram, Gauge
+
+class Metrics:
+    """
+    Central definition of Summit platform custom metrics.
+    """
+    # Agent Metrics
+    tasks_completed = Counter(
+        "summit_agent_tasks_completed_total",
+        "Total number of tasks successfully completed by Summit agents",
+        ["agent_id", "task_type"]
+    )
+    tasks_failed = Counter(
+        "summit_agent_tasks_failed_total",
+        "Total number of tasks failed by Summit agents",
+        ["agent_id", "task_type"]
+    )
+    recapture_success_rate = Gauge(
+        "summit_agent_recapture_success_rate",
+        "Current success rate of agent recapture mechanisms",
+        ["agent_id"]
+    )
+
+    # Flow Metrics
+    flow_duration = Histogram(
+        "summit_flow_duration_seconds",
+        "Duration of Summit flows/cycles in seconds",
+        ["flow_name"],
+        buckets=[0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0, 120.0]
+    )
+    pr_creation = Counter(
+        "summit_flow_pr_creation_total",
+        "Total number of Pull Requests created by Summit flows",
+        ["repository"]
+    )
+    autonomous_fixes = Counter(
+        "summit_flow_autonomous_fixes_total",
+        "Total number of autonomous fixes applied by Summit",
+        ["fix_type"]
+    )
+
+    # Predictive Metrics
+    forecast_accuracy = Gauge(
+        "summit_predictive_forecast_accuracy",
+        "Accuracy score of the predictive foresight engine (0.0 to 1.0)",
+        ["model_version"]
+    )
+    hotspot_lead_time = Gauge(
+        "summit_predictive_hotspot_lead_time_seconds",
+        "Lead time in seconds for detecting hotspots before they occur",
+        ["hotspot_type"]
+    )
 
 def add_open_telemetry_spans(logger, log_method, event_dict):
     """
