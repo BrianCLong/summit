@@ -37,6 +37,13 @@ export default function HomePage() {
   const [recentCases, setRecentCases] = useState<Case[]>([])
   const isDemoMode = useDemoMode()
 
+  const handleItemKeyDown = (e: React.KeyboardEvent, path: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      navigate(path)
+    }
+  }
+
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
@@ -191,15 +198,10 @@ export default function HomePage() {
             return (
               <Card
                 key={action.title}
-                className="cursor-pointer hover:shadow-md transition-shadow focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                className="cursor-pointer hover:shadow-md transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                 onClick={() => navigate(action.href)}
                 tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(action.href);
-                  }
-                }}
+                onKeyDown={(e) => handleItemKeyDown(e, action.href)}
                 role="button"
                 aria-label={`${action.title}: ${action.description}`}
               >
@@ -253,10 +255,19 @@ export default function HomePage() {
               : recentInvestigations.map(investigation => (
                   <div
                     key={investigation.id}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     onClick={() =>
                       navigate(`/explore?investigation=${investigation.id}`)
                     }
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={e =>
+                      handleItemKeyDown(
+                        e,
+                        `/explore?investigation=${investigation.id}`
+                      )
+                    }
+                    aria-label={`View investigation: ${investigation.title}`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">
@@ -318,8 +329,14 @@ export default function HomePage() {
               : recentAlerts.map(alert => (
                   <div
                     key={alert.id}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     onClick={() => navigate(`/alerts/${alert.id}`)}
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={e =>
+                      handleItemKeyDown(e, `/alerts/${alert.id}`)
+                    }
+                    aria-label={`View alert: ${alert.title}`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{alert.title}</div>
@@ -374,8 +391,14 @@ export default function HomePage() {
               : recentCases.map(case_ => (
                   <div
                     key={case_.id}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
                     onClick={() => navigate(`/cases/${case_.id}`)}
+                    tabIndex={0}
+                    role="button"
+                    onKeyDown={e =>
+                      handleItemKeyDown(e, `/cases/${case_.id}`)
+                    }
+                    aria-label={`View case: ${case_.title}`}
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{case_.title}</div>
