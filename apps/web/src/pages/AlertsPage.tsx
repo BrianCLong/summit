@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -77,83 +77,103 @@ export default function AlertsPage() {
   }, [alertUpdates])
 
   // Filter alerts
-  const filteredAlerts = alerts.filter(alert => {
-    if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
-    if (selectedStatus && alert.status !== selectedStatus) {return false}
-    if (
-      searchQuery &&
-      !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      {return false}
-    return true
-  })
+  const filteredAlerts = useMemo(
+    () =>
+      alerts.filter(alert => {
+        if (selectedSeverity && alert.severity !== selectedSeverity) {
+          return false
+        }
+        if (selectedStatus && alert.status !== selectedStatus) {
+          return false
+        }
+        if (
+          searchQuery &&
+          !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
+        ) {
+          return false
+        }
+        return true
+      }),
+    [alerts, selectedSeverity, selectedStatus, searchQuery]
+  )
 
   // Calculate KPIs (do not show change deltas in demo-only mode)
-  const kpiMetrics: KPIMetric[] = [
-    {
-      id: 'critical',
-      title: 'Critical Alerts',
-      value: alerts.filter(a => a.severity === 'critical').length,
-      format: 'number',
-      status:
-        alerts.filter(a => a.severity === 'critical').length > 0
-          ? 'error'
-          : 'success',
-      ...(alertsData ? { change: { value: 12, direction: 'up', period: 'last hour' } } : {}),
-    },
-    {
-      id: 'active',
-      title: 'Active Alerts',
-      value: alerts.filter(a => a.status === 'open').length,
-      format: 'number',
-      status: 'warning',
-      ...(alertsData ? { change: { value: 5, direction: 'down', period: 'last hour' } } : {}),
-    },
-    {
-      id: 'resolved',
-      title: 'Resolved Today',
-      value: alerts.filter(a => a.status === 'resolved').length,
-      format: 'number',
-      status: 'success',
-      ...(alertsData ? { change: { value: 23, direction: 'up', period: 'yesterday' } } : {}),
-    },
-    {
-      id: 'response',
-      title: 'Avg Response Time',
-      value: 156,
-      format: 'duration',
-      status: 'neutral',
-      ...(alertsData ? { change: { value: 8, direction: 'down', period: 'last week' } } : {}),
-    },
-  ]
+  const kpiMetrics: KPIMetric[] = useMemo(
+    () => [
+      {
+        id: 'critical',
+        title: 'Critical Alerts',
+        value: alerts.filter(a => a.severity === 'critical').length,
+        format: 'number',
+        status:
+          alerts.filter(a => a.severity === 'critical').length > 0
+            ? 'error'
+            : 'success',
+        ...(alertsData
+          ? { change: { value: 12, direction: 'up', period: 'last hour' } }
+          : {}),
+      },
+      {
+        id: 'active',
+        title: 'Active Alerts',
+        value: alerts.filter(a => a.status === 'open').length,
+        format: 'number',
+        status: 'warning',
+        ...(alertsData
+          ? { change: { value: 5, direction: 'down', period: 'last hour' } }
+          : {}),
+      },
+      {
+        id: 'resolved',
+        title: 'Resolved Today',
+        value: alerts.filter(a => a.status === 'resolved').length,
+        format: 'number',
+        status: 'success',
+        ...(alertsData
+          ? { change: { value: 23, direction: 'up', period: 'yesterday' } }
+          : {}),
+      },
+      {
+        id: 'response',
+        title: 'Avg Response Time',
+        value: 156,
+        format: 'duration',
+        status: 'neutral',
+        ...(alertsData
+          ? { change: { value: 8, direction: 'down', period: 'last week' } }
+          : {}),
+      },
+    ],
+    [alerts, alertsData]
+  )
 
-  const handleStatusChange = async (
-    alertId: string,
-    newStatus: AlertStatus
-  ) => {
-    try {
-      if (alertsData) {
-        await updateAlertStatus({
-          variables: { id: alertId, status: newStatus },
-        })
-      } else {
-        // Update mock data
-        setAlerts(prev =>
-          prev.map(alert =>
-            alert.id === alertId
-              ? {
-                  ...alert,
-                  status: newStatus,
-                  updatedAt: new Date().toISOString(),
-                }
-              : alert
+  const handleStatusChange = useCallback(
+    async (alertId: string, newStatus: AlertStatus) => {
+      try {
+        if (alertsData) {
+          await updateAlertStatus({
+            variables: { id: alertId, status: newStatus },
+          })
+        } else {
+          // Update mock data
+          setAlerts(prev =>
+            prev.map(alert =>
+              alert.id === alertId
+                ? {
+                    ...alert,
+                    status: newStatus,
+                    updatedAt: new Date().toISOString(),
+                  }
+                : alert
+            )
           )
-        )
+        }
+      } catch (error) {
+        console.error('Failed to update alert status:', error)
       }
-    } catch (error) {
-      console.error('Failed to update alert status:', error)
-    }
-  }
+    },
+    [alertsData, updateAlertStatus]
+  )
 
   const handleRefresh = async () => {
     if (alertsData) {
@@ -162,34 +182,6 @@ export default function AlertsPage() {
       setLoading(true)
       await new Promise(resolve => setTimeout(resolve, 800))
       setLoading(false)
-    }
-  }
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case 'critical':
-        return 'bg-red-500'
-      case 'high':
-        return 'bg-orange-500'
-      case 'medium':
-        return 'bg-yellow-500'
-      case 'low':
-        return 'bg-blue-500'
-      default:
-        return 'bg-gray-500'
-    }
-  }
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'open':
-        return 'destructive'
-      case 'investigating':
-        return 'warning'
-      case 'resolved':
-        return 'success'
-      default:
-        return 'secondary'
     }
   }
 
@@ -336,69 +328,11 @@ export default function AlertsPage() {
               </thead>
               <tbody>
                 {filteredAlerts.map(alert => (
-                  <tr key={alert.id} className="group">
-                    <td>
-                      <div
-                        className={`w-3 h-3 rounded-full ${getSeverityColor(alert.severity)}`}
-                      />
-                    </td>
-                    <td>
-                      <div>
-                        <div className="font-medium">{alert.title}</div>
-                        <div className="text-sm text-muted-foreground line-clamp-1">
-                          {alert.description}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <Badge
-                        variant={
-                          alert.severity === 'critical'
-                            ? 'destructive'
-                            : 'secondary'
-                        }
-                      >
-                        {alert.severity}
-                      </Badge>
-                    </td>
-                    <td>
-                      <Badge variant={getStatusColor(alert.status) as 'destructive' | 'warning' | 'success' | 'secondary'}>
-                        {alert.status}
-                      </Badge>
-                    </td>
-                    <td className="text-sm text-muted-foreground">
-                      {new Date(alert.createdAt).toLocaleDateString()}
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        {alert.status === 'open' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              handleStatusChange(alert.id, 'investigating')
-                            }
-                          >
-                            Investigate
-                          </Button>
-                        )}
-                        {alert.status === 'investigating' && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() =>
-                              handleStatusChange(alert.id, 'resolved')
-                            }
-                          >
-                            Resolve
-                          </Button>
-                        )}
-                        <Button size="sm" variant="ghost">
-                          View
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
+                  <AlertRow
+                    key={alert.id}
+                    alert={alert}
+                    onStatusChange={handleStatusChange}
+                  />
                 ))}
               </tbody>
             </Table>
@@ -408,3 +342,106 @@ export default function AlertsPage() {
     </div>
   )
 }
+
+const getSeverityColor = (severity: string) => {
+  switch (severity) {
+    case 'critical':
+      return 'bg-red-500'
+    case 'high':
+      return 'bg-orange-500'
+    case 'medium':
+      return 'bg-yellow-500'
+    case 'low':
+      return 'bg-blue-500'
+    default:
+      return 'bg-gray-500'
+  }
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'open':
+      return 'destructive'
+    case 'investigating':
+      return 'warning'
+    case 'resolved':
+      return 'success'
+    default:
+      return 'secondary'
+  }
+}
+
+const AlertRow = React.memo(
+  ({
+    alert,
+    onStatusChange,
+  }: {
+    alert: Alert
+    onStatusChange: (id: string, status: AlertStatus) => void
+  }) => (
+    <tr className="group">
+      <td>
+        <div
+          className={`w-3 h-3 rounded-full ${getSeverityColor(alert.severity)}`}
+        />
+      </td>
+      <td>
+        <div>
+          <div className="font-medium">{alert.title}</div>
+          <div className="text-sm text-muted-foreground line-clamp-1">
+            {alert.description}
+          </div>
+        </div>
+      </td>
+      <td>
+        <Badge
+          variant={alert.severity === 'critical' ? 'destructive' : 'secondary'}
+        >
+          {alert.severity}
+        </Badge>
+      </td>
+      <td>
+        <Badge
+          variant={
+            getStatusColor(alert.status) as
+              | 'destructive'
+              | 'warning'
+              | 'success'
+              | 'secondary'
+          }
+        >
+          {alert.status}
+        </Badge>
+      </td>
+      <td className="text-sm text-muted-foreground">
+        {new Date(alert.createdAt).toLocaleDateString()}
+      </td>
+      <td>
+        <div className="flex items-center gap-2">
+          {alert.status === 'open' && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onStatusChange(alert.id, 'investigating')}
+            >
+              Investigate
+            </Button>
+          )}
+          {alert.status === 'investigating' && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onStatusChange(alert.id, 'resolved')}
+            >
+              Resolve
+            </Button>
+          )}
+          <Button size="sm" variant="ghost">
+            View
+          </Button>
+        </div>
+      </td>
+    </tr>
+  )
+)
+AlertRow.displayName = 'AlertRow'
