@@ -1,33 +1,28 @@
-
 /**
  * AI API Endpoints for IntelGraph
  * Provides endpoints for link prediction, sentiment analysis, and AI-powered insights
  */
 
-import express, { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from './types.js';
-import { body, query, validationResult } from 'express-validator';
-import pino from 'pino';
-import EntityLinkingService from '../services/EntityLinkingService.js';
-import { Queue, Worker } from 'bullmq';
-import { requirePermission } from '../middleware/auth.js';
+import express, { Response, NextFunction } from "express";
+import type { AuthenticatedRequest } from "./types.js";
+import { body, query, validationResult } from "express-validator";
+import pino from "pino";
+import EntityLinkingService from "../services/EntityLinkingService.js";
+import { Queue, Worker } from "bullmq";
+import { requirePermission } from "../middleware/auth.js";
 
-import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
-import {
-  ExtractionEngineConfig,
-  ExtractionRequest,
-  ExtractionResult,
-} from '../ai/types.js'; // WAR-GAMED SIMULATION - Import types
-import { getNeo4jDriver } from '../db/neo4j.js'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor
-import { getRedisClient } from '../db/redis.js'; // WAR-GAMED SIMULATION - For BullMQ
-import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
-import { randomUUID } from 'crypto'; // Use Node's built-in UUID for job IDs
-import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
-import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from MediaUploadService
-import { createRateLimiter, EndpointClass } from '../middleware/rateLimit.js';
-import { cfg } from '../config.js';
-import { rateLimiter } from '../services/RateLimiter.js';
-import { ResidencyGuard } from '../data-residency/residency-guard.js';
+import { ExtractionEngine } from "../ai/ExtractionEngine.js"; // WAR-GAMED SIMULATION - Import ExtractionEngine
+import { ExtractionEngineConfig, ExtractionRequest, ExtractionResult } from "../ai/types.js"; // WAR-GAMED SIMULATION - Import types
+import { getNeo4jDriver } from "../db/neo4j.js"; // WAR-GAMED SIMULATION - For ExtractionEngine constructor
+import { getRedisClient } from "../db/redis.js"; // WAR-GAMED SIMULATION - For BullMQ
+import { Pool } from "pg"; // WAR-GAMED SIMULATION - For ExtractionEngine constructor (assuming PG is used)
+import { randomUUID } from "crypto"; // Use Node's built-in UUID for job IDs
+import AdversaryAgentService from "../ai/services/AdversaryAgentService.js";
+import { MediaType } from "../services/MediaUploadService.js"; // Import MediaType from MediaUploadService
+import { createRateLimiter, EndpointClass } from "../middleware/rateLimit.js";
+import { cfg } from "../config.js";
+import { rateLimiter } from "../services/RateLimiter.js";
+import { ResidencyGuard } from "../data-residency/residency-guard.js";
 
 const logger = (pino as any)();
 const router = express.Router();
@@ -36,7 +31,7 @@ const router = express.Router();
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
 const redisClient = getRedisClient(); // Use existing Redis client for BullMQ
 if (!redisClient) {
-  throw new Error('Redis connection is required for AI queue rate limiting');
+  throw new Error("Redis connection is required for AI queue rate limiting");
 }
 
 // Create a new connection with maxRetriesPerRequest: null as required by BullMQ
@@ -45,7 +40,7 @@ const connection = (redisClient as any).duplicate
   ? (redisClient as any).duplicate({ maxRetriesPerRequest: null })
   : redisClient;
 
-const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
+const videoAnalysisQueue = new Queue("videoAnalysisQueue", {
   connection,
   limiter: {
     max: cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
@@ -61,19 +56,19 @@ const buildBackgroundKey = (req: AuthenticatedRequest, scope: string) => {
 
 const enforceBackgroundThrottle = async (
   req: AuthenticatedRequest,
-  scope: string,
+  scope: string
 ): Promise<void> => {
   const key = buildBackgroundKey(req, scope);
   const result = await rateLimiter.consume(
     key,
     1,
     cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
-    cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+    cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS
   );
 
   if (!result.allowed) {
     const retryAfterSeconds = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 0);
-    const error = new Error('Background rate limit exceeded') as Error & {
+    const error = new Error("Background rate limit exceeded") as Error & {
       status?: number;
       retryAfter?: number;
     };
@@ -84,7 +79,7 @@ const enforceBackgroundThrottle = async (
 };
 
 // Feedback Queue for AI insights
-const feedbackQueue = new Queue('aiFeedbackQueue', {
+const feedbackQueue = new Queue("aiFeedbackQueue", {
   connection,
   limiter: {
     max: cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
@@ -96,24 +91,21 @@ const feedbackQueue = new Queue('aiFeedbackQueue', {
 // In a real app, the PG Pool would be passed from the main app initialization
 const dummyPgPool = new Pool(); // WAR-GAMED SIMULATION - Placeholder
 const extractionEngineConfig: ExtractionEngineConfig = {
-  pythonPath: process.env.PYTHON_PATH || 'python', // Ensure this is configured
-  modelsPath: process.env.MODELS_PATH || './models', // Ensure this is configured
-  tempPath: process.env.TEMP_PATH || './temp', // Ensure this is configured
+  pythonPath: process.env.PYTHON_PATH || "python", // Ensure this is configured
+  modelsPath: process.env.MODELS_PATH || "./models", // Ensure this is configured
+  tempPath: process.env.TEMP_PATH || "./temp", // Ensure this is configured
   maxConcurrentJobs: 5,
-  enableGPU: process.env.ENABLE_GPU === 'true',
+  enableGPU: process.env.ENABLE_GPU === "true",
   allowedPaths: [
-    process.env.MEDIA_UPLOAD_PATH || '/tmp/intelgraph/uploads',
-    process.env.TEMP_PATH || './temp'
+    process.env.MEDIA_UPLOAD_PATH || "/tmp/intelgraph/uploads",
+    process.env.TEMP_PATH || "./temp",
   ],
 };
-const extractionEngine = new ExtractionEngine(
-  extractionEngineConfig,
-  dummyPgPool,
-);
+const extractionEngine = new ExtractionEngine(extractionEngineConfig, dummyPgPool);
 
 // WAR-GAMED SIMULATION - Worker to process video analysis jobs
 const videoAnalysisWorker = new Worker(
-  'videoAnalysisQueue',
+  "videoAnalysisQueue",
   async (job: any) => {
     const { jobId, mediaPath, mediaType, extractionMethods, options } =
       job.data as ExtractionRequest;
@@ -127,28 +119,25 @@ const videoAnalysisWorker = new Worker(
         mediaType,
         extractionMethods,
         options,
-        mediaSourceId: options.mediaSourceId || 'unknown', // Ensure mediaSourceId is passed
+        mediaSourceId: options.mediaSourceId || "unknown", // Ensure mediaSourceId is passed
       });
 
       logger.info(`Video analysis job ${jobId} completed successfully.`);
-      return { status: 'completed', results };
+      return { status: "completed", results };
     } catch (error: any) {
-      logger.error(
-        `Video analysis job ${jobId} failed: ${error.message}`,
-        error,
-      );
+      logger.error(`Video analysis job ${jobId} failed: ${error.message}`, error);
       throw new Error(`Video analysis failed: ${error.message}`);
     }
   },
-  { connection },
+  { connection }
 );
 
 // WAR-GAMED SIMULATION - Handle worker events
-videoAnalysisWorker.on('completed', (job: any) => {
+videoAnalysisWorker.on("completed", (job: any) => {
   logger.info(`Job ${job.id} has completed!`);
 });
 
-videoAnalysisWorker.on('failed', (job: any, err: any) => {
+videoAnalysisWorker.on("failed", (job: any, err: any) => {
   logger.error(`Job ${job?.id} has failed with error ${err.message}`);
 });
 
@@ -159,22 +148,29 @@ const aiRateLimit = createRateLimiter(EndpointClass.AI);
 router.use(aiRateLimit);
 
 // Apply permissions to all AI routes
-router.use(requirePermission('ai:request'));
+router.use(requirePermission("ai:request"));
 
 // Localized AI residency check (v2)
-const localizedAIProtection = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const localizedAIProtection = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const tenantId = req.user?.tenantId || (req as any).tenantId;
     if (!tenantId) return next();
 
     const guard = ResidencyGuard.getInstance();
-    const isAllowed = await guard.validateFeatureAccess(tenantId, 'aiFeatures');
+    const isAllowed = await guard.validateFeatureAccess(tenantId, "aiFeatures");
 
     if (!isAllowed) {
-      logger.warn(`AI feature access blocked for tenant ${tenantId} due to regional residency policy.`);
+      logger.warn(
+        `AI feature access blocked for tenant ${tenantId} due to regional residency policy.`
+      );
       return res.status(403).json({
-        error: 'FeatureRestricted',
-        message: 'AI features are not available in your region due to data residency or privacy regulations.'
+        error: "FeatureRestricted",
+        message:
+          "AI features are not available in your region due to data residency or privacy regulations.",
       });
     }
     next();
@@ -187,62 +183,36 @@ router.use(localizedAIProtection);
 
 // Validation middleware
 const validatePredictLinks = [
-  body('entityId').isString().notEmpty().withMessage('entityId is required'),
-  body('topK')
-    .optional()
-    .isInt({ min: 1, max: 50 })
-    .withMessage('topK must be between 1 and 50'),
+  body("entityId").isString().notEmpty().withMessage("entityId is required"),
+  body("topK").optional().isInt({ min: 1, max: 50 }).withMessage("topK must be between 1 and 50"),
 ];
 
 const validateSentiment = [
-  body('entityId')
-    .optional()
-    .isString()
-    .withMessage('entityId must be a string'),
-  body('text').optional().isString().withMessage('text must be a string'),
-  body('entityData')
-    .optional()
-    .isObject()
-    .withMessage('entityData must be an object'),
+  body("entityId").optional().isString().withMessage("entityId must be a string"),
+  body("text").optional().isString().withMessage("text must be a string"),
+  body("entityData").optional().isObject().withMessage("entityData must be an object"),
 ];
 
 const validateAISummary = [
-  body('entityId').isString().notEmpty().withMessage('entityId is required'),
-  body('entityData')
-    .optional()
-    .isObject()
-    .withMessage('entityData must be an object'),
-  body('includeContext')
-    .optional()
-    .isBoolean()
-    .withMessage('includeContext must be boolean'),
+  body("entityId").isString().notEmpty().withMessage("entityId is required"),
+  body("entityData").optional().isObject().withMessage("entityData must be an object"),
+  body("includeContext").optional().isBoolean().withMessage("includeContext must be boolean"),
 ];
 
 // WAR-GAMED SIMULATION - Validation for video extraction endpoint
 const validateExtractVideo = [
-  body('mediaPath').isString().notEmpty().withMessage('mediaPath is required'),
-  body('mediaType')
-    .isIn([MediaType.VIDEO])
-    .withMessage('mediaType must be VIDEO'),
-  body('extractionMethods')
-    .isArray()
-    .withMessage('extractionMethods must be an array'),
-  body('options')
-    .isObject()
-    .optional()
-    .withMessage('options must be an object'),
+  body("mediaPath").isString().notEmpty().withMessage("mediaPath is required"),
+  body("mediaType").isIn([MediaType.VIDEO]).withMessage("mediaType must be VIDEO"),
+  body("extractionMethods").isArray().withMessage("extractionMethods must be an array"),
+  body("options").isObject().optional().withMessage("options must be an object"),
 ];
 
 // Helper function to handle validation errors
-const handleValidationErrors = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-) => {
+const handleValidationErrors = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({
-      error: 'Validation failed',
+      error: "Validation failed",
       details: errors.array(),
     });
   }
@@ -282,7 +252,7 @@ const handleValidationErrors = (
  *         description: Internal server error
  */
 router.post(
-  '/predict-links',
+  "/predict-links",
   validatePredictLinks,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
@@ -292,21 +262,18 @@ router.post(
 
       logger.info(`Link prediction request for entity: ${entityId}`);
 
-      const result = await EntityLinkingService.suggestLinksForEntity(
-        entityId,
-        {
-          limit: topK,
-          investigationId,
-          token: req.headers.authorization?.replace('Bearer ', ''),
-        },
-      );
+      const result = await EntityLinkingService.suggestLinksForEntity(entityId, {
+        limit: topK,
+        investigationId,
+        token: req.headers.authorization?.replace("Bearer ", ""),
+      });
 
       const responseTime = Date.now() - startTime;
 
       if (!result.success) {
         return res.status(500).json({
-          error: 'Link prediction failed',
-          message: result.error || result.message || 'Unknown error',
+          error: "Link prediction failed",
+          message: result.error || result.message || "Unknown error",
         });
       }
 
@@ -317,21 +284,21 @@ router.post(
         taskId: (result as any).taskId,
         candidates: (result as any).candidates,
         metadata: {
-          model: (result as any).modelName || 'default_link_predictor',
+          model: (result as any).modelName || "default_link_predictor",
           topK,
           executionTime: responseTime,
         },
       });
     } catch (error: any) {
       logger.error(
-        `Error in link prediction: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Error in link prediction: ${error instanceof Error ? error.message : "Unknown error"}`
       );
       res.status(500).json({
-        error: 'Link prediction failed',
-        message: 'Internal server error during link prediction',
+        error: "Link prediction failed",
+        message: "Internal server error during link prediction",
       });
     }
-  },
+  }
 );
 
 /**
@@ -364,7 +331,7 @@ router.post(
  *         description: Internal server error
  */
 router.post(
-  '/analyze-sentiment',
+  "/analyze-sentiment",
   validateSentiment,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
@@ -372,9 +339,7 @@ router.post(
       const startTime = Date.now();
       const { entityId, text, entityData } = req.body;
 
-      logger.info(
-        `Sentiment analysis request${entityId ? ` for entity: ${entityId}` : ''}`,
-      );
+      logger.info(`Sentiment analysis request${entityId ? ` for entity: ${entityId}` : ""}`);
 
       let sentimentResult;
 
@@ -386,8 +351,8 @@ router.post(
         sentimentResult = generateScaffoldEntitySentiment(entityData);
       } else {
         return res.status(400).json({
-          error: 'Invalid request',
-          message: 'Either text or entityData must be provided',
+          error: "Invalid request",
+          message: "Either text or entityData must be provided",
         });
       }
 
@@ -400,7 +365,7 @@ router.post(
         entityId,
         sentiment: sentimentResult,
         metadata: {
-          model: 'scaffold-sentiment-v1',
+          model: "scaffold-sentiment-v1",
           executionTime: responseTime,
           analyzedFields: (sentimentResult as any).field_sentiments
             ? Object.keys((sentimentResult as any).field_sentiments).length
@@ -409,14 +374,14 @@ router.post(
       });
     } catch (error: any) {
       logger.error(
-        `Error in sentiment analysis: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Error in sentiment analysis: ${error instanceof Error ? error.message : "Unknown error"}`
       );
       res.status(500).json({
-        error: 'Sentiment analysis failed',
-        message: 'Internal server error during sentiment analysis',
+        error: "Sentiment analysis failed",
+        message: "Internal server error during sentiment analysis",
       });
     }
-  },
+  }
 );
 
 /**
@@ -452,7 +417,7 @@ router.post(
  *         description: Internal server error
  */
 router.post(
-  '/generate-summary',
+  "/generate-summary",
   validateAISummary,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
@@ -463,24 +428,18 @@ router.post(
       logger.info(`AI summary generation request for entity: ${entityId}`);
 
       // TODO: Replace with actual LLM integration
-      const summary = generateScaffoldAISummary(
-        entityId,
-        entityData,
-        includeContext,
-      );
+      const summary = generateScaffoldAISummary(entityId, entityData, includeContext);
 
       const responseTime = Date.now() - startTime;
 
-      logger.info(
-        `AI summary generated in ${responseTime}ms for entity ${entityId}`,
-      );
+      logger.info(`AI summary generated in ${responseTime}ms for entity ${entityId}`);
 
       res.json({
         success: true,
         entityId,
         summary,
         metadata: {
-          model: 'scaffold-llm-v1',
+          model: "scaffold-llm-v1",
           includeContext,
           executionTime: responseTime,
           generatedAt: new Date().toISOString(),
@@ -488,14 +447,14 @@ router.post(
       });
     } catch (error: any) {
       logger.error(
-        `Error in AI summary generation: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Error in AI summary generation: ${error instanceof Error ? error.message : "Unknown error"}`
       );
       res.status(500).json({
-        error: 'AI summary generation failed',
-        message: 'Internal server error during summary generation',
+        error: "AI summary generation failed",
+        message: "Internal server error during summary generation",
       });
     }
-  },
+  }
 );
 
 /**
@@ -512,27 +471,27 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.get('/models/status', async (req: AuthenticatedRequest, res: Response) => {
+router.get("/models/status", async (req: AuthenticatedRequest, res: Response) => {
   try {
     // TODO: Replace with actual model health checks
     const modelStatus = {
       linkPrediction: {
-        status: 'healthy',
-        model: 'scaffold-gnn-v1',
+        status: "healthy",
+        model: "scaffold-gnn-v1",
         lastUpdated: new Date().toISOString(),
-        version: '1.0.0-scaffold',
+        version: "1.0.0-scaffold",
       },
       sentimentAnalysis: {
-        status: 'healthy',
-        model: 'scaffold-sentiment-v1',
+        status: "healthy",
+        model: "scaffold-sentiment-v1",
         lastUpdated: new Date().toISOString(),
-        version: '1.0.0-scaffold',
+        version: "1.0.0-scaffold",
       },
       textGeneration: {
-        status: 'healthy',
-        model: 'scaffold-llm-v1',
+        status: "healthy",
+        model: "scaffold-llm-v1",
         lastUpdated: new Date().toISOString(),
-        version: '1.0.0-scaffold',
+        version: "1.0.0-scaffold",
       },
     };
 
@@ -541,19 +500,17 @@ router.get('/models/status', async (req: AuthenticatedRequest, res: Response) =>
       models: modelStatus,
       overview: {
         totalModels: Object.keys(modelStatus).length,
-        healthyModels: Object.values(modelStatus).filter(
-          (m) => m.status === 'healthy',
-        ).length,
+        healthyModels: Object.values(modelStatus).filter((m) => m.status === "healthy").length,
         lastChecked: new Date().toISOString(),
       },
     });
   } catch (error: any) {
     logger.error(
-      `Error checking model status: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Error checking model status: ${error instanceof Error ? error.message : "Unknown error"}`
     );
     res.status(500).json({
-      error: 'Model status check failed',
-      message: 'Internal server error during model status check',
+      error: "Model status check failed",
+      message: "Internal server error during model status check",
     });
   }
 });
@@ -572,57 +529,49 @@ router.get('/models/status', async (req: AuthenticatedRequest, res: Response) =>
  *       500:
  *         description: Internal server error
  */
-router.get('/capabilities', async (req: AuthenticatedRequest, res: Response) => {
+router.get("/capabilities", async (req: AuthenticatedRequest, res: Response) => {
   try {
     const capabilities = {
       linkPrediction: {
-        description:
-          'Predict potential relationships between entities using graph neural networks',
+        description: "Predict potential relationships between entities using graph neural networks",
         parameters: {
-          topK: { type: 'integer', min: 1, max: 50, default: 10 },
-          threshold: { type: 'float', min: 0, max: 1, default: 0.5 },
+          topK: { type: "integer", min: 1, max: 50, default: 10 },
+          threshold: { type: "float", min: 0, max: 1, default: 0.5 },
         },
-        supportedEntityTypes: [
-          'person',
-          'organization',
-          'event',
-          'location',
-          'document',
-        ],
+        supportedEntityTypes: ["person", "organization", "event", "location", "document"],
         maxEntities: 1000,
       },
       sentimentAnalysis: {
-        description:
-          'Analyze sentiment of text content and entity descriptions',
+        description: "Analyze sentiment of text content and entity descriptions",
         parameters: {
-          language: { type: 'string', options: ['en'], default: 'en' },
+          language: { type: "string", options: ["en"], default: "en" },
         },
-        supportedFields: ['description', 'notes', 'comments', 'content'],
+        supportedFields: ["description", "notes", "comments", "content"],
         maxTextLength: 512,
       },
       textGeneration: {
-        description: 'Generate AI-powered insights and summaries for entities',
+        description: "Generate AI-powered insights and summaries for entities",
         parameters: {
-          includeContext: { type: 'boolean', default: true },
-          maxLength: { type: 'integer', min: 50, max: 1000, default: 200 },
+          includeContext: { type: "boolean", default: true },
+          maxLength: { type: "integer", min: 50, max: 1000, default: 200 },
         },
-        supportedFormats: ['summary', 'insights', 'recommendations'],
+        supportedFormats: ["summary", "insights", "recommendations"],
       },
     };
 
     res.json({
       success: true,
       capabilities,
-      version: '1.0.0-scaffold',
+      version: "1.0.0-scaffold",
       lastUpdated: new Date().toISOString(),
     });
   } catch (error: any) {
     logger.error(
-      `Error retrieving capabilities: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      `Error retrieving capabilities: ${error instanceof Error ? error.message : "Unknown error"}`
     );
     res.status(500).json({
-      error: 'Failed to retrieve capabilities',
-      message: 'Internal server error',
+      error: "Failed to retrieve capabilities",
+      message: "Internal server error",
     });
   }
 });
@@ -666,7 +615,7 @@ router.get('/capabilities', async (req: AuthenticatedRequest, res: Response) => 
  *         description: Internal server error
  */
 router.post(
-  '/extract-video',
+  "/extract-video",
   validateExtractVideo,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
@@ -674,11 +623,11 @@ router.post(
     const jobId = randomUUID(); // Generate a unique job ID
 
     try {
-      await enforceBackgroundThrottle(req, 'video-analysis');
+      await enforceBackgroundThrottle(req, "video-analysis");
 
       // Add job to the queue
       await videoAnalysisQueue.add(
-        'video-analysis-job',
+        "video-analysis-job",
         {
           jobId,
           mediaPath,
@@ -686,7 +635,7 @@ router.post(
           extractionMethods,
           options,
         },
-        { jobId },
+        { jobId }
       ); // Use jobId as BullMQ job ID for easy tracking
 
       logger.info(`Video analysis job ${jobId} submitted for ${mediaPath}`);
@@ -695,28 +644,28 @@ router.post(
         success: true,
         jobId,
         message:
-          'Video analysis job submitted successfully. Use /api/ai/job-status/:jobId to track progress.',
+          "Video analysis job submitted successfully. Use /api/ai/job-status/:jobId to track progress.",
       });
     } catch (error: any) {
       logger.error(
         `Error submitting video analysis job: ${error instanceof Error ? error.message : String(error)}`,
-        error,
+        error
       );
 
-      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
+      if (error && typeof error === "object" && "status" in error && error.status === 429) {
         res.status(429).json({
-          error: 'Too many video analysis requests',
-          retryAfter: 'retryAfter' in error ? error.retryAfter : undefined,
+          error: "Too many video analysis requests",
+          retryAfter: "retryAfter" in error ? error.retryAfter : undefined,
         });
         return;
       }
 
       res.status(500).json({
-        error: 'Failed to submit video analysis job',
+        error: "Failed to submit video analysis job",
         message: error instanceof Error ? error.message : String(error),
       });
     }
-  },
+  }
 );
 
 /**
@@ -741,14 +690,14 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.get('/job-status/:jobId', async (req: AuthenticatedRequest, res: Response) => {
+router.get("/job-status/:jobId", async (req: AuthenticatedRequest, res: Response) => {
   const { jobId } = req.params;
   try {
     const job = await videoAnalysisQueue.getJob(jobId);
 
     if (!job) {
       return res.status(404).json({
-        error: 'Job not found',
+        error: "Job not found",
         message: `Job with ID ${jobId} does not exist.`,
       });
     }
@@ -762,57 +711,48 @@ router.get('/job-status/:jobId', async (req: AuthenticatedRequest, res: Response
       jobId,
       status: state,
       progress: job.progress,
-      result: state === 'completed' ? result : undefined,
-      error: state === 'failed' ? failedReason : undefined,
+      result: state === "completed" ? result : undefined,
+      error: state === "failed" ? failedReason : undefined,
       createdAt: new Date(job.timestamp).toISOString(),
-      processedAt: job.finishedOn
-        ? new Date(job.finishedOn).toISOString()
-        : undefined,
+      processedAt: job.finishedOn ? new Date(job.finishedOn).toISOString() : undefined,
     });
   } catch (error: any) {
     logger.error(
       `Error getting job status for ${jobId}: ${error instanceof Error ? error.message : String(error)}`,
-      error,
+      error
     );
     res.status(500).json({
-      error: 'Failed to retrieve job status',
-      message: 'Internal server error',
+      error: "Failed to retrieve job status",
+      message: "Internal server error",
     });
   }
 });
 
 // Validation for feedback endpoint
 const validateFeedback = [
-  body('insight')
-    .isObject()
-    .notEmpty()
-    .withMessage('insight object is required'),
-  body('feedbackType')
-    .isIn(['accept', 'reject', 'flag'])
+  body("insight").isObject().notEmpty().withMessage("insight object is required"),
+  body("feedbackType")
+    .isIn(["accept", "reject", "flag"])
     .withMessage("feedbackType must be 'accept', 'reject', or 'flag'"),
-  body('user').isString().notEmpty().withMessage('user is required'),
-  body('timestamp')
-    .isISO8601()
-    .withMessage('timestamp must be a valid ISO 8601 date string'),
-  body('originalPrediction')
+  body("user").isString().notEmpty().withMessage("user is required"),
+  body("timestamp").isISO8601().withMessage("timestamp must be a valid ISO 8601 date string"),
+  body("originalPrediction")
     .isObject()
     .notEmpty()
-    .withMessage('originalPrediction object is required'),
+    .withMessage("originalPrediction object is required"),
 ];
 
 const validateDeceptionFeedback = [
-  body('text').isString().notEmpty().withMessage('text is required'),
-  body('label')
-    .isIn(['false_positive', 'false_negative'])
+  body("text").isString().notEmpty().withMessage("text is required"),
+  body("label")
+    .isIn(["false_positive", "false_negative"])
     .withMessage("label must be 'false_positive' or 'false_negative'"),
-  body('user').isString().notEmpty().withMessage('user is required'),
-  body('timestamp')
-    .isISO8601()
-    .withMessage('timestamp must be a valid ISO 8601 date string'),
-  body('deceptionScore')
+  body("user").isString().notEmpty().withMessage("user is required"),
+  body("timestamp").isISO8601().withMessage("timestamp must be a valid ISO 8601 date string"),
+  body("deceptionScore")
     .optional()
     .isFloat({ min: 0, max: 1 })
-    .withMessage('deceptionScore must be between 0 and 1'),
+    .withMessage("deceptionScore must be between 0 and 1"),
 ];
 
 /**
@@ -855,14 +795,13 @@ const validateDeceptionFeedback = [
  *         description: Internal server error
  */
 router.post(
-  '/feedback',
+  "/feedback",
   validateFeedback,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { insight, feedbackType, user, timestamp, originalPrediction } =
-        req.body;
-      logger.info('AI Feedback received:', {
+      const { insight, feedbackType, user, timestamp, originalPrediction } = req.body;
+      logger.info("AI Feedback received:", {
         insight,
         feedbackType,
         user,
@@ -870,10 +809,10 @@ router.post(
         originalPrediction,
       });
 
-      await enforceBackgroundThrottle(req, 'ai-feedback');
+      await enforceBackgroundThrottle(req, "ai-feedback");
 
       // Add feedback to the queue for asynchronous processing by ML services
-      await feedbackQueue.add('logFeedback', {
+      await feedbackQueue.add("logFeedback", {
         insight,
         feedbackType,
         user,
@@ -883,25 +822,25 @@ router.post(
 
       res.status(200).json({
         success: true,
-        message: 'Feedback received successfully and queued for processing',
+        message: "Feedback received successfully and queued for processing",
       });
     } catch (error: any) {
       logger.error(
-        `Error processing feedback: ${error instanceof Error ? error.message : String(error)}`,
+        `Error processing feedback: ${error instanceof Error ? error.message : String(error)}`
       );
-      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
+      if (error && typeof error === "object" && "status" in error && error.status === 429) {
         res.status(429).json({
-          error: 'Too many feedback events submitted',
-          retryAfter: 'retryAfter' in error ? error.retryAfter : undefined,
+          error: "Too many feedback events submitted",
+          retryAfter: "retryAfter" in error ? error.retryAfter : undefined,
         });
         return;
       }
       res.status(500).json({
-        error: 'Failed to process feedback',
-        message: 'Internal server error',
+        error: "Failed to process feedback",
+        message: "Internal server error",
       });
     }
-  },
+  }
 );
 
 /**
@@ -943,77 +882,59 @@ router.post(
  *         description: Internal server error
  */
 router.post(
-  '/feedback/deception',
+  "/feedback/deception",
   validateDeceptionFeedback,
   handleValidationErrors,
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { text, label, user, timestamp, deceptionScore } = req.body;
-      await enforceBackgroundThrottle(req, 'ai-feedback');
-      await feedbackQueue.add('logDeceptionFeedback', {
+      await enforceBackgroundThrottle(req, "ai-feedback");
+      await feedbackQueue.add("logDeceptionFeedback", {
         insight: { text, deceptionScore },
         feedbackType: label,
         user,
         timestamp,
         originalPrediction: { deceptionScore },
       });
-      res.status(200).json({ success: true, message: 'Feedback received' });
+      res.status(200).json({ success: true, message: "Feedback received" });
     } catch (error: any) {
       logger.error(
-        `Error processing deception feedback: ${error instanceof Error ? error.message : String(error)}`,
+        `Error processing deception feedback: ${error instanceof Error ? error.message : String(error)}`
       );
-      if (error && typeof error === 'object' && 'status' in error && error.status === 429) {
+      if (error && typeof error === "object" && "status" in error && error.status === 429) {
         res.status(429).json({
-          error: 'Too many deception feedback events submitted',
-          retryAfter: 'retryAfter' in error ? error.retryAfter : undefined,
+          error: "Too many deception feedback events submitted",
+          retryAfter: "retryAfter" in error ? error.retryAfter : undefined,
         });
         return;
       }
       res.status(500).json({
-        error: 'Failed to process feedback',
-        message: 'Internal server error',
+        error: "Failed to process feedback",
+        message: "Internal server error",
       });
     }
-  },
+  }
 );
 
 // Scaffold helper functions (replace with actual ML integration)
 
 function generateScaffoldSentiment(text: string) {
   // Simple keyword-based scaffold sentiment
-  const positiveWords = [
-    'good',
-    'great',
-    'excellent',
-    'positive',
-    'happy',
-    'success',
-  ];
-  const negativeWords = [
-    'bad',
-    'terrible',
-    'poor',
-    'negative',
-    'sad',
-    'failure',
-  ];
+  const positiveWords = ["good", "great", "excellent", "positive", "happy", "success"];
+  const negativeWords = ["bad", "terrible", "poor", "negative", "sad", "failure"];
 
   const textLower = text.toLowerCase();
-  const positiveCount = positiveWords.filter((word) =>
-    textLower.includes(word),
-  ).length;
-  const negativeCount = negativeWords.filter((word) =>
-    textLower.includes(word),
-  ).length;
+  const positiveCount = positiveWords.filter((word) => textLower.includes(word)).length;
+  const negativeCount = negativeWords.filter((word) => textLower.includes(word)).length;
 
-  let sentiment = 'neutral';
+  let sentiment = "neutral";
   let confidence = 0.7;
 
   if (positiveCount > negativeCount) {
-    sentiment = 'positive';
+    sentiment = "positive";
     confidence = Math.min(0.6 + positiveCount * 0.1, 0.95);
   } else if (negativeCount > positiveCount) {
-    sentiment = 'negative';
+    sentiment = "negative";
     confidence = Math.min(0.6 + negativeCount * 0.1, 0.95);
   }
 
@@ -1021,11 +942,11 @@ function generateScaffoldSentiment(text: string) {
     sentiment,
     confidence: parseFloat(confidence.toFixed(3)),
     scores: {
-      positive: sentiment === 'positive' ? confidence : (1 - confidence) * 0.4,
-      negative: sentiment === 'negative' ? confidence : (1 - confidence) * 0.4,
-      neutral: sentiment === 'neutral' ? confidence : (1 - confidence) * 0.2,
+      positive: sentiment === "positive" ? confidence : (1 - confidence) * 0.4,
+      negative: sentiment === "negative" ? confidence : (1 - confidence) * 0.4,
+      neutral: sentiment === "neutral" ? confidence : (1 - confidence) * 0.2,
     },
-    method: 'scaffold',
+    method: "scaffold",
   };
 }
 
@@ -1036,19 +957,19 @@ function generateScaffoldEntitySentiment(entityData: any) {
   // Extract text from entity
   if (entityData.description) {
     textFields.push(entityData.description);
-    fieldMap[textFields.length - 1] = 'description';
+    fieldMap[textFields.length - 1] = "description";
   }
   if (entityData.notes) {
     textFields.push(entityData.notes);
-    fieldMap[textFields.length - 1] = 'notes';
+    fieldMap[textFields.length - 1] = "notes";
   }
 
   if (textFields.length === 0) {
     return {
-      overall_sentiment: 'neutral',
+      overall_sentiment: "neutral",
       overall_confidence: 0.0,
       field_sentiments: {},
-      summary: 'No text content found for analysis',
+      summary: "No text content found for analysis",
     };
   }
 
@@ -1070,13 +991,11 @@ function generateScaffoldEntitySentiment(entityData: any) {
   const avgScores: Record<string, number> = {};
   Object.entries(sentimentScores).forEach(([sentiment, scores]) => {
     avgScores[sentiment] =
-      scores.length > 0
-        ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length
-        : 0;
+      scores.length > 0 ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length : 0;
   });
 
   const overallSentiment = Object.entries(avgScores).reduce((a, b) =>
-    avgScores[a[0]] > avgScores[b[0]] ? a : b,
+    avgScores[a[0]] > avgScores[b[0]] ? a : b
   )[0];
   const overallConfidence = avgScores[overallSentiment];
 
@@ -1089,33 +1008,27 @@ function generateScaffoldEntitySentiment(entityData: any) {
   };
 }
 
-function generateScaffoldAISummary(
-  entityId: string,
-  entityData: any,
-  includeContext: boolean,
-) {
-  const entityType = entityData?.type || 'entity';
+function generateScaffoldAISummary(entityId: string, entityData: any, includeContext: boolean) {
+  const entityType = entityData?.type || "entity";
   const entityName = entityData?.name || entityId;
 
   const insights = [
     `${entityName} shows characteristics typical of ${entityType} entities`,
-    'Scaffold analysis indicates normal behavior patterns',
-    'No anomalies detected in current data set',
+    "Scaffold analysis indicates normal behavior patterns",
+    "No anomalies detected in current data set",
   ];
 
   const recommendations = [
-    'Continue monitoring entity for changes',
-    'Consider expanding data collection for deeper insights',
-    'Review related entities for additional context',
+    "Continue monitoring entity for changes",
+    "Consider expanding data collection for deeper insights",
+    "Review related entities for additional context",
   ];
 
   if (includeContext) {
     insights.push(
-      'Context analysis would provide additional insights when real ML models are integrated',
+      "Context analysis would provide additional insights when real ML models are integrated"
     );
-    recommendations.push(
-      'Implement context-aware analysis for enhanced predictions',
-    );
+    recommendations.push("Implement context-aware analysis for enhanced predictions");
   }
 
   return {
@@ -1123,12 +1036,25 @@ function generateScaffoldAISummary(
     insights,
     recommendations,
     confidence: 0.75,
-    generatedBy: 'scaffold-ai-v1',
+    generatedBy: "scaffold-ai-v1",
     timestamp: new Date().toISOString(),
   };
 }
 
 const adversaryService = new AdversaryAgentService();
+
+// Validation for adversary generation endpoint
+const validateAdversaryGenerate = [
+  body("context").isObject().withMessage("context must be a JSON object"),
+  body("temperature")
+    .optional()
+    .isFloat({ min: 0, max: 2.0 })
+    .withMessage("temperature must be a float between 0 and 2.0"),
+  body("persistence")
+    .optional()
+    .isInt({ min: 1, max: 10 })
+    .withMessage("persistence must be an integer between 1 and 10"),
+];
 
 /**
  * @openapi
@@ -1161,20 +1087,23 @@ const adversaryService = new AdversaryAgentService();
  *       500:
  *         description: Internal server error
  */
-router.post('/adversary/generate', async (req: AuthenticatedRequest, res: Response) => {
-  const { context, temperature, persistence } = req.body || {};
-  if (!context) {
-    return res.status(400).json({ error: 'context is required' });
+router.post(
+  "/adversary/generate",
+  validateAdversaryGenerate,
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { context, temperature, persistence } = req.body || {};
+    // context existence check is handled by validation middleware now
+    try {
+      const chain = await adversaryService.generateChain(context, {
+        temperature,
+        persistence,
+      });
+      res.json({ ttps: chain });
+    } catch (err: any) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
   }
-  try {
-    const chain = await adversaryService.generateChain(context, {
-      temperature,
-      persistence,
-    });
-    res.json({ ttps: chain });
-  } catch (err: any) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
-  }
-});
+);
 
 export default router;
