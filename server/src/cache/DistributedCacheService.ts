@@ -12,6 +12,8 @@
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
+import zlib from 'zlib';
+import { promisify } from 'util';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -79,6 +81,9 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 // ============================================================================
 // Distributed Cache Service
 // ============================================================================
+
+const gzipAsync = promisify(zlib.gzip);
+const gunzipAsync = promisify(zlib.gunzip);
 
 export class DistributedCacheService {
   private redis: Redis | any;
@@ -158,7 +163,7 @@ export class DistributedCacheService {
 
         // Decompress if needed
         const value = entry.compressed
-          ? this.decompress(entry.value as string)
+          ? await this.decompress(entry.value as string)
           : entry.value;
 
         // Promote to L1
@@ -220,7 +225,7 @@ export class DistributedCacheService {
       let toStore = serialized;
 
       if (serialized.length > this.config.compressionThreshold) {
-        entry.value = this.compress(value) as T;
+        entry.value = await this.compress(value) as T;
         entry.compressed = true;
         toStore = JSON.stringify(entry);
         this.stats.compressions++;
@@ -468,14 +473,24 @@ export class DistributedCacheService {
   // Compression
   // --------------------------------------------------------------------------
 
-  private compress(value: unknown): string {
-    // Simple base64 encoding for now
-    // In production, use zlib or similar
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+  private async compress(value: unknown): Promise<string> {
+    const buffer = Buffer.from(JSON.stringify(value), 'utf-8');
+    return (await gzipAsync(buffer)).toString('base64');
   }
 
-  private decompress(compressed: string): unknown {
-    return JSON.parse(Buffer.from(compressed, 'base64').toString('utf-8'));
+  private async decompress(compressed: string): Promise<unknown> {
+    const buffer = Buffer.from(compressed, 'base64');
+    try {
+      const decompressed = await gunzipAsync(buffer);
+      return JSON.parse(decompressed.toString('utf-8'));
+    } catch (error) {
+      // Fallback for legacy data (uncompressed base64 json)
+      try {
+        return JSON.parse(buffer.toString('utf-8'));
+      } catch (e) {
+        throw error;
+      }
+    }
   }
 
   // --------------------------------------------------------------------------
