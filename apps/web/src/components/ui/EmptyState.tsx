@@ -40,7 +40,7 @@ export function EmptyState({
     >
       <div className="mb-4 rounded-full bg-muted p-4">
         {IconComponent ? (
-          <IconComponent className="h-8 w-8 text-muted-foreground" />
+          <IconComponent className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         ) : (
           icon
         )}
