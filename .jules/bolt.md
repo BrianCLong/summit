@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2027-01-20 - [O(1) LRU Cache with JavaScript Map]
+**Learning:** Implementing LRU or FIFO cache eviction using an auxiliary array for tracking order results in O(N) operations for every hit and miss due to `indexOf`, `splice`, or `shift`. Since JavaScript `Map` preserves insertion order, these can be implemented in O(1) by deleting and re-setting keys (for LRU) and using `map.keys().next().value` (for FIFO/LRU eviction).
+**Action:** Avoid using arrays for tracking cache item order; use the native ordering properties of `Map` for O(1) performance.
