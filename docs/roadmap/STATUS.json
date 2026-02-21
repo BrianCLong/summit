@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-20T00:00:00Z",
+  "revision_note": "Added IO signal operationalization brief and diffusion-first module prioritization.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -24,10 +24,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -36,9 +33,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -47,9 +42,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -217,6 +210,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "io-signal-operationalization-2026-02-19",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published operational brief covering hostage diplomacy forecasting, governance fragmentation mapping, and diffusion-first AI disinformation detection priorities."
     }
   ],
   "summary": {
