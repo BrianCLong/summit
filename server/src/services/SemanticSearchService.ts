@@ -198,6 +198,10 @@ export default class SemanticSearchService {
         params.push(query);
         const qIdx = pIdx;
 
+        // Add limit parameter
+        params.push(Math.max(1, parseInt(String(limit), 10) || 20));
+        const lIdx = qIdx + 1;
+
         const sql = `
           SELECT
             id,
@@ -209,7 +213,7 @@ export default class SemanticSearchService {
           FROM cases
           WHERE ${whereClauses.join(' AND ')}
           ORDER BY ( (1 - (embedding <=> $1::vector)) * 0.7 + (ts_rank(to_tsvector('english', title || ' ' || coalesce(description,'')), plainto_tsquery('english', $${qIdx})) / 10.0) * 0.3 ) DESC
-          LIMIT ${limit}
+          LIMIT $${lIdx}
         `;
 
         const res = await client.query(sql, params);
