@@ -105,7 +105,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(http_requests_total{service=\"summit-ai\"}[5m]))",
+          "expr": "sum(rate(http_requests_total{service=\"summit-api\"}[5m]))",
           "legendFormat": "Total Requests",
           "range": true,
           "refId": "A"
@@ -197,7 +197,7 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"summit-ai\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"summit-api\"}[5m])) by (le))",
           "legendFormat": "p95 Latency",
           "range": true,
           "refId": "A"
