@@ -33,15 +33,18 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals - BOLT: Batched multi-row insert with chunking for performance
+      // This reduces round-trips from O(N) to O(N/chunkSize).
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        const chunkSize = 100;
+        for (let i = 0; i < input.signals.length; i += chunkSize) {
+          const chunk = input.signals.slice(i, i + chunkSize);
+          const values: any[] = [];
+          const placeholders: string[] = [];
+
+          chunk.forEach((sig, index) => {
+            const offset = index * 8;
+            values.push(
               savedScore.id,
               sig.type,
               sig.source,
@@ -49,10 +52,24 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
+              sig.detectedAt || new Date(),
+            );
+            placeholders.push(
+              `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`,
+            );
+          });
+
+          const signalRows = await tx.query(
+            `INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders.join(', ')}
+            RETURNING *`,
+            values,
           );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+
+          if (signalRows) {
+            savedSignals.push(...signalRows.map((row: any) => this.mapSignal(row)));
+          }
         }
       }
 
