@@ -23,6 +23,7 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `typecheck`
 - `build`
 - `test`
+- `ci-council-evidence`
 
 Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.
 

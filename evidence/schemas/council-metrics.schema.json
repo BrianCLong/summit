@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Council Evidence Metrics",
+  "type": "object",
+  "required": ["evidenceId", "metrics"],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVD-LLMCOUNCIL-[A-Z]+-[0-9]{3}$"
+    },
+    "metrics": {
+      "type": "object",
+      "required": ["drafts", "critiques", "members"],
+      "properties": {
+        "drafts": { "type": "integer", "minimum": 0 },
+        "critiques": { "type": "integer", "minimum": 0 },
+        "members": { "type": "integer", "minimum": 0 },
+        "chairman": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
