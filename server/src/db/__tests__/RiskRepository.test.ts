@@ -1,92 +1,53 @@
-
-import { jest } from '@jest/globals';
-import { RiskRepository } from '../repositories/RiskRepository.js';
-import { pg } from '../pg.js';
-import { RiskScoreInput } from '../../risk/types.js';
+import { RiskRepository, RiskScore, RiskSignal } from '../repositories/RiskRepository';
+import { Pool } from 'pg';
 
 describe('RiskRepository', () => {
-  let repo: RiskRepository;
+  let repository: RiskRepository;
+  let mockPool: any;
+  let mockClient: any;
 
   beforeEach(() => {
-    repo = new RiskRepository();
-    jest.clearAllMocks();
+    mockClient = {
+      query: jest.fn().mockResolvedValue({ rows: [{ id: 'test-id' }] }),
+      release: jest.fn(),
+    };
+    mockPool = {
+      connect: jest.fn().mockResolvedValue(mockClient),
+      query: jest.fn(),
+    };
+    repository = new RiskRepository(mockPool as unknown as Pool);
   });
 
   it('should save risk score and signals in batches', async () => {
-    const signalCount = 150;
-    const input: RiskScoreInput = {
-      tenantId: 'tenant-1',
-      entityId: 'entity-1',
-      entityType: 'user',
-      score: 75,
+    const score: RiskScore = {
+      target_id: 'target-1',
+      target_type: 'user',
+      score: 85,
       level: 'high',
-      window: '24h',
-      modelVersion: '1.0.0',
-      rationale: 'Test rationale',
-      signals: Array.from({ length: signalCount }, (_, i) => ({
-        type: `signal-${i}`,
-        source: 'test',
-        value: 0.5,
-        weight: 1.0,
-        contributionScore: 0.5,
-        description: `Signal ${i}`,
-      })),
+      metadata: {},
     };
 
-    // Mock pg.transaction to provide a mock tx
-    const mockTx = {
-      query: jest.fn().mockImplementation(async (sql: string, params: any[]) => {
-        if (sql.includes('INSERT INTO risk_scores')) {
-          return [{
-            id: 'score-1',
-            tenant_id: 'tenant-1',
-            entity_id: 'entity-1',
-            entity_type: 'user',
-            score: '75',
-            level: 'high',
-            window: '24h',
-            model_version: '1.0.0',
-            rationale: 'Test rationale',
-            created_at: new Date()
-          }];
-        }
-        if (sql.includes('INSERT INTO risk_signals')) {
-          const paramsPerSignal = 8;
-          const rowCount = params.length / paramsPerSignal;
-          return Array.from({ length: rowCount }, (_, i) => ({
-            id: `sig-${i}`,
-            risk_score_id: 'score-1',
-            type: 'test',
-            source: 'test',
-            value: '0.5',
-            weight: '1.0',
-            contribution_score: '0.5',
-            description: 'test',
-            detected_at: new Date(),
-          }));
-        }
-        return [];
-      }),
-    };
+    // Create 150 signals to test batching (CHUNK_SIZE = 100)
+    const signals: RiskSignal[] = Array(150).fill(null).map((_, i) => ({
+      signal_type: `type-${i}`,
+      severity: 'medium',
+      description: `desc-${i}`,
+      metadata: {},
+    }));
 
-    jest.spyOn(pg, 'transaction').mockImplementation(async (callback: any) => {
-      return await callback(mockTx);
-    });
+    await repository.saveRiskScore(score, signals);
 
-    const result = await repo.saveRiskScore(input);
+    // Expect 1 BEGIN, 1 INSERT (score), 2 INSERT (signals), 1 COMMIT = 5 calls
+    // The first signal batch is 100, the second is 50.
+    expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+    expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO risk_scores'), expect.any(Array));
 
-    expect(result.id).toBe('score-1');
+    // Check signal batching
+    const signalInserts = mockClient.query.mock.calls.filter((call: any[]) =>
+      typeof call[0] === 'string' && call[0].includes('INSERT INTO risk_signals')
+    );
 
-    const queryCalls = mockTx.query.mock.calls;
-    const signalInserts = queryCalls.filter((call: any) => call[0].includes('INSERT INTO risk_signals'));
-
-    // BOLT: We expect exactly 2 batched inserts for 150 signals with a chunkSize of 100.
-    // If it's still using a loop, this will be 150 and the test will fail.
     expect(signalInserts.length).toBe(2);
-
-    // Verify the first batch has the correct number of parameters
-    if (signalInserts.length > 0) {
-      expect(signalInserts[0][1].length).toBe(100 * 8);
-    }
+    expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
   });
 });

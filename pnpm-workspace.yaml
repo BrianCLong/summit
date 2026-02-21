@@ -1,7 +1,7 @@
 packages:
   - 'apps/*'
+  - "platform/*"
   - 'packages/*'
-  - 'platform/*'
   - 'packages/maestro-skills/*'
   - 'sdk/*'
   - 'services/*'
@@ -14,7 +14,6 @@ packages:
   - 'devtools/*'
   - 'prov-ledger-service'
   - 'agents/*'
-  - 'platform/*'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'
