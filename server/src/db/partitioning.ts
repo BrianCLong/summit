@@ -60,9 +60,10 @@ export class PartitionManager {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const partitionName = `${tableName}_y${year}m${month}`;
 
-    // Calculate range start and end
-    const startObj = new Date(year, date.getMonth(), 1);
-    const endObj = new Date(year, date.getMonth() + 1, 1); // First day of next month
+    // Calculate range start and end using UTC to avoid timezone shifts
+    // We use the input date's year/month as the intended target, but construct UTC bounds
+    const startObj = new Date(Date.UTC(year, month - 1, 1));
+    const endObj = new Date(Date.UTC(year, month, 1));
 
     const startStr = startObj.toISOString().split('T')[0];
     const endStr = endObj.toISOString().split('T')[0];
@@ -102,6 +103,73 @@ export class PartitionManager {
            logger.error(`Failed to create partition ${partitionName}`, error);
            throw error;
        }
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Ensures a monthly partition exists for a given table and date.
+   * Supports custom suffix formats (e.g. '_YYYY_MM' or standard '_yYYYYmMM').
+   */
+  async ensureMonthlyPartition(
+    tableName: string,
+    date: Date,
+    options: { suffixFormat?: string } = {}
+  ): Promise<void> {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+
+    let partitionName = '';
+    if (options.suffixFormat === '_YYYY_MM') {
+      partitionName = `${tableName}_${year}_${String(month).padStart(2, '0')}`;
+    } else {
+      // Default format: _yYYYYmMM
+      partitionName = `${tableName}_y${year}m${String(month).padStart(2, '0')}`;
+    }
+
+    // Calculate range start and end using UTC
+    const startObj = new Date(Date.UTC(year, date.getMonth(), 1));
+    const endObj = new Date(Date.UTC(year, date.getMonth() + 1, 1));
+
+    const startStr = startObj.toISOString().split('T')[0];
+    const endStr = endObj.toISOString().split('T')[0];
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if partition exists
+      const checkRes = await client.query(
+        `SELECT to_regclass($1::text)`,
+        [partitionName]
+      );
+
+      if (checkRes.rows[0].to_regclass) {
+        logger.debug(`Partition ${partitionName} already exists.`);
+        await client.query('COMMIT');
+        return;
+      }
+
+      const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES FROM ('${startStr}') TO ('${endStr}')
+      `;
+
+      await client.query(query);
+      logger.info(`Created monthly partition ${partitionName} (${startStr} to ${endStr})`);
+
+      await client.query('COMMIT');
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      // Don't log error if it's just that the parent table doesn't exist yet (might be dev env)
+      if ((error as any).code === '42P01') {
+        logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+      } else {
+        logger.error(`Failed to create partition ${partitionName}`, error);
+        throw error;
+      }
     } finally {
       client.release();
     }

@@ -1,7 +1,9 @@
 /**
  * Usage Metering Service - records usage metrics for billing and analytics
- * Implementation Status (P1-2): In-memory storage with basic aggregation
+ * Implementation Status (P1-2): Redis-backed storage with aggregations
  */
+
+import { getRedisClient } from '../db/redis.js';
 
 export interface UsageEvent {
   id: string;
@@ -25,10 +27,10 @@ export interface UsageAggregation {
 }
 
 export class UsageMeteringService {
-  private events: Map<string, UsageEvent> = new Map();
+  private redis = getRedisClient();
 
   constructor() {
-    console.info('[UsageMeteringService] Initialized');
+    console.info('[UsageMeteringService] Initialized with Redis');
   }
 
   async record(event: UsageEvent): Promise<void> {
@@ -37,43 +39,75 @@ export class UsageMeteringService {
       const random = Math.random().toString(36).substring(2, 11);
       event.id = 'usage_' + timestamp + '_' + random;
     }
-    this.events.set(event.id, event);
+
+    const eventKey = `metering:event:${event.id}`;
+    const tenantKey = `metering:tenant:${event.tenantId}:events`;
+    const score = new Date(event.occurredAt).getTime();
+
+    // Store event data
+    await this.redis.set(eventKey, JSON.stringify(event));
+    // Index by tenant and time
+    await this.redis.zadd(tenantKey, score, event.id);
+
+    // Set expiry (optional, e.g. 90 days)
+    await this.redis.expire(eventKey, 90 * 24 * 60 * 60);
+
     console.debug('[UsageMeteringService] Recorded:', event.tenantId, event.dimension, event.quantity);
   }
 
   async getAggregation(tenantId: string, dimension: string, startDate: string, endDate: string): Promise<UsageAggregation> {
     const start = new Date(startDate).getTime();
     const end = new Date(endDate).getTime();
+    const tenantKey = `metering:tenant:${tenantId}:events`;
+
+    // Get event IDs in range
+    const eventIds = await this.redis.zrangebyscore(tenantKey, start, end);
+
     let totalQuantity = 0;
     let eventCount = 0;
 
-    for (const event of this.events.values()) {
-      if (event.tenantId !== tenantId || event.dimension !== dimension) continue;
-      const occurredTime = new Date(event.occurredAt).getTime();
-      if (occurredTime < start || occurredTime > end) continue;
-      totalQuantity += event.quantity;
-      eventCount++;
+    if (eventIds.length > 0) {
+        const pipeline = this.redis.pipeline();
+        eventIds.forEach((id: string) => pipeline.get(`metering:event:${id}`));
+        const results = await pipeline.exec();
+
+        for (const [err, result] of results || []) {
+            if (err || !result) continue;
+            const event = JSON.parse(result as string) as UsageEvent;
+            if (event.dimension === dimension) {
+                totalQuantity += event.quantity;
+                eventCount++;
+            }
+        }
     }
 
     return { tenantId, dimension, totalQuantity, eventCount, startDate, endDate };
   }
 
   async getEvents(tenantId: string, options?: { dimension?: string; startDate?: string; endDate?: string; limit?: number }): Promise<UsageEvent[]> {
-    const events: UsageEvent[] = [];
     const start = options?.startDate ? new Date(options.startDate).getTime() : 0;
     const end = options?.endDate ? new Date(options.endDate).getTime() : Date.now();
     const limit = options?.limit || 1000;
+    const tenantKey = `metering:tenant:${tenantId}:events`;
 
-    for (const event of this.events.values()) {
-      if (event.tenantId !== tenantId) continue;
-      if (options?.dimension && event.dimension !== options.dimension) continue;
-      const occurredTime = new Date(event.occurredAt).getTime();
-      if (occurredTime < start || occurredTime > end) continue;
-      events.push(event);
-      if (events.length >= limit) break;
+    // ZREVRANGEBYSCORE for descending order (newest first)
+    // Note: ioredis uses string arguments for infinity
+    const eventIds = await this.redis.zrevrangebyscore(tenantKey, end, start, 'LIMIT', 0, limit);
+
+    const events: UsageEvent[] = [];
+    if (eventIds.length > 0) {
+        const pipeline = this.redis.pipeline();
+        eventIds.forEach((id: string) => pipeline.get(`metering:event:${id}`));
+        const results = await pipeline.exec();
+
+        for (const [err, result] of results || []) {
+            if (err || !result) continue;
+             const event = JSON.parse(result as string) as UsageEvent;
+             if (options?.dimension && event.dimension !== options.dimension) continue;
+             events.push(event);
+        }
     }
 
-    events.sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
     return events;
   }
 }

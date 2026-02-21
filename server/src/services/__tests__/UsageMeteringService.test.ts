@@ -1,79 +1,126 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { UsageKind } from '../../types/usage.js';
+import { jest } from '@jest/globals';
 
-// Track calls for assertions
-let queryCallCount = 0;
-let releaseCallCount = 0;
+// Create mock Redis client
+const mockPipeline = {
+  get: jest.fn(),
+  exec: jest.fn(),
+};
 
-// Mock modules before imports
-jest.mock('../../config/database.js', () => ({
-  getPostgresPool: () => ({
-    connect: () => Promise.resolve({
-      query: () => {
-        queryCallCount++;
-        return Promise.resolve({ rowCount: 1 });
-      },
-      release: () => {
-        releaseCallCount++;
-      },
-    }),
-  }),
+const mockRedisClient = {
+  set: jest.fn(),
+  zadd: jest.fn(),
+  expire: jest.fn(),
+  zrangebyscore: jest.fn(),
+  zrevrangebyscore: jest.fn(),
+  pipeline: jest.fn(),
+};
+
+// Mock dependencies
+jest.unstable_mockModule('../db/redis.js', () => ({
+  getRedisClient: () => mockRedisClient,
 }));
 
-jest.mock('../../utils/logger.js', () => ({
-  default: {
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  },
-  error: jest.fn(),
-}));
-
-jest.mock('../../utils/metrics.js', () => ({
-  PrometheusMetrics: class {
-    createCounter(): void {}
-    incrementCounter(): void {}
-  }
-}));
-
-// Import after mocks
-import { UsageMeteringService } from '../UsageMeteringService.js';
+// Import service after mocking
+const { UsageMeteringService } = await import('../UsageMeteringService.js');
 
 describe('UsageMeteringService', () => {
-  let service: UsageMeteringService;
+  let service: any;
 
   beforeEach(() => {
-    // Reset call counts
-    queryCallCount = 0;
-    releaseCallCount = 0;
+    jest.clearAllMocks();
+    service = new UsageMeteringService();
 
-    // Reset singleton
-    (UsageMeteringService as any).instance = null;
-
-    // Get fresh instance
-    service = UsageMeteringService.getInstance();
+    // Explicitly set return values
+    mockPipeline.exec.mockResolvedValue([]);
+    mockRedisClient.pipeline.mockReturnValue(mockPipeline);
   });
 
-  it('should record a usage event', async () => {
-    await service.record({
-      tenantId: 't1',
-      kind: 'custom' as UsageKind,
-      quantity: 10,
-      unit: 'calls'
+  it('should record usage event', async () => {
+    const event = {
+      tenantId: 'tenant-1',
+      dimension: 'api_calls',
+      quantity: 1,
+      unit: 'count',
+      source: 'api',
+      occurredAt: new Date().toISOString(),
+      recordedAt: new Date().toISOString(),
+    };
+
+    await service.record(event);
+
+    expect(mockRedisClient.set).toHaveBeenCalledWith(
+      expect.stringContaining('metering:event:'),
+      expect.any(String)
+    );
+    expect(mockRedisClient.zadd).toHaveBeenCalledWith(
+      `metering:tenant:${event.tenantId}:events`,
+      expect.any(Number),
+      expect.stringContaining('usage_')
+    );
+    expect(mockRedisClient.expire).toHaveBeenCalled();
+  });
+
+  it('should get aggregation', async () => {
+    const tenantId = 'tenant-1';
+    const dimension = 'api_calls';
+    const startDate = '2023-01-01';
+    const endDate = '2023-01-31';
+
+    // Mock Redis responses
+    const eventId = 'event-1';
+    const event = {
+      id: eventId,
+      tenantId,
+      dimension,
+      quantity: 5,
+      occurredAt: '2023-01-15T12:00:00Z',
+    };
+
+    mockRedisClient.zrangebyscore.mockResolvedValue([eventId]);
+    mockPipeline.exec.mockResolvedValue([[null, JSON.stringify(event)]]);
+
+    const result = await service.getAggregation(tenantId, dimension, startDate, endDate);
+
+    expect(mockRedisClient.zrangebyscore).toHaveBeenCalledWith(
+      `metering:tenant:${tenantId}:events`,
+      new Date(startDate).getTime(),
+      new Date(endDate).getTime()
+    );
+    // Use .pipeline() result to verify calls on it
+    expect(mockPipeline.get).toHaveBeenCalledWith(`metering:event:${eventId}`);
+    expect(result).toEqual({
+      tenantId,
+      dimension,
+      totalQuantity: 5,
+      eventCount: 1,
+      startDate,
+      endDate,
     });
-
-    expect(queryCallCount).toBeGreaterThan(0);
-    expect(releaseCallCount).toBeGreaterThan(0);
   });
 
-  it('should record a batch of events', async () => {
-    await service.recordBatch([
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 1, unit: 'u' },
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 2, unit: 'u' }
-    ]);
+  it('should get events', async () => {
+    const tenantId = 'tenant-1';
+    const startDate = '2023-01-01';
+    const endDate = '2023-01-31';
 
-    // BEGIN + 2 inserts + COMMIT = 4 calls
-    expect(queryCallCount).toBe(4);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    // Mock Redis responses
+    const eventId = 'event-1';
+    const event = {
+      id: eventId,
+      tenantId,
+      dimension: 'api_calls',
+      quantity: 5,
+      occurredAt: '2023-01-15T12:00:00Z',
+    };
+
+    mockRedisClient.zrevrangebyscore.mockResolvedValue([eventId]);
+    mockPipeline.exec.mockResolvedValue([[null, JSON.stringify(event)]]);
+
+    const result = await service.getEvents(tenantId, { startDate, endDate });
+
+    expect(mockRedisClient.zrevrangebyscore).toHaveBeenCalled();
+    expect(mockPipeline.get).toHaveBeenCalledWith(`metering:event:${eventId}`);
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(event);
   });
 });

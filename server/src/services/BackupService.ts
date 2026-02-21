@@ -5,6 +5,7 @@ import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import { restoreService } from './RestoreService.js';
 
 const logger = (pino as any)({ name: 'BackupService' });
 
@@ -175,72 +176,43 @@ export class BackupService {
     const writeStream = fs.createWriteStream(file);
 
     try {
-      let apocSuccess = false;
-      try {
-        await new Promise<void>((resolve, reject) => {
-          session.run(`
-            CALL apoc.export.json.all(null, {stream: true})
-            YIELD data
-            RETURN data
-          `).subscribe({
-            onNext: (record: any) => {
-              apocSuccess = true;
-              const chunk = record.get('data');
-              if (chunk) writeStream.write(chunk);
-            },
-            onCompleted: () => resolve(),
-            onError: (err: any) => reject(err)
-          });
+      // Manual NDJSON export for streaming and better structure (labels, IDs)
+      await new Promise<void>((resolve, reject) => {
+        session.run('MATCH (n) RETURN n').subscribe({
+          onNext: (record: any) => {
+            const n = record.get('n');
+            const nodeData = {
+              type: 'node',
+              labels: n.labels,
+              properties: n.properties,
+              id: n.elementId // Internal ID, needed for relationship reconstruction during restore
+            };
+            writeStream.write(JSON.stringify(nodeData) + '\n');
+          },
+          onCompleted: () => resolve(),
+          onError: (err: any) => reject(err)
         });
-        logger.info(`Neo4j backup (APOC) created at ${file}`);
-      } catch (err: any) {
-        logger.warn('APOC export failed, falling back to manual stream', err);
-        apocSuccess = false;
-      }
+      });
 
-      if (!apocSuccess) {
-        writeStream.write('{"nodes":[');
-        let isFirstNode = true;
-
-        await new Promise<void>((resolve, reject) => {
-          session.run('MATCH (n) RETURN n').subscribe({
-            onNext: (record: any) => {
-              const props = record.get('n').properties;
-              if (!isFirstNode) writeStream.write(',');
-              writeStream.write(JSON.stringify(props));
-              isFirstNode = false;
-            },
-            onCompleted: () => resolve(),
-            onError: (err: any) => reject(err)
-          });
+      await new Promise<void>((resolve, reject) => {
+        session.run('MATCH ()-[r]->() RETURN r').subscribe({
+          onNext: (record: any) => {
+            const r = record.get('r');
+            const relData = {
+              type: 'relationship',
+              label: r.type,
+              properties: r.properties,
+              start: r.startNodeElementId,
+              end: r.endNodeElementId
+            };
+            writeStream.write(JSON.stringify(relData) + '\n');
+          },
+          onCompleted: () => resolve(),
+          onError: (err: any) => reject(err)
         });
+      });
 
-        writeStream.write('],"relationships":[');
-        let isFirstRel = true;
-
-        await new Promise<void>((resolve, reject) => {
-          session.run('MATCH ()-[r]->() RETURN r').subscribe({
-            onNext: (record: any) => {
-              const r = record.get('r');
-              const rel = {
-                type: r.type,
-                properties: r.properties,
-                start: r.startNodeElementId,
-                end: r.endNodeElementId
-              };
-              if (!isFirstRel) writeStream.write(',');
-              writeStream.write(JSON.stringify(rel));
-              isFirstRel = false;
-            },
-            onCompleted: () => resolve(),
-            onError: (err: any) => reject(err)
-          });
-        });
-
-        writeStream.write(']}');
-        logger.info(`Neo4j manual backup created at ${file}`);
-      }
-
+      logger.info(`Neo4j backup (NDJSON) created at ${file}`);
       return file;
 
     } finally {
@@ -265,8 +237,6 @@ export class BackupService {
     }
 
     const writeStream = fs.createWriteStream(file);
-    writeStream.write('{');
-    let isFirstKey = true;
 
     const stream = client.scanStream({ match: '*', count: 100 });
 
@@ -279,18 +249,16 @@ export class BackupService {
         keys.forEach((key: string, index: number) => {
           const val = values?.[index]?.[1];
           if (typeof val === 'string') {
-            if (!isFirstKey) writeStream.write(',');
-            writeStream.write(`"${key}":${JSON.stringify(val)}`);
-            isFirstKey = false;
+            // Write as NDJSON
+            writeStream.write(JSON.stringify({ key, value: val }) + '\n');
           }
         });
       }
     }
 
-    writeStream.write('}');
     writeStream.end();
 
-    logger.info(`Redis backup created at ${file}`);
+    logger.info(`Redis backup (NDJSON) created at ${file}`);
     return file;
   }
 
@@ -374,10 +342,10 @@ export class BackupService {
   }
 
   /**
-   * Stub for restoring a backup
+   * Restores a backup
    */
   async restore(backupId: string): Promise<void> {
-    logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Manual intervention required.`);
-    // TODO: Implement download from S3 and restoration logic for each service
+    logger.info(`Delegating restore for ${backupId} to RestoreService`);
+    await restoreService.restore(backupId);
   }
 }
