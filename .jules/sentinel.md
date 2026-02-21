@@ -75,3 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-03-02 - [HIGH] Unprotected Operational Routers in Main Application
+**Vulnerability:** The `/airgap`, `/analytics`, and `/dr` routers were mounted directly in `server/src/app.ts` without any authentication or authorization middleware. This allowed unauthenticated access to sensitive administrative, analytical, and disaster recovery functions.
+**Learning:** Routers defined outside the global `/api` auth-enforcement block are easily overlooked. Centralized mounting points in `app.ts` must explicitly apply security middleware even if individual routers are expected to handle it.
+**Prevention:** Apply `authenticateToken` and `ensureRole` at the mounting point in `app.ts` for all administrative and operational routers. Maintain a "deny-by-default" posture for any top-level route not explicitly intended for public access.
