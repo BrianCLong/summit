@@ -1,0 +1,28 @@
+name: Summit Evidence Gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  SummitEvidenceGate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify evidence bundle
+        run: npx tsx .github/scripts/verify-evidence-bundle.ts

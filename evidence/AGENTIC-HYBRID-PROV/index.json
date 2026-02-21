@@ -1,0 +1,13 @@
+{
+  "item": "AGENTIC-HYBRID-PROV",
+  "evidence": [
+    {
+      "id": "EVD-AGENTIC-HYBRID-PROV-001",
+      "files": [
+        "evidence/AGENTIC-HYBRID-PROV/report.json",
+        "evidence/AGENTIC-HYBRID-PROV/metrics.json",
+        "evidence/AGENTIC-HYBRID-PROV/stamp.json"
+      ]
+    }
+  ]
+}

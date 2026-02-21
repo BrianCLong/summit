@@ -1,0 +1,10 @@
+{
+  "item": "AGENTIC-HYBRID-PROV",
+  "run": {
+    "mode": "ci",
+    "git": {
+      "sha": "TODO"
+    }
+  },
+  "results": []
+}
