@@ -141,14 +141,13 @@ docs(api): update authentication endpoint documentation
 
 See `.claude/workflows/` for copy-paste prompts:
 
-| Workflow                    | Use Case                              |
-| --------------------------- | ------------------------------------- |
-| `/antigravity` (command)    | **Master session prompt** — full A→F workflow for any atomic PR |
-| `workflow-bugfix.md`        | Fixing reported bugs                  |
-| `workflow-feature-small.md` | Small feature additions               |
-| `workflow-docs.md`          | Documentation updates                 |
-| `workflow-security-fix.md`  | Security vulnerability fixes          |
-| `workflow-ga-red.md`        | When GA gate is failing               |
+| Workflow                    | Use Case                     |
+| --------------------------- | ---------------------------- |
+| `workflow-bugfix.md`        | Fixing reported bugs         |
+| `workflow-feature-small.md` | Small feature additions      |
+| `workflow-docs.md`          | Documentation updates        |
+| `workflow-security-fix.md`  | Security vulnerability fixes |
+| `workflow-ga-red.md`        | When GA gate is failing      |
 
 ---
 
