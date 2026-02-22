@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import json
-import hashlib
-import os
 from dataclasses import dataclass
 from datetime import UTC, datetime, timezone
 from pathlib import Path
@@ -105,45 +103,3 @@ def init_evidence(paths: EvidencePaths, run_id: str, item_slug: str, evidence_id
         "run_id": run_id,
         "evidence": {}
     })
-
-def _sha256_bytes(b: bytes) -> str:
-    return hashlib.sha256(b).hexdigest()
-
-def write_bundle(run_ctx: dict, out_dir: str) -> None:
-    root = Path(out_dir)
-    root.mkdir(parents=True, exist_ok=True)
-    evidence_dir = root / "evidence"
-    evidence_dir.mkdir(exist_ok=True)
-
-    # Deterministic files (no timestamps here)
-    report = {
-        "evidence_id": run_ctx["evidence_id"],
-        "run_id": run_ctx["run_id"],
-        "summary": run_ctx.get("summary", ""),
-        "policies_applied": run_ctx.get("policies_applied", []),
-        "artifacts": run_ctx.get("artifacts", [])
-    }
-    metrics = run_ctx.get("metrics", {})
-
-    # Deterministic serialization
-    report_bytes = (json.dumps(report, sort_keys=True, separators=(",", ":"))).encode("utf-8")
-    metrics_bytes = (json.dumps(metrics, sort_keys=True, separators=(",", ":"))).encode("utf-8")
-
-    (root / "report.json").write_bytes(report_bytes)
-    (root / "metrics.json").write_bytes(metrics_bytes)
-
-    # Timestamps ONLY here
-    stamp = {"generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")}
-    with open(root / "stamp.json", "w", encoding="utf-8") as f:
-        json.dump(stamp, f, sort_keys=True, indent=2)
-
-    # Evidence index with hashes
-    index = {
-        "evidence_id": run_ctx["evidence_id"],
-        "files": {
-            "report.json": _sha256_bytes(report_bytes),
-            "metrics.json": _sha256_bytes(metrics_bytes)
-        }
-    }
-    with open(evidence_dir / "index.json", "w", encoding="utf-8") as f:
-        json.dump(index, f, sort_keys=True, indent=2)

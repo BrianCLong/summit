@@ -29,9 +29,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -56,7 +53,7 @@ jobs:
 
       - name: Determine MVP tier from PR body
         id: tier
-        if: (${{ github.event_name == 'pull_request' }}) && (always())
+        if: ${{ github.event_name == 'pull_request' }}
         run: node scripts/mvp/gate.mjs tier-from-pr
 
       - name: MVP Gate (mvp-0 always enforced)
@@ -65,6 +62,7 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
 
       - name: Gate Summary
+        if: always()
         run: node scripts/mvp/gate.mjs summary
         env:
           PR_BODY: ${{ github.event.pull_request.body }}

@@ -6,4 +6,3 @@ from .validator import (  # noqa: F401
     validate_report,
     validate_stamp,
 )
-from .writer import write_bundle  # noqa: F401

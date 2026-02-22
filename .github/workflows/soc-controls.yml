@@ -4,11 +4,10 @@ on:
   pull_request:
   push:
     branches: [ main ]
-  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: soc-controls-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   soc-controls:
@@ -24,7 +23,6 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run SOC control tests

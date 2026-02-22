@@ -6,7 +6,6 @@ jobs:
     steps:
       - uses: actions/checkout @v4/**
       - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md
-      - run: pnpm -r audit:ci || true
       - run: pnpm -r lint
       - run: pnpm -r typecheck || true
       - name: Trivy (SCA + config)

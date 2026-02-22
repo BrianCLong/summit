@@ -1,5 +1,0 @@
-{
-  "status": "pass",
-  "check": "schema-validation",
-  "details": "Schema prompt_event.schema.json validated successfully."
-}

@@ -18,16 +18,6 @@ pytest-cov
 requests
 urllib3>=2.6.0
 openlineage-dbt
-jsonschema>=4.0.0
+jsonschema
 beautifulsoup4
 deepdiff
-neo4j
-psycopg2-binary
-opentelemetry-api>=1.20.0
-opentelemetry-sdk>=1.20.0
-opentelemetry-exporter-otlp>=1.20.0
-opentelemetry-instrumentation-fastapi
-opentelemetry-instrumentation-logging
-prometheus-fastapi-instrumentator
-python-json-logger
-structlog

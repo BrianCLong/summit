@@ -1,7 +1,4 @@
 {
-  "evidence_id": "EVD-SDSBC-CODEGEN-001",
-  "metrics": {
-    "flags_count": 1,
-    "generation_time_ms": 1
-  }
+  "flags_count": 1,
+  "generation_time_ms": 1
 }

@@ -60,12 +60,9 @@ def update_index(evidence_id, paths):
         with open(index_path, 'r') as f:
             index = json.load(f)
     else:
-        index = {"version": "1.0", "items": {}}
+        index = {"evidence": {}, "version": 1}
 
-    if "items" not in index:
-        index["items"] = {}
-
-    index["items"][evidence_id] = {"files": list(paths.values())}
+    index["evidence"][evidence_id] = paths
 
     with open(index_path, 'w') as f:
         json.dump(index, f, indent=2)

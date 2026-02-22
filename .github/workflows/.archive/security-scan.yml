@@ -29,8 +29,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -53,7 +51,7 @@ jobs:
           ENFORCE_AUDIT_EXIT: false
 
       - name: Upload vulnerability artifacts
-        if: ((always()) && (always())) && (always())
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vuln-report-${{ env.SERVICE_NAME }}
@@ -62,6 +60,7 @@ jobs:
             artifacts/security/${{ env.SERVICE_NAME }}/
 
       - name: Upload audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependency-audit-report
@@ -107,8 +106,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -132,8 +129,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -149,6 +144,7 @@ jobs:
     name: Generate Security Report
     needs: [dependency-scan, secret-scan, security-linting]
     runs-on: ubuntu-latest
+    if: always()
 
     steps:
       - name: Checkout code
