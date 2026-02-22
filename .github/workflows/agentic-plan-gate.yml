@@ -4,15 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 jobs:
-  plan-check:
+  agentic-policy-check:
     name: Agentic Policy Check
     runs-on: ubuntu-latest
     steps:
@@ -21,10 +14,6 @@ jobs:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
-<<<<<<< HEAD
-=======
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
