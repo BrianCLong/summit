@@ -39,3 +39,7 @@
 ## 2026-02-07 - Accessibility for Loading States
 **Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
 **Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
+
+## 2026-02-22 - Platform-Aware Keyboard Shortcuts
+**Learning:** Displaying Mac-specific shortcuts (⌘) to Windows/Linux users increases cognitive friction. Dynamically rendering 'Ctrl' vs '⌘' based on the user's platform makes the interface feel native and intuitive across all operating systems.
+**Action:** Use an `isMac` utility to conditionally render keyboard modifier labels in hints and ARIA labels.
