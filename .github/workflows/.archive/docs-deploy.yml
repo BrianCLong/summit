@@ -68,7 +68,7 @@ jobs:
         continue-on-error: true
       
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') && (always())
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +76,6 @@ jobs:
           cname: docs.summit.io
       
       - name: Upload build artifacts
-        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: docs-build
