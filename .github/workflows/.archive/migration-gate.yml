@@ -60,7 +60,7 @@ jobs:
           pip install alembic psycopg2-binary neo4j typesense
 
       - name: Check for migration labels
-        if: github.event_name == 'pull_request'
+        if: (((((github.event_name == 'pull_request') && (${{ always() }})) && (${{ always() }})) && (${{ always() }})) && (github.event.pull_request.number != '')) && (${{ github.event.pull_request.number != '' }})
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -85,14 +85,12 @@ jobs:
           policy: .ci/policies
 
       - name: Plan Postgres migrations
-        if: ${{ always() }}
         run: ./.ci/scripts/migrations/plan_postgres.sh
         env:
           POSTGRES_URL: ${{ secrets.MIGRATION_POSTGRES_URL || '' }}
           ALEMBIC_CONFIG: services/strategic-foresight/db/alembic.ini
 
       - name: Plan Neo4j migrations
-        if: ${{ always() }}
         run: ./.ci/scripts/migrations/plan_neo4j.sh
         env:
           NEO4J_URI: ${{ secrets.MIGRATION_NEO4J_URI || '' }}
@@ -100,7 +98,6 @@ jobs:
           NEO4J_PASSWORD: ${{ secrets.MIGRATION_NEO4J_PASSWORD || '' }}
 
       - name: Plan Typesense migrations
-        if: ${{ always() }}
         run: ./.ci/scripts/migrations/plan_typesense.sh
         env:
           TYPESENSE_API_KEY: ${{ secrets.MIGRATION_TYPESENSE_KEY || '' }}
@@ -160,7 +157,6 @@ jobs:
     name: Check for Migration Approval
     needs: plan-and-validate
     runs-on: ubuntu-latest
-    if: github.event.pull_request.number != ''
     steps:
       - name: Verify approval label
         env:
@@ -180,7 +176,6 @@ jobs:
   synthetic-load:
     needs: plan-and-validate
     runs-on: ubuntu-22.04
-    if: ${{ github.event.pull_request.number != '' }}
     steps:
       - uses: actions/checkout@v4
       - name: Run synthetic read shadowing
