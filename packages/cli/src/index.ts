@@ -22,6 +22,7 @@ import { agentsCommands } from './commands/agents.js';
 import { doctor } from './commands/doctor.js';
 import { mediaCommands } from './commands/media.js';
 import { orchCommands } from './commands/orch.js';
+import { serviceCommands } from './commands/service.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -97,6 +98,9 @@ program
   .addCommand(pluginCommands.build)
   .addCommand(pluginCommands.publish)
   .addCommand(pluginCommands.list);
+
+// Service commands
+program.addCommand(serviceCommands);
 
 // Agent registry commands
 program.addCommand(agentsCommands);

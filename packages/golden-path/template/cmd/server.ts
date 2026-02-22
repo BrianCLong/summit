@@ -8,7 +8,7 @@ import {
   denyByDefaultBundle,
 } from '@intelgraph/golden-path';
 
-const app = express();
+export const app = express();
 app.use(express.json());
 const metrics = createMetrics();
 app.use(createTraceMiddleware());
@@ -56,8 +56,10 @@ app.get('/api/timeline', (req, res) => {
   res.json(items);
 });
 
-const port = process.env.PORT ?? 8080;
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`__SERVICE_NAME__ listening on ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  const port = process.env.PORT ?? 8080;
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
+    console.log(`__SERVICE_NAME__ listening on ${port}`);
+  });
+}
