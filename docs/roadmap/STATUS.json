@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-11T10:18:21Z",
+  "revision_note": "Hardened GA control room and architecture docs for merge-ready evidence-first execution; refined Summit PR explainer skill.",
   "initiatives": [
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -24,10 +18,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -36,9 +27,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -47,9 +36,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -64,31 +51,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
-    },
-    {
-      "id": "summit-skill-router-ga-orchestrator",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ops-incident-console",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
-    },
-    {
-      "id": "summit-ga-preflight-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
-    },
-    {
-      "id": "summit-pr-stack-sequencer-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -189,12 +152,6 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -211,12 +168,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "summit-architecture-brief",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     }
   ],
   "summary": {
@@ -224,7 +175,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
