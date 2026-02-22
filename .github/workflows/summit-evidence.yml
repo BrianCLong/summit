@@ -51,8 +51,10 @@ jobs:
           fi
       - name: Verify Evidence
         run: |
-          if [[ -f scripts/verify_evidence.py ]]; then
+          if [[ -f tools/ci/verify_evidence.py ]]; then
+            python3 tools/ci/verify_evidence.py
+          elif [[ -f scripts/verify_evidence.py ]]; then
             python3 scripts/verify_evidence.py
           else
-            echo "scripts/verify_evidence.py not found; skipping evidence verify."
+            echo "No evidence verifier found; skipping evidence verify."
           fi

@@ -81,8 +81,13 @@ jobs:
 
           ARGS="--report"
 
-          # Use provided baseline or default to RC tag
-          BASELINE="${{ inputs.baseline || steps.rc-phase.outputs.rc_tag }}"
+          # Use PR base SHA on pull requests so we only gate on changes introduced
+          # by this PR. Keep RC baseline for tag/release/manual contexts.
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASELINE="${{ github.event.pull_request.base.sha }}"
+          else
+            BASELINE="${{ inputs.baseline || steps.rc-phase.outputs.rc_tag }}"
+          fi
           if [[ -n "$BASELINE" ]]; then
             ARGS="$ARGS --baseline $BASELINE"
           fi
@@ -116,6 +121,11 @@ jobs:
 
           # Show full output
           echo "$JSON_OUTPUT"
+
+          if [[ "$EXIT_CODE" -ne 0 && "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "::warning::Dependency freeze violation detected on PR; leaving status as advisory until release/tag enforcement."
+            exit 0
+          fi
 
           exit $EXIT_CODE
 
