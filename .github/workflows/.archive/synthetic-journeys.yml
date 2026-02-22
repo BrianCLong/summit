@@ -32,7 +32,7 @@ jobs:
         run: npx ts-node scripts/synthetic/run-journey.ts
 
       - name: Upload Results
-        if: always()
+        if: (always()) && (failure())
         uses: actions/upload-artifact@v4
         with:
           name: synthetic-results
@@ -41,7 +41,6 @@ jobs:
             synthetic-latency-histogram.json
 
       - name: Alert on Failure
-        if: failure()
         run: |
           echo "Synthetic monitoring failed! Check logs."
           # Integration with Slack/PagerDuty could go here
