@@ -1,0 +1,42 @@
+{
+  "task_id": "COMPETITOR_DECODE_EVIDENCE_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "competitor-decode-evidence",
+    "version": "v1",
+    "sha256": "1a73f9d0a33187daebdf969d126413b85aec5512401d850b467e24918a9a0a31",
+    "path": "prompts/strategy/competitor-decode-evidence@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/scripts/required-checks/README.md",
+      "required_checks.todo.md",
+      "src/graphrag/evidence/schemas/",
+      "src/graphrag/evidence/writeEvidence.ts",
+      "tests/graphrag/evidence/evidence.spec.ts",
+      "docs/roadmap/STATUS.json",
+      "prompts/strategy/competitor-decode-evidence@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/COMPETITOR_DECODE_EVIDENCE_20260206.json"
+    ],
+    "domains": ["evidence", "governance", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["schema_files", "determinism_tests"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Evidence schemas are present for report, metrics, stamp, and index.",
+    "Deterministic writer enforces timestamp-only stamp policy.",
+    "Unit tests validate canonicalization and index output."
+  ],
+  "stop_conditions": [
+    "Evidence bundle emits timestamps outside stamp.json.",
+    "Scope exceeds declared paths."
+  ]
+}
