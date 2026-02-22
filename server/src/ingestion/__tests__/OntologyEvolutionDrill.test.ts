@@ -5,7 +5,7 @@ import { ontologyEvolutionService } from '../ontology-evolution-service.js';
 describe('Ontology Evolution Drill (Task #112)', () => {
   it('should identify high-frequency custom attributes', async () => {
     const suggestions = await ontologyEvolutionService.analyzeDrift();
-    
+
     expect(suggestions).toHaveLength(2);
     expect(suggestions[0].field).toBe('linkedin_url');
     expect(suggestions[0].frequency).toBeGreaterThan(0.8);

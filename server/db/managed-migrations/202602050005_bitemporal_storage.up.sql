@@ -8,18 +8,18 @@ CREATE TABLE IF NOT EXISTS bitemporal_entities (
   tenant_id TEXT NOT NULL,
   kind TEXT NOT NULL,
   props JSONB NOT NULL DEFAULT '{}',
-  
+
   -- Valid Time: When the fact was true in reality
   valid_from TIMESTAMP WITH TIME ZONE NOT NULL,
   valid_to TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '9999-12-31 23:59:59+00',
-  
+
   -- Transaction Time: When we recorded the fact in the system
   transaction_from TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   transaction_to TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT '9999-12-31 23:59:59+00',
-  
+
   provenance_id TEXT,
   created_by TEXT,
-  
+
   PRIMARY KEY (id, tenant_id, transaction_from, valid_from)
 );
 

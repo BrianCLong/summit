@@ -11,7 +11,7 @@ async function runOntologyEvolutionDrill() {
   // 1. Analyze Drift
   console.log('--- Step 1: Analyzing Schema Drift ---');
   const suggestions = await ontologyEvolutionService.analyzeDrift();
-  
+
   console.log('Found ' + suggestions.length + ' potential promotions.');
   for (const s of suggestions) {
     console.log('Candidate: ' + s.entityType + '.' + s.field + ' (Freq: ' + s.frequency + ')');
@@ -23,7 +23,7 @@ async function runOntologyEvolutionDrill() {
 
   // 2. Validate Promotion Logic
   console.log('--- Step 2: Validating Auto-Promotion Thresholds ---');
-  
+
   // Test with a low-confidence promotion
   const lowConf = suggestions.find(s => s.frequency < 0.9);
   if (lowConf) {
@@ -40,10 +40,10 @@ async function runOntologyEvolutionDrill() {
     reason: 'Critical common field',
     suggestedType: 'number' as const
   };
-  
+
   const appliedHigh = await ontologyEvolutionService.applyPromotion(highConf);
   console.log('High confidence (' + highConf.frequency + ') applied: ' + appliedHigh);
-  
+
   if (!appliedHigh) throw new Error('Failed to apply high confidence promotion');
 
   // 3. Operational Readiness
