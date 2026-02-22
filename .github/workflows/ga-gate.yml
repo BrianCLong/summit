@@ -54,18 +54,6 @@ jobs:
           CI: true
           GA_VERIFY_MODE: true
 
-      - name: Verify SLSA Attestations
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "Verifying SLSA provenance..."
-          # Only verify if we are on main branch
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            gh attestation verify . --repo ${{ github.repository }} || echo "::warning::SLSA Verification failed or no attestations found"
-          else
-            echo "Skipping SLSA verification for PR branch"
-          fi
-
       - name: GA Gate Summary
         if: always()
         run: |

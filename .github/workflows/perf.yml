@@ -1,4 +1,4 @@
-name: "[info] Performance Baseline (k6)"
+name: Performance Baseline (k6)
 
 on:
   workflow_dispatch:
@@ -9,13 +9,8 @@ on:
       - 'k6/**'
       - '.github/workflows/perf.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   perf:
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
