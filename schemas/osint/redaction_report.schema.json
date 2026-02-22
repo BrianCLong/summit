@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/osint/redaction_report.schema.json",
+  "title": "OSINT Redaction Report",
+  "type": "object",
+  "required": ["report_id", "redacted_fields", "strategy", "total_redactions", "generated_at"],
+  "additionalProperties": false,
+  "properties": {
+    "report_id": { "type": "string" },
+    "redacted_fields": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "strategy": { "type": "string" },
+    "total_redactions": { "type": "integer", "minimum": 0 },
+    "generated_at": { "type": "string", "format": "date-time" }
+  }
+}

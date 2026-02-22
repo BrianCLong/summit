@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/osint/source_registry.schema.json",
+  "title": "OSINT Source Registry",
+  "type": "object",
+  "required": ["version", "default_risk_envelope", "source_tiers", "source_onboarding_checklist", "sources"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "default_risk_envelope": { "type": "string" },
+    "source_tiers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description"],
+        "additionalProperties": false,
+        "properties": {
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "source_onboarding_checklist": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "tos_class",
+          "allowed_methods",
+          "disallowed_methods",
+          "reliability_tier",
+          "license",
+          "rate_limit_per_min",
+          "geo_restrictions",
+          "notes"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "tos_class": { "type": "string" },
+          "allowed_methods": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "disallowed_methods": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "reliability_tier": { "type": "string" },
+          "license": { "type": "string" },
+          "rate_limit_per_min": { "type": "integer", "minimum": 1 },
+          "geo_restrictions": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

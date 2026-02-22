@@ -1,0 +1,32 @@
+version: 1
+envelopes:
+  conservative:
+    description: "Documented APIs only with explicit automation permission."
+    allowed_methods:
+      - api
+    allow_authenticated_access: false
+    allow_headless_browsing: false
+    max_alerts_per_run: 25
+    min_corroboration: 2
+    require_human_review_on_escalation: true
+  balanced:
+    description: "APIs plus RSS/robots-allowed fetch with stricter privacy controls."
+    allowed_methods:
+      - api
+      - rss
+    allow_authenticated_access: true
+    allow_headless_browsing: false
+    max_alerts_per_run: 75
+    min_corroboration: 2
+    require_human_review_on_escalation: true
+  max_legal:
+    description: "Broader allowed methods where ToS permits, with mandatory escalation review."
+    allowed_methods:
+      - api
+      - rss
+      - web_fetch
+    allow_authenticated_access: true
+    allow_headless_browsing: true
+    max_alerts_per_run: 150
+    min_corroboration: 2
+    require_human_review_on_escalation: true

@@ -922,3 +922,34 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: osint-guardrails-pr1
+    version: v1
+    path: prompts/governance/osint-guardrails-pr1@v1.md
+    sha256: c49c6265b215927aa7a3b78e1471e62638e62fcfbf9037d19aa25a5b74c01c74
+    description: Scaffold OSINT guardrails configs, schemas, policies, fixtures, evidence, and CI verification.
+    scope:
+      paths:
+        - config/osint/
+        - schemas/osint/
+        - .github/policies/osint/
+        - .github/workflows/osint-governance-verify.yml
+        - evidence/index.json
+        - evidence/EVD-OSINT-LIMITS-ENVELOPE-*/
+        - docs/roadmap/STATUS.json
+        - agents/examples/OSINT_LIMITS_ENVELOPE_PR1.json
+        - prompts/governance/osint-guardrails-pr1@v1.md
+        - prompts/registry.yaml
+      domains:
+        - governance
+        - policy
+        - evidence
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
