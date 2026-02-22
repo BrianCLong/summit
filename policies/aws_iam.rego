@@ -1,8 +1,9 @@
-
 package maestro.governance
 
+import rego.v1
+
 # Deny overly permissive IAM roles
-deny[msg] {
+deny contains msg if {
     input.asset_type == "aws_iam_role"
     some statement in input.attributes.policy.Statement
     statement.Effect == "Allow"

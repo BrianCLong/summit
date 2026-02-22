@@ -1,0 +1,57 @@
+{
+  "id": "CAMPAIGN-DOPPELGANGER-FR-001",
+  "name": "Macron-Epstein Smear Campaign",
+  "description": "Disinformation campaign using a cloned France-Soir site to link Macron to Epstein.",
+  "actors": [
+    {
+      "id": "ACTOR-STORM-1516",
+      "name": "Storm-1516",
+      "type": "affiliate"
+    }
+  ],
+  "assets": [
+    {
+      "id": "ASSET-FAKE-FS",
+      "type": "domain",
+      "url": "https://france-soir-clone.example.com",
+      "metadata": {
+        "takedown_status": "active"
+      }
+    },
+    {
+      "id": "ASSET-X-BOTNET",
+      "type": "botnet",
+      "platform": "X"
+    }
+  ],
+  "narratives": [
+    {
+      "id": "NARR-MACRON-EPSTEIN",
+      "type": "claim",
+      "content": "Macron had direct communications with Epstein."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "EVID-FAKE-EMAIL",
+      "type": "screenshot",
+      "fingerprint": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "actions": [
+    {
+      "id": "ACT-SEED-01",
+      "type": "seed",
+      "sourceId": "ACTOR-STORM-1516",
+      "targetId": "ASSET-FAKE-FS",
+      "timestamp": "2026-02-06T08:00:00Z"
+    },
+    {
+      "id": "ACT-AMPLIFY-01",
+      "type": "amplify",
+      "sourceId": "ASSET-X-BOTNET",
+      "targetId": "NARR-MACRON-EPSTEIN",
+      "timestamp": "2026-02-06T09:00:00Z"
+    }
+  ]
+}
