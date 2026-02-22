@@ -46,4 +46,17 @@ describe('Accessibility', () => {
     expect(iconSpinner).toBeDefined();
     expect(iconSpinner?.classList.contains('mr-2')).toBe(false);
   });
+
+  it('Button should have aria-busy when loading', () => {
+    const { getByRole } = render(<Button loading>Click me</Button>);
+    const button = getByRole('button');
+    expect(button.getAttribute('aria-busy')).toBe('true');
+  });
+
+  it('Spinner should have role="status" and aria-label', () => {
+    const { getByRole } = render(<Button loading size="icon">Icon</Button>);
+    const spinner = getByRole('status');
+    expect(spinner).toBeDefined();
+    expect(spinner.getAttribute('aria-label')).toBe('Loading');
+  });
 });
