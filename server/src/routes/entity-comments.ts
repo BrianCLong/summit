@@ -169,10 +169,10 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = req.query.limit
+    const limit = (req.query.limit as any)
       ? parseInt(req.query.limit as string, 10)
       : undefined;
-    const offset = req.query.offset
+    const offset = (req.query.offset as any)
       ? parseInt(req.query.offset as string, 10)
       : undefined;
 
@@ -192,7 +192,7 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
       limit,
       offset,
       {
-        includeDeleted: String(req.query.includeDeleted || '') === 'true',
+        includeDeleted: String((req.query.includeDeleted as any) || '') === 'true',
       },
     );
 

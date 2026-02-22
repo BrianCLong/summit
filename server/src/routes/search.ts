@@ -40,7 +40,7 @@ router.post('/', ensureAuthenticated, async (req: Request, res: Response) => {
  */
 router.get('/autocomplete', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const { q, limit = 5 } = req.query;
+    const { q, limit = 5 } = req.query as any;
 
     if (!q || typeof q !== 'string') {
       return res.json([]);

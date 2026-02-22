@@ -87,7 +87,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { purpose, status } = req.query;
+      const { purpose, status } = req.query as any;
 
       const envelope = keyRotationService.getKeyInventory(principal.tenantId, {
         purpose: purpose as any,
@@ -228,7 +228,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const daysAhead = req.query.days ? parseInt(req.query.days as string, 10) : 14;
+      const daysAhead = (req.query.days as any) ? parseInt(req.query.days as string, 10) : 14;
 
       const envelope = keyRotationService.getKeysNearingExpiry(principal.tenantId, daysAhead);
 
@@ -252,7 +252,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { keyId } = req.query;
+      const { keyId } = req.query as any;
 
       const envelope = keyRotationService.getRotationHistory(
         principal.tenantId,

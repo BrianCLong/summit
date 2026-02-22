@@ -145,7 +145,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { status, category } = req.query;
+      const { status, category } = req.query as any;
 
       const envelope = integrationManager.getIntegrations(principal.tenantId, {
         status: status as string,
@@ -393,7 +393,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { integrationId, from, to } = req.query;
+      const { integrationId, from, to } = req.query as any;
 
       const envelope = integrationManager.getAuditLog(principal.tenantId, {
         integrationId: integrationId as string,

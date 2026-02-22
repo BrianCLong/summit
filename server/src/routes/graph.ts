@@ -98,7 +98,7 @@ router.get('/entities/:id/neighbors', ensureAuthenticated, async (req: Authentic
   try {
     const tenantId = getTenantId(req);
     const { id } = req.params;
-    const { depth = 1 } = req.query;
+    const { depth = 1 } = req.query as any;
 
     securityAudit.logSensitiveRead({
       actor: req.user!.id,
@@ -274,7 +274,7 @@ router.get('/sessions', ensureAuthenticated, async (req: AuthenticatedRequest, r
     try {
         const tenantId = getTenantId(req);
         const userId = req.user!.id;
-        const limit = req.query.limit ? Number(req.query.limit) : 20;
+        const limit = (req.query.limit as any) ? Number((req.query.limit as any)) : 20;
 
         const sessions = await sessionService.listSessions(tenantId, userId, limit);
         res.json({ data: sessions });

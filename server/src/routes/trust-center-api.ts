@@ -121,7 +121,7 @@ router.get('/status', async (req: Request, res: Response, next: NextFunction) =>
  */
 router.get('/certifications', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { framework } = req.query;
+    const { framework } = req.query as any;
     const pool = getPostgresPool();
 
     let query = `
@@ -211,7 +211,7 @@ router.get('/slo', async (req: Request, res: Response, next: NextFunction) => {
  */
 router.get('/packs', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { frameworks } = req.query;
+    const { frameworks } = req.query as any;
 
     const frameworkList = frameworks
       ? (frameworks as string).split(',') as ComplianceFramework[]
@@ -275,7 +275,7 @@ router.get('/packs/:packId/controls', async (req: Request, res: Response, next: 
  */
 router.get('/controls', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { framework } = req.query;
+    const { framework } = req.query as any;
 
     let controls = Object.values(CONTROL_MAPPINGS);
 
@@ -326,7 +326,7 @@ router.get('/controls/:controlId', async (req: Request, res: Response, next: Nex
 router.get('/controls/:controlId/evidence', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { controlId } = req.params;
-    const { startDate, endDate } = req.query;
+    const { startDate, endDate } = req.query as any;
     const tenantId = (req as any).tenantId || 'default';
 
     const control = CONTROL_MAPPINGS[controlId];
@@ -605,7 +605,7 @@ router.get('/questionnaire/caiq', async (req: Request, res: Response, next: Next
  */
 router.get('/export/oscal', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { framework = 'SOC2_TYPE_II' } = req.query;
+    const { framework = 'SOC2_TYPE_II' } = req.query as any;
 
     const controls = getControlsByFramework(framework as ComplianceFramework);
 

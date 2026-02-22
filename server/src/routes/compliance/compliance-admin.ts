@@ -129,7 +129,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { framework } = req.params;
-      const { category } = req.query;
+      const { category } = req.query as any;
 
       const envelope = controlMappingService.getControls(
         framework as any,
@@ -278,7 +278,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { controlId, framework, type, status } = req.query;
+      const { controlId, framework, type, status } = req.query as any;
 
       const envelope = evidenceCollector.getEvidence(principal.tenantId, {
         controlId: controlId as string,
@@ -398,7 +398,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { framework } = req.query;
+      const { framework } = req.query as any;
 
       const envelope = evidenceCollector.getEvidenceStatus(
         principal.tenantId,

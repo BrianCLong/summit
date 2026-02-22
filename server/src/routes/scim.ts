@@ -25,7 +25,7 @@ const handleError = (res: Response, error: any) => {
 
 router.get('/Users', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { startIndex, count, filter, sortBy, sortOrder } = req.query;
+        const { startIndex, count, filter, sortBy, sortOrder } = req.query as any;
         const tenantId = req.user?.tenantId || 'default';
         const result = await scimService.listUsers(
             tenantId,
@@ -100,7 +100,7 @@ router.delete('/Users/:id', async (req: AuthenticatedRequest, res: Response) => 
 
 router.get('/Groups', async (req: AuthenticatedRequest, res: Response) => {
     try {
-        const { startIndex, count, filter, sortBy, sortOrder } = req.query;
+        const { startIndex, count, filter, sortBy, sortOrder } = req.query as any;
         const tenantId = req.user?.tenantId || 'default';
         const result = await scimService.listGroups(
             tenantId,

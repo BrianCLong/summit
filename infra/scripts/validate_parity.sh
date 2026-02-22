@@ -16,7 +16,7 @@ collect() {
   echo 1 > "/tmp/${ws}.tags"  # stub: set to 0 if missing required tags after custom checks
 }
 
-pushd infra >/dev/null
+pushd terraform/aws >/dev/null
 terraform init -upgrade=false >/dev/null
 collect "$WS_BASE"
 collect "$WS_CMP"

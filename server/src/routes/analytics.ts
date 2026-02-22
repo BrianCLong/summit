@@ -18,7 +18,7 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
 router.get(
   '/path',
   asyncHandler(async (req: any, res: any) => {
-    const { sourceId, targetId, algorithm, k, maxDepth } = req.query;
+    const { sourceId, targetId, algorithm, k, maxDepth } = req.query as any;
 
     if (!sourceId || !targetId) {
       return res.status(400).json({ error: 'sourceId and targetId are required' });
@@ -41,7 +41,7 @@ router.get(
 router.get(
   '/community',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm, dp = 'true' } = req.query;
+    const { algorithm, dp = 'true' } = req.query as any;
     const result = await analyticsService.detectCommunities(
       (algorithm as 'louvain' | 'leiden' | 'lpa') || 'lpa'
     );
@@ -66,7 +66,7 @@ router.get(
 router.get(
   '/centrality',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm, limit } = req.query;
+    const { algorithm, limit } = req.query as any;
     const result = await analyticsService.calculateCentrality(
       (algorithm as 'betweenness' | 'eigenvector') || 'betweenness',
       { limit: limit ? parseInt(limit as string) : 20 }
@@ -82,7 +82,7 @@ router.get(
 router.get(
   '/patterns',
   asyncHandler(async (req: any, res: any) => {
-    const { type } = req.query;
+    const { type } = req.query as any;
     if (!type) {
       return res.status(400).json({ error: 'Pattern type is required (temporal-motifs, co-travel, financial-structuring)' });
     }
@@ -100,7 +100,7 @@ router.get(
 router.get(
   '/anomaly',
   asyncHandler(async (req: any, res: any) => {
-    const { type } = req.query;
+    const { type } = req.query as any;
     if (!type) {
       return res.status(400).json({ error: 'Anomaly type is required (degree, temporal-spike, selector-misuse)' });
     }

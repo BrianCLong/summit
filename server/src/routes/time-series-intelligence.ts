@@ -13,7 +13,7 @@ const router = Router();
 router.get('/forecast/:entityId/activity', async (req, res, next) => {
   try {
     const { entityId } = req.params;
-    const { horizon = '7', lookback = '90' } = req.query;
+    const { horizon = '7', lookback = '90' } = req.query as any;
 
     // Ensure tenant context (assuming middleware populates req.user.tenant_id)
     const tenantId = (req as any).user?.tenant_id || (req as any).user?.tenantId;
@@ -42,7 +42,7 @@ router.get('/forecast/:entityId/activity', async (req, res, next) => {
 router.get('/forecast/:entityId/metric', async (req, res, next) => {
   try {
     const { entityId } = req.params;
-    const { path, horizon = '7', lookback = '90' } = req.query;
+    const { path, horizon = '7', lookback = '90' } = req.query as any;
 
     if (!path || typeof path !== 'string') {
       throw new AppError('Metric path is required', 400);

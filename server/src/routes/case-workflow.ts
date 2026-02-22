@@ -191,13 +191,13 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
   router.get('/cases/:id/tasks', async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id: caseId } = req.params;
-      const { status, priority, assignedTo } = req.query;
+      const { status, priority, assignedTo } = req.query as any;
 
       const tasks = await workflowService.listTasks({
         caseId,
         status: status as any,
         priority: priority as any,
-        assignedTo: assignedTo as string,
+        assignedTo: assignedTo ? String(assignedTo) : undefined,
       });
 
       res.json(tasks);
@@ -522,7 +522,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
    */
   router.get('/roles', async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { systemOnly } = req.query;
+      const { systemOnly } = req.query as any;
 
       const roles = await workflowService.listRoles(systemOnly === 'true');
 

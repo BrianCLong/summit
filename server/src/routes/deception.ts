@@ -94,7 +94,7 @@ router.post('/interactions', async (req: AuthenticatedRequest, res: Response) =>
 
 // GET /api/deception/profiles
 router.get('/profiles', async (req: AuthenticatedRequest, res: Response) => {
-    const ip = req.query.ip;
+    const ip = (req.query.ip as any);
     if (!ip || typeof ip !== 'string' || !z.string().ip().safeParse(ip).success) {
         return res.status(400).json({ error: 'Valid IP address required' });
     }

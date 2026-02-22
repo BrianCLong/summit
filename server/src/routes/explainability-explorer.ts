@@ -56,9 +56,9 @@ router.get('/runs', async (req: Request, res: Response) => {
       started_after: req.query.started_after as string,
       started_before: req.query.started_before as string,
       capability: req.query.capability as string,
-      min_confidence: req.query.min_confidence ? parseFloat(req.query.min_confidence as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+      min_confidence: (req.query.min_confidence as any) ? parseFloat(req.query.min_confidence as string) : undefined,
+      limit: (req.query.limit as any) ? parseInt(req.query.limit as string, 10) : 50,
+      offset: (req.query.offset as any) ? parseInt(req.query.offset as string, 10) : 0,
     };
 
     const result = await service.listRuns(tenantId, filter, requesterId);
@@ -131,7 +131,7 @@ router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
   try {
     const { runId } = req.params;
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
-    const depth = req.query.depth ? parseInt(req.query.depth as string, 10) : 3;
+    const depth = (req.query.depth as any) ? parseInt(req.query.depth as string, 10) : 3;
 
     if (!tenantId) {
       return res.status(403).json({

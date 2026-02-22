@@ -743,8 +743,8 @@ router.get(
       const anomalies = await anomalyService!.detectAnomalies(scope);
 
       // Filter by status if provided
-      const filteredAnomalies = req.query.status
-        ? anomalies.filter(a => a.status === req.query.status)
+      const filteredAnomalies = (req.query.status as any)
+        ? anomalies.filter(a => a.status === (req.query.status as any))
         : anomalies;
 
       // Apply pagination
@@ -957,10 +957,10 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const endDate = req.query.endDate
+      const endDate = (req.query.endDate as any)
         ? new Date(req.query.endDate as string)
         : new Date();
-      const startDate = req.query.startDate
+      const startDate = (req.query.startDate as any)
         ? new Date(req.query.startDate as string)
         : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 

@@ -315,23 +315,27 @@ Use this format for business case presentations:
 **Date:** {{Date}}
 
 **Current State:**
+
 - {{N}} analysts spending {{X}} hours/week on inefficient search and correlation
 - {{N}} cases per year; growth of {{X}}% expected
 - {{$X}} annual spend on fragmented tools
 - {{N}} audit findings related to provenance/documentation
 
 **With Summit:**
+
 - Reduce analyst inefficiency by **{{X}}%**
 - Increase case throughput by **{{X}}%**
 - Consolidate tools, saving **{{$X}}** annually
 - Eliminate provenance-related audit findings
 
 **Investment:**
+
 - Pilot: **${{X}}** ({{N}} weeks)
 - Production (Year 1): **${{X}}**
 - 3-Year TCO: **${{X}}**
 
 **Returns:**
+
 - Annual value: **${{X}}**
 - 3-Year net benefit: **${{X}}**
 - **ROI: {{X}}%**

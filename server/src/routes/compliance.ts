@@ -40,7 +40,7 @@ router.get(
   ensureAuthenticated,
   ensureRole(['ADMIN', 'compliance-officer']),
   async (req, res) => {
-    const { startDate, endDate, format } = req.query;
+    const { startDate, endDate, format } = req.query as any;
 
     if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
     return res.status(400).json({ error: 'startDate and endDate query parameters are required.' });

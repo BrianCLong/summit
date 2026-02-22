@@ -14,7 +14,6 @@ packages:
   - 'devtools/*'
   - 'prov-ledger-service'
   - 'agents/*'
-  - 'platform/*'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'
@@ -24,4 +23,3 @@ exclude:
   - 'intelgraph-mvp/ui'
   - '!**/test/**'
   - '!**/tests/**'
-  - '!**/node_modules/**'

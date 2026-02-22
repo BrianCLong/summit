@@ -76,7 +76,7 @@ function getAuditContext(
  */
 caseRouter.get('/:id/overview', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -88,8 +88,8 @@ caseRouter.get('/:id/overview', async (req, res) => {
 
     const { id } = req.params;
 
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
+    const reason = String((req.query.reason as any) || "");
+    const legalBasis = (req.query.legalBasis as string) as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -119,9 +119,11 @@ caseRouter.get('/:id/overview', async (req, res) => {
 
     routeLogger.info(
       {
-        caseId: id,
-        tenantId,
-        userId,
+
+        targetType: 'CASE',
+        targetId: id,
+
+        authorId: userId,
         cacheStatus: overview.cache.status,
       },
       'Case overview retrieved',
@@ -145,7 +147,7 @@ caseRouter.get('/:id/overview', async (req, res) => {
  */
 caseRouter.post('/', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -156,7 +158,7 @@ caseRouter.post('/', async (req, res) => {
     }
 
     const input: CaseInput = {
-      tenantId,
+
       title: req.body.title,
       description: req.body.description,
       status: req.body.status,
@@ -169,7 +171,7 @@ caseRouter.post('/', async (req, res) => {
     const service = new CaseService(pg);
 
     const auditContext = getAuditContext(req.body);
-    const caseRecord = await service.createCase(input, userId, auditContext);
+    const caseRecord = await service.createCase(input, authorId: userId, auditContext);
 
     goldenPathStepTotal.inc({
       step: 'investigation_created',
@@ -178,7 +180,7 @@ caseRouter.post('/', async (req, res) => {
     });
 
     routeLogger.info(
-      { caseId: caseRecord.id, tenantId, userId },
+      { caseId: caseRecord.id,  userId },
       'Case created via API',
     );
 
@@ -194,7 +196,7 @@ caseRouter.post('/', async (req, res) => {
  */
 caseRouter.get('/:id', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -207,8 +209,8 @@ caseRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     // Require reason and legal basis for viewing
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
+    const reason = String((req.query.reason as any) || "");
+    const legalBasis = (req.query.legalBasis as string) as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -230,12 +232,12 @@ caseRouter.get('/:id', async (req, res) => {
     const auditContext = {
       reason,
       legalBasis,
-      warrantId: req.query.warrantId as string,
+      warrantId: (req.query.warrantId as any) ? String((req.query.warrantId as any)) : undefined,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     };
 
-    const caseRecord = await service.getCase(id, tenantId, userId, auditContext);
+    const caseRecord = await service.getCase(id,  authorId: userId, auditContext);
 
     if (!caseRecord) {
       return res.status(404).json({ error: 'case_not_found' });
@@ -253,7 +255,7 @@ caseRouter.get('/:id', async (req, res) => {
  */
 caseRouter.put('/:id', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -299,8 +301,8 @@ caseRouter.put('/:id', async (req, res) => {
 
     const caseRecord = await service.updateCase(
       input,
-      userId,
-      tenantId,
+      authorId: userId,
+
       auditContext,
     );
 
@@ -330,15 +332,15 @@ caseRouter.get('/', async (req, res) => {
     const service = new CaseService(pg);
 
     const cases = await service.listCases({
-      tenantId,
+
       status: req.query.status as any,
-      compartment: req.query.compartment as string,
-      policyLabels: req.query.policyLabels
+      compartment: (req.query.compartment as any) ? String((req.query.compartment as any)) : undefined,
+      policyLabels: (req.query.policyLabels as any)
         ? (req.query.policyLabels as string).split(',')
         : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-      offset: req.query.offset
-        ? parseInt(req.query.offset as string)
+      limit: (req.query.limit as any) ? parseInt(String((req.query.limit as any))) : undefined,
+      offset: (req.query.offset as any)
+        ? parseInt(String((req.query.offset as any)))
         : undefined,
     });
 
@@ -354,7 +356,7 @@ caseRouter.get('/', async (req, res) => {
  */
 caseRouter.post('/:id/archive', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -390,8 +392,8 @@ caseRouter.post('/:id/archive', async (req, res) => {
 
     const caseRecord = await service.archiveCase(
       id,
-      userId,
-      tenantId,
+      authorId: userId,
+
       auditContext,
     );
 
@@ -411,7 +413,7 @@ caseRouter.post('/:id/archive', async (req, res) => {
  */
 caseRouter.post('/:id/export', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -447,8 +449,8 @@ caseRouter.post('/:id/export', async (req, res) => {
 
     const caseRecord = await service.exportCase(
       id,
-      tenantId,
-      userId,
+
+      authorId: userId,
       auditContext,
     );
 
@@ -472,7 +474,7 @@ caseRouter.post('/:id/export', async (req, res) => {
  */
 caseRouter.post('/:id/release-criteria', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -493,7 +495,7 @@ caseRouter.post('/:id/release-criteria', async (req, res) => {
     const { ReleaseCriteriaService } = await import('../cases/ReleaseCriteriaService.js');
     const service = new ReleaseCriteriaService(pg);
 
-    await service.configure(id, tenantId, userId, config);
+    await service.configure(id,  authorId: userId, config);
 
     res.status(200).json({ message: 'Release criteria configured' });
   } catch (error: any) {
@@ -535,7 +537,7 @@ caseRouter.get('/:id/release-criteria/status', async (req, res) => {
  */
 caseRouter.post('/:id/comments', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -555,15 +557,14 @@ caseRouter.post('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comment = await service.addComment(
-      {
-        caseId: id,
-        userId,
+    const comment = await service.addComment({
+        tenantId,
+        targetType: 'CASE',
+        targetId: id,
         content,
+        authorId: userId,
         metadata,
-      },
-      tenantId,
-    );
+      });
 
     await emitAuditEvent(
       {
@@ -571,22 +572,24 @@ caseRouter.post('/:id/comments', async (req, res) => {
         occurredAt: new Date().toISOString(),
         actor: {
           type: 'user',
-          id: userId,
-          name: (req.user as any)?.username || (req.user as any)?.email || userId,
+          id: authorId: userId,
+          name: (req.user as any)?.username || (req.user as any)?.email || authorId: userId,
           ipAddress: req.ip,
         },
         action: {
           type: 'comment.added',
           outcome: 'success',
         },
-        tenantId,
+
         target: {
           type: 'case_comment',
           id: comment.id,
           path: `cases/${id}`,
         },
         metadata: {
-          caseId: id,
+
+        targetType: 'CASE',
+        targetId: id,
           commentId: comment.id,
           messageLength: String(content).length,
           userAgent: req.headers['user-agent'],
@@ -619,20 +622,20 @@ caseRouter.post('/:id/comments', async (req, res) => {
  */
 caseRouter.get('/:id/comments', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
     }
 
     const { id } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+    const limit = (req.query.limit as any) ? parseInt(String((req.query.limit as any))) : undefined;
+    const offset = (req.query.offset as any) ? parseInt(String((req.query.offset as any))) : undefined;
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comments = await service.listComments(id, tenantId, limit, offset);
+    const comments = await service.listComments(id,  limit, offset);
 
     res.json(comments);
   } catch (error: any) {
@@ -651,7 +654,7 @@ caseRouter.get('/:id/comments', async (req, res) => {
  */
 caseRouter.post('/:id/evidence/event', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!userId) {
       return res.status(401).json({ error: 'user_required' });
@@ -671,7 +674,7 @@ caseRouter.post('/:id/evidence/event', async (req, res) => {
       caseId,
       evidenceId,
       action,
-      actorId: userId,
+      actorId: authorId: userId,
       location,
       notes,
       verificationHash,
@@ -710,7 +713,7 @@ caseRouter.get('/:id/evidence/:evidenceId/chain', async (req, res) => {
  */
 caseRouter.post('/:id/report', async (req, res) => {
   try {
-    const { tenantId, userId } = getRequestContext(req);
+    const {  userId } = getRequestContext(req);
 
     if (!tenantId) {
       return res.status(400).json({ error: 'tenant_required' });
@@ -727,7 +730,7 @@ caseRouter.post('/:id/report', async (req, res) => {
 
     // Fetch case data to populate template
     // We pass minimal audit context since this is an internal fetch for reporting
-    const caseData = await caseService.getCase(id, tenantId, userId, { reason: 'Report Generation', legalBasis: 'investigation' });
+    const caseData = await caseService.getCase(id,  authorId: userId, { reason: 'Report Generation', legalBasis: 'investigation' });
 
     if (!caseData) {
       return res.status(404).json({ error: 'case_not_found' });
@@ -780,7 +783,7 @@ caseRouter.post('/:id/report', async (req, res) => {
         watermark: req.body.watermark,
       },
       {
-        userId,
+        authorId: userId,
         roles: userRoles,
       },
     );

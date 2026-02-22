@@ -184,7 +184,7 @@ router.get('/gates', async (req, res) => {
 router.get('/trends/:metric', async (req, res) => {
   try {
     const { metric } = req.params;
-    const { days = 7 } = req.query;
+    const { days = 7 } = req.query as any;
     const pool = getPostgresPool();
 
     let query: string;
@@ -257,7 +257,7 @@ router.get('/er-ops/precision-recall', async (req, res) => {
     'ga_core_metrics.er_ops.precision_recall',
     async (span: any) => {
       try {
-        const { days = 30, modelType = 'entity_resolution' } = req.query;
+        const { days = 30, modelType = 'entity_resolution' } = req.query as any;
         const pool = getPostgresPool();
         const parsedDays = parseInt(days as string, 10);
 
@@ -321,7 +321,7 @@ router.get('/er-ops/rollbacks', async (req, res) => {
     'ga_core_metrics.er_ops.rollbacks',
     async (span: any) => {
       try {
-        const { days = 30 } = req.query;
+        const { days = 30 } = req.query as any;
         const pool = getPostgresPool();
         const parsedDays = parseInt(days as string, 10);
 
@@ -378,7 +378,7 @@ router.get('/er-ops/conflicts', async (req, res) => {
     'ga_core_metrics.er_ops.conflicts',
     async (span: any) => {
       try {
-        const { days = 30 } = req.query;
+        const { days = 30 } = req.query as any;
         const pool = getPostgresPool();
         const parsedDays = parseInt(days as string, 10);
 

@@ -35,7 +35,7 @@ router.get('/stream', (req, res) => {
 });
 
 router.get('/recent', (req, res) => {
-  const limit = Number(req.query.limit ?? '200');
+  const limit = Number((req.query.limit as any) ?? '200');
   res.json({ logs: logEventBus.recent(Math.min(limit, 1000)) });
 });
 

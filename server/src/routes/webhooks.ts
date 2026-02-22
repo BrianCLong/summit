@@ -74,7 +74,7 @@ const verifyJiraSecret = (req: any, res: any, next: any) => {
   }
 
   // Check for secret in header or query param (common Jira patterns)
-  const incomingSecret = req.headers['x-webhook-secret'] || req.query.secret;
+  const incomingSecret = req.headers['x-webhook-secret'] || (req.query.secret as any);
 
   if (!incomingSecret || incomingSecret !== secret) {
     logger.warn('Jira webhook rejected: Invalid secret');

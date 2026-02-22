@@ -212,7 +212,7 @@ router.get('/history/:investigationId',
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       const { investigationId } = req.params;
-      const { limit = '20', offset = '0', mode } = req.query;
+      const { limit = '20', offset = '0', mode } = req.query as any;
 
       const orchestrator = req.orchestrator as AICopilotOrchestrator;
       if (!orchestrator) {

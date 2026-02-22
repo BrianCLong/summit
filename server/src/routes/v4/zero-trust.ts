@@ -614,7 +614,7 @@ router.get(
         actorId: req.query.actorId as string,
         resourceType: req.query.resourceType as string,
         resourceId: req.query.resourceId as string,
-        entryTypes: req.query.entryType
+        entryTypes: (req.query.entryType as any)
           ? [req.query.entryType as any]
           : undefined,
         startTime: req.query.startTime as string,

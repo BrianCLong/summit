@@ -17,7 +17,7 @@ router.get('/summary', async (req, res) => {
       return;
     }
     const tenantId = user.tenantId;
-    const { start, end } = req.query;
+    const { start, end } = req.query as any;
 
     const pool = getPostgresPool();
     const client = await pool.connect();
