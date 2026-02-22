@@ -1,64 +1,25 @@
 name: Reusable Security Scan
-
 on:
   workflow_call:
     inputs:
-      node_version:
-        required: false
+      packages:
+        required: true
         type: string
-        default: '20.x'
+        description: 'JSON list of packages to scan'
 
 jobs:
-  security-scan:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4 # v4
-      - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
-        with:
-          path: .
-          output-file: sbom.spdx.json
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: sbom-spdx
-          path: sbom.spdx.json
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # 0.24.0
-        with:
-          scan-type: fs
-          format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
-          vuln-type: 'os,library'
-
-  trufflehog:
+  audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v4
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
-      - uses: trufflesecurity/trufflehog@v3
-        with: { path: '.', base: 'origin/main', head: '${{ github.sha }}' }
-
-  license-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4 # v4
-      - uses: pilosus/action-pip-license-checker@cc7a461bfa27b44ad187b8578c881ef5138c13fd # v2
-        with: { requirements: 'requirements.txt', fail: 'strong' }
-      - uses: pilosus/action-licensefinder@v2
-        with: { decisions-file: 'doc/license-decisions.yml' }
-
-  npm-audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4 # v4
-      - uses: actions/setup-node@v4 # v4
-        with: { node-version: ${{ inputs.node_version }}, cache: 'pnpm' }
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with: { version: 9.12.0 }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high || true
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Audit
+        run: pnpm audit

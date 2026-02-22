@@ -37,7 +37,7 @@ env:
 
 jobs:
   guard:
-    if: (((((((((((((((((((github.event_name == 'schedule') && (steps.guard.outputs.saturated == 'true')) && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true')) && (github.event_name == 'schedule')) && (always())) && (always())) && (always())) && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true')) && (github.event_name == 'schedule')) && (always())) && (always())) && (always())) && (${{ !inputs.skip_soak && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') }})) && (github.event_name == 'schedule')) && (always())) && (always())) && (always())) && (always())) && (always())) && (${{ failure() }})
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     outputs:
       saturated: ${{ steps.guard.outputs.saturated }}
@@ -49,6 +49,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Summarize guard decision
+        if: steps.guard.outputs.saturated == 'true'
         run: |
           echo "⚠️ **Backlog Guard Active**" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -59,6 +60,7 @@ jobs:
           echo "**Manual Override:** \`gh workflow run nightly-testing.yml\` (bypasses guard)" >> "$GITHUB_STEP_SUMMARY"
 
   nightly-e2e:
+    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
     needs: [guard]
     runs-on: ubuntu-22.04
     timeout-minutes: 90
@@ -72,6 +74,7 @@ jobs:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:
       - name: Start jitter
+        if: github.event_name == 'schedule'
         run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
 
       - name: Checkout repository
@@ -113,6 +116,7 @@ jobs:
           PLAYWRIGHT_HTML_REPORT: playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}/html-report
 
       - name: Upload E2E test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-results-${{ matrix.browser }}-shard${{ matrix.shard }}
@@ -122,6 +126,7 @@ jobs:
           retention-days: 30
 
       - name: Upload E2E test videos
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-videos-${{ matrix.browser }}-shard${{ matrix.shard }}
@@ -129,6 +134,7 @@ jobs:
           retention-days: 7
 
       - name: Publish E2E test results
+        if: always()
         uses: dorny/test-reporter@v1
         with:
           name: E2E Tests (${{ matrix.browser }} - shard ${{ matrix.shard }})
@@ -136,6 +142,7 @@ jobs:
           reporter: java-junit
 
   nightly-integration:
+    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
     needs: [guard]
     runs-on: ubuntu-22.04
     timeout-minutes: 45
@@ -143,6 +150,7 @@ jobs:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:
       - name: Start jitter
+        if: github.event_name == 'schedule'
         run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
 
       - name: Checkout repository
@@ -166,11 +174,13 @@ jobs:
           npm run itest
 
       - name: Generate integration test report
+        if: always()
         run: |
           echo "📊 Generating integration test report..."
           node scripts/coverage-aggregate.js
 
       - name: Upload integration test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-results
@@ -181,6 +191,7 @@ jobs:
           retention-days: 30
 
       - name: Publish integration test results
+        if: always()
         uses: dorny/test-reporter@v1
         with:
           name: Integration Tests
@@ -188,6 +199,7 @@ jobs:
           reporter: java-junit
 
   nightly-performance:
+    if: ${{ !inputs.skip_soak && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') }}
     needs: [guard]
     runs-on: ubuntu-22.04
     timeout-minutes: 300 # 5 hours for soak test
@@ -195,6 +207,7 @@ jobs:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:
       - name: Start jitter
+        if: github.event_name == 'schedule'
         run: sleep $((RANDOM%${START_JITTER_MAX_SEC:-240}+30))
 
       - name: Checkout repository
@@ -230,11 +243,13 @@ jobs:
           STAGE: ${{ env.TARGET_ENV }}
 
       - name: Generate performance regression report
+        if: always()
         run: |
           cd tests/load
           node scripts/performance-analysis.js soak-test-results.json > performance-report.md
 
       - name: Upload performance test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: performance-test-results
@@ -245,6 +260,7 @@ jobs:
           retention-days: 90
 
       - name: Publish performance test results
+        if: always()
         uses: dorny/test-reporter@v1
         with:
           name: Performance Soak Tests
@@ -252,6 +268,7 @@ jobs:
           reporter: java-junit
 
       - name: Performance regression check
+        if: always()
         run: |
           cd tests/load
           if [ -f performance-report.md ]; then
@@ -266,6 +283,7 @@ jobs:
 
   nightly-summary:
     needs: [nightly-e2e, nightly-integration, nightly-performance]
+    if: always()
     runs-on: ubuntu-22.04
     steps:
       - name: Generate nightly test summary
@@ -284,6 +302,7 @@ jobs:
           echo "- **Commit**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Create GitHub issue on failure
+        if: ${{ failure() }}
         uses: actions/github-script@v7
         with:
           script: |

@@ -184,7 +184,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload Oracle Report
-        if: ((((always()) && (github.event_name == 'pull_request' && always())) && (steps.oracle.outcome == 'failure')) && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (steps.metrics.outputs.avg_latency != '')
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: graph-oracle-report
@@ -194,6 +194,7 @@ jobs:
           retention-days: 30
 
       - name: Comment PR with Results
+        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -247,6 +248,7 @@ jobs:
             }
 
       - name: Check Oracle Status
+        if: steps.oracle.outcome == 'failure'
         run: |
           echo "::error::Graph Query Oracle detected correctness violations!"
           echo "Review the oracle report for details on which scenarios failed."
@@ -256,6 +258,7 @@ jobs:
     name: Track Performance Metrics
     runs-on: ubuntu-latest
     needs: oracle
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout code
@@ -282,6 +285,7 @@ jobs:
           fi
 
       - name: Performance Alert
+        if: steps.metrics.outputs.avg_latency != ''
         run: |
           AVG_LATENCY=${{ steps.metrics.outputs.avg_latency }}
           THRESHOLD=1000

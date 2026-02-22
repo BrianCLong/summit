@@ -1,0 +1,79 @@
+{
+  "item_slug": "cti-briefing-cloud-supplychain",
+  "claims": [
+    {
+      "id": "ITEM:CLAIM-01",
+      "source": "TechRadar",
+      "snippet": "CoolClient… can monitor the clipboard… enables HTTP proxy credential sniffing… expanded plugin ecosystem… remote shell plugin…",
+      "url": "https://www.techradar.com/pro/security/this-dangerous-apt-has-expanded-its-skills-with-some-new-tools-heres-what-we-know",
+      "tags": ["apt", "mustang-panda", "malware-capability"]
+    },
+    {
+      "id": "ITEM:CLAIM-02",
+      "source": "TechRadar",
+      "snippet": "…use of legitimate cloud services for quiet exfiltration of stolen data.",
+      "url": "https://www.techradar.com/pro/security/this-dangerous-apt-has-expanded-its-skills-with-some-new-tools-heres-what-we-know",
+      "tags": ["exfiltration", "cloud-abuse"]
+    },
+    {
+      "id": "ITEM:CLAIM-03",
+      "source": "IT Pro",
+      "snippet": "Sonatype identified 454,648 malicious open source packages in 2025…",
+      "url": "https://www.itpro.com/software/open-source/the-open-source-ecosystem-is-booming-thanks-to-ai-but-hackers-are-taking-advantage",
+      "tags": ["supply-chain", "malicious-packages", "oss"]
+    },
+    {
+      "id": "ITEM:CLAIM-04",
+      "source": "IT Pro",
+      "snippet": "Log4Shell… reached 42 million downloads in 2025 despite fixed versions…",
+      "url": "https://www.itpro.com/software/open-source/the-open-source-ecosystem-is-booming-thanks-to-ai-but-hackers-are-taking-advantage",
+      "tags": ["vulnerability", "log4shell", "patch-management"]
+    },
+    {
+      "id": "ITEM:CLAIM-05",
+      "source": "IT Pro",
+      "snippet": "…GPT-5 hallucinated 27.8% of component versions… suggested actual malware packages.",
+      "url": "https://www.itpro.com/software/open-source/the-open-source-ecosystem-is-booming-thanks-to-ai-but-hackers-are-taking-advantage",
+      "tags": ["ai-misuse", "hallucination", "supply-chain"]
+    },
+    {
+      "id": "ITEM:CLAIM-06",
+      "source": "Google Cloud",
+      "snippet": "capabilities… advertised… include… malware generation… phishing kits…",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/threat-actor-usage-of-ai-tools",
+      "tags": ["ai-misuse", "cybercrime-market"]
+    },
+    {
+      "id": "ITEM:CLAIM-07",
+      "source": "Google Cloud",
+      "snippet": "…misuse… across… reconnaissance… lateral movement… C2… data exfiltration… including… cloud infrastructure… Kubernetes… AWS tokens…",
+      "url": "https://cloud.google.com/blog/topics/threat-intelligence/threat-actor-usage-of-ai-tools",
+      "tags": ["ai-misuse", "cloud-security", "k8s", "aws"]
+    },
+    {
+      "id": "ITEM:CLAIM-08",
+      "source": "Bitsight",
+      "snippet": "Exploiting Public-Facing Applications… abused… CVE-2025-58360… added to CISA’s KEV…",
+      "url": "https://www.bitsight.com/blog/top-cybersecurity-ttps-used-by-threat-actors-in-2025",
+      "tags": ["exploitation", "public-facing", "cve", "kev"]
+    },
+    {
+      "id": "ITEM:CLAIM-09",
+      "source": "Context",
+      "snippet": "Attacks on the supply chain… indirect compromise… diverse and stealthy… particularly effective…",
+      "tags": ["supply-chain", "stealth"]
+    },
+    {
+      "id": "ITEM:CLAIM-10",
+      "source": "Context",
+      "snippet": "attack… against the XZ Utils project… perpetrator… acquire… co-maintainer… introduce malicious changes.",
+      "tags": ["supply-chain", "maintainer-takeover", "xz-utils"]
+    },
+    {
+      "id": "ITEM:CLAIM-11",
+      "source": "Context",
+      "snippet": "Software supply-chain attacks… maliciously modifying software… reaching all users… compromise of vendor IS…",
+      "tags": ["supply-chain", "definition"]
+    }
+  ]
+}

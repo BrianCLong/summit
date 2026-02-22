@@ -263,7 +263,7 @@ ON provenance_chain_stats (tenant_id, action_type, resource_type, date);
 CREATE OR REPLACE FUNCTION refresh_provenance_stats()
 RETURNS VOID AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW  provenance_chain_stats;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY provenance_chain_stats;
 END;
 $$ LANGUAGE plpgsql;
 
