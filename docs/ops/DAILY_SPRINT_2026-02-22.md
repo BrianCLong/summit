@@ -49,6 +49,7 @@
 ## Execution Log
 - 2026-02-22T13:02:06Z: Captured open PR snapshot and PR detail evidence via `gh pr`.
 - 2026-02-22T13:02:06Z: Attempted issue scan; failed with `error connecting to api.github.com` (Governed Exception).
+- 2026-02-22T13:03:40Z: Attempted PR creation for daily sprint branch; deferred pending api.github.com connectivity (Governed Exception).
 
 ## Blockers
 - Deferred pending: GitHub Issues API connectivity (api.github.com).
@@ -61,3 +62,4 @@
 - Deferred pending: Issue scan (GH API). Dependency install for tests.
 - PRs Touched: #18586, #18574, #18583 (evidence only).
 - Commands Run: `gh pr list`, `gh pr view`, `gh issue list` (failed).
+- Governed Exceptions: Issue scan and PR creation deferred pending api.github.com connectivity.
