@@ -1,0 +1,210 @@
+ID,Epic,Title,Component,AcceptanceCriteria,Dependencies,Risk,Effort,Owner,Priority,Status
+EP01-T01,"Backlog, Scope & Stakeholder Alignment",Stakeholder map & RACI,TBD,Defined in Master Prompt,None,Low,M,Product,High,Ready
+EP01-T02,"Backlog, Scope & Stakeholder Alignment",Problem statements & objectives,TBD,Defined in Master Prompt,None,Low,M,Product,High,Ready
+EP01-T03,"Backlog, Scope & Stakeholder Alignment",In-scope vs out-of-scope,TBD,Defined in Master Prompt,None,Low,M,Product,High,Ready
+EP01-T04,"Backlog, Scope & Stakeholder Alignment",Personas & JTBD; success metrics,TBD,Defined in Master Prompt,None,Low,M,Product,High,Ready
+EP01-T05,"Backlog, Scope & Stakeholder Alignment",Story mapping (Day-0 slice),TBD,Defined in Master Prompt,None,Low,M,Product,High,Ready
+EP01-T06,"Backlog, Scope & Stakeholder Alignment",Non-functional requirements,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T07,"Backlog, Scope & Stakeholder Alignment",Risk register,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T08,"Backlog, Scope & Stakeholder Alignment",Compliance & privacy matrix,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T09,"Backlog, Scope & Stakeholder Alignment",Cost envelope & unit economics,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T10,"Backlog, Scope & Stakeholder Alignment",Dependency graph,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T11,"Backlog, Scope & Stakeholder Alignment",Acceptance Criteria template,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T12,"Backlog, Scope & Stakeholder Alignment",Evidence template & provenance fields,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T13,"Backlog, Scope & Stakeholder Alignment",Release cadence & demo plan,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T14,"Backlog, Scope & Stakeholder Alignment",OKRs,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T15,"Backlog, Scope & Stakeholder Alignment",Governance & change-control,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T16,"Backlog, Scope & Stakeholder Alignment",Comms plan,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T17,"Backlog, Scope & Stakeholder Alignment",MoSCoW prioritization,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T18,"Backlog, Scope & Stakeholder Alignment",Stakeholder sign-off,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP01-T19,"Backlog, Scope & Stakeholder Alignment",Backlog grooming #1,TBD,Defined in Master Prompt,None,Low,M,Product,Medium,Ready
+EP02-T01,Architecture & ADRs,C4 Context,TBD,Defined in Master Prompt,None,Low,M,Architecture,High,Ready
+EP02-T02,Architecture & ADRs,C4 Container,TBD,Defined in Master Prompt,None,Low,M,Architecture,High,Ready
+EP02-T03,Architecture & ADRs,C4 Component,TBD,Defined in Master Prompt,None,Low,M,Architecture,High,Ready
+EP02-T04,Architecture & ADRs,Deployment diagram,TBD,Defined in Master Prompt,None,Low,M,Architecture,High,Ready
+EP02-T05,Architecture & ADRs,ADR Graph store,TBD,Defined in Master Prompt,None,Low,M,Architecture,High,Ready
+EP02-T06,Architecture & ADRs,ADR Gateway & GraphQL,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T07,Architecture & ADRs,ADR Multitenancy/ABAC,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T08,Architecture & ADRs,ADR Secrets/keys,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T09,Architecture & ADRs,ADR Streaming backbone,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T10,Architecture & ADRs,ADR Caching,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T11,Architecture & ADRs,ADR Search/index,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T12,Architecture & ADRs,ADR Schema versioning,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T13,Architecture & ADRs,ADR Feature flags,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T14,Architecture & ADRs,ADR Rate limiting/backpressure,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T15,Architecture & ADRs,ADR DR RTO/RPO,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T16,Architecture & ADRs,Threat model (STRIDE),TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T17,Architecture & ADRs,Performance budgets -> SLOs,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T18,Architecture & ADRs,Rollback/Backout,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP02-T19,Architecture & ADRs,Architecture sign-off,TBD,Defined in Master Prompt,None,Low,M,Architecture,Medium,Ready
+EP03-T01,Data Modeling & Graph Schema,Canonical entity/edge inventory,TBD,Defined in Master Prompt,None,Low,M,Data,High,Ready
+EP03-T02,Data Modeling & Graph Schema,Ontology mapping,TBD,Defined in Master Prompt,None,Low,M,Data,High,Ready
+EP03-T03,Data Modeling & Graph Schema,Label/property design,TBD,Defined in Master Prompt,None,Low,M,Data,High,Ready
+EP03-T04,Data Modeling & Graph Schema,Index/constraint plan,TBD,Defined in Master Prompt,None,Low,M,Data,High,Ready
+EP03-T05,Data Modeling & Graph Schema,Temporal modeling,TBD,Defined in Master Prompt,None,Low,M,Data,High,Ready
+EP03-T06,Data Modeling & Graph Schema,Deletion/archival,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T07,Data Modeling & Graph Schema,Entity resolution rules,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T08,Data Modeling & Graph Schema,PII tagging/retention,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T09,Data Modeling & Graph Schema,Provenance property set,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T10,Data Modeling & Graph Schema,Synthetic datasets,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T11,Data Modeling & Graph Schema,Golden fixtures,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T12,Data Modeling & Graph Schema,Cypher style guide,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T13,Data Modeling & Graph Schema,Data quality checks,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T14,Data Modeling & Graph Schema,GDS algorithm plan,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T15,Data Modeling & Graph Schema,Persisted sample queries,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T16,Data Modeling & Graph Schema,Migration scripts,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T17,Data Modeling & Graph Schema,Data catalog/glossary,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T18,Data Modeling & Graph Schema,Residency matrix,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP03-T19,Data Modeling & Graph Schema,Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,Data,Medium,Ready
+EP04-T01,API & GraphQL Gateway,GraphQL SDL (core types/ops),TBD,Defined in Master Prompt,None,Low,M,API,High,Ready
+EP04-T02,API & GraphQL Gateway,Authn flows (OIDC),TBD,Defined in Master Prompt,None,Low,M,API,High,Ready
+EP04-T03,API & GraphQL Gateway,Authz via OPA (ABAC),TBD,Defined in Master Prompt,None,Low,M,API,High,Ready
+EP04-T04,API & GraphQL Gateway,Rate limits/quotas (tenant-aware),TBD,Defined in Master Prompt,None,Low,M,API,High,Ready
+EP04-T05,API & GraphQL Gateway,Persisted queries & safelisting,TBD,Defined in Master Prompt,None,Low,M,API,High,Ready
+EP04-T06,API & GraphQL Gateway,Pagination/filter/sort contracts,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T07,API & GraphQL Gateway,Mutations for ingest + idempotency,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T08,API & GraphQL Gateway,Subscriptions transport,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T09,API & GraphQL Gateway,Input validation & error taxonomy,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T10,API & GraphQL Gateway,Versioning & deprecation,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T11,API & GraphQL Gateway,N+1 prevention,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T12,API & GraphQL Gateway,Admin/ops endpoints (OpenAPI),TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T13,API & GraphQL Gateway,Contract tests,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T14,API & GraphQL Gateway,Performance harness (CI),TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T15,API & GraphQL Gateway,API docs & runnable examples,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T16,API & GraphQL Gateway,Canary routing & flags,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T17,API & GraphQL Gateway,Audit/provenance hooks (mutations),TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T18,API & GraphQL Gateway,SLA/SLO doc for tenants,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP04-T19,API & GraphQL Gateway,Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,API,Medium,Ready
+EP05-T01,Ingestion Pipelines,S3/CSV connector MVP,TBD,Defined in Master Prompt,None,Low,M,Ingest,High,Ready
+EP05-T02,Ingestion Pipelines,HTTP pull/push connectors,TBD,Defined in Master Prompt,None,Low,M,Ingest,High,Ready
+EP05-T03,Ingestion Pipelines,File-drop (air-gapped),TBD,Defined in Master Prompt,None,Low,M,Ingest,High,Ready
+EP05-T04,Ingestion Pipelines,Mapping DSL,TBD,Defined in Master Prompt,None,Low,M,Ingest,High,Ready
+EP05-T05,Ingestion Pipelines,Idempotency & duplicates,TBD,Defined in Master Prompt,None,Low,M,Ingest,High,Ready
+EP05-T06,Ingestion Pipelines,Backpressure/flow control,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T07,Ingestion Pipelines,DLQ & quarantine,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T08,Ingestion Pipelines,Replay & checkpointing,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T09,Ingestion Pipelines,Transformation library,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T10,Ingestion Pipelines,Provenance enrichment,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T11,Ingestion Pipelines,Throughput/latency benchmarking,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T12,Ingestion Pipelines,PII detection/redaction,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T13,Ingestion Pipelines,Multitenant isolation on ingest,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T14,Ingestion Pipelines,Cost metering,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T15,Ingestion Pipelines,Monitoring dashboards/alerts,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T16,Ingestion Pipelines,Connector SDK docs/examples,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T17,Ingestion Pipelines,Phase-next roadmap,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T18,Ingestion Pipelines,Blue/green deploy & rollback,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP05-T19,Ingestion Pipelines,Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,Ingest,Medium,Ready
+EP06-T01,"Privacy, Security & Compliance",Data classification policy,TBD,Defined in Master Prompt,None,Low,M,Security,High,Ready
+EP06-T02,"Privacy, Security & Compliance",Retention policy & tiering,TBD,Defined in Master Prompt,None,Low,M,Security,High,Ready
+EP06-T03,"Privacy, Security & Compliance",Purpose limitation/consent,TBD,Defined in Master Prompt,None,Low,M,Security,High,Ready
+EP06-T04,"Privacy, Security & Compliance",Field-level encryption & keys,TBD,Defined in Master Prompt,None,Low,M,Security,High,Ready
+EP06-T05,"Privacy, Security & Compliance",Secrets management & rotation,TBD,Defined in Master Prompt,None,Low,M,Security,High,Ready
+EP06-T06,"Privacy, Security & Compliance",SCIM provisioning,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T07,"Privacy, Security & Compliance",WebAuthn MFA,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T08,"Privacy, Security & Compliance",Audit policy,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T09,"Privacy, Security & Compliance",Access reviews,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T10,"Privacy, Security & Compliance",SAST/DAST/SCA,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T11,"Privacy, Security & Compliance",SBOM + license/TOS scanning,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T12,"Privacy, Security & Compliance",DPIA templates,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T13,"Privacy, Security & Compliance",Pen-test engagement,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T14,"Privacy, Security & Compliance",Incident response runbook,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T15,"Privacy, Security & Compliance",Warrant/authority binding,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T16,"Privacy, Security & Compliance",Policy-as-code test suite,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T17,"Privacy, Security & Compliance",Residency/geo-fencing tests,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T18,"Privacy, Security & Compliance",Compliance evidence binder,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP06-T19,"Privacy, Security & Compliance",Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,Security,Medium,Ready
+EP07-T01,Provenance & Auditability,"Ledger design (append-only, hash-chained)",TBD,Defined in Master Prompt,None,Low,M,Provenance,High,Ready
+EP07-T02,Provenance & Auditability,Provenance event schema + IDs,TBD,Defined in Master Prompt,None,Low,M,Provenance,High,Ready
+EP07-T03,Provenance & Auditability,Hash manifest format & CAS,TBD,Defined in Master Prompt,None,Low,M,Provenance,High,Ready
+EP07-T04,Provenance & Auditability,Export signing & verification CLI,TBD,Defined in Master Prompt,None,Low,M,Provenance,High,Ready
+EP07-T05,Provenance & Auditability,Verify routine in CI/CD & read paths,TBD,Defined in Master Prompt,None,Low,M,Provenance,High,Ready
+EP07-T06,Provenance & Auditability,Tamper checks & alerting,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T07,Provenance & Auditability,Provenance viewer UI,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T08,Provenance & Auditability,Provenance query API & controls,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T09,Provenance & Auditability,Evidence bundle packager,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T10,Provenance & Auditability,Chain-of-custody processes,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T11,Provenance & Auditability,Air-gapped resync protocol,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T12,Provenance & Auditability,Redaction with proofs,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T13,Provenance & Auditability,Storage lifecycle & retention enforcement,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T14,Provenance & Auditability,High-volume performance tests,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T15,Provenance & Auditability,Compliance mapping crosswalk,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T16,Provenance & Auditability,Backfill strategy,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T17,Provenance & Auditability,Provenance anomaly runbooks,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T18,Provenance & Auditability,Docs & SDK examples,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP07-T19,Provenance & Auditability,Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,Provenance,Medium,Ready
+EP08-T01,Frontend & UX,Design tokens & theme,TBD,Defined in Master Prompt,None,Low,M,Frontend,High,Ready
+EP08-T02,Frontend & UX,Navigation shell & routing,TBD,Defined in Master Prompt,None,Low,M,Frontend,High,Ready
+EP08-T03,Frontend & UX,Auth screens & tenant switcher,TBD,Defined in Master Prompt,None,Low,M,Frontend,High,Ready
+EP08-T04,Frontend & UX,Graph explorer (Cytoscape),TBD,Defined in Master Prompt,None,Low,M,Frontend,High,Ready
+EP08-T05,Frontend & UX,Query builder,TBD,Defined in Master Prompt,None,Low,M,Frontend,High,Ready
+EP08-T06,Frontend & UX,Provenance overlays,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T07,Frontend & UX,Ingest dashboard,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T08,Frontend & UX,Provenance viewer,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T09,Frontend & UX,Error boundaries & fallback,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T10,Frontend & UX,Accessibility automation,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T11,Frontend & UX,i18n scaffolding,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T12,Frontend & UX,Offline/air-gapped modes,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T13,Frontend & UX,Tutorial/empty states,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T14,Frontend & UX,Usage metering UI,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T15,Frontend & UX,Web perf budgets,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T16,Frontend & UX,E2E + visual regression,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T17,Frontend & UX,UI telemetry (OTel),TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T18,Frontend & UX,Docs site,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP08-T19,Frontend & UX,Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,Frontend,Medium,Ready
+EP09-T01,AI/Analytics & RAG,Embedding/feature strategy,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,High,Ready
+EP09-T02,AI/Analytics & RAG,Chunking policy & dedupe,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,High,Ready
+EP09-T03,AI/Analytics & RAG,Vector store selection & isolation,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,High,Ready
+EP09-T04,AI/Analytics & RAG,Retrieval policies (filters/MMR),TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,High,Ready
+EP09-T05,AI/Analytics & RAG,Citation enforcement,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,High,Ready
+EP09-T06,AI/Analytics & RAG,Prompt templates & guardrails,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T07,AI/Analytics & RAG,Automated eval harness,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T08,AI/Analytics & RAG,Explainability surfaces,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T09,AI/Analytics & RAG,Cost caps/quota per tenant,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T10,AI/Analytics & RAG,Provider failover,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T11,AI/Analytics & RAG,Safety filters,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T12,AI/Analytics & RAG,Grounded generation via persisted queries,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T13,AI/Analytics & RAG,Vectorization pipeline integrated with ingest,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T14,AI/Analytics & RAG,Metrics,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T15,AI/Analytics & RAG,Red-team datasets & adversarial prompts,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T16,AI/Analytics & RAG,Dataset governance,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T17,AI/Analytics & RAG,Flags & staged rollout,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T18,AI/Analytics & RAG,Release gating on eval + SLO + cost,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP09-T19,AI/Analytics & RAG,Docs & operator runbook,TBD,Defined in Master Prompt,None,Low,M,AI/Analytics,Medium,Ready
+EP10-T01,"CI/CD, IaC & Environments",Repo scaffolding,TBD,Defined in Master Prompt,None,Low,M,DevOps,High,Ready
+EP10-T02,"CI/CD, IaC & Environments",Branch protection rules,TBD,Defined in Master Prompt,None,Low,M,DevOps,High,Ready
+EP10-T03,"CI/CD, IaC & Environments",CI gates,TBD,Defined in Master Prompt,None,Low,M,DevOps,High,Ready
+EP10-T04,"CI/CD, IaC & Environments",Build pipelines,TBD,Defined in Master Prompt,None,Low,M,DevOps,High,Ready
+EP10-T05,"CI/CD, IaC & Environments",Container hardening,TBD,Defined in Master Prompt,None,Low,M,DevOps,High,Ready
+EP10-T06,"CI/CD, IaC & Environments",Terraform stacks,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T07,"CI/CD, IaC & Environments",Helm charts,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T08,"CI/CD, IaC & Environments",Secrets management in CI/CD,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T09,"CI/CD, IaC & Environments",Ephemeral preview environments,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T10,"CI/CD, IaC & Environments",Progressive delivery,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T11,"CI/CD, IaC & Environments",Seed data & migration runners,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T12,"CI/CD, IaC & Environments",Policy simulation stage,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T13,"CI/CD, IaC & Environments",Cost guardrails in pipeline,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T14,"CI/CD, IaC & Environments",Dependency update bot,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T15,"CI/CD, IaC & Environments",Release notes auto-gen,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T16,"CI/CD, IaC & Environments",DR drill scheduler,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T17,"CI/CD, IaC & Environments",Post-deploy validation,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T18,"CI/CD, IaC & Environments",IaC docs & runbooks,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP10-T19,"CI/CD, IaC & Environments",Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,DevOps,Medium,Ready
+EP11-T01,Observability & SRE,OpenTelemetry instrumentation plan,TBD,Defined in Master Prompt,None,Low,M,SRE,High,Ready
+EP11-T02,Observability & SRE,Metrics schema (SLIs),TBD,Defined in Master Prompt,None,Low,M,SRE,High,Ready
+EP11-T03,Observability & SRE,Logging baseline,TBD,Defined in Master Prompt,None,Low,M,SRE,High,Ready
+EP11-T04,Observability & SRE,Distributed tracing,TBD,Defined in Master Prompt,None,Low,M,SRE,High,Ready
+EP11-T05,Observability & SRE,Dashboards,TBD,Defined in Master Prompt,None,Low,M,SRE,High,Ready
+EP11-T06,Observability & SRE,SLO burn-rate alerts,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T07,Observability & SRE,Synthetic checks,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T08,Observability & SRE,Load tests (k6),TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T09,Observability & SRE,Chaos experiments,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T10,Observability & SRE,Capacity planning,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T11,Observability & SRE,On-call runbooks,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T12,Observability & SRE,Post-deploy validation,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T13,Observability & SRE,Incident management templates,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T14,Observability & SRE,Error budget policies,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T15,Observability & SRE,Cost observability,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T16,Observability & SRE,Multi-region failover tests,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T17,Observability & SRE,Health/readiness endpoints,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T18,Observability & SRE,Audit of logs/metrics/traces,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready
+EP11-T19,Observability & SRE,Review & sign-off,TBD,Defined in Master Prompt,None,Low,M,SRE,Medium,Ready

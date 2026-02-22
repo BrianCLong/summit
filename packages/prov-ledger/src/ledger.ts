@@ -2,19 +2,21 @@ import { createHash, randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Evidence, Claim, Transformation, Manifest, LedgerConfig } from './types';
+import { HashChain } from './hashing';
 
 export class Ledger {
   private config: LedgerConfig;
   private evidenceStore: Map<string, Evidence> = new Map();
   private claimStore: Map<string, Claim> = new Map();
   private transformStore: Map<string, Transformation> = new Map();
+  private hashChain: HashChain;
 
   constructor(config: LedgerConfig) {
+    this.hashChain = new HashChain();
     this.config = config;
     if (this.config.enabled) {
       this.init();
-      // In a real implementation, we would load existing data here
-      // For now, we start fresh or append
+      this.loadChainHead();
     }
   }
 
@@ -24,10 +26,32 @@ export class Ledger {
     }
   }
 
+  private loadChainHead() {
+    const logPath = path.join(this.config.dataDir, 'ledger.log');
+    if (fs.existsSync(logPath)) {
+      const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n');
+      if (lines.length > 0) {
+        try {
+          const lastEvent = JSON.parse(lines[lines.length - 1]);
+          if (lastEvent.hash) {
+            this.hashChain.setHead(lastEvent.hash);
+          }
+        } catch (err) {
+          // Fallback to genesis if log is corrupt
+        }
+      }
+    }
+  }
+
   private append(filename: string, data: any) {
     if (!this.config.enabled) {return;}
     const filePath = path.join(this.config.dataDir, filename);
     fs.appendFileSync(filePath, `${JSON.stringify(data)  }\n`);
+
+    // Also append to a unified hash-chained event log
+    const event = this.hashChain.createEvent(filename.replace('.jsonl', '').toUpperCase(), data);
+    const logPath = path.join(this.config.dataDir, 'ledger.log');
+    fs.appendFileSync(logPath, `${JSON.stringify(event)}\n`);
   }
 
   public registerEvidence(evidence: Omit<Evidence, 'id' | 'timestamp' | 'hash'>): Evidence {

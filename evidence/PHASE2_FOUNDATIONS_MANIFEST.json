@@ -1,0 +1,31 @@
+{
+  "phase": "Phase 2 Foundations",
+  "status": "COMPLETED",
+  "artifacts": [
+    {
+      "id": "ADR-0031",
+      "path": "adr/0031-intelgraph-phase2-foundations.md",
+      "type": "Architecture Decision Record"
+    },
+    {
+      "id": "BACKLOG-MASTER",
+      "path": "backlog/intelgraph-phase2-master-backlog.csv",
+      "type": "Product Backlog"
+    },
+    {
+      "id": "INGEST-CONNECTOR-S3",
+      "path": "services/ingest/src/connectors/S3CsvConnector.ts",
+      "type": "Technical Component"
+    },
+    {
+      "id": "PROV-LEDGER-CORE",
+      "path": "packages/prov-ledger/src/ledger.ts",
+      "type": "Core Library"
+    }
+  ],
+  "gates": {
+    "CI_BLOCKS_RESOLVED": true,
+    "TECHNICAL_DEBT_REDUCED": true,
+    "EVIDENCE_MAP_SYNCED": true
+  }
+}

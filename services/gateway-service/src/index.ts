@@ -6,6 +6,8 @@
 
 import express from 'express';
 import { config } from 'dotenv';
+import { ApolloServer, gql } from 'apollo-server-express';
+import { readFileSync } from 'fs';
 import { APIGateway } from '@intelgraph/api-gateway';
 import { JWTManager, AuthMiddleware, RBACManager } from '@intelgraph/authentication';
 import { RedisRateLimiter, createRateLimitMiddleware } from '@intelgraph/rate-limiting';
@@ -61,6 +63,29 @@ async function startGatewayService() {
   // Initialize Express App
   const app = express();
   app.use(express.json());
+
+  // Initialize Apollo Server
+  const typeDefs = gql(readFileSync('src/schema.graphql', 'utf8'));
+  const resolvers = {
+    Query: {
+      entity: () => ({ id: '1', type: 'Person', name: 'John Doe' }),
+      entities: () => [{ id: '1', type: 'Person', name: 'John Doe' }],
+    },
+    Mutation: {
+      createEntity: (_: any, args: any) => ({ id: '2', ...args }),
+    }
+  };
+
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: ({ req }) => ({
+      user: (req as any).user,
+    }),
+  });
+
+  await server.start();
+  server.applyMiddleware({ app, path: '/graphql' });
 
   // Health check endpoint
   app.get('/health', (req, res) => {

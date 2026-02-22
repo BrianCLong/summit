@@ -1,0 +1,231 @@
+# IntelGraph Detailed Backlog
+
+## EP01 — Backlog, Scope & Stakeholder Alignment
+- EP01-T01: Stakeholder map & RACI
+- EP01-T02: Problem statements & objectives
+- EP01-T03: In-scope vs out-of-scope
+- EP01-T04: Personas & JTBD; success metrics
+- EP01-T05: Story mapping (Day-0 slice)
+- EP01-T06: Non-functional requirements
+- EP01-T07: Risk register
+- EP01-T08: Compliance & privacy matrix
+- EP01-T09: Cost envelope & unit economics
+- EP01-T10: Dependency graph
+- EP01-T11: Acceptance Criteria template
+- EP01-T12: Evidence template & provenance fields
+- EP01-T13: Release cadence & demo plan
+- EP01-T14: OKRs
+- EP01-T15: Governance & change-control
+- EP01-T16: Comms plan
+- EP01-T17: MoSCoW prioritization
+- EP01-T18: Stakeholder sign-off
+- EP01-T19: Backlog grooming #1
+
+## EP02 — Architecture & ADRs
+- EP02-T01: C4 Context
+- EP02-T02: C4 Container
+- EP02-T03: C4 Component
+- EP02-T04: Deployment diagram
+- EP02-T05: ADR Graph store
+- EP02-T06: ADR Gateway & GraphQL
+- EP02-T07: ADR Multitenancy/ABAC
+- EP02-T08: ADR Secrets/keys
+- EP02-T09: ADR Streaming backbone
+- EP02-T10: ADR Caching
+- EP02-T11: ADR Search/index
+- EP02-T12: ADR Schema versioning
+- EP02-T13: ADR Feature flags
+- EP02-T14: ADR Rate limiting/backpressure
+- EP02-T15: ADR DR RTO/RPO
+- EP02-T16: Threat model (STRIDE)
+- EP02-T17: Performance budgets -> SLOs
+- EP02-T18: Rollback/Backout
+- EP02-T19: Architecture sign-off
+
+## EP03 — Data Modeling & Graph Schema
+- EP03-T01: Canonical entity/edge inventory
+- EP03-T02: Ontology mapping
+- EP03-T03: Label/property design
+- EP03-T04: Index/constraint plan
+- EP03-T05: Temporal modeling
+- EP03-T06: Deletion/archival
+- EP03-T07: Entity resolution rules
+- EP03-T08: PII tagging/retention
+- EP03-T09: Provenance property set
+- EP03-T10: Synthetic datasets
+- EP03-T11: Golden fixtures
+- EP03-T12: Cypher style guide
+- EP03-T13: Data quality checks
+- EP03-T14: GDS algorithm plan
+- EP03-T15: Persisted sample queries
+- EP03-T16: Migration scripts
+- EP03-T17: Data catalog/glossary
+- EP03-T18: Residency matrix
+- EP03-T19: Review & sign-off
+
+## EP04 — API & GraphQL Gateway
+- EP04-T01: GraphQL SDL (core types/ops)
+- EP04-T02: Authn flows (OIDC)
+- EP04-T03: Authz via OPA (ABAC)
+- EP04-T04: Rate limits/quotas (tenant-aware)
+- EP04-T05: Persisted queries & safelisting
+- EP04-T06: Pagination/filter/sort contracts
+- EP04-T07: Mutations for ingest + idempotency
+- EP04-T08: Subscriptions transport
+- EP04-T09: Input validation & error taxonomy
+- EP04-T10: Versioning & deprecation
+- EP04-T11: N+1 prevention
+- EP04-T12: Admin/ops endpoints (OpenAPI)
+- EP04-T13: Contract tests
+- EP04-T14: Performance harness (CI)
+- EP04-T15: API docs & runnable examples
+- EP04-T16: Canary routing & flags
+- EP04-T17: Audit/provenance hooks (mutations)
+- EP04-T18: SLA/SLO doc for tenants
+- EP04-T19: Review & sign-off
+
+## EP05 — Ingestion Pipelines
+- EP05-T01: S3/CSV connector MVP
+- EP05-T02: HTTP pull/push connectors
+- EP05-T03: File-drop (air-gapped)
+- EP05-T04: Mapping DSL
+- EP05-T05: Idempotency & duplicates
+- EP05-T06: Backpressure/flow control
+- EP05-T07: DLQ & quarantine
+- EP05-T08: Replay & checkpointing
+- EP05-T09: Transformation library
+- EP05-T10: Provenance enrichment
+- EP05-T11: Throughput/latency benchmarking
+- EP05-T12: PII detection/redaction
+- EP05-T13: Multitenant isolation on ingest
+- EP05-T14: Cost metering
+- EP05-T15: Monitoring dashboards/alerts
+- EP05-T16: Connector SDK docs/examples
+- EP05-T17: Phase-next roadmap
+- EP05-T18: Blue/green deploy & rollback
+- EP05-T19: Review & sign-off
+
+## EP06 — Privacy, Security & Compliance
+- EP06-T01: Data classification policy
+- EP06-T02: Retention policy & tiering
+- EP06-T03: Purpose limitation/consent
+- EP06-T04: Field-level encryption & keys
+- EP06-T05: Secrets management & rotation
+- EP06-T06: SCIM provisioning
+- EP06-T07: WebAuthn MFA
+- EP06-T08: Audit policy
+- EP06-T09: Access reviews
+- EP06-T10: SAST/DAST/SCA
+- EP06-T11: SBOM + license/TOS scanning
+- EP06-T12: DPIA templates
+- EP06-T13: Pen-test engagement
+- EP06-T14: Incident response runbook
+- EP06-T15: Warrant/authority binding
+- EP06-T16: Policy-as-code test suite
+- EP06-T17: Residency/geo-fencing tests
+- EP06-T18: Compliance evidence binder
+- EP06-T19: Review & sign-off
+
+## EP07 — Provenance & Auditability
+- EP07-T01: Ledger design (append-only, hash-chained)
+- EP07-T02: Provenance event schema + IDs
+- EP07-T03: Hash manifest format & CAS
+- EP07-T04: Export signing & verification CLI
+- EP07-T05: Verify routine in CI/CD & read paths
+- EP07-T06: Tamper checks & alerting
+- EP07-T07: Provenance viewer UI
+- EP07-T08: Provenance query API & controls
+- EP07-T09: Evidence bundle packager
+- EP07-T10: Chain-of-custody processes
+- EP07-T11: Air-gapped resync protocol
+- EP07-T12: Redaction with proofs
+- EP07-T13: Storage lifecycle & retention enforcement
+- EP07-T14: High-volume performance tests
+- EP07-T15: Compliance mapping crosswalk
+- EP07-T16: Backfill strategy
+- EP07-T17: Provenance anomaly runbooks
+- EP07-T18: Docs & SDK examples
+- EP07-T19: Review & sign-off
+
+## EP08 — Frontend & UX
+- EP08-T01: Design tokens & theme
+- EP08-T02: Navigation shell & routing
+- EP08-T03: Auth screens & tenant switcher
+- EP08-T04: Graph explorer (Cytoscape)
+- EP08-T05: Query builder
+- EP08-T06: Provenance overlays
+- EP08-T07: Ingest dashboard
+- EP08-T08: Provenance viewer
+- EP08-T09: Error boundaries & fallback
+- EP08-T10: Accessibility automation
+- EP08-T11: i18n scaffolding
+- EP08-T12: Offline/air-gapped modes
+- EP08-T13: Tutorial/empty states
+- EP08-T14: Usage metering UI
+- EP08-T15: Web perf budgets
+- EP08-T16: E2E + visual regression
+- EP08-T17: UI telemetry (OTel)
+- EP08-T18: Docs site
+- EP08-T19: Review & sign-off
+
+## EP09 — AI/Analytics & RAG
+- EP09-T01: Embedding/feature strategy
+- EP09-T02: Chunking policy & dedupe
+- EP09-T03: Vector store selection & isolation
+- EP09-T04: Retrieval policies (filters/MMR)
+- EP09-T05: Citation enforcement
+- EP09-T06: Prompt templates & guardrails
+- EP09-T07: Automated eval harness
+- EP09-T08: Explainability surfaces
+- EP09-T09: Cost caps/quota per tenant
+- EP09-T10: Provider failover
+- EP09-T11: Safety filters
+- EP09-T12: Grounded generation via persisted queries
+- EP09-T13: Vectorization pipeline integrated with ingest
+- EP09-T14: Metrics
+- EP09-T15: Red-team datasets & adversarial prompts
+- EP09-T16: Dataset governance
+- EP09-T17: Flags & staged rollout
+- EP09-T18: Release gating on eval + SLO + cost
+- EP09-T19: Docs & operator runbook
+
+## EP10 — CI/CD, IaC & Environments
+- EP10-T01: Repo scaffolding
+- EP10-T02: Branch protection rules
+- EP10-T03: CI gates
+- EP10-T04: Build pipelines
+- EP10-T05: Container hardening
+- EP10-T06: Terraform stacks
+- EP10-T07: Helm charts
+- EP10-T08: Secrets management in CI/CD
+- EP10-T10: Progressive delivery
+- EP10-T11: Seed data & migration runners
+- EP10-T12: Policy simulation stage
+- EP10-T13: Cost guardrails in pipeline
+- EP10-T14: Dependency update bot
+- EP10-T15: Release notes auto-gen
+- EP10-T16: DR drill scheduler
+- EP10-T17: Post-deploy validation
+- EP10-T18: IaC docs & runbooks
+- EP10-T19: Review & sign-off
+
+## EP11 — Observability & SRE
+- EP11-T01: OpenTelemetry instrumentation plan
+- EP11-T02: Metrics schema (SLIs)
+- EP11-T03: Logging baseline
+- EP11-T04: Distributed tracing
+- EP11-T05: Dashboards
+- EP11-T06: SLO burn-rate alerts
+- EP11-T07: Synthetic checks
+- EP11-T08: Load tests (k6)
+- EP11-T09: Chaos experiments
+- EP11-T10: Capacity planning
+- EP11-T11: On-call runbooks
+- EP11-T12: Post-deploy validation
+- EP11-T13: Incident management templates
+- EP11-T14: Error budget policies
+- EP11-T15: Cost observability
+- EP11-T16: Multi-region failover tests
+- EP11-T17: Health/readiness endpoints
+- EP11-T18: Audit of logs/metrics/traces
+- EP11-T19: Review & sign-off
