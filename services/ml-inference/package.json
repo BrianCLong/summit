@@ -15,7 +15,7 @@
     "@intelgraph/narrative-tracking": "workspace:*",
     "@intelgraph/influence-detection": "workspace:*",
     "express": "^5.2.0",
-    "axios": "^1.11.0"
+    "axios": "^1.13.5"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",

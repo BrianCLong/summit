@@ -31,7 +31,7 @@
   "license": "PROPRIETARY",
   "dependencies": {
     "pg": "^8.11.0",
-    "axios": "^1.6.0",
+    "axios": "^1.13.5",
     "pino": "^8.16.0"
   },
   "devDependencies": {
