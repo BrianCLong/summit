@@ -1,6 +1,9 @@
 package intelgraph.data_classification
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # IntelGraph Data Classification and Access Control Policy
 # MIT License - Copyright (c) 2025 IntelGraph

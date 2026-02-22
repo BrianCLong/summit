@@ -2,8 +2,10 @@
 # Unit tests for zero-trust service-to-service authorization
 
 package zerotrust.service_authz_test
+import future.keywords.if
+import future.keywords.contains
 
-import rego.v1
+
 import data.zerotrust.service_authz
 
 good_governance := {

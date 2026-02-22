@@ -78,8 +78,10 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "18"
 
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs
@@ -93,12 +95,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-      - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
 

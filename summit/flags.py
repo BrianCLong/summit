@@ -14,3 +14,4 @@ FINANCE_SHADOW_AGENT_ENABLED = is_feature_enabled("FINANCE_SHADOW_AGENT_ENABLED"
 FEATURE_QWEN3_ASR = is_feature_enabled("FEATURE_QWEN3_ASR", default=False)
 FEATURE_QWEN3_TTS = is_feature_enabled("FEATURE_QWEN3_TTS", default=False)
 REDIS_CACHE_ENABLED = is_feature_enabled("REDIS_CACHE_ENABLED", default=True)
+FS_RESEARCHER_ENABLED = is_feature_enabled("FS_RESEARCHER_ENABLED", default=False)

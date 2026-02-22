@@ -1,4 +1,6 @@
 package migrations
+import future.keywords.in
+import future.keywords.contains
 
 default allow = false
 

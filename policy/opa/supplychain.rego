@@ -1,6 +1,8 @@
 package supplychain
+import future.keywords.if
+import future.keywords.contains
 
-import rego.v1
+
 
 default allow := false
 

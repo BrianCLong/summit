@@ -1,7 +1,9 @@
 package companyos.rbac
+import future.keywords.if
+import future.keywords.in
 
 # OPA v1 imports - keywords are built-in
-import rego.v1
+
 
 default allow := false
 

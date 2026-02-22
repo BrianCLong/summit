@@ -1,4 +1,5 @@
 package docker.policy
+import future.keywords.if
 
 # Deny if the MAINTAINER label is missing from the image configuration.
 deny[msg] {

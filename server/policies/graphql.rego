@@ -1,4 +1,5 @@
 package graphql.authz
+import future.keywords.if
 
 # Default deny
 default allow = false

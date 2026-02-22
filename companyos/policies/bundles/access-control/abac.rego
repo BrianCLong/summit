@@ -9,8 +9,10 @@
 # - Tenant context (isolation, quotas, features)
 
 package companyos.authz.abac
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # ============================================================================
 # Default Deny - All access must be explicitly granted

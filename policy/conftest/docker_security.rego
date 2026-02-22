@@ -1,6 +1,9 @@
 package docker.security
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Deny images using latest tag in production
 deny contains msg if {

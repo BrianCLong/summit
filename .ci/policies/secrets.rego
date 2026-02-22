@@ -1,4 +1,7 @@
 package secrets
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
 import data.inventory
 

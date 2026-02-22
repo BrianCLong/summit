@@ -1,0 +1,9 @@
+claims:
+  - id: "CLAIM-01"
+    description: "Persistent on-disk workspace concept"
+    status: "implemented"
+    evidence_id: "EVD-FS-RESEARCHER-001"
+  - id: "CLAIM-02"
+    description: "Dual-agent separation (Context Builder / Report Writer)"
+    status: "implemented"
+    evidence_id: "EVD-FS-RESEARCHER-001"

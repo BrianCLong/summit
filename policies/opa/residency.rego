@@ -1,4 +1,5 @@
 package composer.residency
+import future.keywords.in
 
 # Input contract (example):
 # input = {

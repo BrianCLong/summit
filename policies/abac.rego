@@ -1,5 +1,7 @@
 # (same as in sprint doc)
 package abac.authz
+import future.keywords.if
+import future.keywords.in
 
 default allow = false
 
@@ -62,7 +64,7 @@ role_can_write if { role_editor_write }
 # Sensitive data read checks
 sensitive_read_basic_ok if {
   input.action == "read"
-  not ("pii" in input.resource.labels)
+  not labels_contains_pii
 }
 
 sensitive_read_privileged_ok if {
@@ -93,4 +95,8 @@ allow if {
   tenant_isolated
   purpose_allowed
   role_can_write
+}
+
+labels_contains_pii if {
+  input.resource.labels[_] == "pii"
 }

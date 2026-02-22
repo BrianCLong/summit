@@ -1,6 +1,7 @@
 package tenant.bundle
+import future.keywords.if
 
-import rego.v1
+
 
 test_cross_tenant_denied_by_default if {
     result := data.tenant.bundle.decision with input as {

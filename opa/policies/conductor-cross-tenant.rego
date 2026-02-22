@@ -2,8 +2,11 @@
 # Governs inter-tenant data sharing and collaborative operations
 
 package conductor.cross_tenant
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Default deny cross-tenant operations
 default allow := false

@@ -1,0 +1,22 @@
+version: 1
+item:
+  slug: fs-researcher-2602-01566
+  title: "FS-Researcher: Test-Time Scaling for Long-Horizon Research Tasks with File-System-Based Agents"
+  type: "arXiv"
+  date: "2026-02-05"
+  links:
+    - "https://arxiv.org/abs/2602.01566"
+claims:
+  registry: "subsumption/fs-researcher-2602-01566/claims.yaml"
+required_checks:
+  discovery_status: "verified"
+  checks:
+    - "subsumption-bundle-verify"
+evidence_ids:
+  - "EVD-FS-RESEARCHER-001"
+docs:
+  - "docs/standards/fs-researcher-2602-01566.md"
+  - "docs/security/data-handling/fs-researcher-2602-01566.md"
+  - "docs/ops/runbooks/fs-researcher-2602-01566.md"
+feature_flags:
+  - "FS_RESEARCHER_ENABLED"

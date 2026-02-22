@@ -1,6 +1,8 @@
 package dockerfile
+import future.keywords.if
+import future.keywords.contains
 
-import rego.v1
+
 
 # Test cases for dockerfile policy
 

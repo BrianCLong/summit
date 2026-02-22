@@ -2,8 +2,11 @@
 # Controls access to different data types based on sensitivity and tenant context
 
 package conductor.data_access
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Default deny
 default allow := false

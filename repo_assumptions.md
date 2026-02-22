@@ -1,40 +1,41 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation - FS-Researcher Subsumption
 
-## Verified vs Assumed Directory List
+## Structure Validation
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| Plan Path | Actual Path | Status | Notes |
+| :--- | :--- | :--- | :--- |
+| `summit/` | `summit/` | ✅ Exists | Root directory for Summit core logic. |
+| `summit/agents/` | `summit/agents/` | ✅ Exists | Contains agent implementations (e.g., `cli.py`, `sandbox.py`). |
+| `summit/cli/` | `summit/cli/` | ✅ Exists | Contains CLI scripts. |
+| `docs/` | `docs/` | ✅ Exists | Root directory for documentation. |
+| `tests/` | `tests/` | ✅ Exists | Root directory for Python and JS tests. |
+| `evidence/` | `evidence/` | ✅ Exists | Contains evidence artifacts and schemas. |
 
-## CI Check Names (Exact)
+## Component Mapping
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Planned Component | Proposed Location | Actual Location / Action |
+| :--- | :--- | :--- |
+| FS-Researcher Package | `summit/agents/fs_researcher/` | Create as new Python subpackage. |
+| Workspace Logic | `summit/agents/fs_researcher/workspace.py` | Implementation of persistent workspace. |
+| Context Builder | `summit/agents/fs_researcher/context_builder.py` | Stage 1 agent logic. |
+| Report Writer | `summit/agents/fs_researcher/report_writer.py` | Stage 2 agent logic (KB-only). |
+| CLI Command | `summit/cli/fs_research.py` | Register as a new CLI entry point. |
+| Standards Doc | `docs/standards/fs-researcher-2602-01566.md` | Compliance with paper standards. |
+| Security Policy | `docs/security/data-handling/fs-researcher-2602-01566.md` | Data handling and prompt injection defense. |
 
-## Evidence Schema Conventions (Exact)
+## Verified vs Assumed
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+* **Verified**: `summit/` is the primary Python package.
+* **Verified**: `argparse` is used in `summit/agents/cli.py`.
+* **Verified**: `pytest` is configured in `pytest.ini`.
+* **Verified**: `evidence/` uses `report.json`, `metrics.json`, and `stamp.json`.
+* **Assumed**: No built-in high-level "browse" tool exists; will implement a stub or interface for MWS.
+* **Assumed**: `pnpm test` is the primary test entry point for CI.
 
-## Must-Not-Touch List (Guardrails)
+## Must-Not-Touch List
 
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+* `pnpm-lock.yaml` - Managed by pnpm.
+* `.github/workflows/` - Core CI/CD pipelines.
+* `evidence/governed_exceptions.json` - Security bypass list.
+* `AGENTS.md` - Core repo instructions.
+* `package.json` - Root project configuration (unless adding scripts).

@@ -1,6 +1,9 @@
 package kubernetes
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Kubernetes security policy rules
 # Based on Pod Security Standards and CIS Kubernetes Benchmarks

@@ -1,4 +1,5 @@
 package summit.release
+import future.keywords.if
 
 default allow := false
 

@@ -1,6 +1,8 @@
 package conductor.security
+import future.keywords.if
+import future.keywords.contains
 
-import rego.v1
+
 
 # Test data for policy validation
 test_user_viewer := {

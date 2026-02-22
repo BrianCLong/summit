@@ -1,5 +1,6 @@
 {
   "git_sha": "test-sha",
   "timestamp": "2026-02-01T23:42:11.556Z",
-  "run_id": "eval-run"
+  "run_id": "eval-run",
+  "generated_at": "2026-01-23T00:00:00Z"
 }
