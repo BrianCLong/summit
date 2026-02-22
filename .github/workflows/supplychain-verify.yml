@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout (shallow ok)
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set image ref
         id: img
@@ -31,8 +33,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa && sudo mv opa /usr/local/bin/opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin-bin-bin && sudo mv opa-bin /usr/local/bin/opa
 
       - name: Resolve digest and fetch attestation
         id: fetch

@@ -26,7 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # v6
         with:
           fetch-depth: 0
 
@@ -87,7 +89,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -115,7 +119,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # v6
 
       - name: Helm Lint
         run: |
@@ -143,7 +149,9 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

@@ -29,6 +29,8 @@ env:
 jobs:
   drift:
     name: Drift – plan & risk
+    outputs:
+      matrix: ${{ steps.mx.outputs.matrix }}
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     defaults:
@@ -38,6 +40,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup tools
         uses: hashicorp/setup-terraform@v3
@@ -53,9 +57,9 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin
+          sudo mv opa-bin /usr/local/bin/opa
 
       - name: Generate workspace matrix (rollout-aware)
         id: mx
@@ -86,6 +90,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup tools
         uses: hashicorp/setup-terraform@v3
@@ -94,9 +100,9 @@ jobs:
 
       - name: OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin
+          sudo mv opa-bin /usr/local/bin/opa
 
       - name: Terraform init
         run: terraform init

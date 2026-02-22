@@ -1,17 +1,13 @@
-# Dependency Delta Documentation
-
-## PR Context
-- **PR**: (to be filled by author)
-- **Reason for change**: (to be filled by author)
+# Dependency Delta Report
 
 ## Changes
-- **Added**:
-  - (to be filled by author)
-- **Removed**:
-  - (to be filled by author)
-- **Upgraded**:
-  - (to be filled by author)
+- Added `@types/hapi__catbox` and `@types/hapi__shot` to root devDependencies.
+- Aligned project versions to `1.0.0-rc.1`.
 
-## Security Review
-- [ ] No known vulnerabilities in added packages.
-- [ ] License compliance verified.
+## Reasoning
+- Fix build/typecheck errors in `analytics-engine` and `desktop-electron`.
+- Prepare for GA RC1 release.
+
+## Verification
+- `pnpm install` successful.
+- `server/src/monitoring/metrics.ts` exports validated.
