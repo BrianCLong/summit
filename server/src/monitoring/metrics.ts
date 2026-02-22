@@ -1100,8 +1100,26 @@ export const maestroSynthesisOperations = createCounter({
   help: 'Data synthesis operations',
 });
 
+// Agent Metrics
+export const agentExecutionsTotal = createCounter({
+  registers: [],
+  name: 'agent_executions_total',
+  help: 'Total number of agent executions',
+  labelNames: ['tenant', 'status'],
+});
+
+export const agentExecutionDuration = createHistogram({
+  registers: [],
+  name: 'agent_execution_duration_seconds',
+  help: 'Duration of agent execution in seconds',
+  labelNames: ['tenant', 'status'],
+  buckets: [1, 5, 10, 30, 60, 120, 300],
+});
+
 // Register new metrics
 try {
+  register.registerMetric(agentExecutionsTotal);
+  register.registerMetric(agentExecutionDuration);
   register.registerMetric(maestroOrchestrationRequests);
   register.registerMetric(maestroOrchestrationDuration);
   register.registerMetric(maestroOrchestrationErrors);
@@ -1218,6 +1236,8 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
+  agentExecutionsTotal,
+  agentExecutionDuration,
 };
 
 export default metrics;

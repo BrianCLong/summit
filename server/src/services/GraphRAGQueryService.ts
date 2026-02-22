@@ -26,7 +26,7 @@ import { GlassBoxRunService, type GlassBoxRun } from "./GlassBoxRunService.js";
 import { NlToCypherService } from "../ai/nl-to-cypher/nl-to-cypher.service.js";
 import { meteringEmitter } from "../metering/emitter.js";
 import { promptRegistry } from "../prompts/registry.js";
-import { tracer } from "../observability/tracing.js";
+import { getTracer } from "../observability/tracer.js";
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -121,7 +121,7 @@ export class GraphRAGQueryService {
    * Main query method - handles the full flow from NL query to answer with citations
    */
   async query(request: GraphRAGQueryRequest): Promise<GraphRAGQueryResponse> {
-    return tracer.trace("graphrag.query", async (span) => {
+    return getTracer().trace("graphrag.query", async (span) => {
       span.setAttribute("graphrag.investigation_id", request.investigationId);
       span.setAttribute("graphrag.tenant_id", request.tenantId);
       span.setAttribute("graphrag.question_length", request.question.length);

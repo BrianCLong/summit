@@ -332,6 +332,81 @@ export class IntelGraphTracer {
     );
   }
 
+  // Alias for withSpan to support migration
+  async trace<T>(
+    name: string,
+    fn: (span: Span) => Promise<T>,
+    options?: {
+      kind?: typeof SpanKind[keyof typeof SpanKind];
+      attributes?: Attributes;
+    },
+  ): Promise<T> {
+    return this.withSpan(name, fn, options);
+  }
+
+  // Helper for queue tracing
+  async traceQueue<T>(
+    queueName: string,
+    jobName: string,
+    processor: () => Promise<T>,
+  ): Promise<T> {
+    return this.withSpan(
+      `queue.${queueName}.${jobName}`,
+      async (span: any) => {
+        span.setAttributes({
+          'messaging.system': 'redis',
+          'messaging.destination': queueName,
+          'messaging.operation': 'process',
+          'job.name': jobName,
+        });
+        return await processor();
+      },
+      { kind: SpanKind.CONSUMER },
+    );
+  }
+
+  // Helper for HTTP tracing
+  async traceHTTP<T>(
+    method: string,
+    url: string,
+    httpOperation: () => Promise<T>,
+  ): Promise<T> {
+    return this.withSpan(
+      `http.${method.toLowerCase()}`,
+      async (span: any) => {
+        span.setAttributes({
+          'http.method': method,
+          'http.url': url,
+        });
+        return await httpOperation();
+      },
+      { kind: SpanKind.CLIENT },
+    );
+  }
+
+  // Helper for GraphQL tracing
+  async traceGraphQL<T>(
+    operationName: string,
+    fieldName: string,
+    resolver: () => Promise<T>,
+    contextData?: { user?: { id: string } },
+  ): Promise<T> {
+    return this.withSpan(
+      `graphql.${operationName}`,
+      async (span: any) => {
+        span.setAttributes({
+          'graphql.operation.name': operationName,
+          'graphql.field.name': fieldName,
+        });
+        if (contextData?.user?.id) {
+          span.setAttribute('user.id', contextData.user.id);
+        }
+        return await resolver();
+      },
+      { kind: SpanKind.SERVER },
+    );
+  }
+
   isInitialized(): boolean {
     return this.initialized;
   }

@@ -1,7 +1,7 @@
 import { IntentClassificationService, IntentResult } from "./IntentClassificationService.js";
 import { GraphRAGQueryService } from "./GraphRAGQueryService.js";
 import { logger } from "../utils/logger.js";
-import { tracer } from "../observability/tracing.js";
+import { getTracer } from "../observability/tracer.js";
 
 export interface RouterResponse {
   answer: string;
@@ -22,7 +22,7 @@ export class IntentRouterService {
   ) {}
 
   async route(query: string, context: any): Promise<RouterResponse> {
-    return tracer.trace("intent.route", async (span) => {
+    return getTracer().trace("intent.route", async (span) => {
       span.setAttribute("intent.query_length", query.length);
       if (context.tenantId) span.setAttribute("tenant.id", context.tenantId);
 

@@ -9,11 +9,11 @@ import type { DuplicateCandidate } from '../SimilarityService.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../../config/database.js', () => ({}));
-jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
-  otelService: {
-    wrapNeo4jOperation: jest.fn((name: string, fn: () => any) => fn()),
-    addSpanAttributes: jest.fn(),
-  },
+jest.unstable_mockModule('../../observability/tracer.js', () => ({
+  getTracer: jest.fn(() => ({
+    traceDbQuery: jest.fn((db: string, op: string, q: string, fn: () => any) => fn()),
+    addAttributes: jest.fn(),
+  })),
 }));
 jest.unstable_mockModule('../../monitoring/metrics.js', () => ({}));
 jest.unstable_mockModule('../../utils/logger.js', () => ({
@@ -188,16 +188,6 @@ describe('SimilarityService - Duplicate Detection', () => {
           ],
         });
 
-      // Mock telemetry
-      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
-        fn(),
-      );
-      const mockAddSpanAttributes = jest.fn();
-      (service as any).otelService = {
-        wrapNeo4jOperation: mockWrapNeo4jOperation,
-        addSpanAttributes: mockAddSpanAttributes,
-      };
-
       const candidates = await service.findDuplicateCandidates({
         investigationId: 'inv-123',
         threshold: 0.7,
@@ -257,14 +247,6 @@ describe('SimilarityService - Duplicate Detection', () => {
         .mockResolvedValueOnce({
           rows: [{ entity_id: 'entity-1', similarity: 0.3 }],
         });
-
-      const mockWrapNeo4jOperation = jest.fn((name: string, fn: () => any) =>
-        fn(),
-      );
-      (service as any).otelService = {
-        wrapNeo4jOperation: mockWrapNeo4jOperation,
-        addSpanAttributes: jest.fn(),
-      };
 
       const candidates = await service.findDuplicateCandidates({
         investigationId: 'inv-123',
