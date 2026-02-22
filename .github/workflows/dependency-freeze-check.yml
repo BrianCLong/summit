@@ -97,20 +97,25 @@ jobs:
 
           # Run verification
           EXIT_CODE=0
-          OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS 2>&1) || EXIT_CODE=$?
+          JSON_OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS 2> dependency_freeze_stderr.log) || EXIT_CODE=$?
+          cat dependency_freeze_stderr.log
 
-          # Parse JSON output
-          JSON_OUTPUT=$(echo "$OUTPUT" | tail -1)
+          if ! echo "$JSON_OUTPUT" | jq -e . >/dev/null 2>&1; then
+            echo "::error::verify_dependency_freeze.sh did not return valid JSON output"
+            echo "Raw stdout:"
+            echo "$JSON_OUTPUT"
+            exit 1
+          fi
 
-          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status')
-          HAS_CHANGES=$(echo "$JSON_OUTPUT" | jq -r '.has_changes')
+          STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status // "UNKNOWN"')
+          HAS_CHANGES=$(echo "$JSON_OUTPUT" | jq -r '.has_changes // false')
 
           echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "has_changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 
           # Show full output
-          echo "$OUTPUT"
+          echo "$JSON_OUTPUT"
 
           exit $EXIT_CODE
 
@@ -132,6 +137,7 @@ jobs:
 
       - name: Comment on PR
         if: github.event_name == 'pull_request' && steps.verify.outputs.status == 'FAIL'
+        continue-on-error: true
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |

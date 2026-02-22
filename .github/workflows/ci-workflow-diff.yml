@@ -63,6 +63,7 @@ jobs:
 
       - name: Comment on PR
         if: ${{ github.event_name == 'pull_request' }}
+        continue-on-error: true
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true

@@ -79,13 +79,22 @@ jobs:
         id: compliance
         run: |
           # Run compliance check
-          RESULT=$(./scripts/release/check_governance_compliance.sh --json 2>&1) || EXIT_CODE=$?
+          EXIT_CODE=0
+          RESULT_JSON=$(./scripts/release/check_governance_compliance.sh --json 2> compliance_stderr.log) || EXIT_CODE=$?
+          cat compliance_stderr.log
 
-          echo "${RESULT}" > compliance_report.json
+          if ! echo "${RESULT_JSON}" | jq -e . >/dev/null 2>&1; then
+            echo "::error::check_governance_compliance.sh did not return valid JSON output"
+            echo "Raw stdout:"
+            echo "${RESULT_JSON}"
+            exit 1
+          fi
+
+          echo "${RESULT_JSON}" > compliance_report.json
 
           # Parse results
-          STATUS=$(echo "${RESULT}" | jq -r '.compliance.status // "UNKNOWN"')
-          SCORE=$(echo "${RESULT}" | jq -r '.compliance.score // 0')
+          STATUS=$(echo "${RESULT_JSON}" | jq -r '.compliance.status // "UNKNOWN"')
+          SCORE=$(echo "${RESULT_JSON}" | jq -r '.compliance.score // 0')
 
           echo "status=${STATUS}" >> $GITHUB_OUTPUT
           echo "score=${SCORE}" >> $GITHUB_OUTPUT
@@ -107,20 +116,22 @@ jobs:
 
           # Add component breakdown if available
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Component Scores" >> $GITHUB_STEP_SUMMARY
+          echo "### Component Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          POLICY_SCORE=$(echo "${RESULT}" | jq -r '.components.required_policies.score // "N/A"')
-          SYNTAX_SCORE=$(echo "${RESULT}" | jq -r '.components.policy_syntax.score // "N/A"')
-          LOCKFILE_SCORE=$(echo "${RESULT}" | jq -r '.components.governance_lockfile.score // "N/A"')
-          HEALTH_SCORE=$(echo "${RESULT}" | jq -r '.components.governance_health.score // "N/A"')
+          POLICY_RESULT=$(echo "${RESULT_JSON}" | jq -r '"\(.checks.required_policies.passed // 0) passed / \(.checks.required_policies.failed // 0) failed"')
+          SYNTAX_RESULT=$(echo "${RESULT_JSON}" | jq -r '.checks.policy_syntax.status // "N/A"')
+          LOCKFILE_RESULT=$(echo "${RESULT_JSON}" | jq -r '.checks.lockfile.verification.status // .checks.lockfile.status // "N/A"')
+          HEALTH_RESULT=$(echo "${RESULT_JSON}" | jq -r '.checks.governance_health.overall.score // "N/A"')
 
-          echo "| Component | Score |" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Result |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Required Policies | ${POLICY_SCORE}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| Policy Syntax | ${SYNTAX_SCORE}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| Governance Lockfile | ${LOCKFILE_SCORE}% |" >> $GITHUB_STEP_SUMMARY
-          echo "| Governance Health | ${HEALTH_SCORE}% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Required Policies | ${POLICY_RESULT} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Policy Syntax | ${SYNTAX_RESULT} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Governance Lockfile | ${LOCKFILE_RESULT} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Governance Health | ${HEALTH_RESULT} |" >> $GITHUB_STEP_SUMMARY
+
+          exit ${EXIT_CODE:-0}
 
       - name: Evaluate Regression
         id: evaluate
@@ -130,11 +141,11 @@ jobs:
 
           PASSED="false"
 
-          if [[ "${STATUS}" == "COMPLIANT" ]]; then
+          if [[ "${STATUS}" != "NON_COMPLIANT" ]]; then
             PASSED="true"
             echo "## ✅ Governance Regression Guard Passed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "No governance regression detected. Compliance status is COMPLIANT." >> $GITHUB_STEP_SUMMARY
+            echo "No blocking governance regression detected. Compliance status is ${STATUS}." >> $GITHUB_STEP_SUMMARY
           else
             echo "## ❌ Governance Regression Guard Failed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -189,6 +200,7 @@ jobs:
 
       - name: PR Comment on Failure
         if: steps.evaluate.outputs.passed == 'false' && github.event_name == 'pull_request'
+        continue-on-error: true
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |

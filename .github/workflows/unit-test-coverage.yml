@@ -46,7 +46,7 @@ jobs:
         # CANONICAL ENTRYPOINT: Use test:ci script for deterministic CI execution
         # Defined in server/package.json with hardened settings from commit 8434f7ae3b0
         run: |
-          pnpm test:ci
+          PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH" pnpm test:ci
         env:
           CI: true
           NODE_ENV: test

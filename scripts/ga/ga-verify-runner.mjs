@@ -3,6 +3,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const steps = [
+  {
+    name: 'sanitize:type-stubs',
+    command: 'bash',
+    args: ['-lc', 'rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot'],
+  },
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
   { name: 'build', command: 'pnpm', args: ['build'] },
