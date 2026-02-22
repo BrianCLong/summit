@@ -1,4 +1,4 @@
-name: AI Copilot Canary
+name: "[info] AI Copilot Canary"
 
 on:
   schedule:
