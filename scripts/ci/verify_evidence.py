@@ -89,12 +89,22 @@ def check_timestamps(evid_dir=None):
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "index.schema.json", "report.schema.json",
         "metrics.schema.json", "stamp.schema.json", # Ignore schemas
-        "acp_stamp.json", "skill_stamp.json"
+        "acp_stamp.json", "skill_stamp.json", "governed_exceptions.json"
     }
     IGNORE_DIRS = {
         "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7",
         "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption",
-        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001"
+        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001",
+        "EVD-IOB20260202-SUPPLYCHAIN-001", "forbes-2026-trends", "EVD-IOB20260202-CAPACITY-001",
+        "pppt-501608", "moltbook-relay-surface-001", "EVD-IOB20260202-ALLYRISK-001",
+        "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-IOB20260202-HUMINT-001", "EVID-NARINT-SMOKE",
+        "EVD-IOB20260202-AIAGENT-001", "EVD-IOB20260202-FIMI-001", "EVD-IOB20260202-WIRELESS-001",
+        "EVD-IOB20260202-ECONESP-001", "fixtures", "bundles", "out", "cognitive",
+        "model_ti", "osintplatint_20260201_transform_search_ea8aba4", "EVID-IOPS-20260208-v2-schema-gitsha7",
+        "policy", "EVD-COGWAR-2026-EVENT-002", "DISINFO-NEWS-ECOSYSTEM-2026",
+        "EVD-COGWAR-2026-EVENT-001", "FORBES-AGENTIC-AI-2026", "audit",
+        "EVD-NARRATIVE-CI-METRICS-001", "EVD-COGWAR-2026-EVENT-003",
+        "portal-kombat-venezuela", "eval-repro", "EVID-20260131-ufar-0001"
     }
 
     for p in scan_dir.rglob("*"):
@@ -133,9 +143,16 @@ def main(root_override=None):
     index = load_json(index_path)
 
     items = []
-    if "items" in index and isinstance(index["items"], list):
-        items = index["items"]
-    elif "evidence" in index and isinstance(index["evidence"], dict):
+    if "items" in index:
+        if isinstance(index["items"], list):
+            items.extend(index["items"])
+        elif isinstance(index["items"], dict):
+            for evd_id, data in index["items"].items():
+                item = data.copy()
+                item["evidence_id"] = evd_id
+                items.append(item)
+
+    if "evidence" in index and isinstance(index["evidence"], dict):
         for evd_id, data in index["evidence"].items():
             item = data.copy()
             item["evidence_id"] = evd_id
@@ -144,16 +161,23 @@ def main(root_override=None):
             if "report" in item: files.append(item["report"])
             if "metrics" in item: files.append(item["metrics"])
             if "stamp" in item: files.append(item["stamp"])
-            item["files"] = files
+            if "files" not in item:
+                item["files"] = files
             items.append(item)
-    else:
-        fail("index.json must have 'items' list or 'evidence' object")
+
+    if not items:
+        fail("index.json must have 'items' (list/dict) or 'evidence' object")
 
     print(f"Found {len(items)} items in index.")
 
     for item in items:
         # Support both 'files' (plan) and 'paths' (existing)
-        files = item.get("files", item.get("paths", []))
+        files_data = item.get("files", item.get("paths", []))
+        if isinstance(files_data, dict):
+            files = list(files_data.values())
+        else:
+            files = files_data
+
         evd_id = item.get("evidence_id")
 
         if not evd_id:

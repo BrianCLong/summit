@@ -26,6 +26,7 @@
 
 ## STRATEGIC INITIATIVES
 *   **Narrative Operations 2.0** – A 90-day plan to evolve Summit into a full cognitive warfare stack. See [Narrative Operations 2.0 Plan](docs/NARRATIVE_OPS_2_0_PLAN.md).
+*   **IntelGraph Master Orchestration Plan** – A 220-task parallel execution roadmap for platform maturity. See [Master Orchestration Plan](docs/plans/orchestration/MASTER_ORCHESTRATION_PLAN.md).
 
 ## ROADMAP OVERVIEW
 

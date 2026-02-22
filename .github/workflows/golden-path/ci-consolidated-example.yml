@@ -30,7 +30,7 @@ permissions:
 
 env:
   NODE_VERSION: '20'
-  PNPM_VERSION: '9'
+  PNPM_VERSION: '10'
 
 jobs:
   # Single setup job that all test jobs can depend on
