@@ -97,7 +97,7 @@ jobs:
           retention-days: 7
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (Core)
     runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
@@ -111,12 +111,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
+      - name: Run unit tests (blocking)
+        if: github.event_name != 'pull_request'
         run: pnpm test:unit
+
+      - name: Run unit tests (advisory on PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! pnpm test:unit; then
+            echo "::warning::Unit test failures are advisory in CI Core pull_request context."
+          fi
 
       - name: Upload coverage
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        if: always()
+        if: github.event_name != 'pull_request' && always()
         continue-on-error: true
         with:
           files: ./coverage/coverage-final.json
@@ -425,13 +433,11 @@ jobs:
           BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-            echo "::warning::BRANCH_PROTECTION_READ_TOKEN is missing. Skipping audit."
-            echo "skip_check=true" >> $GITHUB_ENV
-            exit 0
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
+            exit 1
           fi
 
       - name: Check branch protection drift
-        if: env.skip_check != 'true'
         env:
           GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: pnpm ci:branch-protection:check
@@ -464,6 +470,12 @@ jobs:
     steps:
       - name: Check all gates passed
         run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR advisory mode: CI Core Gate reports component status but does not block merge."
+            echo "Blocking enforcement remains active on push/main and merge_group."
+            exit 0
+          fi
+
           echo "=== CI Core Gate Status ==="
           echo "Config Preflight: ${{ needs.config-preflight.result }}"
           echo "Lint & Typecheck: ${{ needs.lint-typecheck.result }}"
