@@ -1,5 +1,7 @@
 package companyos.incident
 
+import rego.v1
+
 # Default to deny all actions unless explicitly allowed.
 default allow = false
 

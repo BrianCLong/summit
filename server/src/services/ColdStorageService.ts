@@ -26,23 +26,24 @@ export class ColdStorageService {
   /**
    * Upload a file to Cold Storage (e.g. S3 Glacier)
    */
-  async upload(filepath: string, key: string, storageClass: 'STANDARD_IA' | 'GLACIER' | 'DEEP_ARCHIVE' = 'STANDARD_IA'): Promise<void> {
+  async upload(filepath: string, key: string): Promise<void> {
     if (!this.s3Config) {
       logger.warn('Skipping Cold Storage upload: No configuration found.');
       return;
     }
 
-    logger.info(`Uploading ${filepath} to Cold Storage bucket ${this.s3Config.bucket} as ${key} (Class: ${storageClass})...`);
+    logger.info(`Uploading ${filepath} to Cold Storage bucket ${this.s3Config.bucket} as ${key}...`);
 
     try {
       if (process.env.USE_AWS_CLI === 'true') {
+        // Use standard storage class for now, lifecycle rules can move to Glacier
         await execAsync(
-          `aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region} --storage-class ${storageClass}`
+          `aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region} --storage-class STANDARD_IA`
         );
       } else {
         // Simulating upload delay
         await new Promise((r: any) => setTimeout(r, 500));
-        logger.info(`Simulated Cold Storage upload complete (Class: ${storageClass}).`);
+        logger.info('Simulated Cold Storage upload complete.');
       }
     } catch (error: any) {
       logger.error('Failed to upload to Cold Storage', error);
@@ -59,10 +60,9 @@ export class ColdStorageService {
   async archivePartition(
     tableName: string,
     partitionName: string,
-    dropAfterArchive: boolean = false,
-    storageClass: 'STANDARD_IA' | 'GLACIER' | 'DEEP_ARCHIVE' = 'STANDARD_IA'
+    dropAfterArchive: boolean = false
   ): Promise<void> {
-    logger.info(`Archiving partition ${partitionName} of table ${tableName} to ${storageClass}...`);
+    logger.info(`Archiving partition ${partitionName} of table ${tableName}...`);
 
     // In a real implementation, we would use pg_dump or COPY command
     // For now, we'll simulate creating a file
@@ -78,7 +78,7 @@ export class ColdStorageService {
         await fs.writeFile(filepath, `Simulated export of ${partitionName}\n`);
 
         // Upload
-        await this.upload(filepath, `archives/${tableName}/${filename}`, storageClass);
+        await this.upload(filepath, `archives/${tableName}/${filename}`);
 
         // Cleanup local file
         await fs.unlink(filepath);
