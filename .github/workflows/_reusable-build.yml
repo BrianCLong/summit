@@ -67,15 +67,6 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node-version }}
-          cache: "pnpm"
-
       - name: Get pnpm store path
         id: pnpm-store
         shell: bash

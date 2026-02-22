@@ -196,15 +196,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
-          node-version: 20
-          cache: "pnpm"
-
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@b0eb0c1eb5f79b7ec602946f1fa93f3fc06f6e70 # v2
 
@@ -253,12 +245,11 @@ jobs:
           fi
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Setup Node.js
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10
-
-      - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"

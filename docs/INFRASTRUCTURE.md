@@ -33,7 +33,7 @@ Summit uses Infrastructure as Code (IaC) principles to manage all infrastructure
 
 ### Directory Structure
 
-```
+```bash
 summit/
 ├── terraform/           # Terraform configurations
 │   ├── modules/        # Reusable Terraform modules
@@ -51,7 +51,7 @@ summit/
     ├── aws/            # AWS-specific configs
     ├── terraform/      # Terraform wrappers
     └── scripts/        # Automation scripts
-```
+```bash
 
 ---
 
@@ -61,7 +61,7 @@ summit/
 
 #### EKS Cluster
 
-```hcl
+```bashhcl
 # terraform/modules/eks/main.tf
 resource "aws_eks_cluster" "summit" {
   name     = "summit-${var.environment}"
@@ -88,11 +88,11 @@ resource "aws_eks_cluster" "summit" {
     ManagedBy   = "Terraform"
   })
 }
-```
+```bash
 
 #### RDS PostgreSQL
 
-```hcl
+```bashhcl
 # terraform/modules/rds-postgres/main.tf
 resource "aws_db_instance" "postgres" {
   identifier     = "summit-${var.environment}-postgres"
@@ -124,11 +124,11 @@ resource "aws_db_instance" "postgres" {
 
   tags = var.tags
 }
-```
+```bash
 
 #### S3 Buckets
 
-```hcl
+```bashhcl
 # terraform/modules/s3/main.tf
 resource "aws_s3_bucket" "artifacts" {
   bucket = "summit-${var.environment}-artifacts"
@@ -166,13 +166,13 @@ resource "aws_s3_bucket_public_access_block" "artifacts" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
-```
+```bash
 
 ### Kubernetes Cluster Configuration
 
 #### Node Groups
 
-```yaml
+```bashyaml
 # infra/eks-baseline/nodegroups.yaml
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
@@ -232,11 +232,11 @@ managedNodeGroups:
         effect: NoSchedule
     tags:
       nodegroup-role: memory-optimized
-```
+```bash
 
 #### Cluster Autoscaler
 
-```yaml
+```bashyaml
 # k8s/autoscaling/cluster-autoscaler.yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -274,7 +274,7 @@ spec:
             requests:
               cpu: 100m
               memory: 600Mi
-```
+```bash
 
 ---
 
@@ -282,7 +282,7 @@ spec:
 
 ### Project Structure
 
-```
+```bash
 terraform/
 ├── environments/
 │   ├── dev/
@@ -302,13 +302,13 @@ terraform/
     ├── apply.sh
     ├── plan.sh
     └── destroy.sh
-```
+```bash
 
 ### Environment Configuration
 
 #### Development
 
-```hcl
+```bashhcl
 # terraform/environments/dev/terraform.tfvars
 environment = "dev"
 region      = "us-east-1"
@@ -333,11 +333,11 @@ rds_multi_az       = false
 enable_nat_gateway     = false
 enable_flow_logs       = false
 enable_backup_vault    = false
-```
+```bash
 
 #### Production
 
-```hcl
+```bashhcl
 # terraform/environments/production/terraform.tfvars
 environment = "production"
 region      = "us-east-1"
@@ -369,11 +369,11 @@ enable_nat_gateway     = true
 enable_flow_logs       = true
 enable_backup_vault    = true
 deletion_protection    = true
-```
+```bash
 
 ### Terraform Workflow
 
-```bash
+```bashbash
 # Initialize
 cd terraform/environments/production
 terraform init -backend-config=backend.tfvars
@@ -392,11 +392,11 @@ terraform destroy
 
 # Import existing resources
 terraform import aws_eks_cluster.summit summit-production
-```
+```bash
 
 ### State Management
 
-```hcl
+```bashhcl
 # terraform/environments/production/backend.tf
 terraform {
   backend "s3" {
@@ -408,7 +408,7 @@ terraform {
     kms_key_id     = "arn:aws:kms:us-east-1:xxx:key/xxx"
   }
 }
-```
+```bash
 
 ---
 
@@ -416,7 +416,7 @@ terraform {
 
 ### GitHub Container Registry
 
-```bash
+```bashbash
 # Login
 echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
@@ -426,11 +426,11 @@ docker push ghcr.io/brianclong/summit:v1.2.3
 
 # Pull
 docker pull ghcr.io/brianclong/summit:v1.2.3
-```
+```bash
 
 ### Image Signing and Verification
 
-```bash
+```bashbash
 # Sign image with Cosign
 cosign sign ghcr.io/brianclong/summit:v1.2.3
 
@@ -442,11 +442,11 @@ syft ghcr.io/brianclong/summit:v1.2.3 -o spdx-json > sbom.json
 
 # Attach SBOM
 cosign attach sbom --sbom sbom.json ghcr.io/brianclong/summit:v1.2.3
-```
+```bash
 
 ### Registry Configuration in Kubernetes
 
-```yaml
+```bashyaml
 # k8s/secrets/registry-credentials.yaml
 apiVersion: v1
 kind: Secret
@@ -456,7 +456,7 @@ metadata:
 type: kubernetes.io/dockerconfigjson
 data:
   .dockerconfigjson: <base64-encoded-docker-config>
-```
+```bash
 
 ---
 
@@ -464,7 +464,7 @@ data:
 
 ### VPC Configuration
 
-```hcl
+```bashhcl
 # terraform/modules/vpc/main.tf
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
@@ -499,11 +499,11 @@ module "vpc" {
     "kubernetes.io/role/internal-elb" = "1"
   }
 }
-```
+```bash
 
 ### Service Mesh (Istio)
 
-```yaml
+```bashyaml
 # k8s/service-mesh/istio-installation.yaml
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
@@ -555,11 +555,11 @@ spec:
       tracing:
         zipkin:
           address: jaeger-collector.observability:9411
-```
+```bash
 
 ### Network Policies
 
-```yaml
+```bashyaml
 # k8s/network-policy/summit-network-policy.yaml
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -627,7 +627,7 @@ spec:
           port: 443
         - protocol: TCP
           port: 80
-```
+```bash
 
 ---
 
@@ -635,7 +635,7 @@ spec:
 
 ### IAM Roles and Policies
 
-```hcl
+```bashhcl
 # terraform/modules/security/iam.tf
 resource "aws_iam_role" "eks_node_group" {
   name = "summit-${var.environment}-eks-node-group"
@@ -666,11 +666,11 @@ resource "aws_iam_role_policy_attachment" "eks_container_registry_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks_node_group.name
 }
-```
+```bash
 
 ### Pod Security Standards
 
-```yaml
+```bashyaml
 # k8s/policies/pod-security-standards.yaml
 apiVersion: v1
 kind: Namespace
@@ -680,11 +680,11 @@ metadata:
     pod-security.kubernetes.io/enforce: restricted
     pod-security.kubernetes.io/audit: restricted
     pod-security.kubernetes.io/warn: restricted
-```
+```bash
 
 ### Secrets Management
 
-```yaml
+```bashyaml
 # k8s/secrets/sealed-secret-example.yaml
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
@@ -701,7 +701,7 @@ spec:
       name: summit-secrets
       namespace: intelgraph-prod
     type: Opaque
-```
+```bash
 
 ---
 
@@ -709,7 +709,7 @@ spec:
 
 ### Backup Strategy
 
-```yaml
+```bashyaml
 # k8s/backups/velero-schedule.yaml
 apiVersion: velero.io/v1
 kind: Schedule
@@ -726,11 +726,11 @@ spec:
     volumeSnapshotLocations:
       - aws-ebs
     ttl: 720h  # 30 days
-```
+```bash
 
 ### Restore Procedure
 
-```bash
+```bashbash
 # List backups
 velero backup get
 
@@ -743,7 +743,7 @@ velero restore describe summit-restore-20251120
 # Restore specific namespace
 velero restore create --from-backup summit-daily-backup-20251120020000 \
   --include-namespaces intelgraph-prod
-```
+```bash
 
 ---
 
@@ -751,18 +751,18 @@ velero restore create --from-backup summit-daily-backup-20251120020000 \
 
 ### Resource Right-Sizing
 
-```bash
+```bashbash
 # Analyze resource usage
 kubectl top nodes
 kubectl top pods -n intelgraph-prod
 
 # Get resource recommendations
 kubectl resource-capacity --util --sort cpu.util
-```
+```bash
 
 ### Spot Instances
 
-```hcl
+```bashhcl
 # terraform/modules/eks/spot-nodegroup.tf
 resource "aws_eks_node_group" "spot" {
   cluster_name    = aws_eks_cluster.summit.name
@@ -780,7 +780,7 @@ resource "aws_eks_node_group" "spot" {
 
   instance_types = ["t3.xlarge", "t3a.xlarge", "t2.xlarge"]
 }
-```
+```bash
 
 ---
 
@@ -788,7 +788,7 @@ resource "aws_eks_node_group" "spot" {
 
 ### Upgrade Procedures
 
-```bash
+```bashbash
 # Check current versions
 kubectl version
 helm version
@@ -802,7 +802,7 @@ eksctl upgrade nodegroup --cluster summit-prod --name general-purpose
 # Update Helm charts
 helm repo update
 helm upgrade summit ./helm/summit --version 1.1.0
-```
+```bash
 
 ---
 

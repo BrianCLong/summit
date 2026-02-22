@@ -12,20 +12,16 @@ on:
       - 'packages/extortion/**'
       - 'scripts/ci/.*extortion'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          run_install: false
-
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20

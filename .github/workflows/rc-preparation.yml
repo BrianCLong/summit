@@ -80,15 +80,7 @@ jobs:
           echo "Commit SHA: ${COMMIT_SHA}"
           echo "Base Version: ${VERSION}"
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
