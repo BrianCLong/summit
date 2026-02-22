@@ -14,23 +14,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
-<<<<<<< HEAD
-=======
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -42,23 +36,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
-<<<<<<< HEAD
-=======
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -70,10 +58,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -84,14 +75,11 @@ jobs:
       - name: Validate LongRunJob Specs (dry-run)
         run: node scripts/ci/validate-longrun-job.mjs
 
-    # NOTE: ga-risk-gate job removed - referenced workflow file does not exist
-    # TODO: Re-enable when ga-risk-gate.yml is created
-
   security-scan:
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
     with:
-      run_dast: false # DAST is too slow for a PR check
+      run_dast: false
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
@@ -99,7 +87,7 @@ jobs:
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0
@@ -119,4 +107,3 @@ jobs:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14
-
