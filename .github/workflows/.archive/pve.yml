@@ -48,7 +48,7 @@ jobs:
         run: pnpm --filter @intelgraph/pve test:run
 
       - name: Validate PR
-        if: (github.event_name == 'pull_request') && (github.event_name == 'pull_request')
+        if: github.event_name == 'pull_request'
         run: |
           node --loader ts-node/esm packages/pve/scripts/validate-pr.ts
         env:
@@ -58,6 +58,7 @@ jobs:
   schema-drift:
     name: Schema Drift Detection
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
