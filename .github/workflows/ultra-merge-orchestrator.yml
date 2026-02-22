@@ -70,6 +70,7 @@ jobs:
           echo "Ready to merge: $ready"
 
       - name: Smart PR update (workflow fixes)
+        id: update
         env:
           GH_TOKEN: ${{ github.token }}
           BATCH_SIZE: ${{ inputs.batch_size || '20' }}
@@ -111,6 +112,7 @@ jobs:
           echo "updated_count=$updated" >> $GITHUB_OUTPUT
 
       - name: Intelligent merge execution
+        id: merge
         env:
           GH_TOKEN: ${{ github.token }}
           AGGRESSIVE: ${{ inputs.aggressive_mode || 'true' }}
