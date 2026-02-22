@@ -61,3 +61,23 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter:9115
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+
+  - job_name: 'mongodb-exporter'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+
+  - job_name: 'neo4j-exporter'
+    static_configs:
+      - targets: ['neo4j-exporter:9308']
+
+  - job_name: 'kafka-exporter'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+
+  - job_name: 'pushgateway'
+    static_configs:
+      - targets: ['pushgateway:9091']

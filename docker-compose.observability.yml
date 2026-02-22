@@ -268,7 +268,7 @@ services:
     command:
       - '--kafka.server=kafka:9092'
     ports:
-      - '9308:9308'
+      - '9309:9308'
     networks:
       - observability
       - intelgraph
