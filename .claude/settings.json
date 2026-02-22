@@ -92,5 +92,18 @@
     "maxFileSize": 500,
     "preferSmallPRs": true,
     "runSmokeBeforeCommit": true
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-init.sh"
+          }
+        ]
+      }
+    ]
   }
 }
