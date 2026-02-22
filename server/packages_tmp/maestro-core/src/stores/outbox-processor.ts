@@ -46,7 +46,7 @@ export class OutboxProcessor {
           // Select pending entries
           const result = await client.query(
             `
-            SELECT * FROM workflow_outbox 
+            SELECT * FROM workflow_outbox
             WHERE status = 'pending' AND retry_count < $1
             ORDER BY created_at ASC
             LIMIT $2
@@ -88,13 +88,13 @@ export class OutboxProcessor {
         // In a real system, this would call a message bus (Kafka, RabbitMQ, SNS)
         // eslint-disable-next-line no-console
         console.log(`[Outbox] Publishing ${row.event_type} for run ${row.run_id}`);
-        
+
         // Mark as published
         await this.pool.query(
           `UPDATE workflow_outbox SET status = 'published', processed_at = NOW() WHERE id = $1`,
           [row.id]
         );
-        
+
         span.setStatus({ code: SpanStatusCode.OK });
       } catch (error) {
         // eslint-disable-next-line no-console

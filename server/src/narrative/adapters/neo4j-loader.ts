@@ -117,7 +117,7 @@ export class Neo4jNarrativeLoader {
 
         const result = await neo.run(query, { rootId });
         if (result.records.length === 0) return [];
-        // Apply same mapping logic... 
+        // Apply same mapping logic...
         // (Truncated for brevity, but ideally shared)
         return []; // Placeholder for actual implementation in real scenario
     }

@@ -17,7 +17,7 @@ steps:
       threshold: 300
       idle_only: true
     onFailure: continue
-  
+
   - name: Increase connection pool size
     actionType: scale_connection_pool
     parameters:
@@ -25,7 +25,7 @@ steps:
       max_connections: 200
       min_connections: 50
     onFailure: abort
-  
+
   - name: Enable connection timeout
     actionType: update_db_config
     parameters:
@@ -33,7 +33,7 @@ steps:
       idle_timeout: 60
       max_lifetime: 3600
     onFailure: continue
-  
+
   - name: Restart connection pool
     actionType: restart_service
     parameters:
@@ -50,7 +50,7 @@ rollbackSteps:
       database: primary
       max_connections: 100
       min_connections: 20
-  
+
   - name: Restore original timeouts
     actionType: update_db_config
     parameters:

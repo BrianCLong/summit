@@ -10,7 +10,7 @@ const router = express.Router();
 
 /**
  * Admin Gateway Router
- * 
+ *
  * Consolidates all administrative modules into a single entry point.
  * Mounted at /api/admin in app.ts
  */

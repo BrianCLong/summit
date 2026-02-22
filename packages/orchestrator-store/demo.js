@@ -20,7 +20,7 @@ const mockPool = {
   async query(text, params) {
     console.log(`Mock DB Query: ${text}`);
     console.log(`Params: ${params ? JSON.stringify(params) : 'none'}`);
-    
+
     // Return mock results based on the query
     if (text.includes('SELECT id, name, type')) {
       // Mock response for getLoops
@@ -71,26 +71,26 @@ async function runDemo() {
   try {
     console.log('🚀 Creating OrchestratorPostgresStore instance...');
     const store = new OrchestratorPostgresStore({ pool: mockPool });
-    
+
     console.log('✅ Instance created successfully');
     console.log('');
-    
+
     console.log('🔧 Initializing orchestrator store...');
     await store.initialize();
     console.log('✅ Store initialized successfully');
     console.log('');
-    
+
     console.log('📊 Retrieving orchestrator loops...');
     const loops = await store.getLoops();
     console.log(`✅ Retrieved ${loops.length} autonomic loop(s)`);
     console.log('Example loop:', loops[0]);
     console.log('');
-    
+
     console.log('👤 Retrieving orchestrator agents...');
     const agents = await store.getAgents();
     console.log(`✅ Retrieved ${agents.length} agent(s)`);
     console.log('');
-    
+
     console.log('🧪 Creating coordination task...');
     const task = await store.createCoordinationTask({
       title: 'Demo coordination task',
@@ -101,7 +101,7 @@ async function runDemo() {
     }, 'demo-actor');
     console.log('✅ Coordination task created:', task ? task.id : 'mock-task-created');
     console.log('');
-    
+
     console.log('💬 Creating coordination channel...');
     const channel = await store.createCoordinationChannel(
       'demo-topic',
@@ -127,12 +127,12 @@ async function runDemo() {
     const logs = await store.getAuditLog();
     console.log(`✅ Retrieved ${logs ? logs.length : 0} audit event(s)`);
     console.log('');
-    
+
     console.log('🎯 Demonstration completed successfully!');
     console.log('');
     console.log('✨ Package Features Demonstrated:');
     console.log('   • PostgreSQL-backed orchestrator persistence');
-    console.log('   • Maestro autonomic loop management');  
+    console.log('   • Maestro autonomic loop management');
     console.log('   • Multi-agent coordination mechanisms');
     console.log('   • Consensus/voting for distributed decisions');
     console.log('   • Audit logging for compliance');
@@ -141,7 +141,7 @@ async function runDemo() {
     console.log('');
     console.log('✅ The @intelgraph/orchestrator-store package is ready for production use!');
     console.log('✅ All P1 issues have been successfully resolved!');
-    
+
   } catch (error) {
     console.error('❌ Demo failed with error:', error);
     process.exit(1);

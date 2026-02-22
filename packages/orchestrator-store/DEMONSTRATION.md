@@ -154,5 +154,5 @@ The `@intelgraph/orchestrator-store` package is **READY FOR PUBLICATION** and wi
 
 ---
 
-_Publication Completion Report - IntelGraph Summit v5.4.1_  
+_Publication Completion Report - IntelGraph Summit v5.4.1_
 _Automated Triage Resolution Initiative_

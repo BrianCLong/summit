@@ -20,4 +20,3 @@ Establish the NDS CI gate workflow and evidence metadata updates for the Narrati
 ## Evidence
 
 - Reference `EVD-NDS-CI-001..004` in the evidence index.
-

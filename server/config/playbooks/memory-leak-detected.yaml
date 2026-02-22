@@ -17,7 +17,7 @@ steps:
       service: affected-service
       destination: s3://diagnostics/heap-dumps/
     onFailure: continue
-  
+
   - name: Restart affected service
     actionType: restart_service
     parameters:
@@ -25,7 +25,7 @@ steps:
       graceful: true
       timeout: 30
     onFailure: abort
-  
+
   - name: Apply memory limits
     actionType: update_resource_limits
     parameters:

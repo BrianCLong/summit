@@ -43,7 +43,7 @@ export class AuditArchivingService {
 
         // 1. Fetch records from DB
         const query = `
-            SELECT * FROM audit_events 
+            SELECT * FROM audit_events
             WHERE timestamp >= $1 AND timestamp < $2
         `;
         const result = await this.db.query(query, [startDate, endDate]);

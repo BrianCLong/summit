@@ -54,12 +54,12 @@ ALTER TABLE orchestrator_outbox_p
     PRIMARY KEY (created_at, id);
 
 -- Indices for processing
-CREATE INDEX IF NOT EXISTS idx_orchestrator_outbox_p_unprocessed 
-    ON orchestrator_outbox_p (created_at, id) 
+CREATE INDEX IF NOT EXISTS idx_orchestrator_outbox_p_unprocessed
+    ON orchestrator_outbox_p (created_at, id)
     WHERE status = 'PENDING';
 
-CREATE INDEX IF NOT EXISTS idx_orchestrator_outbox_p_processed 
-    ON orchestrator_outbox_p (processed_at) 
+CREATE INDEX IF NOT EXISTS idx_orchestrator_outbox_p_processed
+    ON orchestrator_outbox_p (processed_at)
     WHERE status IN ('SENT', 'DEAD');
 
 -- 4. Create Initial Partitions for Outbox

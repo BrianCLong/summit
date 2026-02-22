@@ -93,7 +93,7 @@ const TIMESTAMP_KEYS = new Set([
 ]);
 
 const ID_LIKE_KEYS = new Set([
-  'id', 'uuid', 'guid', 'uid', 'eid', 'pk', 'hash', 'sha256', 'checksum', 
+  'id', 'uuid', 'guid', 'uid', 'eid', 'pk', 'hash', 'sha256', 'checksum',
   'external_id', 'externalid', 'externalId',
   'build_number', 'buildnumber', 'buildNumber',
 ]);
@@ -111,7 +111,7 @@ function isIdLikeKey(key) {
 }
 
 const TIMESTAMP_VALUE_PATTERNS = [
-  /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/, 
+  /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/,
   /\b\d{4}-\d{2}-\d{2}\b/,
 ];
 
