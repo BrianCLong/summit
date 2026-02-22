@@ -1,3 +1,4 @@
+import future.keywords
 package policy.iam
 
 deny[msg] {

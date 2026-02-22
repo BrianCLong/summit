@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.policy.export
 
 test_deny_on_restricted_license if {

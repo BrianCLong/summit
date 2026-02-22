@@ -1,3 +1,4 @@
+import future.keywords
 package compliance.test
 
 import data.compliance.access

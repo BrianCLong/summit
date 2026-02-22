@@ -1,3 +1,4 @@
+import future.keywords
 package kkp.authz
 
 default allow = false

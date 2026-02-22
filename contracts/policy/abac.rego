@@ -1,3 +1,4 @@
+import future.keywords
 package policy
 
 default decision = {"allow": false, "reason": "deny-by-default"}

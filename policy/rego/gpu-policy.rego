@@ -1,3 +1,4 @@
+import future.keywords
 package gpu.policy
 # Example policy: Deny GPU usage for non-ML workloads
 deny contains msg if {

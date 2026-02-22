@@ -1,3 +1,4 @@
+import future.keywords
 package deps.policy
 
 # Demo dependency input format:

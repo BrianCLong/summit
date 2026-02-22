@@ -1,3 +1,4 @@
+import future.keywords
 package supplychain.policy
 
 deny["missing_spdx_sbom"] {

@@ -26,10 +26,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
+      - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          cache: 'pnpm'
+          node-version: "20"
 
       - name: Install dependencies
         run: npm install -g pnpm && pnpm install --frozen-lockfile
@@ -42,11 +45,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:

@@ -1,3 +1,4 @@
+import future.keywords
 # Baseline ABAC Rego Policies for IntelGraph Summit
 # Implements foundational attribute-based access control for core platform operations
 

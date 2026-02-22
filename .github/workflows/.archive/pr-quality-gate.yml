@@ -26,6 +26,7 @@ jobs:
         with:
           fetch-depth: 0 # Needed for some checks
 
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'

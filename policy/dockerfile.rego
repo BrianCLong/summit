@@ -1,3 +1,4 @@
+import future.keywords
 package dockerfile
 
 import rego.v1

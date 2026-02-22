@@ -1,3 +1,4 @@
+import future.keywords
 package fcr.alerts
 
 severity := "critical" {

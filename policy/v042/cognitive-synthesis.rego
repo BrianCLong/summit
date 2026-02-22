@@ -1,3 +1,4 @@
+import future.keywords
 package cognitive_synthesis
 
 import rego.v1

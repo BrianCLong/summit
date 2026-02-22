@@ -1,3 +1,4 @@
+import future.keywords
 package drift
 
 import rego.v1

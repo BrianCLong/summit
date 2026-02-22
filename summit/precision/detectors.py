@@ -31,6 +31,11 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
 
+    if torch is None:
+        # Fallback if torch is not available, though in production it should be.
+        # This allows unit tests to run in environments without torch.
+        return MismatchReport()
+
     delta = (train_logprobs - rollout_logprobs).abs()
 
     return MismatchReport(

@@ -1,3 +1,4 @@
+import future.keywords
 package companyos.authz.customer
 
 default decision := {

@@ -1,3 +1,4 @@
+import future.keywords
 package summit.retention
 
 import rego.v1

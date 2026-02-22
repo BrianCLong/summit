@@ -1,3 +1,4 @@
+import future.keywords
 package deps.policy
 
 test_unsigned_denied {

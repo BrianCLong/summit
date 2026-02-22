@@ -1,3 +1,4 @@
+import future.keywords
 package terraform.policy
 
 deny[msg] {

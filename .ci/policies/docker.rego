@@ -1,3 +1,4 @@
+import future.keywords
 package policy.container
 
 approved_runtime_bases := {
