@@ -52,14 +52,13 @@ const MissionControlPage = React.lazy(() => import('@/features/mission-control/M
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
+const ApprovalsPage = React.lazy(() => import('@/pages/switchboard/ApprovalsPage'))
+const ApprovalDetailPage = React.lazy(() => import('@/pages/switchboard/ApprovalDetailPage'))
+const IncidentsPage = React.lazy(() => import('@/pages/switchboard/IncidentsPage'))
+const IncidentDetailPage = React.lazy(() => import('@/pages/switchboard/IncidentDetailPage'))
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
-
-// New Switchboard Pages
-const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
-const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
-const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -75,7 +74,6 @@ import { CommandStatusProvider } from '@/features/internal-command/CommandStatus
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
-import { CommandPalette } from '@/components/CommandPalette'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -152,11 +150,6 @@ function App() {
                       } />
                       <Route path="/trust" element={<TrustDashboard />} />
 
-                      {/* Switchboard Routes */}
-                      <Route path="/approvals" element={<ApprovalsPage />} />
-                      <Route path="/receipts" element={<ReceiptsPage />} />
-                      <Route path="/tenant-ops" element={<TenantOpsPage />} />
-
                       {/* Workbench Route */}
                       <Route path="/workbench" element={<WorkbenchShell />} />
                       <Route path="/copilot" element={<CopilotPage />} />
@@ -214,6 +207,12 @@ function App() {
                         {/* Cases */}
                         <Route path="cases" element={<CasesPage />} />
                         <Route path="cases/:id" element={<CaseDetailPage />} />
+
+                        {/* Switchboard */}
+                        <Route path="switchboard/approvals" element={<ApprovalsPage />} />
+                        <Route path="switchboard/approvals/:id" element={<ApprovalDetailPage />} />
+                        <Route path="switchboard/incidents" element={<IncidentsPage />} />
+                        <Route path="switchboard/incidents/:id" element={<IncidentDetailPage />} />
 
                         {/* Dashboards - Wrapped with DataFetchErrorBoundary */}
                         <Route

@@ -149,6 +149,7 @@ import intentRouter from './routes/intent.js';
 import factFlowRouter from './factflow/routes.js';
 import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { buildApprovalsRouter } from './routes/approvals.js';
+import incidentsRouter from './routes/incidents.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
 
 export const createApp = async () => {
@@ -560,6 +561,7 @@ export const createApp = async () => {
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
   app.use('/api/approvals', authenticateToken, buildApprovalsRouter(maestro)); // Re-mount with maestro context
+  app.use('/api/incidents', incidentsRouter);
   process.stdout.write('[DEBUG] Maestro router built\n');
 
   // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)

@@ -9,6 +9,7 @@ import {
   getApprovalById,
   listApprovals,
   rejectApproval,
+  ApprovalDecisionResult
 } from '../services/approvals.js';
 
 interface ApprovalPayload {
@@ -22,6 +23,10 @@ const approvalsLogger = logger.child({ name: 'ApprovalsRouter' });
 const resolveUserId = (req: express.Request): string | null => {
   const user = (req as any).user;
   return user?.sub || user?.id || null;
+};
+
+const resolveTenantId = (req: express.Request): string | null => {
+  return (req as any).user?.tenantId || null;
 };
 
 const ensureApprover = (
@@ -43,6 +48,8 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
   router.post('/', async (req, res, next) => {
     try {
       const requesterId = resolveUserId(req) || req.body.requesterId;
+      const tenantId = resolveTenantId(req);
+
       if (!requesterId) {
         return res.status(400).json({ error: 'requesterId is required' });
       }
@@ -53,6 +60,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         payload: req.body.payload,
         reason: req.body.reason,
         runId: req.body.runId,
+        tenantId: tenantId || undefined,
       });
 
       res.status(201).json(approval);
@@ -65,9 +73,10 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
     try {
       const role = (req as any).user?.role;
       const userId = resolveUserId(req);
+      const tenantId = resolveTenantId(req);
       const status = (req.query.status as ApprovalStatus | undefined) || undefined;
 
-      const approvals = await listApprovals({ status });
+      const approvals = await listApprovals({ status, tenantId: tenantId || undefined });
       const visible = canApprove(role)
         ? approvals
         : approvals.filter((item) => item.requester_id === userId);
@@ -93,21 +102,30 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
   router.post('/:id/approve', ensureApprover, async (req, res, next) => {
     try {
       const approverId = resolveUserId(req);
+      const tenantId = resolveTenantId(req);
+
       if (!approverId) {
         return res.status(400).json({ error: 'approverId is required' });
       }
 
-      const approval = await approveApproval(
+      if (!req.body.reason) {
+          return res.status(400).json({ error: 'Approval rationale is required' });
+      }
+
+      const result = await approveApproval(
         req.params.id,
         approverId,
         req.body?.reason,
+        tenantId || undefined
       );
 
-      if (!approval) {
+      if (!result) {
         return res.status(409).json({ error: 'Approval not pending or not found' });
       }
 
+      const { approval } = result;
       let actionResult: unknown = null;
+
       if (
         maestro &&
         approval.action === 'maestro_run' &&
@@ -142,7 +160,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         'Approval executed',
       );
 
-      res.json({ approval, actionResult });
+      res.json({ ...result, actionResult });
     } catch (error: any) {
       next(error);
     }
@@ -151,19 +169,28 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
   router.post('/:id/reject', ensureApprover, async (req, res, next) => {
     try {
       const approverId = resolveUserId(req);
+      const tenantId = resolveTenantId(req);
+
       if (!approverId) {
         return res.status(400).json({ error: 'approverId is required' });
       }
 
-      const approval = await rejectApproval(
+      if (!req.body.reason) {
+          return res.status(400).json({ error: 'Rejection rationale is required' });
+      }
+
+      const result = await rejectApproval(
         req.params.id,
         approverId,
         req.body?.reason,
+        tenantId || undefined
       );
 
-      if (!approval) {
+      if (!result) {
         return res.status(409).json({ error: 'Approval not pending or not found' });
       }
+
+      const { approval } = result;
 
       approvalsLogger.info(
         {
@@ -175,7 +202,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
         'Approval rejected',
       );
 
-      res.json({ approval });
+      res.json(result);
     } catch (error: any) {
       next(error);
     }
