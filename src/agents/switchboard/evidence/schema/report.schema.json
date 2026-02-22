@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SwitchboardEvidenceReport",
+  "description": "Determinism contract for Switchboard evidence reports.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "evidenceId": { "type": "string" },
+    "summary": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["evidenceId", "summary", "findings", "inputs"]
+}

@@ -1,25 +1,30 @@
 version: 1
 prompts:
-  - id: saas-crash-2026-positioning-pack
+  - id: switchboard-lane1-evidence
     version: v1
-    path: prompts/positioning/saas-crash-2026@v1.md
-    sha256: 1acce34de92a05653ef32c23fed94b971bf06b529c6d76fcb9c8ad43c7d48ed8
-    description: Create the saas-crash-2026 positioning pack, claim registry, and repo validation alignment.
+    path: prompts/switchboard/switchboard-lane1-evidence@v1.md
+    sha256: 63566a32116bf391ee3e06e26edcabb19129ad4604fceaf15b03b1b81c44f250
+    description: Switchboard MCP control-plane Lane 1 evidence scaffolding.
     scope:
       paths:
-        - docs/positioning/saas-crash-2026.md
-        - docs/positioning/claim-registry.md
-        - repo_assumptions.md
+        - src/agents/switchboard/
+        - tests/agents/switchboard/
+        - tests/fixtures/evidence/switchboard/
+        - docs/ga/evidence.md
+        - docs/ga/switchboard-truth-table.md
         - docs/roadmap/STATUS.json
-        - prompts/positioning/saas-crash-2026@v1.md
+        - .github/workflows/_reusable-switchboard-gates.yml
+        - required_checks.todo.md
+        - agent-contract.json
+        - prompts/switchboard/switchboard-lane1-evidence@v1.md
         - prompts/registry.yaml
       domains:
-        - documentation
-        - positioning
         - governance
+        - switchboard
+        - evidence
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
