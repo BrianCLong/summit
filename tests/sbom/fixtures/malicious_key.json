@@ -1,0 +1,19 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "name": "leaky-lib",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "text": {
+              "content": "-----BEGIN RSA PRIVATE KEY-----..."
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
