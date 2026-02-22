@@ -50,6 +50,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: postgres-cdc-blueprint
+    version: v1
+    path: prompts/docs/postgres-cdc-blueprint@v1.md
+    sha256: 7b91ac6617cbcd6a5ef84d0334e78dd134d2bb83649d2c3b4341058ae28f46cb
+    description: Document deterministic Postgres CDC blueprint with provenance and projections.
+    scope:
+      paths:
+        - docs/streaming/postgres-cdc-blueprint.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/postgres-cdc-blueprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - streaming
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: structured-content-primitives
     version: v1
     path: prompts/content/structured-content-primitives@v1.md
