@@ -1,0 +1,10 @@
+{
+  "source_id": "abuse-case-1",
+  "adjacency": [
+    {
+      "type": "dox",
+      "content": { "text": "Call me at +15551234567 or email victim@example.com" },
+      "rank": 1
+    }
+  ]
+}

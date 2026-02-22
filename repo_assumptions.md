@@ -1,40 +1,21 @@
-# Repo Assumptions & Validation
+# Repo Assumptions
 
-## Verified vs Assumed Directory List
+| Item | Status | Verified Path/Value | Notes |
+| :--- | :--- | :--- | :--- |
+| Language | Verified | Python 3.12 | `summit-ci.yml`, `requirements.in` |
+| Test Framework | Verified | `pytest` | `summit-ci.yml` |
+| CI Workflow | Verified | `.github/workflows/summit-ci.yml` | Job: `test-python` |
+| Evidence Root | Verified | `evidence/` | Also `summit_evidence/` exists |
+| Artifacts Root | Assumed | `artifacts/` | Will create if missing |
+| Schema Root | Verified | `schemas/` | |
+| Main Package | Verified | `summit/` | |
+| New Module | Assumed | `summit/osint/` | To be created |
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Must-not-touch List
+* `summit/ingest/` (unless integrating)
+* `intelgraph/`
+* `client/`
 
-## CI Check Names (Exact)
-
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## CI Check Name Discovery
+* [x] `test-python` (pytest)
+* [x] `test-e2e` (playwright)

@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Rerun Stamp",
+  "type": "object",
+  "properties": {
+    "run_id": { "type": "string" },
+    "trigger_event": { "type": "string" },
+    "invalidated_assumptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "deterministic_timestamp": { "type": "string" }
+  },
+  "required": ["run_id", "trigger_event"]
+}
