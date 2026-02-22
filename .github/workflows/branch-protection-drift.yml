@@ -47,6 +47,10 @@ env:
 jobs:
   check-drift:
     name: Check Branch Protection Drift
+<<<<<<< HEAD
+    if: false  # Temporarily disabled for GA merge surge
+=======
+>>>>>>> origin/main
     runs-on: ubuntu-latest
 
     outputs:

@@ -12,6 +12,8 @@
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 import { LRUCache } from 'lru-cache';
+import zlib from 'zlib';
+import { promisify } from 'util';
 import {
   DataEnvelope,
   GovernanceVerdict,
@@ -79,6 +81,9 @@ function createVerdict(result: GovernanceResult, reason?: string): GovernanceVer
 // ============================================================================
 // Distributed Cache Service
 // ============================================================================
+
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
 
 export class DistributedCacheService {
   private redis: Redis | any;
@@ -158,7 +163,7 @@ export class DistributedCacheService {
 
         // Decompress if needed
         const value = entry.compressed
-          ? this.decompress(entry.value as string)
+          ? await this.decompress(entry.value as string)
           : entry.value;
 
         // Promote to L1
@@ -218,11 +223,14 @@ export class DistributedCacheService {
       // Check if compression needed
       const serialized = JSON.stringify(entry);
       let toStore = serialized;
+      let redisEntry = { ...entry };
 
       if (serialized.length > this.config.compressionThreshold) {
-        entry.value = this.compress(value) as T;
-        entry.compressed = true;
-        toStore = JSON.stringify(entry);
+        // Clone entry for Redis storage so we don't mutate the in-memory L1 copy
+        redisEntry = { ...entry };
+        redisEntry.value = (await this.compress(value)) as any;
+        redisEntry.compressed = true;
+        toStore = JSON.stringify(redisEntry);
         this.stats.compressions++;
       }
 
@@ -230,13 +238,14 @@ export class DistributedCacheService {
       switch (strategy) {
         case 'write-through':
           // Write to both L1 and L2 synchronously
-          this.l1Cache.set(fullKey, { ...entry, value, compressed: false });
+          // Use original 'entry' (uncompressed) for L1
+          this.l1Cache.set(fullKey, entry);
           await this.redis.setex(fullKey, ttl, toStore);
           break;
 
         case 'write-behind':
           // Write to L1 immediately, buffer L2 write
-          this.l1Cache.set(fullKey, { ...entry, value, compressed: false });
+          this.l1Cache.set(fullKey, entry);
           this.bufferWrite(fullKey, toStore, ttl);
           break;
 
@@ -244,7 +253,7 @@ export class DistributedCacheService {
         default:
           // Write to L2 first, then L1
           await this.redis.setex(fullKey, ttl, toStore);
-          this.l1Cache.set(fullKey, { ...entry, value, compressed: false });
+          this.l1Cache.set(fullKey, entry);
           break;
       }
 
@@ -468,14 +477,16 @@ export class DistributedCacheService {
   // Compression
   // --------------------------------------------------------------------------
 
-  private compress(value: unknown): string {
-    // Simple base64 encoding for now
-    // In production, use zlib or similar
-    return Buffer.from(JSON.stringify(value)).toString('base64');
+  private async compress(value: unknown): Promise<string> {
+    const buffer = Buffer.from(JSON.stringify(value));
+    const compressed = await gzip(buffer);
+    return compressed.toString('base64');
   }
 
-  private decompress(compressed: string): unknown {
-    return JSON.parse(Buffer.from(compressed, 'base64').toString('utf-8'));
+  private async decompress(compressed: string): Promise<unknown> {
+    const buffer = Buffer.from(compressed, 'base64');
+    const decompressed = await gunzip(buffer);
+    return JSON.parse(decompressed.toString('utf-8'));
   }
 
   // --------------------------------------------------------------------------

@@ -4,7 +4,7 @@ import fs from 'fs';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3';
 
 const logger = (pino as any)({ name: 'BackupService' });
 
@@ -374,10 +374,99 @@ export class BackupService {
   }
 
   /**
-   * Stub for restoring a backup
+   * Restores a backup from local storage or S3
+   * Currently supports full PostgreSQL restoration and downloads other backup files.
+   * @param backupId - The timestamp identifier of the backup (e.g., '2023-10-25T12-00-00-000Z')
    */
   async restore(backupId: string): Promise<void> {
-    logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Manual intervention required.`);
-    // TODO: Implement download from S3 and restoration logic for each service
+    // Validate backupId to prevent path traversal or injection
+    if (!/^[a-zA-Z0-9T-]+$/.test(backupId)) {
+      throw new Error('Invalid backup ID format. Only alphanumeric characters, dashes, and T are allowed.');
+    }
+
+    logger.info(`Starting restore for backup ID: ${backupId}`);
+
+    const pgFile = `postgres_${backupId}.sql`;
+    const neo4jFile = `neo4j_${backupId}.json`;
+    const redisFile = `redis_${backupId}.json`;
+
+    const filesToRestore = [pgFile, neo4jFile, redisFile];
+
+    // 1. Download missing files from S3
+    if (this.s3Client && this.s3Bucket) {
+      for (const file of filesToRestore) {
+        const localPath = path.join(this.backupDir, file);
+        if (!fs.existsSync(localPath)) {
+          logger.info(`Downloading ${file} from S3...`);
+          try {
+            const command = new GetObjectCommand({
+              Bucket: this.s3Bucket,
+              Key: `backups/${file}`,
+            });
+            const response = await this.s3Client.send(command);
+            if (response.Body) {
+              const writeStream = fs.createWriteStream(localPath);
+              // @ts-ignore - AWS SDK types compatibility
+              response.Body.pipe(writeStream);
+              await new Promise((resolve, reject) => {
+                writeStream.on('finish', resolve);
+                writeStream.on('error', reject);
+              });
+              logger.info(`Downloaded ${file}`);
+            }
+          } catch (e: any) {
+            logger.warn(`Failed to download ${file} from S3 (might not exist): ${e.message}`);
+          }
+        }
+      }
+    }
+
+    // 2. Restore PostgreSQL
+    const pgPath = path.join(this.backupDir, pgFile);
+    if (fs.existsSync(pgPath)) {
+      logger.info('Restoring PostgreSQL...');
+      const env = { ...process.env };
+      const psqlArgs: string[] = [];
+
+      if (env.DATABASE_URL) {
+        psqlArgs.push(env.DATABASE_URL);
+      } else {
+        if (env.POSTGRES_HOST) psqlArgs.push('-h', env.POSTGRES_HOST);
+        if (env.POSTGRES_PORT) psqlArgs.push('-p', env.POSTGRES_PORT);
+        if (env.POSTGRES_USER) psqlArgs.push('-U', env.POSTGRES_USER);
+        if (env.POSTGRES_DB) psqlArgs.push(env.POSTGRES_DB);
+        if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
+          env.PGPASSWORD = env.POSTGRES_PASSWORD;
+        }
+      }
+      psqlArgs.push('-f', pgPath);
+
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn('psql', psqlArgs, { env });
+
+        child.stderr.on('data', (data) => logger.debug(`psql stderr: ${data}`));
+        child.on('error', (err) => {
+            logger.error('Failed to spawn psql', err);
+            reject(err);
+        });
+        child.on('close', (code) => {
+          if (code === 0) {
+            logger.info('PostgreSQL restored successfully.');
+            resolve();
+          } else {
+            reject(new Error(`psql exited with code ${code}`));
+          }
+        });
+      });
+    } else {
+        logger.error(`PostgreSQL backup file not found: ${pgPath}`);
+        throw new Error(`PostgreSQL backup file not found`);
+    }
+
+    // 3. Notify about others
+    logger.info(`Restore process completed for PostgreSQL.
+      Neo4j backup is available at ${path.join(this.backupDir, neo4jFile)}.
+      Redis backup is available at ${path.join(this.backupDir, redisFile)}.
+      Automated restoration for Neo4j and Redis is pending implementation of custom importers.`);
   }
 }

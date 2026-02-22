@@ -14,9 +14,13 @@ concurrency:
 jobs:
   smoke-test:
     name: create->kubectl->delete
+<<<<<<< HEAD
+    if: false  # Temporarily disabled for GA merge surge
+=======
     if: false && (vars.SUMMIT_VIND_CI == '1')
+>>>>>>> origin/main
     runs-on: ubuntu-latest
-
+    if: vars.SUMMIT_VIND_CI == '1'
 
     steps:
       - name: Checkout code

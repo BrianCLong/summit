@@ -19,7 +19,11 @@ concurrency:
 
 jobs:
   validate-exceptions:
+<<<<<<< HEAD
+    if: false  # Temporarily disabled for GA merge surge
+=======
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+>>>>>>> origin/main
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

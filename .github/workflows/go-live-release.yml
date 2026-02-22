@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -49,7 +49,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
@@ -58,7 +58,7 @@ jobs:
         run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
       - name: Setup pnpm cache
-        uses: actions/cache@7f84b8d26f5a22fbf8a47afefabd3a8bb8c6fb4a # v4
+        uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -115,7 +115,7 @@ jobs:
           fi
 
       - name: Upload Evidence Artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4
         with:
           name: go-live-evidence-${{ steps.capture-sha.outputs.sha }}
           path: artifacts/evidence/go-live/${{ steps.capture-sha.outputs.sha }}/
@@ -129,10 +129,14 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
+        uses: actions/checkout@v4
 
       - name: Download Evidence Artifact
+<<<<<<< HEAD
+        uses: actions/download-artifact@v4
+=======
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
+>>>>>>> origin/main
         with:
           name: go-live-evidence-${{ needs.go-live-gate.outputs.sha }}
           path: evidence

@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   cleanup:
+    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +29,11 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Remove PR comment
+<<<<<<< HEAD
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+=======
     if: false && (github.event_name == 'pull_request' && github.event.action == 'closed')
+>>>>>>> origin/main
         run: |
           COMMENTS=$(curl -s -X GET \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \

@@ -15,6 +15,11 @@
 
 import crypto from 'crypto';
 import { EventEmitter } from 'events';
+import zlib from 'zlib';
+import { promisify } from 'util';
+
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
 
 // ============================================================================
 // Types and Interfaces
@@ -31,6 +36,7 @@ export interface CacheEntry<T> {
   lastAccessedAt: number;
   tags: string[];
   version: number;
+  compressed?: boolean;
 }
 
 /**
@@ -358,7 +364,13 @@ export class CacheManager extends EventEmitter {
         try {
           const serialized = await this.redisClient.get(fullKey);
           if (serialized) {
-            const entry = JSON.parse(serialized) as CacheEntry<T>;
+            let entry = JSON.parse(serialized) as CacheEntry<T>;
+
+            // Decompress if needed
+            if (entry.compressed && typeof entry.value === 'string') {
+               const decompressedValue = await this.decompress(entry.value);
+               entry = { ...entry, value: decompressedValue as T, compressed: false };
+            }
 
             // Check if stale
             const now = Date.now();
@@ -436,7 +448,22 @@ export class CacheManager extends EventEmitter {
       // Set in L2 cache (Redis)
       if (!options.skipL2 && this.redisClient && !this.isCircuitOpen()) {
         try {
-          const serialized = JSON.stringify(entry);
+          let valueToStore = entry;
+
+          if (this.config.enableCompression) {
+            const rawString = JSON.stringify(entry.value);
+            if (rawString.length > this.config.compressionThreshold) {
+               const compressedValue = await this.compress(entry.value);
+               valueToStore = {
+                 ...entry,
+                 value: compressedValue as any,
+                 compressed: true
+               };
+               this.metrics.l2Size += rawString.length; // Approximate tracking
+            }
+          }
+
+          const serialized = JSON.stringify(valueToStore);
           await this.redisClient.setex(fullKey, ttl, serialized);
 
           // Store tag mappings for invalidation
@@ -790,6 +817,24 @@ export class CacheManager extends EventEmitter {
     setTimeout(() => {
       this.pendingRevalidations.delete(key);
     }, 5000);
+  }
+
+  /**
+   * Compress value using gzip
+   */
+  private async compress(value: unknown): Promise<string> {
+    const buffer = Buffer.from(JSON.stringify(value));
+    const compressed = await gzip(buffer);
+    return compressed.toString('base64');
+  }
+
+  /**
+   * Decompress value using gunzip
+   */
+  private async decompress(compressed: string): Promise<unknown> {
+    const buffer = Buffer.from(compressed, 'base64');
+    const decompressed = await gunzip(buffer);
+    return JSON.parse(decompressed.toString('utf-8'));
   }
 
   /**

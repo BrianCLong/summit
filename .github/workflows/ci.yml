@@ -77,12 +77,16 @@ jobs:
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+=======
 <<<<<<< HEAD
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -93,6 +97,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 >>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
+>>>>>>> origin/main
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -145,7 +150,11 @@ jobs:
       strict: true
 
   soc-controls:
+<<<<<<< HEAD
+    name: SOC Controls (CI)
+=======
     name: SOC Controls
+>>>>>>> origin/main
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
