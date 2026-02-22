@@ -1,0 +1,22 @@
+{
+  "$id": "https://summit.dev/schemas/events/agent_run.v0.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Run Event",
+  "type": "object",
+  "required": ["event_type", "run_id", "timestamp"],
+  "properties": {
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "agent.run.requested",
+        "agent.run.completed",
+        "agent.run.failed"
+      ]
+    },
+    "run_id": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "payload": { "type": "object", "additionalProperties": true }
+  }
+}
