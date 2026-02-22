@@ -11,19 +11,16 @@ on:
       - 'server/src/policy-engine/**'
       - 'server/src/scripts/policy-propose.ts'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   test-engine:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'

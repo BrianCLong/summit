@@ -9,8 +9,7 @@
 
 package agents.archetypes
 
-import future.keywords.if
-import future.keywords.in
+import future.keywords
 
 # Default deny
 default allow = false

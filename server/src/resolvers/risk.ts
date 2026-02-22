@@ -1,4 +1,4 @@
-import { RiskService } from '../risk/RiskService.js';
+import { RiskService } from '../risk/RiskService';
 
 const service = new RiskService();
 

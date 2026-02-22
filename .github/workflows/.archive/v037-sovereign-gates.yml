@@ -464,7 +464,7 @@ jobs:
           cat evidence/v0.3.7/ci-validation/sovereign-gate-summary.json
 
       - name: Upload Sovereign Evidence Bundle
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: v037-sovereign-evidence-bundle
           path: evidence/v0.3.7/ci-validation/

@@ -11,11 +11,10 @@ import { Logger } from 'pino';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
 const { sign, verify } = jwt;
-import { getPostgresPool, getRedisClient } from '../config/database.js';
-import logger from '../utils/logger.js';
-import { correlationStorage } from '../config/logger.js';
-import { AuditTimelineRollupService } from './AuditTimelineRollupService.js';
-import { AuditArchivingService } from '../services/AuditArchivingService.js';
+import { getPostgresPool, getRedisClient } from '../config/database.ts';
+import logger from '../utils/logger.ts';
+import { correlationStorage } from '../config/logger.ts';
+import { AuditTimelineRollupService } from './AuditTimelineRollupService.ts';
 
 // Core audit event types
 export type AuditEventType =
@@ -187,7 +186,6 @@ export class AdvancedAuditSystem extends EventEmitter {
   private batchSize: number = 100;
   private compressionEnabled: boolean = true;
   private realTimeAlerting: boolean = true;
-  private archiveThresholdDays: number = 90; // Archive events older than 90 days
 
   // Caching
   private eventBuffer: AuditEvent[] = [];
@@ -222,11 +220,6 @@ export class AdvancedAuditSystem extends EventEmitter {
     );
     if (!Number.isNaN(retentionIntervalHours) && retentionIntervalHours > 0) {
       this.retentionIntervalHours = retentionIntervalHours;
-    }
-
-    const archiveThreshold = Number(process.env.AUDIT_ARCHIVE_THRESHOLD_DAYS);
-    if (!Number.isNaN(archiveThreshold) && archiveThreshold > 0) {
-      this.archiveThresholdDays = archiveThreshold;
     }
 
     // Initialize schema
@@ -533,26 +526,10 @@ export class AdvancedAuditSystem extends EventEmitter {
     if (!this.retentionEnabled) {
       return 0;
     }
-
     const effectiveDays = Math.max(0, retentionDays);
     if (effectiveDays === 0) {
       return 0;
     }
-
-    // 1. Archival Phase: Archive logs between ARCHIVE_THRESHOLD and RETENTION_PERIOD
-    if (this.archiveThresholdDays < effectiveDays) {
-      const archiver = AuditArchivingService.getInstance();
-      const archiveEnd = new Date(Date.now() - (this.archiveThresholdDays * 24 * 60 * 60 * 1000));
-      const archiveStart = new Date(Date.now() - (effectiveDays * 24 * 60 * 60 * 1000));
-
-      try {
-        await archiver.archiveRange(archiveStart, archiveEnd, 'COLD');
-      } catch (err: any) {
-        this.logger.error({ error: err.message }, 'Audit archival failed - continuing with pruning');
-      }
-    }
-
-    // 2. Pruning Phase: Delete records older than retention period
     const result = await this.db.query(
       `DELETE FROM audit_events
        WHERE timestamp < NOW() - ($1 * INTERVAL '1 day')`,

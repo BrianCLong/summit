@@ -1,4 +1,4 @@
-import { DrillScenario } from './types.js';
+import { DrillScenario } from './types';
 
 export const defaultScenario: DrillScenario = {
   name: 'Day-0 → Day-30 Privacy Incident Drill',

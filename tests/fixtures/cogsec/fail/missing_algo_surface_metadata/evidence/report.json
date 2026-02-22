@@ -1,0 +1,7 @@
+{
+  "cognitive_surface": {
+    "channels": ["twitter"]
+  },
+  "threat_hypotheses": [],
+  "mitigations_applied": []
+}

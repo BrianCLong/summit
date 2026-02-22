@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { DataPoint, ColorScale, Margin, Dimension } from './types.js';
+import { DataPoint, ColorScale, Margin, Dimension } from './types';
 import * as d3 from 'd3';
 
 // Color utilities

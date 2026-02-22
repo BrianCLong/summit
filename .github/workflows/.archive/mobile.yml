@@ -50,7 +50,7 @@ jobs:
   build-android:
     needs: validate
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main') && (github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -75,7 +75,7 @@ jobs:
         run: cd apps/mobile/android && ./gradlew bundleRelease
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-release.aab
           path: apps/mobile/android/app/build/outputs/bundle/release/app-release.aab
@@ -83,6 +83,7 @@ jobs:
   build-ios:
     needs: validate
     runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 

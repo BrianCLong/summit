@@ -3,7 +3,7 @@
  */
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import type { IngestService as IngestServiceType, IngestInput } from '../IngestService.js';
+import type { IngestService as IngestServiceType, IngestInput } from '../IngestService';
 import type { Pool } from 'pg';
 import type { Driver } from 'neo4j-driver';
 
@@ -59,7 +59,7 @@ jest.unstable_mockModule('../../config/logger', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { IngestService } = await import('../IngestService.js');
+const { IngestService } = await import('../IngestService');
 
 describe('IngestService', () => {
   let ingestService: IngestServiceType;

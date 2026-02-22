@@ -21,23 +21,23 @@ import {
   type QueryPreview,
   type QueryRefinement,
   type QueryCostEstimate,
-} from './types.js';
+} from './types.ts';
 import {
   generateFromPattern,
   queryPatterns,
-} from '../nl-graph-query/query-patterns.js';
+} from '../nl-graph-query/query-patterns.ts';
 import {
   estimateQueryCost,
   isSafeToExecute,
   generateCostWarnings,
-} from '../nl-graph-query/cost-estimator.js';
+} from '../nl-graph-query/cost-estimator.ts';
 import {
   validateCypher,
   extractRequiredParameters,
   isReadOnlyQuery,
-} from '../nl-graph-query/validator.js';
-import { explainQuery, summarizeQuery } from '../nl-graph-query/explainer.js';
-import type { SchemaContext } from '../nl-graph-query/types.js';
+} from '../nl-graph-query/validator.ts';
+import { explainQuery, summarizeQuery } from '../nl-graph-query/explainer.ts';
+import type { SchemaContext } from '../nl-graph-query/types.ts';
 
 const logger = (pino as any)({ name: 'nl-query-service' });
 

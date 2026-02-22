@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-SEC-001",
-  "metrics": {
-    "redaction_patterns": 4,
-    "never_embed_enforced": true,
-    "unit_tests_passed": 4
-  }
-}

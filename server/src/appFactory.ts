@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { cfg } from './config.js';
-import logger from './utils/logger.js';
-import { auditLogDashboard } from './logging/structuredLogger.js';
+import { cfg } from './config.ts';
+import logger from './utils/logger.ts';
+import { auditLogDashboard } from './logging/structuredLogger.ts';
 
 interface AppOptions {
   lightweight?: boolean;
@@ -29,14 +29,14 @@ function createApp({ lightweight = false }: AppOptions = {}) {
   );
 
   app.use(cors({ origin: cfg.CORS_ORIGIN, credentials: true }));
-  app.use(express.json({ limit: '10mb' }));
+  app.use(express.tson({ limit: '10mb' }));
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
   app.use(
     morgan('combined', { stream: { write: (msg: string) => logger.info(msg.trim()) } }),
   );
 
   app.get('/health', (req, res) => {
-    res.status(200).json({
+    res.status(200).tson({
       status: 'OK',
       timestamp: new Date().toISOString(),
       environment: cfg.NODE_ENV,
@@ -45,7 +45,7 @@ function createApp({ lightweight = false }: AppOptions = {}) {
   });
 
   app.get('/observability/logs/dashboard', (req, res) => {
-    res.status(200).json(auditLogDashboard.getDashboardSnapshot());
+    res.status(200).tson(auditLogDashboard.getDashboardSnapshot());
   });
 
   if (lightweight) return app;

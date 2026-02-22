@@ -1,7 +1,0 @@
-{
-  "stage": "stage_2_pilot",
-  "decision_rights_defined": true,
-  "model_inventory_present": true,
-  "runtime_monitoring": false,
-  "owner_role": "product_lead"
-}

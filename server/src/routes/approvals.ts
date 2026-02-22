@@ -118,18 +118,6 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
           payload.userId || approverId,
           String(payload.requestText || ''),
         );
-      } else if (
-        maestro &&
-        approval.action === 'maestro_task_execution' &&
-        approval.payload
-      ) {
-        const payload = approval.payload as { taskId: string };
-        const task = await maestro.getTask(payload.taskId);
-        if (task) {
-          // Re-execute the task now that it has been approved
-          // Governance flip check will allow it this time because of the manual approval record
-          actionResult = await maestro.executeTask(task);
-        }
       }
 
       approvalsLogger.info(

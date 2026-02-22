@@ -1,7 +1,7 @@
 import { jest, describe, test, expect } from '@jest/globals';
 import InvestigativeThreadQualityAgent, {
   ThreadInput,
-} from '../src/ai/investigative-thread-quality-agent.js';
+} from '../src/ai/investigative-thread-quality-agent';
 
 describe('InvestigativeThreadQualityAgent', () => {
   test('scores and updates graph metadata', async () => {

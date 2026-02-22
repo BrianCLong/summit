@@ -17,9 +17,10 @@ jobs:
         with:
           ref: ${{ github.event.inputs.ref }}
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'

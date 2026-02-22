@@ -7,7 +7,7 @@
     "noEmit": false,
     "baseUrl": ".",
     "paths": {
-      "@intelgraph/maestro-core": ["../../maestro-core/dist/engine.d.ts"]
+      "@maestro/core": ["../../maestro-core/dist/engine.d.ts"]
     }
   },
   "include": ["src/**/*"]

@@ -33,7 +33,7 @@ jobs:
           echo "ready=true" >> $GITHUB_OUTPUT
 
       - name: Run Policy Gates (OPA)
-        if: ((steps.check-ready.outputs.ready == 'true') && (steps.check-ready.outputs.ready == 'true')) && (steps.check-ready.outputs.ready == 'true')
+        if: steps.check-ready.outputs.ready == 'true'
         run: |
           # Placeholder for OPA check
           echo "Running OPA policies..."
@@ -41,12 +41,14 @@ jobs:
           echo "OPA passed."
 
       - name: Run Security Scans
+        if: steps.check-ready.outputs.ready == 'true'
         run: |
           echo "Running security scans..."
           # npm run security:scan <-- would run this
           echo "Security scan passed."
 
       - name: Auto-Create PR
+        if: steps.check-ready.outputs.ready == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           title: "Agentic Task: ${{ github.ref_name }}"

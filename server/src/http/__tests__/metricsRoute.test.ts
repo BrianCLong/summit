@@ -7,7 +7,7 @@ await jest.unstable_mockModule('../../observability/metrics.js', () => ({
   },
 }));
 
-const { metricsRoute } = await import('../metricsRoute.js');
+const { metricsRoute } = await import('../metricsRoute');
 
 describe('metricsRoute', () => {
   it('returns a metrics payload with reliability collectors', async () => {

@@ -17,7 +17,7 @@ jobs:
           cd policy-fuzzer
           python main.py
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: policy-fuzzer-reports
           path: |

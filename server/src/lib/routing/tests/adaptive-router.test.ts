@@ -1,9 +1,9 @@
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import AdaptiveRouter from '../adaptive-router.js';
+import AdaptiveRouter from '../adaptive-router';
 
 // Mock backend data for testing
-import { Backend } from '../types.js';
+import { Backend } from '../types';
 
 const mockBackends: Backend[] = [
   { id: 'backend-1', address: '1.1.1.1', weight: 5, connections: 10, latency: 50, status: 'UP' },

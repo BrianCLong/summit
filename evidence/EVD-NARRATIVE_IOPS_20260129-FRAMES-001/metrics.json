@@ -1,8 +1,5 @@
 {
-  "evidence_id": "EVD-NARRATIVE_IOPS_20260129-FRAMES-001",
-  "metrics": {
-    "failed": 0,
-    "frame_contract_coverage": 1.0,
-    "passed": 6
-  }
+  "failed": 0,
+  "frame_contract_coverage": 1.0,
+  "passed": 5
 }

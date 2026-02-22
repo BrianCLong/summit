@@ -1,4 +1,4 @@
-import { AggregateFunction } from './types.js';
+import { AggregateFunction } from './types';
 
 /**
  * Common aggregation functions for stream processing

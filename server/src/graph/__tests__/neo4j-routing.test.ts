@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { runCypher, __resetGraphConnectionsForTests } from '../neo4j.js';
+import { runCypher, __resetGraphConnectionsForTests } from '../neo4j';
 import {
   buildGraphCacheKey,
   invalidateGraphQueryCache,
   normalizeQuery,
-} from '../queryCache.js';
+} from '../queryCache';
 import { flushLocalCache } from '../../cache/responseCache.js';
 
 jest.mock('neo4j-driver', () => {

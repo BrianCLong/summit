@@ -3,12 +3,12 @@ import {
   WhatIfRequest, WhatIfResult,
   SimulationRequest, SimulationResult,
   GraphSnapshot, Node, Edge
-} from '../contracts/predictive/types.js';
-import { SimpleGraphEngine } from './SimpleGraph.js';
-import { hybridForecast } from './forecasting.js';
-import { CampaignSimulator } from './simulation.js';
-import GraphAnalyticsService from '../services/GraphAnalyticsService.js';
-import { getNeo4jDriver } from '../config/database.js';
+} from '../contracts/predictive/types';
+import { SimpleGraphEngine } from './SimpleGraph';
+import { hybridForecast } from './forecasting';
+import { CampaignSimulator } from './simulation';
+import GraphAnalyticsService from '../services/GraphAnalyticsService';
+import { getNeo4jDriver } from '../config/database';
 import { Driver } from 'neo4j-driver';
 
 export class PredictiveService {

@@ -1,16 +1,16 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import type { SpeechJob } from '../../types.js';
+import type { SpeechJob } from '../../types.ts';
 
 const mockGetInstance = jest.fn();
 
-jest.unstable_mockModule('../../VoiceProvenanceLedger.js', () => ({
+jest.unstable_mockModule('../../VoiceProvenanceLedger.ts', () => ({
   VoiceProvenanceLedger: {
     getInstance: mockGetInstance,
   },
 }));
 
-const { Qwen3TTSProvider } = await import('../Qwen3TTSProvider.js');
-const { VoiceProvenanceLedger } = await import('../../VoiceProvenanceLedger.js');
+const { Qwen3TTSProvider } = await import('../Qwen3TTSProvider.ts');
+const { VoiceProvenanceLedger } = await import('../../VoiceProvenanceLedger.ts');
 
 describe('Qwen3TTSProvider', () => {
   let provider: InstanceType<typeof Qwen3TTSProvider>;

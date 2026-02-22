@@ -19,14 +19,10 @@ vi.mock('../src/db/postgres.js', () => ({
 }));
 
 // Import after mocking
-import app, { serverReady } from '../src/index.js';
+import app from '../src/index.js';
 import { pool } from '../src/db/postgres.js';
 
 describe('Tenant API', () => {
-  // Wait for Apollo server to be ready before GraphQL tests
-  beforeAll(async () => {
-    await serverReady;
-  });
   describe('Health Endpoints', () => {
     it('GET /health returns healthy status', async () => {
       const response = await request(app).get('/health');

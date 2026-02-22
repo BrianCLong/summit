@@ -1,7 +1,7 @@
-import { BulkOperationPayload, BulkOperationResponse, BulkItemResult, BulkContext, BulkItemInput } from './types.js';
-import { handlers } from './handlers.js';
-import { getPostgresPool } from '../db/postgres.js';
-import logger from '../config/logger.js';
+import { BulkOperationPayload, BulkOperationResponse, BulkItemResult, BulkContext, BulkItemInput } from './types.ts';
+import { handlers } from './handlers.ts';
+import { getPostgresPool } from '../db/postgres.ts';
+import logger from '../config/logger.ts';
 
 const serviceLogger = logger.child({ name: 'BulkOperationService' });
 

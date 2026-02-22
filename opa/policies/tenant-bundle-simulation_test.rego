@@ -2,7 +2,7 @@ package tenant.bundle
 
 import rego.v1
 
-test_cross_tenant_denied_by_default if {
+test_cross_tenant_denied_by_default {
     result := data.tenant.bundle.decision with input as {
         "subject_tenant": "tenant-a",
         "resource_tenant": "tenant-b",
@@ -12,7 +12,7 @@ test_cross_tenant_denied_by_default if {
     result.reason == "cross_tenant_denied"
 }
 
-test_overlay_override_respected if {
+test_overlay_override_respected {
     result := data.tenant.bundle.decision with input as {
         "subject_tenant": "tenant-a",
         "resource_tenant": "tenant-b",

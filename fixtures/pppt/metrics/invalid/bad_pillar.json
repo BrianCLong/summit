@@ -1,6 +1,0 @@
-{
-  "pillar": "vanity_metrics",
-  "kpis": ["Unique Visitors", "MQLs"],
-  "owner": "CMO",
-  "decision_cadence": "weekly"
-}
