@@ -39,7 +39,7 @@ jobs:
           cache: pnpm
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run Server Unit Tests with Coverage (blocking)
         if: github.event_name != 'pull_request'
@@ -47,7 +47,7 @@ jobs:
         # CANONICAL ENTRYPOINT: Use test:ci script for deterministic CI execution
         # Defined in server/package.json with hardened settings from commit 8434f7ae3b0
         run: |
-          pnpm test:ci
+          PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH" pnpm test:ci
         env:
           CI: true
           NODE_ENV: test
