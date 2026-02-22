@@ -46,13 +46,17 @@ Mitigations: Evidence-first capture, no policy bypass, explicit Governed Excepti
 - 2026-02-22: Attempted issue list query; blocked by api.github.com connectivity.
 - 2026-02-22: PR #18569 targeted test `pnpm --filter intelgraph-server test -- SemanticSearchService.test.ts` failed: `cross-env` missing; node_modules absent.
 - 2026-02-22: PR #18574 targeted test `pnpm --filter intelgraph-server test -- security_regression.test.js` failed: `cross-env` missing; node_modules absent.
+- 2026-02-22: Pushed branch `chore/daily-sprint-2026-02-22-12` with daily sprint evidence and STATUS update.
+- 2026-02-22: PR creation failed: api.github.com connectivity error.
 
 **Governed Exceptions**
 - GitHub issue scan blocked by api.github.com connectivity.
 - Targeted test runs blocked by missing `cross-env` due to absent `node_modules` in this worktree.
+- PR creation blocked by api.github.com connectivity.
 
 **End-of-Day Report (Current Run)**
 Completed: Evidence capture and daily sprint plan.
 In progress: Targeted PR triage for #18569 and #18574.
 Blocked: Issue scan due to api.github.com connectivity.
 Blocked: Targeted tests due to missing `cross-env` and `node_modules`.
+Blocked: PR creation due to api.github.com connectivity.
