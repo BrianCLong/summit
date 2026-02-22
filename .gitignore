@@ -283,7 +283,7 @@ pr-dashboard-report.json
 pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
-artifacts/
+artifacts/*
 /dist
 .env
 sbom.json
@@ -378,3 +378,4 @@ packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
 *.js.map
+!artifacts/governance/
