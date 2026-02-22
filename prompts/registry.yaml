@@ -689,6 +689,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agent-data-access-policy-foundation
+    version: v1
+    path: prompts/agent-data-access/policy-foundation@v1.md
+    sha256: 7110bddbf18d26c2b0a1111016b7c460a4e3a629783fb271443079d54bcd5607
+    description: Establish agent data-access policy registries, evaluator, tests, and evidence scaffolding.
+    scope:
+      paths:
+        - .github/policies/agent-data-access/
+        - src/agents/policy/
+        - tests/agents/policy/
+        - evidence/index.json
+        - evidence/EVD-OSINTLEGAL-DATAACCESS-001/
+        - evidence/EVD-OSINTLEGAL-DATAACCESS-002/
+        - docs/roadmap/STATUS.json
+        - prompts/agent-data-access/policy-foundation@v1.md
+        - prompts/registry.yaml
+        - agents/examples/AGENT_DATA_ACCESS_PR1.json
+      domains:
+        - governance
+        - policy
+        - evidence
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: minimal-architecture-index
     version: v1
     path: prompts/architecture/minimal-architecture-index@v1.md

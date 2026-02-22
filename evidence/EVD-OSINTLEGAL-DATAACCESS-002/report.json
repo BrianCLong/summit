@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-OSINTLEGAL-DATAACCESS-002",
+  "summary": "Restricted sources require explicit approval before access is allowed.",
+  "references": [
+    "tests/agents/policy/policyEval.test.ts#requires-approval-for-restricted-sources"
+  ]
+}

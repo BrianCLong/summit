@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/agent-data-access/tool_registry.schema.json",
+  "title": "Agent Data Access Tool Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "tools"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tools": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/tool" }
+    }
+  },
+  "definitions": {
+    "tool": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "description",
+        "capabilities",
+        "scopes",
+        "rateLimitPerMin",
+        "enabled"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "scopes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        },
+        "rateLimitPerMin": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "enabled": { "type": "boolean" },
+        "classification": {
+          "type": "string",
+          "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "RESTRICTED"]
+        }
+      }
+    }
+  }
+}

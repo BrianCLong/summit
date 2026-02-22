@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "patterns": [
+    "bypass",
+    "credential stuffing",
+    "paywall circumvention",
+    "scrape behind login",
+    "exploit"
+  ]
+}
