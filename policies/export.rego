@@ -1,4 +1,5 @@
 package intelgraph.export
+import rego.v1
 
 # Export policy for IntelGraph GA Core — simulate/enforce, DLP redactions, WebAuthn step-up.
 # Decision object intentionally explicit for audit & UX payloads.
