@@ -1,3 +1,5 @@
+import { getAuditSystem } from '../audit/advanced-audit-system.js';
+import { randomUUID } from 'crypto';
 // @ts-nocheck
 /**
  * @fileoverview Authentication Service for Summit/IntelGraph Platform
@@ -514,6 +516,30 @@ export class AuthService {
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       this.metrics.incrementCounter('user_logins_total', { tenant_id: tenantId, result: 'success' });
+
+      // Audit Log
+      try {
+        getAuditSystem().recordEvent({
+          eventType: 'user_login',
+          level: 'info',
+          timestamp: new Date(),
+          correlationId: randomUUID(),
+          userId: user.id,
+          tenantId: tenantId,
+          serviceId: 'auth-service',
+          resourceType: 'user',
+          resourceId: user.id,
+          action: 'login',
+          outcome: 'success',
+          message: `User ${user.email} logged in successfully`,
+          complianceRelevant: true,
+          complianceFrameworks: ['SOC2', 'GDPR'],
+          ipAddress,
+          userAgent
+        });
+      } catch (e) {
+        logger.error('Failed to log audit event', e);
+      }
       return {
         user: this.formatUser(user),
         token,
@@ -523,6 +549,55 @@ export class AuthService {
     } catch (error: any) {
       logger.error('Error logging in user:', error);
       this.metrics.incrementCounter('user_logins_total', { tenant_id: tenantId, result: 'failure' });
+
+      // Audit Log Failure
+      try {
+        getAuditSystem().recordEvent({
+          id: randomUUID(),
+          eventType: 'user_login',
+          level: 'warn',
+          timestamp: new Date(),
+          correlationId: randomUUID(),
+          tenantId: tenantId,
+          serviceId: 'auth-service',
+          resourceType: 'user',
+          resourceId: email,
+          action: 'login',
+          outcome: 'failure',
+          message: `Login failed for ${email}: ${error.message}`,
+          complianceRelevant: true,
+          complianceFrameworks: ['SOC2'],
+          ipAddress,
+          userAgent,
+          details: { error: error.message }
+        });
+      } catch (e) {
+         // ignore
+      }
+
+      // Audit Log Failure
+      try {
+        getAuditSystem().recordEvent({
+          eventType: 'user_login',
+          level: 'warn',
+          timestamp: new Date(),
+          correlationId: randomUUID(),
+          tenantId: tenantId,
+          serviceId: 'auth-service',
+          resourceType: 'user',
+          resourceId: email,
+          action: 'login',
+          outcome: 'failure',
+          message: `Login failed for ${email}: ${error.message}`,
+          complianceRelevant: true,
+          complianceFrameworks: ['SOC2'],
+          ipAddress,
+          userAgent,
+          details: { error: error.message }
+        });
+      } catch (e) {
+         // ignore
+      }
       throw error;
     } finally {
       client.release();

@@ -26,6 +26,7 @@ jest.unstable_mockModule('../GAEnrollmentService.js', () => ({
 const mockGetPostgresPool = jest.fn();
 jest.unstable_mockModule('../../config/database.js', () => ({
   getPostgresPool: mockGetPostgresPool,
+  getRedisClient: jest.fn(),
 }));
 
 // 3. Mock Config Utils
@@ -66,6 +67,14 @@ jest.unstable_mockModule('jsonwebtoken', () => ({
   },
   sign: mockSign,
   verify: mockVerify,
+}));
+
+
+const mockRecordEvent = jest.fn();
+jest.unstable_mockModule('../../audit/advanced-audit-system.js', () => ({
+  getAuditSystem: jest.fn(() => ({
+    recordEvent: mockRecordEvent
+  }))
 }));
 
 // 5. Dynamic Imports

@@ -1,3 +1,5 @@
+import { getAuditSystem } from '../audit/advanced-audit-system.js';
+import { randomUUID } from 'crypto';
 /**
  * Deterministic Export Service - GA Core Implementation
  * Provides export bundles with SHA256 manifests and integrity verification
@@ -104,11 +106,34 @@ export class DeterministicExportService {
     request: ExportRequest,
     session: Session,
   ): Promise<{
+
+
     exportId: string;
     bundlePath: string;
     manifest: ExportManifest;
   }> {
     const exportId = uuidv4();
+    try {
+      getAuditSystem().recordEvent({
+        id: randomUUID(),
+        eventType: 'data_export',
+        level: 'info',
+        timestamp: new Date(),
+        correlationId: randomUUID(),
+        userId: request.userId,
+        tenantId: request.tenantId,
+        serviceId: 'export-service',
+        resourceType: 'export_bundle',
+        resourceId: 'pending',
+        action: 'create',
+        outcome: 'pending',
+        message: `Export requested by ${request.userId}`,
+        complianceRelevant: true,
+        complianceFrameworks: ['GDPR'],
+        details: { request }
+      });
+    } catch (e) {}
+
     const startTime = Date.now();
 
     log.info({ exportId, request }, 'Starting deterministic export');

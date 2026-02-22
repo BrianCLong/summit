@@ -1,3 +1,4 @@
+import type { ResidencyGuard } from '../residency-guard.js';
 import { jest } from '@jest/globals';
 
 const queryMock = jest.fn();

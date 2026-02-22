@@ -1,3 +1,6 @@
+import { ensureAuthenticated as authenticateToken } from '../middleware/auth.js';
+import { AuthorizationServiceImpl } from '../services/AuthorizationService.js';
+import { Principal } from '../types/identity.js';
 import { Router } from 'express';
 import { AirgapService } from '../services/AirgapService.js';
 import { tenantHeader } from '../middleware/tenantHeader.js';
@@ -10,9 +13,11 @@ import express from 'express';
 
 export const airgapRouter = Router();
 const service = new AirgapService();
+const authService = new AuthorizationServiceImpl();
 
 // Middleware to ensure tenant context
 airgapRouter.use(tenantHeader());
+airgapRouter.use(authenticateToken);
 
 // Export Route
 airgapRouter.post('/export', async (req: any, res) => {
@@ -25,6 +30,19 @@ airgapRouter.post('/export', async (req: any, res) => {
             tenantId,
             userId: req.user?.id || 'unknown'
         };
+        const user = (req as any).user; // Cast to any as req.user might not be typed
+        if (!user) throw new Error('Unauthenticated');
+
+        const principal: Principal = {
+            id: user.id,
+            kind: 'user',
+            tenantId: tenantId,
+            roles: [user.role],
+            user: { email: user.email, username: user.username }
+        };
+
+        await authService.assertCan(principal, 'create', { type: 'data_export', tenantId });
+
 
         const result = await service.exportBundle(request, session);
         res.json(result);
