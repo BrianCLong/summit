@@ -92,7 +92,13 @@ describe('IngestService', () => {
   });
 
   describe('ingest', () => {
-    it('should successfully ingest entities and relationships', async () => {
+    it('should successfully ingest entities and relationships and sync to Neo4j using batching', async () => {
+      const mockSession = {
+        run: jest.fn().mockResolvedValue({ records: [] }),
+        close: jest.fn().mockResolvedValue(undefined),
+      };
+      (mockNeo4j.session as jest.Mock).mockReturnValue(mockSession);
+
       const input: IngestInput = {
         tenantId: 'test-tenant',
         sourceType: 's3-csv',
@@ -105,7 +111,6 @@ describe('IngestService', () => {
             labels: ['Person'],
             properties: {
               name: 'Alice Smith',
-              email: 'alice@example.com',
             },
           },
           {
@@ -139,7 +144,46 @@ describe('IngestService', () => {
         .mockResolvedValueOnce({ rows: [{ id: 'stable-id-2' }] }) // INSERT entity 2
         .mockResolvedValueOnce({ rows: [] }) // Check existing relationship
         .mockResolvedValueOnce({ rows: [{ id: 'rel-1' }] }) // INSERT relationship
-        .mockResolvedValueOnce({ rows: [] }); // COMMIT
+        .mockResolvedValueOnce({ rows: [] }) // COMMIT
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'stable-id-1',
+              tenant_id: 'test-tenant',
+              kind: 'person',
+              props: JSON.stringify({ name: 'Alice Smith' }),
+              labels: ['Person'],
+              created_at: new Date(),
+              updated_at: new Date(),
+            },
+            {
+              id: 'stable-id-2',
+              tenant_id: 'test-tenant',
+              kind: 'organization',
+              props: JSON.stringify({ name: 'Tech Corp' }),
+              labels: ['Organization'],
+              created_at: new Date(),
+              updated_at: new Date(),
+            },
+          ],
+        }) // SELECT entities for Neo4j sync
+        .mockResolvedValueOnce({ rows: [] }) // SELECT entities for Neo4j sync (empty)
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              from_entity_id: 'stable-id-1',
+              to_entity_id: 'stable-id-2',
+              tenant_id: 'test-tenant',
+              relationship_type: 'MEMBER_OF',
+              props: JSON.stringify({ role: 'CEO' }),
+              confidence: 0.95,
+              source: 's3-csv',
+              first_seen: new Date(),
+              last_seen: new Date(),
+            },
+          ],
+        }) // SELECT relationships for Neo4j sync
+        .mockResolvedValueOnce({ rows: [] }); // SELECT relationships for Neo4j sync (empty)
 
       const result = await ingestService.ingest(input);
 
@@ -154,6 +198,16 @@ describe('IngestService', () => {
 
       // Verify COMMIT was called
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+
+      // BOLT: Verify batched Neo4j synchronization
+      expect(mockSession.run).toHaveBeenCalledWith(
+        expect.stringContaining('UNWIND $batch AS item'),
+        expect.objectContaining({
+          batch: expect.arrayContaining([
+            expect.objectContaining({ id: 'stable-id-1' }),
+          ]),
+        }),
+      );
 
       // Verify client was released
       expect(mockClient.release).toHaveBeenCalled();

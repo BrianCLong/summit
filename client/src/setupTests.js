@@ -128,7 +128,7 @@ jest.mock('./context/AuthContext', () => ({
         user: {
             id: 'test-user-id',
             name: 'Test User',
-            email: 'test@example.com',
+            email: 'test.at.example.com',
             roles: ['admin', 'analyst']
         },
         login: jest.fn(),
