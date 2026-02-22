@@ -30,6 +30,8 @@
     "test:release-scripts": "node --test scripts/release/__tests__/*.test.mjs",
     "test:docs-governance": "node --test scripts/ci/__tests__/governance_docs_verifier.test.mjs",
     "test:soc-report": "PYTHONPATH=. python3 -m unittest scripts.evidence.tests.test_soc_report",
+    "summit:repoFlow:profile": "node scripts/ci/repoflow-profile.js",
+    "summit:repoFlow:drift": "tsx scripts/monitoring/vercel-v0-90-problem-drift.ts",
     "test:smoke": "npm run test:smoke:backend && npm run test:smoke:frontend",
     "test:smoke:backend": "cd server && npm run test:smoke",
     "test:smoke:frontend": "cd client && npm run test:smoke",
