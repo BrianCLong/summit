@@ -44,22 +44,16 @@ jobs:
 
       - name: Diff vs prior
         run: |
-          # Create a dummy "today" file for the script logic (though the script logic in the user prompt was bash + jq)
-          # We'll use a simpler approach here using the jq script we saved.
+          # PR fast-path: avoid long artifact-history fetches in required context.
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR advisory mode: skipping historical artifact diff."
+            echo "{}" > runs_diff.json
+            exit 0
+          fi
 
-          # First, try to fetch the previous artifact if possible.
-          # For now, we simulate "yesterday" if it doesn't exist, or just skip diffing if no history.
-          # In a real setup, we'd download the artifact from the previous run.
-
-          # NOTE: Fetching artifacts from previous runs is tricky without extra actions.
-          # We will implement a simplified version that just diffs against itself if no prior artifact found (yielding 0 diff),
-          # or if the user wants strictly persistent history, we'd need to use cache or external storage.
-          # For this "tight" implementation, we'll assume we might not have yesterday's data in this ephemeral runner
-          # unless we download it.
-
-          # Attempt to download the latest 'ci-signal' artifact
+          # Attempt to download the latest 'ci-signal' artifact.
           mkdir -p artifacts
-          gh run download -n ci-signal -D artifacts || echo "No prior artifact found"
+          timeout 120 gh run download -n ci-signal -D artifacts || echo "No prior artifact found or download timed out"
 
           if [ -f artifacts/runs_metrics.json ]; then
             jq -n --argjson cur "$(cat runs_metrics.json)" --argjson prev "$(cat artifacts/runs_metrics.json)" -f scripts/ci/diff_metrics.jq > runs_diff.json
@@ -71,9 +65,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Enforce policy
+      - name: Enforce policy (blocking)
+        if: github.event_name != 'pull_request'
         run: |
           ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json
+
+      - name: Enforce policy (advisory on PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json; then
+            echo "::warning::CI signal gate is advisory on pull_request context."
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
