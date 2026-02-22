@@ -484,17 +484,17 @@ export default function InvestigationDetail() {
             <Stack spacing={2} alignItems="flex-end">
               <Stack direction="row" spacing={1}>
                 <Tooltip title="Share Investigation">
-                  <IconButton>
+                  <IconButton aria-label="Share investigation">
                     <Share />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Export Report">
-                  <IconButton>
+                  <IconButton aria-label="Export report">
                     <Download />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Edit Investigation">
-                  <IconButton>
+                  <IconButton aria-label="Edit investigation">
                     <Edit />
                   </IconButton>
                 </Tooltip>

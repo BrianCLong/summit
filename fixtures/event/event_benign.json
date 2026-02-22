@@ -1,26 +1,7 @@
 {
-  "event": {
-    "id": "evt_benign",
-    "name": "Benign Event",
-    "tags": ["test"],
-    "window": {
-      "pre_start": "2026-01-01T00:00:00Z",
-      "start": "2026-01-02T00:00:00Z",
-      "end": "2026-01-03T00:00:00Z",
-      "post_end": "2026-01-04T00:00:00Z"
-    }
-  },
-  "narrative_series": [
-    {"t": 1, "v": 2},
-    {"t": 2, "v": 2},
-    {"t": 3, "v": 1}
-  ],
-  "incident_series": [
-    {"t": 1, "v": 0},
-    {"t": 2, "v": 0},
-    {"t": 3, "v": 0}
-  ],
-  "expected": {
-    "fusion_hit": false
-  }
+  "event": {"id":"evt_benign","name":"Benign Event","tags":["test"],
+    "window":{"pre_start":"2026-01-01T00:00:00Z","start":"2026-01-02T00:00:00Z","end":"2026-01-03T00:00:00Z","post_end":"2026-01-04T00:00:00Z"}},
+  "narrative_series":[{"t":1,"v":2},{"t":2,"v":2},{"t":3,"v":1}],
+  "incident_series":[{"t":1,"v":0},{"t":2,"v":0},{"t":3,"v":0}],
+  "expected":{"fusion_hit":false}
 }

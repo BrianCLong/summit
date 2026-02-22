@@ -1,4 +1,5 @@
 {
-  "evidence_id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
-  "generated_at": "2026-02-02T12:00:00Z"
+  "id": "EVD-MITTR-AIMEM-PRIV-MODEL-001",
+  "generated_at": "2026-02-02T12:00:00Z",
+  "hash": "sha256:simulated"
 }

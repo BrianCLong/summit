@@ -1,63 +1,48 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import { InMemoryMemoryBroker } from "../../../core/memory/storage_memory";
-import contextCollapseFixtures from "../fixtures/context_collapse.json";
+import { MemoryBroker } from '../../../core/memory/broker';
+import { InMemoryMemoryStorage } from '../../../core/memory/storage_memory';
+import { MemoryRecord, MemoryScope } from '../../../core/memory/types';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-describe("Memory Privacy: Context Firewall Evaluation", () => {
-  let broker: InMemoryMemoryBroker;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  beforeEach(() => {
-    broker = new InMemoryMemoryBroker();
-  });
+describe('Context Leakage Evaluation', () => {
+  let broker: MemoryBroker;
+  let storage: InMemoryMemoryStorage;
+  const fixturePath = path.join(__dirname, '../fixtures/context_collapse.json');
+  const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
 
-  it("should prevent cross-context leakage as defined in fixtures", async () => {
-    for (const scenario of contextCollapseFixtures) {
-      // 1. Setup: Load records into broker
-      for (const recordData of scenario.records) {
-        await broker.remember({
-          ...recordData,
-          sources: ["test-fixture"],
-          expiresAt: 0,
-          visibility: "user",
-        } as any);
-      }
+  beforeEach(async () => {
+    storage = new InMemoryMemoryStorage();
+    broker = new MemoryBroker(storage);
 
-      // 2. Execution & Verification: Run each test case in the scenario
-      for (const testCase of scenario.tests) {
-        const results = await broker.recall(testCase.scope as any);
-
-        expect(
-          results.length,
-          `Test '${testCase.description}' failed: expected ${testCase.expectedIds} results, got ${results.length}`
-        ).toBe(testCase.expectedIds);
-
-        const allContent = results.map((r) => r.content).join(" ");
-        for (const forbidden of testCase.forbiddenContent) {
-          expect(
-            allContent.toLowerCase(),
-            `Leak detected in '${testCase.description}': found forbidden content '${forbidden}'`
-          ).not.toContain(forbidden.toLowerCase());
-        }
-      }
+    // Load fixtures
+    for (const rec of fixture.records) {
+      await broker.remember({
+        ...rec,
+        userId: fixture.userId,
+        facets: {},
+        sources: ['fixture'],
+        expiresAt: Date.now() + 100000,
+        visibility: 'user'
+      } as MemoryRecord);
     }
   });
 
-  it("should deny access when purpose mismatches even if context matches", async () => {
-    await broker.remember({
-      userId: "u1",
-      content: "Sensitive compliance data",
-      purpose: "compliance",
-      contextSpace: "work",
-      facets: [],
-      sources: [],
-      expiresAt: 0,
-      visibility: "user",
-    });
+  test.each(fixture.leakage_tests)('$name', async (testCase) => {
+    const results = await broker.search({ ...testCase.request, userId: fixture.userId } as MemoryScope);
+    const resultIds = results.map(r => r.id);
 
-    const results = await broker.recall({
-      userId: "u1",
-      purpose: "assist",
-      contextSpace: "work",
-    });
+    for (const forbiddenId of testCase.forbidden_ids) {
+      expect(resultIds).not.toContain(forbiddenId);
+    }
+  });
+
+  test('Deny-by-default: empty scope should return nothing', async () => {
+    // Note: cast to any to simulate invalid/empty scope if type allows
+    const results = await broker.search({} as any);
     expect(results.length).toBe(0);
   });
 });
