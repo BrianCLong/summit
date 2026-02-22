@@ -1,6 +1,6 @@
 
 import logger from '../config/logger.js';
-import { S3Config } from '../backup/BackupService.js';
+import { S3Config } from '../types/infrastructure.js';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 import path from 'path';

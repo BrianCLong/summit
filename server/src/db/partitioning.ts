@@ -1,12 +1,10 @@
 
 import { getPostgresPool } from './postgres.js';
-import logger from '../utils/logger.js';
-import { RedisService } from '../cache/redis.js';
+import { logger } from '../config/logger.js';
 import { coldStorageService } from '../services/ColdStorageService.js';
 
 export class PartitionManager {
   private pool = getPostgresPool();
-  private redis = RedisService.getInstance();
 
   /**
    * Creates a new partition for a specific tenant in the maestro_runs table.
