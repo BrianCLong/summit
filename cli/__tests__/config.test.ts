@@ -87,6 +87,17 @@ describe('Config', () => {
       expect(profile.postgres?.password).toBe('pass');
       expect(profile.postgres?.ssl).toBe(true);
     });
+
+    it('should load Switchboard config from environment variables', async () => {
+      process.env.SWITCHBOARD_TENANT_ID = 'test-tenant';
+      process.env.SWITCHBOARD_REGISTRY_PATH = '/tmp/registry';
+
+      const config = await loadConfig();
+      const profile = getProfile(config);
+
+      expect(profile.switchboard?.tenantId).toBe('test-tenant');
+      expect(profile.switchboard?.registryPath).toBe('/tmp/registry');
+    });
   });
 
   describe('getProfile', () => {
@@ -151,6 +162,26 @@ describe('Config', () => {
       const profile = getProfile(config, 'nonexistent');
 
       expect(profile).toEqual({});
+    });
+
+    it('should prefer environment variables over profile values', () => {
+      const config: CLIConfig = {
+        defaultProfile: 'default',
+        profiles: {
+          default: {
+            switchboard: {
+              tenantId: 'profile-tenant',
+            },
+          },
+        },
+        telemetry: false,
+      };
+
+      process.env.SWITCHBOARD_TENANT_ID = 'env-tenant';
+
+      const profile = getProfile(config);
+
+      expect(profile.switchboard?.tenantId).toBe('env-tenant');
     });
   });
 });

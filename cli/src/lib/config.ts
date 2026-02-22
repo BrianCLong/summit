@@ -49,11 +49,19 @@ const ExportConfigSchema = z.object({
   privateKeyPath: z.string().optional(),
 });
 
+const SwitchboardConfigSchema = z.object({
+  tenantId: z.string().optional(),
+  registryPath: z.string().optional(),
+  policyPath: z.string().optional(),
+  secretsNamespace: z.string().optional(),
+});
+
 const ProfileSchema = z.object({
   neo4j: Neo4jConfigSchema.optional(),
   postgres: PostgresConfigSchema.optional(),
   agent: AgentConfigSchema.optional(),
   export: ExportConfigSchema.optional(),
+  switchboard: SwitchboardConfigSchema.optional(),
 });
 
 const CLIConfigSchema = z.object({
@@ -66,6 +74,7 @@ export type Neo4jConfig = z.infer<typeof Neo4jConfigSchema>;
 export type PostgresConfig = z.infer<typeof PostgresConfigSchema>;
 export type AgentConfig = z.infer<typeof AgentConfigSchema>;
 export type ExportConfig = z.infer<typeof ExportConfigSchema>;
+export type SwitchboardConfig = z.infer<typeof SwitchboardConfigSchema>;
 export type Profile = z.infer<typeof ProfileSchema>;
 export type CLIConfig = z.infer<typeof CLIConfigSchema>;
 
@@ -79,6 +88,12 @@ const configStore = new Conf<CLIConfig>({
         postgres: PostgresConfigSchema.parse({}),
         agent: AgentConfigSchema.parse({}),
         export: ExportConfigSchema.parse({}),
+        switchboard: {
+          tenantId: 'default',
+          registryPath: '.switchboard/registry',
+          policyPath: 'policies',
+          secretsNamespace: 'default',
+        },
       },
     },
     telemetry: false,
@@ -112,31 +127,21 @@ export async function loadConfig(configPath?: string): Promise<CLIConfig> {
     }
   }
 
-  // Load from environment variables
-  const envConfig = loadEnvConfig();
-  if (Object.keys(envConfig).length > 0) {
-    const merged = mergeConfigs(configStore.store, envConfig);
-    return CLIConfigSchema.parse(merged);
-  }
-
   return configStore.store;
 }
 
-function loadEnvConfig(): Partial<CLIConfig> {
-  const config: Partial<CLIConfig> = {
-    profiles: {
-      default: {},
-    },
-  };
+function mergeProfileWithEnv(profile: Profile): Profile {
+  const merged = JSON.parse(JSON.stringify(profile)) as Profile;
 
   // Neo4j from environment
   if (process.env.NEO4J_URI || process.env.NEO4J_USER || process.env.NEO4J_PASSWORD) {
-    config.profiles!.default.neo4j = {
-      uri: process.env.NEO4J_URI || DEFAULT_NEO4J_URI,
-      user: process.env.NEO4J_USER || DEFAULT_NEO4J_USER,
-      password: process.env.NEO4J_PASSWORD,
-      database: process.env.NEO4J_DATABASE || 'neo4j',
-      encrypted: process.env.NEO4J_ENCRYPTED === 'true',
+    merged.neo4j = {
+      ...(merged.neo4j || {}),
+      uri: process.env.NEO4J_URI || merged.neo4j?.uri || DEFAULT_NEO4J_URI,
+      user: process.env.NEO4J_USER || merged.neo4j?.user || DEFAULT_NEO4J_USER,
+      password: process.env.NEO4J_PASSWORD || merged.neo4j?.password,
+      database: process.env.NEO4J_DATABASE || merged.neo4j?.database || 'neo4j',
+      encrypted: process.env.NEO4J_ENCRYPTED ? process.env.NEO4J_ENCRYPTED === 'true' : merged.neo4j?.encrypted || false,
     };
   }
 
@@ -149,7 +154,7 @@ function loadEnvConfig(): Partial<CLIConfig> {
   ) {
     if (process.env.DATABASE_URL) {
       const url = new URL(process.env.DATABASE_URL);
-      config.profiles!.default.postgres = {
+      merged.postgres = {
         host: url.hostname,
         port: parseInt(url.port || '5432'),
         database: url.pathname.slice(1),
@@ -158,44 +163,52 @@ function loadEnvConfig(): Partial<CLIConfig> {
         ssl: url.searchParams.get('sslmode') === 'require',
       };
     } else {
-      config.profiles!.default.postgres = {
-        host: process.env.PGHOST || DEFAULT_POSTGRES_HOST,
-        port: parseInt(process.env.PGPORT || String(DEFAULT_POSTGRES_PORT)),
-        database: process.env.PGDATABASE || DEFAULT_POSTGRES_DB,
-        user: process.env.PGUSER,
-        password: process.env.PGPASSWORD,
-        ssl: process.env.PGSSLMODE === 'require',
+      merged.postgres = {
+        ...(merged.postgres || {}),
+        host: process.env.PGHOST || merged.postgres?.host || DEFAULT_POSTGRES_HOST,
+        port: parseInt(process.env.PGPORT || String(merged.postgres?.port || DEFAULT_POSTGRES_PORT)),
+        database: process.env.PGDATABASE || merged.postgres?.database || DEFAULT_POSTGRES_DB,
+        user: process.env.PGUSER || merged.postgres?.user,
+        password: process.env.PGPASSWORD || merged.postgres?.password,
+        ssl: process.env.PGSSLMODE ? process.env.PGSSLMODE === 'require' : merged.postgres?.ssl || false,
       };
     }
   }
 
   // Agent from environment
   if (process.env.AGENT_ENDPOINT || process.env.AGENT_API_KEY) {
-    config.profiles!.default.agent = {
-      endpoint: process.env.AGENT_ENDPOINT,
-      apiKey: process.env.AGENT_API_KEY,
-      timeout: parseInt(process.env.AGENT_TIMEOUT || '30000'),
-      maxConcurrent: parseInt(process.env.AGENT_MAX_CONCURRENT || '5'),
+    merged.agent = {
+      ...(merged.agent || { timeout: 30000, maxConcurrent: 5 }),
+      endpoint: process.env.AGENT_ENDPOINT || merged.agent?.endpoint,
+      apiKey: process.env.AGENT_API_KEY || merged.agent?.apiKey,
+      timeout: parseInt(process.env.AGENT_TIMEOUT || String(merged.agent?.timeout || 30000)),
+      maxConcurrent: parseInt(process.env.AGENT_MAX_CONCURRENT || String(merged.agent?.maxConcurrent || 5)),
     };
   }
 
-  return config;
-}
+  // Switchboard from environment
+  if (
+    process.env.SWITCHBOARD_TENANT_ID ||
+    process.env.SWITCHBOARD_REGISTRY_PATH ||
+    process.env.SWITCHBOARD_POLICY_PATH ||
+    process.env.SWITCHBOARD_SECRETS_NAMESPACE
+  ) {
+    merged.switchboard = {
+      ...(merged.switchboard || {}),
+      tenantId: process.env.SWITCHBOARD_TENANT_ID || merged.switchboard?.tenantId,
+      registryPath: process.env.SWITCHBOARD_REGISTRY_PATH || merged.switchboard?.registryPath,
+      policyPath: process.env.SWITCHBOARD_POLICY_PATH || merged.switchboard?.policyPath,
+      secretsNamespace: process.env.SWITCHBOARD_SECRETS_NAMESPACE || merged.switchboard?.secretsNamespace,
+    };
+  }
 
-function mergeConfigs(base: CLIConfig, override: Partial<CLIConfig>): CLIConfig {
-  return {
-    ...base,
-    ...override,
-    profiles: {
-      ...base.profiles,
-      ...override.profiles,
-    },
-  };
+  return merged;
 }
 
 export function getProfile(config: CLIConfig, profileName?: string): Profile {
   const name = profileName || config.defaultProfile;
-  return config.profiles[name] || config.profiles.default || {};
+  const profile = config.profiles[name] || config.profiles.default || {};
+  return mergeProfileWithEnv(profile);
 }
 
 export function saveConfig(config: CLIConfig): void {

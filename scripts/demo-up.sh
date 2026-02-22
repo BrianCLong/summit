@@ -44,6 +44,10 @@ fi
 log_info "Starting Summit Platform Demo Environment..."
 log_info "DEMO_MODE is enabled - this is safe for demonstration purposes."
 
+if [ -n "$SWITCHBOARD_TENANT_ID" ]; then
+    log_info "Active Profile Tenant: $SWITCHBOARD_TENANT_ID"
+fi
+
 # Run prerequisite checks
 log_info "Checking prerequisites..."
 if [ -f "$SCRIPT_DIR/demo-check.sh" ]; then
