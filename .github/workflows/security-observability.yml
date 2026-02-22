@@ -41,7 +41,7 @@ jobs:
 
       - name: Download Previous Metrics
         if: steps.previous_run.outputs.run_id != ''
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: security-metrics
           github-token: ${{ secrets.GITHUB_TOKEN }}
