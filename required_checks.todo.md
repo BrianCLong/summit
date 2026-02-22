@@ -18,7 +18,9 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
-- `sigstore-verify` (PR4)
+- `verify-evidence`
+- `verify-tests`
+- `evidence-determinism`
 - `lint`
 - `typecheck`
 - `build`

@@ -4,21 +4,35 @@
   "allowedZones": [
     {
       "name": "Documentation",
-      "paths": ["docs/", "docs/ga/"],
+      "paths": [
+        "docs/",
+        "docs/ga/"
+      ],
       "notes": "Safe for Tier B/C verification updates and governance docs."
     },
     {
       "name": "VerificationScripts",
-      "paths": ["scripts/ga/", "testing/ga-verification/"],
+      "paths": [
+        "scripts/ga/",
+        "testing/ga-verification/"
+      ],
       "notes": "Node-native checks only; no global test runner changes."
     }
   ],
   "verificationRules": {
     "gaCriticalWork": "Must reference Tier A/B/C artifact before merge.",
     "legacyMode": "New files cannot self-designate legacy mode; exemptions require documented issue and owner.",
-    "ciCommands": ["make ga-verify", "pnpm run test:a11y-gate"],
+    "ciCommands": [
+      "make ga-verify",
+      "pnpm run test:a11y-gate"
+    ],
     "provenance": "Changes must cite evidence artifacts in PR summaries.",
-    "verificationSurfaces": ["docs/ga/genui/UI_CONTRACT.md", "docs/ga/MVP4_GA_GATE_ARTIFACTS.md"]
+    "verificationSurfaces": [
+      "docs/ga/genui/UI_CONTRACT.md",
+      "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
+      "docs/ga/evidence-system.md",
+      ".github/scripts/verify-evidence.mjs"
+    ]
   },
   "restrictedAreas": [
     {
@@ -51,7 +65,9 @@
     },
     {
       "name": "ProductionInfra",
-      "paths": ["terraform/prod/"],
+      "paths": [
+        "terraform/prod/"
+      ],
       "overrideLabel": "restricted-area-override",
       "notes": "Production infrastructure definitions cannot be modified by agents without a human override."
     },
@@ -85,7 +101,11 @@
       "description": "Credit Card Number"
     }
   ],
-  "requiredChecks": ["restricted-path-check", "pr-metadata-check", "pii-scan"],
+  "requiredChecks": [
+    "restricted-path-check",
+    "pr-metadata-check",
+    "pii-scan"
+  ],
   "activityTracking": {
     "ledger": "AGENT_ACTIVITY.md",
     "backlog": "TASK_BACKLOG.md",

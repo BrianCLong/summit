@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "koreai-agentic-evidence-20260208",
+    "timestamp": "2026-02-08T02:23:55Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAia29yZWFpLWFnZW50aWMgZXZpZGVuY2UgYnVuZGxlIHNjYWZmb2xkICsgZGV0ZXJtaW5pc3RpYyB2ZXJpZnkgZ2F0ZSIsICJmaWxlcyI6IFsiZG9jcy9nYS9ldmlkZW5jZS1zeXN0ZW0ubWQiLCAiLmdpdGh1Yi9zY3JpcHRzL3ZlcmlmeS1ldmlkZW5jZS5tanMiLCAiLmdpdGh1Yi93b3JrZmxvd3MvY2ktdmVyaWZ5LnltbCIsICJldmlkZW5jZS9ydW5zL2tvcmVhaS1hZ2VudGljL2luZGV4Lmpzb24iLCAiZXZpZGVuY2UvcnVucy9rb3JlYWktYWdlbnRpYy9yZXBvcnQuanNvbiIsICJldmlkZW5jZS9ydW5zL2tvcmVhaS1hZ2VudGljL21ldHJpY3MuanNvbiIsICJldmlkZW5jZS9ydW5zL2tvcmVhaS1hZ2VudGljL3N0YW1wLmpzb24iLCAiZXZpZGVuY2UvaW5kZXguanNvbiIsICJkb2NzL2dhL01WUC00LUdBLVZFUklGSUNBVElPTi5tZCIsICJkb2NzL2dhL3ZlcmlmaWNhdGlvbi1tYXAuanNvbiIsICJyZXBvcnRzL2ExMXkta2V5Ym9hcmQvUkVBRE1FLm1kIiwgInJlcXVpcmVkX2NoZWNrcy50b2RvLm1kIiwgImFnZW50LWNvbnRyYWN0Lmpzb24iLCAiZG9jcy9yb2FkbWFwL1NUQVRVUy5qc29uIiwgInByb21wdHMvZXZpZGVuY2Uva29yZWFpLWFnZW50aWMtZXZpZGVuY2Utc2NhZmZvbGRAdjEubWQiLCAicHJvbXB0cy9yZWdpc3RyeS55YW1sIiwgImFnZW50cy9leGFtcGxlcy9LT1JFQUlfQUdFTlRJQ19FVklERU5DRV9TQ0FGRk9MRF8yMDI2MDIwOC5qc29uIiwgInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiJdfQ==",
+    "decision": {
+      "action": "scaffold_koreai_agentic_evidence",
+      "rule": {
+        "condition": "deterministic evidence gate required",
+        "action": "scaffold_koreai_agentic_evidence",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Established koreai-agentic evidence bundle, deterministic verifier, GA verification mapping, and registered prompt/task spec. Rollback: revert commit that adds the evidence bundle and verifier.",
+    "reverted": false
   }
 ]
