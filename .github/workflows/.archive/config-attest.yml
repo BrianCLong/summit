@@ -60,7 +60,7 @@ jobs:
           fi
 
       - name: Check change approval
-        if: steps.drift_check.outputs.drift_detected == 'true'
+        if: ((steps.drift_check.outputs.drift_detected == 'true') && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))) && (steps.drift_check.outputs.drift_detected == 'true' && (github.event.inputs.change_approved == 'true' || github.event.inputs.change_approved == '1'))
         run: |
           CHANGE_APPROVED="${{ github.event.inputs.change_approved }}"
           if [[ "$CHANGE_APPROVED" != "true" && "$CHANGE_APPROVED" != "1" ]]; then
@@ -75,13 +75,11 @@ jobs:
           fi
 
       - name: Sign current config (on main/release)
-        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/')
         run: |
           python3 ops/config-attest.py sign "evidence/v0.3.3/config/config-current.json" \
             --out "evidence/v0.3.3/config/config-signature.txt"
 
       - name: Update baseline (on approved changes)
-        if: steps.drift_check.outputs.drift_detected == 'true' && (github.event.inputs.change_approved == 'true' || github.event.inputs.change_approved == '1')
         run: |
           cp "evidence/v0.3.3/config/config-current.json" "evidence/v0.3.3/config/config-baseline.json"
           echo "✅ Baseline updated with approved changes"
