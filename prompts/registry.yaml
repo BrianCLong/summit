@@ -922,3 +922,30 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: living-architecture-flows-pr1
+    version: v1
+    path: prompts/flows/living-architecture-flows-pr1@v1.md
+    sha256: 70b0ff6064a2ce4414e123f4c7c797d7c6e95b36f0b1d63d6a718838094a4edc
+    description: Define Living Architecture Flows schemas, types, and documentation contract.
+    scope:
+      paths:
+        - src/flows/
+        - docs/architecture/flows/
+        - docs/repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/flows/living-architecture-flows-pr1@v1.md
+        - prompts/registry.yaml
+        - agents/examples/LIVING_ARCH_FLOWS_PR1.task.json
+      domains:
+        - architecture
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
