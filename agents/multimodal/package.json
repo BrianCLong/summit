@@ -46,11 +46,11 @@
     "pino": "^8.x"
   },
   "devDependencies": {
-    "@types/jest": "^29.x",
+    "@types/jest": "^29.5.14",
     "@types/node": "^20.x",
     "@types/pg": "^8.x",
-    "jest": "^29.x",
-    "ts-jest": "^29.x",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.x"
   },
   "peerDependencies": {
