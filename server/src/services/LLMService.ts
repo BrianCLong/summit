@@ -25,6 +25,7 @@ export interface CompletionOptions {
   model?: string;
   temperature?: number;
   maxTokens?: number;
+  seed?: number;
   responseFormat?: 'json' | 'text';
   prompt?: string;
 }
@@ -83,6 +84,7 @@ export class LLMService {
         'llm.provider': provider,
         'llm.model': model,
         'llm.temperature': options.temperature || this.config.temperature,
+        'llm.seed': options.seed,
       });
 
       try {
@@ -206,12 +208,14 @@ export class LLMService {
       messages: { role: string; content: string }[];
       temperature: number;
       max_tokens?: number;
+      seed?: number;
       response_format?: { type: string };
     } = {
       model: options.model || this.config.defaultModel,
       messages: [{ role: 'user', content: prompt }],
       temperature: options.temperature || this.config.temperature,
       max_tokens: options.maxTokens,
+      seed: options.seed,
     };
 
     if (options.responseFormat === 'json') {
