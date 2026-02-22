@@ -5,7 +5,6 @@ packages:
   - 'packages/maestro-skills/*'
   - 'sdk/*'
   - 'services/*'
-  - 'companyos/services/*'
   - 'libs/*/node'
   - 'client'
   - 'server'
