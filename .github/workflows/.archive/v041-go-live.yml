@@ -129,13 +129,14 @@ jobs:
           retention-days: 90
 
       - name: Success notification
-        if: (success()) && (failure())
+        if: success()
         run: |
           echo "🎉 MC Platform v0.4.1 Sovereign Safeguards Go-Live successful!"
           echo "Environment: ${{ github.event.inputs.environment }}"
           echo "Compliance evidence generated and uploaded"
 
       - name: Failure notification
+        if: failure()
         run: |
           echo "❌ MC Platform v0.4.1 Go-Live failed!"
           echo "Check logs and execute rollback procedures"
