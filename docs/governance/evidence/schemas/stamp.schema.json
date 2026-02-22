@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/stamp.schema.json",
+  "title": "Summit Evidence Stamp (Lane 1)",
+  "type": "object",
+  "required": ["timestamp"],
+  "properties": {
+    "timestamp": {
+      "oneOf": [
+        { "type": "number" },
+        { "type": "string", "format": "date-time" }
+      ]
+    },
+    "version": { "type": "string" },
+    "evidence_id": { "type": "string" }
+  },
+  "additionalProperties": true
+}
