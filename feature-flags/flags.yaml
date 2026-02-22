@@ -49,3 +49,4 @@ features:
   # Memory Bridge
   memory_bridge_enabled: { default: false, owners: [security, platform] }
   memory_bridge_lane2_enabled: { default: false, owners: [security, platform] }
+  summit_dual_reasoning_enabled: { default: false, owners: [product] }

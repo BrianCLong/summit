@@ -62,11 +62,9 @@ decision := {
 }
 
 reasons := r {
-  base := []
-  rs := base
-  rs := cond_append(rs, needs_step_up, reason_step_up)
-  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
-  r := rs
+  r1 := [reason_step_up | needs_step_up]
+  r2 := [reason_no_step | needs_step_up; not has_step_up; is_enforce]
+  r := array.concat(r1, r2)
 }
 
 # allow rules

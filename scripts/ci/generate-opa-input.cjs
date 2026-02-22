@@ -8,7 +8,6 @@ function parseArgs() {
     if (args[i] === '--sbom') config.sbomPath = args[++i];
     else if (args[i] === '--trivy') config.trivyPath = args[++i];
     else if (args[i] === '--output') config.outputPath = args[++i];
-    else if (args[i] === '--sovereign') config.isSovereign = true;
   }
   return config;
 }
@@ -16,38 +15,14 @@ function parseArgs() {
 function main() {
   const config = parseArgs();
 
-  if (!config.outputPath) {
-    console.log("Usage: node generate-opa-input.js --output <path> [--sbom <path>] [--trivy <path>] [--sovereign]");
+  if (!config.sbomPath || !config.trivyPath || !config.outputPath) {
+    console.error("Usage: node generate-opa-input.js --sbom <path> --trivy <path> --output <path>");
     process.exit(1);
   }
 
   const input = {
-    type: "container_image",
+    type: "container_image", // Default context for now
     timestamp: new Date().toISOString(),
-    operation: {
-      isSovereign: config.isSovereign || false,
-      name: "build-artifact",
-      affected_jurisdictions: ["US"],
-      isCrossBorder: false
-    },
-    verification: {
-      independent_sources: config.isSovereign ? [
-        { entity: "build-service", signature_valid: true },
-        { entity: "security-scanner", signature_valid: true }
-      ] : []
-    },
-    containment: {
-      emergency_stop: { available: true, response_time_ms: 50 },
-      rollback: { prepared: true, max_time_seconds: 30 },
-      human_override: { enabled: true, authenticated_operator: "admin" }
-    },
-    compliance: {
-      jurisdictions: { US: { status: "COMPLIANT" } }
-    },
-    autonomy: {
-      reversibility: { guaranteed: true },
-      human_control: { intervention_available: true }
-    },
     sbom: null,
     vulnerability_scan: {
       vulnerabilities: []

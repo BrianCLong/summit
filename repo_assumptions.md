@@ -1,40 +1,31 @@
-# Repo Assumptions & Validation
+# Repo Assumptions - UniReason 1.0 Integration
 
-## Verified vs Assumed Directory List
+## Verified (from repo map)
+*   **Language/Tooling:** TypeScript, Node 18+, pnpm.
+*   **CI:** GitHub Actions.
+*   **Key Paths:**
+    *   `src/api/graphql`
+    *   `src/api/rest`
+    *   `src/agents`
+    *   `src/connectors`
+    *   `src/graphrag`
+    *   `tests/`
+    *   `docs/{architecture,api,security}`
+    *   `.github/workflows/*`
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumed (to be validated)
+*   **Pipeline Runner:** Existence of a central pipeline runner or agent orchestrator under `src/agents/*`.
+*   **Evidence Schema:** Existing "evidence" artifact schema and CI enforcement steps.
+*   **Logging:** Preferred logging framework and redaction utilities.
 
-## CI Check Names (Exact)
-
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+## Must-Not-Touch
+*   `.github/workflows/ci-*.yml` (critical for governance)
+*   `.github/policies/*`
+*   `.github/MILESTONES/*`
+*   Production docker-compose files (`docker-compose.yml`, `docker-compose.prod.yml`)
 
 ## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+1.  [ ] Confirm `pnpm` scripts: `pnpm test`, `pnpm test:e2e`, `pnpm test:coverage`.
+2.  [ ] Locate agent orchestration entrypoints under `src/agents/`.
+3.  [ ] Confirm preferred logger + redaction utilities.
+4.  [ ] Identify CI check names that gate merges.
