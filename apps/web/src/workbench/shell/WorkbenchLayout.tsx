@@ -3,6 +3,11 @@ import { useWorkbenchStore } from '../store/viewStore'
 import { LinkAnalysisCanvas } from '../canvas/LinkAnalysisCanvas'
 import { InspectorPanel } from '../inspector/InspectorPanel'
 import { Button } from '@/components/ui/Button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/Tooltip'
 import { PanelLeft, PanelRight, Save, Layout } from 'lucide-react'
 import type { Entity, Relationship } from '@/types'
 
@@ -71,20 +76,44 @@ export function WorkbenchShell() {
         {/* Toolbar */}
         <div className="h-12 border-b flex items-center px-4 justify-between bg-card">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={toggleLeftRail}>
-              <PanelLeft className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleLeftRail}
+                  aria-label="Toggle case files"
+                >
+                  <PanelLeft className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle case files</p>
+              </TooltipContent>
+            </Tooltip>
             <span className="font-medium text-sm">Investigator Workbench</span>
           </div>
 
           <div className="flex items-center gap-2">
-             <Button variant="outline" size="sm" onClick={handleSaveView}>
-               <Save className="h-4 w-4 mr-2" />
-               Save View
-             </Button>
-             <Button variant="ghost" size="icon" onClick={toggleRightRail}>
-              <PanelRight className="h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={handleSaveView}>
+              <Save className="h-4 w-4 mr-2" />
+              Save View
             </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={toggleRightRail}
+                  aria-label="Toggle inspector"
+                >
+                  <PanelRight className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle inspector</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
