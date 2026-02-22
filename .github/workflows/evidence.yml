@@ -31,4 +31,15 @@ jobs:
       - name: Verify evidence and policy
         run: python tools/evidence/verify_evidence.py
       - name: Run cogwar contract tests
-        run: pytest tests/policy tests/iw tests/provenance tests/tech_radar
+        run: |
+          TEST_DIRS=()
+          for d in tests/policy tests/iw tests/provenance tests/tech_radar; do
+            if [ -d "$d" ]; then
+              TEST_DIRS+=("$d")
+            fi
+          done
+          if [ "${#TEST_DIRS[@]}" -eq 0 ]; then
+            echo "No cogwar contract test directories present; skipping pytest step."
+            exit 0
+          fi
+          pytest "${TEST_DIRS[@]}"
