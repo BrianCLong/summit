@@ -19,6 +19,7 @@ const IGNORE = [
   '**/*.min.js',
   '.github/workflows/compliance-automation.yml',
   'v4/archive/**',
+  '.worktrees/**',
   '.venv/**',
   'venv/**',
   '**/v24_modules/**',

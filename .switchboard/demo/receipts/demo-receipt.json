@@ -1,0 +1,11 @@
+{
+  "id": "receipt-demo-0001",
+  "tool_id": "demo.echo",
+  "server_id": "local-demo",
+  "status": "allowed",
+  "output": {
+    "payload": "demo-output",
+    "ok": true
+  },
+  "timestamp": "2026-02-11T00:00:00.000Z"
+}

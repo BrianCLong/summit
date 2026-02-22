@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.io/schemas/influence_ops/attribution_hypothesis.json",
+  "title": "Influence Ops Attribution Hypothesis",
+  "description": "Hypothesis scoring payload for governed attribution workflows.",
+  "type": "object",
+  "properties": {
+    "hypotheses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "campaign_id": { "type": "string" },
+          "actor_hypothesis_id": { "type": "string" },
+          "confidence_score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "calibration_bucket": {
+            "type": "string",
+            "enum": ["LOW", "MEDIUM", "HIGH"]
+          },
+          "state": {
+            "type": "string",
+            "enum": ["PENDING_HITL", "APPROVED", "REJECTED", "REVOKED"]
+          },
+          "requires_hitl": { "type": "boolean" },
+          "provenance": {
+            "type": "object",
+            "properties": {
+              "source_id": { "type": "string" },
+              "collected_at": { "type": "string", "format": "date-time" },
+              "method": {
+                "type": "string",
+                "enum": ["MODEL_INFERENCE", "ANALYST_REVIEW"]
+              },
+              "transform_chain": {
+                "type": "array",
+                "items": { "type": "string" },
+                "minItems": 1
+              }
+            },
+            "required": [
+              "source_id",
+              "collected_at",
+              "method",
+              "transform_chain"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "campaign_id",
+          "actor_hypothesis_id",
+          "confidence_score",
+          "calibration_bucket",
+          "state",
+          "requires_hitl",
+          "provenance"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["hypotheses"],
+  "additionalProperties": false
+}

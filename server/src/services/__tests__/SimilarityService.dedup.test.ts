@@ -7,16 +7,40 @@
 import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import type { DuplicateCandidate } from '../SimilarityService.js';
 
+const mockInc = jest.fn();
+const mockLabels = jest.fn(() => ({ inc: mockInc }));
+const mockStartTimer = jest.fn(() => jest.fn());
+const mockWrapNeo4jOperation = jest.fn();
+const mockAddSpanAttributes = jest.fn();
+
 // Mock dependencies
-jest.unstable_mockModule('../../config/database.js', () => ({}));
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getPostgresPool: jest.fn(),
+}));
 jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
   otelService: {
-    wrapNeo4jOperation: jest.fn((name: string, fn: () => any) => fn()),
-    addSpanAttributes: jest.fn(),
+    wrapNeo4jOperation: mockWrapNeo4jOperation,
+    addSpanAttributes: mockAddSpanAttributes,
   },
 }));
-jest.unstable_mockModule('../../monitoring/metrics.js', () => ({}));
+jest.unstable_mockModule('../../monitoring/metrics.js', () => ({
+  applicationErrors: { labels: mockLabels, inc: mockInc },
+  vectorQueriesTotal: { labels: mockLabels, inc: mockInc },
+  vectorQueryDurationSeconds: { startTimer: mockStartTimer },
+}));
 jest.unstable_mockModule('../../utils/logger.js', () => ({
+  logger: {
+    child: jest.fn(() => ({
+      info: jest.fn(),
+      debug: jest.fn(),
+      error: jest.fn(),
+      warn: jest.fn(),
+    })),
+    info: jest.fn(),
+    debug: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+  },
   default: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
 }));
 
@@ -34,6 +58,9 @@ describe('SimilarityService - Duplicate Detection', () => {
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    mockWrapNeo4jOperation.mockImplementation((name: string, fn: () => any) =>
+      fn(),
+    );
 
     // Create mock client
     mockClient = {

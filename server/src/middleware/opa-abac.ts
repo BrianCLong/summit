@@ -49,6 +49,60 @@ interface OPADecision {
   obligations: OPAObligation[];
 }
 
+const SAFE_POLICY_SEGMENT = /^[A-Za-z0-9_-]+$/;
+const BLOCKED_OPA_HOSTS = new Set([
+  'localhost',
+  '0.0.0.0',
+  '127.0.0.1',
+  '::1',
+  '169.254.169.254',
+  'metadata.google.internal',
+]);
+
+function isPrivateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return (
+    host.startsWith('10.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+  );
+}
+
+function normalizeOPAServiceUrl(baseUrl: string): string {
+  const parsed = new URL(baseUrl);
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('OPA base URL must use http or https');
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error('OPA base URL must not include URL credentials');
+  }
+  const host = parsed.hostname.toLowerCase();
+  const allowPrivate =
+    process.env.NODE_ENV === 'development' ||
+    process.env.ALLOW_PRIVATE_OPA_URLS === 'true';
+  if (!allowPrivate && (BLOCKED_OPA_HOSTS.has(host) || isPrivateHost(host))) {
+    throw new Error('OPA base URL host is not allowed');
+  }
+  parsed.pathname = parsed.pathname.replace(/\/+$/, '');
+  return parsed.toString().replace(/\/$/, '');
+}
+
+function toPolicyPath(policy: string): string {
+  const segments = policy
+    .split('.')
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0);
+  if (segments.length === 0) {
+    throw new Error('Invalid OPA policy path');
+  }
+  for (const segment of segments) {
+    if (!SAFE_POLICY_SEGMENT.test(segment)) {
+      throw new Error(`Invalid OPA policy segment: ${segment}`);
+    }
+  }
+  return segments.join('/');
+}
+
 export class OPAClient implements IOPAClient {
   private baseUrl: string;
   private timeout: number;
@@ -60,7 +114,7 @@ export class OPAClient implements IOPAClient {
   })();
 
   constructor(baseUrl: string, timeout = 5000) {
-    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.baseUrl = normalizeOPAServiceUrl(baseUrl);
     this.timeout = timeout;
   }
 
@@ -75,8 +129,9 @@ export class OPAClient implements IOPAClient {
     const log = this.logger ?? namedLogger ?? baseLogger ?? console;
 
     try {
+      const policyPath = toPolicyPath(policy);
       const response = await axios.post(
-        `${this.baseUrl}/v1/data/${policy.replace(/\./g, '/')}`,
+        `${this.baseUrl}/v1/data/${policyPath}`,
         { input },
         {
           timeout: this.timeout,

@@ -49,7 +49,7 @@ export class CaseBundleService {
 
     const include = this.resolveInclude(options.include);
     const bundlePath = options.targetDir
-      ? options.targetDir
+      ? this.resolveAllowedPath(options.targetDir)
       : await fs.mkdtemp(path.join(tmpdir(), 'case-bundle-'));
 
     await fs.mkdir(bundlePath, { recursive: true });
@@ -311,12 +311,13 @@ export class CaseBundleService {
   }
 
   private async ensureDirectory(bundlePath: string): Promise<string> {
-    const stats = await fs.stat(bundlePath);
-    if (stats.isDirectory()) return bundlePath;
+    const safeBundlePath = this.resolveAllowedPath(bundlePath);
+    const stats = await fs.stat(safeBundlePath);
+    if (stats.isDirectory()) return safeBundlePath;
 
-    if (bundlePath.endsWith('.zip')) {
+    if (safeBundlePath.endsWith('.zip')) {
       const extractDir = await fs.mkdtemp(path.join(tmpdir(), 'case-bundle-import-'));
-      const zip = new AdmZip(bundlePath);
+      const zip = new AdmZip(safeBundlePath);
       zip.extractAllTo(extractDir, true);
       return extractDir;
     }
@@ -349,7 +350,7 @@ export class CaseBundleService {
   ): Promise<string> {
     const ordered = this.orderValue(payload);
     const serialized = JSON.stringify(ordered, null, 2);
-    const target = path.join(baseDir, relativePath);
+    const target = this.resolvePathWithinBase(baseDir, relativePath);
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.writeFile(target, serialized);
     return this.hashString(serialized);
@@ -364,7 +365,7 @@ export class CaseBundleService {
     const loaded: Array<{ manifest: CaseBundleManifestEntry; parsed: T }> = [];
 
     for (const entry of orderedEntries) {
-      const absolutePath = path.join(baseDir, entry.path);
+      const absolutePath = this.resolvePathWithinBase(baseDir, entry.path);
       const fileContent = await fs.readFile(absolutePath, 'utf-8');
       const computedHash = this.hashString(fileContent);
       if (computedHash !== entry.hash) {
@@ -433,5 +434,26 @@ export class CaseBundleService {
       return `${options.namespace}:${sourceId}`;
     }
     return randomUUID();
+  }
+
+  private resolveAllowedPath(inputPath: string): string {
+    const resolved = path.resolve(inputPath);
+    if (process.env.CASE_BUNDLE_ALLOW_EXTERNAL_PATHS === 'true') {
+      return resolved;
+    }
+    const workspaceRoot = path.resolve(process.cwd());
+    if (resolved === workspaceRoot || resolved.startsWith(`${workspaceRoot}${path.sep}`)) {
+      return resolved;
+    }
+    throw new Error('bundle_path_outside_workspace');
+  }
+
+  private resolvePathWithinBase(baseDir: string, inputPath: string): string {
+    const baseResolved = path.resolve(baseDir);
+    const resolved = path.resolve(baseResolved, inputPath);
+    if (resolved === baseResolved || resolved.startsWith(`${baseResolved}${path.sep}`)) {
+      return resolved;
+    }
+    throw new Error('bundle_path_traversal_detected');
   }
 }

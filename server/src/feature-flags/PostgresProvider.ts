@@ -264,7 +264,7 @@ export class PostgresProvider extends EventEmitter implements FeatureFlagProvide
     }
 
     const hashInput = `${flagKey}:${String(bucketValue)}:${rollout.seed || 0}`;
-    const hash = crypto.createHash('sha1').update(hashInput).digest('hex');
+    const hash = crypto.createHash('sha256').update(hashInput).digest('hex');
     const bucket = parseInt(hash.substring(0, 8), 16) % 10000; // 0-9999 (0.00% - 99.99%)
 
     let accumulated = 0;

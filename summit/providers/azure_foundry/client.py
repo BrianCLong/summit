@@ -1,8 +1,15 @@
-import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
+from urllib.parse import urlparse
 import httpx
 from .auth import AzureAuthProvider
 from .catalog import AzureFoundryCatalog
+
+
+def _is_azure_openai_endpoint(endpoint: str) -> bool:
+    candidate = endpoint if "://" in endpoint else f"https://{endpoint}"
+    parsed = urlparse(candidate)
+    hostname = (parsed.hostname or "").lower()
+    return hostname == "openai.azure.com" or hostname.endswith(".openai.azure.com")
 
 class AzureFoundryProvider:
     """
@@ -13,8 +20,9 @@ class AzureFoundryProvider:
         self.endpoint = endpoint.rstrip("/")
         self.auth_provider = auth_provider or AzureAuthProvider()
         self.catalog_service = AzureFoundryCatalog(self.endpoint, self.auth_provider)
+        self.is_azure_openai = _is_azure_openai_endpoint(self.endpoint)
 
-    async def get_catalog(self) -> List[Dict[str, Any]]:
+    async def get_catalog(self) -> list[dict[str, Any]]:
         return await self.catalog_service.list_models()
 
     async def chat_completion(
@@ -34,7 +42,7 @@ class AzureFoundryProvider:
         }
 
         # Determine URL based on endpoint pattern
-        if "openai.azure.com" in self.endpoint:
+        if self.is_azure_openai:
             # Azure OpenAI resource pattern
             # model argument is treated as deployment_id
             deployment_id = model
