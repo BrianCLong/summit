@@ -101,6 +101,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sigstore-bundle-verify
+    version: v1
+    path: prompts/ci/sigstore-bundle-verify@v1.md
+    sha256: 2e1109c6fadf94c9d5a78079e3a1c4360142df91701f7dfa9437fa6e8db82a8c
+    description: Add bundle-first sigstore verification gates with cosign version floor and trust root pinning.
+    scope:
+      paths:
+        - .github/actions/sigstore-verify/action.yml
+        - ci/attest/verify.sh
+        - policy/opa/sigstore.rego
+        - policy/tests/sigstore_gate_test.rego
+        - summit/evidence/schemas/report.schema.json
+        - docs/roadmap/STATUS.json
+        - prompts/ci/sigstore-bundle-verify@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SIGSTORE_BUNDLE_VERIFY_20260208.json
+      domains:
+        - ci
+        - governance
+        - supply-chain
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md
