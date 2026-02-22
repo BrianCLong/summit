@@ -18,8 +18,7 @@ def add_open_telemetry_spans(logger, log_method, event_dict):
     Structlog processor to inject OpenTelemetry trace_id and span_id into log events.
     """
     span = trace.get_current_span()
-    if not span:
-        return event_dict
+    # span is always returned, even if it's a NoOpSpan
 
     span_context = span.get_span_context()
     if span_context.is_valid:
