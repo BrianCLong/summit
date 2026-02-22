@@ -922,3 +922,29 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/operations/daily-sprint-orchestrator@v1.md
+    sha256: bba9996a77cd66981165d3ec6dc7884a93d604d34bd40ec02e73d33e9e607598
+    description: Run the daily sprint loop and publish evidence bundles + ops report.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/ops/evidence/
+        - docs/roadmap/STATUS.json
+        - prompts/operations/daily-sprint-orchestrator@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+        - documentation
+        - evidence
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
