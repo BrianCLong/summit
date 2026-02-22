@@ -1130,6 +1130,22 @@ function generateScaffoldAISummary(
 
 const adversaryService = new AdversaryAgentService();
 
+const validateAdversaryGenerate = [
+  body('context')
+    .notEmpty()
+    .withMessage('context is required')
+    .isLength({ max: 5000 })
+    .withMessage('context too long'),
+  body('temperature')
+    .optional()
+    .isFloat({ min: 0.0, max: 2.0 })
+    .withMessage('temperature must be between 0.0 and 2.0'),
+  body('persistence')
+    .optional()
+    .isInt({ min: 1, max: 10 })
+    .withMessage('persistence must be between 1 and 10'),
+];
+
 /**
  * @openapi
  * /api/ai/adversary/generate:
@@ -1161,20 +1177,24 @@ const adversaryService = new AdversaryAgentService();
  *       500:
  *         description: Internal server error
  */
-router.post('/adversary/generate', async (req: AuthenticatedRequest, res: Response) => {
-  const { context, temperature, persistence } = req.body || {};
-  if (!context) {
-    return res.status(400).json({ error: 'context is required' });
-  }
-  try {
-    const chain = await adversaryService.generateChain(context, {
-      temperature,
-      persistence,
-    });
-    res.json({ ttps: chain });
-  } catch (err: any) {
-    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
-  }
-});
+router.post(
+  '/adversary/generate',
+  validateAdversaryGenerate,
+  handleValidationErrors,
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { context, temperature, persistence } = req.body || {};
+    try {
+      const chain = await adversaryService.generateChain(context, {
+        temperature,
+        persistence,
+      });
+      res.json({ ttps: chain });
+    } catch (err: any) {
+      res
+        .status(500)
+        .json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  },
+);
 
 export default router;

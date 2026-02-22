@@ -2,44 +2,34 @@ name: Governance Check
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled]
+    branches: [main]
+    paths:
+      - "governance/**"
+      - ".github/workflows/governance-check.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  enforce-classification:
+  governance-check:
+    name: Governance Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
-      - name: Check Labels
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          script: |
-            const pr = context.payload.pull_request;
-            const labels = pr.labels.map(l => l.name);
-            const title = pr.title;
+          node-version: 20
+          cache: "pnpm"
 
-            // Auto-infer from title if no labels
-            if (labels.length === 0) {
-              if (title.startsWith('feat:')) labels.push('minor');
-              else if (title.startsWith('fix:')) labels.push('patch');
-              else if (title.startsWith('docs:')) labels.push('patch');
-              else if (title.includes('BREAKING CHANGE')) labels.push('major');
-            }
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
-            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
-            if (!valid) {
-              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
-            }
-
-  check-approvals:
-    needs: enforce-classification
-    runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.labels.*.name, 'major')
-    steps:
-      - name: Verify Major Approval
-        run: echo "Checking for Architecture Review (Mock)..."
+      - name: Run Governance Check
+        run: pnpm run check:governance
