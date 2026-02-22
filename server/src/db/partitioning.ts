@@ -125,7 +125,24 @@ export class PartitionManager {
         await this.createMonthlyPartition(table, monthAfterNext);
     }
 
-    // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
+    // Also maintain outbox partitions if not explicitly excluded or handled elsewhere
+    // But since maintainPartitions takes a list, the caller decides.
+    // We can add a separate call or check if 'outbox_events' is in the list, but outbox requires different logic.
+  }
+
+  /**
+   * Maintains partitions for the outbox_events table using the database function.
+   * Arguments roughly correspond to keeping partitions for X future periods.
+   */
+  async maintainOutboxPartitions(futurePartitions: number = 2, bufferPartitions: number = 6): Promise<void> {
+    try {
+      // Using pool directly as we are calling a function
+      await this.pool.query('SELECT ensure_outbox_partition($1, $2)', [futurePartitions, bufferPartitions]);
+      logger.info({ tableName: 'outbox_events' }, 'Outbox partition maintenance successful');
+    } catch (error: any) {
+      logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain outbox partitions');
+      // We don't throw here to avoid stopping the whole maintenance job if one table fails
+    }
   }
 
   async detachOldPartitions(
