@@ -1,8 +1,13 @@
-# Dependency Delta: item-unknown
-No dependency changes in foundation PRs.
+# Dependency Delta: item-UNKNOWN
 
-## Rule
-If pnpm-lock.yaml/package-lock.json/yarn.lock changes, update this file with:
-- Added/Removed deps
-- License
-- Reason
+## New deps
+
+- None.
+
+## Removed deps
+
+- None.
+
+## Notes
+
+- Verifier implemented without new runtime dependencies.
