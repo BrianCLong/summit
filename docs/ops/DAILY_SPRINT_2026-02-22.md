@@ -67,9 +67,11 @@
 - Issue scan deferred pending GitHub API connectivity (Governed Exception).
 - Updated execution invariant in `docs/roadmap/STATUS.json`.
 - Authored daily sprint log in `docs/ops/DAILY_SPRINT_2026-02-22.md`.
+- Pushed branch `chore/daily-sprint-2026-02-22-9`; PR creation deferred pending GitHub API connectivity.
 
 ## Blockers & Governed Exceptions
 - **Governed Exception**: GitHub issue scan deferred pending `api.github.com` connectivity.
+- **Governed Exception**: PR creation deferred pending `api.github.com` connectivity.
 - **Deferred pending dependency install**: Targeted test validation for security PRs (redaction + RBAC) pending local `pnpm install`.
 
 ## End-of-Day Report
@@ -80,7 +82,7 @@
 - Deferred: Issue scan (GitHub API connectivity), test validation (dependencies).
 
 ### PRs Touched
-- None (evidence capture only).
+- None (evidence capture only); branch `chore/daily-sprint-2026-02-22-9` pushed, PR creation deferred.
 
 ### Commands Run
 - `gh pr list --repo BrianCLong/summit --limit 20 --json number,title,updatedAt,author,labels,headRefName,baseRefName,state,url`
