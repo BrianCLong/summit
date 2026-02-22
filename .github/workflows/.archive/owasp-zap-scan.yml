@@ -35,7 +35,7 @@ jobs:
   zap-baseline-scan:
     name: ZAP Baseline Scan
     runs-on: ubuntu-latest
-    if: ((((((((github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'baseline')) && (always())) && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'api'))) && (always())) && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'full'))) && (always())) && (failure())) && (github.event_name == 'push' || github.event_name == 'schedule')) && (always())
+    if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'baseline')
 
     steps:
       - name: Checkout code
@@ -75,6 +75,7 @@ jobs:
 
       - name: Upload ZAP Baseline Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: zap-baseline-report
           path: |
@@ -86,6 +87,7 @@ jobs:
   zap-api-scan:
     name: ZAP API Scan
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'api')
 
     steps:
       - name: Checkout code
@@ -127,6 +129,7 @@ jobs:
 
       - name: Upload ZAP API Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: zap-api-report
           path: |
@@ -138,6 +141,7 @@ jobs:
   zap-full-scan:
     name: ZAP Full Scan
     runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'full')
 
     steps:
       - name: Checkout code
@@ -173,6 +177,7 @@ jobs:
 
       - name: Upload ZAP Full Report
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: zap-full-report
           path: |
@@ -182,6 +187,7 @@ jobs:
           retention-days: 90
 
       - name: Create issue if vulnerabilities found
+        if: failure()
         uses: actions/github-script@v7
         with:
           script: |
@@ -206,6 +212,7 @@ jobs:
   graphql-security-scan:
     name: GraphQL Security Scan
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'schedule'
 
     steps:
       - name: Checkout code
@@ -260,6 +267,7 @@ jobs:
 
       - name: Upload GraphQL test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: graphql-security-tests
           path: |

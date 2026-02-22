@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger';
 
 export interface ChannelProfile {
   reach: number; // e.g., active user count or potential audience size

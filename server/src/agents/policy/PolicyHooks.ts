@@ -10,8 +10,8 @@
 
 import { randomUUID } from 'crypto';
 import { Pool } from 'pg';
-import { getPostgresPool } from '../../config/database.js';
-import { agentAuditLogger } from '../audit/AgentAuditLogger.js';
+import { getPostgresPool } from '../../config/database.ts';
+import { agentAuditLogger } from '../audit/AgentAuditLogger.ts';
 
 // ============================================================================
 // Local Policy Engine Interface (to avoid cross-package import)

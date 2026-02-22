@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.intelgraph.io/schemas/audit_event_v1.json",
+  "title": "Audit Event V1",
+  "description": "Schema for audit events in the append-only audit store",
+  "type": "object",
+  "required": [
+    "version",
+    "actor",
+    "action",
+    "resource",
+    "classification",
+    "policy_version",
+    "decision_id",
+    "trace_id",
+    "timestamp"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "audit_event_v1"
+    },
+    "actor": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["user", "service", "system", "api", "automation"]
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "ip_address": {
+          "type": "string",
+          "format": "ipv4"
+        }
+      },
+      "additionalProperties": false
+    },
+    "action": {
+      "type": "string"
+    },
+    "resource": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "classification": {
+      "type": "string",
+      "enum": ["public", "internal", "confidential", "restricted"]
+    },
+    "policy_version": {
+      "type": "string"
+    },
+    "decision_id": {
+      "type": "string"
+    },
+    "trace_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "customer": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

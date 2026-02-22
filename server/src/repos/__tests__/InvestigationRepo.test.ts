@@ -15,7 +15,7 @@ import {
   InvestigationRepo,
   type Investigation,
   type InvestigationInput,
-} from '../InvestigationRepo.js';
+} from '../InvestigationRepo';
 import type { Pool } from 'pg';
 
 describe('InvestigationRepo', () => {

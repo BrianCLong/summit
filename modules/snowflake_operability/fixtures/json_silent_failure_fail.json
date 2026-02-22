@@ -1,6 +1,0 @@
-[
-  {"marker": "late_data_policy", "status": "success"},
-  {"marker": "schema_contract", "status": "success"},
-  {"marker": "file_format_checks", "status": "failure", "details": "null values in non-nullable field"},
-  {"marker": "cost_budget", "status": "success"}
-]

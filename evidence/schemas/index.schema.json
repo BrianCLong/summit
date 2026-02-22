@@ -1,49 +1,30 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit evidence index",
-  "type": "object",
-  "required": ["mappings"],
-  "properties": {
-<<<<<<< HEAD
-    "version": {
-      "type": "string"
-    },
-    "items": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "evidence_id": { "type": "string" },
-          "files": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Evidence Pack V1 - Index",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["evidence_id", "area", "description", "files"],
+    "properties": {
+      "evidence_id": {
+        "type": "string",
+        "description": "Unique identifier for the evidence artifact."
+      },
+      "area": {
+        "type": "string",
+        "description": "Functional area or domain the evidence belongs to."
+      },
+      "description": {
+        "type": "string",
+        "description": "Human-readable description of what this evidence proves."
+      },
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "string"
         },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
-        "additionalProperties": true
-      }
-    },
-    "map": {
-=======
-    "mappings": {
->>>>>>> origin/main
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["report", "metrics", "stamp"],
-        "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        }
+        "description": "List of relative file paths included in this evidence bundle."
       }
     }
-  },
-  "additionalProperties": false
+  }
 }

@@ -13,7 +13,7 @@ import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError } from 'apollo-server-express';
 import { Pool } from 'pg';
 import { Logger } from 'pino';
-import { WarrantService } from '../services/WarrantService.js';
+import { WarrantService } from '../services/WarrantService';
 
 export interface GovernanceContext {
   purpose: string;

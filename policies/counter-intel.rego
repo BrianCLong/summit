@@ -4,6 +4,8 @@
 
 package counter_intelligence
 
+import future.keywords
+
 default allow = false
 
 # Example rule: Allow containment protocol to be activated if attribution

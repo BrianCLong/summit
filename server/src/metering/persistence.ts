@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import stringify from 'fast-json-stable-stringify';
-import { MeterEvent, TenantUsageDailyRow } from './schema.js';
-import { TenantUsageDailyRepository } from './repository.js';
+import { MeterEvent, TenantUsageDailyRow } from './schema';
+import { TenantUsageDailyRepository } from './repository';
 
 // We will implement a file-based store
 const DATA_DIR = path.join(process.cwd(), 'data', 'metering');

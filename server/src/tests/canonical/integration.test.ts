@@ -18,9 +18,9 @@ import {
   exportSubgraph,
   validateSubgraphExport,
   verifyManifest,
-} from '../../canonical.js';
-import migrate from '../../migrations/021_canonical_entities_bitemporal.js';
-import { CanonicalEntity } from '../../canonical/types.js';
+} from '../../canonical';
+import migrate from '../../migrations/021_canonical_entities_bitemporal';
+import { CanonicalEntity } from '../../canonical/types';
 
 // Define generic PersonEntity for testing
 interface PersonEntity extends CanonicalEntity {
@@ -375,7 +375,7 @@ describe('Canonical Entities Integration', () => {
     console.log('   ✓ Transaction time dimension tested');
     console.log('   ✓ Time-travel queries tested');
     console.log('   ✓ Retroactive corrections tested');
-    console.log('   See: tests/canonical/bitemporal.test.js');
+    console.log('   See: tests/canonical/bitemporal.test.ts');
 
     // ============ Acceptance 2: Export produces provenance manifest ============
     console.log('\n2. Exporting a subgraph produces a provenance manifest:');

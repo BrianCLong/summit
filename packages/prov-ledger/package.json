@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "start": "node dist/server.js"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
-import { PrivacyIncidentDrillEngine } from '../src/pits/engine.js';
-import { defaultScenario } from '../src/pits/defaultScenario.js';
+import { PrivacyIncidentDrillEngine } from '../src/pits/engine';
+import { defaultScenario } from '../src/pits/defaultScenario';
 import { describe, it, expect } from '@jest/globals';
 
 describe('PrivacyIncidentDrillEngine', () => {

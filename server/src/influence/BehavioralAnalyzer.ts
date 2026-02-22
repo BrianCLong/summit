@@ -1,5 +1,5 @@
 
-import { Actor, SocialPost, BehavioralFingerprint, AnomalyDetectionResult } from './types.js';
+import { Actor, SocialPost, BehavioralFingerprint, AnomalyDetectionResult } from './types';
 
 export class BehavioralAnalyzer {
 

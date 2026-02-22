@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { provenanceLedger } from '../provenance/ledger.js';
-import { ModelMetadata, ModelVersion } from './types.js';
-import { logger } from '../config/logger.js';
+import { provenanceLedger } from '../provenance/ledger';
+import { ModelMetadata, ModelVersion } from './types';
+import { logger } from '../config/logger';
 
 /**
  * Registry for managing ML model lifecycles.

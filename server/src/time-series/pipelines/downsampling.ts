@@ -54,9 +54,9 @@ function averageFields(rows: TimeSeriesRow[]) {
   const values: Record<string, number> = {};
   const counts: Record<string, number> = {};
 
-  rows.forEach((row) => {
+  rows.forEach((row: any) => {
     Object.entries(row.values).forEach(([field, value]) => {
-      values[field] = (values[field] ?? 0) + value;
+      (values as any)[field] = ((values as any)[field] ?? 0) + value;
       counts[field] = (counts[field] ?? 0) + 1;
     });
   });

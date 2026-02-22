@@ -1,6 +1,6 @@
 
-import { NarrativeEvent } from './types.js';
-import { SuppressionInteraction } from './primitives.js';
+import { NarrativeEvent } from './types';
+import { SuppressionInteraction } from './primitives';
 
 /**
  * CENSORSHIP X INFLUENCE INTERACTION MODEL

@@ -1,16 +1,21 @@
-# Repo Assumptions & Verification
+# Repo Assumptions (Subsumption Bundle Scaffold)
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+- Repo state: Intentionally constrained to local verification; external branch protection state is deferred pending governance access.
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Assumed (must validate)
+
+- CI uses GitHub Actions.
+- Node runtime is available for CI scripts.
+- Evidence artifacts are acceptable as JSON outputs under `evidence/`.
+
+## Must-not-touch
+
+- Existing workflows (modify only by adding new workflow or a single job if conventions require).
+- Public API surfaces and packages unless explicitly required by a gate.
+
+## Validation plan
+
+- Discover required checks (see `docs/required_checks.todo.md`).
+- Confirm Node version and package manager conventions.

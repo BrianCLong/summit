@@ -11,7 +11,7 @@ import CacheManager from '../cache/AdvancedCachingStrategy.js';
  *
  * @example
  * ```typescript
- * import { cacheService } from './CacheService.js';
+ * import { cacheService } from './CacheService';
  *
  * async function getUser(userId: string) {
  *   return cacheService.getOrSet(`user:${userId}`, async () => {

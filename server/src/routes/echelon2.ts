@@ -1,7 +1,7 @@
 // server/src/routes/echelon2.ts
 import { Router } from 'express';
-import { echelon2Service } from '../echelon2/Echelon2Service.js';
-import { eDNAReading } from '../echelon2/echelon2.types.js';
+import { echelon2Service } from '../echelon2/Echelon2Service';
+import { eDNAReading } from '../echelon2/echelon2.types';
 
 const router = Router();
 

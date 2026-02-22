@@ -13,8 +13,7 @@ This registry binds every public claim about Summit to the authoritative evidenc
 2. [Data & Provenance](#data--provenance)
 3. [Architecture & Resilience](#architecture--resilience)
 4. [Intelligence & AI](#intelligence--ai)
-5. [Narrative Defense Governance](#narrative-defense-governance)
-6. [Anti-Claims](#anti-claims)
+5. [Anti-Claims](#anti-claims)
 
 ---
 
@@ -50,14 +49,6 @@ This registry binds every public claim about Summit to the authoritative evidenc
 | **AI-001** | **Model Agnostic:** Prompts are decoupled from model providers via a configuration layer. | `server/prompts/registry.ts` | Supports OpenAI, Anthropic, and Local models via config. | AI Platform | **VERIFIED** |
 | **AI-002** | **PII Redaction:** Sensitive entities are detected and redacted before LLM inference. | `server/src/pii/ingestionHooks.ts` | Heuristic-based; not 100% guaranteed for all edge cases. | AI Security | **VERIFIED** |
 | **AI-003** | **Defensive PsyOps:** System actively detects and counters influence operations. | `server/src/services/DefensivePsyOpsService.ts` | Automated detection based on content signatures. | CogSec | **VERIFIED** |
-
-## Narrative Defense Governance
-
-| ID | Claim | Evidence Path | Scope / Limit | Owner | Status |
-|----|-------|---------------|---------------|-------|--------|
-| **EVD-NARRDOM-COMP-001** | **Continuous Compliance:** System detects policy drift and triggers safe mode for external actions. | `fixtures/governance/drift_detected.json` | Validated via compliance monitor safe-mode invariants. | Governance | **VERIFIED** |
-| **EVD-NARRDOM-AUTH-001** | **Authenticity Gating:** Watermark and provenance signals are used to gate external publishing. | `fixtures/governance/authenticity_verified.json` | Requires high confidence scores for media-referencing actions. | Governance | **VERIFIED** |
-| **EVD-NARRDOM-HIL-001** | **Human Accountability:** Mandatory review checklists and load caps enforce operator accountability. | `fixtures/governance/checklist_complete.json` | Enforced for all external publishing defense actions. | Governance | **VERIFIED** |
 
 ## Anti-Claims
 

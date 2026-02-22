@@ -12,61 +12,61 @@
  */
 
 // Types
-export * from './proof-carrying-types.js';
+export * from './proof-carrying-types';
 
 // Core components
-export { HashTreeBuilder, createHashTreeBuilder } from './hash-tree-builder.js';
-export type { FileHashInfo } from './hash-tree-builder.js';
+export { HashTreeBuilder, createHashTreeBuilder } from './hash-tree-builder';
+export type { FileHashInfo } from './hash-tree-builder';
 
 export {
   ModelCardGenerator,
   createModelCardFromExport,
   calculateQualityMetrics,
   mergeModelCards,
-} from './model-card-generator.js';
-export type { DataSource, TransformInput, QualityMetrics } from './model-card-generator.js';
+} from './model-card-generator';
+export type { DataSource, TransformInput, QualityMetrics } from './model-card-generator';
 
 export {
   DisclosurePackager,
   AudienceScopes,
-} from './disclosure-packager.js';
-export type { PackagerConfig, PackageOptions } from './disclosure-packager.js';
+} from './disclosure-packager';
+export type { PackagerConfig, PackageOptions } from './disclosure-packager';
 
 export {
   RevocationRegistry,
   DistributedRevocationChecker,
   PersistentRevocationRegistry,
-} from './revocation-registry.js';
+} from './revocation-registry';
 export type {
   RevocationRegistryConfig,
   RevokeOptions,
   DatabaseAdapter,
-} from './revocation-registry.js';
+} from './revocation-registry';
 
 export {
   CitationValidator,
   PublishingPipeline,
   StandardLicenses,
-} from './citation-validator.js';
+} from './citation-validator';
 export type {
   CitationRegistry,
   ValidationConfig,
-} from './citation-validator.js';
+} from './citation-validator';
 
 export {
   BundleVerifier,
   quickVerify,
   verifyWalletFile,
-} from './bundle-verifier.js';
-export type { VerifierConfig } from './bundle-verifier.js';
+} from './bundle-verifier';
+export type { VerifierConfig } from './bundle-verifier';
 
 export {
   ProofCarryingPublisher,
   createPublisherFromEnv,
   integrateWithExport,
-} from './proof-carrying-publisher.js';
+} from './proof-carrying-publisher';
 export type {
   PublisherConfig,
   PublishOptions,
   ExportIntegrationOptions,
-} from './proof-carrying-publisher.js';
+} from './proof-carrying-publisher';
