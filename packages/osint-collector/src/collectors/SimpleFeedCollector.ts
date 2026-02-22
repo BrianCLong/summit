@@ -32,9 +32,9 @@ export class SimpleFeedCollector extends CollectorBase {
     console.log(`[SimpleFeedCollector] Fetching feed from ${url}`);
 
     try {
-      await validateSafeUrl(url);
+      const safeUrl = await validateSafeUrl(url);
 
-      const response = await fetch(url);
+      const response = await fetch(safeUrl);
       if (!response.ok) {
         throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`);
       }

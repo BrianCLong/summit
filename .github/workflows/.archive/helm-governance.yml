@@ -103,11 +103,12 @@ jobs:
           kubeconform -v
 
       - name: Lint charts with ct
-        if: ((((((steps.chart-list.outputs.count != '0') && (steps.chart-list.outputs.count != '0')) && (steps.chart-list.outputs.count != '0')) && (steps.chart-list.outputs.count != '0')) && (steps.chart-list.outputs.count != '0')) && (needs.lint-and-template.outputs.chart-count != '0')) && (needs.lint-and-template.outputs.chart-count != '0')
+        if: steps.chart-list.outputs.count != '0'
         run: |
           ct lint --config "$CT_CONFIG" --all
 
       - name: Template charts and run kubeconform
+        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
           mkdir -p "$RENDER_DIR" artifacts
@@ -142,6 +143,7 @@ jobs:
           done
 
       - name: Package docs and dashboards
+        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
           mkdir -p artifacts
@@ -156,6 +158,7 @@ jobs:
           fi
 
       - name: Upload rendered manifests
+        if: steps.chart-list.outputs.count != '0'
         uses: actions/upload-artifact@v4
         with:
           name: helm-rendered-manifests
@@ -163,6 +166,7 @@ jobs:
           retention-days: 7
 
       - name: Upload docs and dashboards
+        if: steps.chart-list.outputs.count != '0'
         uses: actions/upload-artifact@v4
         with:
           name: helm-docs-and-dashboards
@@ -173,6 +177,7 @@ jobs:
     name: OPA and Kyverno policy gates
     needs: lint-and-template
     runs-on: ubuntu-22.04
+    if: needs.lint-and-template.outputs.chart-count != '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -232,6 +237,7 @@ jobs:
     name: Kind integration smoke
     needs: lint-and-template
     runs-on: ubuntu-22.04
+    if: needs.lint-and-template.outputs.chart-count != '0'
     env:
       IMAGE_REPOSITORY: registry.k8s.io/pause
     steps:

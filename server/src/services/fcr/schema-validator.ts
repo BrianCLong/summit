@@ -8,7 +8,8 @@ const Ajv = (AjvModule as any).default || AjvModule;
 const addFormats = (addFormatsModule as any).default || addFormatsModule;
 
 export class FcrSchemaValidator {
-  private ajv = new Ajv({ allErrors: true, strict: true });
+  // BOLT OPTIMIZATION: Disable allErrors to prevent DoS from malicious inputs
+  private ajv = new Ajv({ allErrors: false, strict: true });
 
   constructor() {
     addFormats(this.ajv);
@@ -26,6 +27,11 @@ export class FcrSchemaValidator {
     const schema = JSON.parse(schemaRaw);
     const validate = this.ajv.compile(schema);
     const failures: string[] = [];
+
+    // BOLT OPTIMIZATION: Bounding the number of signals to process
+    if (!Array.isArray(signals) || signals.length > 1000) {
+        throw new Error('Too many signals provided for validation');
+    }
 
     for (const signal of signals) {
       const ok = validate(signal);

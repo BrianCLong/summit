@@ -21,12 +21,21 @@ export class FunnelService {
 
     public generateReport(funnelId: string): FunnelReport {
         const funnel = this.funnels.get(funnelId);
-        if (!funnel) throw new Error('Funnel not found');
+        if (!funnel) {
+            throw new Error('Funnel not found');
+        }
+
+        // BOLT OPTIMIZATION: Prevent DoS from excessively large funnel definitions
+        if (!Array.isArray(funnel.steps) || funnel.steps.length > 1000) {
+            throw new Error('Funnel too complex or invalid');
+        }
 
         const userEvents = this.loadUserEvents();
 
         const stepCounts: Record<string, number> = {};
-        for (let i = 0; i < funnel.steps.length; i++) stepCounts[i] = 0;
+        for (let i = 0; i < funnel.steps.length; i++) {
+            stepCounts[i] = 0;
+        }
 
         for (const [userId, events] of userEvents.entries()) {
             // Sort by time

@@ -441,7 +441,7 @@ router.post(
       try {
         const { action, pull_request, issue, repository } = req.body;
 
-        logger.info(`Received GitHub webhook: ${action}`, {
+        logger.info('Received GitHub webhook: %s', action, {
           pr: pull_request?.number,
           issue: issue?.number,
           repo: repository?.name,
@@ -494,12 +494,12 @@ router.post(
 
         // Handle issue events
         if (issue && (action === 'opened' || action === 'closed')) {
-          console.log(`GitHub issue ${action}: #${issue.number}`);
+          console.log('GitHub issue %s: #%d', action, issue.number);
         }
 
         res.status(200).json({ status: 'processed' });
       } catch (error: any) {
-        logger.error('GitHub webhook error:', { error: error.message });
+        logger.error('GitHub webhook error: %s', error.message);
         metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'failed', provider: 'github' });
 
         span.recordException(error);
@@ -546,7 +546,7 @@ router.post(
     try {
       const { webhookEvent, issue, changelog } = req.body;
 
-      console.log(`Received Jira webhook: ${webhookEvent}`, {
+      console.log('Received Jira webhook: %s', webhookEvent, {
         issue: issue?.key,
         status: issue?.fields?.status?.name,
       });
@@ -589,7 +589,7 @@ router.post(
 
       res.status(200).json({ status: 'processed' });
     } catch (error: any) {
-      console.error('Jira webhook error:', error);
+      console.error('Jira webhook error: %o', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
   },
@@ -671,7 +671,7 @@ router.post(
 
       res.status(200).json({ status: 'processed' });
     } catch (error: any) {
-      console.error('Lifecycle webhook error:', error);
+      console.error('Lifecycle webhook error: %o', error);
       res.status(500).json({ error: 'Webhook processing failed' });
     }
   },

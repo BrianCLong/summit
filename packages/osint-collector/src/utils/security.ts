@@ -11,7 +11,7 @@ const lookup = promisify(dns.lookup);
  * @param url The URL to validate
  * @throws Error if URL is invalid or unsafe
  */
-export async function validateSafeUrl(url: string): Promise<void> {
+export async function validateSafeUrl(url: string): Promise<string> {
   let parsedUrl: URL;
 
   try {
@@ -36,12 +36,12 @@ export async function validateSafeUrl(url: string): Promise<void> {
   // Check if hostname is an IP (IPv4 or IPv6)
   if (Address4.isValid(hostname)) {
     checkIp(hostname);
-    return;
+    return parsedUrl.toString();
   }
 
   if (Address6.isValid(hostname)) {
     checkIp(hostname);
-    return;
+    return parsedUrl.toString();
   }
 
   // 3. DNS Resolution & IP Check
@@ -58,6 +58,8 @@ export async function validateSafeUrl(url: string): Promise<void> {
     }
     throw new Error(`DNS lookup failed for ${hostname}: ${error instanceof Error ? error.message : String(error)}`);
   }
+
+  return parsedUrl.toString();
 }
 
 function checkIp(ip: string): void {
