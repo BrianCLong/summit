@@ -303,6 +303,7 @@ export default function ExplorePage(): React.ReactElement {
                 variant={policyOverlay === 'purpose' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setPolicyOverlay(policyOverlay === 'purpose' ? 'none' : 'purpose')}
+                aria-pressed={policyOverlay === 'purpose'}
               >
                   <Shield className="h-3 w-3 mr-1" /> Purpose
               </Button>
@@ -310,6 +311,7 @@ export default function ExplorePage(): React.ReactElement {
                 variant={policyOverlay === 'residency' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setPolicyOverlay(policyOverlay === 'residency' ? 'none' : 'residency')}
+                aria-pressed={policyOverlay === 'residency'}
               >
                   <Shield className="h-3 w-3 mr-1" /> Residency
               </Button>
@@ -319,6 +321,8 @@ export default function ExplorePage(): React.ReactElement {
             variant="outline"
             size="sm"
             onClick={() => setFilterPanelOpen(!filterPanelOpen)}
+            aria-expanded={filterPanelOpen}
+            aria-controls="filter-panel"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -328,6 +332,8 @@ export default function ExplorePage(): React.ReactElement {
             variant="outline"
             size="sm"
             onClick={() => setTimelineOpen(!timelineOpen)}
+            aria-expanded={timelineOpen}
+            aria-controls="timeline-panel"
           >
             <Search className="h-4 w-4 mr-2" />
             Timeline
@@ -337,6 +343,8 @@ export default function ExplorePage(): React.ReactElement {
             variant="outline"
             size="sm"
             onClick={() => setSnapshotsOpen(!snapshotsOpen)}
+            aria-expanded={snapshotsOpen}
+            aria-controls="snapshots-panel"
           >
             <History className="h-4 w-4 mr-2" />
             Snapshots
@@ -385,7 +393,7 @@ export default function ExplorePage(): React.ReactElement {
       <div className="flex-1 flex">
         {/* Left Sidebar - Filters */}
         {filterPanelOpen && (
-          <div className="w-80 border-r overflow-y-auto">
+          <div id="filter-panel" className="w-80 border-r overflow-y-auto">
             <FilterPanel
               data={filters}
               onFilterChange={setFilters}
@@ -457,7 +465,7 @@ export default function ExplorePage(): React.ReactElement {
 
         {/* Right Sidebar - Timeline */}
         {timelineOpen && (
-          <div className="w-80 border-l overflow-y-auto">
+          <div id="timeline-panel" className="w-80 border-l overflow-y-auto">
             <TimelineRail
               data={timelineEvents}
               loading={loading}
@@ -474,7 +482,7 @@ export default function ExplorePage(): React.ReactElement {
 
         {/* Far Right Sidebar - Snapshots (Overlay or separate panel) */}
         {snapshotsOpen && (
-          <div className="w-96 border-l overflow-y-auto bg-background z-10">
+          <div id="snapshots-panel" className="w-96 border-l overflow-y-auto bg-background z-10">
             <SnapshotManager
               investigationId={investigationId || 'inv-1'}
               onClose={() => setSnapshotsOpen(false)}
