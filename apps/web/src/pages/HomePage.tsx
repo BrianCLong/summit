@@ -131,6 +131,13 @@ export default function HomePage() {
     }
   }
 
+  const handleItemKeyDown = (e: React.KeyboardEvent, path: string) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      navigate(path)
+    }
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* Welcome Header */}
@@ -253,9 +260,18 @@ export default function HomePage() {
               : recentInvestigations.map(investigation => (
                   <div
                     key={investigation.id}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View investigation: ${investigation.title}`}
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() =>
                       navigate(`/explore?investigation=${investigation.id}`)
+                    }
+                    onKeyDown={e =>
+                      handleItemKeyDown(
+                        e,
+                        `/explore?investigation=${investigation.id}`
+                      )
                     }
                   >
                     <div className="flex-1 min-w-0">
@@ -283,9 +299,17 @@ export default function HomePage() {
                   </div>
                 ))}
             {!loading && recentInvestigations.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No investigations available.
-              </p>
+              <EmptyState
+                icon="search"
+                title="No investigations"
+                description="Start a new investigation to see it here."
+                className="py-4"
+                action={{
+                  label: 'Start Investigation',
+                  onClick: () => navigate('/explore'),
+                  variant: 'outline',
+                }}
+              />
             )}
             <Button
               variant="ghost"
@@ -318,8 +342,14 @@ export default function HomePage() {
               : recentAlerts.map(alert => (
                   <div
                     key={alert.id}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View alert: ${alert.title}`}
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() => navigate(`/alerts/${alert.id}`)}
+                    onKeyDown={e =>
+                      handleItemKeyDown(e, `/alerts/${alert.id}`)
+                    }
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{alert.title}</div>
@@ -339,9 +369,17 @@ export default function HomePage() {
                   </div>
                 ))}
             {!loading && recentAlerts.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No alerts available.
-              </p>
+              <EmptyState
+                icon="alert"
+                title="No alerts"
+                description="New security alerts will appear here."
+                className="py-4"
+                action={{
+                  label: 'View All Alerts',
+                  onClick: () => navigate('/alerts'),
+                  variant: 'outline',
+                }}
+              />
             )}
             <Button
               variant="ghost"
@@ -374,8 +412,14 @@ export default function HomePage() {
               : recentCases.map(case_ => (
                   <div
                     key={case_.id}
-                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View case: ${case_.title}`}
+                    className="flex items-center justify-between p-3 hover:bg-muted/50 rounded-lg cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     onClick={() => navigate(`/cases/${case_.id}`)}
+                    onKeyDown={e =>
+                      handleItemKeyDown(e, `/cases/${case_.id}`)
+                    }
                   >
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">{case_.title}</div>
@@ -398,9 +442,17 @@ export default function HomePage() {
                   </div>
                 ))}
             {!loading && recentCases.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                No cases available.
-              </p>
+              <EmptyState
+                icon="file"
+                title="No active cases"
+                description="Manage your active investigations in cases."
+                className="py-4"
+                action={{
+                  label: 'View All Cases',
+                  onClick: () => navigate('/cases'),
+                  variant: 'outline',
+                }}
+              />
             )}
             <Button
               variant="ghost"
