@@ -65,7 +65,8 @@ export function requirePermission(permission: string) {
 }
 
 export function ensureRole(requiredRole: string | string[]) {
-  const roles = (Array.isArray(requiredRole) ? requiredRole : [requiredRole]).map(r =>
+  // Security Hardening: Ensure role comparison is case-insensitive to handle 'ADMIN' vs 'admin'
+  const roles = (Array.isArray(requiredRole) ? requiredRole : [requiredRole]).map((r) =>
     r.toUpperCase(),
   );
   return (
@@ -76,8 +77,7 @@ export function ensureRole(requiredRole: string | string[]) {
     const user = req.user;
     if (!user || !user.role) return res.status(401).json({ error: 'Unauthorized' });
 
-    const userRole = user.role.toUpperCase();
-    if (roles.includes(userRole)) {
+    if (roles.includes(user.role.toUpperCase())) {
       return next();
     } else {
       return res.status(403).json({ error: 'Forbidden: Insufficient role' });
