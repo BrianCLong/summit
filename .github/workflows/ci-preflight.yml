@@ -12,7 +12,6 @@ on:
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
-<<<<<<< HEAD
 concurrency:
   group: ci-preflight-${{ github.ref }}
 =======
