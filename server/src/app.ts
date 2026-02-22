@@ -421,7 +421,12 @@ export const createApp = async () => {
   app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use('/api/brand-packs', brandPackRouter);
-  app.use(['/monitoring', '/api/monitoring'], authenticateToken, monitoringRouter);
+  app.use(
+    ['/monitoring', '/api/monitoring'],
+    authenticateToken,
+    ensureRole(['ADMIN']),
+    monitoringRouter,
+  );
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   if (process.env.SKIP_AI_ROUTES !== 'true') {

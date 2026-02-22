@@ -129,8 +129,8 @@ export class ConflictUIController {
         tenantId,
         allFieldConflicts,
         {
-          userId: (req.headers['x-user-id'] as string) || 'system',
-          userRole: (req.headers['x-user-role'] as string) || 'user',
+          userId: (req as any).user?.sub || (req as any).user?.id || 'system',
+          userRole: (req as any).user?.role || 'user',
           manualOverrides,
           approver,
         },
@@ -272,8 +272,11 @@ export class ConflictUIController {
               tenantId,
               allFieldConflicts,
               {
-                userId: (req.headers['x-user-id'] as string) || 'batch-system',
-                userRole: (req.headers['x-user-role'] as string) || 'admin',
+                userId:
+                  (req as any).user?.sub ||
+                  (req as any).user?.id ||
+                  'batch-system',
+                userRole: (req as any).user?.role || 'admin',
                 approver,
               },
             );
