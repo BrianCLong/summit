@@ -55,6 +55,11 @@ jobs:
         run: |
           # jq is usually pre-installed, but ensure it's available
           which jq || sudo apt-get install -y jq
+          # Install PyYAML for python fallback
+          pip install PyYAML
+
+      - name: Debug Fixtures
+        run: ls -R scripts/release/tests/fixtures
 
       - name: Make Scripts Executable
         run: |

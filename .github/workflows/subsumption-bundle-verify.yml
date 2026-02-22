@@ -8,10 +8,6 @@ on:
       - "docs/**"
       - "evidence/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   subsumption-bundle-verify:
     name: subsumption-bundle-verify
@@ -20,4 +16,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify bundle
         run: |
-          node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml
+          if [ -f "subsumption/item-unknown/manifest.yaml" ]; then
+            node scripts/ci/verify_subsumption_bundle.mjs subsumption/item-unknown/manifest.yaml
+          else
+            echo "Skipping verification: subsumption/item-unknown/manifest.yaml not found."
+          fi

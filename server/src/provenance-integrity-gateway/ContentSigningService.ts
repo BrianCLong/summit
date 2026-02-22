@@ -204,7 +204,7 @@ export class ContentSigningService extends EventEmitter {
 
       // Store the content
       const storagePath = path.join(this.config.storagePath, tenantId, assetId);
-      await fs.mkdir(storagePath, { recursive: true });
+      await fs.mkdir(path.dirname(storagePath), { recursive: true });
       const storageUri = path.join(storagePath, request.filename);
       await fs.writeFile(storageUri, contentBuffer);
 

@@ -1,0 +1,10 @@
+{
+  "publishers": [
+    "summit-official",
+    "trusted-partner-a"
+  ],
+  "repositories": [
+    "github.com/summit-ecosystem",
+    "github.com/trusted-org"
+  ]
+}
