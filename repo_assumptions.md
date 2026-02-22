@@ -1,40 +1,54 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (Moltbook AI-Theater Pack)
 
-## Verified vs Assumed Directory List
+## Structure Validation
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| Plan Path | Actual Path | Status | Notes |
+| --- | --- | --- | --- |
+| `docs/` | `docs/` | ✅ Exists | Documentation tree for standards, security, and runbooks. |
+| `docs/standards/` | `docs/standards/` | ✅ Exists | Standards catalog (target for interop spec). |
+| `docs/security/` | `docs/security/` | ✅ Exists | Security governance and data-handling guidance. |
+| `docs/ops/` | `docs/ops/` | ✅ Exists | Operational runbooks and readiness guides. |
+| `artifacts/` | `artifacts/` | ✅ Exists | Artifact storage (evidence bundles, agent runs). |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | CI workflows (reusable + workflow entrypoints). |
+| `cli/` | `cli/` | ✅ Exists | CLI workspace with `summit` binary entry. |
 
-## CI Check Names (Exact)
+## CLI Entry Points
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Planned CLI | Actual Entry | Status | Notes |
+| --- | --- | --- | --- |
+| `summit` | `cli/package.json` `bin.summit` → `dist/summit.js` | ✅ Verified | `summit` CLI is registered alongside `intelgraph` and `ig`. |
 
-## Evidence Schema Conventions (Exact)
+## Artifact & Evidence Conventions
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+| Planned Artifact | Actual Path | Status | Notes |
+| --- | --- | --- | --- |
+| `artifacts/<slug>/report.json` | `artifacts/` | ✅ Verified | Artifact root exists; deterministic JSON expected. |
+| `artifacts/<slug>/metrics.json` | `artifacts/` | ✅ Verified | Metrics bundles stored in artifacts. |
+| `artifacts/<slug>/stamp.json` | `artifacts/` | ✅ Verified | Stamp bundles stored in artifacts. |
+| Evidence bundle spec | `docs/evidence-bundle-spec.md` | ✅ Verified | Evidence bundle format and expectations. |
 
-## Must-Not-Touch List (Guardrails)
+## CI Gate Discovery
 
-Deferred pending validation. Baseline expectations:
+| Requirement | Actual Location | Status | Notes |
+| --- | --- | --- | --- |
+| Required checks | `.github/required-checks.yml` | ✅ Verified | Required checks enumerated for branch protection. |
+| CI workflows | `.github/workflows/` | ✅ Verified | Reusable CI workflows present. |
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+## Must-Not-Touch Files (Policy/Release/Lock)
 
-## Validation Checklist
+* `pnpm-lock.yaml` (dependency lock)
+* `Cargo.lock` (Rust lock)
+* `CHANGELOG.md` / release notes files (release governance)
+* `LICENSE`, `NOTICE`, `NOTICE.third_party.md` (license governance)
+* `.github/required-checks.yml` (branch protection)
+* `agent-contract.json` (governance contract)
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Deferred Pending Verification
+
+* Evidence JSON schema paths for evaluation profiles (confirm in `eval/` or `evidence/`).
+* Deterministic artifact normalization script location (search in `scripts/ci` or `scripts/evidence`).
+* Existing evaluation profile registry (if present under `eval/` or `scripts/`).
+
+## Notes
+
+This repo already registers a `summit` CLI entry and contains artifact/evidence infrastructure. New work should align to `docs/evidence-bundle-spec.md` and existing CI required checks without modifying protection rules.
