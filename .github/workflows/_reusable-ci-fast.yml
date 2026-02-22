@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20.11.x"
+          node-version: 20
 
       - name: Enable corepack (belt & suspenders)
         run: corepack enable

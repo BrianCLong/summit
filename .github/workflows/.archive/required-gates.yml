@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "20", cache: "pnpm" }
       - uses: pnpm/action-setup@v4
-        with: { version: 9.12.0 }
+        with: { # version handled by package.json
       - run: pnpm install --frozen-lockfile
       - name: Lint & unit
         run: pnpm lint && pnpm test -- --ci
@@ -19,8 +19,9 @@ jobs:
       - name: E2E
         run: pnpm playwright install --with-deps && pnpm e2e
       - name: Policy sim
-        run: |
-          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
+      - name: Ensure opa path is clean
+        run: rm -rf opa
+           |          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
           ./opa test policies/ -v
       - name: SBOM + provenance
         run: pnpm cyclonedx-npm --output-format JSON --output-file sbom.json && node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json

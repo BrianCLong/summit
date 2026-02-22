@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: '20'
+          node-version: 20
 
       - name: Install Spectral
         run: npm install -g @stoplight/spectral-cli

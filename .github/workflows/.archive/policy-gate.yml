@@ -64,7 +64,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          # version handled by package.json
 
       - name: OPA Test
         run: opa test policy/rego/ -v
@@ -102,7 +102,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
         with:
-          version: latest
+          # auto-detect
 
       - name: Build quality gate input
         run: |

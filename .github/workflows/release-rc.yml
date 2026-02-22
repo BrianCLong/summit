@@ -103,7 +103,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: 20
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -307,12 +307,12 @@ jobs:
             --arg verify_result "${{ needs.verify.result }}" \
             --arg guard_result "${{ needs.promotion-guard.result }}" \
             '{
-              version: $version,
+              # auto-detect
               pipeline: $pipeline,
               generated_at: $generated_at,
               rc_tag: $rc_tag,
               ga_tag: $ga_tag,
-              base_version: $base_version,
+              base_# version handled by package.json
               commit_sha: $commit_sha,
               verification_status: $verification_status,
               promotion_allowed: $promotion_allowed,

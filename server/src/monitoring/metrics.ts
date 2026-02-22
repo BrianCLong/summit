@@ -1221,3 +1221,10 @@ export const metrics = {
 };
 
 export default metrics;
+
+export {
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds
+};

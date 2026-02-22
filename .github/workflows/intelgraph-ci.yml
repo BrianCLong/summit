@@ -28,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies
@@ -43,7 +43,7 @@ jobs:
       - name: Set up OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          opa-version: latest
+          opa-# auto-detect
 
       - name: Build OPA Policy Bundle
         run: |

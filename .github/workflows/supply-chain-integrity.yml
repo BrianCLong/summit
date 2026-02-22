@@ -55,18 +55,18 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v4.0.3
         with:
-          node-version: "20"
+          node-version: 20
           cache: "pnpm"
 
       - name: Set up Python
         uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
       - name: Set up Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5.0.1
         with:
-          go-version: "1.21"
+          go-# version handled by package.json
 
       # Install supply chain tools with strict pinning
       - name: Install syft

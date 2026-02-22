@@ -19,7 +19,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: 20
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsx scripts/governance/validate_claims.ts
       - name: Verify Governance Gates

@@ -41,7 +41,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9.12.0'
+          # version handled by package.json
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -98,12 +98,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '20'
+          node-version: 20
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9.12.0'
+          # version handled by package.json
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -180,12 +180,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '20'
+          node-version: 20
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: '9.12.0'
+          # version handled by package.json
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

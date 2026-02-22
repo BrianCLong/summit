@@ -138,12 +138,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.preflight.outputs.node-version }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -183,12 +183,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.preflight.outputs.node-version }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -225,12 +225,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.preflight.outputs.node-version }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -304,12 +304,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Get pnpm store path
@@ -381,12 +381,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -466,12 +466,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.preflight.outputs.node-version }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -525,12 +525,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.preflight.outputs.node-version }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Setup Python
@@ -593,12 +593,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
+          # version handled by package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.preflight.outputs.node-version }}
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies

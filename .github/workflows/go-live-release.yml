@@ -51,7 +51,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
         with:
-          node-version: "20"
+          node-version: 20
 
       - name: Get pnpm store directory
         shell: bash

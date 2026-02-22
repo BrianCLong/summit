@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: 20
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -74,7 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            ./scripts/security/trivy-scan.sh
+            ./scripts/security/trivy-scan.sh companyos-api .evidence/trivy-results.json
           else
             echo "Trivy scan script not found, skipping."
           fi
@@ -96,7 +96,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: 20
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -152,7 +152,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: 20
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

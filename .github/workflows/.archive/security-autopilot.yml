@@ -96,7 +96,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.11.x'
+          node-version: 20
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -181,7 +181,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '20.11.x'
+          node-version: 20
 
       - name: Run Crypto Hygiene Checker
         run: |

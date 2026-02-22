@@ -1,0 +1,14 @@
+{
+  "api": {
+    "getCustomer": {
+      "p95_ms": 200,
+      "p99_ms": 500
+    }
+  },
+  "audit": {
+    "publish": {
+      "p95_ms": 50,
+      "p99_ms": 100
+    }
+  }
+}
