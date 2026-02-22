@@ -1,40 +1,43 @@
-# Repo Assumptions & Validation
+# repo_assumptions.md
 
-## Verified vs Assumed Directory List
+## Verified
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+- Repository contents inspected locally; subsumption bundles and verifier script exist.
+- CI uses GitHub Actions workflows under `.github/workflows/`.
+- Evidence schemas and index live under `evidence/`.
 
-## CI Check Names (Exact)
+## Assumed (validate ASAP)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+- Required status check names remain to be confirmed against branch protection.
+- Summit prefers deterministic evidence: separate report/metrics/stamp artifacts.
 
-## Evidence Schema Conventions (Exact)
+## Must-not-touch (until validated)
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+- Public API surfaces in `packages/**` (no breaking changes).
+- Existing GA gates / branch protection requirements.
+- Deployment configs / secrets / infra definitions.
 
-## Must-Not-Touch List (Guardrails)
+## Validation plan
 
-Deferred pending validation. Baseline expectations:
+- Enumerate required checks via GitHub branch protection UI/API.
+- Confirm test runner (jest/vitest) and lint tooling.
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+## Ingress NGINX Retirement Bundle (Assumptions)
 
-## Validation Checklist
+### Verified
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- Bundle manifest and docs are now present under `subsumption/ingress-nginx-retirement` and `docs/**`.
+
+### Assumed (validate)
+
+- GitHub Actions required checks can be updated to include bundle-specific gates.
+- CI runners have Node.js 20+ available for the bundle verifier and deny gate scripts.
+
+### Must-not-touch (blast radius)
+
+- Runtime API surfaces and production deployment logic outside CI gating.
+
+### Validation plan
+
+- Confirm required check names in branch protection.
+- Confirm CI execution for `scripts/ci/verify_subsumption_bundle.mjs`.

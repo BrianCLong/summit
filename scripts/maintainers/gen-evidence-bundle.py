@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Evidence Bundle Generator for Summit PRs and Releases.
-Produces a deterministic bundle directory with manifest, diff, diffstat, and tree listing.
+Summit Evidence Bundle Generator
+Generates deterministic evidence bundles from the git working tree.
 """
-
 import argparse
 import json
 import subprocess
@@ -12,107 +11,104 @@ from datetime import datetime
 from pathlib import Path
 
 def run_git(args):
-    """Run a git command and return the output as a string."""
     try:
-        result = subprocess.run(
-            ["git"] + args,
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        result = subprocess.run(['git'] + args, capture_output=True, text=True, check=True)
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        # Don't exit on all errors, some commands are expected to fail in some envs
-        raise e
+        print(f"Error running git {' '.join(args)}: {e.stderr}", file=sys.stderr)
+        sys.exit(1)
+
+def get_merge_base(base, head):
+    try:
+        # Try to find merge base to get a cleaner diff
+        return run_git(['merge-base', base, head])
+    except:
+        return base
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate a Summit Evidence Bundle.")
-    parser.add_argument("--out", type=str, help="Output directory for the bundle.")
-    parser.add_argument("--base", type=str, help="Base reference for the diff (default: origin/main or merge-base).")
-    parser.add_argument("--no-timestamp", action="store_true", help="Omit timestamp from manifest for full determinism.")
-    parser.add_argument("--risk", type=str, default="unknown", help="Risk level (low, medium, high, unknown).")
-    parser.add_argument("--checks", type=str, help="Comma-separated list of checks run.")
-    parser.add_argument("--prompts", type=str, help="Comma-separated list of prompt hashes/IDs.")
+    parser = argparse.ArgumentParser(description="Generate a Summit Evidence Bundle")
+    parser.add_argument("--out", required=True, help="Output directory for the bundle")
+    parser.add_argument("--base", default="origin/main", help="Base reference for the diff (default: origin/main)")
+    parser.add_argument("--no-timestamp", action="store_true", help="Disable timestamp in manifest (for deterministic testing)")
 
     args = parser.parse_args()
 
-    # 1. Determine Git Metadata
-    head_sha = run_git(["rev-parse", "HEAD"])
-
-    base_ref = args.base
-    if not base_ref:
-        # Strategy: try origin/main, then main, then HEAD~1
-        for candidate in ["origin/main", "main"]:
-            try:
-                base_ref = run_git(["merge-base", candidate, "HEAD"])
-                break
-            except:
-                continue
-        if not base_ref:
-            try:
-                base_ref = run_git(["rev-parse", "HEAD~1"])
-            except:
-                base_ref = head_sha # No parent
-
-    # 2. Collect Artifacts
-    diff_patch = run_git(["diff", base_ref, "HEAD"])
-    diff_stat = run_git(["diff", "--stat", base_ref, "HEAD"])
-    # One-line summary of diffstat
-    try:
-        diff_stat_summary = run_git(["diff", "--shortstat", base_ref, "HEAD"])
-    except:
-        diff_stat_summary = "0 files changed"
-
-    changed_files_raw = run_git(["diff", "--name-only", base_ref, "HEAD"])
-    changed_files = changed_files_raw.splitlines() if changed_files_raw else []
-    changed_files.sort()
-
-    # Deterministic tree listing
-    tree_listing = run_git(["ls-tree", "-r", "--name-only", "HEAD"])
-
-    # 3. Prepare Manifest
-    manifest = {
-        "commit_sha": head_sha,
-        "base_ref": base_ref,
-        "changed_files": changed_files,
-        "diffstat_summary": diff_stat_summary,
-        "risk_level": args.risk,
-        "checks_run": sorted([c.strip() for c in args.checks.split(",")]) if args.checks else [],
-        "prompt_hashes": sorted([p.strip() for p in args.prompts.split(",")]) if args.prompts else []
-    }
-
-    if not args.no_timestamp:
-        # Use a stable format for ISO8601
-        try:
-            from datetime import timezone
-            manifest["timestamp"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-        except ImportError:
-            # Fallback for older python
-            manifest["timestamp"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-
-    # 4. Write to Output Directory
-    out_path_str = args.out if args.out else f"evidence/bundles/{head_sha[:7]}"
-    out_dir = Path(out_path_str)
+    out_dir = Path(args.out)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Use sort_keys=True for determinism
-    with open(out_dir / "manifest.json", "w") as f:
-        json.dump(manifest, f, indent=2, sort_keys=True)
-        f.write("\n") # Ensure trailing newline
+    head_sha = run_git(['rev-parse', 'HEAD'])
+    merge_base = get_merge_base(args.base, 'HEAD')
 
+    # 1. Get Changed Files (including uncommitted changes)
+    changed_files_raw = run_git(['diff', '--name-only', merge_base])
+    changed_files = sorted(changed_files_raw.splitlines()) if changed_files_raw else []
+
+    # Filter out output directory from changed_files if it's inside the repo
+    try:
+        rel_out = out_dir.resolve().relative_to(Path.cwd().resolve())
+        changed_files = [f for f in changed_files if not f.startswith(str(rel_out))]
+    except ValueError:
+        # out_dir is not under current directory
+        pass
+
+    # 2. Get Diffstat Summary
+    diffstat_summary = run_git(['diff', '--shortstat', merge_base])
+    insertions = 0
+    deletions = 0
+    files_changed = 0
+
+    if diffstat_summary:
+        parts = [p.strip() for p in diffstat_summary.split(',')]
+        for part in parts:
+            if 'file' in part:
+                files_changed = int(part.split()[0])
+            elif 'insertion' in part:
+                insertions = int(part.split()[0])
+            elif 'deletion' in part:
+                deletions = int(part.split()[0])
+
+    # 3. Generate diff.patch
+    diff_patch = run_git(['diff', merge_base])
     with open(out_dir / "diff.patch", "w") as f:
         f.write(diff_patch)
-        if diff_patch: f.write("\n")
 
+    # 4. Generate diffstat.txt
+    diffstat_full = run_git(['diff', '--stat', merge_base])
     with open(out_dir / "diffstat.txt", "w") as f:
-        f.write(diff_stat)
-        if diff_stat: f.write("\n")
+        f.write(diffstat_full)
 
+    # 5. Generate tree.txt (list of changed files)
     with open(out_dir / "tree.txt", "w") as f:
-        f.write(tree_listing)
-        if tree_listing: f.write("\n")
+        f.write("\n".join(changed_files))
 
-    print(f"✅ Evidence bundle generated at: {out_dir}")
+    # 6. Generate manifest.json
+    # Use timezone-aware UTC datetime
+    try:
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
+    except ImportError:
+        now = datetime.utcnow()
+
+    manifest = {
+        "timestamp": now.strftime("%Y-%m-%dT%H:%M:%SZ") if not args.no_timestamp else "0000-00-00T00:00:00Z",
+        "commit_sha": head_sha,
+        "base_ref": args.base,
+        "merge_base": merge_base,
+        "changed_files": changed_files,
+        "diffstat": {
+            "files_changed": files_changed,
+            "insertions": insertions,
+            "deletions": deletions
+        },
+        "prompt_hashes": [],
+        "risk_level": "unknown",
+        "checks_run": []
+    }
+
+    with open(out_dir / "manifest.json", "w") as f:
+        json.dump(manifest, f, indent=2, sort_keys=True)
+
+    print(f"✅ Evidence bundle generated in {out_dir}")
 
 if __name__ == "__main__":
     main()

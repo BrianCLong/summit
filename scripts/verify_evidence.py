@@ -125,7 +125,7 @@ def main() -> int:
         "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
         "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
     }
-    IGNORE_DIRS = {"EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"}
+    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out"}
 
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):

@@ -19,16 +19,23 @@
     {
       "evidence_id": "EVD-ENTRE-502318-GOV-001",
       "files": [
-        "solo_os/governance/policy.schema.json",
-        "solo_os/governance/policy.default.json"
+        "solo_os/evidence/samples/GOV/report.json",
+        "solo_os/evidence/samples/GOV/stamp.json"
       ]
     },
     {
-      "evidence_id": "EVD-ENTRE-502318-CTR-001",
+      "evidence_id": "EVD-ENTRE-502318-ENG-001",
       "files": [
-        "solo_os/contracts/engine.schema.json",
-        "solo_os/contracts/run_request.schema.json",
-        "solo_os/contracts/run_result.schema.json"
+        "solo_os/evidence/samples/ENG/report.json",
+        "solo_os/evidence/samples/ENG/metrics.json",
+        "solo_os/evidence/samples/ENG/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-CI-001",
+      "files": [
+        "solo_os/evidence/samples/CI/report.json",
+        "solo_os/evidence/samples/CI/stamp.json"
       ]
     }
   ]

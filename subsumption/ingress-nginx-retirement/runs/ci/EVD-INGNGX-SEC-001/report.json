@@ -12,7 +12,5 @@
   "evidence_id": "EVD-INGNGX-SEC-001",
   "generated_by": "scripts/ci/deny_ingress_nginx.mjs",
   "item_slug": "ingress-nginx-retirement",
-  "notes": [
-    "deny_gate_ok"
-  ]
+  "notes": ["deny_gate_ok"]
 }

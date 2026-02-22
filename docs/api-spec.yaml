@@ -3,6 +3,9 @@ info:
   title: IntelGraph Summit API
   version: 1.1.0
   description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
+  contact:
+    name: IntelGraph Support
+    email: support@intelgraph.example.com
 
 servers:
   - url: /api
@@ -10,11 +13,26 @@ servers:
   - url: /
     description: Root path for monitoring and health
 
+tags:
+  - name: Observability
+    description: Monitoring and health endpoints
+  - name: Tenancy
+    description: Tenant management
+  - name: Governance
+    description: Policy and compliance
+  - name: Disclosure
+    description: Data export and bundles
+  - name: Provenance
+    description: Signed receipts and audit trails
+  - name: Maestro
+    description: Orchestration and task execution
+
 paths:
   /monitoring/metrics:
     get:
       operationId: getMonitoringMetrics
       summary: Prometheus metrics
+      description: Returns metrics in Prometheus text format.
       tags: [Observability]
       responses:
         '200':
@@ -28,6 +46,7 @@ paths:
     get:
       operationId: getHealth
       summary: System health check
+      description: Returns the health status of the system.
       tags: [Observability]
       responses:
         '200':
@@ -45,7 +64,9 @@ paths:
 
   /api/tenants:
     post:
+      operationId: createTenant
       summary: Create a new tenant
+      description: Registers a new tenant in the system.
       tags: [Tenancy]
       requestBody:
         required: true
@@ -62,7 +83,9 @@ paths:
                 $ref: '#/components/schemas/Tenant'
 
     get:
+      operationId: listTenants
       summary: List tenants (Admin only)
+      description: Returns a list of all tenants. Admin credentials required.
       tags: [Tenancy]
       responses:
         '200':
@@ -76,7 +99,9 @@ paths:
 
   /api/policy/simulate:
     post:
+      operationId: simulatePolicy
       summary: Simulate a policy decision (Preflight)
+      description: Previews the outcome of a policy decision without executing it.
       tags: [Governance]
       requestBody:
         required: true
@@ -94,7 +119,9 @@ paths:
 
   /api/export/bundles:
     post:
+      operationId: createBundle
       summary: Create an Intel Bundle export
+      description: Initiates the creation of a downloadable Intel Bundle.
       tags: [Disclosure]
       requestBody:
         required: true
@@ -112,7 +139,9 @@ paths:
 
   /api/receipts/{id}:
     get:
+      operationId: getReceipt
       summary: Get a signed receipt by ID
+      description: Retrieves a specific signed receipt for audit purposes.
       tags: [Provenance]
       parameters:
         - name: id
@@ -132,6 +161,7 @@ paths:
     post:
       operationId: previewRoute
       summary: Preview routing candidates for a task
+      description: Lists potential models or web interfaces for a given task.
       tags: [Maestro]
       requestBody:
         required: true
@@ -156,6 +186,7 @@ paths:
     post:
       operationId: executeRoute
       summary: Execute a task with selected candidates
+      description: Runs a task using specific routing candidates.
       tags: [Maestro]
       requestBody:
         required: true
@@ -182,6 +213,7 @@ paths:
     get:
       operationId: getWebInterfaces
       summary: Get available web interfaces
+      description: Returns a list of web-accessible search and content interfaces.
       tags: [Maestro]
       responses:
         '200':
@@ -195,6 +227,7 @@ paths:
     post:
       operationId: runWebOrchestration
       summary: Orchestrate web search/content tasks
+      description: Executes complex web-based tasks using selected interfaces.
       tags: [Maestro]
       requestBody:
         required: true
@@ -221,6 +254,7 @@ paths:
     get:
       operationId: getBudgets
       summary: Get budget and usage information
+      description: Retrieves remaining token and USD budgets.
       tags: [Maestro]
       responses:
         '200':
@@ -234,6 +268,7 @@ paths:
     post:
       operationId: checkPolicy
       summary: Check policy for an action
+      description: Checks if a specific action is allowed under current policies.
       tags: [Maestro]
       requestBody:
         required: true
@@ -258,6 +293,7 @@ paths:
     post:
       operationId: createRun
       summary: Create and run a new pipeline
+      description: Starts a new pipeline run for a user.
       tags: [Maestro]
       requestBody:
         required: true
@@ -282,6 +318,7 @@ paths:
     post:
       operationId: createWorkflowDefinition
       summary: Create or update a workflow definition
+      description: Saves a workflow definition for a specific tenant.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -307,6 +344,7 @@ paths:
     post:
       operationId: startRun
       summary: Start a new run from a workflow definition
+      description: Triggers a run of a predefined workflow.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -332,6 +370,7 @@ paths:
     get:
       operationId: getRun
       summary: Get run details including receipts
+      description: Retrieves the status and results of a specific run.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -356,6 +395,7 @@ paths:
     post:
       operationId: approveRun
       summary: Approve or reject a run/step
+      description: Submits a human decision for a run that requires approval.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -386,6 +426,7 @@ paths:
     get:
       operationId: getRunEvents
       summary: Get timeline events for a run
+      description: Returns a history of events that occurred during a run.
       tags: [Maestro]
       parameters:
         - name: tenantId

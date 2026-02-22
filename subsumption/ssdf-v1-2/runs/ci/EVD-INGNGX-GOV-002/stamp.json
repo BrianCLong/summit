@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-INGNGX-GOV-002",
-  "item_slug": "ingress-nginx-retirement",
-  "timestamp": "2026-02-03T02:51:07.981Z",
-  "tool_versions": {
-    "node": "v22.22.0"
-  }
-}

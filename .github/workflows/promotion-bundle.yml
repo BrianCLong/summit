@@ -93,7 +93,7 @@ jobs:
           echo "bundle_path=${OUTPUT_DIR}" >> $GITHUB_OUTPUT
 
       - name: Upload Bundle Artifact
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: promotion-bundle-${{ steps.params.outputs.tag }}
           path: ${{ steps.bundle.outputs.bundle_path }}

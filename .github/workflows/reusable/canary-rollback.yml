@@ -46,15 +46,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-
       - name: Setup Node
         uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node-version }}
-          cache: pnpm
-
       - name: Install canary dependencies
         run: pnpm add -w js-yaml
 
@@ -65,10 +60,11 @@ jobs:
 
       - name: Rollback on canary failure
         id: rollback
-        if: (${{ inputs.rollback-enabled && steps.canary.outcome != 'success' }}) && (${{ steps.canary.outcome != 'success' }})
+        if: ${{ inputs.rollback-enabled && steps.canary.outcome != 'success' }}
         run: bash ${{ inputs.rollback-script }} ${{ inputs.service-name }}
 
       - name: Report canary failure
+        if: ${{ steps.canary.outcome != 'success' }}
         run: |
           echo "Canary checks failed for ${{ inputs.service-name }}." >&2
           exit 1

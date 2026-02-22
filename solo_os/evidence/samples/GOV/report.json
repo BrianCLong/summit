@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-ENTRE-502318-GOV-001",
+  "summary": "Governance deny-by-default verified",
+  "environment": {"test": "governance_gate"},
+  "backend": "solo_os",
+  "artifacts": ["report.json", "stamp.json"]
+}
