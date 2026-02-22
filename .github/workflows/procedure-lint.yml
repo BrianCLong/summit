@@ -23,10 +23,27 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+<<<<<<< HEAD
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
+=======
+      - name: Install pnpm
+
+
+        uses: pnpm/action-setup@v4
+
+
+        with:
+
+
+          version: 10.0.0
+
+
+>>>>>>> 4d18e8178d (feat(narrative): Narrative IO Inference & Convergence)
       - name: Setup Node
+
+
         uses: actions/setup-node@v4
         with:
           node-version: 20

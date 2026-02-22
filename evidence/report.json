@@ -1,5 +1,10 @@
 {
-  "summary": "Partitioning eval completed",
+  "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+  "item_slug": "pipeline-resilience",
+  "summary": "Pipeline resilience check",
+  "version": 1,
+  "classification": "internal",
+  "artifacts": [],
   "scenarios": 3,
   "status": "PASS"
 }

@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import narrativeSimulationRouter from '../../routes/narrative-sim.js';
+import narrativeSimulationRouter from '../../routes/narrative-sim';
 import { describe, it, expect } from '@jest/globals';
 
 const NO_NETWORK_LISTEN = process.env.NO_NETWORK_LISTEN === 'true';

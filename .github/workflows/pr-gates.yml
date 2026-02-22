@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -57,9 +57,14 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+<<<<<<< HEAD
+=======
+        with:
+          version: 10.0.0
+>>>>>>> 4d18e8178d (feat(narrative): Narrative IO Inference & Convergence)
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: "18"
@@ -87,13 +92,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: "18"
@@ -115,12 +125,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            helm lint helm/
+            helm lint helm/summit/
           fi
 
       - name: Terraform Plan
@@ -143,13 +153,18 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: "18"
@@ -161,61 +176,36 @@ jobs:
         id: deploy
         run: |
           echo "Starting Preview Environment Deployment..."
-
           PREVIEW_NAME="pr-${{ github.event.number }}"
-
-          # Attempt to deploy via Terraform if directory exists
           if [ -d "terraform" ]; then
             cd terraform
-            echo "Initializing Terraform..."
             terraform init -backend=false
-
-            echo "Creating/Selecting Workspace $PREVIEW_NAME..."
             terraform workspace select $PREVIEW_NAME || terraform workspace new $PREVIEW_NAME
-
-            echo "Applying Terraform Configuration..."
-            # Using -target or specific vars to limit scope to preview resources would be ideal
-            # Here we assume standard apply for the env
-            # We use '|| true' to allow the workflow to continue if cloud creds are missing in this demo environment,
-            # but we capture the status.
             if terraform apply -auto-approve; then
-               # Capture the output URL if deployment succeeds
                DEPLOYED_URL=$(terraform output -raw preview_url)
                echo "preview_url=$DEPLOYED_URL" >> $GITHUB_OUTPUT
                echo "DEPLOY_STATUS=success" >> $GITHUB_ENV
             else
-               echo "Terraform apply failed (likely due to missing credentials in CI)."
-               echo "Falling back to local simulation for smoke tests."
                echo "DEPLOY_STATUS=fallback" >> $GITHUB_ENV
             fi
             cd ..
           else
-            echo "Terraform directory not found, using fallback."
             echo "DEPLOY_STATUS=fallback" >> $GITHUB_ENV
           fi
 
-          # Fallback: Stand up local environment if real deployment failed (for CI verification)
-          # This ensures the 'smoke test' requirement can be verified in this sandbox environment
           if [ "$DEPLOY_STATUS" != "success" ]; then
-             echo "Starting local preview environment..."
-
-             # Start server in background
              if command -v docker-compose &> /dev/null; then
                  docker-compose -f docker-compose.dev.yml up -d
              else
                  npm run build:server
                  cd server && npm start &
              fi
-
-             # Wait for service readiness
              sleep 30
-
-             # Set localhost as the preview URL for smoke tests
              echo "preview_url=http://localhost:4000" >> $GITHUB_OUTPUT
           fi
 
       - name: Post Preview URL
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        uses: actions/github-script@v7
         with:
           script: |
             const previewUrl = '${{ steps.deploy.outputs.preview_url }}';
@@ -234,6 +224,5 @@ jobs:
       - name: Run Smoke Tests
         run: |
           export TARGET_URL="${{ steps.deploy.outputs.preview_url }}"
-          # Ensure smoke tests target the correct URL
           echo "Running smoke tests against $TARGET_URL"
           npm run test:smoke

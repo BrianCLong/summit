@@ -1,0 +1,7 @@
+version: 1
+kind: item
+slug: narrative-io-inference-convergence
+title: Narrative Analysis & IO
+status: draft
+components:
+  - src/narrative

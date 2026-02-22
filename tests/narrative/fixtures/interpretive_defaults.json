@@ -1,0 +1,10 @@
+[
+  {
+    "doc_id": "doc1",
+    "text": "It is obviously true that the sky is blue."
+  },
+  {
+    "doc_id": "doc2",
+    "text": "The rain implies that the ground is wet."
+  }
+]
