@@ -17,6 +17,8 @@
 import validator from 'validator';
 import { escape as htmlEscape } from 'html-escaper';
 import DOMPurify from 'isomorphic-dompurify';
+import dns from 'node:dns/promises';
+import net from 'node:net';
 
 /**
  * Sanitize string input to prevent XSS
@@ -357,8 +359,18 @@ export function sanitizeEmail(email: string): string {
 /**
  * Validate and sanitize URL
  */
-export function sanitizeURL(url: string, allowedProtocols: string[] = ['http', 'https']): string {
-  if (!validator.isURL(url, { protocols: allowedProtocols, require_protocol: true })) {
+export function sanitizeURL(url: string, options: string[] | { allowedProtocols?: string[], requireTld?: boolean } = ['http', 'https']): string {
+  let allowedProtocols = ['http', 'https'];
+  let requireTld = true;
+
+  if (Array.isArray(options)) {
+    allowedProtocols = options;
+  } else {
+    allowedProtocols = options.allowedProtocols || allowedProtocols;
+    requireTld = options.requireTld ?? true;
+  }
+
+  if (!validator.isURL(url, { protocols: allowedProtocols, require_protocol: true, require_tld: requireTld })) {
     throw new Error('Invalid URL');
   }
 
@@ -369,6 +381,108 @@ export function sanitizeURL(url: string, allowedProtocols: string[] = ['http', '
   }
 
   return url.trim();
+}
+
+/**
+ * Check if an IP address is private or reserved
+ */
+export function isPrivateIP(ip: string): boolean {
+  if (!net.isIP(ip)) return false;
+
+  // IPv4 checks
+  if (net.isIPv4(ip)) {
+    const parts = ip.split('.').map(Number);
+    // 10.0.0.0/8
+    if (parts[0] === 10) return true;
+    // 172.16.0.0/12
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+    // 192.168.0.0/16
+    if (parts[0] === 192 && parts[1] === 168) return true;
+    // 127.0.0.0/8 (Loopback)
+    if (parts[0] === 127) return true;
+    // 169.254.0.0/16 (Link-local)
+    if (parts[0] === 169 && parts[1] === 254) return true;
+    // 0.0.0.0/8 (Current network)
+    if (parts[0] === 0) return true;
+
+    return false;
+  }
+
+  // IPv6 checks
+  if (net.isIPv6(ip)) {
+    // ::1 (Loopback)
+    if (ip === '::1' || ip === '0:0:0:0:0:0:0:1') return true;
+    // :: (Unspecified)
+    if (ip === '::' || ip === '0:0:0:0:0:0:0:0') return true;
+
+    // Normalize IPv6 manually or check prefix
+    // Simple checks for prefixes
+    const normalized = ip.toLowerCase();
+
+    // fc00::/7 (Unique Local) - fc00... to fdff...
+    if (normalized.startsWith('fc') || normalized.startsWith('fd')) return true;
+
+    // fe80::/10 (Link-Local) - fe80... to febf...
+    if (normalized.startsWith('fe8') || normalized.startsWith('fe9') || normalized.startsWith('fea') || normalized.startsWith('feb')) return true;
+
+    // IPv4-mapped IPv6 ::ffff:127.0.0.1
+    if (normalized.includes('::ffff:')) {
+      const parts = normalized.split(':');
+      const lastPart = parts[parts.length - 1];
+      if (net.isIPv4(lastPart)) {
+        return isPrivateIP(lastPart);
+      }
+    }
+
+    return false;
+  }
+
+  return false;
+}
+
+/**
+ * Validate and sanitize URL, ensuring it resolves to a public IP (SSRF protection)
+ */
+export async function validateSafeURL(url: string, options: { allowedProtocols?: string[], allowLocal?: boolean } = {}): Promise<string> {
+  const { allowedProtocols = ['http', 'https'], allowLocal = false } = options;
+
+  // 1. Syntax check
+  // We disable TLD requirement here to allow 'localhost' to pass syntax check,
+  // so we can explicitly check for it later with a clearer error message.
+  const validUrl = sanitizeURL(url, { allowedProtocols, requireTld: false });
+
+  // 2. Parse hostname
+  let hostname: string;
+  try {
+    const parsed = new URL(validUrl);
+    hostname = parsed.hostname;
+  } catch (error) {
+    throw new Error('Invalid URL format');
+  }
+
+  // 3. Check for localhost
+  if (!allowLocal && (hostname === 'localhost' || hostname.endsWith('.localhost'))) {
+    throw new Error('Localhost access is restricted');
+  }
+
+  // 4. DNS Resolution
+  try {
+    const addresses = await dns.lookup(hostname, { all: true });
+
+    for (const addr of addresses) {
+      if (!allowLocal && isPrivateIP(addr.address)) {
+        throw new Error(`URL resolves to a restricted IP: ${addr.address}`);
+      }
+    }
+  } catch (error: any) {
+    if (error.message.includes('restricted IP')) {
+      throw error;
+    }
+    // If DNS lookup fails, we assume it's unsafe or unreachable
+    throw new Error(`DNS resolution failed for ${hostname}: ${error.message}`);
+  }
+
+  return validUrl;
 }
 
 /**
