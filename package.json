@@ -124,7 +124,7 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky"
   },
@@ -284,7 +284,7 @@
       "micromatch": ">=4.0.8",
       "path-to-regexp": ">=8.0.0",
       "validator": ">=13.15.20",
-      "nanoid": ">=5.0.9",
+      "nanoid": "^3.3.7",
       "cross-spawn": ">=7.0.6",
       "tar": ">=7.5.7",
       "cookie": ">=0.7.0",
