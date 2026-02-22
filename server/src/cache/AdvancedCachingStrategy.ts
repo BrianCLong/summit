@@ -118,11 +118,11 @@ export interface RedisClientInterface {
 // ============================================================================
 
 /**
- * L1 in-memory cache with configurable eviction
+ * L1 in-memory cache with configurable eviction.
+ * Optimized to use Map's insertion order for O(1) LRU and FIFO.
  */
 class L1Cache<T> {
   private cache: Map<string, CacheEntry<T>> = new Map();
-  private accessOrder: string[] = []; // For LRU
   private readonly maxEntries: number;
   private readonly evictionPolicy: 'lru' | 'lfu' | 'fifo';
 
@@ -137,7 +137,7 @@ class L1Cache<T> {
 
     // Check expiration
     if (entry.expiresAt < Date.now()) {
-      this.delete(key);
+      this.cache.delete(key);
       return undefined;
     }
 
@@ -145,39 +145,33 @@ class L1Cache<T> {
     entry.accessCount++;
     entry.lastAccessedAt = Date.now();
 
-    // Update access order for LRU
+    // Update access order for LRU: move to end of Map in O(1)
     if (this.evictionPolicy === 'lru') {
-      const index = this.accessOrder.indexOf(key);
-      if (index > -1) {
-        this.accessOrder.splice(index, 1);
-      }
-      this.accessOrder.push(key);
+      this.cache.delete(key);
+      this.cache.set(key, entry);
     }
 
     return entry;
   }
 
   set(key: string, entry: CacheEntry<T>): void {
-    // Evict if necessary
-    while (this.cache.size >= this.maxEntries) {
+    if (this.cache.has(key)) {
+      // Re-insert to update order
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.maxEntries) {
+      // Evict oldest entry in O(1)
       this.evict();
     }
 
     this.cache.set(key, entry);
-    this.accessOrder.push(key);
   }
 
   delete(key: string): boolean {
-    const index = this.accessOrder.indexOf(key);
-    if (index > -1) {
-      this.accessOrder.splice(index, 1);
-    }
     return this.cache.delete(key);
   }
 
   clear(): void {
     this.cache.clear();
-    this.accessOrder = [];
   }
 
   size(): number {
@@ -191,20 +185,15 @@ class L1Cache<T> {
   private evict(): void {
     let keyToEvict: string | undefined;
 
-    switch (this.evictionPolicy) {
-      case 'lru':
-        keyToEvict = this.accessOrder.shift();
-        break;
-      case 'lfu':
-        keyToEvict = this.findLFUKey();
-        break;
-      case 'fifo':
-        keyToEvict = this.accessOrder.shift();
-        break;
+    if (this.evictionPolicy === 'lru' || this.evictionPolicy === 'fifo') {
+      // BOLT OPTIMIZATION: Map.keys().next().value gives the oldest entry in O(1)
+      keyToEvict = this.cache.keys().next().value;
+    } else if (this.evictionPolicy === 'lfu') {
+      keyToEvict = this.findLFUKey();
     }
 
-    if (keyToEvict) {
-      this.delete(keyToEvict);
+    if (keyToEvict !== undefined) {
+      this.cache.delete(keyToEvict);
     }
   }
 
