@@ -1,18 +1,17 @@
 {
-  "name": "@intelgraph/graph",
-  "version": "1.0.0",
-  "description": "Core graph types and definitions for IntelGraph",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
+  "name": "@summit/graph",
+  "version": "0.0.1",
   "type": "module",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
-    "test": "echo \"Error: no test specified\""
+    "build": "tsc"
   },
-  "keywords": ["graph", "types", "typescript"],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {
+    "@summit/evidence": "workspace:*",
+    "uuid": "^13.0.0"
+  },
   "devDependencies": {
-    "typescript": "^5.3.3"
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.7.3"
   }
 }
