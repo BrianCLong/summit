@@ -60,7 +60,7 @@ jobs:
           BASE_URL=http://localhost:3000 SLO_MODE=mock k6 run tests/k6-graphql-slo.js
 
       - name: Upload K6 artifacts
-        if: always()
+        if: (((always()) && (always())) && (${{ github.event_name != 'pull_request' && secrets.STAGING_BASE_URL != '' }})) && (always())
         uses: actions/upload-artifact@v4
         with:
           name: k6-mock-results
@@ -70,12 +70,10 @@ jobs:
           if-no-files-found: warn
 
       - name: Tear down
-        if: always()
         run: make down || true
 
   k6-strict:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'pull_request' && secrets.STAGING_BASE_URL != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -95,7 +93,6 @@ jobs:
         run: k6 run tests/k6-graphql-slo.js
 
       - name: Upload strict artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: k6-strict-results

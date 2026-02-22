@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IO Campaign",
+  "type": "object",
+  "required": ["campaign_id", "name", "provenance"],
+  "properties": {
+    "campaign_id": { "type": "string" },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "start_date": { "type": "string", "format": "date-time" },
+    "end_date": { "type": "string", "format": "date-time" },
+    "target_audience": { "type": "string" },
+    "narratives": { "type": "array", "items": { "type": "string" } },
+    "provenance": { "$ref": "./provenance.json" }
+  }
+}

@@ -9,6 +9,10 @@ on:
       - "evidence/**"
       - ".github/workflows/subsumption-bundle-verifier.yml"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   subsumption-bundle-verifier:
     runs-on: ubuntu-latest

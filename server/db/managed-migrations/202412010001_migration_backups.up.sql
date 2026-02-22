@@ -10,5 +10,5 @@ CREATE TABLE IF NOT EXISTS migration_backups (
 
 -- NO_TRANSACTION
 -- SAFE: Creating index on new table is safe
-CREATE INDEX CONCURRENTLY IF NOT EXISTS migration_backups_taken_at_idx
+CREATE INDEX  IF NOT EXISTS migration_backups_taken_at_idx
   ON migration_backups (taken_at DESC);

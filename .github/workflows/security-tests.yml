@@ -9,6 +9,10 @@ on:
       - 'package.json'
       - '.github/workflows/security-tests.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   security-tests:
     name: Restored Security Tests
