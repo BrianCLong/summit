@@ -23,7 +23,7 @@ export class SearchIndexService {
       },
       extractField: (document: SearchableItem, fieldName: string) => {
         // Access nested fields if necessary
-        const record = document as Record<string, unknown>;
+        const record = document as unknown as Record<string, unknown>;
         return record[fieldName];
       }
     });
@@ -132,7 +132,7 @@ export class SearchIndexService {
       queries: [query.q],
     };
 
-    const results = this.miniSearch.search(query.q, opts) as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
+    const results = this.miniSearch.search(query.q, opts) as unknown as Array<SearchableItem & { score: number; match: Record<string, string[]> }>;
 
     // Pagination (manual slicing since minisearch returns all sorted by score)
     const limit = query.limit || 20;
@@ -238,7 +238,7 @@ export class SearchIndexService {
             prefix: true
           },
           extractField: (document: SearchableItem, fieldName: string) => {
-            const record = document as Record<string, unknown>;
+            const record = document as unknown as Record<string, unknown>;
             return record[fieldName];
           }
         });
