@@ -1,9 +1,0 @@
-{
-  "evidence_bundle": {
-    "version": "2025.09.0",
-    "environment": "staging"
-  },
-  "release_metadata": {
-    "git_commit": "abcdef123"
-  }
-}
