@@ -1,0 +1,6 @@
+{
+  "evidence_id": "SUMMIT-WEBMCP-C2E48D9DF98B",
+  "name": "webmcp_replay",
+  "policy_reason": "prompt_injection_pattern",
+  "status": "fail"
+}
