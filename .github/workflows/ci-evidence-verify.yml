@@ -3,12 +3,12 @@ name: ci_evidence_verify
 on:
   pull_request:
     paths:
-      - "evidence/trustparadox/**"
-      - "evidence/schemas/trustparadox-*.schema.json"
+      - "evidence/**"
       - "ci/verifier/**"
       - "fixtures/evidence/**"
       - "fixtures/policy/**"
       - ".github/workflows/ci-evidence-verify.yml"
+      - ".github/policies/ga-evidence.rego"
   workflow_dispatch: {}
 
 concurrency:
@@ -30,3 +30,34 @@ jobs:
         run: python ci/verifier/verify_evidence.py
       - name: Verify policy fixtures
         run: python ci/verifier/verify_policy_fixtures.py
+
+  ga_evidence_enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup OPA
+        run: |
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static
+          chmod 755 opa-bin
+          sudo mv opa-bin /usr/local/bin/opa
+          opa version
+      - name: Enforce GA Evidence Policy
+        run: |
+          echo "Checking for violations..."
+          VIOLATIONS=$(opa eval -i evidence/report.json -d .github/policies/ga-evidence.rego "data.ga_evidence.deny" --format=json | jq -r '.result[0].expressions[0].value | length')
+
+          if [ "$VIOLATIONS" -gt 0 ]; then
+            echo "::error::GA Evidence Policy detected $VIOLATIONS violations."
+            opa eval -i evidence/report.json -d .github/policies/ga-evidence.rego "data.ga_evidence.deny" --format=pretty
+            exit 1
+          fi
+
+          echo "Checking allow rule..."
+          ALLOWED=$(opa eval -i evidence/report.json -d .github/policies/ga-evidence.rego "data.ga_evidence.allow" --format=json | jq '.result[0].expressions[0].value')
+
+          if [ "$ALLOWED" != "true" ]; then
+             echo "::error::GA Evidence Policy 'allow' rule failed."
+             exit 1
+          fi
+
+          echo "GA Evidence Policy Passed."

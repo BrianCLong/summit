@@ -14,9 +14,8 @@ concurrency:
 jobs:
   smoke-test:
     name: create->kubectl->delete
-    if: false && (vars.SUMMIT_VIND_CI == '1')
     runs-on: ubuntu-latest
-
+    if: vars.SUMMIT_VIND_CI == '1'
 
     steps:
       - name: Checkout code
