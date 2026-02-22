@@ -1,15 +1,22 @@
-
 import logger from '../config/logger.js';
 import { S3Config } from '../backup/BackupService.js';
-import { promisify } from 'util';
-import { exec } from 'child_process';
 import path from 'path';
-import fs from 'fs/promises';
+import { getPostgresPool } from '../db/postgres.js';
+import pgCopyStreams from 'pg-copy-streams';
+import { pipeline } from 'stream/promises';
+import zlib from 'zlib';
+import { S3Client } from '@aws-sdk/client-s3';
+import { Upload } from '@aws-sdk/lib-storage';
+import { exec } from 'child_process';
+
+const { to: copyTo } = pgCopyStreams;
+import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
 export class ColdStorageService {
   private s3Config: S3Config | null = null;
+  private s3Client: S3Client | null = null;
 
   constructor() {
     if (process.env.S3_COLD_STORAGE_BUCKET) {
@@ -20,12 +27,78 @@ export class ColdStorageService {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       };
+
+      if (this.s3Config.accessKeyId && this.s3Config.secretAccessKey) {
+          this.s3Client = new S3Client({
+              region: this.s3Config.region,
+              endpoint: this.s3Config.endpoint,
+              credentials: {
+                  accessKeyId: this.s3Config.accessKeyId,
+                  secretAccessKey: this.s3Config.secretAccessKey
+              },
+              forcePathStyle: true // Needed for some S3 compatible storages like MinIO
+          });
+      }
     }
   }
 
   /**
-   * Upload a file to Cold Storage (e.g. S3 Glacier)
+   * Archive a table partition
+   * Stream data directly from DB -> Gzip -> S3
    */
+  async archivePartition(
+    tableName: string,
+    partitionName: string,
+    dropAfterArchive: boolean = false,
+    storageClass: 'STANDARD_IA' | 'GLACIER' | 'DEEP_ARCHIVE' = 'STANDARD_IA'
+  ): Promise<void> {
+    if (!this.s3Client || !this.s3Config) {
+         logger.warn(`Skipping archive for ${partitionName}: Cold Storage not configured`);
+         return;
+    }
+
+    logger.info(`Archiving partition ${partitionName} of table ${tableName} to ${storageClass}...`);
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const s3Key = `archives/${tableName}/${partitionName}-${timestamp}.csv.gz`;
+
+    const pool = getPostgresPool();
+    // We need a raw client for streaming
+    const client = await pool.connect();
+
+    try {
+        const stream = client.query(copyTo(`COPY (SELECT * FROM ${partitionName}) TO STDOUT WITH (FORMAT CSV, HEADER)`));
+        const gzip = zlib.createGzip();
+
+        // Use @aws-sdk/lib-storage Upload for streaming upload
+        const upload = new Upload({
+            client: this.s3Client,
+            params: {
+                Bucket: this.s3Config.bucket,
+                Key: s3Key,
+                Body: stream.pipe(gzip),
+                StorageClass: storageClass,
+                ContentType: 'application/gzip'
+            }
+        });
+
+        await upload.done();
+        logger.info(`Successfully archived ${partitionName} to s3://${this.s3Config.bucket}/${s3Key}`);
+
+        if (dropAfterArchive) {
+             logger.info(`Dropping partition ${partitionName} after successful archive`);
+             await client.query(`DROP TABLE IF EXISTS ${partitionName}`);
+        }
+
+    } catch (error: any) {
+        logger.error(`Failed to archive partition ${partitionName}`, error);
+        throw error;
+    } finally {
+        client.release();
+    }
+  }
+
+  // Keep legacy upload method (simulated or CLI based) for compatibility
   async upload(filepath: string, key: string, storageClass: 'STANDARD_IA' | 'GLACIER' | 'DEEP_ARCHIVE' = 'STANDARD_IA'): Promise<void> {
     if (!this.s3Config) {
       logger.warn('Skipping Cold Storage upload: No configuration found.');
@@ -47,50 +120,6 @@ export class ColdStorageService {
     } catch (error: any) {
       logger.error('Failed to upload to Cold Storage', error);
       throw error;
-    }
-  }
-
-  /**
-   * Archive a table partition
-   * 1. Export partition data to file (CSV/Parquet)
-   * 2. Upload to Cold Storage
-   * 3. (Optional) Drop partition from DB
-   */
-  async archivePartition(
-    tableName: string,
-    partitionName: string,
-    dropAfterArchive: boolean = false,
-    storageClass: 'STANDARD_IA' | 'GLACIER' | 'DEEP_ARCHIVE' = 'STANDARD_IA'
-  ): Promise<void> {
-    logger.info(`Archiving partition ${partitionName} of table ${tableName} to ${storageClass}...`);
-
-    // In a real implementation, we would use pg_dump or COPY command
-    // For now, we'll simulate creating a file
-    const exportDir = path.join(process.env.TEMP_DIR || '/tmp', 'archives');
-    await fs.mkdir(exportDir, { recursive: true });
-
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const filename = `${partitionName}-${timestamp}.csv.gz`;
-    const filepath = path.join(exportDir, filename);
-
-    try {
-        // Simulate export
-        await fs.writeFile(filepath, `Simulated export of ${partitionName}\n`);
-
-        // Upload
-        await this.upload(filepath, `archives/${tableName}/${filename}`, storageClass);
-
-        // Cleanup local file
-        await fs.unlink(filepath);
-
-        if (dropAfterArchive) {
-            logger.info(`Ready to drop partition ${partitionName} (dry-run)`);
-            // await client.query(`DROP TABLE ${partitionName}`);
-        }
-
-    } catch (error: any) {
-        logger.error(`Failed to archive partition ${partitionName}`, error);
-        throw error;
     }
   }
 }
