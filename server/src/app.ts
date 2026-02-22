@@ -139,6 +139,7 @@ import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
 import adminGateway from './routes/admin/gateway.js';
 import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
+import supportBundlesRouter from './routes/support-bundles.js';
 import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
@@ -443,6 +444,7 @@ export const createApp = async () => {
     app.use('/api/webhooks', webhookRouter);
   }
   app.use('/api/support', supportTicketsRouter);
+  app.use('/api', supportBundlesRouter);
   app.use('/api', ticketLinksRouter);
   app.use('/api/cases', caseRouter);
   app.use('/api/entities', entityCommentsRouter);
