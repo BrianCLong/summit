@@ -430,7 +430,7 @@ jobs:
   # ===========================================================================
   provenance-server:
     needs: build-server
-    if: github.event_name != 'pull_request'
+    if: (((((github.event_name != 'pull_request') && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request' && !inputs.skip_verification)) && (always())) && (always() && github.event_name != 'pull_request')
     permissions:
       actions: read
       id-token: write
@@ -455,7 +455,6 @@ jobs:
 
   provenance-web:
     needs: build-web
-    if: github.event_name != 'pull_request'
     permissions:
       actions: read
       id-token: write
@@ -479,7 +478,6 @@ jobs:
   sign-images:
     name: Sign Images (Cosign)
     needs: [build-server, build-web]
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -644,7 +642,6 @@ jobs:
   slsa-verify:
     name: Verify SLSA L3 Compliance
     needs: [hermetic-build, cosign-sign, slsa-provenance]
-    if: github.event_name != 'pull_request' && !inputs.skip_verification
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -813,7 +810,6 @@ jobs:
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
         with:
           sarif_file: vulnerability-report.sarif
           category: grype-sbom-scan
@@ -831,7 +827,6 @@ jobs:
   compliance-summary:
     name: Generate Compliance Summary
     needs: [pre-build-checks, hermetic-build, cosign-sign, slsa-verify, vulnerability-scan]
-    if: always() && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Generate comprehensive compliance report
