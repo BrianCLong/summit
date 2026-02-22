@@ -29,32 +29,41 @@ branch_protection:
   required_status_checks:
     strict: true
     contexts:
-      - "Governance Meta Gate / meta-gate"
-      - "CI Core (Primary Gate) / CI Core Gate ✅"
-      - "CI / Unit Tests"
-      - "GA Gate"
+      - "meta-gate"
+      - "CI Core Gate ✅"
+      - "Unit Tests"
+      - "gate"
       - "Release Readiness Gate"
       - "SOC Controls"
-      - "Unit Tests & Coverage"
+      - "test (20.x)"
+      - "Workflow Validity Check"
 
 # Always Required Checks
 # ----------------------
 # These checks MUST pass for every commit, regardless of what changed.
 # They are blocking for both RC and GA promotion.
 always_required:
-  - name: "Governance Meta Gate / meta-gate"
+  - name: "meta-gate"
     workflow: "governance-meta-gate.yml"
     rationale: "Unified governance verification (drift, determinism, policy)"
+
+  - name: "CI Core Gate ✅"
+    workflow: "ci-core.yml"
+    rationale: "Primary blocking gate - lint, typecheck, tests, build"
+
+  - name: "Unit Tests"
+    workflow: "ci-pr.yml"
+    rationale: "Primary PR test gate status required by branch protection"
+
+  - name: "gate"
+    workflow: "ga-gate.yml"
+    rationale: "Official GA gate job required by branch protection"
 
   - name: "Release Readiness Gate"
     workflow: "release-readiness.yml"
     rationale: "Comprehensive release readiness verification - runs on every change"
 
-  - name: "GA Gate"
-    workflow: "ga-gate.yml"
-    rationale: "Official GA verification entrypoint with make ga"
-
-  - name: "Unit Tests & Coverage"
+  - name: "test (20.x)"
     workflow: "unit-test-coverage.yml"
     rationale: "Test suite and coverage gates must pass for all code changes"
 
@@ -62,9 +71,9 @@ always_required:
     workflow: "soc-controls.yml"
     rationale: "SOC control verification is required for audit readiness"
 
-  - name: "CI Core (Primary Gate) / CI Core Gate ✅"
-    workflow: "ci-core.yml"
-    rationale: "Primary blocking gate - lint, typecheck, tests, build"
+  - name: "Workflow Validity Check"
+    workflow: "workflow-validity.yml"
+    rationale: "Workflow syntax validity is required by protected-branch checks"
 
 # Conditional Required Checks
 # ---------------------------
@@ -76,12 +85,12 @@ always_required:
 #   "^\.github/workflows/" - Matches workflow files (escape dots)
 #   "^Dockerfile$" - Matches exactly "Dockerfile" at root
 conditional_required:
-  - name: "Workflow Lint"
-    workflow: "workflow-lint.yml"
-    rationale: "Validates GitHub Actions workflow syntax and safety"
+  - name: "Workflow Validity Gate"
+    workflow: "workflow-validity.yml"
+    rationale: "Validates GitHub Actions workflow syntax and safety to prevent global outages"
     when_paths_match:
-      - "^\.github/workflows/"
-      - "^\.github/actions/"
+      - '^\.github/workflows/'
+      - '^\.github/actions/'
 
   - name: "CodeQL"
     workflow: "codeql.yml"
@@ -97,10 +106,10 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^package\.json$"
-      - "^pnpm-lock\.yaml$"
-      - "^server/package\.json$"
-      - "^\.github/workflows/supply-chain"
+      - '^package\.json$'
+      - '^pnpm-lock\.yaml$'
+      - '^server/package\.json$'
+      - '^\.github/workflows/supply-chain'
       - "^scripts/security/"
 
   - name: "Docker Build & Security Scan"
@@ -109,11 +118,10 @@ conditional_required:
     when_paths_match:
       - "^Dockerfile"
       - "^docker-compose"
-      - "^\.dockerignore$"
+      - '^\.dockerignore$'
 
-  - name: "Schema compatibility guard"
+  - name: "Schema compatibility guard / schema-compat"
     workflow: "schema-compat.yml"
-
     rationale: "API schema backward compatibility checks"
     when_paths_match:
       - "^server/src/graphql/schema"
@@ -134,6 +142,13 @@ conditional_required:
     rationale: "Validates OPA/Rego policies with 90% coverage requirement"
     when_paths_match:
       - "^policy/"
+
+  - name: "Extortion Pressure Gates"
+    workflow: "extortion-gates.yml"
+    rationale: "Ensures extortion artifacts are deterministic and follow never-log policy"
+    when_paths_match:
+      - "^packages/extortion/"
+      - "^scripts/ci/.*extortion"
 
 # Informational Checks
 # --------------------
