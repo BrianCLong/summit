@@ -15,7 +15,7 @@ module.exports = {
     ],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(\\.pnpm/)?(conf|env-paths|atomically|dot-prop|pkg-dir|find-up-simple|find-up|locate-path|p-limit|yocto-queue|path-exists))',
+    'node_modules/(?!(\\.pnpm/)?(conf|env-paths|atomically|dot-prop|pkg-dir|find-up-simple|find-up|locate-path|p-limit|yocto-queue|@summit/receipts|cbor|path-exists))',
   ],
   testMatch: ['**/__tests__/**/*.test.ts'],
   collectCoverageFrom: [
