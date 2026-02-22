@@ -146,6 +146,26 @@ export class RedisService {
   }
 
   async getKeysByPattern(pattern: string): Promise<string[]> {
-    return this.client.keys(pattern);
+    const keys: string[] = [];
+    const stream = this.client.scanStream({ match: pattern });
+
+    return new Promise((resolve, reject) => {
+      stream.on('data', (resultKeys) => {
+        // scanStream returns batches of keys
+        if (Array.isArray(resultKeys)) {
+            keys.push(...resultKeys);
+        } else {
+            // Should be array, but handling just in case
+            keys.push(resultKeys);
+        }
+      });
+      stream.on('end', () => {
+        // Filter out duplicates if any (Cluster scan might return duplicates during rebalancing)
+        resolve([...new Set(keys)]);
+      });
+      stream.on('error', (err) => {
+        reject(err);
+      });
+    });
   }
 }

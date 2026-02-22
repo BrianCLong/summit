@@ -1,6 +1,8 @@
 import logger from '../config/logger.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
+import { RedisService } from '../cache/redis.js';
 import fs from 'fs';
+import path from 'path';
 import readline from 'readline';
 import { promisify } from 'util';
 import { exec } from 'child_process';
@@ -9,6 +11,8 @@ import zlib from 'zlib';
 const execAsync = promisify(exec);
 
 export class RestoreService {
+  private redis = RedisService.getInstance();
+
   async restorePostgres(filepath: string): Promise<void> {
     logger.info(`Starting PostgreSQL restore from ${filepath}...`);
     try {
@@ -30,6 +34,60 @@ export class RestoreService {
     } catch (error: any) {
       logger.error('PostgreSQL restore failed', error);
       throw error;
+    }
+  }
+
+  async restoreRedis(filepath: string): Promise<void> {
+    logger.info(`Starting Redis restore from ${filepath}...`);
+    try {
+        const client = this.redis.getClient();
+        if (!client) throw new Error('Redis client not available');
+
+        const isCluster = (client as any).constructor.name === 'Cluster';
+        if (isCluster) {
+            logger.warn('Redis Cluster restore is not supported via this tool. Please use manual procedures.');
+            return;
+        }
+
+        let rdbDir: string = '/data';
+        let rdbFile: string = 'dump.rdb';
+
+        try {
+            // @ts-ignore
+            const dirConfig = await client.config('GET', 'dir');
+            // @ts-ignore
+            const dbfilenameConfig = await client.config('GET', 'dbfilename');
+
+            if (Array.isArray(dirConfig) && dirConfig.length === 2) rdbDir = dirConfig[1];
+            if (Array.isArray(dbfilenameConfig) && dbfilenameConfig.length === 2) rdbFile = dbfilenameConfig[1];
+        } catch (e) {
+            logger.warn('Failed to get Redis config, assuming defaults');
+        }
+
+        const targetPath = path.join(rdbDir, rdbFile);
+
+        logger.info(`Target Redis RDB path: ${targetPath}`);
+        logger.info(`Backup source: ${filepath}`);
+
+        // Check if we can write to target
+        try {
+            await fs.promises.access(rdbDir, fs.constants.W_OK);
+        } catch (e) {
+            logger.error(`Cannot write to Redis directory ${rdbDir}. Restore cannot proceed automatically.`);
+            logger.info(`MANUAL STEP: Copy ${filepath} to ${targetPath} and restart Redis.`);
+            return;
+        }
+
+        // We can't just overwrite while Redis is running without restart usually.
+        logger.warn('Use caution: Overwriting active Redis RDB file.');
+        await fs.promises.copyFile(filepath, targetPath);
+
+        logger.info('Redis RDB file restored. You must RESTART Redis server to load the data.');
+        logger.info('Alternatively, use "DEBUG RELOAD" command in redis-cli if supported (blocking).');
+
+    } catch (error: any) {
+        logger.error('Redis restore failed', error);
+        throw error;
     }
   }
 

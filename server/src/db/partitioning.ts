@@ -9,13 +9,13 @@ export class PartitionManager {
   private redis = RedisService.getInstance();
 
   /**
-   * Creates a new partition for a specific tenant in the maestro_runs table.
-   * Useful when onboarding a new tenant to ensure they have their own dedicated partition.
+   * Creates a list partition for a table.
    */
-  async createTenantPartition(tenantId: string): Promise<void> {
-    const safeTenantId = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
-    const partitionName = `maestro_runs_${safeTenantId}`;
-
+  async createListPartition(
+    tableName: string,
+    partitionName: string,
+    values: string[],
+  ): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -32,23 +32,87 @@ export class PartitionManager {
         return;
       }
 
+      // Check if parent table exists first to avoid error
+      try {
+        await client.query(`SELECT 1 FROM ${tableName} LIMIT 1`);
+      } catch (e: any) {
+        if (e.code === '42P01') {
+           logger.warn(`Parent table ${tableName} does not exist. Skipping partition creation.`);
+           await client.query('ROLLBACK');
+           return;
+        }
+        throw e;
+      }
+
+      // Format values for SQL: 'val1', 'val2'
+      const valuesStr = values.map((v) => `'${v}'`).join(', ');
+
       const query = `
         CREATE TABLE ${partitionName}
-        PARTITION OF maestro_runs
-        FOR VALUES IN ('${tenantId}')
+        PARTITION OF ${tableName}
+        FOR VALUES IN (${valuesStr})
       `;
 
       await client.query(query);
-      logger.info(`Created partition ${partitionName} for tenant ${tenantId}`);
+      logger.info(
+        `Created list partition ${partitionName} for table ${tableName} with values: ${valuesStr}`,
+      );
 
       await client.query('COMMIT');
     } catch (error: any) {
       await client.query('ROLLBACK');
-      logger.error(`Failed to create partition for tenant ${tenantId}`, error);
+      logger.error(
+        `Failed to create list partition ${partitionName} for table ${tableName}`,
+        error,
+      );
       throw error;
     } finally {
       client.release();
     }
+  }
+
+  /**
+   * Creates a new partition for a specific tenant in the maestro_runs table.
+   * Useful when onboarding a new tenant to ensure they have their own dedicated partition.
+   */
+  async createTenantPartition(tenantId: string): Promise<void> {
+    const safeTenantId = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
+    const partitionName = `maestro_runs_${safeTenantId}`;
+    await this.createListPartition('maestro_runs', partitionName, [tenantId]);
+  }
+
+  /**
+   * Helper to verify if a table is set up for partitioning.
+   */
+  async ensurePartitioningSetup(
+    tableName: string,
+    strategy: 'RANGE' | 'LIST',
+  ): Promise<void> {
+     const client = await this.pool.connect();
+     try {
+         const res = await client.query(`
+             SELECT relkind FROM pg_class WHERE oid = $1::regclass
+         `, [tableName]);
+
+         if (res.rows.length === 0) {
+             logger.warn(`Table ${tableName} does not exist. It should be created as PARTITION BY ${strategy} in migration.`);
+             return;
+         }
+
+         if (res.rows[0].relkind !== 'p') {
+             logger.error(`Table ${tableName} exists but is NOT partitioned. Strategy ${strategy} cannot be applied.`);
+         } else {
+             logger.info(`Table ${tableName} is correctly partitioned.`);
+         }
+     } catch (e: any) {
+         if (e.code === '42P01') { // Undefined table
+              logger.warn(`Table ${tableName} does not exist.`);
+         } else {
+             logger.error(`Failed to check partitioning for ${tableName}`, e);
+         }
+     } finally {
+         client.release();
+     }
   }
 
   /**

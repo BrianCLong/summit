@@ -244,6 +244,7 @@ export class BackupService {
 
        // Check if cluster or standalone
        const isCluster = (client as any).constructor.name === 'Cluster';
+       let backupFilepath: string | null = null;
 
        if (isCluster) {
           // @ts-ignore
@@ -256,28 +257,78 @@ export class BackupService {
           } else {
               logger.warn('No master nodes found in cluster for backup.');
           }
+          // For cluster, we currently only support triggering BGSAVE.
+          // Future: Implement individual node RDB collection.
        } else {
+           // Standalone: Try to copy the RDB file
+           let rdbDir: string = '/data';
+           let rdbFile: string = 'dump.rdb';
+
+           try {
+               // @ts-ignore
+               const dirConfig = await client.config('GET', 'dir');
+               // @ts-ignore
+               const dbfilenameConfig = await client.config('GET', 'dbfilename');
+
+               if (Array.isArray(dirConfig) && dirConfig.length === 2) rdbDir = dirConfig[1];
+               if (Array.isArray(dbfilenameConfig) && dbfilenameConfig.length === 2) rdbFile = dbfilenameConfig[1];
+           } catch (e) {
+               logger.warn('Failed to get Redis config, assuming defaults');
+           }
+
+           const lastSaveBefore = await client.lastsave();
            // @ts-ignore
            await client.bgsave();
+
+           // Wait for save to complete (up to 30s)
+           logger.info('Waiting for Redis BGSAVE to complete...');
+           for (let i = 0; i < 30; i++) {
+               await new Promise(r => setTimeout(r, 1000));
+               const lastSaveAfter = await client.lastsave();
+               if (lastSaveAfter > lastSaveBefore) {
+                   logger.info('Redis BGSAVE completed.');
+                   break;
+               }
+           }
+
+           const rdbPath = path.join(rdbDir, rdbFile);
+           try {
+               await fs.access(rdbPath);
+
+               const dir = await this.ensureBackupDir('redis');
+               const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+               const filename = `redis-dump-${timestamp}.rdb`;
+               backupFilepath = path.join(dir, filename);
+
+               await fs.copyFile(rdbPath, backupFilepath);
+               logger.info(`Copied Redis RDB from ${rdbPath} to ${backupFilepath}`);
+           } catch (e) {
+               logger.warn(`Could not access local Redis RDB at ${rdbPath}. If Redis is remote/containerized, ensure volumes are shared.`);
+               // Fallback to redis-cli --rdb if available?
+               // For now, we proceed to create a log file if copy failed
+           }
        }
 
-       const dir = await this.ensureBackupDir('redis');
-       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-       const filename = `redis-backup-log-${timestamp}.txt`;
-       const filepath = path.join(dir, filename);
+       if (!backupFilepath) {
+           // Fallback: Create a log file indicating BGSAVE was triggered
+           const dir = await this.ensureBackupDir('redis');
+           const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+           const filename = `redis-backup-log-${timestamp}.txt`;
+           backupFilepath = path.join(dir, filename);
+           await fs.writeFile(backupFilepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
+       }
 
-       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
-
+       const stats = await fs.stat(backupFilepath);
        backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
 
        if (options.uploadToS3) {
-           const s3Key = `redis/${path.basename(filepath)}`;
-           await this.uploadToS3(filepath, s3Key);
+           const s3Key = `redis/${path.basename(backupFilepath)}`;
+           await this.uploadToS3(backupFilepath, s3Key);
        }
 
-       await this.recordBackupMeta('redis', filepath, 0);
+       await this.recordBackupMeta('redis', backupFilepath, stats.size);
 
-       return filepath;
+       return backupFilepath;
      } catch (error: any) {
        logger.error('Redis backup failed', error);
        throw error;
