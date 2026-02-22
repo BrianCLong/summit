@@ -1,0 +1,72 @@
+agents:
+  - agent_id: "maestro-orchestrator"
+    version: "1.0.0"
+    identity:
+      name: "Maestro Orchestrator"
+      description: "Core orchestrator for long-running Summit workflows."
+      owner_id: "platform-team"
+      organization_id: "summit-internal"
+      tags: ["core", "orchestrator", "maestro"]
+    governance:
+      classification: "internal"
+      policy_set: "policies/maestro-core"
+      risk_level: "high"
+      compliance_tags: ["SOC2", "ISO27001"]
+    runtime:
+      model:
+        provider: "openai"
+        name: "gpt-5.3-codex"
+        parameters:
+          temperature: 0.2
+          effort: "high"
+          budget:
+            max_cost_usd: 10.0
+            max_steps: 100
+      instructions:
+        source: "prompts/maestro/maestro-orchestrator@v1.md"
+        sha256: "630bd8b40d2255b4aad1e0e1ddce72e7d795435169257744272f0db702141091"
+      capabilities:
+        - name: "repository:read"
+          permission: "read-only"
+          timeout_ms: 60000
+        - name: "provenance:write"
+          permission: "read-write"
+          timeout_ms: 5000
+    evidence:
+      log_level: "audit"
+      required_artifacts: ["trace", "decision_log", "compaction_summary"]
+      replay_mode: "deterministic"
+
+  - agent_id: "frontier-adapter"
+    version: "1.0.0"
+    identity:
+      name: "Frontier Adapter"
+      description: "Bridge between Summit Control Plane and OpenAI Frontier."
+      owner_id: "integrations-team"
+      organization_id: "summit-internal"
+      tags: ["integration", "openai", "frontier"]
+    governance:
+      classification: "confidential"
+      policy_set: "policies/frontier-integration"
+      risk_level: "medium"
+      compliance_tags: ["SOC2"]
+    runtime:
+      model:
+        provider: "openai"
+        name: "gpt-4o"
+        parameters:
+          temperature: 0.1
+          max_tokens: 4096
+      instructions:
+        source: "prompts/integrations/frontier-adapter@v1.md"
+        sha256: "a72a6e0383320addf15796f6f1e6f07bb4ea8a44997a1b3a33c5484ff6b0d8d1"
+      capabilities:
+        - name: "frontier:manage"
+          permission: "admin"
+          sandbox_profile: "profiles/frontier-sandbox"
+        - name: "graph:retrieval"
+          permission: "read-only"
+    evidence:
+      log_level: "info"
+      required_artifacts: ["trace", "tool_output"]
+      replay_mode: "best-effort"

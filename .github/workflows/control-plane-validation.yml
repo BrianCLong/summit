@@ -1,0 +1,38 @@
+name: Control Plane Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'control_plane/**'
+      - 'scripts/ci/validate_control_plane_agents.ts'
+      - 'prompts/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'control_plane/**'
+      - 'scripts/ci/validate_control_plane_agents.ts'
+      - 'prompts/**'
+
+jobs:
+  validate-agents:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Validate Control Plane Agent Manifests
+        run: pnpm exec tsx scripts/ci/validate_control_plane_agents.ts
