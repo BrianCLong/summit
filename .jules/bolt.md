@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-02-12 - PostgreSQL Transaction Abort on Query Failure
+**Learning:** In PostgreSQL, any query failure within a transaction block immediately aborts the transaction. Subsequent queries (even valid ones) will fail with "current transaction is aborted, commands ignored until end of transaction block".
+**Action:** Do not use try-catch blocks inside a transaction to "swallow" errors and continue with a fallback. Instead, let the error propagate, ROLLBACK the transaction, and handle the retry/fallback at the application level outside the transaction block.
