@@ -1,29 +1,51 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
-    branches: [main]
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - "**/*.md"
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# Global environment for all jobs - prevents V8 heap exhaustion
+env:
+  NODE_OPTIONS: --max-old-space-size=8192
 
 jobs:
-  lint:
-    name: Lint
+  config-guard:
+    name: Build & Test (Untrusted)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    permissions:
+      contents: read
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Validate Jest & pnpm Configuration
+        run: pnpm -w check:jest-config
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
           cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm run lint
+          node-version-file: .nvmrc
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
 
   typecheck:
     name: Typecheck
@@ -32,20 +54,20 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
@@ -66,7 +88,11 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs             --job unit-tests             --runner ${{ runner.os }}             --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}"             --out artifacts/stamp.json
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job unit-tests \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
         shell: bash
       - name: Generate Metrics
         if: always()
@@ -78,7 +104,7 @@ jobs:
   integration-test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [lint]
+    needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
@@ -96,15 +122,15 @@ jobs:
   security-compliance:
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
-    needs: [lint]
+    needs: [config-guard]
     with:
       strict: true
 
   soc-controls:
-    name: SOC Controls
+    name: SOC Controls (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [lint]
+    needs: [config-guard]
     services:
       postgres:
         image: postgres:15
@@ -161,7 +187,11 @@ jobs:
         if: always()
         run: |
           mkdir -p artifacts
-          node scripts/ci/emit_evidence_stamp.mjs             --job verify-versions             --runner ${{ runner.os }}             --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}"             --out artifacts/stamp.json
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job verify-versions \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/stamp.json
         shell: bash
       - name: Upload artifacts
         if: always()
