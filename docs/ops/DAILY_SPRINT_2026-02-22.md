@@ -73,8 +73,9 @@ Execution Log
 
 Blockers / Governed Exceptions
 - Governed Exception: GitHub issue scan deferred pending api.github.com connectivity.
+- Governed Exception: PR creation deferred pending api.github.com connectivity.
 
 End-of-Day Report
 Completed: PR evidence snapshot; daily sprint log; STATUS.json refresh; prompt registry update.
-In progress: Issue backlog scan (deferred pending GitHub API connectivity).
+In progress: Issue backlog scan (deferred pending GitHub API connectivity); PR creation (deferred pending GitHub API connectivity).
 Blocked: None.
