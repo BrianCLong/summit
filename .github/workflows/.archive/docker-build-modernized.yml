@@ -130,7 +130,7 @@ jobs:
             network=host
 
       - name: Log in to Container Registry
-        if: needs.prepare.outputs.should-push == 'true'
+        if: (((((((((((needs.prepare.outputs.should-push == 'true') && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (steps.dockerfile-check.outputs.exists == 'true')) && (always())
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -169,7 +169,6 @@ jobs:
           fi
 
       - name: Build and push image
-        if: steps.dockerfile-check.outputs.exists == 'true'
         id: build
         uses: docker/build-push-action@v4
         with:
@@ -187,7 +186,6 @@ jobs:
           outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }},push-by-digest=false
 
       - name: Generate SBOM with Syft
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         run: |
           # Install Syft
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
@@ -200,7 +198,6 @@ jobs:
             -o cyclonedx-json=sbom-${{ matrix.name }}.cyclonedx.json
 
       - name: Scan image with Trivy
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         uses: aquasecurity/trivy-action@0.24.0
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }}:${{ github.sha }}
@@ -211,20 +208,17 @@ jobs:
           vuln-type: os,library
 
       - name: Upload Trivy results to Security tab
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-${{ matrix.name }}.sarif
           category: trivy-${{ matrix.name }}
 
       - name: Install Cosign
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         uses: sigstore/cosign-installer@v3
         with:
           cosign-release: v2.2.4
 
       - name: Sign image with Cosign (keyless)
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
@@ -232,7 +226,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
 
       - name: Verify signature
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
@@ -242,7 +235,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
 
       - name: Attest SBOM
-        if: steps.dockerfile-check.outputs.exists == 'true' && needs.prepare.outputs.should-push == 'true'
         env:
           COSIGN_EXPERIMENTAL: 1
         run: |
@@ -252,7 +244,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
 
       - name: Upload SBOM artifacts
-        if: steps.dockerfile-check.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: sbom-${{ matrix.name }}-${{ github.run_number }}
@@ -261,7 +252,6 @@ jobs:
           retention-days: 90
 
       - name: Generate build summary
-        if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
           echo "## 🐳 Container Build - ${{ matrix.name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -291,7 +281,6 @@ jobs:
     name: 📊 Security Report
     runs-on: ubuntu-latest
     needs: [build-push]
-    if: always()
     steps:
       - name: Download all SBOMs
         uses: actions/download-artifact@v4
