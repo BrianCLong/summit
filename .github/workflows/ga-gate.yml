@@ -44,7 +44,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Run GA Verification
         run: |
