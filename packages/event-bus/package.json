@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/event-bus",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Enterprise-grade distributed event bus with pub-sub, queuing, and message routing",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

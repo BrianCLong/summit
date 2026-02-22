@@ -1,19 +1,16 @@
-# MVP-4 Evidence Pack — v4.1.4
+# MVP-4 Evidence Pack — v1.0.0-rc.1
 
-Git range: `v2025.10.07..HEAD`
-Commit: `0853b089cb8205b4879bef95b9ff0667f29fe631`
+Git range: `v2026.01.19..HEAD`
+Commit: `0ecc8d91e8ac9e7a98d6ea3553627e7c379570ca`
 
 ## Environment
-
-- node: v20.19.6
+- node: v22.22.0
 - pnpm: 10.0.0
 
 ## GA Verify Stamp
-
-- artifacts/ga-verify/0853b089cb8205b4879bef95b9ff0667f29fe631/stamp.json
+- artifacts/ga-verify/0ecc8d91e8ac9e7a98d6ea3553627e7c379570ca/stamp.json
 
 ## Commands
-
 - pnpm ga:verify
 - pnpm verify:governance
 - pnpm verify:living-documents

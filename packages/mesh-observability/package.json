@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mesh-observability",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Observability utilities for the Agentic Mesh - logging, metrics, and tracing",
   "type": "module",
   "main": "dist/index.js",

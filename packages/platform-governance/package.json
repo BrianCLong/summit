@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/platform-governance",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Policy engine and governance utilities (P46-47)",
   "type": "module",
   "main": "dist/index.js",

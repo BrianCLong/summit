@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/advanced-caching",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Multi-tier caching with warming, stampede prevention, and smart invalidation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

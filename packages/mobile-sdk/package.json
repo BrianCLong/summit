@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mobile-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Shared mobile SDK for IntelGraph cross-platform applications with offline-first architecture",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mdm-core",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Core Master Data Management infrastructure with golden record management and entity resolution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

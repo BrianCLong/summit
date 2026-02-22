@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/geospatial-synthesis",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Geospatial data synthesis with privacy preservation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

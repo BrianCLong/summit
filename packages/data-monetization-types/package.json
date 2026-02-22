@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/data-monetization-types",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Type definitions for the Data Monetization Engine",
   "license": "MIT",
   "type": "module",

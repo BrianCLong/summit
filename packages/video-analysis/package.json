@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/video-analysis",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Video analysis including action recognition, activity detection, crowd analysis, and real-time streaming",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

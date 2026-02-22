@@ -1,6 +1,6 @@
 {
   "name": "@summit/explainability-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "SDK for instrumenting Summit AI operations with inference chain capture",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

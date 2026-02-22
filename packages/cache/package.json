@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cache",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Unified cache abstraction with Redis backend and in-memory fallback",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

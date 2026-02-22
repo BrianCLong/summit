@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/stream-analytics",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Real-time streaming analytics with metrics, aggregations, and ML inference",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

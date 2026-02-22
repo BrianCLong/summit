@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/visualization",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Core visualization library for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

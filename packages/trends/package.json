@@ -1,6 +1,6 @@
 {
   "name": "@summit/trends",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "Trend intake and validation for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

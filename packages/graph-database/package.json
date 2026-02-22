@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-database",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Native graph database storage engine with index-free adjacency",
   "type": "module",
   "main": "dist/index.js",

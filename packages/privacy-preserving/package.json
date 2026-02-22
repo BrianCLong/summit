@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/privacy-preserving",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Privacy-preserving data synthesis with differential privacy, k-anonymity, and compliance verification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

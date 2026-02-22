@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ml-models",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "ML model integration for threat detection",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/quantum-supply-chain",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Quantum-inspired optimization algorithms for ultra-complex supply chain planning and optimization problems",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

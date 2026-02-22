@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/audio-intelligence",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Audio event detection and acoustic intelligence",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

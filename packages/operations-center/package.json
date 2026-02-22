@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/operations-center",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Real-time operations center with common operating picture and situational awareness",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/workspace",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Multi-tenant workspace management with RBAC",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

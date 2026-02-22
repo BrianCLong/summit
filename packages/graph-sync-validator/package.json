@@ -1,6 +1,6 @@
 {
   "name": "@summit/graph-sync-validator",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "description": "Graph↔PG sync validator",
   "main": "src/compare/compare.mjs",
   "bin": {

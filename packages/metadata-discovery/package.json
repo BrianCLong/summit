@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/metadata-discovery",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Automated metadata discovery and extraction for databases, files, and APIs",
   "license": "MIT",
   "type": "module",

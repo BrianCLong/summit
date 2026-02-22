@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/link-prediction",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Link prediction and relationship inference algorithms",
   "type": "module",
   "main": "dist/index.js",

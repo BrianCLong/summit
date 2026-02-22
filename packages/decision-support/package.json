@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/decision-support",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Decision support systems with predictive analytics and course of action analysis",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@summit/federated-campaign-radar",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Privacy-preserving cross-organization campaign signal sharing for coordinated information warfare defense",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

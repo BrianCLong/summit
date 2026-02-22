@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/release-bundle",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Typed models, parsers, and loaders for release bundle artifacts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

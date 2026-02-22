@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/supply-chain-ai",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Advanced AI/ML intelligence engine for supply chain with deep learning, computer vision, NLP, and reinforcement learning",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

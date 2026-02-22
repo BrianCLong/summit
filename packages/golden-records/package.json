@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/golden-records",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Golden record management with entity resolution and survivorship",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

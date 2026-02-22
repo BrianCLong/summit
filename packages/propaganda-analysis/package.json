@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/propaganda-analysis",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Terrorist propaganda and messaging analysis",
   "license": "MIT",
   "type": "module",

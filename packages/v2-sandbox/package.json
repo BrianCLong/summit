@@ -1,6 +1,6 @@
 {
   "name": "@summit/v2-sandbox",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "private": true,
   "description": "Experimental sandbox for Summit V2 innovations. Isolated from production.",
   "scripts": {

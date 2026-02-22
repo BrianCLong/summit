@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/competitive-execution",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Competitive execution engine operationalizing intelligence, switching costs, growth, pricing, reliability, security, narrative, partners, and legal readiness",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

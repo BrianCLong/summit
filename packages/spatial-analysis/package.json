@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/spatial-analysis",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Advanced spatial analysis algorithms for IntelGraph GEOINT platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

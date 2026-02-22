@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/text-analytics",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Comprehensive text analytics including sentiment analysis, topic modeling, and text classification",
   "type": "module",
   "main": "./dist/index.js",

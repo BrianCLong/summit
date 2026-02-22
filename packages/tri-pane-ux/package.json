@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/tri-pane-ux",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Tri-pane analyst UX (Graph + Timeline + Map)",
   "type": "module",
   "main": "dist/index.js",

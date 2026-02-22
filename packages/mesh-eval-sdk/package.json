@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mesh-eval-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "TypeScript SDK for Agentic Mesh Evaluation & Auto-Improvement",
   "type": "module",
   "main": "./dist/index.js",

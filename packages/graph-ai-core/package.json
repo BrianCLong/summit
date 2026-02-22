@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-ai-core",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Graph AI core functionality",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

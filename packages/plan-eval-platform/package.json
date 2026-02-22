@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/plan-eval-platform",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Evaluation-first platform for Summit/IntelGraph with cost-aware routing and telemetry",
   "type": "module",
   "exports": {

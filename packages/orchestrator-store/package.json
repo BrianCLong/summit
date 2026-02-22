@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/orchestrator-store",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "PostgreSQL-backed orchestrator store for IntelGraph Summit platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

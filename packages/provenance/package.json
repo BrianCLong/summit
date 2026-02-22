@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/provenance",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Shared provenance receipt types, schema alignment, and verification helpers.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

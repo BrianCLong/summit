@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/help-overlay",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "In-product contextual help overlay components for IntelGraph",
   "license": "MIT",
   "type": "module",

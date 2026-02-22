@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/hierarchy-management",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Hierarchical data management for organizational, product, and location hierarchies",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

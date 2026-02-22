@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/edge-sync",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Edge-to-cloud synchronization with conflict resolution",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

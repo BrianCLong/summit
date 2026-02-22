@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/pve",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Policy Validation Engine - OPA-driven governance and invariant enforcement for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

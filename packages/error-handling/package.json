@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/error-handling",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Standardized error handling and resilience patterns for Summit platform",
   "type": "module",
   "main": "./dist/index.js",

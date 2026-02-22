@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cloud-governance",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Cloud governance, security, and compliance for data lakehouse",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

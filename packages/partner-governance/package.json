@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/partner-governance",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Partner strategy, tiering, and enforcement engine derived from blueprint requirements",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@summit/orchestrator",
-  "version": "0.1.0",
+  "version": "1.0.0-rc.1",
   "description": "Deterministic orchestration engine for Summit Agent Swarms",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -10,12 +10,12 @@
       "import": "./dist/index.js"
     },
     "./dist/scheduler/graph.js": {
-        "types": "./dist/scheduler/graph.d.ts",
-        "import": "./dist/scheduler/graph.js"
+      "types": "./dist/scheduler/graph.d.ts",
+      "import": "./dist/scheduler/graph.js"
     },
     "./dist/scheduler/transitions.js": {
-        "types": "./dist/scheduler/transitions.d.ts",
-        "import": "./dist/scheduler/transitions.js"
+      "types": "./dist/scheduler/transitions.d.ts",
+      "import": "./dist/scheduler/transitions.js"
     }
   },
   "type": "module",

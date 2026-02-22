@@ -1,6 +1,6 @@
 {
   "name": "@summit/graph-rag",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "Summit GraphRAG retrieval and context assembly",
   "main": "dist/index.js",
   "type": "module",

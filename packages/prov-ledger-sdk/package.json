@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/prov-ledger-sdk",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "TypeScript SDK for Provenance Ledger service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

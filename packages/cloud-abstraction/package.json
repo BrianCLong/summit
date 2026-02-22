@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/cloud-abstraction",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Cloud-agnostic abstraction layer for multi-cloud deployments",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

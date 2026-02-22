@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/audio-forensics",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Audio forensics and authenticity verification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

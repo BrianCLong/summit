@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/logistics-automation-types",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Type definitions for Defense Logistics Automation and Smart Contracting",
   "type": "module",
   "main": "dist/index.js",

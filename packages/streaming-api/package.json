@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/streaming-api",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "WebSocket and SSE streaming API for real-time intelligence data",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

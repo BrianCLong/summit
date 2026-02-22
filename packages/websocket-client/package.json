@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/websocket-client",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "WebSocket client SDK for Summit platform",
   "main": "dist/index.js",
   "module": "dist/index.mjs",

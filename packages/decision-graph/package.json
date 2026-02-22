@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/decision-graph",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Decision provenance graph schema and types for IntelGraph",
   "type": "module",
   "main": "dist/index.js",

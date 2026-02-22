@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/lakehouse",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Data Lakehouse implementation with Delta Lake, Iceberg, and Hudi support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

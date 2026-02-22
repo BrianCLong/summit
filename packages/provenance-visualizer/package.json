@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/provenance-visualizer",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "React components for visualizing provenance chains, Merkle trees, and chain-of-custody",
   "main": "dist/index.js",
   "type": "module",

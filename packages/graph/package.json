@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph",
-  "version": "1.0.0",
+  "version": "1.0.0-rc.1",
   "description": "Core graph types and definitions for IntelGraph",
   "main": "src/index.ts",
   "types": "src/index.ts",
@@ -9,7 +9,11 @@
     "build": "tsc",
     "test": "echo \"Error: no test specified\""
   },
-  "keywords": ["graph", "types", "typescript"],
+  "keywords": [
+    "graph",
+    "types",
+    "typescript"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {

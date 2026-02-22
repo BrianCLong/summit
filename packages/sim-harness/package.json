@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/sim-harness",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Scenario simulation and evaluation harness for IntelGraph platform",
   "type": "module",
   "main": "./dist/index.js",

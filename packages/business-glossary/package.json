@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/business-glossary",
-  "version": "4.2.3",
+  "version": "1.0.0-rc.1",
   "description": "Business glossary and data dictionary with term management and approval workflows",
   "license": "MIT",
   "type": "module",
