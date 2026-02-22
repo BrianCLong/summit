@@ -342,6 +342,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // n8n flows admin (read/write server/config/n8n-flows.json)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
 
 router.get('/n8n-flows', (_req, res) => {

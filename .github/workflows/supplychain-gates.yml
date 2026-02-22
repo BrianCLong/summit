@@ -12,10 +12,6 @@ on:
       - "scripts/ci/dependency_intake_gate.mjs"
       - "scripts/ci/dev_threat_audit_gate.mjs"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   supply-chain-gates:
     runs-on: ubuntu-latest

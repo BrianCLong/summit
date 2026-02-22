@@ -4,10 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   evaluate-learning-value:
     runs-on: ubuntu-latest

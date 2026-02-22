@@ -112,7 +112,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
-          version: ${{ steps.resolve-pnpm.outputs.pnpm }}
+
           run_install: ${{ inputs.install-deps }}
 
       - name: Setup Node.js
