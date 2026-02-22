@@ -468,6 +468,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ai-psych-safety-trust-docs
+    version: v1
+    path: prompts/docs/ai-psych-safety-trust-docs@v1.md
+    sha256: 54b62f3745dff902fd33c169319937ebec3a7b27574d7d8e966d9748f5e30e37
+    description: Draft AI psych safety trust standards, data handling, and runbook documentation.
+    scope:
+      paths:
+        - repo_assumptions.md
+        - docs/standards/ai-psych-safety-trust.md
+        - docs/security/data-handling/ai-psych-safety-trust.md
+        - docs/ops/runbooks/ai-psych-safety-trust.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/AI_PSYCH_SAFETY_TRUST_DOCS_20260209.json
+        - prompts/docs/ai-psych-safety-trust-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: longhorizon-ai-native-engineering-team
     version: v1
     path: prompts/longhorizon/longhorizon-ai-native-engineering-team.md
