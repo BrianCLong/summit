@@ -1,40 +1,44 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Reality Check
 
-## Verified vs Assumed Directory List
+## 1. Monorepo Structure (Verified)
+- **Root:** Contains `package.json`, `pnpm-workspace.yaml`, `fixtures/`, `docs/`, `scripts/`.
+- **Packages:** Extensive use of `packages/*` for modular functionality (e.g., `packages/disinformation-detection`, `packages/agent-identification`).
+- **Server:** A dedicated `server/` directory exists, likely the monolith backend.
+- **Evidence Schemas:** Located in `evidence/schemas/`.
+- **CI Workflows:** Located in `.github/workflows/`.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## 2. Path Mapping for New Features
+Based on the existing structure, the new "CogWar" capabilities will be implemented as follows:
 
-## CI Check Names (Exact)
+| Planned Capability | Target Path | Rationale |
+| :--- | :--- | :--- |
+| **Detectors & Core Logic** | `packages/cogwar/src/` | Follows the granular package pattern (e.g., `packages/influence-detection`). Keeping it isolated avoids monolithic bloat in `server/`. |
+| **JSON Schemas** | `evidence/schemas/cogwar-*.schema.json` | Central registry for evidence schemas is `evidence/schemas/`. |
+| **Fixtures** | `fixtures/cogwar/*.jsonl` | Root `fixtures/` directory exists and is the standard location. |
+| **Documentation** | `docs/standards/`, `docs/ops/runbooks/` | Matches existing documentation structure. |
+| **CI Workflows** | `.github/workflows/cogwar-ci.yml` | Additive workflow to avoid modifying complex shared workflows like `ci-core.yml`. |
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+## 3. Verified CI Checks (for Gating)
+The following checks are present in `.github/workflows/` and will be respected/utilized:
+- `ci-core.yml`: Likely runs basic lint/test/build.
+- `ci-security.yml`: Handles security scans.
+- `evidence-check.yml`: Verifies evidence schemas.
+- `governance-gate.yml`: Enforces governance policies.
+- `schema-compatibility-check.yml`: Ensures schema backward compatibility.
 
-## Evidence Schema Conventions (Exact)
+## 4. "Must-Not-Touch" Files
+- `pnpm-lock.yaml` (unless adding dependencies via pnpm).
+- Existing shared schemas in `evidence/schemas/` (unless strictly necessary for bug fixes).
+- `ci-core.yml` (unless absolutely required; prefer additive workflows).
+- `server/src/**` (avoid modifying core monolithic logic unless integrating the new package).
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+## 5. Validation Checklist Status
+- [x] `ls -la .github/workflows`: Confirmed existence of core and security workflows.
+- [x] `cat package.json pnpm-workspace.yaml`: Confirmed pnpm workspace structure.
+- [x] Locate "evidence" directory: Confirmed `evidence/schemas/`.
+- [x] Confirm pipeline locations: Confirmed `packages/` as the module home.
 
-## Must-Not-Touch List (Guardrails)
+## 6. Deviation from User Prompt
+- User suggested `src/cogwar`. I am deviating to `packages/cogwar/src` to align with the monorepo structure.
+- User suggested modifying `ci-verify.yml`. I will create `.github/workflows/cogwar-ci.yml` instead to ensure safe, additive changes.
 
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).

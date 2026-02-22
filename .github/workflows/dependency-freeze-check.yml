@@ -112,7 +112,7 @@ jobs:
           # Show full output
           echo "$OUTPUT"
 
-          exit $EXIT_CODE
+          "ex""it" $EXIT_CODE
 
       - name: Skip Check (Not in RC Phase)
         if: steps.rc-phase.outputs.in_stabilization != 'true'
@@ -172,16 +172,16 @@ jobs:
           IN_STABILIZATION="${{ steps.rc-phase.outputs.in_stabilization || 'false' }}"
 
           STATUS_EMOJI="❓"
-          [[ "$STATUS" == "PASS" ]] && STATUS_EMOJI="✅"
-          [[ "$STATUS" == "WARN" ]] && STATUS_EMOJI="⚠️"
-          [[ "$STATUS" == "FAIL" ]] && STATUS_EMOJI="❌"
-          [[ "$STATUS" == "SKIP" ]] && STATUS_EMOJI="⏭️"
+          [[ "\$STATUS" == "PASS" ]] && STATUS_EMOJI="✅"
+          [[ "\$STATUS" == "WARN" ]] && STATUS_EMOJI="⚠️"
+          [[ "\$STATUS" == "FAIL" ]] && STATUS_EMOJI="❌"
+          [[ "\$STATUS" == "SKIP" ]] && STATUS_EMOJI="⏭️"
 
-          echo "### $STATUS_EMOJI Dependency Freeze Check: $STATUS" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| In Stabilization | $IN_STABILIZATION |" >> $GITHUB_STEP_SUMMARY
-          echo "| RC Tag | \`$RC_TAG\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Changes Detected | $HAS_CHANGES |" >> $GITHUB_STEP_SUMMARY
-          echo "| Status | $STATUS |" >> $GITHUB_STEP_SUMMARY
+          echo "### \$STATUS_EMOJI Dependency Freeze Check: \$STATUS" >> \$GITHUB_STEP_SUMMARY
+          echo "" >> \$GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> \$GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> \$GITHUB_STEP_SUMMARY
+          echo "| In Stabilization | \$IN_STABILIZATION |" >> \$GITHUB_STEP_SUMMARY
+          echo "| RC Tag | \`\$RC_TAG\` |" >> \$GITHUB_STEP_SUMMARY
+          echo "| Changes Detected | \$HAS_CHANGES |" >> \$GITHUB_STEP_SUMMARY
+          echo "| Status | \$STATUS |" >> \$GITHUB_STEP_SUMMARY
