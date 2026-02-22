@@ -1,5 +1,5 @@
 name: sigstore-verify
-description: "Bundle-first Sigstore/Cosign verification with pinned cosign and evidence output"
+description: Bundle-first Sigstore/Cosign verification with pinned cosign and evidence output
 inputs:
   cosign_version:
     required: true
@@ -15,25 +15,45 @@ inputs:
   evidence_id:
     required: true
 runs:
-  using: "composite"
+  using: composite
   steps:
     - name: Verify cosign version floor
       shell: bash
       run: |
         set -euo pipefail
-        COSIGN_VERSION="${{ inputs.cosign_version }}"
-        case "$COSIGN_VERSION" in
-          3.0.[0-3]) echo "cosign must be >= 3.0.4 due to bundle verification advisory"; exit 1;;
-        esac
-
+        .github/scripts/sigstore/check-cosign-version.sh "${{ inputs.cosign_version }}"
     - name: Install cosign (pinned)
-      uses: sigstore/cosign-installer@v3.5.0
-      with:
-        cosign-release: "v${{ inputs.cosign_version }}"
-
+      shell: bash
+      run: |
+        set -euo pipefail
+        version="${{ inputs.cosign_version }}"
+        os="$(uname | tr '[:upper:]' '[:lower:]')"
+        arch="$(uname -m)"
+        case "$arch" in
+          x86_64) arch="amd64" ;;
+          aarch64|arm64) arch="arm64" ;;
+          *) echo "unsupported architecture: $arch" >&2; exit 1 ;;
+        esac
+        cosign_path="${RUNNER_TEMP}/cosign"
+        curl -sSfL -o "$cosign_path" \
+          "https://github.com/sigstore/cosign/releases/download/v${version}/cosign-${os}-${arch}"
+        chmod +x "$cosign_path"
+        echo "${RUNNER_TEMP}" >> "$GITHUB_PATH"
     - name: Verify (bundle-first)
       shell: bash
       run: |
         set -euo pipefail
-        chmod +x .github/scripts/sigstore/verify.sh
-        .github/scripts/sigstore/verify.sh           --artifact "${{ inputs.artifact }}"           --bundle "${{ inputs.bundle }}"           ${{ inputs.trusted_root != '' && format('--trusted-root "{0}"', inputs.trusted_root) || '' }}           ${{ inputs.signing_config != '' && format('--signing-config "{0}"', inputs.signing_config) || '' }}           --evidence-id "${{ inputs.evidence_id }}"
+        trusted_root="${{ inputs.trusted_root }}"
+        signing_config="${{ inputs.signing_config }}"
+        args=()
+        if [[ -n "$trusted_root" ]]; then
+          args+=(--trusted-root "$trusted_root")
+        fi
+        if [[ -n "$signing_config" ]]; then
+          args+=(--signing-config "$signing_config")
+        fi
+        .github/scripts/sigstore/verify.sh \
+          --artifact "${{ inputs.artifact }}" \
+          --bundle "${{ inputs.bundle }}" \
+          "${args[@]}" \
+          --evidence-id "${{ inputs.evidence_id }}"
