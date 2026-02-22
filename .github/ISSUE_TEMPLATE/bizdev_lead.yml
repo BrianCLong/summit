@@ -1,0 +1,35 @@
+name: "BizDev / GTM Lead"
+description: "Track a new sales opportunity or partnership."
+labels: ["lane:bizdev", "triage:needed"]
+body:
+  - type: input
+    id: lead_name
+    attributes:
+      label: Opportunity Name / Client
+      placeholder: "Acme Corp"
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Deal Stage
+      options:
+        - Discovery
+        - Pilot
+        - Contract
+        - Closed
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Key Requirements
+      description: "What are the main technical or compliance hurdles?"
+  - type: checkboxes
+    id: compliance
+    attributes:
+      label: Compliance Needs
+      options:
+        - label: Audit Logs
+        - label: SSO / RBAC
+        - label: On-Prem Deployment
