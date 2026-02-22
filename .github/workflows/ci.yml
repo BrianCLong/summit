@@ -6,10 +6,11 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
+  merge_group:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Global environment for all jobs - prevents V8 heap exhaustion
 env:
@@ -36,6 +37,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+=======
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -53,6 +59,11 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+=======
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -72,11 +83,16 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
+=======
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -122,7 +138,6 @@ jobs:
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
   security-compliance:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml
     needs: [config-guard]
@@ -130,14 +145,29 @@ jobs:
       strict: true
 
   soc-controls:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
+<<<<<<< HEAD
     services:
       postgres:
         image: postgres:15
+=======
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
