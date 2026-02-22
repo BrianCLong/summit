@@ -18,12 +18,11 @@ interface RequestWithUser extends Request {
 
 export const cookieParserMiddleware = cookieParser();
 
-export function buildContentSecurityPolicy(origins?: string): RequestHandler {
+export function buildContentSecurityPolicy(): RequestHandler {
   const connectSources = Array.from(
     new Set([
       "'self'",
-      ...(origins || cfg.CORS_ORIGIN)
-        .split(',')
+      ...cfg.CORS_ORIGIN.split(',')
         .map((origin) => origin.trim())
         .filter(Boolean),
     ]),

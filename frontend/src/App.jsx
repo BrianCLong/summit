@@ -74,13 +74,10 @@ function App() {
     <div className="App">
       <header className="App-header">
         <h1>IntelGraph</h1>
-        <button
-          onClick={() => setNeighborhoodMode((m) => !m)}
-          aria-pressed={neighborhoodMode}
-        >
+        <button onClick={() => setNeighborhoodMode((m) => !m)}>
           {neighborhoodMode ? 'Show Full Graph' : 'Neighborhood Mode'}
         </button>
-        <button onClick={toggleForecast} aria-pressed={showForecast}>
+        <button onClick={toggleForecast}>
           {showForecast ? 'Hide Forecast' : 'Forecast View'}
         </button>
       </header>
@@ -90,31 +87,13 @@ function App() {
           neighborhoodMode={neighborhoodMode}
         />
         {showForecast && forecastEdges.length > 0 && (
-          <div style={{ padding: '10px 0' }}>
-            <label
-              htmlFor="forecast-slider"
-              style={{ display: 'block', marginBottom: '5px' }}
-            >
-              Forecast Timeline:{' '}
-              {forecastEdges[forecastIndex]?.data?.label?.replace(
-                'ETA: ',
-                '',
-              ) || 'Unknown'}
-            </label>
-            <input
-              id="forecast-slider"
-              type="range"
-              min="0"
-              max={forecastEdges.length - 1}
-              value={forecastIndex}
-              onChange={(e) => setForecastIndex(Number(e.target.value))}
-              style={{ width: '100%' }}
-              aria-valuemin={0}
-              aria-valuemax={forecastEdges.length - 1}
-              aria-valuenow={forecastIndex}
-              aria-valuetext={forecastEdges[forecastIndex]?.data?.label}
-            />
-          </div>
+          <input
+            type="range"
+            min="0"
+            max={forecastEdges.length - 1}
+            value={forecastIndex}
+            onChange={(e) => setForecastIndex(Number(e.target.value))}
+          />
         )}
         <TimelinePanel events={events} />
       </main>

@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { geopoliticalOracle } from '../services/GeopoliticalOracleService.js';
-import { logger } from '../utils/logger.js';
+import { geopoliticalOracle } from '../services/GeopoliticalOracleService';
+import { logger } from '../utils/logger';
 
 const router = Router();
 

@@ -1,8 +1,8 @@
 
-import { SwarmDetector } from '../detection/swarm_signature.js';
-import { NarrativeEvent, NarrativeEventType } from '../../narrative/types.js';
-import { SocialPost, Actor } from '../types.js';
-import { ActorClass } from '../../narrative/primitives.js';
+import { SwarmDetector } from '../detection/swarm_signature';
+import { NarrativeEvent, NarrativeEventType } from '../../narrative/types';
+import { SocialPost, Actor } from '../types';
+import { ActorClass } from '../../narrative/primitives';
 
 describe('SwarmDetector', () => {
   let detector: SwarmDetector;

@@ -1,3 +1,5 @@
+import future.keywords
+
 # ============================================================================
 # IntelGraph ABAC Authorization Policy
 # Main allow policy that orchestrates all authorization checks

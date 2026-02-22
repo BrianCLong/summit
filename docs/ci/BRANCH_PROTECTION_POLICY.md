@@ -60,46 +60,6 @@ pnpm ci:branch-protection:plan -- --repo OWNER/REPO --branch main
 ALLOW_BRANCH_PROTECTION_CHANGES=1 pnpm ci:branch-protection:apply -- --repo OWNER/REPO --branch main
 ```
 
-### Generate ruleset payload (GitHub Rulesets)
-
-Generate a ruleset payload aligned to the required checks policy and standard review rules:
-
-```bash
-node scripts/ci/generate_ruleset_payload.mjs \
-  --policy docs/ci/REQUIRED_CHECKS_POLICY.yml \
-  --name "Summit Main Branch Protection" \
-  --output artifacts/governance/main-ruleset.json
-```
-
-Apply via GitHub API (admin token required):
-
-```bash
-gh api repos/OWNER/REPO/rulesets \
-  --method POST \
-  --input artifacts/governance/main-ruleset.json
-```
-
-The payload is deterministic and derives required check contexts from
-`docs/ci/REQUIRED_CHECKS_POLICY.yml`.
-
-### Generate branch protection payload (GitHub API)
-
-Generate a branch protection payload aligned to required checks and review rules:
-
-```bash
-node scripts/ci/generate_branch_protection_payload.mjs \
-  --policy docs/ci/REQUIRED_CHECKS_POLICY.yml \
-  --output artifacts/governance/main-branch-protection.json
-```
-
-Apply via GitHub API (admin token required):
-
-```bash
-gh api repos/OWNER/REPO/branches/main/protection \
-  --method PUT \
-  --input artifacts/governance/main-branch-protection.json
-```
-
 ---
 
 ## Required Token Scopes

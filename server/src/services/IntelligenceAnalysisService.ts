@@ -8,7 +8,7 @@ const VisionService = requireFunc('./VisionService.js');
 const SentimentService = requireFunc('./SentimentService.js');
 const GraphAnalyticsService = requireFunc('./GraphAnalyticsService.js');
 
-import { autoMLService } from './AutoMLService.js';
+import { autoMLService } from './AutoMLService';
 import logger from '../utils/logger.js';
 
 // Simple implementation of TimeSeriesAnalyzer locally since it might be missing

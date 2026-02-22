@@ -4,7 +4,7 @@
  */
 
 import request from 'supertest';
-import { app } from '../src/app.js';
+import { app } from '../src/app';
 import { jest, describe, test, expect } from '@jest/globals';
 
 describe('NL→Cypher Guardrails', () => {

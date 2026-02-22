@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntityResolutionService } from '../src/services/EntityResolutionService.js';
-import { ConflictResolutionService, ConflictResolutionStrategy } from '../src/services/ConflictResolutionService.js';
-import { resolveEntities } from '../src/services/HybridEntityResolutionService.js';
+import { EntityResolutionService } from '../src/services/EntityResolutionService';
+import { ConflictResolutionService, ConflictResolutionStrategy } from '../src/services/ConflictResolutionService';
+import { resolveEntities } from '../src/services/HybridEntityResolutionService';
 
 // Mock dependencies
 jest.mock('../src/services/HybridEntityResolutionService', () => ({

@@ -1,12 +1,12 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { UsageDimension } from '../events.js';
+import { UsageDimension } from '../events';
 import {
   InMemoryQuotaDataSource,
   PostgresQuotaService,
   QuotaCheck,
   TenantQuotaConfig,
   TenantUsageTotals,
-} from '../quota.js';
+} from '../quota';
 
 describe('PostgresQuotaService', () => {
   const tenantId = 'tenant-123';

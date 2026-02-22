@@ -1,0 +1,14 @@
+{
+  "nodes": {
+    "user:jules": {"uid": "user:jules", "name": "Jules", "role": "engineer"},
+    "repo:intelgraph": {"uid": "repo:intelgraph", "name": "intelgraph", "lang": "python"}
+  },
+  "edges": {
+    "rel:contributes": {
+      "edge_key": "rel:contributes",
+      "src_uid": "user:jules",
+      "dst_uid": "repo:intelgraph",
+      "type": "CONTRIBUTES_TO"
+    }
+  }
+}

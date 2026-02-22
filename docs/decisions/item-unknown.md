@@ -1,22 +1,16 @@
-# Decisions: item-UNKNOWN
+# Decisions — item-unknown
 
-## Decisions made
-
-- Implemented subsumption bundle scaffolding without ITEM-specific features.
-- Enforced deterministic evidence file separation (report/metrics vs stamp).
+## Decision
+Ship subsumption bundle framework without ITEM-specific claims.
 
 ## Alternatives rejected
-
-- Implementing ITEM features immediately (deferred pending ITEM excerpts).
+- Implement ITEM features without grounding (rejected: hallucination risk)
 
 ## Deferred
-
-- Claim registry population and lane-2 innovation until ITEM is provided.
+- All ITEM-specific integrations (waiting on excerpts/license)
 
 ## Risk tradeoffs
-
-- Added new CI job name assumed; requires required-check discovery to finalize.
+- Minimal YAML parser (no deps) vs full YAML: chosen to avoid supply chain additions.
 
 ## GA alignment
-
-- Improves machine-verifiable governance with minimal blast radius.
+- Improves determinism and machine-verifiability of future subsumptions.

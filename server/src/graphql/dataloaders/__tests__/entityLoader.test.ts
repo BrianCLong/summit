@@ -2,8 +2,8 @@
  * Tests for Entity DataLoader
  */
 
-import { createEntityLoader } from '../entityLoader.js';
-import type { DataLoaderContext } from '../index.js';
+import { createEntityLoader } from '../entityLoader';
+import type { DataLoaderContext } from '../index';
 import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 interface MockNeo4jSession {

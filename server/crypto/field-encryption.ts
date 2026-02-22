@@ -12,7 +12,7 @@
  * - PII and API key protection
  */
 
-import { enc, dec } from './kms.js';
+import { enc, dec } from './kms';
 import { createHash, randomBytes } from 'crypto';
 
 // Field encryption metadata

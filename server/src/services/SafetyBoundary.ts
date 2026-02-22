@@ -5,7 +5,7 @@
  * specifically Artifact B (Input Sanitization) and Artifact A (Constitution Check).
  */
 
-import { logger } from '../utils/logger.js';
+import { logger } from '../utils/logger';
 
 export interface SafetyCheckResult {
   safe: boolean;

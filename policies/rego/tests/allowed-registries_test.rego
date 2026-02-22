@@ -1,3 +1,5 @@
+import future.keywords
+
 package policies.allowedregistries
 
 test_allow_ghcr {

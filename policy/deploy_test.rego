@@ -8,7 +8,6 @@ test_prod_allows if {
     "env": "prod",
     "pr": {"approvals": 2},
     "artifact": {"sbom": {"signed": true}},
-    "evidence": {"bundle_id": "ev-1", "status": "verified"},
     "security": {"failures": []}
   }
 }
@@ -18,7 +17,6 @@ test_prod_denies_on_security_failure if {
     "env": "prod",
     "pr": {"approvals": 2},
     "artifact": {"sbom": {"signed": true}},
-    "evidence": {"bundle_id": "ev-1", "status": "verified"},
     "security": {"failures": ["crit"]}
   }
 }
