@@ -75,3 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-03-15 - [HIGH] Identity Spoofing via Header Reliance in Support Tickets
+**Vulnerability:** The support ticket routes in `server/src/routes/support-tickets.ts` relied on a `resolveActor` helper that fell back to `x-user-id` and `x-user-role` HTTP headers when the authenticated `user` object was perceived as incomplete. This allowed unauthenticated or low-privileged users to spoof identities and roles, leading to unauthorized access and privilege escalation.
+**Learning:** Helpers that bridge authentication context must NEVER trust user-supplied headers if an authenticated session/token is required. Even if global middleware is present, inconsistent local extraction logic creates spoofing vectors.
+**Prevention:** Always rely exclusively on the validated `req.user` object for identity and role checks. Explicitly ignore identity-related headers in route handlers to prevent "Broken Access Control" patterns.
