@@ -922,3 +922,29 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+
+  - id: daily-sprint-ops-log
+    version: v1
+    path: prompts/ops/daily-sprint@v1.md
+    sha256: a0d7e53a884bc8f9e00bf7a2197b1a92d5325d66b55a2d67b56b6a79565c040a
+    description: Create daily sprint ops logs with evidence-first snapshots and execution status.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/roadmap/STATUS.json
+        - prompts/ops/daily-sprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - operations
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+

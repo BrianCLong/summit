@@ -62,15 +62,19 @@ Governed Exception: Issue scan is deferred pending stable GitHub API connectivit
 2. Refresh execution invariant tracking in `docs/roadmap/STATUS.json`.
    Files/subsystems: `docs/roadmap/STATUS.json`.
    Validation: JSON diff review.
-3. Package and open a doc-only PR for the daily sprint artifacts.
-   Files/subsystems: `docs/ops/`, `docs/roadmap/`.
+3. Register a daily sprint prompt scope to cover `docs/ops/` artifacts.
+   Files/subsystems: `prompts/ops/daily-sprint@v1.md`, `prompts/registry.yaml`.
+   Validation: SHA-256 hash recorded in registry.
+4. Package and open a doc-only PR for the daily sprint artifacts.
+   Files/subsystems: `docs/ops/`, `docs/roadmap/`, `prompts/`.
    Validation: `git status -sb` and PR metadata check.
 
 ## Execution Log
 
 - Task 1: Completed. Evidence bundle and plan recorded in this file.
 - Task 2: Completed. `docs/roadmap/STATUS.json` refreshed.
-- Task 3: In progress. Branch prepared; PR creation deferred pending GH API stability.
+- Task 3: Completed. Daily sprint prompt registered in `prompts/registry.yaml`.
+- Task 4: In progress. Branch prepared; PR creation deferred pending GH API stability.
 
 ## Commands Run
 
@@ -80,7 +84,7 @@ Governed Exception: Issue scan is deferred pending stable GitHub API connectivit
 
 ## End-of-Day Report
 
-- Planned: 3 tasks. Completed: 2. In progress: 1.
+- Planned: 4 tasks. Completed: 3. In progress: 1.
 - PRs touched: none (doc-only PR pending GH API stability).
 - Blockers: GitHub API instability for issue scan and PR creation (Governed Exception).
 - Follow-up: Re-run issue scan and open the doc-only PR once API connectivity stabilizes.
