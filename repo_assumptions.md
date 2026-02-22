@@ -1,40 +1,34 @@
 # Repo Assumptions & Validation
 
-## Verified vs Assumed Directory List
+## Verified vs Assumed Checklist
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| Item | Verified | Evidence | Notes |
+| --- | --- | --- | --- |
+| Tool interface location | ✅ | `src/hooks/runner.ts`, `src/hooks/policy.ts` | Policy gating + redaction in hooks layer; `src/tools/` exists with minimal subdirs. |
+| Config system | ✅ | `config/`, `configs/`, `feature_flags.json`, `feature_flags/` | Multiple config entrypoints present; feature flags are file-based. |
+| Artifact directory conventions | ✅ | `artifacts/`, `evidence/`, `EVIDENCE_BUNDLE.manifest.json` | `artifacts/agent-runs` exists; evidence bundles tracked. |
+| CI job names | ✅ | `.github/workflows/pr-quality-gate.yml`, `ci-*.yml` | PR-quality gate is present; multiple CI workflows are defined. |
+| Logging/redaction helpers | ✅ | `src/hooks/policy.ts`, `src/audit/auditMiddleware.ts`, `src/intelgraph/governance/redaction.py` | Redaction utilities exist in both TS and Python stacks. |
+| Evidence/provenance schema | ✅ | `PROVENANCE_SCHEMA.md`, `EVIDENCE_BUNDLE.manifest.json` | Provenance schema defined at repo root. |
+| Policy-as-code versioning | ✅ | `packages/decision-policy/` | Decision policy package is present. |
 
-## CI Check Names (Exact)
+## Must-Not-Touch List
+- Release workflows under `.github/workflows/release-*.yml`
+- Licensing artifacts (`LICENSE`, `NOTICE`, `OSS-MIT-LICENSE`, `THIRD_PARTY_NOTICES*`)
+- Security gates and governance workflows (`*.yml` in `.github/workflows/` with `governance`, `security`, `evidence`)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+## CI Check Names (Verified)
+- `pr-quality-gate.yml`
+- `ci-pr.yml`
+- `ci-core.yml`
+- `ci-governance.yml`
+- `evidence-check.yml`
 
-## Evidence Schema Conventions (Exact)
+## Existing Policy/Evidence Schema Locations (Verified)
+- `PROVENANCE_SCHEMA.md`
+- `EVIDENCE_BUNDLE.manifest.json`
+- `evidence/`
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Validation Notes
+All key locations referenced by the non-public data access standards are present and verified.
+Any new connector work must align with the hooks policy layer and evidence/provenance schema.

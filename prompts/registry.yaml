@@ -922,3 +922,31 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: nonpublic-data-access-standards
+    version: v1
+    path: prompts/standards/nonpublic-data-access@v1.md
+    sha256: cde11a8ac62de3c4b235c96a26d9a4658bf674e5580be4ca0032e3903c4f42f3
+    description: Define non-public data access standards, data handling guidance, and runbook with roadmap update.
+    scope:
+      paths:
+        - docs/standards/nonpublic-data-access.md
+        - docs/security/data-handling/nonpublic-data-access.md
+        - docs/ops/runbooks/nonpublic-data-access.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/standards/nonpublic-data-access@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
