@@ -33,6 +33,53 @@ groups:
           description: '95th percentile latency is {{ $value }}s, exceeding the 1s threshold.'
           runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-latency'
 
+  # Summit AI Worker (Python)
+  - name: summit.ai
+    rules:
+      - alert: SummitAiWorkerHighErrorRate
+        expr: |
+          sum(rate(http_requests_total{service="summit-ai", status=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total{service="summit-ai"}[5m]))
+          > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: summit-ai
+          component: ai-worker
+        annotations:
+          summary: 'Summit AI Worker Error Rate > 5%'
+          description: 'The AI Worker is experiencing a high error rate ({{ $value | humanizePercentage }}).'
+
+      - alert: SummitAiWorkerLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="summit-ai"}[5m])) by (le)) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-ai
+          component: ai-worker
+        annotations:
+          summary: 'Summit AI Worker P95 Latency > 5s'
+          description: '95th percentile latency is {{ $value }}s.'
+
+  # IntelGraph Web (Frontend)
+  - name: intelgraph.web
+    rules:
+      - alert: WebClientHighErrorRate
+        expr: |
+          sum(rate(http_client_request_duration_count{service="intelgraph-web", http_response_status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_client_request_duration_count{service="intelgraph-web"}[5m]))
+          > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph-web
+          component: frontend
+        annotations:
+          summary: 'Web Client High Error Rate'
+          description: 'Web client is reporting high error rate ({{ $value | humanizePercentage }}).'
+
   # GraphQL Specific
   - name: summit.graphql
     rules:
