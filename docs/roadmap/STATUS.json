@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-08T00:33:31Z",
+  "revision_note": "Added governed GitHub Actions OIDC with AWS STS hardening guide in docs/security.",
   "initiatives": [
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -58,7 +52,7 @@
       "id": "sera-cli-proxy",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails."
+      "notes": "Summit-native SERA CLI-style proxy integration with evidence artifacts and guardrails. Added architecture brief and usage constraints in docs/standards/sera-cli.md."
     },
     {
       "id": "governance-evidence-contracts",
@@ -71,12 +65,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ops-incident-console",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
     },
     {
       "id": "summit-ga-preflight-skill",
@@ -94,7 +82,7 @@
       "id": "promptspec-foundation-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
+      "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
     },
     {
       "id": "E",
@@ -162,13 +150,13 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab. Added deterministic example and evidence budgeting notes in docs/standards/ru-ua-cogwar-lab.md."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
@@ -189,12 +177,6 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -211,12 +193,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "summit-architecture-brief",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     }
   ],
   "summary": {
