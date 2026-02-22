@@ -1,0 +1,31 @@
+name: Verify PR Classification
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, labeled, unlabeled]
+
+jobs:
+  enforce-classification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            const title = pr.title;
+
+            // Allow 'feat', 'fix', 'docs', 'chore', 'test', 'refactor' prefixes
+            const conventionalCommitRegex = /^(feat|fix|docs|chore|test|refactor)(\(.+\))?: .+$/;
+
+            if (labels.length === 0) {
+              if (conventionalCommitRegex.test(title)) {
+                console.log("Valid conventional commit title detected.");
+                return;
+              }
+            }
+
+            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
+            if (!valid) {
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:, etc).");
+            }

@@ -25,6 +25,7 @@ To configure a specific partition, set the corresponding environment variables u
 In this scenario, we use a dedicated Redis server for caching to avoid evicting persistent data (like queues) during memory pressure.
 
 **Default Redis (Persistent/Queues):**
+
 ```env
 REDIS_HOST=redis-persistent
 REDIS_PORT=6379
@@ -32,6 +33,7 @@ REDIS_PASSWORD=securepass
 ```
 
 **Cache Redis (Ephemeral/High-Throughput):**
+
 ```env
 REDIS_CACHE_HOST=redis-cache
 REDIS_CACHE_PORT=6379
@@ -57,6 +59,7 @@ For any partition `{NAME}` (e.g., `CACHE`, `DIST`), the following variables are 
 Summit supports Redis Cluster for horizontal scaling. Set `REDIS_{NAME}_USE_CLUSTER=true` and provide the initial seed nodes in `REDIS_{NAME}_CLUSTER_NODES`.
 
 **Example:**
+
 ```env
 REDIS_CACHE_USE_CLUSTER=true
 REDIS_CACHE_CLUSTER_NODES=10.0.0.1:6379,10.0.0.2:6379,10.0.0.3:6379

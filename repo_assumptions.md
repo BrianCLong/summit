@@ -1,40 +1,16 @@
-# Repo Assumptions & Validation
+# Repo Reality Check
 
-## Verified vs Assumed Directory List
+## Verified
+* `summit` is the root python package.
+* `summit/post_training/recipes/typhoon_s/opd_trainer.py` exists and uses PyTorch.
+* `summit/post_training/recipes/typhoon_s/ink_grpo.py` exists but is only a config dataclass.
+* `tools/summit-fara` contains an agent loop with placeholder GRPO comments.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumed (and will be created)
+* `summit/rl` will be the new home for the RL pipeline to support SAGE.
+* `summit/rl/trainers/grpo.py` will be created (or mocked) as the target for SAGE integration.
+* Evidence artifacts will be stored in `reports/sage-self-hint-grpo/` following the pattern seen in `summit/evidence/templates`.
 
-## CI Check Names (Exact)
-
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Must-not-touch
+* `summit/post_training/recipes/typhoon_s/*` (unless strictly necessary, will leave as is).
+* `packages/*` (TypeScript/Node.js code).

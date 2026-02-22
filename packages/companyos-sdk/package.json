@@ -1,12 +1,6 @@
 {
-  "name": "@intelgraph/companyos-sdk",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "build": "tsc"
-  },
+  "name": "companyos-sdk",
+  "version": "0.0.0",
   "devDependencies": {
     "typescript": "^5.4.0"
   }

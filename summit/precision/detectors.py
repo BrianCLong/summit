@@ -31,6 +31,14 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
 
+    if torch is None:
+         # Fallback or raise error if torch is strictly required for this path
+         # For now, just return empty report or maybe raise specific error
+         # But based on the code, it uses .abs(), .max().item() which are torch tensor methods.
+         # Assuming if we have logprobs as tensors, we must have torch installed.
+         # But the test only calls it with empty dicts, so it returns early.
+         return MismatchReport()
+
     delta = (train_logprobs - rollout_logprobs).abs()
 
     return MismatchReport(

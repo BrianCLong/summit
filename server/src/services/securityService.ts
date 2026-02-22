@@ -1,10 +1,8 @@
 // @ts-nocheck
 import { EventEmitter } from 'events';
-import argon2 from 'argon2';
+import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { cacheService } from './CacheService.js';
-import { v4 as uuidv4 } from 'uuid';
-import type { Pool, PoolClient } from 'pg';
 
 export interface User {
   id: string;
@@ -242,7 +240,7 @@ export class SecurityService extends EventEmitter {
     process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
   private readonly jwtRefreshSecret =
     process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production';
-  // Argon2 is handled by its default secure settings, saltRounds not needed
+  private readonly saltRounds = 12;
 
   constructor() {
     super();
@@ -399,7 +397,7 @@ export class SecurityService extends EventEmitter {
       username: 'admin',
       email: 'admin@intelgraph.com',
       fullName: 'System Administrator',
-      passwordHash: await argon2.hash('admin123'), // Change in production
+      passwordHash: await bcrypt.hash('admin123', this.saltRounds), // Change in production
       role: 'ADMIN',
       permissions: this.roles.get('role-admin')?.permissions || [],
       department: 'IT Security',
@@ -422,28 +420,6 @@ export class SecurityService extends EventEmitter {
 
     this.users.set(adminUser.id, adminUser);
     console.log('[SECURITY] Initialized default admin user');
-  }
-
-  /**
-   * Hash password using argon2
-   */
-  async hashPassword(password: string): Promise<string> {
-    return argon2.hash(password);
-  }
-
-  /**
-   * Verify password using argon2
-   */
-  async verifyPassword(passwordHash: string, password: string): Promise<boolean> {
-    return argon2.verify(passwordHash, password);
-  }
-
-  /**
-   * Hash token for storage (SHA256)
-   */
-  hashToken(token: string): string {
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   /**
@@ -491,7 +467,7 @@ export class SecurityService extends EventEmitter {
     }
 
     // Verify password
-    const passwordValid = await argon2.verify(user.passwordHash, password);
+    const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
       user.failedLoginAttempts++;
 
@@ -641,143 +617,9 @@ export class SecurityService extends EventEmitter {
   }
 
   /**
-   * Revoke an access token
-   */
-  public async revokeToken(token: string, pool: Pool): Promise<boolean> {
-    try {
-      const tokenHash = this.hashToken(token);
-      await pool.query(
-        `
-        INSERT INTO token_blacklist (token_hash, revoked_at, expires_at)
-        VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '24 hours')
-        ON CONFLICT (token_hash) DO NOTHING
-      `,
-        [tokenHash],
-      );
-      return true;
-    } catch (error) {
-      console.error('[SECURITY] Error revoking token:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Generate a new JWT and refresh token pair for a user (DB-backed)
-   */
-  public async generateDbTokenPair(
-    user: any,
-    client: PoolClient,
-    scopes: string[] = []
-  ): Promise<{ token: string, refreshToken: string }> {
-    const tokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-      tenantId: user.tenant_id || user.default_tenant_id || 'unknown',
-      scp: scopes,
-    };
-
-    const token = jwt.sign(tokenPayload, this.jwtSecret, {
-      expiresIn: '24h',
-    }) as string;
-
-    const refreshToken = uuidv4();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await client.query(
-      `
-      INSERT INTO user_sessions (user_id, refresh_token, expires_at)
-      VALUES ($1, $2, $3)
-    `,
-      [user.id, refreshToken, expiresAt],
-    );
-
-    return { token, refreshToken };
-  }
-
-  /**
-   * Verify a JWT against database and blacklist
-   */
-  public async verifyDbToken(token: string, pool: Pool): Promise<any> {
-    try {
-      if (!token) return null;
-      const decoded = jwt.verify(token, this.jwtSecret) as any;
-
-      // Check if token is blacklisted
-      const tokenHash = this.hashToken(token);
-      const blacklistCheck = await pool.query(
-        'SELECT 1 FROM token_blacklist WHERE token_hash = $1',
-        [tokenHash],
-      );
-
-      if (blacklistCheck.rows.length > 0) {
-        return null;
-      }
-
-      return decoded;
-    } catch (error) {
-      return null;
-    }
-  }
-
-  /**
-   * Refresh a token pair using token rotation
-   */
-  public async refreshDbToken(
-    refreshToken: string,
-    client: PoolClient,
-    getScopes: (role: string) => string[]
-  ): Promise<{ token: string, refreshToken: string, userId: string } | null> {
-    // Verify refresh token exists and is not expired
-    const sessionResult = await client.query(
-      `
-      SELECT user_id, expires_at, is_revoked
-      FROM user_sessions
-      WHERE refresh_token = $1
-    `,
-      [refreshToken],
-    );
-
-    if (sessionResult.rows.length === 0) return null;
-    const session = sessionResult.rows[0];
-
-    if (session.is_revoked || new Date(session.expires_at) < new Date()) {
-      if (!session.is_revoked) {
-        await client.query(
-          'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
-          [refreshToken],
-        );
-      }
-      return null;
-    }
-
-    // Get user data
-    const userResult = await client.query(
-      'SELECT * FROM users WHERE id = $1 AND is_active = true',
-      [session.user_id],
-    );
-
-    if (userResult.rows.length === 0) return null;
-    const user = userResult.rows[0];
-
-    // Revoke old refresh token
-    await client.query(
-      'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
-      [refreshToken],
-    );
-
-    // Generate new token pair
-    const scopes = getScopes(user.role);
-    const tokens = await this.generateDbTokenPair(user, client, scopes);
-
-    return { ...tokens, userId: user.id };
-  }
-
-  /**
    * Generate JWT access token
    */
-  public generateAccessToken(user: any): string {
+  private generateAccessToken(user: User): string {
     return jwt.sign(
       {
         userId: user.id,
@@ -798,7 +640,7 @@ export class SecurityService extends EventEmitter {
   /**
    * Generate JWT refresh token
    */
-  public generateRefreshToken(user: any, sessionId: string): string {
+  private generateRefreshToken(user: User, sessionId: string): string {
     return jwt.sign(
       {
         userId: user.id,

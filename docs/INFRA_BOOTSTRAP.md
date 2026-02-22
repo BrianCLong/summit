@@ -6,15 +6,15 @@ This guide documents the "Day-0" infrastructure setup and the standardized "Gold
 
 We use three standard environments, defined by Helm values in \`charts/intelgraph-api/\`:
 
-*   **Dev (\`values.dev.yaml\`)**:
+* **Dev (\`values.dev.yaml\`)**:
     *   Optimized for cost and speed.
     *   1 Replica, reduced resources (50m CPU).
     *   No canary rollouts.
-*   **Stage (\`values.stage.yaml\`)**:
+* **Stage (\`values.stage.yaml\`)**:
     *   Prod-like environment for validation.
     *   2 Replicas, moderate resources.
     *   Simple canary (50/50 split).
-*   **Prod (\`values.prod.yaml\`)**:
+* **Prod (\`values.prod.yaml\`)**:
     *   High Availability.
     *   3+ Replicas, full resources.
     *   Advanced progressive delivery (20% -> 40% -> 80% -> 100%) with automated analysis.
@@ -42,9 +42,9 @@ New workflows in \`.github/workflows/\` standardize the delivery pipeline:
 ## 3. Observability
 
 SLOs are defined as code in \`observability/slos/intelgraph-api-slo.yaml\`:
-*   **Availability**: 99.9% success rate.
-*   **Latency**: p99 < 500ms.
-*   **Alerts**: Burn rate alerts are configured to trigger before budget exhaustion.
+* **Availability**: 99.9% success rate.
+* **Latency**: p99 < 500ms.
+* **Alerts**: Burn rate alerts are configured to trigger before budget exhaustion.
 
 ## 4. Bootstrapping (Terraform)
 

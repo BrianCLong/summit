@@ -114,7 +114,7 @@ CREATE UNIQUE INDEX idx_mv_authz_denials_pk
 CREATE OR REPLACE FUNCTION refresh_authz_denials_summary()
 RETURNS void AS $$
 BEGIN
-  REFRESH MATERIALIZED VIEW  mv_authz_denials_summary;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY mv_authz_denials_summary;
 END;
 $$ LANGUAGE plpgsql;
 
