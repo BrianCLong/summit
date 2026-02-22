@@ -387,7 +387,10 @@ export function listSessions(sessionDir: string): SessionState[] {
         const timeDiff = new Date(b.session.startTime).getTime() - new Date(a.session.startTime).getTime();
         if (timeDiff !== 0) return timeDiff;
         // Use file mtime as tiebreaker (newer files first)
-        return b.mtime - a.mtime;
+        const mtimeDiff = b.mtime - a.mtime;
+        if (mtimeDiff !== 0) return mtimeDiff;
+        // Final tiebreaker: sessionId (deterministic)
+        return b.session.sessionId.localeCompare(a.session.sessionId);
       })
       .map((item) => item.session);
   } catch {

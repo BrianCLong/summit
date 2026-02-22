@@ -244,7 +244,7 @@ function normalizeMetadata(
 }
 
 function normalizeClawdbot(value: unknown):
-  | OpenClawSkillFrontmatter['metadata']['clawdbot']
+  | Exclude<OpenClawSkillFrontmatter['metadata'], undefined>['clawdbot']
   | undefined {
   if (!value || typeof value !== 'object') {
     return undefined;
@@ -259,7 +259,7 @@ function normalizeClawdbot(value: unknown):
 }
 
 function normalizeRequires(value: unknown):
-  | OpenClawSkillFrontmatter['metadata']['clawdbot']['requires']
+  | Exclude<Exclude<OpenClawSkillFrontmatter['metadata'], undefined>['clawdbot'], undefined>['requires']
   | undefined {
   if (!value || typeof value !== 'object') {
     return undefined;
