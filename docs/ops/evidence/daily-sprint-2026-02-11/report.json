@@ -1,0 +1,21 @@
+{
+  "run_id": "daily-sprint-2026-02-11-2026-02-11T195003Z",
+  "generated_at": "2026-02-11T19:50:03Z",
+  "mode": "sensing",
+  "sources": [
+    "gh_pr_list.json",
+    "gh_pr_list.txt",
+    "gh_issue_list.json",
+    "gh_issue_list.txt"
+  ],
+  "summary": {
+    "pr_count": 20,
+    "issue_count": 3,
+    "top_pr": 18487,
+    "top_issue": 17754,
+    "notes": [
+      "Live GH triage restored and captured in deterministic evidence artifacts.",
+      "Governance drift issue remains active and prioritized for follow-on execution."
+    ]
+  }
+}
