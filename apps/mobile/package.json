@@ -73,7 +73,7 @@
     "nativewind": "^4.1.23",
     "react": "^19.2.0",
     "react-hook-form": "^7.54.2",
-    "react-native": "^0.76.6",
+    "react-native": "^0.84.0",
     "react-native-background-fetch": "^4.2.0",
     "react-native-background-geolocation": "^4.19.0",
     "react-native-biometrics": "^3.0.1",
