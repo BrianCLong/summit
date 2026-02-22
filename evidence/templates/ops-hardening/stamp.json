@@ -1,0 +1,6 @@
+{
+  "timestamp": "2025-01-01T00:00:00Z",
+  "version": "1.0",
+  "actor": "user@example.com",
+  "tool": "manual-entry"
+}

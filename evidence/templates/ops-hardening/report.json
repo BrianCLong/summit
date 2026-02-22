@@ -1,0 +1,15 @@
+{
+  "id": "EVD-TEMPLATE-001",
+  "summary": "Brief summary of the ops hardening task or event.",
+  "status": "completed",
+  "details": {
+    "description": "Detailed description of what was done.",
+    "steps_taken": ["Step 1", "Step 2"]
+  },
+  "artifacts": [
+    {
+      "name": "Screenshot",
+      "url": "https://link-to-screenshot"
+    }
+  ]
+}
