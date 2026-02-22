@@ -1,69 +1,87 @@
 openapi: 3.0.0
 info:
-  title: IntelGraph Summit API
-  version: 1.1.0
-  description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
-
+  title: Summit API
+  version: 1.0.0
+  description: API for Summit, the IntelGraph agent platform.
+  contact:
+    name: IntelGraph Support
+    email: support@intelgraph.com
 servers:
-  - url: /api
-    description: Base API path for most endpoints
-  - url: /
-    description: Root path for monitoring and health
+  - url: http://localhost:3000
+    description: Local development server
+tags:
+  - name: Monitoring
+    description: System health and metrics
+  - name: Tenants
+    description: Tenant management
+  - name: Policy
+    description: Policy simulation and enforcement
+  - name: Export
+    description: Data export and compliance
+  - name: Maestro
+    description: Orchestration and workflow management
 
 paths:
   /monitoring/metrics:
     get:
-      operationId: getMonitoringMetrics
-      summary: Prometheus metrics
-      tags: [Observability]
+      operationId: getMetrics
+      summary: Get system metrics
+      description: Retrieve current system metrics including CPU, memory, and request counts.
+      tags: [Monitoring]
       responses:
         '200':
-          description: Prometheus metrics text
+          description: Metrics object
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                type: object
+                additionalProperties:
+                  type: number
 
   /health:
     get:
       operationId: getHealth
-      summary: System health check
-      tags: [Observability]
+      summary: Health check
+      description: Check the health status of the API and its dependencies.
+      tags: [Monitoring]
       responses:
         '200':
-          description: Healthy
+          description: System is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                : '#/components/schemas/HealthStatus'
         '503':
-          description: Unhealthy
+          description: System is unhealthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                : '#/components/schemas/HealthStatus'
 
   /api/tenants:
     post:
+      operationId: createTenant
       summary: Create a new tenant
-      tags: [Tenancy]
+      description: Provision a new tenant with the specified configuration.
+      tags: [Tenants]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateTenantRequest'
+              : '#/components/schemas/CreateTenantRequest'
       responses:
         '201':
           description: Tenant created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Tenant'
-
+                : '#/components/schemas/Tenant'
     get:
-      summary: List tenants (Admin only)
-      tags: [Tenancy]
+      operationId: listTenants
+      summary: List all tenants
+      description: Retrieve a list of all registered tenants.
+      tags: [Tenants]
       responses:
         '200':
           description: List of tenants
@@ -72,48 +90,54 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Tenant'
+                  : '#/components/schemas/Tenant'
 
   /api/policy/simulate:
     post:
-      summary: Simulate a policy decision (Preflight)
-      tags: [Governance]
+      operationId: simulatePolicy
+      summary: Simulate policy enforcement
+      description: Simulate a policy decision for a given subject, resource, and action.
+      tags: [Policy]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PolicySimulationInput'
+              : '#/components/schemas/PolicySimulationInput'
       responses:
         '200':
           description: Simulation result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicySimulationResult'
+                : '#/components/schemas/PolicySimulationResult'
 
   /api/export/bundles:
     post:
-      summary: Create an Intel Bundle export
-      tags: [Disclosure]
+      operationId: createExportBundle
+      summary: Create an export bundle
+      description: Initiate a job to create an export bundle for a specific run.
+      tags: [Export]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateBundleRequest'
+              : '#/components/schemas/CreateBundleRequest'
       responses:
         '202':
-          description: Bundle generation started
+          description: Export job started
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/JobStatus'
+                : '#/components/schemas/JobStatus'
 
   /api/receipts/{id}:
     get:
-      summary: Get a signed receipt by ID
-      tags: [Provenance]
+      operationId: getReceipt
+      summary: Get a receipt by ID
+      description: Retrieve a specific receipt by its unique identifier.
+      tags: [Export]
       parameters:
         - name: id
           in: path
@@ -122,82 +146,83 @@ paths:
             type: string
       responses:
         '200':
-          description: Signed receipt
+          description: Receipt details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Receipt'
+                : '#/components/schemas/Receipt'
+        '404':
+          description: Receipt not found
 
   /api/maestro/route/preview:
     post:
       operationId: previewRoute
-      summary: Preview routing candidates for a task
+      summary: Preview routing decision
+      description: Preview the candidates and estimated costs for a routing request.
       tags: [Maestro]
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                task:
+                prompt:
                   type: string
-                context:
-                  type: object
       responses:
         '200':
-          description: List of candidates
+          description: Routing candidates
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RoutePreviewResponse'
+                : '#/components/schemas/RoutePreviewResponse'
 
   /api/maestro/route/execute:
     post:
       operationId: executeRoute
-      summary: Execute a task with selected candidates
+      summary: Execute routed request
+      description: Execute a request using the Maestro routing logic.
       tags: [Maestro]
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                task:
+                prompt:
                   type: string
-                selection:
+                models:
                   type: array
                   items:
                     type: string
       responses:
         '200':
-          description: Execution results
+          description: Execution result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RouteExecuteResponse'
+                : '#/components/schemas/RouteExecuteResponse'
 
   /api/maestro/web/interfaces:
     get:
-      operationId: getWebInterfaces
-      summary: Get available web interfaces
+      operationId: listWebInterfaces
+      summary: List available web interfaces
+      description: Retrieve a list of available web interfaces for orchestration.
       tags: [Maestro]
       responses:
         '200':
-          description: List of web interfaces
+          description: List of interfaces
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WebInterfacesResponse'
+                : '#/components/schemas/WebInterfacesResponse'
 
   /api/maestro/web/run:
     post:
       operationId: runWebOrchestration
-      summary: Orchestrate web search/content tasks
+      summary: Run web orchestration
+      description: Orchestrate a task across multiple web interfaces.
       tags: [Maestro]
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -205,38 +230,35 @@ paths:
               properties:
                 task:
                   type: string
-                interfaces:
-                  type: array
-                  items:
-                    type: string
       responses:
         '200':
-          description: Orchestration results
+          description: Orchestration result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OrchestrateWebResponse'
+                : '#/components/schemas/OrchestrateWebResponse'
 
   /api/maestro/budgets:
     get:
       operationId: getBudgets
-      summary: Get budget and usage information
+      summary: Get budget status
+      description: Retrieve the current budget status and usage for the tenant.
       tags: [Maestro]
       responses:
         '200':
-          description: Budget info
+          description: Budget details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BudgetsResponse'
+                : '#/components/schemas/BudgetsResponse'
 
   /api/maestro/policy/check:
     post:
       operationId: checkPolicy
-      summary: Check policy for an action
+      summary: Check policy compliance
+      description: Check if a proposed action complies with the configured policies.
       tags: [Maestro]
       requestBody:
-        required: true
         content:
           application/json:
             schema:
@@ -244,44 +266,44 @@ paths:
               properties:
                 action:
                   type: string
-                payload:
-                  type: object
       responses:
         '200':
           description: Policy check result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyCheckResponse'
+                : '#/components/schemas/PolicyCheckResponse'
 
   /api/maestro/runs:
     post:
       operationId: createRun
-      summary: Create and run a new pipeline
+      summary: Start a new run
+      description: Initiate a new workflow run.
       tags: [Maestro]
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                userId:
-                  type: string
-                requestText:
+                workflowId:
                   type: string
       responses:
-        '200':
+        '201':
           description: Run created
           content:
             application/json:
               schema:
                 type: object
+                properties:
+                  runId:
+                    type: string
 
   /api/tenants/{tenantId}/workflows:
     post:
-      operationId: createWorkflowDefinition
-      summary: Create or update a workflow definition
+      operationId: createWorkflow
+      summary: Create a workflow definition
+      description: Define a new workflow for a specific tenant.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -294,19 +316,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkflowDefinitionInput'
+              : '#/components/schemas/WorkflowDefinitionInput'
       responses:
         '201':
-          description: Workflow definition created
+          description: Workflow created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkflowDefinition'
+                : '#/components/schemas/WorkflowDefinition'
 
   /api/tenants/{tenantId}/runs:
     post:
-      operationId: startRun
-      summary: Start a new run from a workflow definition
+      operationId: startTenantRun
+      summary: Start a run for a tenant
+      description: Start a workflow run within a specific tenant context.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -319,19 +342,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/StartRunInput'
+              : '#/components/schemas/StartRunInput'
       responses:
         '201':
           description: Run started
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                : '#/components/schemas/Run'
 
   /api/tenants/{tenantId}/runs/{runId}:
     get:
-      operationId: getRun
-      summary: Get run details including receipts
+      operationId: getRunDetails
+      summary: Get run details
+      description: Retrieve the details and status of a specific run.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -350,12 +374,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Run'
+                : '#/components/schemas/Run'
 
   /api/tenants/{tenantId}/runs/{runId}/approve:
     post:
       operationId: approveRun
       summary: Approve or reject a run/step
+      description: Submit an approval decision for a specific step in a run.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -373,19 +398,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApprovalInput'
+              : '#/components/schemas/ApprovalInput'
       responses:
         '200':
           description: Approval processed
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApprovalResult'
+                : '#/components/schemas/ApprovalResult'
 
   /api/tenants/{tenantId}/runs/{runId}/events:
     get:
       operationId: getRunEvents
       summary: Get timeline events for a run
+      description: Retrieve the event timeline for a specific run.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -406,7 +432,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/RunEvent'
+                  : '#/components/schemas/RunEvent'
 
 components:
   schemas:
@@ -557,7 +583,7 @@ components:
         candidates:
           type: array
           items:
-            $ref: '#/components/schemas/Candidate'
+            : '#/components/schemas/Candidate'
 
     RouteExecuteStep:
       type: object
@@ -593,7 +619,7 @@ components:
         steps:
           type: array
           items:
-            $ref: '#/components/schemas/RouteExecuteStep'
+            : '#/components/schemas/RouteExecuteStep'
 
     WebInterface:
       type: object
@@ -615,7 +641,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/WebInterface'
+            : '#/components/schemas/WebInterface'
 
     OrchestrateWebResponse:
       type: object
@@ -716,7 +742,7 @@ components:
 
     WorkflowDefinition:
       allOf:
-        - $ref: '#/components/schemas/WorkflowDefinitionInput'
+        - : '#/components/schemas/WorkflowDefinitionInput'
         - type: object
           properties:
             id:
@@ -762,7 +788,7 @@ components:
         receipts:
           type: array
           items:
-            $ref: '#/components/schemas/Receipt'
+            : '#/components/schemas/Receipt'
 
     ApprovalInput:
       type: object
