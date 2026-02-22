@@ -1,4 +1,5 @@
 packages:
+  - "streaming/*"
   - 'apps/*'
   - 'packages/*'
   - 'platform/*'

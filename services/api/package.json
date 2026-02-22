@@ -1,0 +1,10 @@
+{
+  "name": "@summit/api",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "dependencies": {
+    "rate-limiter-flexible": "^2.4.1",
+    "@intelgraph/observability": "workspace:*",
+    "@summit/resilience": "workspace:*"
+  }
+}

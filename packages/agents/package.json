@@ -1,0 +1,8 @@
+{
+  "name": "@summit/agents",
+  "version": "0.1.0",
+  "main": "src/registry/index.ts",
+  "dependencies": {
+    "@summit/governance": "workspace:*"
+  }
+}

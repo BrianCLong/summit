@@ -1,0 +1,10 @@
+{
+  "name": "@summit/cdc-projection",
+  "version": "0.1.0",
+  "main": "src/manager.ts",
+  "dependencies": {
+    "pg-logical-replication": "^2.0.0",
+    "@summit/graph": "workspace:*",
+    "@intelgraph/graph": "workspace:*"
+  }
+}
