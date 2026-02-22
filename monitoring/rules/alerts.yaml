@@ -190,3 +190,38 @@ groups:
         annotations:
           summary: "High AI Job Failure Rate"
           description: "AI Job failure rate is {{ $value | humanizePercentage }}."
+
+  - name: summit.incident.response.rules
+    rules:
+      - alert: MergeLoopDetected
+        # TODO: Implement github_merge_queue_requeues_total metric in dora/exporter.ts
+        expr: increase(github_merge_queue_requeues_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "Merge Loop Detected"
+          description: "More than 5 requeues in the last hour, indicating potential merge loop."
+
+      - alert: PnpmPathIssue
+        # TODO: Ensure pnpm_check job is configured in Prometheus
+        expr: absent(up{job="pnpm_check"})
+        for: 5m
+        labels:
+          severity: critical
+          team: devops
+        annotations:
+          summary: "PNPM Binary Path Issue"
+          description: "PNPM check job is down or missing."
+
+      - alert: RunnerQueueHigh
+        # TODO: Implement github_actions_runner_queue_depth metric in dora/exporter.ts
+        expr: github_actions_runner_queue_depth > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "Runner Queue Depth High"
+          description: "Runner queue depth > 10."
