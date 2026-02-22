@@ -1,6 +1,6 @@
-import subprocess
 import json
 import os
+import subprocess
 import sys
 
 # Define the TS script content

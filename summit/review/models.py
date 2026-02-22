@@ -1,8 +1,10 @@
 from __future__ import annotations
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+
 import hashlib
 import json
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+
 
 @dataclass(frozen=True)
 class DecisionPacket:
@@ -11,16 +13,16 @@ class DecisionPacket:
     node_id: str
     inputs_ref: str
     model_output_ref: str
-    policy_results: Dict[str, Any]
+    policy_results: dict[str, Any]
     recommended_action: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     reviewer: Optional[str] = None
     disposition: Optional[str] = None # APPROVED, DENIED
     rationale: Optional[str] = None
-    redaction_map: Dict[str, str] = field(default_factory=dict)
+    redaction_map: dict[str, str] = field(default_factory=dict)
 
     @staticmethod
-    def create(workflow_id: str, node_id: str, payload: Dict[str, Any], recommended_action: str) -> DecisionPacket:
+    def create(workflow_id: str, node_id: str, payload: dict[str, Any], recommended_action: str) -> DecisionPacket:
         # Deterministic ID generation
         content = json.dumps({
             "workflow_id": workflow_id,

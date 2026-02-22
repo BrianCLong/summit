@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
+import datetime
 import json
 import os
-import datetime
+
 
 def load_json_first_match(filenames):
     for f in filenames:
         if os.path.exists(f):
             try:
-                with open(f, 'r') as fh:
+                with open(f) as fh:
                     return json.load(fh)
             except:
                 pass

@@ -1,5 +1,5 @@
 import json
-from datetime import timezone
+from datetime import UTC, timezone
 from pathlib import Path
 from typing import Any, Dict
 
@@ -20,7 +20,7 @@ def write_compliance_evidence(run_dir: Path, evidence_id: str, findings: dict[st
     }
     from datetime import datetime
     stamp = {
-        "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         "run_id": run_dir.name
     }
 

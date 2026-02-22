@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional
+
 from summit.ingest.flatten import StructuredFlattener
 from summit.ingest.flatten_policy import FlatteningPolicy
 
@@ -8,7 +9,7 @@ class IngestPipeline:
         self.flattening_policy = flattening_policy or FlatteningPolicy(enabled=False)
         self.flattener = StructuredFlattener(self.flattening_policy)
 
-    def process(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, data: dict[str, Any]) -> dict[str, Any]:
         """Process a single record through the ingestion stages."""
         result = data.copy()
 
@@ -21,5 +22,5 @@ class IngestPipeline:
 
         return result
 
-    def batch_process(self, records: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def batch_process(self, records: list[dict[str, Any]]) -> list[dict[str, Any]]:
         return [self.process(r) for r in records]

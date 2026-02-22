@@ -1,6 +1,7 @@
 from .base import Engine, RunRequest, RunResult
 from .evidence_helper import write_engine_evidence
 
+
 class ContentEngine:
     name = "content_engine"
 

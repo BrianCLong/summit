@@ -1,6 +1,7 @@
 import pytest
 from graph_shape_guardrail.stats import calculate_skewness
 
+
 def test_skewness_symmetric():
     # Symmetric distribution should have 0 skewness
     data = [1, 2, 3, 4, 5]

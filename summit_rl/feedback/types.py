@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Literal, Optional, Dict, Any, List
+from typing import Any, Dict, List, Literal, Optional
 
 FeedbackKind = Literal["scalar", "text", "tool_trace", "unit_test", "runtime_error", "judge"]
 
@@ -7,6 +7,6 @@ FeedbackKind = Literal["scalar", "text", "tool_trace", "unit_test", "runtime_err
 class RichFeedback:
     kind: FeedbackKind
     text: str
-    meta: Dict[str, Any]
-    provenance: Dict[str, Any]  # e.g., tool name, judge model, runtime, version
-    redactions: Optional[List[Dict[str, Any]]] = None
+    meta: dict[str, Any]
+    provenance: dict[str, Any]  # e.g., tool name, judge model, runtime, version
+    redactions: Optional[list[dict[str, Any]]] = None

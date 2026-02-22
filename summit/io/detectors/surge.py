@@ -1,21 +1,22 @@
-from typing import List, Dict, Any
 import json
 import os
+from typing import Any, Dict, List
 
-def load_registry(registry_path: str = None) -> List[str]:
+
+def load_registry(registry_path: str = None) -> list[str]:
     if registry_path is None:
         registry_path = os.path.join(os.path.dirname(__file__), "..", "registry", "pravda_domains.json")
     try:
-        with open(registry_path, "r") as f:
+        with open(registry_path) as f:
             return json.load(f)
     except FileNotFoundError:
         return []
 
 def detect_surge(
-    daily_counts: Dict[str, Dict[str, int]],
+    daily_counts: dict[str, dict[str, int]],
     target_topic: str,
-    domains: List[str] = None
-) -> List[Dict[str, Any]]:
+    domains: list[str] = None
+) -> list[dict[str, Any]]:
     """
     Detects if any of the monitored domains have a surge in the target topic.
     daily_counts: { "date": { "domain": topic_count } } (Simplified for this example)

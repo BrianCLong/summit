@@ -30,4 +30,4 @@ class ASRSegment:
 class ASRResult:
     language: Optional[str]
     text: str
-    segments: List[ASRSegment]
+    segments: list[ASRSegment]

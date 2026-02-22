@@ -12,6 +12,6 @@ class CartographerStub:
         capabilities={"role": "graph", "outputs": ["nog_updates"]},
     )
 
-    def run(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def run(self, inputs: dict[str, Any]) -> dict[str, Any]:
         inputs.setdefault("nog_updates", [])
         return inputs

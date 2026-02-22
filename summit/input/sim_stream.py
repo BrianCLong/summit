@@ -1,9 +1,11 @@
 from typing import List
-from summit.input.types import IntentFrame, IntentClass
+
 from summit.input.provider import InputProvider
+from summit.input.types import IntentClass, IntentFrame
+
 
 class SimulatedStreamProvider(InputProvider):
-    def poll(self) -> List[IntentFrame]:
+    def poll(self) -> list[IntentFrame]:
         # Simulate a command_decode event every few polls
         return [
             IntentFrame(

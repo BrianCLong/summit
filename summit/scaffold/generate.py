@@ -7,11 +7,11 @@ def scaffold_enabled() -> bool:
   return os.getenv("SUMMIT_SCAFFOLD_ENABLE", "0") == "1"
 
 
-def generate_from_prompt(prompt: str) -> Dict[str, object]:
+def generate_from_prompt(prompt: str) -> dict[str, object]:
   if not scaffold_enabled():
     return {"status": "disabled", "reason": "flag_off"}
 
-  files: List[str] = [
+  files: list[str] = [
     "README.md",
     "src/main.py",
     "src/__init__.py",

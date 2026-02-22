@@ -1,6 +1,6 @@
 import json
 
-with open("evidence/index.json", "r") as f:
+with open("evidence/index.json") as f:
     data = json.load(f)
 
 # Convert dictionary items to list format matching schema

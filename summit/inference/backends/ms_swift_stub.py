@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 from typing import Any, Dict
+
 from summit.flags import ENABLE_MS_SWIFT_INTEGRATION
+
 
 class MSSwiftBackend:
     """
@@ -12,6 +15,6 @@ class MSSwiftBackend:
             raise RuntimeError("MS-Swift integration is disabled.")
         self.model_id = model_id
 
-    def run_inference(self, input_data: Any) -> Dict[str, Any]:
+    def run_inference(self, input_data: Any) -> dict[str, Any]:
         # TODO: Implement ms-swift command line or python API call
         return {"status": "ms_swift_not_implemented"}
