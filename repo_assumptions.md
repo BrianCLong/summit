@@ -1,40 +1,21 @@
-# Repo Assumptions & Validation
+# repo_assumptions.md
 
-## Verified vs Assumed Directory List
+## Verified
+- Repo: BrianCLong/summit exists and is MIT licensed. (source: GitHub UI)
+- README references "Switchboard" as ingestion/normalization routing component (not MCP).
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumed (Deferred pending validation)
+- Runtime: Node.js 18+, TypeScript, pnpm.
+- Source layout: src/api/graphql, src/api/rest, src/agents, src/connectors, src/graphrag.
+- CI workflows under .github/workflows/*.yml and scripts under .github/scripts/.
 
-## CI Check Names (Exact)
+## Must-not-touch (until explicit ticket)
+- Existing ingestion Switchboard implementation (naming collision)
+- Production deployment manifests
+- Provenance Ledger core schema (extend via additive fields only)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Validation checklist (before merging PR2)
+- Confirm actual src/ layout and test runner.
+- Find existing "switchboard" directory (if any) and avoid name collision by using
+  switchboard_mcp/.
+- Confirm CI workflow names to hook new checks without breaking required gates.
