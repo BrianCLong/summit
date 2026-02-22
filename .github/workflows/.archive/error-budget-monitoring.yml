@@ -262,7 +262,7 @@ jobs:
           PY
 
       - name: Create or Update Issue
-        if: steps.report.outputs.alert-needed == 'true'
+        if: ((steps.report.outputs.alert-needed == 'true') && (steps.report.outputs.alert-needed == 'true')) && (steps.report.outputs.alert-needed == 'true' && steps.deployment.outputs.rollback_target != '')
         uses: actions/github-script@v7
         env:
           RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
@@ -304,7 +304,6 @@ jobs:
             }
 
       - name: Notify Slack
-        if: steps.report.outputs.alert-needed == 'true'
         env:
           RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
           DEPLOYMENT_SHA: ${{ steps.deployment.outputs.current_sha }}
@@ -349,7 +348,6 @@ jobs:
           retention-days: 30
 
       - name: Trigger rollback workflow
-        if: steps.report.outputs.alert-needed == 'true' && steps.deployment.outputs.rollback_target != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
