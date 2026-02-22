@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-INGNGX-EVAL-002",
-  "item_slug": "ingress-nginx-retirement",
-  "metrics": {
-    "scan_mode": 1,
-    "deny_patterns": 3
-  }
-}

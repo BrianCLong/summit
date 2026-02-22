@@ -38,7 +38,7 @@ jest.mock('../src/config/database.js', () => {
 describe('stats caching', () => {
   test('caseCounts and summaryStats are cached via local/redis cache', async () => {
     jest.resetModules();
-    const { statsResolvers } = await import('../src/graphql/resolvers/stats.js');
+    const { statsResolvers } = await import('../src/graphql/resolvers/stats');
     const ctx: any = { user: { tenant: 't-test' } };
     // First pass -> populates cache
     await statsResolvers.Query.caseCounts(null as any, {}, ctx);

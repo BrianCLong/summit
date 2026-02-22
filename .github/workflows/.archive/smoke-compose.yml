@@ -30,7 +30,8 @@ jobs:
           docker compose -f docker-compose.yml logs server client
           exit 1
       - name: Print service logs (on success)
-        if: (success()) && (always())
+        if: success()
         run: docker compose -f docker-compose.yml logs --no-color server client | tail -n 200
       - name: Cleanup
+        if: always()
         run: docker compose -f docker-compose.yml down -v

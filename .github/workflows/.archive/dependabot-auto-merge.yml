@@ -20,7 +20,7 @@ jobs:
   # Add label to dependabot PRs for easy filtering
   label-dependabot:
     runs-on: ubuntu-latest
-    if: ((((((${{ github.actor == 'dependabot[bot]' }}) && (${{ github.actor == 'dependabot[bot]' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }})) && (${{ github.actor == 'dependabot[bot]' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-major' }})
+    if: ${{ github.actor == 'dependabot[bot]' }}
     permissions:
       pull-requests: write
     steps:
@@ -38,6 +38,7 @@ jobs:
   # Auto-approve dependabot PRs (patch and minor updates)
   auto-approve:
     runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
     permissions:
       pull-requests: write
     steps:
@@ -48,6 +49,7 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
       - name: Auto-approve patch and minor updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
         run: gh pr review --approve "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
@@ -57,6 +59,7 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     needs: [label-dependabot, auto-approve]
+    if: ${{ github.actor == 'dependabot[bot]' }}
     permissions:
       pull-requests: write
       contents: write
@@ -78,6 +81,7 @@ jobs:
           allowed-conclusions: success,skipped,neutral
 
       - name: Enable auto-merge for patch updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
         run: |
           gh pr merge --auto --squash "$PR_URL"
         env:
@@ -85,6 +89,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Enable auto-merge for minor updates (after review)
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
         run: |
           # Minor updates require approval but can auto-merge after CI passes
           gh pr merge --auto --squash "$PR_URL"
@@ -93,6 +98,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on major updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-major' }}
         uses: actions/github-script@v7
         with:
           script: |

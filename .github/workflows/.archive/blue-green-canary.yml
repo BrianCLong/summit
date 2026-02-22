@@ -215,7 +215,7 @@ PY
           ./scripts/canary/deploy-canary.sh
 
       - name: Update deployment status (canary complete)
-        if: ((success()) && (failure())) && (always())
+        if: success()
         uses: actions/github-script@v7
         env:
           DEPLOYMENT_ID: ${{ needs.create-deployment-record.outputs.deployment_id }}
@@ -230,6 +230,7 @@ PY
             });
 
       - name: Automatic rollback
+        if: failure()
         env:
           ENVIRONMENT: ${{ inputs.environment }}
           STANDBY_ENV: ${{ needs.blue-green.outputs.standby_env }}
@@ -241,6 +242,7 @@ PY
     name: Finalize deployment status
     runs-on: ubuntu-latest
     needs: [create-deployment-record, blue-green, canary-progressive]
+    if: always()
     steps:
       - name: Mark deployment result
         uses: actions/github-script@v7

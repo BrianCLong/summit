@@ -1,5 +1,5 @@
 FROM alpine:latest
-RUN apk add --no-cache postgresql-client redis bash aws-cli
+RUN apk add --no-cache postgresql-client redis bash
 COPY backup.sh /scripts/backup.sh
 COPY restore.sh /scripts/restore.sh
 RUN chmod +x /scripts/*.sh

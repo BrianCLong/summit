@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SecretManager } from '../lib/secrets/secret-manager.js';
+import { SecretManager } from '../lib/secrets/secret-manager';
 
 // Use process.cwd() since tests run from server directory
 const testsDir = path.join(process.cwd(), 'tests');

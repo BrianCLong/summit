@@ -3,8 +3,8 @@
  */
 
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { DigitalTwinService } from '../services/DigitalTwinService.js';
-import { AssetType, TwinSyncState, HealthStatus, CreateAssetInput } from '../types/digitalTwin.js';
+import { DigitalTwinService } from '../services/DigitalTwinService';
+import { AssetType, TwinSyncState, HealthStatus, CreateAssetInput } from '../types/digitalTwin';
 
 describe('DigitalTwinService', () => {
   let service: DigitalTwinService;

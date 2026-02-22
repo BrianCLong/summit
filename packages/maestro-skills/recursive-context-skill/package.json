@@ -8,7 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@intelgraph/maestro-core": "workspace:*",
+    "@maestro/core": "workspace:*",
     "@maestro/recursive-context-runtime": "workspace:*",
     "uuid": "^11.0.0"
   },

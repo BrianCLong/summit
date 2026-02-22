@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { GAReleaseService } from '../services/GAReleaseService.js';
+import { GAReleaseService } from '../services/GAReleaseService';
 
 const router = Router();
 const gaReleaseService = new GAReleaseService();

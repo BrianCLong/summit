@@ -1,6 +1,6 @@
 export type RateLimitStore = 'memory' | 'redis';
 
-export type RateLimitRouteGroup = 'default' | 'webhookIngest' | 'governance' | 'caseWorkflow';
+export type RateLimitRouteGroup = 'default' | 'webhookIngest';
 
 export interface RateLimitRule {
   limit: number;
@@ -34,10 +34,6 @@ export function loadRateLimitConfig(env: NodeJS.ProcessEnv = process.env): RateL
   const defaultLimit = parseNumber(env.RATE_LIMIT_DEFAULT_LIMIT, 100);
   const webhookWindowMs = parseNumber(env.RATE_LIMIT_WEBHOOK_WINDOW_MS, defaultWindowMs);
   const webhookLimit = parseNumber(env.RATE_LIMIT_WEBHOOK_LIMIT, 30);
-  const governanceWindowMs = parseNumber(env.RATE_LIMIT_GOVERNANCE_WINDOW_MS, defaultWindowMs);
-  const governanceLimit = parseNumber(env.RATE_LIMIT_GOVERNANCE_LIMIT, 30);
-  const caseWorkflowWindowMs = parseNumber(env.RATE_LIMIT_CASE_WORKFLOW_WINDOW_MS, defaultWindowMs);
-  const caseWorkflowLimit = parseNumber(env.RATE_LIMIT_CASE_WORKFLOW_LIMIT, 60);
 
   return {
     enabled,
@@ -45,8 +41,6 @@ export function loadRateLimitConfig(env: NodeJS.ProcessEnv = process.env): RateL
     groups: {
       default: { limit: defaultLimit, windowMs: defaultWindowMs },
       webhookIngest: { limit: webhookLimit, windowMs: webhookWindowMs },
-      governance: { limit: governanceLimit, windowMs: governanceWindowMs },
-      caseWorkflow: { limit: caseWorkflowLimit, windowMs: caseWorkflowWindowMs },
     },
   };
 }

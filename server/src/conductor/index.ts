@@ -13,16 +13,16 @@ import {
   mcpRegistry,
   executeToolAnywhere,
   initializeMCPClient,
-} from './mcp/client.js';
-import { orchestrator, MCPOrchestrator, WorkflowRecipes } from './mcp/orchestrator.js';
+} from './mcp/client';
+import { orchestrator, MCPOrchestrator, WorkflowRecipes } from './mcp/orchestrator';
 import { randomUUID as uuid } from 'crypto';
 import {
   BudgetAdmissionController,
   createBudgetController,
-} from './admission/budget-control.js';
+} from './admission/budget-control';
 import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
-import { ConductorCache } from './cache.js';
+import { ConductorCache } from './cache';
 import { createHash } from 'crypto';
 import { registerBuiltins, runPlugin } from '../plugins/index.js';
 import { checkResidency } from '../policy/opaClient.js';
@@ -30,20 +30,14 @@ import { checkQuota, accrueUsage } from './quotas.js';
 import {
   MissionControlConflictResolver,
   MissionControlResolution,
-} from './mission-control/conflict-resolution.js';
+} from './mission-control/conflict-resolution';
 import { PolicyEngine } from '../services/PolicyEngine.js'; // Integration of Policy Engine
-import type {
-  MCPTransportName,
-  MCPTransportNegotiationPolicy,
-} from './mcp/transport/types.js';
 
 export interface ConductorConfig {
   enabledExperts: ExpertType[];
   defaultTimeoutMs: number;
   maxConcurrentTasks: number;
   auditEnabled: boolean;
-  mcpTransport?: MCPTransportName;
-  mcpTransportPolicy?: MCPTransportNegotiationPolicy;
   llmProviders: {
     light?: {
       endpoint: string;
@@ -76,8 +70,6 @@ export class Conductor {
       timeout: config.defaultTimeoutMs,
       retryAttempts: 3,
       retryDelay: 1000,
-      transport: config.mcpTransport,
-      negotiationPolicy: config.mcpTransportPolicy,
     });
     // Initialize budget controller
     // In a real application, Redis client should be injected or managed globally

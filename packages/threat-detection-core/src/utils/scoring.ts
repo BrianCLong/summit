@@ -2,7 +2,7 @@
  * Threat scoring utilities
  */
 
-import { ThreatSeverity, ThreatCategory } from '../types/events.js';
+import { ThreatSeverity, ThreatCategory } from '../types/events';
 
 /**
  * Calculate normalized threat score (0-1) from multiple factors

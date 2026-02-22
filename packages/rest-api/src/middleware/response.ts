@@ -4,7 +4,7 @@
  * Standardizes API responses
  */
 
-import type { Request, Response, APIResponse, HATEOASLinks, Link } from '../types.js';
+import type { Request, Response, APIResponse, HATEOASLinks, Link } from '../types';
 import { NextFunction } from 'express';
 
 /**

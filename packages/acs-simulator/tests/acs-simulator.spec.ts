@@ -1,4 +1,4 @@
-import { ACSSimulator, SimulationState, AdversaryAction } from '../src.js';
+import { ACSSimulator, SimulationState, AdversaryAction } from '../src';
 import { trainATL } from '@intelgraph/atl/src/index';
 import { ADC } from '@intelgraph/adc/src/index';
 import { AFLStore } from '@intelgraph/afl-store';

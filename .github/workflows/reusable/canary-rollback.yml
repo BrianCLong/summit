@@ -65,10 +65,11 @@ jobs:
 
       - name: Rollback on canary failure
         id: rollback
-        if: (${{ inputs.rollback-enabled && steps.canary.outcome != 'success' }}) && (${{ steps.canary.outcome != 'success' }})
+        if: ${{ inputs.rollback-enabled && steps.canary.outcome != 'success' }}
         run: bash ${{ inputs.rollback-script }} ${{ inputs.service-name }}
 
       - name: Report canary failure
+        if: ${{ steps.canary.outcome != 'success' }}
         run: |
           echo "Canary checks failed for ${{ inputs.service-name }}." >&2
           exit 1

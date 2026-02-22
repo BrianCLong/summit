@@ -13,7 +13,7 @@ import {
   createCopilotService,
   type CopilotConfig,
   type RequestContext,
-} from '../copilot.service.js';
+} from '../copilot.service.ts';
 import {
   type NLQueryRequest,
   type GraphRAGRequest,
@@ -21,7 +21,7 @@ import {
   isAnswer,
   isRefusal,
   isPreview,
-} from '../types.js';
+} from '../types.ts';
 
 /**
  * Mock Neo4j driver

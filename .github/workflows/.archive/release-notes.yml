@@ -311,7 +311,7 @@ jobs:
           path: RELEASE_NOTES.md
 
       - name: Update or create GitHub release
-        if: (github.ref_type == 'tag') && (github.event_name == 'push' && github.ref == 'refs/heads/main')
+        if: github.ref_type == 'tag'
         uses: actions/github-script@v7
         with:
           script: |
@@ -356,6 +356,7 @@ jobs:
             }
 
       - name: Post release notes to PR (if triggered by PR merge)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/github-script@v7
         with:
           script: |

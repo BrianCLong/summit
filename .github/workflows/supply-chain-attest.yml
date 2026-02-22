@@ -27,6 +27,8 @@ jobs:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Setup Node (if needed)
         uses: actions/setup-node@v4

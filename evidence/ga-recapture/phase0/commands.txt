@@ -1,8 +1,0 @@
-git status -sb
-git rev-parse HEAD
-node -v || true
-pnpm -v || true
-python --version || true
-docker --version || true
-rg -n "ga|preflight|release" Makefile
-ls .github/workflows | wc -l

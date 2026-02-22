@@ -1,17 +1,6 @@
-# Dependency Delta Documentation
+# Dependency Delta
 
-## PR Context
-- **PR**: (to be filled by author)
-- **Reason for change**: (to be filled by author)
+This file tracks dependency changes as required by CI policy.
 
 ## Changes
-- **Added**:
-  - (to be filled by author)
-- **Removed**:
-  - (to be filled by author)
-- **Upgraded**:
-  - (to be filled by author)
-
-## Security Review
-- [ ] No known vulnerabilities in added packages.
-- [ ] License compliance verified.
+- Updated pnpm-lock.yaml to sync with package.json

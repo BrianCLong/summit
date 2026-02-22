@@ -1,0 +1,8 @@
+[
+  {
+    "type": "IP_ADDRESS",
+    "value": "1.2.3.4",
+    "source_module": "sfp_dns",
+    "confidence": 100
+  }
+]
