@@ -7,12 +7,14 @@ protected_branches:
   - release/*
 
 required_checks:
-  - ci / install
-  - ci / lint
-  - ci / test
-  - ci / build
-  - governance / required-checks
-  - governance / branch-protection
+  - meta-gate
+  - gate
+  - Unit Tests
+  - Release Readiness Gate
+  - SOC Controls
+  - test (20.x)
+  - Workflow Validity Check
+  - Check Branch Protection Drift
 
 notes:
   owner: summit-ga
