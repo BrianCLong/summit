@@ -120,7 +120,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const envelope = await roleService.getRole(
         principal.tenantId,
@@ -195,7 +195,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       // Validate input
       const parseResult = updateRoleSchema.safeParse(req.body);
@@ -239,7 +239,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const envelope = await roleService.deleteRole(
         principal.tenantId,
@@ -303,7 +303,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { userId } = req.params;
+      const userId = req.params.userId as string;
 
       const envelope = await roleService.getUserRoles(
         principal.tenantId,

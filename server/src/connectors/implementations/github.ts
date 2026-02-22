@@ -69,4 +69,8 @@ export class GitHubConnector extends BaseConnector {
       });
       return stream;
   }
+
+  async writeRecords(_records: any[]): Promise<void> {
+    throw new Error('GitHubConnector is read-only and does not support write operations');
+  }
 }

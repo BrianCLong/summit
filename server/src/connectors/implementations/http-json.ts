@@ -130,4 +130,8 @@ export class HTTPJSONConnector extends BaseConnector {
 
     return stream;
   }
+
+  async writeRecords(_records: any[]): Promise<void> {
+    throw new Error('HTTPJSONConnector is read-only and does not support write operations');
+  }
 }

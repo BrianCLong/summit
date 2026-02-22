@@ -917,7 +917,7 @@ export class DataResidencyService {
     if (result.rows.length === 0) return null;
 
     // Prioritize regional match if multiple found
-    const row = result.rows.find(r => r.region === region) || result.rows[0];
+    const row = result.rows.find((r: Record<string, any>) => r.region === region) || result.rows[0];
     return {
       provider: row.provider,
       keyId: row.key_id,

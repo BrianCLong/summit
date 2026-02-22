@@ -63,7 +63,7 @@ export class OpaController {
 
   static async getPolicyContent(req: Request, res: Response) {
     try {
-      const { filename } = req.params;
+      const filename = req.params.filename as string;
       if (!filename || !filename.endsWith('.rego')) {
         return res.status(400).json({ error: 'Invalid filename' });
       }

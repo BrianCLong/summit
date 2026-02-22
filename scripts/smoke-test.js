@@ -26,6 +26,8 @@ const defaultDataset = path.join(
   'golden-path',
   'demo-investigation.json',
 );
+// BB-004: Make timeout configurable, default 60s for slower CI machines
+const defaultTimeout = parseInt(process.env.SMOKE_TIMEOUT, 10) || 60000;
 const config = {
   apiBaseUrl: defaultApiBase,
   apiUrl: process.env.VITE_API_URL || `${defaultApiBase}/graphql`,
@@ -33,12 +35,13 @@ const config = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   neo4jUrl: process.env.NEO4J_URL || 'http://localhost:7474',
   metricsUrl: process.env.METRICS_URL || `${defaultApiBase}/metrics`,
-  timeout: 30000,
+  timeout: defaultTimeout,
   maxRetries: 3,
   retryDelay: 2000,
   datasetPath: path.resolve(
     process.env.GOLDEN_PATH_DATASET || defaultDataset,
   ),
+  healthCheckResultsPath: path.join(repoRoot, 'health-check-results.json'),
 };
 
 // GraphQL queries and mutations
@@ -564,6 +567,41 @@ class SmokeTest {
       `\nSuccess Rate: ${successRate}%`,
       successRate === '100.0' ? 'success' : 'warning',
     );
+
+    // BB-005: Write health check results to file for debugging
+    const healthCheckResults = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      config: {
+        apiUrl: config.apiUrl,
+        frontendUrl: config.frontendUrl,
+        neo4jUrl: config.neo4jUrl,
+        timeout: config.timeout,
+      },
+      summary: {
+        total: this.results.total,
+        passed: this.results.passed,
+        failed: this.results.failed,
+        successRate: parseFloat(successRate),
+      },
+      tests: this.results.details,
+    };
+
+    try {
+      fs.writeFileSync(
+        config.healthCheckResultsPath,
+        JSON.stringify(healthCheckResults, null, 2),
+      );
+      await this.log(
+        `Health check results written to: ${config.healthCheckResultsPath}`,
+        'info',
+      );
+    } catch (err) {
+      await this.log(
+        `Failed to write health check results: ${err.message}`,
+        'warning',
+      );
+    }
 
     if (this.results.failed === 0) {
       await this.log(
