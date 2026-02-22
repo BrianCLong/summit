@@ -4,7 +4,7 @@ on: [pull_request, push]
 
 jobs:
   validate:
-    if: ${{ false }}
+    if: ((((${{ false }}) && (steps.changes.outputs.catalog != 'true')) && (steps.changes.outputs.catalog == 'true')) && (steps.changes.outputs.catalog == 'true')) && (steps.changes.outputs.catalog == 'true')
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -21,15 +21,12 @@ jobs:
             catalog:
               - 'model-catalog/**'
       - name: No catalog changes, skipping
-        if: steps.changes.outputs.catalog != 'true'
         run: echo "No model catalog changes; skipping"
       - uses: actions/setup-node@v4
-        if: steps.changes.outputs.catalog == 'true'
         with:
           cache: 'pnpm'
           node-version: '20'
       - name: Install validators
-        if: steps.changes.outputs.catalog == 'true'
         continue-on-error: true
         run: npm i -g ajv-cli@5 && npm i yaml@2
       - name: Validate schema
@@ -38,7 +35,6 @@ jobs:
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/cataloga?.yaml --errors=text || \
           ajv validate -s model-catalog/schemas/model.schema.json -d model-catalog/catalog.yaml
       - name: Render Markdown
-        if: steps.changes.outputs.catalog == 'true'
         run: |
           node -e '
           const fs=require("fs");
