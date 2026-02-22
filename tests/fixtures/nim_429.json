@@ -1,0 +1,8 @@
+{
+  "error": {
+    "message": "Too Many Requests",
+    "type": "server_error",
+    "param": null,
+    "code": "429"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "version": "2",
+  "nodes": [
+    {
+      "id": "state-1",
+      "type": "narrative_state",
+      "attrs": {"title": "Seed"},
+      "lifecycle": "seeding",
+      "classification": "internal"
+    },
+    {
+      "id": "actor-1",
+      "type": "actor",
+      "attrs": {"name": "Analyst"},
+      "lifecycle": "propagation",
+      "classification": "internal"
+    },
+    {
+      "id": "channel-1",
+      "type": "channel",
+      "attrs": {"name": "Internal"},
+      "lifecycle": "peak",
+      "classification": "public"
+    }
+  ],
+  "edges": [
+    {
+      "src": "state-1",
+      "dst": "actor-1",
+      "type": "mentions",
+      "attrs": {"weight": 0.5}
+    },
+    {
+      "src": "actor-1",
+      "dst": "channel-1",
+      "type": "propagates_via",
+      "attrs": {"confidence": 0.8}
+    }
+  ]
+}

@@ -19,7 +19,7 @@ chrono = { version = "0.4", features = ["serde"] }
 prometheus = "0.13"
 anyhow = "1.0"
 rand = "0.8"
-bytes = "1.11"
+bytes = "1.0"
 lru = "0.16"
 jsonschema = "0.17"
 sysinfo = "0.30"
