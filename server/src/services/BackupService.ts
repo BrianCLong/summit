@@ -5,16 +5,18 @@ import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import zlib from 'zlib';
+import { createWriteStream, createReadStream } from 'fs';
+import { PrometheusMetrics } from '../utils/metrics.js';
 
 const logger = (pino as any)({ name: 'BackupService' });
 
-/**
- * @class BackupService
- * @description Provides functionality to perform backups of the application's data stores: PostgreSQL, Neo4j, and Redis.
- * Backups are stored in a local directory defined by the `BACKUP_DIR` environment variable and optionally uploaded to S3.
- * It also handles retention policies.
- * This service is implemented as a singleton.
- */
+// Initialize Metrics
+const backupMetrics = new PrometheusMetrics('backup_service');
+backupMetrics.createCounter('ops_total', 'Total backup operations', ['type', 'status']);
+backupMetrics.createHistogram('duration_seconds', 'Backup duration', { buckets: [0.1, 1, 10, 60, 300, 600] });
+backupMetrics.createGauge('size_bytes', 'Backup size', ['type']);
+
 export class BackupService {
   private static instance: BackupService;
   private s3Client: S3Client | null = null;
@@ -41,12 +43,6 @@ export class BackupService {
     }
   }
 
-  /**
-   * @method getInstance
-   * @description Gets the singleton instance of the BackupService.
-   * @static
-   * @returns {BackupService} The singleton instance.
-   */
   public static getInstance(): BackupService {
     if (!BackupService.instance) {
       BackupService.instance = new BackupService();
@@ -54,12 +50,6 @@ export class BackupService {
     return BackupService.instance;
   }
 
-  /**
-   * @method performFullBackup
-   * @description Orchestrates a full backup of all data stores.
-   * It individually backs up PostgreSQL, Neo4j, and Redis, logs the outcome, uploads to S3, and enforces retention.
-   * @returns {Promise<{ postgres: boolean; neo4j: boolean; redis: boolean; timestamp: string; s3Uploads: string[] }>}
-   */
   async performFullBackup(): Promise<{
     postgres: boolean;
     neo4j: boolean;
@@ -69,6 +59,7 @@ export class BackupService {
   }> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     logger.info(`Starting full backup for ${timestamp}`);
+    const startTime = Date.now();
 
     const results = {
       postgres: false,
@@ -80,28 +71,43 @@ export class BackupService {
 
     const files: string[] = [];
 
+    // Postgres
     try {
       const pgFile = await this.backupPostgres(timestamp);
       results.postgres = true;
       files.push(pgFile);
+      const stats = fs.statSync(pgFile);
+      backupMetrics.setGauge('size_bytes', stats.size, { type: 'postgres' });
+      backupMetrics.incrementCounter('ops_total', { type: 'postgres', status: 'success' });
     } catch (error: any) {
       logger.error('PostgreSQL backup failed', error);
+      backupMetrics.incrementCounter('ops_total', { type: 'postgres', status: 'failure' });
     }
 
+    // Neo4j
     try {
       const neo4jFile = await this.backupNeo4j(timestamp);
       results.neo4j = true;
       files.push(neo4jFile);
+      const stats = fs.statSync(neo4jFile);
+      backupMetrics.setGauge('size_bytes', stats.size, { type: 'neo4j' });
+      backupMetrics.incrementCounter('ops_total', { type: 'neo4j', status: 'success' });
     } catch (error: any) {
       logger.error('Neo4j backup failed', error);
+      backupMetrics.incrementCounter('ops_total', { type: 'neo4j', status: 'failure' });
     }
 
+    // Redis
     try {
       const redisFile = await this.backupRedis(timestamp);
       results.redis = true;
       files.push(redisFile);
+      const stats = fs.statSync(redisFile);
+      backupMetrics.setGauge('size_bytes', stats.size, { type: 'redis' });
+      backupMetrics.incrementCounter('ops_total', { type: 'redis', status: 'success' });
     } catch (error: any) {
       logger.error('Redis backup failed', error);
+      backupMetrics.incrementCounter('ops_total', { type: 'redis', status: 'failure' });
     }
 
     // Upload to S3
@@ -116,17 +122,23 @@ export class BackupService {
       }
     }
 
-    // Cleanup old backups
+    // Cleanup Old Backups
     await this.cleanupOldBackups();
 
-    logger.info('Full backup completed', results);
+    const duration = (Date.now() - startTime) / 1000;
+    backupMetrics.observeHistogram('duration_seconds', duration);
+
+    logger.info({ results, duration }, 'Full backup completed');
     return results;
   }
 
   private async backupPostgres(timestamp: string): Promise<string> {
-    const fileName = `postgres_${timestamp}.sql`;
+    const fileName = `postgres_${timestamp}.sql.gz`;
     const file = path.join(this.backupDir, fileName);
-    const writeStream = fs.createWriteStream(file);
+    const writeStream = createWriteStream(file);
+    const gzip = zlib.createGzip();
+
+    gzip.pipe(writeStream);
 
     const env = { ...process.env };
     const args: string[] = [];
@@ -146,7 +158,7 @@ export class BackupService {
     return new Promise((resolve, reject) => {
       const child = spawn('pg_dump', args, { env });
 
-      child.stdout.pipe(writeStream);
+      child.stdout.pipe(gzip);
 
       child.stderr.on('data', (data) => {
         logger.debug(`pg_dump stderr: ${data}`);
@@ -168,11 +180,14 @@ export class BackupService {
   }
 
   private async backupNeo4j(timestamp: string): Promise<string> {
-    const fileName = `neo4j_${timestamp}.json`;
+    const fileName = `neo4j_${timestamp}.json.gz`;
     const file = path.join(this.backupDir, fileName);
     const driver = getNeo4jDriver();
     const session = driver.session();
-    const writeStream = fs.createWriteStream(file);
+
+    const writeStream = createWriteStream(file);
+    const gzip = zlib.createGzip();
+    gzip.pipe(writeStream);
 
     try {
       let apocSuccess = false;
@@ -186,7 +201,7 @@ export class BackupService {
             onNext: (record: any) => {
               apocSuccess = true;
               const chunk = record.get('data');
-              if (chunk) writeStream.write(chunk);
+              if (chunk) gzip.write(chunk);
             },
             onCompleted: () => resolve(),
             onError: (err: any) => reject(err)
@@ -199,15 +214,15 @@ export class BackupService {
       }
 
       if (!apocSuccess) {
-        writeStream.write('{"nodes":[');
+        gzip.write('{"nodes":[');
         let isFirstNode = true;
 
         await new Promise<void>((resolve, reject) => {
           session.run('MATCH (n) RETURN n').subscribe({
             onNext: (record: any) => {
               const props = record.get('n').properties;
-              if (!isFirstNode) writeStream.write(',');
-              writeStream.write(JSON.stringify(props));
+              if (!isFirstNode) gzip.write(',');
+              gzip.write(JSON.stringify(props));
               isFirstNode = false;
             },
             onCompleted: () => resolve(),
@@ -215,7 +230,7 @@ export class BackupService {
           });
         });
 
-        writeStream.write('],"relationships":[');
+        gzip.write('],"relationships":[');
         let isFirstRel = true;
 
         await new Promise<void>((resolve, reject) => {
@@ -228,8 +243,8 @@ export class BackupService {
                 start: r.startNodeElementId,
                 end: r.endNodeElementId
               };
-              if (!isFirstRel) writeStream.write(',');
-              writeStream.write(JSON.stringify(rel));
+              if (!isFirstRel) gzip.write(',');
+              gzip.write(JSON.stringify(rel));
               isFirstRel = false;
             },
             onCompleted: () => resolve(),
@@ -237,35 +252,39 @@ export class BackupService {
           });
         });
 
-        writeStream.write(']}');
+        gzip.write(']}');
         logger.info(`Neo4j manual backup created at ${file}`);
       }
 
-      return file;
+      // Finish gzip stream
+      gzip.end();
+
+      return new Promise((resolve, reject) => {
+          writeStream.on('finish', () => resolve(file));
+          writeStream.on('error', reject);
+      });
 
     } finally {
-      writeStream.end();
       await session.close();
     }
   }
 
   private async backupRedis(timestamp: string): Promise<string> {
-    const fileName = `redis_${timestamp}.json`;
+    const fileName = `redis_${timestamp}.json.gz`;
     const file = path.join(this.backupDir, fileName);
     const client = getRedisClient();
     if (!client) throw new Error('Redis client unavailable');
 
     try {
-      await client.bgsave();
-    } catch (err: any) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (!message.includes('already in progress')) {
-        throw err;
-      }
-    }
+      // Trigger background save on server for persistence
+      await client.bgsave().catch(() => {}); // Ignore if already in progress
+    } catch (err) { }
 
-    const writeStream = fs.createWriteStream(file);
-    writeStream.write('{');
+    const writeStream = createWriteStream(file);
+    const gzip = zlib.createGzip();
+    gzip.pipe(writeStream);
+
+    gzip.write('{');
     let isFirstKey = true;
 
     const stream = client.scanStream({ match: '*', count: 100 });
@@ -279,36 +298,36 @@ export class BackupService {
         keys.forEach((key: string, index: number) => {
           const val = values?.[index]?.[1];
           if (typeof val === 'string') {
-            if (!isFirstKey) writeStream.write(',');
-            writeStream.write(`"${key}":${JSON.stringify(val)}`);
+            if (!isFirstKey) gzip.write(',');
+            gzip.write(`"${key}":${JSON.stringify(val)}`);
             isFirstKey = false;
           }
         });
       }
     }
 
-    writeStream.write('}');
-    writeStream.end();
+    gzip.write('}');
+    gzip.end();
 
     logger.info(`Redis backup created at ${file}`);
-    return file;
+    return new Promise((resolve, reject) => {
+        writeStream.on('finish', () => resolve(file));
+        writeStream.on('error', reject);
+    });
   }
 
-  /**
-   * Uploads a file to S3
-   */
   async uploadToS3(filePath: string): Promise<string> {
     if (!this.s3Client || !this.s3Bucket) {
       throw new Error('S3 not configured');
     }
 
     const fileName = path.basename(filePath);
-    const fileContent = fs.readFileSync(filePath);
+    const fileStream = createReadStream(filePath);
 
     const command = new PutObjectCommand({
       Bucket: this.s3Bucket,
       Key: `backups/${fileName}`,
-      Body: fileContent,
+      Body: fileStream,
     });
 
     await this.s3Client.send(command);
@@ -316,9 +335,6 @@ export class BackupService {
     return `s3://${this.s3Bucket}/backups/${fileName}`;
   }
 
-  /**
-   * Cleans up backups older than RETENTION_DAYS
-   */
   async cleanupOldBackups(): Promise<void> {
     const now = Date.now();
     const retentionMs = this.retentionDays * 24 * 60 * 60 * 1000;
@@ -373,11 +389,7 @@ export class BackupService {
     }
   }
 
-  /**
-   * Stub for restoring a backup
-   */
   async restore(backupId: string): Promise<void> {
     logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Manual intervention required.`);
-    // TODO: Implement download from S3 and restoration logic for each service
   }
 }

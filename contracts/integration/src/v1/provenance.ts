@@ -9,7 +9,7 @@ import { z } from 'zod'
 /**
  * Source types for data ingestion
  */
-export const SourceTypeV1 = z.enum([
+const SourceTypeV1Schema = z.enum([
   'csv',
   'http',
   'stix',
@@ -22,25 +22,27 @@ export const SourceTypeV1 = z.enum([
   'webhook',
 ])
 
-export type SourceTypeV1 = z.infer<typeof SourceTypeV1>
+export const SourceTypeV1 = SourceTypeV1Schema
+export type SourceTypeV1 = z.infer<typeof SourceTypeV1Schema>
 
 /**
  * Source metadata for provenance tracking
  */
-export const SourceMetadataV1 = z.object({
+const SourceMetadataV1Schema = z.object({
   id: z.string().min(1).describe('Unique identifier for the data source'),
   name: z.string().min(1).describe('Human-readable source name'),
-  type: SourceTypeV1.describe('Type of data source'),
+  type: SourceTypeV1Schema.describe('Type of data source'),
   url: z.string().url().optional().describe('Source URL if applicable'),
   version: z.string().optional().describe('Source data version or API version'),
 })
 
-export type SourceMetadataV1 = z.infer<typeof SourceMetadataV1>
+export const SourceMetadataV1 = SourceMetadataV1Schema
+export type SourceMetadataV1 = z.infer<typeof SourceMetadataV1Schema>
 
 /**
  * Provenance record for data lineage tracking
  */
-export const ProvenanceV1 = z.object({
+const ProvenanceV1Schema = z.object({
   ingestedAt: z.string().datetime().describe('ISO 8601 timestamp of ingestion'),
   ingestedBy: z.string().optional().describe('User or service that ingested the data'),
   confidence: z
@@ -52,12 +54,13 @@ export const ProvenanceV1 = z.object({
   batchId: z.string().optional().describe('Batch identifier for bulk ingestion'),
 })
 
-export type ProvenanceV1 = z.infer<typeof ProvenanceV1>
+export const ProvenanceV1 = ProvenanceV1Schema
+export type ProvenanceV1 = z.infer<typeof ProvenanceV1Schema>
 
 /**
  * Entity metadata for tracking lifecycle
  */
-export const EntityMetadataV1 = z.object({
+const EntityMetadataV1Schema = z.object({
   createdAt: z.string().datetime().describe('ISO 8601 timestamp of creation'),
   updatedAt: z.string().datetime().describe('ISO 8601 timestamp of last update'),
   source: z.string().min(1).describe('Source identifier'),
@@ -70,12 +73,13 @@ export const EntityMetadataV1 = z.object({
   tags: z.array(z.string()).optional().describe('User-defined tags for categorization'),
 })
 
-export type EntityMetadataV1 = z.infer<typeof EntityMetadataV1>
+export const EntityMetadataV1 = EntityMetadataV1Schema
+export type EntityMetadataV1 = z.infer<typeof EntityMetadataV1Schema>
 
 /**
  * Edge metadata for relationship tracking
  */
-export const EdgeMetadataV1 = z.object({
+const EdgeMetadataV1Schema = z.object({
   createdAt: z.string().datetime().describe('ISO 8601 timestamp of creation'),
   source: z.string().min(1).describe('Source identifier'),
   confidence: z
@@ -86,4 +90,5 @@ export const EdgeMetadataV1 = z.object({
   weight: z.number().min(0).max(1).optional().describe('Relationship strength (0.0-1.0)'),
 })
 
-export type EdgeMetadataV1 = z.infer<typeof EdgeMetadataV1>
+export const EdgeMetadataV1 = EdgeMetadataV1Schema
+export type EdgeMetadataV1 = z.infer<typeof EdgeMetadataV1Schema>
