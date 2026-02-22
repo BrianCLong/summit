@@ -76,6 +76,33 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: influence-ops-suite-docs
+    version: v1
+    path: prompts/docs/influence-ops-suite-docs@v1.md
+    sha256: 6854419a0bd51077b05311129becf7f3727a2c2dd2287c2d07317d31c3053b69
+    description: Publish Influence Ops Suite documentation and roadmap status updates.
+    scope:
+      paths:
+        - docs/influence_ops/
+        - docs/strategy/forward_generalization.md
+        - docs/security/threat_model_influence_ops.md
+        - docs/ops/runbooks/influence_ops_jobs.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/influence-ops-suite-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - influence-ops
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md
