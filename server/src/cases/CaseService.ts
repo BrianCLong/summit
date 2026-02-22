@@ -11,6 +11,7 @@ import {
   AuditAccessLogInput,
 } from '../repos/AuditAccessLogRepo.js';
 import { ReleaseCriteriaService } from './ReleaseCriteriaService.js';
+import { CaseSLAService } from './sla/CaseSLAService.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../config/logger.js';
 import { UserFacingError } from '../lib/errors.js';
@@ -21,6 +22,7 @@ export class CaseService {
   private caseRepo: CaseRepo;
   private auditRepo: AuditAccessLogRepo;
   private releaseCriteriaService: ReleaseCriteriaService;
+  private slaService: CaseSLAService;
   private pg: Pool;
 
   constructor(pg: Pool) {
@@ -28,6 +30,7 @@ export class CaseService {
     this.caseRepo = new CaseRepo(pg);
     this.auditRepo = new AuditAccessLogRepo(pg);
     this.releaseCriteriaService = new ReleaseCriteriaService(pg);
+    this.slaService = new CaseSLAService(pg);
   }
 
   /**
@@ -39,6 +42,20 @@ export class CaseService {
     auditContext?: Partial<AuditAccessLogInput>,
   ): Promise<Case> {
     const caseRecord = await this.caseRepo.create(input, userId);
+
+    // Auto-create initial SLA if configured
+    try {
+      await this.slaService.createTimer({
+        caseId: caseRecord.id,
+        tenantId: input.tenantId,
+        type: 'RESOLUTION_TIME',
+        name: 'Standard Resolution SLA',
+        targetDurationSeconds: 7 * 24 * 60 * 60, // 7 days default
+        metadata: { created_by: userId }
+      });
+    } catch (e) {
+      serviceLogger.error({ err: e, caseId: caseRecord.id }, 'Failed to create initial SLA timer');
+    }
 
     // Log the creation in audit trail
     await this.auditRepo.logAccess({

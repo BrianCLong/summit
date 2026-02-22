@@ -11,6 +11,10 @@ on:
       - 'src/evals/memalign/**'
       - 'src/cli/judge_align.ts'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test-and-bench:
     runs-on: ubuntu-latest

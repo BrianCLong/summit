@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '0 2 * * *' # Nightly at 2 AM
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   guardrail:
     runs-on: ubuntu-22.04

@@ -27,6 +27,7 @@ const require = createRequire(import.meta.url);
 import logger from '../config/logger.js';
 import { getPostgresPool } from '../config/database.js';
 import { redactData } from '../utils/dataRedaction.js';
+import { quantumIdentityManager } from '../security/quantum-identity-manager.js';
 
 const log = logger.child({ name: 'DeterministicExportService' });
 
@@ -62,6 +63,8 @@ export interface ExportManifest {
     verifiedAt?: string;
     verificationErrors: string[];
   };
+  pqcSignature?: string; // Task #114: Quantum-Resistant Signature
+  pqcServiceId?: string;
 }
 
 export interface ExportFileEntry {
@@ -600,6 +603,16 @@ export class DeterministicExportService {
     delete (manifestForHash.integrity as any).bundleHash;
 
     manifest.integrity.manifestHash = this.calculateObjectHash(manifestForHash);
+
+    // Task #114: Attach PQC Signature
+    const serviceId = process.env.SERVICE_ID || 'summit-api-export';
+    
+    // We sign a string containing BOTH the serviceId and the manifestHash for stability
+    const signedPayload = `service=${serviceId};hash=${manifest.integrity.manifestHash}`;
+    const identity = quantumIdentityManager.issueIdentity(signedPayload);
+    
+    manifest.pqcServiceId = serviceId;
+    manifest.pqcSignature = identity.signature;
 
     return manifest;
   }

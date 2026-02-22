@@ -8,6 +8,10 @@ on:
   check_suite:
     types: [completed]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   pull-requests: write
   contents: read

@@ -1,0 +1,43 @@
+version: 1
+nodes:
+  Artifact:
+    key: artifact_id
+    props: [artifact_id, kind, uri, content_sha256, published_at, lang, outlet_tier]
+  Actor:
+    key: actor_id
+    props: [actor_id, kind, handle, org, credibility_tier]
+  Community:
+    key: community_id
+    props: [community_id, method, cohesion, size_est]
+  Event:
+    key: event_id
+    props: [event_id, kind, occurred_at, external_ref]
+  Narrative:
+    key: narrative_id
+    props: [narrative_id, title, state, created_run_id]
+  Frame:
+    key: frame_id
+    props: [frame_id, label, stance, blame_target]
+  Claim:
+    key: claim_id
+    props: [claim_id, text_norm, verifiability, confidence]
+  Assumption:
+    key: assumption_id
+    props: [assumption_id, text_norm, stability, confidence]
+  Handoff:
+    key: handoff_id
+    props: [handoff_id, from_tier, to_tier, score, triggered_run_id]
+
+edges:
+  PUBLISHED: { from: Actor, to: Artifact, props: [published_at] }
+  AMPLIFIED: { from: Community, to: Artifact, props: [weight] }
+  MAKES: { from: Artifact, to: Claim, props: [extract_confidence] }
+  EXPRESSES: { from: Artifact, to: Frame, props: [extract_confidence] }
+  SUPPORTED_BY: { from: Frame, to: Assumption, props: [support_weight] }
+  COMPOSED_OF: { from: Narrative, to: Frame, props: [weight] }
+  TRIGGERED_BY: { from: Narrative, to: Event, props: [weight] }
+  HANDOFF_TO: { from: Narrative, to: Handoff, props: [] }
+  DISPUTED_BY: { from: Claim, to: Claim, props: [stance] }
+  BROKEN_BY: { from: Assumption, to: Claim, props: [mode] }
+provenance:
+  receipt_node: ProvenanceReceipt

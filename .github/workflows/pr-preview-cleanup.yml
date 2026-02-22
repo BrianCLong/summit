@@ -28,7 +28,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 
       - name: Remove PR comment
-        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    if: false && (github.event_name == 'pull_request' && github.event.action == 'closed')
         run: |
           COMMENTS=$(curl -s -X GET \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \

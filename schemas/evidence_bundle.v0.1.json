@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://switchboard.dev/schemas/evidence_bundle.v0.1.json",
+  "title": "Switchboard Evidence Bundle Manifest v0.1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "exported_at",
+    "exporter",
+    "contents"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "switchboard.evidence_bundle.v0.1"
+    },
+    "bundle_id": {
+      "type": "string",
+      "description": "Unique ID for this export bundle"
+    },
+    "exported_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "exporter": {
+      "type": "object",
+      "required": ["user_id", "tenant_id"],
+      "properties": {
+        "user_id": { "type": "string" },
+        "tenant_id": { "type": "string" }
+      }
+    },
+    "contents": {
+      "type": "object",
+      "required": ["receipts", "skills", "policies", "artifacts"],
+      "properties": {
+        "receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["receipt_id", "path", "hash"],
+            "properties": {
+              "receipt_id": { "type": "string" },
+              "path": { "type": "string", "description": "Path relative to bundle root" },
+              "hash": { "type": "string" }
+            }
+          }
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["skill_id", "version", "path", "bundle_digest"],
+            "properties": {
+              "skill_id": { "type": "string" },
+              "version": { "type": "string" },
+              "path": { "type": "string" },
+              "bundle_digest": { "type": "string" }
+            }
+          }
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["policy_version", "path", "hash"],
+            "properties": {
+              "policy_version": { "type": "string" },
+              "path": { "type": "string" },
+              "hash": { "type": "string" }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["artifact_id", "path", "hash"],
+            "properties": {
+              "artifact_id": { "type": "string" },
+              "path": { "type": "string" },
+              "hash": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "signer": { "type": "string" },
+          "sig": { "type": "string" }
+        }
+      }
+    }
+  }
+}

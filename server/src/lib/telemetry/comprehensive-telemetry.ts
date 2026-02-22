@@ -105,7 +105,7 @@ class ComprehensiveTelemetry {
         errors: {
           add: (value: number = 1) => {
             if (metrics.applicationErrors) {
-              metrics.applicationErrors.labels('api', 'error', 'error').inc(value);
+              metrics.applicationErrors.labels('api', 'error', 'high', 'general').inc(value);
             }
           }
         }
@@ -143,7 +143,7 @@ class ComprehensiveTelemetry {
     const legacyLabels = {
       method: String(attributes.method || 'GET'),
       route: String(attributes.route || 'unknown'),
-      status: String(attributes.status || 200),
+      status_code: String(attributes.status || 200),
     };
     metrics.httpRequestDuration.observe(legacyLabels, duration);
   }

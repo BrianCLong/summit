@@ -5,6 +5,10 @@ on:
     paths:
       - "**.md"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   markdown-lint:
     name: Markdown Linter

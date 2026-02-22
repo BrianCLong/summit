@@ -59,6 +59,17 @@ export const ConfigSchema = (z as any).object({
     origin: (z as any).string().default('http://localhost:3000'),
   }).default({}),
 
+  cache: (z as any).object({
+    staleWhileRevalidateSeconds: (z as any).coerce.number().default(300),
+  }).default({}),
+
+  cdn: (z as any).object({
+    enabled: (z as any).coerce.boolean().default(false),
+    browserTtlSeconds: (z as any).coerce.number().default(60),
+    edgeTtlSeconds: (z as any).coerce.number().default(300),
+    surrogateKeyNamespace: (z as any).string().default('summit'),
+  }).default({}),
+
   features: (z as any).object({
     GRAPH_EXPAND_CACHE: (z as any).coerce.boolean().default(true),
     AI_REQUEST_ENABLED: (z as any).coerce.boolean().default(true),
