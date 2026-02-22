@@ -94,7 +94,7 @@ jobs:
           printf 'Discovered %s chart(s)\n' "${#charts[@]}"
 
       - name: Helm lint
-        if: steps.chart-list.outputs.count != '0'
+        if: ((steps.chart-list.outputs.count != '0') && (steps.chart-list.outputs.count != '0')) && (github.event_name == 'workflow_dispatch' && inputs.run_kind_smoke)
         run: |
           set -euo pipefail
           echo "${{ steps.chart-list.outputs.paths }}" | while read -r chart; do
@@ -107,7 +107,6 @@ jobs:
           done
 
       - name: Template & validate manifests
-        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
           echo "${{ steps.chart-list.outputs.paths }}" | while read -r chart; do
@@ -123,7 +122,6 @@ jobs:
   kind-smoke:
     runs-on: ubuntu-latest
     needs: lint-and-validate
-    if: github.event_name == 'workflow_dispatch' && inputs.run_kind_smoke
     steps:
       - name: Checkout
         uses: actions/checkout@v4
