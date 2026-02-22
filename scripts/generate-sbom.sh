@@ -36,16 +36,15 @@ if [ -f "Dockerfile" ] || [ -f "Dockerfile.*" ]; then
         echo "  - Processing $service_name from $dockerfile..."
         
         # Generate CycloneDX format (Targeting $CYCLONEDX_VERSION)
-        # Note: syft uses -o cyclonedx-json. Explicit versioning might require additional flags or tool-specific config.
-        syft packages dir:. -o "cyclonedx-json@$CYCLONEDX_VERSION" --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json" 2>/dev/null || \
-        syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
+        syft scan dir:. --output "cyclonedx-json@$CYCLONEDX_VERSION=$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json" 2>/dev/null || \
+        syft scan dir:. --output "cyclonedx-json=$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
         
         # Generate SPDX format (Targeting $SPDX_VERSION)
-        syft packages dir:. -o "spdx-json@$SPDX_VERSION" --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json" 2>/dev/null || \
-        syft packages dir:. -o spdx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
+        syft scan dir:. --output "spdx-json@$SPDX_VERSION=$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json" 2>/dev/null || \
+        syft scan dir:. --output "spdx-json=$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
         
         # Generate syft table format for human consumption
-        syft packages dir:. -o table --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.syft.txt"
+        syft scan dir:. --output "table=$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.syft.txt"
       fi
     done
   else
@@ -68,7 +67,7 @@ if [ -f "package.json" ]; then
   
   # Alternative: Use syft for npm
   if command -v syft &> /dev/null; then
-    syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-npm-${VERSION}-alt.cdx.json"
+    syft scan dir:. --output "cyclonedx-json=$OUTPUT_DIR/${ARTIFACT_NAME}-npm-${VERSION}-alt.cdx.json"
   fi
 fi
 
@@ -77,7 +76,7 @@ if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
   echo "🐍 Generating SBOM for Python packages..."
   
   if command -v syft &> /dev/null; then
-    syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-python-${VERSION}.cdx.json"
+    syft scan dir:. --output "cyclonedx-json=$OUTPUT_DIR/${ARTIFACT_NAME}-python-${VERSION}.cdx.json"
   fi
   
   # If cdx-vex-gen is available, enhance with vulnerability info
@@ -91,11 +90,12 @@ if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
   echo "☕ Generating SBOM for Java packages..."
   
   if command -v syft &> /dev/null; then
-    syft packages dir:. -o cyclonedx-json --file "$OUTPUT_DIR/${ARTIFACT_NAME}-java-${VERSION}.cdx.json"
+    syft scan dir:. --output "cyclonedx-json=$OUTPUT_DIR/${ARTIFACT_NAME}-java-${VERSION}.cdx.json"
   fi
 fi
 
 # Create summary file
+mkdir -p "$(dirname "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json")"
 cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
 {
   "artifactName": "$ARTIFACT_NAME",

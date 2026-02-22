@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Temporal GraphRAG**: Integrated TG-RAG into IntelGraph for time-sensitive knowledge retrieval.
+  - Implemented dynamic subgraph retrieval with time-aware scoring.
+  - Added deterministic personalized PageRank (PPR) for relation salience.
+  - Introduced rule-first time scope resolution (Tq) to mitigate prompt injection.
+  - Registered `temporal_graphrag_local` retrieval mode.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

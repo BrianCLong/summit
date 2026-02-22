@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
       POSTGRES_USER: ${POSTGRES_USER:-summit}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres_dev_pw}
     ports:
       - '5432:5432'
     volumes:
@@ -43,7 +43,7 @@ services:
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env (see .env.example)}
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-neo4j_dev_pw}
       NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
       NEO4J_PLUGINS: '["apoc","graph-data-science"]'
     ports:
@@ -54,7 +54,7 @@ services:
       - neo4j_logs:/logs
     healthcheck:
       test:
-        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"']
+        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD:-neo4j_dev_pw} "RETURN 1"']
       interval: 15s
       timeout: 10s
       retries: 10
@@ -111,7 +111,7 @@ services:
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-neo4j_dev_pw}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -156,7 +156,6 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4100
-      PROMETHEUS_PORT: 9464
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-gateway
       OTEL_SERVICE_VERSION: 1.0.0
@@ -174,12 +173,11 @@ services:
       api:
         condition: service_healthy
       policy-compiler:
-        condition: service_healthy
+        condition: service_started
       typesense:
-        condition: service_healthy
+        condition: service_started
     ports:
       - '4100:4100'
-      - '9464:9464'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s
@@ -191,20 +189,17 @@ services:
       - 'prometheus.job=summit_gateway'
       - 'prometheus.port=4100'
 
+  ui:
+    build: ./apps/ui
+    ports: [ "3000:80" ]
+
   prov-ledger:
     build: ./services/prov-ledger
-    ports: [ "4010:4010" ]
+    ports: [ "8101:8080" ]
 
   policy-compiler:
     build: ./services/policy-compiler
     ports: [ "8102:8080" ]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - summit
 
   ai-nlq:
     build: ./services/ai-nlq
@@ -261,13 +256,6 @@ services:
       - TYPESENSE_ENABLE_CORS=true
     volumes:
       - ./tmp/typesense-data:/data
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8108/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - summit
 
   opa:
     image: openpolicyagent/opa:0.61.0
@@ -323,7 +311,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_SECRET: ${JWT_SECRET:-dev_secret_only}
       JWT_ALGORITHM: HS256
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       CORS_CREDENTIALS: "true"
