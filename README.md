@@ -17,6 +17,23 @@
 
 ## 🚀 Quickstart
 
+### ⏱ Getting started in 3 minutes
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run the local Switchboard demo (offline + deterministic)
+pnpm demo:switchboard
+
+# List and inspect the demo receipt
+ls .switchboard/demo/receipts
+cat .switchboard/demo/receipts/demo-receipt.json
+
+# Validate the demo registry directly
+pnpm exec tsx cli/src/cli.ts switchboard registry validate --registry fixtures/registry.demo.json
+```
+
 ### Prerequisites
 
 - Node.js 18+

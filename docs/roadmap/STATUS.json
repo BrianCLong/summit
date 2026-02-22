@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-11T09:45:00Z",
+  "revision_note": "Rebased: Daily sprint automation + GA feature discovery prompt expansion.",
   "initiatives": [
+    {
+      "id": "daily-sprint-automation-loop-2026-02-11",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Daily sprint loop now runs via `make daily-sprint`, validates via `make daily-sprint-validate`, and writes evidence-local markdown plus JSON bundle outputs."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -217,6 +223,18 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "ga-feature-discovery-prompt",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Expanded feature discovery GA prompt with full delivery package, PR requirements, and evidence-first strict output ordering; added roadmap prompt #00, CI evidence-mode runbook, and make-driven bundle scaffold/verify tooling."
+    },
+    {
+      "id": "roadmap-todo-standup-snapshot-2026-02-11",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published docs/roadmaps/summit-development-roadmap-todo-standup.md with Todo classification method, not-started inventory, transition criteria, and Today/Next/Blockers standup snapshot."
     }
   ],
   "summary": {

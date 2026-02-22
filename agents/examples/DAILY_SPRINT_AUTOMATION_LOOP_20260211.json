@@ -1,0 +1,52 @@
+{
+  "task_id": "DAILY_SPRINT_AUTOMATION_LOOP_20260211",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-automation-loop",
+    "version": "v1",
+    "sha256": "86fb5131bc27970a7d9d250a45ab113c937c3f40cd1b3ebf71b510ece3d0ffaa",
+    "path": "prompts/operations/daily-sprint-loop@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "scripts/ops/daily-sprint-loop.sh",
+      "docs/ops/DAILY_SPRINT_AUTOMATION.md",
+      "docs/ops/DAILY_SPRINT_",
+      "docs/ops/evidence/daily-sprint-",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/DAILY_SPRINT_AUTOMATION_LOOP_20260211.json",
+      "prompts/operations/daily-sprint-loop@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": [
+      "operations",
+      "governance",
+      "evidence",
+      "documentation"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "bash -n scripts/ops/daily-sprint-loop.sh",
+      "python3 -m json.tool docs/ops/evidence/daily-sprint-YYYY-MM-DD/report.json >/dev/null",
+      "python3 -m json.tool docs/ops/evidence/daily-sprint-YYYY-MM-DD/metrics.json >/dev/null",
+      "python3 -m json.tool docs/ops/evidence/daily-sprint-YYYY-MM-DD/stamp.json >/dev/null"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint report and evidence bundle are generated deterministically.",
+    "Runtime tooling failures are captured in .err artifacts without aborting the run.",
+    "Prompt registry hash and scope stay aligned to prompt contents and task outputs."
+  ],
+  "stop_conditions": [
+    "Prompt registry hash mismatch is detected for daily-sprint-automation-loop.",
+    "Evidence JSON files fail structural parse checks.",
+    "Scope expands beyond declared daily sprint automation paths."
+  ]
+}

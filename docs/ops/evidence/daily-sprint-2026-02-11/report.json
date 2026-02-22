@@ -1,0 +1,32 @@
+{
+  "schema_version": "daily-sprint-report.v1",
+  "report_date_utc": "2026-02-11",
+  "evidence_id": "daily-sprint-2026-02-11",
+  "evidence_dir": "docs/ops/evidence/daily-sprint-2026-02-11",
+  "inputs": {
+    "pr_list": "docs/ops/evidence/daily-sprint-2026-02-11/pr_list.txt",
+    "issue_list": "docs/ops/evidence/daily-sprint-2026-02-11/issue_list.txt"
+  },
+  "tool_runs": [
+    {
+      "tool": "gh_pr_list",
+      "status": "success",
+      "exit_code": 0,
+      "error": "",
+      "output_file": "docs/ops/evidence/daily-sprint-2026-02-11/pr_list.txt"
+    },
+    {
+      "tool": "gh_issue_list",
+      "status": "success",
+      "exit_code": 0,
+      "error": "",
+      "output_file": "docs/ops/evidence/daily-sprint-2026-02-11/issue_list.txt"
+    }
+  ],
+  "summary": {
+    "open_pr_count": 100,
+    "open_issue_count": 100,
+    "tool_failure_count": 0
+  },
+  "failures": []
+}

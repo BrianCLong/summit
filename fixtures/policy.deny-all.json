@@ -1,0 +1,5 @@
+{
+  "version": "v1",
+  "name": "deny-all",
+  "allow_tools": []
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version": "daily-sprint-metrics.v1",
+  "report_date_utc": "2026-02-11",
+  "open_pr_count": 100,
+  "open_issue_count": 100,
+  "tool_failure_count": 0,
+  "report_line_count": 214
+}
