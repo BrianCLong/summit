@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-08T01:21:28Z",
+  "revision_note": "Added bundle-first Sigstore governance specification and Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -217,6 +217,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "supply-chain-sigstore-bundle-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Bundle-first Sigstore governance specification with 24+ order intent map and MAESTRO alignment in docs/supply-chain/sigstore-bundle-first-governance.md."
     }
   ],
   "summary": {
@@ -224,7 +230,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }
