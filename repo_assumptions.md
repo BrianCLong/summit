@@ -1,40 +1,44 @@
 # Repo Assumptions & Validation
 
-## Verified vs Assumed Directory List
+## Structure Validation
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| Plan Path | Actual Path | Status | Notes |
+|---|---|---|---|
+| `summit/` | `summit/` | ✅ Exists | Core Python package. |
+| `pyproject.toml` | `pyproject.toml` | ✅ Exists | Defines dependencies (OTEL, Structlog, FastAPI). |
+| `summit/observability.py` | `summit/observability.py` | ✅ Exists | Existing OTEL/Prometheus setup. |
+| `summit/agents/` | `summit/agents/` | ✅ Exists | Contains `ShadowAgent` (in `finance/`). |
 
-## CI Check Names (Exact)
+## Component Mapping
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Planned Component | Proposed Location | Actual Location / Action |
+|---|---|---|
+| Observability Schema | `summit/observability/schema.py` | Create new. |
+| Evidence ID Logic | `summit/observability/evidence.py` | Create new. |
+| Decision Provenance | `summit/observability/provenance.py` | Create new. |
+| State Snapshot | `summit/observability/state.py` | Create new. |
+| Lineage Graph | `summit/observability/lineage.py` | Create new. |
+| Conflict Log | `summit/observability/conflicts.py` | Create new. |
+| Wrapper | `summit/observability/wrapper.py` | Create new. |
+| Existing Obs Setup | `summit/observability.py` | Will integrate with or move to `summit/observability/__init__.py`. |
 
-## Evidence Schema Conventions (Exact)
+## Agent Interface Findings
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+* **Assumption**: `agent.decide(request) -> decision dict`.
+* **Reality**:
+    * `summit.policy.permission_broker.PermissionBroker` has `decide(request)`.
+    * `summit.agents.finance.shadow_agent.ShadowAgent` has `process(inputs)`.
+    * No unified `Agent` base class found in `summit/agent` or `summit/agents`.
+* **Action**: The wrapper will primarily target the `decide` pattern but should be flexible (e.g., support `process` or custom method names via config).
 
-## Must-Not-Touch List (Guardrails)
+## Observability Stack
 
-Deferred pending validation. Baseline expectations:
+* **Existing**: `opentelemetry`, `structlog`, `prometheus-fastapi-instrumentator`.
+* **Plan**: Leverage existing OTEL stack. The new `ObservableAgent` should emit OTEL spans and structured logs compatible with the existing setup.
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+## Must-Not-Touch
 
-## Validation Checklist
+* `summit/acp/` (Agent Control Plane internals).
+* `summit/agents/cli.py` (CLI entry point).
+* `summit/observability.py` (Existing setup - I should probably *import* from it or refactor it carefully, but for now I will treat it as "legacy" to integrate with, ensuring I don't break existing apps using it).
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
