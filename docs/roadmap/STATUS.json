@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-21T00:00:00Z",
+  "revision_note": "Added GA exit criteria v1 scorecard artifact and wired it into GA verification mapping.",
   "initiatives": [
+    {
+      "id": "ga-exit-criteria-v1-scorecard",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published docs/ga/GA_EXIT_CRITERIA_v1.md and mapped the gate in docs/ga verification artifacts."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
