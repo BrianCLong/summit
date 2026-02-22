@@ -65,7 +65,9 @@ export function requirePermission(permission: string) {
 }
 
 export function ensureRole(requiredRole: string | string[]) {
-  const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+  const roles = (Array.isArray(requiredRole) ? requiredRole : [requiredRole]).map(r =>
+    r.toUpperCase(),
+  );
   return (
     req: Request,
     res: Response,
@@ -74,7 +76,8 @@ export function ensureRole(requiredRole: string | string[]) {
     const user = req.user;
     if (!user || !user.role) return res.status(401).json({ error: 'Unauthorized' });
 
-    if (roles.includes(user.role)) {
+    const userRole = user.role.toUpperCase();
+    if (roles.includes(userRole)) {
       return next();
     } else {
       return res.status(403).json({ error: 'Forbidden: Insufficient role' });
