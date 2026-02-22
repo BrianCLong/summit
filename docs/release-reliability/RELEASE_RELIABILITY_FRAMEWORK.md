@@ -684,7 +684,7 @@ groups:
           action: investigate
         annotations:
           summary: "Error rate anomaly detected for {{ $labels.service }}"
-          runbook: "docs/RUNBOOKS/observability/error-rate-spike.md"
+          runbook: "docs/runbooks/observability/error-rate-spike.md"
 
       # Latency spike detection
       - alert: LatencyAnomaly

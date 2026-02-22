@@ -187,7 +187,7 @@ jobs:
 ## NEXT (this week)
 
 - **Release train workflow:** add `.github/workflows/release-train.yml` to cut notes, publish artifacts, and open/close the train.
-- **Chaos/DR drill on `stage`:** use `RUNBOOKS/disaster-recovery-procedures.yaml`; capture evidence in `PRODUCTION_GO_EVIDENCE.md`.
+- **Chaos/DR drill on `stage`:** use `runbooks/disaster-recovery-procedures.yaml`; capture evidence in `PRODUCTION_GO_EVIDENCE.md`.
 - **Cost guard:** TTL labels on preview namespaces; nightly cleanup cron.
 - **OPA policies:** enforce ABAC/RBAC and reason‑for‑access prompts on risky actions.
 - **Golden signals dashboards:** OTEL traces, Prom metrics, logs; add p95 latency SLO panels.

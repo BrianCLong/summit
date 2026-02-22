@@ -34,5 +34,5 @@ Job names will be kept stable to avoid frequent branch protection updates.
 ## Documentation and onboarding
 
 - Update README with a concise CI & merge policy section (required checks, golden-path enforcement on `main`, and the auto-merge label policy).
-- Maintain a runbook (`RUNBOOKS/CI.md`) describing workflows, debugging tips, and local pre-flight commands (`./start.sh` or `make bootstrap && make up && make smoke`).
+- Maintain a runbook (`runbooks/CI.md`) describing workflows, debugging tips, and local pre-flight commands (`./start.sh` or `make bootstrap && make up && make smoke`).
 - Keep workflow names and job names human-readable and consistent with the required-checks list above.

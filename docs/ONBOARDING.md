@@ -52,7 +52,7 @@ Open these in a browser (from README):
   - UI: `client/` or `conductor-ui/`
   - Backend/API: `backend/`, `api/`, `api-schemas/`
   - Orchestration: `.maestro/`, `.orchestrator/`
-  - Ops/Governance: `RUNBOOKS/`, `SECURITY/`, `compliance/`, `audit/`, `.ga-check/`
+  - Ops/Governance: `runbooks/`, `SECURITY/`, `compliance/`, `audit/`, `.ga-check/`
 
 - [ ] Create a branch using a consistent naming convention.
 - [ ] Implement change + tests.

@@ -1,0 +1,52 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.summit.ai/context_receipt.v0.1.json",
+  "title": "Context Receipt",
+  "description": "A receipt for a governed context compaction or transformation event.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this receipt (e.g., UUID or hash-based ID)."
+    },
+    "input_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the input context before transformation."
+    },
+    "output_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the output context after transformation."
+    },
+    "transformer": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "The model used for transformation (e.g., 'gpt-4-turbo')."
+        },
+        "version": {
+          "type": "string",
+          "description": "The version of the model or service."
+        },
+        "reasoning_effort": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "xhigh"],
+          "description": "The reasoning effort level configured for this transformation."
+        }
+      },
+      "required": ["model"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the transformation occurred."
+    },
+    "signature": {
+      "type": "string",
+      "description": "Cryptographic signature of the receipt contents."
+    }
+  },
+  "required": ["id", "input_hash", "output_hash", "transformer", "timestamp"]
+}

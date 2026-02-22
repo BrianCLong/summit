@@ -37,4 +37,4 @@
 
    * Capture Grafana snapshot links.
    * Capture CI build + logs.
-   * File post-incident report in `RUNBOOKS/incidents/YYYYMMDD-<slug>.md`.
+   * File post-incident report in `runbooks/incidents/YYYYMMDD-<slug>.md`.

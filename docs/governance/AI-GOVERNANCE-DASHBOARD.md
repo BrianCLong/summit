@@ -385,7 +385,7 @@ DEBUG=governance:* pnpm start
 ## Support
 
 - **Documentation**: https://docs.intelgraph.io/governance
-- **Runbooks**: `/RUNBOOKS/governance/`
+- **Runbooks**: `/runbooks/governance/`
 - **On-call**: #governance-oncall Slack channel
 - **Issues**: https://github.com/BrianCLong/summit/issues
 

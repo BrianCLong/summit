@@ -12,7 +12,7 @@
 
 ## Key Links
 - Day-one guide: [docs/ONBOARDING.md](./ONBOARDING.md)
-- CI golden-path reference: [RUNBOOKS/CI.md](../RUNBOOKS/CI.md)
+- CI golden-path reference: [runbooks/CI.md](../runbooks/CI.md)
 - Troubleshooting tree: [RUNBOOK.md](../RUNBOOK.md#troubleshooting)
 
 ## How to Update the Recording
