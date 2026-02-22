@@ -12,23 +12,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          node-version: 18
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install jsonschema
       - name: Validate Fixtures (Pass)
-        run: node tools/evidence/validate.mjs
-        env:
-          EVIDENCE_OUT_DIR: evidence/fixtures/pass
+        run: python3 scripts/evidence_validate.py --index evidence/fixtures/pass/basic_bundle/index.json --root evidence/fixtures/pass/basic_bundle
       - name: Validate Fixtures (Fail)
         run: |
-          if node tools/evidence/validate.mjs; then
+          if python3 scripts/evidence_validate.py --index evidence/fixtures/fail/bad_bundle/index.json --root evidence/fixtures/fail/bad_bundle; then
             echo "Expected failure but passed"
             exit 1
           else
             echo "Failed as expected"
           fi
-        env:
-          EVIDENCE_OUT_DIR: evidence/fixtures/fail
