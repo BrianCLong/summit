@@ -43,6 +43,11 @@ describe('FusionOrchestrator', () => {
     (TextPipeline as jest.MockedClass<typeof TextPipeline>).mockImplementation(() => ({
       embedText: jest.fn().mockResolvedValue(createMockTextEmbedding()),
       embedTextBatch: jest.fn().mockResolvedValue([createMockTextEmbedding()]),
+      extractEntities: jest.fn().mockResolvedValue([
+        { type: 'EMAIL', text: 'test@example.com', confidence: 0.95 },
+        { type: 'URL', text: 'https://example.com', confidence: 0.95 },
+        { type: 'IP_ADDRESS', text: '192.168.1.1', confidence: 0.95 },
+      ]),
       clearCache: jest.fn(),
       getStats: jest.fn().mockReturnValue({ model: 'text', dimension: 1536, cacheSize: 0 }),
     } as any));
@@ -333,7 +338,24 @@ describe('HallucinationGuard', () => {
 
     it('should detect confidence anomalies', async () => {
       const lowConfidenceSources = [
-        createMockTextEmbedding({ confidence: 0.2 }),
+        createMockTextEmbedding({
+          metadata: {
+            confidence: 0.2,
+            sourceId: 'src-low-conf',
+            sourceUri: 'text://low-conf',
+            investigationId: 'inv-123',
+            processingTime: 100,
+            provenance: {
+              extractorName: 'TextPipeline',
+              extractorVersion: '1.0.0',
+              modelName: 'text-embedding-3-small',
+              modelVersion: '1.0',
+              processingParams: {},
+              errors: [],
+              warnings: [],
+            },
+          },
+        }),
       ];
 
       const fusedEmbedding = createMockFusedEmbedding({
@@ -485,7 +507,7 @@ describe('Performance Tests', () => {
 function createMockTextEmbedding(overrides: Partial<TextEmbedding> = {}): TextEmbedding {
   return {
     id: `text-${Date.now()}`,
-    vector: new Array(1536).fill(0).map(() => Math.random() - 0.5),
+    vector: new Array(1536).fill(0.1), // Positive vector for consistent similarity
     dimension: 1536,
     model: 'text-embedding-3-small',
     modality: 'text',
@@ -514,7 +536,7 @@ function createMockTextEmbedding(overrides: Partial<TextEmbedding> = {}): TextEm
 function createMockImageEmbedding(overrides: Partial<ImageEmbedding> = {}): ImageEmbedding {
   return {
     id: `image-${Date.now()}`,
-    vector: new Array(768).fill(0).map(() => Math.random() - 0.5),
+    vector: new Array(768).fill(0.1), // Positive vector for consistent similarity
     dimension: 768,
     model: 'clip-vit-large-patch14',
     modality: 'image',
