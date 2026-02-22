@@ -32,4 +32,7 @@ jobs:
 
       - name: Run actionlint
         run: |
-          actionlint -shellcheck= -color -verbose
+          # Lint only active top-level workflows; archived/legacy workflow
+          # snapshots are intentionally excluded from blocking CI.
+          find .github/workflows -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' \) \
+            | xargs actionlint -shellcheck= -color -verbose
