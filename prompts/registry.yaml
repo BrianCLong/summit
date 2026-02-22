@@ -922,3 +922,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: naio-narrative-signals-plan
+    version: v1
+    path: prompts/narrative/naio-integration-plan@v1.md
+    sha256: cfea269e026fb2fd6fbaacb3b0519c339a1eeb2333396326e51d177a0f884a52
+    description: Draft NAIO narrative signals integration plan and update roadmap status.
+    scope:
+      paths:
+        - docs/narrative-signals/naio-integration-plan.md
+        - docs/roadmap/STATUS.json
+        - prompts/narrative/naio-integration-plan@v1.md
+        - prompts/registry.yaml
+        - agents/examples/NAIO_NARRATIVE_SIGNALS_PLAN_20260207.json
+      domains:
+        - documentation
+        - governance
+        - narrative-signals
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
