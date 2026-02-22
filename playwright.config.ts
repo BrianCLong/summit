@@ -22,14 +22,20 @@ export default defineConfig({
     ? {
         webServer: [
           {
-            command: 'npm run client:dev',
+            command: 'cd apps/web && pnpm dev',
             port: 3000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },
           {
-            command: 'npm run server:dev',
+            command: 'cd server && npm run dev',
             port: 4000,
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+          },
+          {
+            command: 'uvicorn summit.main:app --port 8000',
+            port: 8000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },
