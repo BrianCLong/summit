@@ -61,13 +61,15 @@
 ## Execution Log
 - Captured PR and issue evidence from local snapshots (UEF).
 - Updated `docs/roadmap/STATUS.json` timestamp and revision note.
+- Pushed branch `chore/daily-sprint-2026-02-22-13`.
+- PR creation via `gh pr create` failed with `error connecting to api.github.com`.
 - Deferred GitHub API sync and test validations pending connectivity and dependencies.
 
 ## Blockers / Governed Exceptions
-- GitHub API connectivity check: Deferred pending api.github.com availability (Governed Exception).
+- GitHub API connectivity check + PR creation: Deferred pending api.github.com availability (Governed Exception).
 - Dependency install: `node_modules` missing; tests deferred pending `pnpm install` (Intentionally constrained).
 
 ## End-of-Day Report
-- Completed: Evidence capture, sprint plan, STATUS.json refresh.
+- Completed: Evidence capture, sprint plan, STATUS.json refresh, branch push.
 - In progress: GitHub API sync and targeted validation readiness.
-- Blocked: GH API connectivity; dependencies not installed.
+- Blocked: GH API connectivity (PR creation + issue sync); dependencies not installed.
