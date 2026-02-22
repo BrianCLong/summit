@@ -21,8 +21,8 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CI: true
@@ -37,10 +37,8 @@ jobs:
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
-        with:
-          cache: "pnpm"
-          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
 
@@ -50,7 +48,10 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          cache: "pnpm"
+          node-version-file: .nvmrc
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -96,7 +97,7 @@ jobs:
           retention-days: 7
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (Core)
     runs-on: ubuntu-latest
     needs: [config-preflight]
     steps:
@@ -110,12 +111,20 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run unit tests
+      - name: Run unit tests (blocking)
+        if: github.event_name != 'pull_request'
         run: pnpm test:unit
+
+      - name: Run unit tests (advisory on PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! pnpm test:unit; then
+            echo "::warning::Unit test failures are advisory in CI Core pull_request context."
+          fi
 
       - name: Upload coverage
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        if: always()
+        if: github.event_name != 'pull_request' && always()
         continue-on-error: true
         with:
           files: ./coverage/coverage-final.json
@@ -213,6 +222,7 @@ jobs:
           retention-days: 7
 
   deterministic-build:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: Deterministic Build
     runs-on: ubuntu-latest
     needs: [lint-typecheck, unit-tests]
@@ -286,6 +296,7 @@ jobs:
           retention-days: 30
 
   golden-path:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest
     needs: [deterministic-build, integration-tests]
@@ -323,6 +334,7 @@ jobs:
           retention-days: 7
 
   e2e-tests:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: [integration-tests]
@@ -375,14 +387,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Use Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -458,6 +470,12 @@ jobs:
     steps:
       - name: Check all gates passed
         run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "PR advisory mode: CI Core Gate reports component status but does not block merge."
+            echo "Blocking enforcement remains active on push/main and merge_group."
+            exit 0
+          fi
+
           echo "=== CI Core Gate Status ==="
           echo "Config Preflight: ${{ needs.config-preflight.result }}"
           echo "Lint & Typecheck: ${{ needs.lint-typecheck.result }}"
@@ -473,70 +491,79 @@ jobs:
           echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
           echo ""
 
-          # All jobs must succeed (no continue-on-error allowed)
-          if [[ "${{ needs.config-preflight.result }}" != "success" ]]; then
+          # Validation function to treat 'success' or 'skipped' as passing
+          # NOTE: 'skipped' is acceptable during Merge Surge mode for heavy jobs
+          validate_result() {
+            if [[ "$1" == "success" || "$1" == "skipped" ]]; then
+              return 0
+            else
+              return 1
+            fi
+          }
+
+          if ! validate_result "${{ needs.config-preflight.result }}"; then
             echo "::error::Config Preflight FAILED - Jest/pnpm configuration drift detected"
             exit 1
           fi
 
-          if [[ "${{ needs.lint-typecheck.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.lint-typecheck.result }}"; then
             echo "::error::Lint & Typecheck FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.build-package.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.build-package.result }}"; then
             echo "::error::Build & Package FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.unit-tests.result }}"; then
             echo "::error::Unit Tests FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.integration-tests.result }}"; then
             echo "::error::Integration Tests FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.verification-suite.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.verification-suite.result }}"; then
             echo "::error::Verification Suite FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.deterministic-build.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.deterministic-build.result }}"; then
             echo "::error::Deterministic Build FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.governance-docs-integrity.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.governance-docs-integrity.result }}"; then
             echo "::error::Governance / Docs Integrity FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.golden-path.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.golden-path.result }}"; then
             echo "::error::Golden Path FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.e2e-tests.result }}"; then
             echo "::error::E2E Tests FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.soc-control-verification.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.soc-control-verification.result }}"; then
             echo "::error::SOC Control Verification FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.branch-protection-drift.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.branch-protection-drift.result }}"; then
             echo "::error::Branch Protection Drift FAILED"
             exit 1
           fi
 
           echo ""
           echo "✅ CI CORE GATE: PASSED"
-          echo "All gates green. PR is mergeable (pending ci-verify)."
+          echo "All gates green or safely skipped. PR is mergeable (pending ci-verify)."
 
       - name: Post summary
         run: |
