@@ -1,4 +1,5 @@
 packages:
+  - 'connectors/*'
   - 'apps/*'
   - 'packages/*'
   - 'platform/*'
