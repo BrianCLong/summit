@@ -7,6 +7,8 @@ import {
   Calendar,
   User,
   MapPin,
+  MessageSquare,
+  Unlink,
 } from 'lucide-react'
 import {
   Drawer,
@@ -17,6 +19,7 @@ import {
 } from '@/components/ui/Drawer'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -27,7 +30,7 @@ import {
 } from '@/components/ui/Tooltip'
 import { useAuth } from '@/contexts/AuthContext'
 import { renderMarkdown } from '@/lib/markdown'
-import { formatDate, getRiskColor, capitalizeFirst } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 import type { Entity, EntityComment, Relationship, PanelProps } from '@/types'
 
 interface EntityDrawerProps extends PanelProps<Entity[]> {
@@ -39,8 +42,8 @@ interface EntityDrawerProps extends PanelProps<Entity[]> {
 
 export function EntityDrawer({
   data: entities,
-  loading = false,
-  error,
+  loading: _loading = false,
+  error: _error,
   onSelect,
   onAction,
   open,
@@ -390,9 +393,11 @@ export function EntityDrawer({
               </div>
 
               {relatedEntities.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  No relationships found
-                </div>
+                <EmptyState
+                  icon={<Unlink className="h-8 w-8 text-muted-foreground" />}
+                  title="No relationships found"
+                  description="This entity is not connected to any other entities."
+                />
               ) : (
                 <div className="space-y-2">
                   {relatedEntities.map(entity => {
@@ -512,9 +517,13 @@ export function EntityDrawer({
                     Loading comments…
                   </div>
                 ) : comments.length === 0 ? (
-                  <div className="text-sm text-muted-foreground">
-                    No comments yet.
-                  </div>
+                  <EmptyState
+                    icon={
+                      <MessageSquare className="h-8 w-8 text-muted-foreground" />
+                    }
+                    title="No comments yet"
+                    description="Be the first to share your thoughts."
+                  />
                 ) : (
                   comments.map(comment => (
                     <Card key={comment.id}>
