@@ -18,7 +18,7 @@ class MismatchReport:
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
     if torch is None:
-        return MismatchReport()
+        raise ImportError("torch is required for compute_mismatch_metrics")
 
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
