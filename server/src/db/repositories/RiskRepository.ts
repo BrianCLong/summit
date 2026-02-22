@@ -33,15 +33,16 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals in batches of 100 to optimize performance
+      // This reduces database round-trips from O(N) to O(N/100)
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        const chunkSize = 100;
+        for (let i = 0; i < input.signals.length; i += chunkSize) {
+          const chunk = input.signals.slice(i, i + chunkSize);
+          const values: any[] = [];
+          const placeholders = chunk.map((sig, index) => {
+            const base = index * 8;
+            values.push(
               savedScore.id,
               sig.type,
               sig.source,
@@ -49,17 +50,24 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
+              sig.detectedAt || new Date()
+            );
+            return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+          }).join(', ');
+
+          const sigRows = await tx.query(
+            `INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders}
+            RETURNING *`,
+            values
           );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+          savedSignals.push(...sigRows.map((r: any) => this.mapSignal(r)));
         }
       }
 
       return {
         ...this.mapScore(savedScore),
-        // Note: signals are not part of RiskScore interface but usually returned in a full object
-        // For strict typing we return the RiskScore entity
       };
     });
   }

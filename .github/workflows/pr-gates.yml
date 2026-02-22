@@ -120,7 +120,10 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            helm lint helm/
+            for chart in $(find helm -name Chart.yaml -exec dirname {} \;); do
+              echo "Linting chart: $chart"
+              helm lint "$chart"
+            done
           fi
 
       - name: Terraform Plan
