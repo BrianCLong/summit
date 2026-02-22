@@ -34,7 +34,7 @@ jobs:
 
   smoke:
     needs: detect
-    if: needs.detect.outputs.run == 'true'
+    if: (needs.detect.outputs.run == 'true') && (failure())
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -54,7 +54,6 @@ jobs:
       - name: Run smoke
         run: pnpm exec playwright test -j 1 --reporter=line --output=playwright-results
       - name: Upload Playwright traces (on failure)
-        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-traces
