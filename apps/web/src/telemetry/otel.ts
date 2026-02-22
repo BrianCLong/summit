@@ -8,16 +8,20 @@ import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
 import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xml-http-request';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { ZoneContextManager } from '@opentelemetry/context-zone';
-import { trace, Span, SpanStatusCode } from '@opentelemetry/api';
+import { trace, Span, SpanStatusCode, metrics } from '@opentelemetry/api';
+import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 
 const SERVICE_NAME = 'intelgraph-web';
 
 export function initializeTelemetry() {
+  const resource = new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: SERVICE_NAME,
+    [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
+  });
+
   const provider = new WebTracerProvider({
-    resource: new Resource({
-      [SemanticResourceAttributes.SERVICE_NAME]: SERVICE_NAME,
-      [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
-    }),
+    resource: resource,
   });
 
   const collectorUrl = import.meta.env.VITE_OTEL_COLLECTOR_URL || 'http://localhost:4318/v1/traces';
@@ -46,7 +50,22 @@ export function initializeTelemetry() {
     ],
   });
 
-  console.log('OpenTelemetry initialized');
+  // Metrics Initialization
+  const metricsUrl = import.meta.env.VITE_OTEL_METRICS_URL || 'http://localhost:4318/v1/metrics';
+  const metricReader = new PeriodicExportingMetricReader({
+    exporter: new OTLPMetricExporter({
+      url: metricsUrl,
+    }),
+    exportIntervalMillis: 10000,
+  });
+
+  const meterProvider = new MeterProvider({
+    resource: resource,
+  });
+  meterProvider.addMetricReader(metricReader);
+  metrics.setGlobalMeterProvider(meterProvider);
+
+  console.log('OpenTelemetry initialized with Tracing and Metrics');
 }
 
 export function withSpan<T>(name: string, fn: () => T): T {
