@@ -1,79 +1,96 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { UsageKind } from '../../types/usage.js';
 
-// Track calls for assertions
-let queryCallCount = 0;
-let releaseCallCount = 0;
+const mockPipeline = {
+  hset: jest.fn(),
+  zadd: jest.fn(),
+  expire: jest.fn(),
+  exec: jest.fn().mockResolvedValue([]),
+  hget: jest.fn(),
+  hgetall: jest.fn(),
+};
 
-// Mock modules before imports
-jest.mock('../../config/database.js', () => ({
-  getPostgresPool: () => ({
-    connect: () => Promise.resolve({
-      query: () => {
-        queryCallCount++;
-        return Promise.resolve({ rowCount: 1 });
-      },
-      release: () => {
-        releaseCallCount++;
-      },
-    }),
-  }),
+const mockRedis = {
+  pipeline: jest.fn(() => mockPipeline),
+  zrangebyscore: jest.fn(),
+  zrevrangebyscore: jest.fn(),
+};
+
+jest.unstable_mockModule('../db/redis.js', () => ({
+  getRedisClient: jest.fn(() => mockRedis),
 }));
 
-jest.mock('../../utils/logger.js', () => ({
+// Mock logger to avoid clutter
+jest.unstable_mockModule('../config/logger.js', () => ({
   default: {
-    error: jest.fn(),
     info: jest.fn(),
-    warn: jest.fn(),
+    debug: jest.fn(),
+    error: jest.fn(),
   },
-  error: jest.fn(),
 }));
 
-jest.mock('../../utils/metrics.js', () => ({
-  PrometheusMetrics: class {
-    createCounter(): void {}
-    incrementCounter(): void {}
-  }
-}));
-
-// Import after mocks
-import { UsageMeteringService } from '../UsageMeteringService.js';
+const { UsageMeteringService } = await import('../UsageMeteringService.js');
 
 describe('UsageMeteringService', () => {
   let service: UsageMeteringService;
 
   beforeEach(() => {
-    // Reset call counts
-    queryCallCount = 0;
-    releaseCallCount = 0;
-
-    // Reset singleton
-    (UsageMeteringService as any).instance = null;
-
-    // Get fresh instance
-    service = UsageMeteringService.getInstance();
+    jest.clearAllMocks();
+    service = new UsageMeteringService();
   });
 
   it('should record a usage event', async () => {
-    await service.record({
+    const event = {
+      id: 'evt1',
       tenantId: 't1',
-      kind: 'custom' as UsageKind,
-      quantity: 10,
-      unit: 'calls'
-    });
+      dimension: 'api_calls',
+      quantity: 1,
+      unit: 'calls',
+      source: 'api',
+      occurredAt: new Date().toISOString(),
+      recordedAt: new Date().toISOString(),
+    };
 
-    expect(queryCallCount).toBeGreaterThan(0);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    await service.record(event);
+
+    expect(mockRedis.pipeline).toHaveBeenCalled();
+    expect(mockPipeline.hset).toHaveBeenCalledWith(`usage:event:${event.id}`, expect.objectContaining({
+      id: event.id,
+      quantity: event.quantity
+    }));
+    expect(mockPipeline.zadd).toHaveBeenCalled();
+    expect(mockPipeline.exec).toHaveBeenCalled();
   });
 
-  it('should record a batch of events', async () => {
-    await service.recordBatch([
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 1, unit: 'u' },
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 2, unit: 'u' }
+  it('should aggregate usage', async () => {
+    mockRedis.zrangebyscore.mockResolvedValue(['evt1', 'evt2']);
+    // Mock hget results
+    mockPipeline.exec.mockResolvedValue([
+      [null, '10'], // quantity 10
+      [null, '20'], // quantity 20
     ]);
 
-    // BEGIN + 2 inserts + COMMIT = 4 calls
-    expect(queryCallCount).toBe(4);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    const result = await service.getAggregation('t1', 'api_calls', '2023-01-01', '2023-01-02');
+
+    expect(result.totalQuantity).toBe(30);
+    expect(result.eventCount).toBe(2);
+    expect(mockRedis.zrangebyscore).toHaveBeenCalledWith(
+      'usage:timeline:t1:api_calls',
+      expect.any(Number),
+      expect.any(Number)
+    );
+  });
+
+  it('should get events list', async () => {
+    mockRedis.zrevrangebyscore.mockResolvedValue(['evt1']);
+    mockPipeline.exec.mockResolvedValue([
+        [null, { id: 'evt1', quantity: '5', metadata: '{"foo":"bar"}' }]
+    ]);
+
+    const events = await service.getEvents('t1', { dimension: 'api_calls' });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].id).toBe('evt1');
+    expect(events[0].quantity).toBe(5);
+    expect(events[0].metadata).toEqual({ foo: 'bar' });
   });
 });
