@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Provenance Standard**: Integrated OTel-to-PROV JSON-LD provenance mapping system.
+- Added deterministic context generator and URDNA2015-based CI validation gate.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
