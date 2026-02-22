@@ -271,8 +271,8 @@ importers:
         specifier: ^13.0.0
         version: 13.0.0
       zod:
-        specifier: ^4.2.1
-        version: 4.2.1
+        specifier: 3.25.76
+        version: 3.25.76
 
   agents/governance:
     devDependencies:
@@ -11841,6 +11841,19 @@ importers:
   packages/sb: {}
 
   packages/schema: {}
+
+  packages/sdes-jee:
+    dependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.19.27
+      tsx:
+        specifier: ^4.0.0
+        version: 4.21.0
 
   packages/sdk:
     devDependencies:

@@ -67,17 +67,14 @@ jobs:
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -130,7 +127,7 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls
+    name: SOC Controls (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
