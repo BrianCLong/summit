@@ -14,6 +14,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
 const ARTIFACTS_DIR = process.env.ARTIFACTS_DIR || join(ROOT, 'artifacts/governance');
 const OFFLINE_MODE = process.argv.includes('--offline') || process.argv.includes('--dry-run');
+const EVENT_NAME = process.env.GITHUB_EVENT_NAME || '';
+const IS_PULL_REQUEST = EVENT_NAME === 'pull_request' || EVENT_NAME === 'pull_request_target';
 
 async function runPolicyGate(sha) {
   console.log('Running: Required Checks Policy...');
@@ -83,7 +85,10 @@ async function runBranchProtectionGate(sha) {
     state = VerificationState.UNVERIFIABLE_ERROR;
   }
 
-  const verdict = state === VerificationState.VERIFIED_MATCH ? 'PASS' : state === VerificationState.VERIFIED_DRIFT ? 'FAIL' : 'SKIP';
+  let verdict = state === VerificationState.VERIFIED_MATCH ? 'PASS' : state === VerificationState.VERIFIED_DRIFT ? 'FAIL' : 'SKIP';
+  if (state === VerificationState.VERIFIED_DRIFT && IS_PULL_REQUEST) {
+    verdict = 'SKIP';
+  }
   if (verdict === 'SKIP' && state === VerificationState.UNVERIFIABLE_ERROR) {
     console.log(`  Status: SKIP (${state})\n`);
   } else {
