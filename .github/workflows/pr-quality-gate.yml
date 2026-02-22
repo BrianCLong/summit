@@ -24,7 +24,13 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -46,7 +52,13 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -107,3 +119,4 @@ jobs:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14
+
