@@ -1,6 +1,6 @@
 {
   "name": "@summit/sgf-ledger",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "type": "module",
   "description": "Tamper-evident append-only ledger for Summit Governance Fabric",
   "main": "dist/index.js",

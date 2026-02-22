@@ -1,40 +1,21 @@
-# Repo Assumptions & Validation
+# Repo Reality Check (OMB M-26-05)
 
-## Verified vs Assumed Directory List
+## Verified Structure
+- ✅ `docs/security/`: Exists
+- ✅ `docs/ci/REQUIRED_CHECKS_POLICY.yml`: Exists
+- ✅ `.github/workflows/`: Exists
+- ✅ `package.json` / `pnpm-lock.yaml`: Node.js environment verified.
+- ✅ Existing scanners: Trivy, Gitleaks, Semgrep, CodeQL found in `ci-security.yml`.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumptions
+- ⚠️ CI environment has access to OIDC for provenance (assumed for GitHub Actions).
+- ⚠️ Release process uses `dist/` as the primary artifact staging area.
 
-## CI Check Names (Exact)
+## Must-not-touch
+- Production infrastructure files (Terraform, K8s manifests) unless explicitly required.
+- Core required checks in `docs/ci/REQUIRED_CHECKS_POLICY.yml` (only add new ones via established process).
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Performance Budgets (Enforced)
+- SBOM generation: p95 ≤ 2 min
+- Evidence verification: ≤ 30 sec
+- Drift job: ≤ 5 min

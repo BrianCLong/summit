@@ -1,6 +1,6 @@
 {
   "name": "@summit/agent-ecosystem",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Agent Ecosystem Index and Capability Map",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

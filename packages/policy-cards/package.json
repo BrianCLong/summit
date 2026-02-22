@@ -1,6 +1,6 @@
 {
   "name": "@summit/policy-cards",
-  "version": "0.0.1",
+  "version": "4.2.3",
   "description": "Policy Cards v0: Schema, canonicalization, and validation.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

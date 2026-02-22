@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/systemic-risk-engine",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",

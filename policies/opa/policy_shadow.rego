@@ -1,4 +1,7 @@
 package composer.policy_shadow
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 # Combine sub-decisions and emit a consolidated verdict
 

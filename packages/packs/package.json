@@ -1,6 +1,6 @@
 {
   "name": "@summit/packs",
-  "version": "0.0.1",
+  "version": "4.2.3",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {

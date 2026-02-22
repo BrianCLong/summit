@@ -8,6 +8,7 @@
 # All agent actions must pass through these policies before execution.
 
 package agents.archetypes
+import future.keywords.contains
 
 import future.keywords.if
 import future.keywords.in

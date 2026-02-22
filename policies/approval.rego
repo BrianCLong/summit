@@ -2,6 +2,7 @@
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.approval"
 
 package intelgraph.approval
+import future.keywords.contains
 
 import future.keywords.if
 import future.keywords.in

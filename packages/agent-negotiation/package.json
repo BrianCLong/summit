@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/agent-negotiation",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "type": "module",
   "description": "Multi-agent negotiation control plane.",
   "main": "dist/index.js",

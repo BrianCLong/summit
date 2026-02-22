@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/experiment-intent",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "type": "module",
   "description": "Calculates expected learning value for experiments.",
   "main": "dist/index.js",

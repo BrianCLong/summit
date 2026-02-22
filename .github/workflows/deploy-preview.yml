@@ -2,10 +2,6 @@ name: deploy-preview
 on:
   push:
     branches: [ "release/*" ]
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 env:
   ENVIRONMENT: preview
 permissions:
@@ -18,15 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: |
-          npm install -g pnpm
-          pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       # OIDC Authentication
       - name: Configure AWS Credentials
