@@ -1,0 +1,8 @@
+version: 1
+egress:
+  deny_by_default: true
+  allowed_hosts:
+    - host: "huggingface.co"
+      port: 443
+    - host: "github.com"
+      port: 443

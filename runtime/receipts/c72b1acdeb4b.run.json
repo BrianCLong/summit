@@ -1,0 +1,18 @@
+{
+  "evidence_id": "MSBX-c72b1acdeb4b",
+  "config": {
+    "user": "1001:1001",
+    "readOnly": true,
+    "seccomp": ".github/policies/model-sandbox/security-profile.json",
+    "modelPath": "tools/model-sandbox/fixtures/dummy-weights.bin",
+    "network": "none",
+    "mounts": [
+      "/tmp"
+    ]
+  },
+  "results": {
+    "exit_code": 0,
+    "stdout_sha256": "dry-run",
+    "stderr_sha256": "dry-run"
+  }
+}
