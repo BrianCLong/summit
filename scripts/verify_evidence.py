@@ -127,6 +127,9 @@ def main() -> int:
     }
     IGNORE_DIRS = {"EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"}
 
+    # Improved timestamp regex: YYYY-MM-DD followed by T or space, then HH:MM
+    TIMESTAMP_RE = re.compile(r"202\d-[01]\d-[0-3]\d[T ][0-2]\d:[0-5]\d")
+
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
@@ -134,7 +137,8 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            # Use regex instead of simple substring matching
+            if TIMESTAMP_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
