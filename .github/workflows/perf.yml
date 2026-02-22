@@ -1,4 +1,4 @@
-name: Performance Baseline (k6)
+name: "[info] Performance Baseline (k6)"
 
 on:
   workflow_dispatch:
@@ -15,6 +15,7 @@ concurrency:
 
 jobs:
   perf:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
