@@ -10,8 +10,8 @@ export class RiskRepository {
    * Persists a risk score and its associated signals.
    * This is transactional.
    */
-  async saveRiskScore(input: RiskScoreInput): Promise<RiskScore> {
-    return await pg.transaction(async (tx: any) => {
+  saveRiskScore(input: RiskScoreInput): Promise<RiskScore> {
+    return pg.transaction(async (tx: any) => {
       // 1. Insert Risk Score
       const scoreRows = await tx.query(
         `INSERT INTO risk_scores (
@@ -31,17 +31,18 @@ export class RiskRepository {
       );
 
       const savedScore = scoreRows[0];
-      const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals (Optimized: Batched multi-row insert)
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        const CHUNK_SIZE = 100;
+        const signals = input.signals;
+
+        for (let i = 0; i < signals.length; i += CHUNK_SIZE) {
+          const chunk = signals.slice(i, i + CHUNK_SIZE);
+          const values: any[] = [];
+          const placeholders = chunk.map((sig, index) => {
+            const offset = index * 8;
+            values.push(
               savedScore.id,
               sig.type,
               sig.source,
@@ -49,10 +50,17 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
+              sig.detectedAt || new Date()
+            );
+            return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
+          }).join(', ');
+
+          await tx.query(
+            `INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders}`,
+            values
           );
-          savedSignals.push(this.mapSignal(sigRows[0]));
         }
       }
 
