@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example/schema/cogwar/campaign-object.schema.json",
+  "title": "CogWar Campaign Object",
+  "type": "object",
+  "required": ["schema_version", "campaign_id", "narratives", "indicators", "evidence"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "cogwar.campaign.v1"
+    },
+    "campaign_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "label": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "actors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["actor_id", "label", "actor_type"],
+        "properties": {
+          "actor_id": { "type": "string" },
+          "label": { "type": "string" },
+          "actor_type": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "channels": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["channel_type", "platform"],
+        "properties": {
+          "channel_type": { "type": "string" },
+          "platform": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "narratives": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["narrative_id", "theme"],
+        "properties": {
+          "narrative_id": { "type": "string" },
+          "theme": { "type": "string" },
+          "frames": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "timing": {
+      "type": "object",
+      "properties": {
+        "event_hooks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event_type"],
+            "properties": {
+              "event_type": { "type": "string" },
+              "notes": { "type": "string" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "indicators": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["indicator_id", "kind"],
+        "properties": {
+          "indicator_id": { "type": "string" },
+          "kind": { "type": "string" },
+          "pattern": { "type": "string" },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "attribution": {
+      "type": "object",
+      "required": ["status", "confidence"],
+      "properties": {
+        "status": { "type": "string" },
+        "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "source"],
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^(EVD:CW26:[A-Z0-9_-]+:[A-Z0-9_-]+:[A-F0-9]{8}|EVID-[A-Z0-9-]+)$"
+          },
+          "source": { "type": "string" },
+          "locator": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "scores": {
+      "type": "object",
+      "properties": {
+        "adaptivity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cognitive_infrastructure": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cross_domain_linkage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "swarm_coordination": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
