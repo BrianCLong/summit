@@ -116,6 +116,8 @@
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "regulatory:build": "npx tsx cli/src/cli.ts regulatory build",
+    "regulatory:diff": "npx tsx cli/src/cli.ts regulatory diff",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
@@ -193,7 +195,7 @@
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
     "vitest": "^4.0.16",
-    "zod": "^4.2.1"
+    "zod": "3.25.76"
   },
   "lint-staged": {
     "server/**/*.{ts,js}": [
