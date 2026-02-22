@@ -39,3 +39,11 @@
 ## 2026-02-07 - Accessibility for Loading States
 **Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
 **Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
+
+## 2026-02-10 - Dashboard Keyboard Navigation and Decorative Icons
+
+**Learning:** Dashboards often use `div` elements with `onClick` for navigation, creating "keyboard-blind" interactive items. Using `role="button"`, `tabIndex={0}`, and a shared `onKeyDown` handler (supporting Enter and Space) ensures all users can navigate the main workspace efficiently.
+
+**Learning:** Icons in `EmptyState` components are purely decorative as they accompany a clear title and description. Marking them with `aria-hidden="true"` reduces noise for screen reader users.
+
+**Action:** Always audit interactive dashboard list items for keyboard support and ensure decorative icons in common components are hidden from the accessibility tree.
