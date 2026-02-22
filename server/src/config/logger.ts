@@ -55,6 +55,7 @@ export const logger = pino({
         principalId: store.get('principalId'),
         requestId: store.get('requestId'),
         traceId: store.get('traceId'),
+        role: store.get('role'),
       };
     }
     return {};
