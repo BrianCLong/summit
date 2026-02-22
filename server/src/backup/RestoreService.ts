@@ -9,6 +9,8 @@ import zlib from 'zlib';
 const execAsync = promisify(exec);
 
 export class RestoreService {
+  private seenLabels = new Set<string>();
+
   async restorePostgres(filepath: string): Promise<void> {
     logger.info(`Starting PostgreSQL restore from ${filepath}...`);
     try {
@@ -25,7 +27,12 @@ export class RestoreService {
           cmd = `${cmd} -f "${filepath}"`;
       }
 
-      await execAsync(cmd);
+      const { stderr } = await execAsync(cmd);
+      if (stderr) {
+        // psql outputs notices/warnings to stderr, so we log it but don't necessarily throw unless error
+        logger.debug({ stderr }, 'PostgreSQL restore stderr output');
+      }
+
       logger.info('PostgreSQL restore completed successfully.');
     } catch (error: any) {
       logger.error('PostgreSQL restore failed', error);
@@ -41,6 +48,7 @@ export class RestoreService {
     try {
         logger.info('Wiping existing Neo4j data...');
         await session.run('MATCH (n) DETACH DELETE n');
+        this.seenLabels.clear();
 
         const fileStream = fs.createReadStream(filepath);
         let input;
@@ -116,6 +124,23 @@ export class RestoreService {
       }
 
       for (const [labels, propsList] of batchesByLabel.entries()) {
+          // Create indices for these labels if not already done
+          if (labels) {
+            const labelList = labels.split(':');
+            for (const label of labelList) {
+                if (!this.seenLabels.has(label)) {
+                    try {
+                        // Create index on 'id' property which is assumed to be the unique identifier
+                        await session.run(`CREATE INDEX IF NOT EXISTS FOR (n:${label}) ON (n.id)`);
+                        this.seenLabels.add(label);
+                        logger.info(`Ensured index for label ${label} on id`);
+                    } catch (e: any) {
+                        logger.warn(`Failed to create index for label ${label}: ${e.message}`);
+                    }
+                }
+            }
+          }
+
           const cypherLabels = labels ? `:${labels}` : '';
           await session.run(
               `UNWIND $propsList AS props CREATE (n${cypherLabels}) SET n = props`,
@@ -133,6 +158,9 @@ export class RestoreService {
       }
 
       for (const [type, items] of batchesByType.entries()) {
+          // Note: This MATCH (a {id: ...}) without label scans all nodes if no index or if not optimized.
+          // By ensuring indices on (n:Label).id in processNodeBatch, we hope Neo4j planner uses them.
+          // Ideally, backup should include start/end labels to make this efficient: MATCH (a:LabelA {id: ...}).
           await session.run(
               `
               UNWIND $items AS item

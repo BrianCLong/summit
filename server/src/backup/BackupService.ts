@@ -119,15 +119,17 @@ export class BackupService {
       while (attempt < maxRetries) {
           try {
               if (options.compress) {
-                await execAsync(`${cmd} | gzip > "${finalPath}"`);
+                const { stderr } = await execAsync(`${cmd} | gzip > "${finalPath}"`);
+                if (stderr) logger.warn({ stderr }, 'pg_dump stderr output');
               } else {
-                await execAsync(`${cmd} > "${finalPath}"`);
+                const { stderr } = await execAsync(`${cmd} > "${finalPath}"`);
+                if (stderr) logger.warn({ stderr }, 'pg_dump stderr output');
               }
               break;
-          } catch (e) {
+          } catch (e: any) {
               attempt++;
               if (attempt >= maxRetries) throw e;
-              logger.warn({ error: e }, `Postgres backup attempt ${attempt} failed, retrying in 2s...`);
+              logger.warn({ error: e, stderr: e.stderr }, `Postgres backup attempt ${attempt} failed, retrying in 2s...`);
               await new Promise(r => setTimeout(r, 2000));
           }
       }
@@ -180,7 +182,7 @@ export class BackupService {
 
           const writeTarget = outputStream || fileStream;
 
-          // Full logical backup (removed LIMIT)
+          // Full logical backup
           const nodeResult = await session.run('MATCH (n) RETURN n');
           for (const record of nodeResult.records) {
               const node = record.get('n');
@@ -246,6 +248,7 @@ export class BackupService {
        const isCluster = (client as any).constructor.name === 'Cluster';
 
        if (isCluster) {
+          // Cluster mode: Trigger BGSAVE on masters
           // @ts-ignore
           const nodes = client.nodes ? client.nodes('master') : [];
           if (nodes.length > 0) {
@@ -257,25 +260,62 @@ export class BackupService {
               logger.warn('No master nodes found in cluster for backup.');
           }
        } else {
+           // Standalone: Trigger BGSAVE
            // @ts-ignore
            await client.bgsave();
        }
 
        const dir = await this.ensureBackupDir('redis');
        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-       const filename = `redis-backup-log-${timestamp}.txt`;
-       const filepath = path.join(dir, filename);
 
-       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
+       let filepath: string;
+       let backupSize = 0;
+
+       // Attempt to access and copy the RDB file
+       try {
+           // Get Redis config to find where the RDB file is
+           const configDir = await client.config('GET', 'dir') as string[];
+           const configDbFilename = await client.config('GET', 'dbfilename') as string[];
+
+           // Redis config GET returns array [key, value]
+           const redisDir = configDir[1];
+           const redisFile = configDbFilename[1];
+
+           if (redisDir && redisFile) {
+               const rdbPath = path.join(redisDir, redisFile);
+               // Check if file exists and we can read it (meaning we are on same FS or volume)
+               const stats = await fs.stat(rdbPath);
+
+               if (stats.isFile()) {
+                   const rdbBackupPath = path.join(dir, `dump-${timestamp}.rdb`);
+                   logger.info(`Copying Redis dump from ${rdbPath} to ${rdbBackupPath}...`);
+                   await fs.copyFile(rdbPath, rdbBackupPath);
+                   filepath = rdbBackupPath;
+                   backupSize = stats.size;
+               } else {
+                   throw new Error('Redis dump file not found or not a file');
+               }
+           } else {
+               throw new Error('Could not retrieve Redis dir/dbfilename config');
+           }
+       } catch (err: any) {
+           logger.warn('Could not directly copy Redis dump.rdb (likely running in separate container). Falling back to log-only backup.', { error: err.message });
+
+           // Fallback to log file
+           const filename = `redis-backup-log-${timestamp}.txt`;
+           filepath = path.join(dir, filename);
+           await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}\nWarning: Could not copy dump.rdb directly.`);
+       }
 
        backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
+       backupMetrics.setGauge('size_bytes', backupSize, { type: 'redis' });
 
        if (options.uploadToS3) {
            const s3Key = `redis/${path.basename(filepath)}`;
            await this.uploadToS3(filepath, s3Key);
        }
 
-       await this.recordBackupMeta('redis', filepath, 0);
+       await this.recordBackupMeta('redis', filepath, backupSize);
 
        return filepath;
      } catch (error: any) {
