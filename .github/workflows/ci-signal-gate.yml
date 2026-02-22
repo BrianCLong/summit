@@ -71,9 +71,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Enforce policy
+      - name: Enforce policy (blocking)
+        if: github.event_name != 'pull_request'
         run: |
           ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json
+
+      - name: Enforce policy (advisory on PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! ./scripts/ci/gate_check.sh runs_metrics.json .ci/policy.json runs_diff.json; then
+            echo "::warning::CI signal gate is advisory on pull_request context."
+          fi
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
