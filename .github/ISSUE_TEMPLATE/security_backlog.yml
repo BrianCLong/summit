@@ -1,0 +1,146 @@
+name: Security Backlog Item
+description: Report a security vulnerability, governance gap, supply-chain alert, or policy failure
+title: "[SECURITY] "
+labels: ["type:security", "area:security", "triage:needed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Security Backlog Intake
+        
+        Use this form to report security vulnerabilities, governance gaps, supply-chain alerts, or policy failures.
+        
+        **Evidence-first workflow**: All security issues must include evidence links and risk analysis.
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: CVSS-aligned severity rating
+      options:
+        - Critical (CVSS 9.0-10.0)
+        - High (CVSS 7.0-8.9)
+        - Medium (CVSS 4.0-6.9)
+        - Low (CVSS 0.1-3.9)
+    validations:
+      required: true
+
+  - type: input
+    id: affected_components
+    attributes:
+      label: Affected Components
+      description: "List affected packages, services, or modules (comma-separated)"
+      placeholder: "e.g., @intelgraph/api, services/auth-gateway, server/src/security"
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: "Describe the security impact: confidentiality, integrity, availability, compliance"
+      placeholder: |
+        - Confidentiality: Can attacker access sensitive data?
+        - Integrity: Can attacker modify data or code?
+        - Availability: Can attacker cause denial of service?
+        - Compliance: Does this violate security policies or regulations?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: exploitability
+    attributes:
+      label: Exploitability
+      description: How easily can this be exploited?
+      options:
+        - Trivial (no authentication, public exploit available)
+        - Easy (requires authentication, known attack pattern)
+        - Moderate (requires specific conditions or configuration)
+        - Difficult (requires deep knowledge or complex setup)
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence_links
+    attributes:
+      label: Evidence Links
+      description: "Links to artifacts, logs, SBOM/provenance, commit/PR refs, CVE databases, security advisories"
+      placeholder: |
+        - CVE: https://nvd.nist.gov/vuln/detail/CVE-XXXX-XXXXX
+        - GitHub Advisory: https://github.com/advisories/GHSA-XXXX-XXXX-XXXX
+        - Dependabot Alert: https://github.com/BrianCLong/summit/security/dependabot/XXX
+        - SBOM: [link to artifact]
+        - Logs: [link to logs or paste snippet]
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Reproduction Steps
+      description: "Step-by-step instructions to reproduce the vulnerability"
+      placeholder: |
+        1. Configure environment with...
+        2. Execute command: `...`
+        3. Observe behavior: ...
+        4. Expected: ...
+        5. Actual: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_fix
+    attributes:
+      label: Proposed Fix
+      description: "Suggested remediation or mitigation strategy"
+      placeholder: |
+        - Upgrade dependency X to version Y
+        - Apply patch from upstream
+        - Implement input validation for...
+        - Add rate limiting to...
+        - Mitigation: [temporary workaround if no fix available]
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback_considerations
+    attributes:
+      label: Rollback Considerations
+      description: "What are the risks and rollback steps if the fix causes issues?"
+      placeholder: |
+        - Rollback plan: Revert PR #XXXX or downgrade to version X
+        - Blast radius: [which services/users affected]
+        - Monitoring: [what metrics to watch]
+        - Compatibility: [any breaking changes]
+    validations:
+      required: true
+
+  - type: input
+    id: owners
+    attributes:
+      label: Owners
+      description: "GitHub usernames of responsible parties (comma-separated)"
+      placeholder: "@username1, @username2"
+    validations:
+      required: true
+
+  - type: input
+    id: due_date
+    attributes:
+      label: Target Due Date
+      description: "Target resolution date (YYYY-MM-DD)"
+      placeholder: "2026-03-01"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: evidence_bundle
+    attributes:
+      label: Evidence Bundle Checklist
+      description: "Confirm you have included the following evidence (check all that apply)"
+      options:
+        - label: Links to artifacts (SBOM, provenance, scan results)
+        - label: Logs or error messages demonstrating the issue
+        - label: Commit/PR references if applicable
+        - label: CVE or security advisory links
+        - label: Reproduction steps that can be independently verified

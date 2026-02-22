@@ -1,5 +1,11 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
+  - name: CI Release Gate Runbook
+    url: https://github.com/BrianCLong/summit/blob/main/docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md
+    about: Troubleshooting guide for CI/CD pipeline failures and release gate issues
+  - name: Security Policy
+    url: https://github.com/BrianCLong/summit/blob/main/.github/SECURITY.md
+    about: Security vulnerability reporting and disclosure policy
   - name: Nightly Services Workflow
     url: https://github.com/${{ github.repository }}/actions/workflows/ci-nightly-services.yml
     about: View the nightly services lane runs and artifacts
