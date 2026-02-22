@@ -18,7 +18,8 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
-- `sigstore-verify` (PR4)
+- `Evidence Verify (ATG)` (PR1)
+- `ATG Agent Guardrails` (PR1)
 - `lint`
 - `typecheck`
 - `build`

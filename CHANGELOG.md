@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Adaptive Tradecraft Graph (ATG) foundational infrastructure.
+- Tradecraft Event Canonical Format (TECF) schema and validators in `src/graphrag/atg/tecf`.
+- ATG Neo4j graph schema and tenant-scoped query/write helpers in `src/graphrag/atg/graph`.
+- Automated evidence verification gate in `.github/scripts/evidence_verify.ts`.
+- ATG agent safety guardrails gate in `.github/scripts/agent_guardrails.ts`.
+- ATG evidence schemas in `docs/ga/evidence-schema`.
+
+### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

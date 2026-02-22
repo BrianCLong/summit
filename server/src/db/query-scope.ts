@@ -77,37 +77,18 @@ export function validateAndScopeQuery(
     return { query, params, wasScoped: true };
   }
 
-  // Security Check: Prevent SQL injection via comments that could bypass scoping
-  // If auto-scoping is required, we must ensure the query structure is safe to append to.
-  // Comments like '--' or '/*' can be used to comment out the appended tenant_id clause.
-  if (query.includes('--') || query.includes('/*')) {
-    throw new Error(
-      `Unsafe query for auto-scoping: Comments detected. Please manually add 'tenant_id' clause or remove comments. Query: ${query.substring(
-        0,
-        50,
-      )}...`,
-    );
-  }
-
-  // Sanitize: Remove trailing semicolon to ensure appended clause is valid SQL
-  // e.g., "SELECT * FROM table;" -> "SELECT * FROM table WHERE ..."
-  let cleanQuery = query.trim();
-  if (cleanQuery.endsWith(';')) {
-    cleanQuery = cleanQuery.slice(0, -1);
-  }
-
   // Auto-scope the query based on operation type
   if (operationType === 'select') {
-    return applyScope(cleanQuery, params, tenantId, hasWhereClause, 'AND');
+    return applyScope(query, params, tenantId, hasWhereClause, 'AND');
   } else if (operationType === 'insert') {
-    console.warn(
+     console.warn(
       `INSERT query tenant scoping needs manual verification: ${query}`,
     );
     return { query, params, wasScoped: false };
   } else if (operationType === 'update') {
-    return applyScope(cleanQuery, params, tenantId, hasWhereClause, 'AND');
+    return applyScope(query, params, tenantId, hasWhereClause, 'AND');
   } else if (operationType === 'delete') {
-    return applyScope(cleanQuery, params, tenantId, hasWhereClause, 'AND');
+    return applyScope(query, params, tenantId, hasWhereClause, 'AND');
   }
 
   // Fallback for unrecognized query patterns

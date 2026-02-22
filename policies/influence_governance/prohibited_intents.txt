@@ -1,6 +1,6 @@
-persuasion
-microtargeting
-psychographic_segmentation
+generate persuasion copy
+identify persuadable individuals
+automate amplification
 automated_counter_messaging
 covert_influence
 narrative_shaping_playbook

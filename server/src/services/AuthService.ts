@@ -38,6 +38,9 @@
  * ```
  */
 
+import * as argon2 from 'argon2';
+import * as jwt from 'jsonwebtoken';
+import crypto, { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import { cfg } from '../config.js';
 import logger from '../utils/logger.js';
@@ -47,7 +50,6 @@ import type { Pool, PoolClient } from 'pg';
 import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import { checkScope } from '../api/scopeGuard.js';
-import { securityService as defaultSecurityService, SecurityService } from './securityService.js';
 
 /**
  * User registration data payload
@@ -267,15 +269,13 @@ export class AuthService {
     return getPostgresPool() as unknown as Pool;
   }
   private metrics: PrometheusMetrics;
-  private securityService: SecurityService;
 
   /**
    * @constructor
    * @description Creates an instance of AuthService.
    * Initializes the PostgreSQL connection pool and sets up Prometheus metrics for authentication events.
    */
-  constructor(securityService: SecurityService = defaultSecurityService) {
-    this.securityService = securityService;
+  constructor() {
 
     // Lazy initialized via getter
     try {
@@ -352,7 +352,7 @@ export class AuthService {
         throw new Error('User with this email or username already exists');
       }
 
-      const hashedPassword = await this.securityService.hashPassword(userData.password);
+      const passwordHash = await argon2.hash(userData.password);
 
       const userResult = await client.query(
         `
@@ -500,7 +500,7 @@ export class AuthService {
 
       const user = userResult.rows[0] as DatabaseUser;
       tenantId = user.tenant_id || 'unknown';
-      const validPassword = await this.securityService.verifyPassword(user.password_hash, password);
+      const validPassword = await argon2.verify(user.password_hash, password);
 
       if (!validPassword) {
         throw new Error('Invalid credentials');
@@ -543,7 +543,34 @@ export class AuthService {
     client: PoolClient,
   ): Promise<TokenPair> {
     const userScopes = ROLE_SCOPES[user.role.toUpperCase()] || [];
-    return this.securityService.generateDbTokenPair(user, client, userScopes);
+
+    const tokenPayload: TokenPayload = {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenant_id || user.default_tenant_id || 'unknown',
+      scp: userScopes,
+    };
+
+    const jwtSecret = cfg.JWT_SECRET;
+
+    const token = jwt.sign(tokenPayload, jwtSecret, {
+      expiresIn: '24h',
+    }) as string;
+
+    const refreshToken = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await client.query(
+      `
+      INSERT INTO user_sessions (user_id, refresh_token, expires_at)
+      VALUES ($1, $2, $3)
+    `,
+      [user.id, refreshToken, expiresAt],
+    );
+
+    return { token, refreshToken };
   }
 
   /**
@@ -579,8 +606,21 @@ export class AuthService {
         };
       }
 
-      const decoded = await this.securityService.verifyDbToken(token, this.pool);
-      if (!decoded) return null;
+      const jwtSecret = cfg.JWT_SECRET;
+      const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
+
+      // Check if token is blacklisted
+      const blacklistCheck = await this.pool.query(
+        'SELECT 1 FROM token_blacklist WHERE token_hash = $1',
+        [this.hashToken(token)],
+      );
+
+      if (blacklistCheck.rows.length > 0) {
+        logger.warn('Blacklisted token attempted to be used:', {
+          userId: decoded.userId,
+        });
+        return null;
+      }
 
       const client = await this.pool.connect();
       const userResult = await client.query(
@@ -615,16 +655,65 @@ export class AuthService {
     const client = await this.pool.connect();
 
     try {
-      const getScopes = (role: string) => ROLE_SCOPES[role.toUpperCase()] || [];
-      const result = await this.securityService.refreshDbToken(refreshToken, client, getScopes);
+      // Verify refresh token exists and is not expired
+      const sessionResult = await client.query(
+        `
+        SELECT user_id, expires_at, is_revoked
+        FROM user_sessions
+        WHERE refresh_token = $1
+      `,
+        [refreshToken],
+      );
 
-      if (!result) return null;
+      if (sessionResult.rows.length === 0) {
+        logger.warn('Invalid refresh token used');
+        return null;
+      }
+
+      const session = sessionResult.rows[0];
+
+      // Check if token is revoked
+      if (session.is_revoked) {
+        logger.warn('Revoked refresh token attempted to be used');
+        return null;
+      }
+
+      // Check if token is expired
+      if (new Date(session.expires_at) < new Date()) {
+        logger.warn('Expired refresh token used');
+        await client.query(
+          'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
+          [refreshToken],
+        );
+        return null;
+      }
+
+      // Get user data
+      const userResult = await client.query(
+        'SELECT * FROM users WHERE id = $1 AND is_active = true',
+        [session.user_id],
+      );
+
+      if (userResult.rows.length === 0) {
+        return null;
+      }
+
+      const user = userResult.rows[0] as DatabaseUser;
+
+      // Revoke old refresh token
+      await client.query(
+        'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
+        [refreshToken],
+      );
+
+      // Generate new token pair with rotation
+      const newTokenPair = await this.generateTokens(user, client);
 
       logger.info('Token successfully refreshed with rotation', {
-        userId: result.userId,
+        userId: user.id,
       });
 
-      return { token: result.token, refreshToken: result.refreshToken };
+      return newTokenPair;
     } catch (error: any) {
       logger.error('Error refreshing token:', error);
       return null;
@@ -641,7 +730,24 @@ export class AuthService {
    * @returns {Promise<boolean>} True if the token was successfully blacklisted, false otherwise.
    */
   async revokeToken(token: string): Promise<boolean> {
-    return this.securityService.revokeToken(token, this.pool);
+    try {
+      const tokenHash = this.hashToken(token);
+
+      await this.pool.query(
+        `
+        INSERT INTO token_blacklist (token_hash, revoked_at, expires_at)
+        VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '24 hours')
+        ON CONFLICT (token_hash) DO NOTHING
+      `,
+        [tokenHash],
+      );
+
+      logger.info('Token successfully blacklisted');
+      return true;
+    } catch (error: any) {
+      logger.error('Error revoking token:', error);
+      return false;
+    }
   }
 
   /**
@@ -700,7 +806,7 @@ export class AuthService {
    * @returns {string} The SHA256 hash of the token.
    */
   private hashToken(token: string): string {
-    return this.securityService.hashToken(token);
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   /**

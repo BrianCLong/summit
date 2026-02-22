@@ -31,6 +31,18 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
 
+    if torch is None:
+        # Fallback for environments without torch
+        import math
+        if isinstance(train_logprobs, (int, float)) and isinstance(rollout_logprobs, (int, float)):
+            delta = abs(train_logprobs - rollout_logprobs)
+            return MismatchReport(
+                max_abs_logprob_delta=float(delta),
+                mean_abs_logprob_delta=float(delta),
+                violations=0,
+            )
+        return MismatchReport()
+
     delta = (train_logprobs - rollout_logprobs).abs()
 
     return MismatchReport(

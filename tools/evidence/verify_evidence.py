@@ -58,7 +58,12 @@ def validate_index() -> dict:
 
 def require_evidence_files(index: dict) -> int:
     missing = 0
-    items = index.get("items", {})
+    items_data = index.get("items", {})
+    if isinstance(items_data, list):
+        items = {item["evidence_id"]: item for item in items_data if "evidence_id" in item}
+    else:
+        items = items_data
+
     for evidence_id in REQUIRED_EVIDENCE_IDS:
         entry = items.get(evidence_id)
         if not entry:
@@ -83,12 +88,19 @@ def require_evidence_files(index: dict) -> int:
     return missing
 
 
-def validate_evidence_payloads() -> tuple[int, int]:
+def validate_evidence_payloads(index: dict) -> tuple[int, int]:
     report_validator = validate_schema(REPORT_SCHEMA)
     metrics_validator = validate_schema(METRICS_SCHEMA)
     stamp_validator = validate_schema(STAMP_SCHEMA)
     validated_files = 0
     errors = 0
+
+    items_data = index.get("items", {})
+    if isinstance(items_data, list):
+        items = {item["evidence_id"]: item for item in items_data if "evidence_id" in item}
+    else:
+        items = items_data
+
     for evidence_id in REQUIRED_EVIDENCE_IDS:
         evidence_dir = Path("evidence") / evidence_id
         report = load_json(evidence_dir / "report.json")
@@ -239,7 +251,7 @@ def main() -> int:
     flag_violations = validate_feature_flags()
     dep_violations = validate_dependency_delta()
 
-    validate_evidence_payloads()
+    validate_evidence_payloads(index)
 
     write_governance_metrics(
         schema_count=len(list(COGWAR_SCHEMA_DIR.glob("*.schema.json"))),
