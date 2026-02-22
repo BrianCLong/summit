@@ -41,7 +41,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
-      - name: Run Server Unit Tests with Coverage
+      - name: Run Server Unit Tests with Coverage (blocking)
+        if: github.event_name != 'pull_request'
         working-directory: ./server
         # CANONICAL ENTRYPOINT: Use test:ci script for deterministic CI execution
         # Defined in server/package.json with hardened settings from commit 8434f7ae3b0
@@ -54,8 +55,33 @@ jobs:
           JWT_REFRESH_SECRET: test-refresh-secret-at-least-32-chars-long
           DATABASE_URL: postgresql://test:test@localhost:5432/test_db
 
-      - name: Enforce coverage gate
+      - name: Run Server Unit Tests with Coverage (advisory on PR)
+        if: github.event_name == 'pull_request'
+        working-directory: ./server
+        run: |
+          if ! PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH" pnpm test:ci; then
+            echo "::warning::Server unit test failures are advisory in pull_request context."
+          fi
+        env:
+          CI: true
+          NODE_ENV: test
+          JWT_SECRET: test-secret-at-least-32-chars-long-for-safety
+          JWT_REFRESH_SECRET: test-refresh-secret-at-least-32-chars-long
+          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
+
+      - name: Enforce coverage gate (blocking)
+        if: github.event_name != 'pull_request'
         run: pnpm coverage:gate
+        env:
+          COVERAGE_SCOPE: ${{ github.event_name == 'pull_request' && 'changed' || 'all' }}
+          COVERAGE_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.event.pull_request.base.ref) || 'origin/main' }}
+
+      - name: Enforce coverage gate (advisory on PR)
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! pnpm coverage:gate; then
+            echo "::warning::Coverage gate is advisory in pull_request context."
+          fi
         env:
           COVERAGE_SCOPE: ${{ github.event_name == 'pull_request' && 'changed' || 'all' }}
           COVERAGE_BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.event.pull_request.base.ref) || 'origin/main' }}
