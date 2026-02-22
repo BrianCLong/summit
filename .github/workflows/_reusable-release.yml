@@ -21,7 +21,7 @@ jobs:
   governance-gate:
     name: Governance Gate
     if: inputs.skip_governance_gate != true
-    uses: ./.github/workflows/_reusable-governance-gate.yml
+    uses: ./.github/workflows/governance-meta-gate.yml
     with:
       require_lockfile: true
       strict_mode: ${{ inputs.governance_strict }}

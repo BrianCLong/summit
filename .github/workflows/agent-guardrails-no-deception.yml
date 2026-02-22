@@ -1,0 +1,21 @@
+name: Agent Guardrails (No Deception)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install -g tsx
+      - name: Run Guardrails Script
+        run: npx tsx .github/scripts/agent_guardrails_no_deception.ts
