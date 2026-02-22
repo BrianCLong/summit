@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PolicyRegistry",
+  "type": "object",
+  "required": ["version", "updated", "policies"],
+  "properties": {
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "updated": { "type": "string" },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "workflows", "required"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "control_map": { "type": "array", "items": { "type": "string" } },
+          "required": { "type": "boolean" },
+          "workflows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["path", "job", "check_name", "evidence_id", "artifact"],
+              "properties": {
+                "path": { "type": "string" },
+                "job": { "type": "string" },
+                "check_name": { "type": "string" },
+                "evidence_id": {
+                  "type": "string",
+                  "pattern": "^evidence\\.[a-z0-9_.]+\\.v[0-9]+$"
+                },
+                "artifact": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

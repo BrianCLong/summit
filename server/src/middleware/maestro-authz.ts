@@ -100,31 +100,13 @@ export function maestroAuthzMiddleware(
 
       return next();
     } catch (error: any) {
-      // FAIL-CLOSED: On any policy evaluation error, deny the request
-      // This prevents authorization bypass if OPA is unreachable
-      const isProduction = process.env.NODE_ENV === 'production';
-
-      logger.error('Error evaluating Maestro authorization policy - FAIL-CLOSED', {
+      logger.error('Error evaluating Maestro authorization policy', {
         ...decisionLog,
         error: error?.message || 'Unknown error',
-        failClosed: true,
-        environment: process.env.NODE_ENV,
       });
-
-      if (isProduction) {
-        // Production: Always deny on policy evaluation failure
-        return res.status(403).json({
-          error: 'Forbidden',
-          message: 'Authorization service unavailable - access denied',
-          failClosed: true,
-        });
-      } else {
-        // Non-production: Allow with warning for development convenience
-        logger.warn('Non-production: allowing request despite policy error (WOULD BE DENIED IN PRODUCTION)', {
-          ...decisionLog,
-        });
-        return next();
-      }
+      return res.status(500).json({
+        error: 'Internal server error: Policy evaluation failed',
+      });
     }
   };
 }

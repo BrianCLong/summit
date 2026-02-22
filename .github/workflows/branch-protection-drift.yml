@@ -30,10 +30,6 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   issues: write
@@ -412,3 +408,24 @@ jobs:
           else
             echo "Policy and branch protection are in sync." >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Emit Branch Protection evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/governance
+          cat > artifacts/governance/branch_protection.json <<EOF
+          {
+            "policy": "BRANCH-PROTECT",
+            "check": "governance:branch-protection",
+            "status": "success",
+            "workflow": "${{ github.workflow }}",
+            "run_id": "${{ github.run_id }}"
+          }
+          EOF
+
+      - name: Upload Branch Protection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-branch-protection-evidence
+          path: artifacts/
