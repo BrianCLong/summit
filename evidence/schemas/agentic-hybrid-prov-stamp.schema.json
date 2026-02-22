@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["generated_at", "notes"],
+  "properties": {
+    "generated_at": {"type": "string", "format": "date-time"},
+    "notes": {"type": "string"}
+  }
+}

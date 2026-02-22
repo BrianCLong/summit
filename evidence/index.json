@@ -408,6 +408,14 @@
         "metrics": "evidence/EVD-NARRATIVE-CI-METRICS-001/metrics.json",
         "stamp": "evidence/EVD-NARRATIVE-CI-METRICS-001/stamp.json"
       }
+    },
+    "EVD-AGENTIC-HYBRID-PROV-001": {
+      "evidence_id": "EVD-AGENTIC-HYBRID-PROV-001",
+      "files": {
+        "report": "evidence/AGENTIC-HYBRID-PROV/report.json",
+        "metrics": "evidence/AGENTIC-HYBRID-PROV/metrics.json",
+        "stamp": "evidence/AGENTIC-HYBRID-PROV/stamp.json"
+      }
     }
   }
 }

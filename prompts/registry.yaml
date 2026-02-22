@@ -897,6 +897,40 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: agentic-hybrid-prov-pr1
+    version: v1
+    path: prompts/evidence/agentic-hybrid-prov-pr1.md
+    sha256: 2df662862c67c30a8a91972b296887c982fa6ff141b9d6fce6924d65fafb41ff
+    description: Scaffold agentic hybrid provenance evidence bundle, schemas, and CI gate.
+    scope:
+      paths:
+        - evidence/AGENTIC-HYBRID-PROV/
+        - evidence/schemas/agentic-hybrid-prov-index.schema.json
+        - evidence/schemas/agentic-hybrid-prov-metrics.schema.json
+        - evidence/schemas/agentic-hybrid-prov-report.schema.json
+        - evidence/schemas/agentic-hybrid-prov-stamp.schema.json
+        - evidence/index.json
+        - .github/scripts/verify-evidence-bundle.ts
+        - .github/workflows/ci-verify.yml
+        - .github/policies/dependency-delta.md
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/agentic-hybrid-prov-pr1.md
+        - prompts/registry.yaml
+      domains:
+        - evidence
+        - governance
+        - ci
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: jest-entities-override
     version: v1
     path: prompts/maintenance/jest-entities-override@v1.md
