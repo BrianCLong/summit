@@ -1,40 +1,20 @@
-# Repo Assumptions & Validation
+## Repository Assumptions and Validations
 
-## Verified vs Assumed Directory List
+### Verified
+* **Package Manager**: `pnpm` (verified via `pnpm-workspace.yaml`, `package.json`, `pnpm-lock.yaml`).
+* **DB Drivers**: `pg` and `neo4j-driver` are present in `package.json` dependencies.
+* **Test Runner**: `vitest` is present in `devDependencies`, but integration tests use `tsx` for direct execution as per blueprint.
+* **CI**: GitHub Actions is used (`.github/workflows` populated).
+* **Directory Structure**: `tools/` exists, `tests/` exists.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+### Assumed
+* **Node Version**: CI environment supports Node 20 (used in workflow definition).
+* **Docker Services**: `postgres:15` and `neo4j:5.12.0` images are available and sufficient for parity checks.
+* **APOC**: Neo4j APOC plugin is enabled in CI service definition (added to workflow).
+* **Network**: Localhost ports 5432 and 7687 are available in CI runner services network.
 
-## CI Check Names (Exact)
-
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+### Constraints Respected
+* **Production Deployment**: No changes made to production workflows.
+* **Secrets**: No new secrets hardcoded; workflow uses standard env vars (with defaults for CI services).
+* **Refactor**: No refactor of existing ETL/sync logic performed.
+* **Read-Only**: Validator is read-only.

@@ -12,9 +12,6 @@ SCHEMAS = {
   "run_report": "evidence/schemas/run_report.schema.json",
   "run_metrics": "evidence/schemas/run_metrics.schema.json",
   "run_index": "evidence/schemas/run_index.schema.json",
-  "ai_maturity": "evidence/schemas/ai_maturity.schema.json",
-  "ai_task_profile": "evidence/schemas/ai_task_profile.schema.json",
-  "human_authority": "evidence/schemas/human_authority.schema.json",
 }
 
 def main() -> int:
