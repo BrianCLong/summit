@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "run_id": { "type": "string" },
+    "previous_run_hash": { "type": "string" },
+    "new_claims": {
+      "type": "array",
+      "items": { "$ref": "./nodes.schema.json#/definitions/Claim" }
+    },
+    "removed_claims": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "updated_claims": {
+      "type": "array",
+      "items": { "$ref": "./nodes.schema.json#/definitions/Claim" }
+    },
+    "new_artifacts": {
+      "type": "array",
+      "items": { "$ref": "./nodes.schema.json#/definitions/Artifact" }
+    },
+    "state_transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["narrative_id", "from_state", "to_state"],
+        "properties": {
+          "narrative_id": { "type": "string" },
+          "from_state": { "type": "string" },
+          "to_state": { "type": "string" },
+          "trigger_scores": { "type": "object" },
+          "supporting_artifacts": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

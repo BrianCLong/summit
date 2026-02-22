@@ -1,0 +1,11 @@
+{
+  "run_id": "RUN-002",
+  "generated_at": "2026-02-07T10:00:00Z",
+  "new_claims": [
+    {
+      "node_id": "CLAIM-002",
+      "text": "Invalid payload",
+      "timestamp": "2026-02-07T10:00:00Z"
+    }
+  ]
+}

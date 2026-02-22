@@ -1,0 +1,15 @@
+{
+  "new_claims": [
+    {
+      "node_id": "CLAIM-003",
+      "kind": "Claim",
+      "text": "Unverified assertion",
+      "provenance_receipt_ids": []
+    },
+    {
+      "node_id": "CLAIM-004",
+      "kind": "Claim",
+      "text": "Another unverified assertion"
+    }
+  ]
+}
