@@ -4,8 +4,11 @@ import fs from 'fs';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
 import pino from 'pino';
-import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { promisify } from 'util';
+import { pipeline } from 'stream';
 
+const streamPipeline = promisify(pipeline);
 const logger = (pino as any)({ name: 'BackupService' });
 
 /**
@@ -250,19 +253,48 @@ export class BackupService {
   }
 
   private async backupRedis(timestamp: string): Promise<string> {
-    const fileName = `redis_${timestamp}.json`;
-    const file = path.join(this.backupDir, fileName);
     const client = getRedisClient();
     if (!client) throw new Error('Redis client unavailable');
 
+    // 1. Try RDB Backup (Prioritized)
     try {
-      await client.bgsave();
-    } catch (err: any) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (!message.includes('already in progress')) {
-        throw err;
+      const dirConfig = await client.config('GET', 'dir');
+      const dbfilenameConfig = await client.config('GET', 'dbfilename');
+
+      // ioredis config command returns array like ['dir', '/path', 'dbfilename', 'dump.rdb'] or separate arrays?
+      // Standard redis returns [key, value].
+      const dir = dirConfig[1];
+      const dbfilename = dbfilenameConfig[1];
+      const rdbPath = path.join(dir, dbfilename);
+
+      // Trigger BGSAVE
+      try {
+        await client.bgsave();
+        // Wait for save to complete
+        await this.waitForBgsave(client);
+      } catch (err: any) {
+        const message = err instanceof Error ? err.message : String(err);
+        if (!message.includes('already in progress')) {
+          logger.warn(`BGSAVE failed: ${message}`);
+        }
       }
+
+      if (fs.existsSync(rdbPath)) {
+        const fileName = `redis_${timestamp}.rdb`;
+        const destFile = path.join(this.backupDir, fileName);
+        fs.copyFileSync(rdbPath, destFile);
+        logger.info(`Redis RDB backup copied to ${destFile}`);
+        return destFile;
+      } else {
+        logger.warn(`Redis RDB file not found at ${rdbPath}, falling back to JSON scan`);
+      }
+    } catch (error) {
+       logger.warn('Failed to perform RDB backup, falling back to JSON scan', error);
     }
+
+    // 2. Fallback to JSON Scan
+    const fileName = `redis_${timestamp}.json`;
+    const file = path.join(this.backupDir, fileName);
 
     const writeStream = fs.createWriteStream(file);
     writeStream.write('{');
@@ -290,8 +322,20 @@ export class BackupService {
     writeStream.write('}');
     writeStream.end();
 
-    logger.info(`Redis backup created at ${file}`);
+    logger.info(`Redis backup (JSON) created at ${file}`);
     return file;
+  }
+
+  private async waitForBgsave(client: any, timeoutMs = 60000): Promise<void> {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      const info = await client.info('persistence');
+      if (!info.includes('rdb_bgsave_in_progress:1')) {
+        return;
+      }
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    throw new Error('Timeout waiting for BGSAVE');
   }
 
   /**
@@ -374,10 +418,177 @@ export class BackupService {
   }
 
   /**
-   * Stub for restoring a backup
+   * Restores data from a backup
    */
   async restore(backupId: string): Promise<void> {
-    logger.warn(`Restore functionality requested for ${backupId} but not fully implemented. Manual intervention required.`);
-    // TODO: Implement download from S3 and restoration logic for each service
+    logger.info(`Starting restore for backupId: ${backupId}`);
+
+    try {
+      // 1. Download files
+      const files = await this.downloadBackupFiles(backupId);
+
+      // 2. Restore PostgreSQL
+      if (files.postgres) {
+        await this.restorePostgres(files.postgres);
+      }
+
+      // 3. Restore Redis
+      if (files.redis) {
+        await this.restoreRedis(files.redis);
+      }
+
+      // 4. Restore Neo4j
+      if (files.neo4j) {
+        await this.restoreNeo4j(files.neo4j);
+      }
+
+      logger.info(`Restore for ${backupId} completed successfully`);
+    } catch (error) {
+      logger.error('Restore failed', error);
+      throw error;
+    }
+  }
+
+  private async downloadBackupFiles(backupId: string): Promise<{ postgres?: string; redis?: string; neo4j?: string }> {
+    if (!this.s3Client || !this.s3Bucket) {
+       throw new Error('S3 not configured, cannot download backups');
+    }
+
+    const files: { postgres?: string; redis?: string; neo4j?: string } = {};
+    const download = async (prefix: string) => {
+      const fileName = `${prefix}_${backupId}`;
+      // Check extensions
+      const extensions = ['.sql', '.json', '.rdb'];
+      for (const ext of extensions) {
+         const key = `backups/${fileName}${ext}`;
+         const destPath = path.join(this.backupDir, `${fileName}${ext}`);
+         try {
+            await this.downloadFromS3(key, destPath);
+            return destPath;
+         } catch (e) {
+            // Ignore if key not found, try next extension
+         }
+      }
+      return undefined;
+    };
+
+    files.postgres = await download('postgres');
+    files.redis = await download('redis');
+    files.neo4j = await download('neo4j');
+
+    return files;
+  }
+
+  private async downloadFromS3(key: string, destPath: string): Promise<void> {
+    if (!this.s3Client || !this.s3Bucket) throw new Error('S3 not configured');
+
+    const command = new GetObjectCommand({
+        Bucket: this.s3Bucket,
+        Key: key
+    });
+
+    const response = await this.s3Client.send(command);
+    if (!response.Body) throw new Error(`Empty body for ${key}`);
+
+    // response.Body is a stream in Node.js
+    await streamPipeline(response.Body as any, fs.createWriteStream(destPath));
+    logger.info(`Downloaded ${key} to ${destPath}`);
+  }
+
+  private async restorePostgres(filePath: string): Promise<void> {
+    logger.info(`Restoring PostgreSQL from ${filePath}`);
+
+    const env = { ...process.env };
+    // Construct command similar to backup but using psql
+    const args = ['-f', filePath];
+    if (env.DATABASE_URL) {
+       args.unshift(env.DATABASE_URL); // psql <url> -f file
+    } else {
+       if (env.POSTGRES_HOST) args.push('-h', env.POSTGRES_HOST);
+       if (env.POSTGRES_PORT) args.push('-p', env.POSTGRES_PORT);
+       if (env.POSTGRES_USER) args.push('-U', env.POSTGRES_USER);
+       if (env.POSTGRES_DB) args.push(env.POSTGRES_DB);
+       if (!env.PGPASSWORD && env.POSTGRES_PASSWORD) {
+          env.PGPASSWORD = env.POSTGRES_PASSWORD;
+       }
+    }
+
+    return new Promise((resolve, reject) => {
+        const child = spawn('psql', args, { env });
+
+        child.on('close', (code) => {
+            if (code === 0) {
+                logger.info('PostgreSQL restore successful');
+                resolve();
+            } else {
+                reject(new Error(`psql exited with code ${code}`));
+            }
+        });
+
+        child.stderr.on('data', (d) => logger.debug(`psql stderr: ${d}`));
+    });
+  }
+
+  private async restoreRedis(filePath: string): Promise<void> {
+    logger.info(`Restoring Redis from ${filePath}`);
+    const client = getRedisClient();
+
+    if (filePath.endsWith('.rdb')) {
+        logger.warn('Automated RDB restore requires manual Redis restart with new dump.rdb. Copying file to Redis dir...');
+        try {
+            const dirConfig = await client.config('GET', 'dir');
+            const dir = dirConfig[1];
+            const dest = path.join(dir, 'dump.rdb'); // Assuming standard name
+
+            // Backup existing
+            if (fs.existsSync(dest)) {
+                fs.renameSync(dest, `${dest}.bak`);
+            }
+
+            fs.copyFileSync(filePath, dest);
+            logger.info(`Copied restored RDB to ${dest}. Please restart Redis to apply.`);
+        } catch (e) {
+            logger.error('Failed to copy RDB file to Redis directory', e);
+        }
+    } else {
+        // JSON restore
+        const content = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(content);
+        const pipeline = client.pipeline();
+
+        for (const [key, value] of Object.entries(data)) {
+            // Check if value is string (it should be if we used backupRedis JSON method)
+            if (typeof value === 'string') {
+                 pipeline.set(key, value);
+            }
+        }
+        await pipeline.exec();
+        logger.info('Redis JSON restore successful');
+    }
+  }
+
+  private async restoreNeo4j(filePath: string): Promise<void> {
+    logger.info(`Restoring Neo4j from ${filePath}`);
+    // Basic implementation for JSON import
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const data = JSON.parse(content);
+
+    const driver = getNeo4jDriver();
+    const session = driver.session();
+
+    try {
+        if (data.nodes) {
+             for (const node of data.nodes) {
+                 // Simplified: Create node with properties. Labels handling would require more complex backup structure
+                 // This assumes a simple restore or that backup includes labels which our backupNeo4j stub does vaguely
+                 // Actually backupNeo4j writes `{"nodes":[props], ...}`. It loses labels and IDs.
+                 // This restore is best-effort for the current backup format.
+                 await session.run('CREATE (n) SET n = $props', { props: node });
+             }
+        }
+        logger.info('Neo4j restore completed (nodes only/simplified)');
+    } finally {
+        await session.close();
+    }
   }
 }

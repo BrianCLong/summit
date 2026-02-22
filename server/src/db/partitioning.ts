@@ -55,10 +55,15 @@ export class PartitionManager {
    * Creates a monthly partition for a time-series table (e.g., audit_logs, metrics).
    * Range Partitioning: FOR VALUES FROM ('2023-01-01') TO ('2023-02-01')
    */
-  async createMonthlyPartition(tableName: string, date: Date): Promise<void> {
+  async createMonthlyPartition(tableName: string, date: Date, suffixFormat: string = '_yYYYYmMM'): Promise<void> {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
-    const partitionName = `${tableName}_y${year}m${month}`;
+
+    const suffix = suffixFormat
+      .replace('YYYY', String(year))
+      .replace('MM', month);
+
+    const partitionName = `${tableName}${suffix}`;
 
     // Calculate range start and end
     const startObj = new Date(year, date.getMonth(), 1);
@@ -102,6 +107,50 @@ export class PartitionManager {
            logger.error(`Failed to create partition ${partitionName}`, error);
            throw error;
        }
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Creates a partition for a list of values.
+   * Useful for region or category based partitioning.
+   */
+  async createListPartition(tableName: string, partitionKey: string, value: string): Promise<void> {
+    const safeValue = value.replace(/'/g, "''"); // Sanitization for SQL string literal
+    const safePartitionKey = partitionKey.replace(/[^a-zA-Z0-9_]/g, '');
+    const partitionName = `${tableName}_${safePartitionKey}`;
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if partition exists
+      const checkRes = await client.query(
+        `SELECT to_regclass($1::text)`,
+        [partitionName]
+      );
+
+      if (checkRes.rows[0].to_regclass) {
+        logger.info(`Partition ${partitionName} already exists.`);
+        await client.query('COMMIT');
+        return;
+      }
+
+      const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES IN ('${safeValue}')
+      `;
+
+      await client.query(query);
+      logger.info(`Created list partition ${partitionName} for value ${value}`);
+
+      await client.query('COMMIT');
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error(`Failed to create list partition ${partitionName}`, error);
+      throw error;
     } finally {
       client.release();
     }
