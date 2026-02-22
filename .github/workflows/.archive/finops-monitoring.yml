@@ -105,7 +105,7 @@ jobs:
           fi
 
       - name: Emergency cost enforcement
-        if: ${{ steps.analysis.outputs.critical-violations > 0 || inputs.emergency_mode }}
+        if: ((((${{ steps.analysis.outputs.critical-violations > 0 || inputs.emergency_mode }}) && (${{ steps.analysis.outputs.potential-savings > 100 }})) && (always())) && (${{ steps.analysis.outputs.critical-violations > 0 }})) && (${{ needs.cost-analysis.outputs.violations-count > 0 }})
         run: |
           echo "🚨 Activating emergency cost enforcement"
 
@@ -120,7 +120,6 @@ jobs:
           echo "Emergency scaling completed"
 
       - name: Generate cost optimization PR
-        if: ${{ steps.analysis.outputs.potential-savings > 100 }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -184,7 +183,6 @@ jobs:
           retention-days: 30
 
       - name: Update GitHub status
-        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -205,7 +203,6 @@ jobs:
             }'
 
       - name: Create GitHub issue for critical violations
-        if: ${{ steps.analysis.outputs.critical-violations > 0 }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -228,7 +225,6 @@ jobs:
     name: Slack Notification
     runs-on: ubuntu-latest
     needs: cost-analysis
-    if: ${{ needs.cost-analysis.outputs.violations-count > 0 }}
 
     steps:
       - name: Send Slack notification
