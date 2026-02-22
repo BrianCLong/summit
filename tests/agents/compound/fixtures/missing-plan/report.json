@@ -1,0 +1,18 @@
+{
+  "work": {
+    "summary": "Work summary present.",
+    "changes": ["Did some work"]
+  },
+  "assess": {
+    "summary": "Assess summary present.",
+    "rubrics": {
+      "security": "No secrets.",
+      "quality": "Tests added.",
+      "architecture": "Scoped changes."
+    }
+  },
+  "compound": {
+    "summary": "Compound summary present.",
+    "memory_updates": ["Memory update"]
+  }
+}

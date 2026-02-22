@@ -1,0 +1,22 @@
+{
+  "plan": {
+    "summary": "Plan summary.",
+    "steps": ["Step one"]
+  },
+  "work": {
+    "summary": "Work summary.",
+    "changes": ["Change one"]
+  },
+  "assess": {
+    "summary": "Assess summary.",
+    "rubrics": {
+      "security": "Checked.",
+      "quality": "Checked.",
+      "architecture": "Checked."
+    }
+  },
+  "compound": {
+    "summary": "Compound summary.",
+    "memory_updates": []
+  }
+}

@@ -101,6 +101,51 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: compound-loop-evidence
+    version: v1
+    path: prompts/governance/compound-loop-evidence@v1.md
+    sha256: 65c314fc5e3f3a220748577268cc0818f5993f214e2878462cbe6767bdf56b48
+    description: Add compound loop evidence schemas, fixtures, validator scaffolding, and governance docs.
+    scope:
+      paths:
+        - docs/governance/compound-loop.md
+        - docs/governance/evidence-schema.md
+        - docs/roadmap/STATUS.json
+        - prompts/governance/compound-loop-evidence@v1.md
+        - prompts/registry.yaml
+        - src/agents/compound/README.md
+        - src/agents/compound/evidence/emit.ts
+        - src/agents/compound/evidence/validate.ts
+        - src/agents/compound/evidence/schemas/report.schema.json
+        - src/agents/compound/evidence/schemas/metrics.schema.json
+        - src/agents/compound/evidence/schemas/stamp.schema.json
+        - src/agents/compound/evidence/schemas/index.schema.json
+        - tests/agents/compound/evidence.test.ts
+        - tests/agents/compound/fixtures/valid-minimal/report.json
+        - tests/agents/compound/fixtures/valid-minimal/metrics.json
+        - tests/agents/compound/fixtures/valid-minimal/stamp.json
+        - tests/agents/compound/fixtures/valid-minimal/index.json
+        - tests/agents/compound/fixtures/missing-plan/report.json
+        - tests/agents/compound/fixtures/missing-plan/metrics.json
+        - tests/agents/compound/fixtures/missing-plan/stamp.json
+        - tests/agents/compound/fixtures/missing-plan/index.json
+        - tests/agents/compound/fixtures/invalid-index/report.json
+        - tests/agents/compound/fixtures/invalid-index/metrics.json
+        - tests/agents/compound/fixtures/invalid-index/stamp.json
+        - tests/agents/compound/fixtures/invalid-index/index.json
+      domains:
+        - governance
+        - evidence
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: deterministic-intel-ingest
     version: v1
     path: prompts/ingest/deterministic-intel-ingest@v1.md

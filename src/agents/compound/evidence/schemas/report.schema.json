@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "compound.report.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "plan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      },
+      "required": ["summary", "steps"]
+    },
+    "work": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string" },
+        "changes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      },
+      "required": ["summary", "changes"]
+    },
+    "assess": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string" },
+        "rubrics": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "security": { "type": "string" },
+            "quality": { "type": "string" },
+            "architecture": { "type": "string" }
+          },
+          "required": ["security", "quality", "architecture"]
+        }
+      },
+      "required": ["summary", "rubrics"]
+    },
+    "compound": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "summary": { "type": "string" },
+        "memory_updates": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["summary", "memory_updates"]
+    }
+  },
+  "required": ["plan", "work", "assess", "compound"]
+}
