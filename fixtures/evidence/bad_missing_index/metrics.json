@@ -1,0 +1,6 @@
+{
+  "run_id": "fixture-bad-missing-index",
+  "metrics": {
+    "evidence_files": 3
+  }
+}

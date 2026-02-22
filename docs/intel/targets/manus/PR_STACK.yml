@@ -1,0 +1,6 @@
+target_id: TARGET-MANUS
+prs:
+  - id: PR-MANUS-INGEST
+    title: "intel: ingest manus target dossier"
+    status: "open"
+    owner: "Jules"

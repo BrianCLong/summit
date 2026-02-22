@@ -1,0 +1,7 @@
+{
+  "run_id": "fixture-bad-missing-index",
+  "summary": "Missing index fixture.",
+  "evidence_ids": [
+    "EVD-TRUSTPARADOX-GOV-001"
+  ]
+}

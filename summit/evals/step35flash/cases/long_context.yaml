@@ -1,0 +1,6 @@
+name: Long Context Stress
+prompt: "Given the following 100k context... (placeholder) ... summarize."
+max_tokens: 200
+context_tokens: 100000
+assertions:
+  - latency_under_ms: 5000

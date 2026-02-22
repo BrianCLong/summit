@@ -1,6 +1,5 @@
 ---
 # Standard timeout policy for web traffic
-# Replaces: nginx.ingress.kubernetes.io/proxy-*-timeout annotations
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:

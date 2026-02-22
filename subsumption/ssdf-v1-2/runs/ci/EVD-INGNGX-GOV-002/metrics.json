@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-INGNGX-GOV-002",
+  "item_slug": "ingress-nginx-retirement",
+  "metrics": {
+    "docs_count": 4,
+    "fixtures_checked": 2,
+    "schemas_checked": 3
+  }
+}

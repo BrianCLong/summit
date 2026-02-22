@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schemas/prompt_event.schema.json",
+  "type": "object",
+  "required": ["event_id", "tenant", "actor", "purpose", "classification", "model_id", "policy_decision"],
+  "properties": {
+    "event_id": { "type": "string" },
+    "tenant": { "type": "string" },
+    "actor": { "type": "string" },
+    "session_id": { "type": "string" },
+    "purpose": { "type": "string" },
+    "classification": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
+    "model_id": { "type": "string" },
+    "inputs_redacted": { "type": "string" },
+    "outputs_redacted": { "type": "string" },
+    "tools_called": { "type": "array", "items": { "type": "string" } },
+    "policy_decision": {
+      "type": "object",
+      "required": ["action", "reasons"],
+      "properties": {
+        "action": { "type": "string", "enum": ["allow", "deny", "redact"] },
+        "reasons": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "additionalProperties": false
+}

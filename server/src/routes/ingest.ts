@@ -14,6 +14,7 @@ import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
 import { TenantContext } from '../tenancy/types.js';
 import { queryWithTenantContext } from '../db/tenant.js';
 import { requireTenantContextMiddleware } from '../middleware/require-tenant-context.js';
+import { securityAudit } from '../audit/security-audit-logger.js';
 
 const ingestRouter = Router();
 const ingestLogger = logger.child({ name: 'IngestAPI' });
@@ -144,6 +145,17 @@ ingestRouter.post(
           received: entities.length,
         });
       }
+
+      securityAudit.logDataImport({
+        actor: user.id,
+        tenantId,
+        resourceType: 'ingest_batch',
+        resourceId: sourceId,
+        action: 'ingest',
+        details: { sourceType, entitiesCount: entities.length, relationshipsCount: relationships.length },
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+      });
 
       ingestLogger.info({
         tenantId,

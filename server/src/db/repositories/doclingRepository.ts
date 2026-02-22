@@ -190,19 +190,23 @@ class DoclingRepository {
     fragments: DocFragmentInput[],
     sourceUri?: string,
   ): Promise<DocFragmentRecord[]> {
+    if (fragments.length === 0) return [];
     await this.ensureSchema();
-    const rows: DocFragmentRecord[] = [];
-    for (const fragment of fragments) {
-      const id = fragment.id || randomUUID();
-      const result = await this.getPool().query(
-        `INSERT INTO doc_fragments (id, tenant_id, request_id, source_type, source_uri, sha256, content_type, text, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         ON CONFLICT (id) DO UPDATE SET
-           source_uri = EXCLUDED.source_uri,
-           text = EXCLUDED.text,
-           metadata = EXCLUDED.metadata
-         RETURNING id, tenant_id, request_id, source_type, source_uri, sha256, content_type, text, metadata, created_at`,
-        [
+
+    // BOLT: Optimized batched insertion with chunking.
+    // Reduces database round-trips while staying under parameter limits.
+    const chunkSize = 100;
+    const allResults: DocFragmentRecord[] = [];
+
+    for (let i = 0; i < fragments.length; i += chunkSize) {
+      const chunk = fragments.slice(i, i + chunkSize);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+      let paramIndex = 1;
+
+      for (const fragment of chunk) {
+        const id = fragment.id || randomUUID();
+        values.push(
           id,
           tenantId,
           requestId,
@@ -212,22 +216,41 @@ class DoclingRepository {
           fragment.contentType || 'text/plain',
           fragment.text,
           fragment.metadata || {},
-        ],
+        );
+        placeholders.push(
+          `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8})`,
+        );
+        paramIndex += 9;
+      }
+
+      const result = await this.getPool().query(
+        `INSERT INTO doc_fragments (id, tenant_id, request_id, source_type, source_uri, sha256, content_type, text, metadata)
+         VALUES ${placeholders.join(', ')}
+         ON CONFLICT (id) DO UPDATE SET
+           source_uri = EXCLUDED.source_uri,
+           text = EXCLUDED.text,
+           metadata = EXCLUDED.metadata
+         RETURNING id, tenant_id, request_id, source_type, source_uri, sha256, content_type, text, metadata, created_at`,
+        values,
       );
-      rows.push({
-        id: result.rows[0].id,
-        tenantId,
-        requestId,
-        sourceType,
-        sourceUri: result.rows[0].source_uri,
-        sha256: result.rows[0].sha256,
-        contentType: result.rows[0].content_type,
-        text: result.rows[0].text,
-        metadata: result.rows[0].metadata,
-        createdAt: result.rows[0].created_at,
-      });
+
+      allResults.push(
+        ...result.rows.map((row: any) => ({
+          id: row.id,
+          tenantId: row.tenant_id,
+          requestId: row.request_id,
+          sourceType: row.source_type,
+          sourceUri: row.source_uri,
+          sha256: row.sha256,
+          contentType: row.content_type,
+          text: row.text,
+          metadata: row.metadata,
+          createdAt: row.created_at,
+        })),
+      );
     }
-    return rows;
+
+    return allResults;
   }
 
   async saveSummary(
@@ -265,15 +288,21 @@ class DoclingRepository {
     requestId: string,
     findings: DocFindingInput[],
   ): Promise<DocFindingRecord[]> {
+    if (findings.length === 0) return [];
     await this.ensureSchema();
-    const rows: DocFindingRecord[] = [];
-    for (const finding of findings) {
-      const id = randomUUID();
-      const result = await this.getPool().query(
-        `INSERT INTO doc_findings (id, tenant_id, request_id, fragment_id, label, value, confidence, severity, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         RETURNING id, fragment_id, label, value, confidence, severity, metadata`,
-        [
+
+    const chunkSize = 100;
+    const allResults: DocFindingRecord[] = [];
+
+    for (let i = 0; i < findings.length; i += chunkSize) {
+      const chunk = findings.slice(i, i + chunkSize);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+      let paramIndex = 1;
+
+      for (const finding of chunk) {
+        const id = randomUUID();
+        values.push(
           id,
           tenantId,
           requestId,
@@ -283,21 +312,36 @@ class DoclingRepository {
           finding.confidence,
           finding.severity || null,
           finding.metadata || {},
-        ],
+        );
+        placeholders.push(
+          `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8})`,
+        );
+        paramIndex += 9;
+      }
+
+      const result = await this.getPool().query(
+        `INSERT INTO doc_findings (id, tenant_id, request_id, fragment_id, label, value, confidence, severity, metadata)
+         VALUES ${placeholders.join(', ')}
+         RETURNING id, tenant_id, request_id, fragment_id, label, value, confidence, severity, metadata`,
+        values,
       );
-      rows.push({
-        id: result.rows[0].id,
-        tenantId,
-        requestId,
-        fragmentId: result.rows[0].fragment_id,
-        label: result.rows[0].label,
-        value: result.rows[0].value,
-        confidence: result.rows[0].confidence,
-        severity: result.rows[0].severity,
-        metadata: result.rows[0].metadata,
-      });
+
+      allResults.push(
+        ...result.rows.map((row: any) => ({
+          id: row.id,
+          tenantId: row.tenant_id,
+          requestId: row.request_id,
+          fragmentId: row.fragment_id,
+          label: row.label,
+          value: row.value,
+          confidence: row.confidence,
+          severity: row.severity,
+          metadata: row.metadata,
+        })),
+      );
     }
-    return rows;
+
+    return allResults;
   }
 
   async savePolicySignals(
@@ -305,15 +349,21 @@ class DoclingRepository {
     requestId: string,
     signals: PolicySignalInput[],
   ): Promise<PolicySignalRecord[]> {
+    if (signals.length === 0) return [];
     await this.ensureSchema();
-    const rows: PolicySignalRecord[] = [];
-    for (const signal of signals) {
-      const id = randomUUID();
-      const result = await this.getPool().query(
-        `INSERT INTO doc_policy_signals (id, tenant_id, request_id, classification, value, purpose, retention, fragment_id, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         RETURNING id, classification, value, purpose, retention, fragment_id, metadata`,
-        [
+
+    const chunkSize = 100;
+    const allResults: PolicySignalRecord[] = [];
+
+    for (let i = 0; i < signals.length; i += chunkSize) {
+      const chunk = signals.slice(i, i + chunkSize);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+      let paramIndex = 1;
+
+      for (const signal of chunk) {
+        const id = randomUUID();
+        values.push(
           id,
           tenantId,
           requestId,
@@ -323,21 +373,36 @@ class DoclingRepository {
           signal.retention,
           signal.fragmentId || null,
           signal.metadata || {},
-        ],
+        );
+        placeholders.push(
+          `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8})`,
+        );
+        paramIndex += 9;
+      }
+
+      const result = await this.getPool().query(
+        `INSERT INTO doc_policy_signals (id, tenant_id, request_id, classification, value, purpose, retention, fragment_id, metadata)
+         VALUES ${placeholders.join(', ')}
+         RETURNING id, tenant_id, request_id, classification, value, purpose, retention, fragment_id, metadata`,
+        values,
       );
-      rows.push({
-        id: result.rows[0].id,
-        tenantId,
-        requestId,
-        classification: result.rows[0].classification,
-        value: result.rows[0].value,
-        purpose: result.rows[0].purpose,
-        retention: result.rows[0].retention,
-        fragmentId: result.rows[0].fragment_id,
-        metadata: result.rows[0].metadata,
-      });
+
+      allResults.push(
+        ...result.rows.map((row: any) => ({
+          id: row.id,
+          tenantId: row.tenant_id,
+          requestId: row.request_id,
+          classification: row.classification,
+          value: row.value,
+          purpose: row.purpose,
+          retention: row.retention,
+          fragmentId: row.fragment_id,
+          metadata: row.metadata,
+        })),
+      );
     }
-    return rows;
+
+    return allResults;
   }
 
   async saveTraceLinks(
@@ -345,15 +410,21 @@ class DoclingRepository {
     requestId: string,
     links: TraceLinkInput[],
   ): Promise<TraceLinkRecord[]> {
+    if (links.length === 0) return [];
     await this.ensureSchema();
-    const rows: TraceLinkRecord[] = [];
-    for (const link of links) {
-      const id = randomUUID();
-      const result = await this.getPool().query(
-        `INSERT INTO doc_trace_links (id, tenant_id, request_id, fragment_id, target_type, target_id, relation, score, metadata)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         RETURNING id, fragment_id, target_type, target_id, relation, score, metadata`,
-        [
+
+    const chunkSize = 100;
+    const allResults: TraceLinkRecord[] = [];
+
+    for (let i = 0; i < links.length; i += chunkSize) {
+      const chunk = links.slice(i, i + chunkSize);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+      let paramIndex = 1;
+
+      for (const link of chunk) {
+        const id = randomUUID();
+        values.push(
           id,
           tenantId,
           requestId,
@@ -363,21 +434,36 @@ class DoclingRepository {
           link.relation,
           link.score || null,
           link.metadata || {},
-        ],
+        );
+        placeholders.push(
+          `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8})`,
+        );
+        paramIndex += 9;
+      }
+
+      const result = await this.getPool().query(
+        `INSERT INTO doc_trace_links (id, tenant_id, request_id, fragment_id, target_type, target_id, relation, score, metadata)
+         VALUES ${placeholders.join(', ')}
+         RETURNING id, tenant_id, request_id, fragment_id, target_type, target_id, relation, score, metadata`,
+        values,
       );
-      rows.push({
-        id: result.rows[0].id,
-        tenantId,
-        requestId,
-        fragmentId: result.rows[0].fragment_id,
-        targetType: result.rows[0].target_type,
-        targetId: result.rows[0].target_id,
-        relation: result.rows[0].relation,
-        score: result.rows[0].score,
-        metadata: result.rows[0].metadata,
-      });
+
+      allResults.push(
+        ...result.rows.map((row: any) => ({
+          id: row.id,
+          tenantId: row.tenant_id,
+          requestId: row.request_id,
+          fragmentId: row.fragment_id,
+          targetType: row.target_type,
+          targetId: row.target_id,
+          relation: row.relation,
+          score: row.score,
+          metadata: row.metadata,
+        })),
+      );
     }
-    return rows;
+
+    return allResults;
   }
 
   async findSummaryByRequestId(

@@ -1,0 +1,15 @@
+allowlist:
+  - domain: aws.amazon.com
+  - domain: docs.aws.amazon.com
+  - domain: docs.tigergraph.com
+  - domain: arxiv.org
+  - domain: neo4j.com
+  - domain: www.tigergraph.com
+  - domain: nebula-graph.io
+  - domain: www.nebula-graph.io
+  - domain: puppygraph.com
+  - domain: www.puppygraph.com
+  - domain: nuix.com
+  - domain: www.nuix.com
+  - domain: github.com
+    path_prefix: /awslabs/

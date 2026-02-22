@@ -27,6 +27,40 @@ const JSONScalar = new GraphQLScalarType({
   },
 });
 
+const delegateToBackend = async (query: string, variables: any, context: any) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(`${process.env.GRAPH_SERVICE_URL}/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': context.token || 'Bearer dev-token',
+        'x-tenant-id': context.tenantId || 'tenant_1',
+      },
+      body: JSON.stringify({ query, variables }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Backend delegation failed:', response.status, errorText);
+      throw new Error(`Backend service error: ${response.status}`);
+    }
+    const result = await response.json();
+    if (result.errors) {
+      console.error('Backend returned GraphQL errors:', JSON.stringify(result.errors));
+      throw new Error(result.errors[0].message);
+    }
+    const dataKey = Object.keys(result.data || {})[0];
+    return result.data?.[dataKey];
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    console.error('Fetch to backend failed:', err.message);
+    throw err;
+  }
+};
+
 export const resolvers = {
   DateTime: DateTimeScalar,
   JSON: JSONScalar,
@@ -39,13 +73,63 @@ export const resolvers = {
 
     // Entity resolvers (delegated to graph service)
     entity: async (parent: any, args: any, context: any) => {
-      // TODO: Delegate to graph service
-      return null;
+      const response = await fetch(
+        `${process.env.GRAPH_SERVICE_URL}/graphql`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': context.token || 'Bearer dev-token',
+            'x-tenant-id': context.tenantId || 'tenant_1',
+          },
+          body: JSON.stringify({
+            query: `query($id: ID!) { entity(id: $id) { id type properties createdAt updatedAt } }`,
+            variables: { id: args.id },
+          }),
+        },
+      );
+      const result = await response.json();
+      return result.data?.entity;
     },
 
     entities: async (parent: any, args: any, context: any) => {
-      // TODO: Delegate to graph service
-      return [];
+      console.log('Delegating entities query to:', `${process.env.GRAPH_SERVICE_URL}/graphql`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch(
+          `${process.env.GRAPH_SERVICE_URL}/graphql`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': context.token || 'Bearer dev-token',
+              'x-tenant-id': context.tenantId || 'tenant_1',
+            },
+            body: JSON.stringify({
+              query: `query($type: String, $limit: Int, $offset: Int) { entities(type: $type, limit: $limit, offset: $offset) { id type props createdAt updatedAt } }`,
+              variables: { type: args.type, limit: args.limit, offset: args.offset },
+            }),
+            signal: controller.signal,
+          },
+        );
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Backend delegation failed:', response.status, errorText);
+          throw new Error(`Backend service error: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log('Backend response result:', JSON.stringify(result));
+        return (result.data?.entities || []).map((e: any) => ({
+          ...e,
+          properties: e.props,
+        }));
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        console.error('Fetch to backend failed:', err.message);
+        throw err;
+      }
     },
 
     // XAI resolvers (delegated to graph-xai service)
@@ -187,6 +271,29 @@ export const resolvers = {
 
       return response.json();
     },
+
+    // Case Management Queries
+    case: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `query($id: ID!, $reason: String!, $legalBasis: String!) { case(id: $id, reason: $reason, legalBasis: $legalBasis) { id tenantId title description status priority compartment policyLabels metadata createdAt updatedAt createdBy closedAt closedBy slaTimers { slaId caseId tenantId type name startTime deadline completedAt status targetDurationSeconds metadata } } }`,
+        args,
+        context
+      );
+    },
+    cases: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `query($status: String, $compartment: String, $limit: Int, $offset: Int) { cases(status: $status, compartment: $compartment, limit: $limit, offset: $offset) { id tenantId title description status priority compartment policyLabels metadata createdAt updatedAt createdBy } }`,
+        args,
+        context
+      );
+    },
+    comments: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `query($targetType: String!, $targetId: ID!, $limit: Int, $offset: Int) { comments(targetType: $targetType, targetId: $targetId, limit: $limit, offset: $offset) { commentId tenantId targetType targetId parentId rootId content authorId createdAt updatedAt mentions isEdited isDeleted metadata } }`,
+        args,
+        context
+      );
+    },
   },
 
   Mutation: {
@@ -267,6 +374,50 @@ export const resolvers = {
       }
 
       return response.json();
+    },
+
+    // Case Management Mutations
+    createCase: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($input: CaseInput!) { createCase(input: $input) { id title status priority createdAt updatedAt createdBy } }`,
+        args,
+        context
+      );
+    },
+    updateCase: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($input: CaseUpdateInput!) { updateCase(input: $input) { id title status priority createdAt updatedAt createdBy } }`,
+        args,
+        context
+      );
+    },
+    archiveCase: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($id: ID!, $reason: String!, $legalBasis: String!) { archiveCase(id: $id, reason: $reason, legalBasis: $legalBasis) { id status } }`,
+        args,
+        context
+      );
+    },
+    addComment: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($input: CommentInput!) { addComment(input: $input) { commentId content targetType targetId authorId createdAt } }`,
+        args,
+        context
+      );
+    },
+    updateComment: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($id: ID!, $content: String!) { updateComment(id: $id, content: $content) { commentId content updatedAt isEdited } }`,
+        args,
+        context
+      );
+    },
+    deleteComment: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($id: ID!) { deleteComment(id: $id) }`,
+        args,
+        context
+      );
     },
 
     ping: (parent: any, args: any) => {

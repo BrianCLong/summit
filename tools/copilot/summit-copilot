@@ -1,0 +1,158 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<'USAGE'
+Usage: summit-copilot <lane> [options] [--] [prompt...]
+
+Lanes:
+  explore | plan | task | review
+
+Options:
+  --tools <list>       Override available tools allowlist (comma-separated).
+  --model <name>       Override model selection for the lane.
+  --mcp-config <path>  Override MCP config path (default: config/copilot/mcp.json if present).
+  --share-dir <path>   Override transcript output directory (default: artifacts/copilot).
+  -h, --help           Show this help.
+
+Environment overrides:
+  COPILOT_BIN                 Copilot CLI binary (default: copilot)
+  COPILOT_AVAILABLE_TOOLS     Default allowlist override
+  COPILOT_MODEL_EXPLORE       Model for explore lane (default: gpt-5-mini)
+  COPILOT_MODEL_PLAN          Model for plan lane (default: gpt-5-mini)
+  COPILOT_MODEL_TASK          Model for task lane (default: gpt-5.2-codex)
+  COPILOT_MODEL_REVIEW        Model for review lane (default: gpt-5.2-codex)
+  COPILOT_MCP_CONFIG          Default MCP config path override
+  COPILOT_SHARE_DIR           Default transcript output directory
+  COPILOT_AGENT_FLAG          Lane flag name (default: --agent; set empty to disable)
+USAGE
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+lane="$1"
+shift
+
+case "$lane" in
+  explore|plan|task|review) ;;
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "Unknown lane: $lane" >&2
+    usage
+    exit 1
+    ;;
+ esac
+
+model_override=""
+tools_override=""
+mcp_config_override=""
+share_dir_override=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --tools)
+      tools_override="$2"
+      shift 2
+      ;;
+    --model)
+      model_override="$2"
+      shift 2
+      ;;
+    --mcp-config)
+      mcp_config_override="$2"
+      shift 2
+      ;;
+    --share-dir)
+      share_dir_override="$2"
+      shift 2
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+repo_root=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+cd "$repo_root"
+
+copilot_bin="${COPILOT_BIN:-copilot}"
+
+if ! command -v "$copilot_bin" >/dev/null 2>&1; then
+  echo "Copilot CLI not found. Install it first (see docs/dev/copilot-cli.md)." >&2
+  exit 1
+fi
+
+case "$lane" in
+  explore)
+    model_default="${COPILOT_MODEL_EXPLORE:-gpt-5-mini}"
+    ;;
+  plan)
+    model_default="${COPILOT_MODEL_PLAN:-gpt-5-mini}"
+    ;;
+  task)
+    model_default="${COPILOT_MODEL_TASK:-gpt-5.2-codex}"
+    ;;
+  review)
+    model_default="${COPILOT_MODEL_REVIEW:-gpt-5.2-codex}"
+    ;;
+ esac
+
+model="${model_override:-$model_default}"
+available_tools_default="${COPILOT_AVAILABLE_TOOLS:-bash,git,rg,pnpm,make}"
+available_tools="${tools_override:-$available_tools_default}"
+agent_flag="${COPILOT_AGENT_FLAG:---agent}"
+
+mcp_config_path="${COPILOT_MCP_CONFIG:-$repo_root/config/copilot/mcp.json}"
+if [[ -n "$mcp_config_override" ]]; then
+  mcp_config_path="$mcp_config_override"
+fi
+
+share_dir="${COPILOT_SHARE_DIR:-$repo_root/artifacts/copilot}"
+if [[ -n "$share_dir_override" ]]; then
+  share_dir="$share_dir_override"
+fi
+mkdir -p "$share_dir"
+
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+share_file="$share_dir/${lane}-${stamp}.md"
+
+cmd=(
+  "$copilot_bin"
+  -p
+  --silent
+  --share "$share_file"
+  --available-tools "$available_tools"
+  --model "$model"
+)
+
+if [[ -n "$agent_flag" ]]; then
+  cmd+=("$agent_flag" "$lane")
+fi
+
+if [[ -f "$mcp_config_path" ]]; then
+  cmd+=(--additional-mcp-config "$mcp_config_path")
+fi
+
+if [[ $# -gt 0 ]]; then
+  cmd+=("$@")
+fi
+
+status=0
+"${cmd[@]}" || status=$?
+
+echo "Transcript written to $share_file"
+exit "$status"

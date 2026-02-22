@@ -54,7 +54,6 @@ spec:
           port: 8080
 ---
 # Maestro rate limiting policy
-# Replaces: nginx.ingress.kubernetes.io/limit-rpm: 1000
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:
@@ -132,7 +131,7 @@ spec:
     maxAge: 86400s
     allowCredentials: true
 ---
-# Maestro security headers (replaces nginx configuration-snippet)
+# Maestro security headers
 # Note: Security headers in Gateway API are typically handled via EnvoyPatchPolicy
 # or implementation-specific extensions
 apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -159,7 +158,6 @@ spec:
             - cidr: "10.0.0.0/8"
 ---
 # Network policy update for Gateway API
-# Replaces the ingress-nginx namespace reference
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -180,14 +178,6 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: envoy-gateway-system
-      ports:
-        - port: 8080
-          protocol: TCP
-    # Allow from ingress-nginx (during migration)
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              kubernetes.io/metadata.name: ingress-nginx
       ports:
         - port: 8080
           protocol: TCP

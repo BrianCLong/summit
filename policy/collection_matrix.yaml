@@ -1,0 +1,27 @@
+version: "1.0"
+platforms:
+  twitter:
+    allowed_methods: ["api"]
+    rate_limit: "900/15min"
+    retention_days: 30
+    pii_policy: "redact"
+  facebook:
+    allowed_methods: ["crowdtangle", "api"]
+    rate_limit: "variable"
+    retention_days: 90
+    pii_policy: "hash"
+  tiktok:
+    allowed_methods: ["official_api"]
+    rate_limit: "variable"
+    retention_days: 30
+    pii_policy: "redact"
+  telegram:
+    allowed_methods: ["telethon", "api"]
+    rate_limit: "variable"
+    retention_days: 365
+    pii_policy: "minimize"
+  fringe:
+    allowed_methods: ["html_snapshot"]
+    rate_limit: "1/sec"
+    retention_days: 365
+    pii_policy: "none"

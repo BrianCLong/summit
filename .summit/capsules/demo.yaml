@@ -1,0 +1,47 @@
+version: v2
+name: demo
+allowed_paths:
+  read:
+    - README.md
+  write:
+    - outputs/demo.txt
+allowed_commands:
+  - bash
+  - node
+network_mode: off
+env_allowlist:
+  - PATH
+time:
+  timezone: UTC
+  locale: en_US.UTF-8
+  fixed_time: "2026-01-01T00:00:00Z"
+secret_handles:
+  - DEMO_TOKEN
+waivers:
+  - token: demo-waiver
+    reason: Demo waiver for capsule walkthrough
+    expires_at: "2026-12-31T00:00:00Z"
+steps:
+  - id: write-demo
+    name: Write demo output
+    command: bash
+    args:
+      - -c
+      - "mkdir -p outputs && echo 'Capsule demo' > outputs/demo.txt"
+    writes:
+      - outputs/demo.txt
+  - id: show-readme
+    name: Verify README presence
+    command: node
+    args:
+      - -e
+      - "console.log('README present:', require('fs').existsSync('README.md'))"
+    reads:
+      - README.md
+  - id: self-test
+    name: Capsule self test
+    command: node
+    args:
+      - -e
+      - "process.exit(0)"
+    category: test

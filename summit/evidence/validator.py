@@ -36,11 +36,15 @@ def _validate_iso8601(value: Any) -> None:
 
 
 def validate_report(payload: Mapping[str, Any]) -> None:
-    _require_keys(payload, {"evidence_id", "summary", "artifacts"})
-    _enforce_no_additional(payload, {"evidence_id", "summary", "artifacts"})
+    _require_keys(payload, {"evidence_id", "summary", "environment", "backend", "artifacts"})
+    _enforce_no_additional(payload, {"evidence_id", "summary", "environment", "backend", "artifacts"})
     _validate_evidence_id(payload["evidence_id"])
     if not isinstance(payload["summary"], str):
         raise ValueError("summary must be a string")
+    if not isinstance(payload["environment"], str):
+        raise ValueError("environment must be a string")
+    if not isinstance(payload["backend"], str):
+        raise ValueError("backend must be a string")
     artifacts = payload["artifacts"]
     if not isinstance(artifacts, list) or not all(
         isinstance(item, str) for item in artifacts
@@ -61,11 +65,13 @@ def validate_metrics(payload: Mapping[str, Any]) -> None:
 
 
 def validate_stamp(payload: Mapping[str, Any]) -> None:
-    _require_keys(payload, {"created_at", "git_commit"})
-    _enforce_no_additional(payload, {"created_at", "git_commit"})
+    _require_keys(payload, {"created_at", "git_commit", "run_id"})
+    _enforce_no_additional(payload, {"created_at", "git_commit", "run_id"})
     _validate_iso8601(payload["created_at"])
     if not isinstance(payload["git_commit"], str):
         raise ValueError("git_commit must be a string")
+    if not isinstance(payload["run_id"], str):
+        raise ValueError("run_id must be a string")
 
 
 def validate_index(payload: Mapping[str, Any]) -> None:

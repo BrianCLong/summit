@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/launchpad/agent.schema.json",
+  "title": "LaunchpadAgent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["agent_id", "display_name", "pubkey"],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "pubkey": {
+      "type": "string",
+      "minLength": 32,
+      "maxLength": 4096
+    }
+  }
+}

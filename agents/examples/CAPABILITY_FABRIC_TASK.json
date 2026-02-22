@@ -1,0 +1,46 @@
+{
+  "task_id": "CAPABILITY_FABRIC_001",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "capability-fabric",
+    "version": "v1",
+    "sha256": "f1381cd75b9ab6994207fa7b5d2c22dd0526690efc6518a3de849cdd0c503f8e",
+    "path": "prompts/capability-fabric/capability-fabric.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "capability-fabric/",
+      "server/src/capability-fabric/",
+      "server/src/maestro/mcp/",
+      "tools/summitctl/",
+      "docs/capability-fabric/",
+      "policies/capability-fabric/",
+      "prompts/capability-fabric/",
+      "agents/examples/",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": ["governance", "policy", "observability", "platform"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "capability-fabric/artifacts/api-inventory.json",
+      "capability-fabric/artifacts/capability-graph.json",
+      "capability-fabric/artifacts/capability-risk-report.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Capability registry compiles and validates with deterministic artifacts.",
+    "MCP tool invocation is blocked when capability is unregistered.",
+    "CLI reports risk and diff artifacts."
+  ],
+  "stop_conditions": [
+    "Schema validation fails for capability registry.",
+    "OPA policy evaluation errors block enforcement."
+  ]
+}

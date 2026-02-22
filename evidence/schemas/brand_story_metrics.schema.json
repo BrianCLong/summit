@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Brand Story Evidence Metrics",
+  "type": "object",
+  "required": ["metrics"],
+  "properties": {
+    "metrics": { "type": "object" }
+  },
+  "additionalProperties": true
+}

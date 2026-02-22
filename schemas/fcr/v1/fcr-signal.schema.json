@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/fcr/v1/fcr-signal.schema.json",
+  "title": "FCR Signal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "entity_id",
+    "tenant_id",
+    "observed_at",
+    "signal_type",
+    "confidence_local",
+    "privacy_budget_cost",
+    "version"
+  ],
+  "properties": {
+    "entity_id": { "type": "string", "format": "uuid" },
+    "tenant_id": { "type": "string", "minLength": 3 },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "signal_type": {
+      "type": "string",
+      "enum": ["claim", "media", "url", "account", "coordination_feature"]
+    },
+    "narrative_claim_hash": { "type": "string", "minLength": 8 },
+    "media_hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "phash": { "type": "string" },
+        "ahash": { "type": "string" },
+        "dhash": { "type": "string" },
+        "sha256": { "type": "string", "minLength": 16 }
+      }
+    },
+    "url": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "normalized": { "type": "string" },
+        "registered_domain": { "type": "string" },
+        "public_archive": { "type": "string", "format": "uri" }
+      }
+    },
+    "account_handle_hash": { "type": "string" },
+    "channel_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "platform": { "type": "string" },
+        "region": { "type": "string" },
+        "language": { "type": "string" },
+        "reach": { "type": "number", "minimum": 0 }
+      }
+    },
+    "coordination_features": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "burstiness": { "type": "number", "minimum": 0 },
+        "repost_similarity": { "type": "number", "minimum": 0, "maximum": 1 },
+        "synchronized_windows": { "type": "integer", "minimum": 0 },
+        "shared_hashtag_set": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "provenance_assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "c2pa_status": { "type": "string", "enum": ["pass", "fail", "error", "unknown"] },
+        "signer": { "type": "string" },
+        "assertion_hash": { "type": "string" },
+        "signature_chain": { "type": "string" }
+      }
+    },
+    "confidence_local": { "type": "number", "minimum": 0, "maximum": 1 },
+    "privacy_budget_cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["epsilon", "delta"],
+      "properties": {
+        "epsilon": { "type": "number", "minimum": 0 },
+        "delta": { "type": "number", "minimum": 0 }
+      }
+    },
+    "labels": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "version": { "type": "string", "const": "v1" }
+  }
+}

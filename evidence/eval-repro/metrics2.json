@@ -1,0 +1,12 @@
+{
+  "faithfulness": 1,
+  "latency": 150,
+  "refusal_rate": 0,
+  "robustness": {
+    "evidenceDiversity": 1,
+    "minimality": 0.5,
+    "pathMultiplicity": 1,
+    "score": 0.95,
+    "stability": 1
+  }
+}

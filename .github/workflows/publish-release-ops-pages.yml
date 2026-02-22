@@ -234,7 +234,7 @@ jobs:
 
       - name: Upload Triage Packet
         if: steps.health-check.outputs.level == 'WARN' || steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
+        uses: actions/upload-artifact@v4 # v4
         with:
           name: redaction-triage-${{ needs.check-trigger.outputs.artifact_run_id }}
           path: artifacts/redaction-triage/

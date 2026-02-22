@@ -1,0 +1,8 @@
+# Temporary gate names until required checks are discovered.
+gates:
+  - name: schema_validation_required
+    description: "Evidence JSON schemas must validate"
+  - name: policy_deny_by_default
+    description: "Policy must deny without flag/authorization"
+  - name: compfeat_evals_required
+    description: "Eval harness must run on fixtures"

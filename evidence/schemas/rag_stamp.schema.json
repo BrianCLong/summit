@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit RAG Stamp",
+  "type": "object",
+  "required": ["run_id", "generated_at_utc"],
+  "properties": {
+    "run_id": {"type": "string"},
+    "generated_at_utc": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": true
+}

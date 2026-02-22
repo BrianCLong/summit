@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "label", "classification"],
+  "properties": {
+    "id": {"type": "string"},
+    "label": {"type": "string"},
+    "classification": {"type": "string", "enum": ["public", "restricted", "sensitive"]},
+    "ethics_gate": {"type": "string"}
+  },
+  "additionalProperties": false
+}

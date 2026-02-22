@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IO Account",
+  "type": "object",
+  "required": ["entity_id", "platform", "provenance"],
+  "properties": {
+    "entity_id": { "type": "string" },
+    "platform": { "type": "string" },
+    "handle": { "type": "string" },
+    "display_name": { "type": "string" },
+    "url": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "provenance": { "$ref": "./provenance.json" }
+  }
+}

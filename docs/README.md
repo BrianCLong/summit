@@ -25,6 +25,7 @@ Use this page as the fast path to the docs you need. The golden path details liv
 
 ## Security & Governance
 
+- **[Latest Executive Briefing (2026-01-31)](executive/2026-01-31-summit-platform-briefing.md)**
 - **[SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md)** – Security posture and privacy controls.
 - **[AI_GOVERNANCE_AGENT_FLEET.md](AI_GOVERNANCE_AGENT_FLEET.md)** – AI governance framework, agent fleet management, and incident response procedures.
 - **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.

@@ -1,0 +1,105 @@
+name: Summit CI
+
+on:
+  push:
+    paths:
+      - 'summit/**'
+      - 'client/**'
+      - '.github/workflows/summit-ci.yml'
+  pull_request:
+    paths:
+      - 'summit/**'
+      - 'client/**'
+      - '.github/workflows/summit-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.in ]; then
+            pip install -r requirements.in
+          else
+            pip install pytest pytest-cov fastapi httpx opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
+          fi
+
+      - name: Run Tests with Coverage
+        env:
+          PYTHONPATH: .
+        run: |
+          # Targeting 80% coverage is the goal, but starting with current baseline to prevent regression
+          pytest --cov=summit --cov-report=xml --cov-fail-under=9 summit/tests/
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  test-e2e:
+    needs: test-python
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: intelgraph_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+      neo4j:
+        image: neo4j:5.15.0
+        env:
+          NEO4J_AUTH: neo4j/password
+        ports:
+          - 7687:7687
+    env:
+      DATABASE_URL: postgresql://postgres:password@localhost:5432/intelgraph_test?sslmode=disable
+      NEO4J_URI: bolt://localhost:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: password
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+      CI: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        run: npx playwright test e2e/summit-smoke.spec.ts

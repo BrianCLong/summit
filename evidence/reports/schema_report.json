@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-COGWAR-2026-SCHEMA-001",
+  "summary": "Cognitive domain schema validated against Draft 07",
+  "artifacts": ["schema/cognitive_domain.yaml"],
+  "determinism": {
+    "timestamps_only_in": ["stamp.json"]
+  }
+}

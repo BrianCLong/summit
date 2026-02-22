@@ -1,3 +1,5 @@
+import { aiMaturityCommand } from './check/ai-maturity';
+import { modalityFitCommand } from './check/modality-fit';
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { runCommandWithStream, execAsync } from '../utils';
@@ -49,3 +51,6 @@ export const checkCommand = new Command('check')
   .option('--no-types', 'Skip type checking')
   .option('--no-security', 'Skip security scan')
   .action(checkAction);
+
+checkCommand.addCommand(aiMaturityCommand);
+checkCommand.addCommand(modalityFitCommand);

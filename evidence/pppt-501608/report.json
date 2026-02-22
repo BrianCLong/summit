@@ -1,0 +1,15 @@
+{
+  "evidence_id": "EVD-pppt-501608-core-001",
+  "source": {
+    "title": "Entrepreneur PPPT framework article",
+    "url": "https://www.entrepreneur.com/growing-a-business/the-business-growth-framework-i-wish-id-discovered-sooner/501608",
+    "published_date": "2026-01-26"
+  },
+  "claims_extracted": [
+    "PPPT: Product, People, Process, Training",
+    "Beyond $5M: values derived from what already worked; metrics-first decisions; 4-pillar diagnostic"
+  ],
+  "notes": {
+    "attribution": "Conceptual extraction; no verbatim reuse."
+  }
+}

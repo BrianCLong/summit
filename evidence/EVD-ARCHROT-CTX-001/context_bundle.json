@@ -1,0 +1,95 @@
+{
+  "adr_references": [
+    {
+      "id": "ADR-021-intelligence-foundry.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-007-MoE-MCP-Conductor.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-003-separate-repos-packaged-adapters.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "0002-polyglot-data-stores.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "0010-counterfactual-context-reassembly.md",
+      "keyword": "governance"
+    },
+    {
+      "id": "0001-graphql-api-boundary.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-001-two-product-strategy.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-025-ingress-nginx-to-gateway-api-migration.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-007_ingest_airgap_gateway.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-005_ontology_and_temporal_model.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-008_simulation_overlay_and_synthetic_policy.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "0004-compose-deployment-baseline.md",
+      "keyword": "neo4j"
+    },
+    {
+      "id": "0005-data-plane-slices.md",
+      "keyword": "neo4j"
+    },
+    {
+      "id": "ADR-006_lbac_security_proxy.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-009_context_provenance_graph.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "0009-data-spine-and-audit.md",
+      "keyword": "security"
+    },
+    {
+      "id": "0008-opa-governance.md",
+      "keyword": "governance"
+    },
+    {
+      "id": "ADR-013-orchestration-ml-split.md",
+      "keyword": "maestro"
+    },
+    {
+      "id": "0011-ci-gate-stabilization.md",
+      "keyword": "governance"
+    },
+    {
+      "id": "0001-choose-neo4j.md",
+      "keyword": "graph"
+    },
+    {
+      "id": "ADR-010_invariant_carrying_context_capsules.md",
+      "keyword": "graph"
+    }
+  ],
+  "impacted_policies": [
+    "EG-001",
+    "EG-002"
+  ],
+  "ownership": [
+    "platform-architecture"
+  ]
+}

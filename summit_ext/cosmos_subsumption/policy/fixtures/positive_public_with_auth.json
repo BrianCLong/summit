@@ -1,0 +1,10 @@
+{
+  "app_id": "test-app",
+  "exposure": "internet",
+  "domain": "test.com",
+  "auth": {
+    "required": true,
+    "provider": "oidc"
+  },
+  "breakglass": false
+}

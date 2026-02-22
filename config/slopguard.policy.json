@@ -1,0 +1,11 @@
+{
+  "version": "1",
+  "deny_threshold": 0.70,
+  "require_disclosure_fields": ["llm_assisted", "llm_tools", "human_verifier"],
+  "feature_flags": {
+    "advanced_cluster_detection": false,
+    "dataset_pollution_firewall": false
+  },
+  "never_log_fields": ["auth", "token", "password", "secret"],
+  "enforcing": true
+}

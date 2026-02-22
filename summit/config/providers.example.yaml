@@ -1,0 +1,7 @@
+# Example provider configuration for Summit
+
+providers:
+  - name: stepfun-chat
+    config:
+      api_key: "${STEPFUN_API_KEY}"
+      base_url: "https://api.stepfun.ai/v1"

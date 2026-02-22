@@ -1,0 +1,5 @@
+{
+  "trust": { "score": null, "method": "stub", "thresholds": { "warn": null, "block": null } },
+  "touchpoints": { "signed_event_pass_rate": null, "spoof_detect_rate": null },
+  "simple_ai": { "latency_p95_ms": null, "failure_rate": null }
+}

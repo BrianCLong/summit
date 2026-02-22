@@ -1,0 +1,36 @@
+{
+  "title": "Forbes 2026 Trends Report Schema",
+  "type": "object",
+  "required": ["item", "verified_headings", "unknown_headings"],
+  "properties": {
+    "item": {
+      "type": "object",
+      "required": ["title", "publisher", "published_date", "source_access"],
+      "properties": {
+        "title": { "type": "string" },
+        "publisher": { "type": "string" },
+        "published_date": { "type": "string" },
+        "source_access": {
+          "type": "object",
+          "required": ["status", "http_status"],
+          "properties": {
+            "status": { "type": "string" },
+            "http_status": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "verified_headings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "unknown_headings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

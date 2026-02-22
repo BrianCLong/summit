@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Leak Signal",
+  "type": "object",
+  "required": ["market", "timestamp_window", "odds_delta", "volume_delta"],
+  "properties": {
+    "market": {
+      "type": "string",
+      "description": "Prediction market identifier"
+    },
+    "timestamp_window": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": {"type": "string", "format": "date-time"},
+        "end": {"type": "string", "format": "date-time"}
+      }
+    },
+    "odds_delta": {
+      "type": "number",
+      "description": "Change in odds over the window"
+    },
+    "volume_delta": {
+      "type": "number",
+      "description": "Change in volume over the window"
+    },
+    "plausibility": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Computed plausibility score"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

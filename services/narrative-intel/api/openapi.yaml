@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: Narrative Intelligence API
+  version: 1.0.0
+  description: API for detecting and tracking narrative operations.
+paths:
+  /v1/extract_skeleton:
+    post:
+      summary: Extract narrative skeleton from a document
+      operationId: extract_skeleton
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doc_id: { type: string }
+                text: { type: string }
+                lang: { type: string }
+      responses:
+        '200':
+          description: Narrative Skeleton
+          content:
+            application/json:
+              schema:
+                $ref: '../spec/narrative_skeleton.schema.json'
+
+  /v1/cluster:
+    post:
+      summary: Cluster narratives by structure fingerprint
+      operationId: cluster_narratives
+      responses:
+        '200':
+          description: Cluster ID and Members
+
+  /v1/track_roles:
+    post:
+      summary: Track actor roles across narratives
+      operationId: track_roles
+
+  /v1/detect_resurfacing:
+    post:
+      summary: Detect resurfaced narratives
+      operationId: detect_resurfacing
+
+  /v1/evidence/{evidence_id}:
+    get:
+      summary: Retrieve evidence artifact
+      operationId: get_evidence
+      parameters:
+        - name: evidence_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidence JSON

@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "evidence": {
+    "EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-001": {
+      "files": [
+        "evidence/fixtures/minimal_run/report.json",
+        "evidence/fixtures/minimal_run/metrics.json",
+        "evidence/fixtures/minimal_run/stamp.json"
+      ]
+    }
+  }
+}

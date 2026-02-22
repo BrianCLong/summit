@@ -35,6 +35,10 @@ on:
     tags:
       - "v*.*.*-rc.*"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: write
@@ -119,7 +123,7 @@ jobs:
 
       - name: Upload Report
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@v4 # v6
         with:
           name: dependency-freeze-report-${{ github.run_id }}
           path: artifacts/reports/dependency-freeze-*.md

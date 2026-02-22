@@ -1,0 +1,40 @@
+{
+  "task_id": "OPENCLAW_SKILLPACK_INGEST_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "openclaw-skillpack-ingest",
+    "version": "v1",
+    "sha256": "8e7bf24ee17be011126323058e3a9901707f2c260f6eadfa627f1ca32a8845d0",
+    "path": "prompts/skills/openclaw-skillpack-ingest@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "cli/src/skills/",
+      "cli/src/summit.ts",
+      "cli/__tests__/openclaw.test.ts",
+      "docs/roadmap/STATUS.json",
+      "prompts/skills/openclaw-skillpack-ingest@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/OPENCLAW_SKILLPACK_INGEST_V1.task.json"
+    ],
+    "domains": ["skills", "cli", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["cli test output"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "OpenClaw skill repositories can be ingested into deterministic index artifacts.",
+    "Skills can be shown from the generated index.",
+    "Skill execution remains disabled but approvals are validated."
+  ],
+  "stop_conditions": [
+    "Missing OpenClaw SKILL.md frontmatter causes ingestion failure.",
+    "Execution path attempts to run scripts or access network."
+  ]
+}

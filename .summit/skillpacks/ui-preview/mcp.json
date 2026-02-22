@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "playwright": {
+      "transport": "stdio",
+      "command": "pnpm",
+      "args": ["exec", "playwright", "test"],
+      "shards": {
+        "default": ["screenshot", "trace"],
+        "deep": ["screenshot", "trace", "har", "console"],
+        "ci": ["screenshot"]
+      }
+    }
+  }
+}

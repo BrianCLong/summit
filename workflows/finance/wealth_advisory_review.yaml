@@ -1,0 +1,28 @@
+name: wealth_advisory_review
+nodes:
+  - id: ingest_portfolio
+    next: generate_advice
+  - id: generate_advice
+    type: agent_task
+    agent: agent_advisor
+    next: compliance_check
+  - id: compliance_check
+    type: agent_task
+    agent: agent_compliance
+    next: hitl_review
+  - id: hitl_review
+    type: hitl_review
+    required_role: "wealth_manager"
+    next_approved: send_advice
+    next_denied: revise_advice
+  - id: send_advice
+    type: execute
+    tool: "email_client"
+    data_class: PII
+    next: evidence_emit
+  - id: revise_advice
+    type: agent_task
+    agent: agent_advisor
+    next: compliance_check
+  - id: evidence_emit
+    type: evidence_writer

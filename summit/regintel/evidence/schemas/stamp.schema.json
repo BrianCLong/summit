@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RegIntelStamp",
+  "type": "object",
+  "required": ["evidence_id", "created_at", "git_commit", "offline_mode"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "git_commit": { "type": "string" },
+    "offline_mode": { "type": "boolean" },
+    "tenant_region": { "type": "string" },
+    "manifest_hash": { "type": "string" }
+  },
+  "additionalProperties": false
+}

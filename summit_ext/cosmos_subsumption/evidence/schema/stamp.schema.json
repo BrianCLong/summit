@@ -1,0 +1,10 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cosmos Subsumption Stamp",
+  "type": "object",
+  "required": ["unix_ms"],
+  "properties": {
+    "unix_ms": { "type": "integer" }
+  },
+  "additionalProperties": false
+}

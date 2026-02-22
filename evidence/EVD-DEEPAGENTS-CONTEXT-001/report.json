@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-DEEPAGENTS-CONTEXT-001",
+  "scenario": "schema-validation",
+  "config_hash": "DEFERRED_PENDING_CONFIG",
+  "events": [],
+  "assertions": []
+}

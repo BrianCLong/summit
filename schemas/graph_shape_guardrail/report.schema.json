@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Graph Shape Guardrail Report",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "overall_pass",
+    "reports",
+    "timestamp"
+  ],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "overall_pass": { "type": "boolean" },
+    "reports": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["passed", "message", "metrics", "report_data"],
+        "properties": {
+          "passed": { "type": "boolean" },
+          "message": { "type": "string" },
+          "metrics": { "type": "object" },
+          "report_data": {
+            "type": "object",
+            "properties": {
+              "top_hubs": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": { "type": ["string", "number"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "timestamp": { "type": "string" }
+  }
+}

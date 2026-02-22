@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-shared-memory-orch-001",
+  "summary": "Shared memory orchestration evidence schema scaffold and index entry.",
+  "artifacts": [
+    "evidence/EVD-shared-memory-orch-001/metrics.json",
+    "evidence/EVD-shared-memory-orch-001/stamp.json",
+    "evidence/schemas/shared-memory-orch-report.schema.json",
+    "evidence/schemas/shared-memory-orch-metrics.schema.json",
+    "evidence/schemas/shared-memory-orch-stamp.schema.json"
+  ]
+}

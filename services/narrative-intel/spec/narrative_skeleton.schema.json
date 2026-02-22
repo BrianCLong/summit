@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Narrative Skeleton",
+  "type": "object",
+  "properties": {
+    "doc_id": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "lang": { "type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2,3})?$" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "setting": {
+      "type": "object",
+      "properties": {
+        "time_refs": { "type": "array", "items": { "type": "string" } },
+        "place_refs": { "type": "array", "items": { "type": "string" } },
+        "domain": { "type": "string" }
+      }
+    },
+    "characters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "role": { "type": "string", "enum": ["hero", "villain", "victim", "other"] },
+          "type": { "type": "string", "enum": ["org", "person", "state", "ingroup", "outgroup"] }
+        },
+        "required": ["name", "role", "type"]
+      }
+    },
+    "frame": {
+      "type": "object",
+      "properties": {
+        "problem_definition": { "type": "string" },
+        "causal_interpretation": { "type": "string" },
+        "moral_evaluation": { "type": "string" },
+        "treatment_recommendation": { "type": "string" }
+      }
+    },
+    "causal_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "actor": { "type": "string" },
+          "action": { "type": "string" },
+          "impact_harm": { "type": "string" },
+          "moral": { "type": "string" },
+          "implied_solution": { "type": "string" }
+        }
+      }
+    },
+    "claims": {
+      "type": "object",
+      "properties": {
+        "major_claim": { "type": "string" },
+        "supporting_claims": { "type": "array", "items": { "type": "string" } },
+        "premises": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "credibility_stack": {
+      "type": "object",
+      "properties": {
+        "epistemic_styles": { "type": "array", "items": { "type": "string" } },
+        "style_shift_score": { "type": "number" }
+      }
+    },
+    "propagation": {
+      "type": "object",
+      "properties": {
+        "outlinks": { "type": "array", "items": { "type": "string" } },
+        "inlinks": { "type": "array", "items": { "type": "string" } },
+        "hop_depth_estimate": { "type": "integer" }
+      }
+    },
+    "signals": {
+      "type": "object",
+      "properties": {
+        "structure_fingerprint": { "type": "string" },
+        "risk_scores": { "type": "object" }
+      }
+    }
+  },
+  "required": ["doc_id", "tenant_id", "lang", "frame", "signals"]
+}

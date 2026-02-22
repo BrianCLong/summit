@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "capabilities": [
+    {
+      "capability_id": "step-3.5-flash",
+      "version": "1.0",
+      "description": "StepFun Step-3.5-Flash: Sparse MoE (196B total / ~11B active), 256K context, MTP-3.",
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "role": {"type": "string"},
+                "content": {"type": "string"}
+              }
+            }
+          }
+        }
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "message": {"type": "object"}
+              }
+            }
+          }
+        }
+      },
+      "constraints": {
+        "context_window": 262144,
+        "provider_default": "stepfun-chat",
+        "architecture": {
+          "type": "moe",
+          "total_params_b": 196.81,
+          "active_params_b": 11.0,
+          "routing_top_k": 8
+        },
+        "capabilities": {
+          "supports_tools": true,
+          "supports_json_mode": "unknown",
+          "multi_token_prediction": "mtp-3"
+        },
+        "known_risks": [
+          "long_horizon_identity_time_inconsistency",
+          "mixed_language_under_shift"
+        ]
+      },
+      "trust": {
+        "provider": "StepFun",
+        "compliance": ["Apache-2.0"]
+      }
+    }
+  ],
+  "signature": null
+}

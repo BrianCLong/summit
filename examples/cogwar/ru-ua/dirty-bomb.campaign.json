@@ -1,0 +1,62 @@
+{
+  "schema_version": "cogwar.campaign.v1",
+  "campaign_id": "CW-DBOMB001",
+  "actors": [
+    {
+      "actor_id": "ACT-DB0001",
+      "label": "Pro-Russian influence ecosystem",
+      "actor_type": "proxy"
+    }
+  ],
+  "channels": [
+    {
+      "channel_type": "web",
+      "platform": "news clone sites"
+    },
+    {
+      "channel_type": "social",
+      "platform": "mixed"
+    }
+  ],
+  "narratives": [
+    {
+      "narrative_id": "NAR-DB001A",
+      "theme": "Dirty bomb allegations",
+      "frames": [
+        "Kyiv authorities planned a dirty bomb",
+        "Ukraine intends to implicate Russia"
+      ]
+    }
+  ],
+  "timing": {
+    "event_hooks": [
+      {
+        "event_type": "aid_announcement",
+        "notes": "Narrative spikes aligned with major aid announcements."
+      }
+    ]
+  },
+  "indicators": [
+    {
+      "indicator_id": "IND-DB0001",
+      "kind": "keyword",
+      "pattern": "dirty bomb"
+    },
+    {
+      "indicator_id": "IND-DB0002",
+      "kind": "claim_cluster",
+      "pattern": "Kyiv authorities planned a dirty bomb"
+    }
+  ],
+  "attribution": {
+    "status": "UNATTRIBUTED",
+    "confidence": 0
+  },
+  "evidence": [
+    {
+      "evidence_id": "EVID-DBOMB00001",
+      "source": "PMC: Decoding manipulative narratives in cognitive warfare",
+      "locator": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12460417/"
+    }
+  ]
+}

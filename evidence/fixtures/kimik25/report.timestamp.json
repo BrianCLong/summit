@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-KIMIK25-COST-001",
+  "item": {
+    "name": "Timestamp leak"
+  },
+  "summary": "Includes a forbidden timestamp.",
+  "artifacts": [],
+  "generated_at": "2026-02-14T00:00:00Z"
+}

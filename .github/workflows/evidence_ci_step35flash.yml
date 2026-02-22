@@ -1,0 +1,31 @@
+name: Evidence CI Step 3.5 Flash
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'summit/evidence/schemas/step35flash_*.json'
+      - 'summit/evidence/step35flash_index.example.json'
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'summit/evidence/schemas/step35flash_*.json'
+      - 'summit/evidence/step35flash_index.example.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-evidence:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Run Validation Script
+      run: python scripts/ci/validate_step35flash_evidence.py

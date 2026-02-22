@@ -1,0 +1,13 @@
+{
+  "run_id": "eval-run",
+  "item": "GraphRAG-Analysis",
+  "evidence_ids": [
+    "GRRAG-20260201-test-sha-eval-run"
+  ],
+  "artifacts": {
+    "selected_explanation": "2def1eb6-58d0-4636-8cc9-5276d7279cc5",
+    "robustness_score": "0.95",
+    "node_count": "2",
+    "edge_count": "1"
+  }
+}

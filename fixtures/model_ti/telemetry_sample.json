@@ -1,0 +1,5 @@
+{
+  "event_type": "prompt_abuse_attempt",
+  "redacted": true,
+  "redaction_reason": "potential_secret_or_pii"
+}

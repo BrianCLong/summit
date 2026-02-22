@@ -1,0 +1,38 @@
+{
+  "task_id": "REGULATORY_INTEL_TURN4_20260122",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "regulatory-intel-automation-turn-4",
+    "version": "v1",
+    "sha256": "a78d534d40715d89531548b2c1b3640910a53446623b1536cd0d0f47500e9ec6",
+    "path": "prompts/regulatory/daily-regulatory-intel-update-20260122.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "agents/examples/",
+      "docs/raos/regulatory-intel/",
+      "docs/roadmap/STATUS.json",
+      "prompts/regulatory/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["compliance", "governance", "regulatory-intelligence"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["scripts/check-boundaries.cjs"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Automation Turn 4 regulatory intelligence update is recorded in docs/raos/regulatory-intel/.",
+    "docs/roadmap/STATUS.json reflects the update timestamp and revision note.",
+    "Prompt registry and task spec are updated with the correct prompt hash."
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond declared paths.",
+    "Regulatory logic required outside policy-as-code."
+  ]
+}

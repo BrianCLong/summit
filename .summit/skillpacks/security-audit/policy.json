@@ -1,0 +1,22 @@
+{
+  "defaultBehavior": "deny",
+  "allow": ["scan-*"],
+  "deny": ["scan-prod-*"],
+  "environments": {
+    "ci": {
+      "allow": ["scan-deps"]
+    }
+  },
+  "breakGlass": {
+    "required": true,
+    "waivers": [
+      {
+        "id": "waiver-2026-01-security-audit",
+        "toolPattern": "sbom-export",
+        "expiresAt": "2026-12-31T23:59:59Z",
+        "issuedBy": "security-council",
+        "reason": "Governed exception for compliance evidence"
+      }
+    ]
+  }
+}

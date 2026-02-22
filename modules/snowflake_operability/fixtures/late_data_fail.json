@@ -1,0 +1,6 @@
+[
+  {"marker": "late_data_policy", "status": "failure", "details": "late records dropped"},
+  {"marker": "schema_contract", "status": "success"},
+  {"marker": "file_format_checks", "status": "success"},
+  {"marker": "cost_budget", "status": "success"}
+]

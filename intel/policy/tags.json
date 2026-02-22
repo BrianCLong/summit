@@ -1,0 +1,16 @@
+{
+  "required_policy_tags": [
+    "offensive-cyber-context",
+    "attribution-confidence-check",
+    "legal-review-required"
+  ],
+  "sensitive_topics": {
+    "offensive_operations": ["offensive-cyber-context", "legal-review-required"],
+    "attribution": ["attribution-confidence-check"]
+  },
+  "definitions": {
+    "offensive-cyber-context": "Required for any content describing offensive cyber operations or active measures.",
+    "attribution-confidence-check": "Required when attributing attacks to specific nation-state actors.",
+    "legal-review-required": "Required for content that implies legal or policy precedents."
+  }
+}

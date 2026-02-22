@@ -24,7 +24,7 @@
   "author": "Jules",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "@apollo/server": "^4.9.5",
+    "@apollo/server": "^4.13.0",
     "@open-policy-agent/opa-wasm": "^1.8.0",
     "apollo-server-express": "^3.13.0",
     "body-parser": "^1.20.2",

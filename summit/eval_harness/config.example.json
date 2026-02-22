@@ -1,0 +1,5 @@
+{
+  "dataset": "summit/eval_harness/fixtures/policy_rag_small.jsonl",
+  "out_dir": "evidence",
+  "model": "mock-model"
+}

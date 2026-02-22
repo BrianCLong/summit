@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Trust Paradox Evidence Metrics",
+  "type": "object",
+  "required": ["run_id", "metrics"],
+  "properties": {
+    "run_id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,22 @@
+{
+  "title": "Forbes 2026 Trends Evidence Index Schema",
+  "type": "object",
+  "required": ["item_slug", "evidence"],
+  "properties": {
+    "item_slug": { "type": "string" },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "files"],
+        "properties": {
+          "id": { "type": "string" },
+          "files": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

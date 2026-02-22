@@ -1,0 +1,21 @@
+{
+  "evidence_id": "EVD-REPLITAGENT-AUTOM-001",
+  "item_slug": "replit-agent-automations",
+  "claims": [
+    "Automations runner remains gated and reports queued execution metadata."
+  ],
+  "decisions": [
+    {
+      "decision": "automations_flag",
+      "status": "pass",
+      "details": "Flag gate enforced and metadata emitted."
+    }
+  ],
+  "findings": [
+    {
+      "finding": "automations_tests",
+      "status": "pass",
+      "details": "Disabled/enabled behaviors covered."
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+{"trace_id": "t1", "judge_name": "politeness", "input": "give me the data now", "label": "0", "rationale": "Demanding tone, lacks please/thank you", "metadata": {}}
+{"trace_id": "t2", "judge_name": "politeness", "input": "could you please share the data?", "label": "1", "rationale": "Polite phrasing with modal verb", "metadata": {}}
