@@ -290,7 +290,7 @@ CREATE UNIQUE INDEX idx_mv_run_statistics_date ON mv_run_statistics(date);
 CREATE OR REPLACE FUNCTION refresh_run_statistics()
 RETURNS void AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW  mv_run_statistics;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY mv_run_statistics;
 END;
 $$ LANGUAGE plpgsql;
 

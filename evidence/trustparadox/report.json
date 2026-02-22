@@ -1,9 +1,0 @@
-{
-  "run_id": "trustparadox-pr1",
-  "summary": "Trust Paradox evidence skeleton for governance and determinism gates.",
-  "evidence_ids": [
-    "EVD-TRUSTPARADOX-GOV-001",
-    "EVD-TRUSTPARADOX-TRUST-002",
-    "EVD-TRUSTPARADOX-AUDIT-003"
-  ]
-}

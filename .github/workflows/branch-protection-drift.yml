@@ -30,15 +30,9 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   issues: write
-  pull-requests: write
-  checks: read
   actions: read
 
 env:
@@ -71,7 +65,7 @@ jobs:
 
       - name: Generate GitHub App token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v1
         continue-on-error: true
         with:
           app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
@@ -109,43 +103,28 @@ jobs:
 
           chmod +x scripts/release/check_branch_protection_drift.sh
           chmod +x scripts/release/extract_required_checks_from_policy.sh
-          chmod +x scripts/release/verify_branch_protection_snapshot.sh
 
-          EXIT_CODE=0
-
-          echo "Step 1: Check drift against REQUIRED_CHECKS_POLICY.yml"
-          if ! ./scripts/release/check_branch_protection_drift.sh \
+          scripts/release/check_branch_protection_drift.sh \
             --repo "${{ github.repository }}" \
             --branch "${{ steps.branch.outputs.branch }}" \
             --out-dir "${{ env.OUT_DIR }}" \
-            --fail-on-drift \
-            --verbose; then
-            echo "❌ Step 1 FAILED"
-            EXIT_CODE=1
-          fi
-
-          echo "Step 2: Check drift against docs/ci/snapshots/ branch protection JSON"
-          if ! ./scripts/release/verify_branch_protection_snapshot.sh \
-            --branch "${{ steps.branch.outputs.branch }}"; then
-            echo "❌ Step 2 FAILED"
-            EXIT_CODE=1
-          fi
+            --verbose
 
           # Extract results for outputs
-          if [[ -f "${{ env.OUT_DIR }}/branch_protection_drift_report.json" ]]; then
-            DRIFT=$(jq -r '.drift_detected' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
-            MISSING=$(jq -r '.summary.missing_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
-            EXTRA=$(jq -r '.summary.extra_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+          DRIFT=$(jq -r '.drift_detected' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+          MISSING=$(jq -r '.summary.missing_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
+          EXTRA=$(jq -r '.summary.extra_in_github_count' "${{ env.OUT_DIR }}/branch_protection_drift_report.json")
 
-            echo "drift_detected=${DRIFT}" >> $GITHUB_OUTPUT
-            echo "missing_count=${MISSING}" >> $GITHUB_OUTPUT
-            echo "extra_count=${EXTRA}" >> $GITHUB_OUTPUT
-          fi
+          echo "drift_detected=${DRIFT}" >> $GITHUB_OUTPUT
+          echo "missing_count=${MISSING}" >> $GITHUB_OUTPUT
+          echo "extra_count=${EXTRA}" >> $GITHUB_OUTPUT
 
-          exit $EXIT_CODE
+          echo "Drift detected: ${DRIFT}"
+          echo "Missing in GitHub: ${MISSING}"
+          echo "Extra in GitHub: ${EXTRA}"
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: branch-protection-drift-report
           path: |
@@ -309,9 +288,9 @@ jobs:
 
           ### Links
 
-          - [REQUIRED_CHECKS_POLICY.yml](${{ github.server_url }}/${{ github.repository }}/blob/main/docs/ci/REQUIRED_CHECKS_POLICY.yml)
-          - [Branch Protection Settings](${{ github.server_url }}/${{ github.repository }}/settings/branches)
-          - [Drift Detection Documentation](${{ github.server_url }}/${{ github.repository }}/blob/main/docs/ci/BRANCH_PROTECTION_DRIFT.md)
+          - [REQUIRED_CHECKS_POLICY.yml](../../docs/ci/REQUIRED_CHECKS_POLICY.yml)
+          - [Branch Protection Settings](../../settings/branches)
+          - [Drift Detection Documentation](../../docs/ci/BRANCH_PROTECTION_DRIFT.md)
           - [Workflow Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
           ---

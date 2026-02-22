@@ -31,6 +31,7 @@ spec:
           weight: 10
 ---
 # Rate limiting policy for web
+# Replaces: nginx.ingress.kubernetes.io/limit-rps: 10
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:
@@ -81,6 +82,7 @@ spec:
     preserveXRequestID: true
 ---
 # IP allowlist for internal bypass of rate limits
+# Replaces: nginx.ingress.kubernetes.io/limit-whitelist: 10.0.0.0/8
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: SecurityPolicy
 metadata:
