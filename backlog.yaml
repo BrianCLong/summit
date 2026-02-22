@@ -103,3 +103,39 @@ backlog:
       - story: Agent Security & Compliance Audits
         priority: P0 - Must
         sprint: Future
+
+  - epic: IntelGraph SDLC Expansion (v1.0)
+    stories:
+      - story: Core Platform Architecture & Guardrails (Epic 1)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Graph & Data Modeling (Epic 2)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Ingestion & Connector Framework (Epic 3)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: API & GraphQL Gateway (Epic 4)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: AI / Analytics / Graph Intelligence (Epic 5)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Frontend & Analyst Experience (Epic 6)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Security, Privacy & Compliance (Epic 7)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Observability, SLOs & SRE (Epic 8)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: CI/CD & Infrastructure as Code (Epic 9)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Provenance, Audit & Evidence Exports (Epic 10)
+        priority: P0 - Must
+        sprint: v1.0 Expansion
+      - story: Cost Governance & Unit Economics (Epic 11)
+        priority: P0 - Must
+        sprint: v1.0 Expansion

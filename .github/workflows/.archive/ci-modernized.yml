@@ -30,7 +30,7 @@ permissions:
 
 env:
   NODE_VERSION: '20.x'
-  PNPM_VERSION: '9.12.0'
+  PNPM_VERSION: '10.0.0'
   PYTHON_VERSION: '3.11'
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -137,9 +137,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -182,9 +179,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -224,9 +218,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -303,9 +294,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -380,9 +368,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -465,9 +450,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -524,9 +506,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -592,9 +571,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ needs.preflight.outputs.pnpm-version }}
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

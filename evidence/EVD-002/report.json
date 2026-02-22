@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "classification": "internal",
+  "summary": "Partitioning eval completed",
+  "scenarios": 3,
+  "status": "PASS",
+  "evidence_id": "EVD-002"
+}

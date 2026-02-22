@@ -1,0 +1,150 @@
+# ────────────────────────────────────────────────────────────────────────────────
+# MC v1.0.0 — IntelGraph SDLC Expansion Orchestration Pack
+# Focus: Executable artifacts and high-level roadmap index.
+# ────────────────────────────────────────────────────────────────────────────────
+---
+kind: file
+name: planning/intelgraph-v1/ROADMAP_V1.md
+content: |
+  # IntelGraph Master Orchestration Roadmap v1.0
+
+  ## Overview
+
+  ```mermaid
+  graph TD
+      A[Core Arch] --> B[Data Model]
+      B --> C[Ingest]
+      B --> D[API]
+      C --> E[AI Intelligence]
+      D --> E
+      E --> F[Analyst UX]
+      A --> G[Security]
+      G --> B
+      G --> D
+      A --> H[Obs/SRE]
+      H --> A
+      A --> I[CI/CD]
+      I --> A
+      B --> J[Provenance]
+      C --> J
+      A --> K[Cost Gov]
+  ```
+  This roadmap defines 11 parallel epics for the IntelGraph SDLC expansion.
+
+  ## Epics Index
+
+  - [EPIC 1 — Core Platform Architecture & Guardrails](./epics/EPIC_01.md)
+  - [EPIC 2 — Graph & Data Modeling](./epics/EPIC_02.md)
+  - [EPIC 3 — Ingestion & Connector Framework](./epics/EPIC_03.md)
+  - [EPIC 4 — API & GraphQL Gateway](./epics/EPIC_04.md)
+  - [EPIC 5 — AI / Analytics / Graph Intelligence](./epics/EPIC_05.md)
+  - [EPIC 6 — Frontend & Analyst Experience](./epics/EPIC_06.md)
+  - [EPIC 7 — Security, Privacy & Compliance](./epics/EPIC_07.md)
+  - [EPIC 8 — Observability, SLOs & SRE](./epics/EPIC_08.md)
+  - [EPIC 9 — CI/CD & Infrastructure as Code](./epics/EPIC_09.md)
+  - [EPIC 10 — Provenance, Audit & Evidence Exports](./epics/EPIC_10.md)
+  - [EPIC 11 — Cost Governance & Unit Economics](./epics/EPIC_11.md)
+---
+kind: file
+name: planning/intelgraph-v1/DELIVERABLE_PACK.md
+content: |
+  # IntelGraph Deliverable Pack v1.0
+
+  ## 1. Consolidated Cross-Epic Dependency Matrix
+  | Epic | Depends On | Rationale |
+  |---|---|---|
+  | Epic 2 (Data) | Epic 1 (Arch) | Arch defines the storage topology. |
+  | Epic 3 (Ingest) | Epic 2 (Data) | Schema must be defined before ingest. |
+  | Epic 4 (API) | Epic 2 (Data) | API requires schema for resolvers. |
+  | Epic 5 (AI) | Epic 2, 3 | AI needs data and ingest pipelines. |
+  | Epic 6 (UX) | Epic 4 (API) | UI depends on API gateway. |
+  | Epic 7 (Sec) | Epic 1 (Arch) | Security integrated into core arch. |
+  | Epic 8 (Obs) | All Epics | Monitoring covers all services. |
+  | Epic 9 (CI/CD) | Epic 1 (Arch) | Infrastructure follows arch patterns. |
+  | Epic 10 (Prov) | Epic 2, 3 | Provenance requires data/ingest hooks. |
+  | Epic 11 (Cost) | All Epics | Cost tracking for all resources. |
+
+  ## 2. Multi-Epic Risk Consolidation Table
+  | Category | Primary Risk | Mitigation |
+  |---|---|---|
+  | Technical | Topology mismatch between SaaS and Air-Gapped. | Universal ADR and abstraction layer. |
+  | Operational | SLO breaches due to Neo4j/LLM latency. | Edge caching and aggressive circuit breakers. |
+  | Compliance | Tenant data leakage in shared graph. | OPA-enforced ABAC and field-level encryption. |
+  | Financial | LLM cost spiraling out of control. | Real-time metering and hard per-tenant caps. |
+
+  ## 3. Global Acceptance Criteria Checklist
+  - [ ] 100% of P0 tasks completed across all 11 epics.
+  - [ ] Unit test coverage >= 85% globally.
+  - [ ] Zero critical or high security vulnerabilities in SBOM.
+  - [ ] All mTLS and OIDC/JWT auth checks passing.
+  - [ ] p95 Latency < 200ms for core API paths.
+  - [ ] Provenance chain intact for 100% of ingested data.
+
+  ## 4. Release Readiness Gate Checklist
+  - [ ] ADRs signed off by Architecture Agent.
+  - [ ] Load tests verified at 2x peak capacity.
+  - [ ] Disaster Recovery (DR) drill completed and signed off.
+  - [ ] SOC2/Compliance alignment audit passed.
+  - [ ] Evidence bundle generated and cryptographically signed.
+
+  ## 5. SLO Compliance Validation Plan
+  - **Metric**: Availability (99.9%) -> Verified via Synthetic probes.
+  - **Metric**: Latency (p95 < 200ms) -> Verified via OTel traces.
+  - **Metric**: Error Rate (< 0.1%) -> Verified via Prometheus alerts.
+  - **Metric**: Cost (< $50/tenant) -> Verified via FinOps metering.
+
+  ## 6. Budget Impact Summary
+  - **Infra (EKS/RDS)**: $2,500/month baseline.
+  - **LLM Usage**: $5,000/month (estimated).
+  - **Monitoring/Ops**: $1,000/month.
+  - **Total Est. OpEx**: $8,500/month for initial 10 tenants.
+
+  ## 7. Evidence Bundle Specification
+  - **Format**: Signed JSON/JSONL.
+  - **Fields**: Timestamp, Evidence ID, Originating Agent, SHA-256 Hash, Policy Verdict.
+  - **Storage**: Immutable WORM storage (S3 Object Lock).
+  - **Verification**: `summit-verify-evidence` CLI utility.
+---
+kind: file
+name: helm/overlays/v100/values-v100-expansion.yaml
+content: |
+  intelgraph:
+    expansion:
+      enabled: true
+      epics: 11
+      parallelExecution: true
+    costGovernance:
+      dailyCapUsd: 50.0
+      alertThreshold: 0.8
+    observability:
+      slo:
+        uptime: 0.999
+        latencyP95ms: 200
+---
+kind: file
+name: .github/workflows/v100-sdlc-expansion.yml
+content: |
+  name: v100-sdlc-expansion
+  on:
+    workflow_dispatch:
+  jobs:
+    validate:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - name: Verify Roadmap
+          run: ls planning/intelgraph-v1/ROADMAP_V1.md
+---
+kind: file
+name: scripts/verify-v1-sdlc.sh
+content: |
+  #!/usr/bin/env bash
+  set -euo pipefail
+  echo "[T-0] IntelGraph v1.0 SDLC Expansion — Verification starting"
+  echo "[+] Checking planning artifacts..."
+  [[ -f planning/intelgraph-v1/ROADMAP_V1.md ]] || (echo "Missing Roadmap Index"; exit 1)
+  [[ -f planning/intelgraph-v1/DELIVERABLE_PACK.md ]] || (echo "Missing Deliverable Pack"; exit 1)
+  for i in {01..11}; do
+    [[ -f planning/intelgraph-v1/epics/EPIC_$i.md ]] || (echo "Missing EPIC_$i.md"; exit 1)
+  done
+  echo "[DONE] Verification complete"

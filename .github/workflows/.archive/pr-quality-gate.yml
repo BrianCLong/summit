@@ -13,7 +13,7 @@ concurrency:
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
   NODE_VERSION: '20.x'
-  PNPM_VERSION: '9.12.0'
+  PNPM_VERSION: '10.0.0'
 
 jobs:
   # Fast feedback lane: Static Analysis & Security

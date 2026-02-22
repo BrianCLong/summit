@@ -59,10 +59,23 @@ def verify_evidence():
         print(f"Error: Expected version 1, got {index.get('version')}")
         sys.exit(1)
 
-    evidence_list = index.get("evidence", [])
-    if not isinstance(evidence_list, list):
-        print("Error: 'evidence' field must be a list.")
-        sys.exit(1)
+    evidence_raw = index.get("items", index.get("evidence", []))
+    evidence_list = []
+    if isinstance(evidence_raw, dict):
+        for eid, meta in evidence_raw.items():
+            if isinstance(meta, dict):
+                item = meta.copy()
+                item["id"] = eid
+                # If path is not present, use a default or derive from files
+                if "path" not in item and "files" in item:
+                    # heuristic for summit/ci/verify_evidence.py which expects report.json in the path
+                    files = item["files"]
+                    if isinstance(files, dict):
+                        if "report" in files:
+                            item["path"] = os.path.dirname(files["report"])
+                evidence_list.append(item)
+    elif isinstance(evidence_raw, list):
+        evidence_list = evidence_raw
 
     print(f"Found {len(evidence_list)} evidence items.")
 

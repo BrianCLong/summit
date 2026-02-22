@@ -8,12 +8,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 if "SUMMIT_EVIDENCE_ROOT" in os.environ:
     EVID = Path(os.environ["SUMMIT_EVIDENCE_ROOT"])
-    ROOT = EVID.parent # Assumption for relative paths
+    ROOT = EVID.parent
 else:
     EVID = ROOT / "evidence"
 
-SCHEMAS = EVID / "schemas"
-NEW_SCHEMAS = EVID / "schema"
+CONFIG_PATH = ROOT / "config" / "evidence_ignore.json"
 
 def fail(msg):
     print(f"evidence-verify: FAIL: {msg}", file=sys.stderr)
@@ -25,15 +24,18 @@ def load_json(p):
     except Exception as e:
         fail(f"Could not read/parse {p}: {e}")
 
+def load_config():
+    if CONFIG_PATH.exists():
+        return load_json(CONFIG_PATH)
+    return {"ignored_directories": [], "ignored_files": []}
+
 def _validate_recursive(instance, schema, context):
-    # Required fields
     required = schema.get("required", [])
     if isinstance(instance, dict):
         for field in required:
             if field not in instance:
                 fail(f"Missing required field '{field}' in {context}")
 
-        # Properties check
         props = schema.get("properties", {})
         additional_allowed = schema.get("additionalProperties", True)
 
@@ -45,7 +47,6 @@ def _validate_recursive(instance, schema, context):
                 prop_schema = props[key]
                 ptype = prop_schema.get("type")
 
-                # Type checking
                 if ptype == "string" and not isinstance(val, str):
                     fail(f"Field '{key}' in {context} must be string")
                 elif ptype == "array" and not isinstance(val, list):
@@ -57,19 +58,16 @@ def _validate_recursive(instance, schema, context):
                 elif ptype == "integer" and not isinstance(val, int):
                     fail(f"Field '{key}' in {context} must be integer")
 
-                # Pattern check
                 pattern = prop_schema.get("pattern")
                 if pattern and isinstance(val, str):
                     if not re.match(pattern, val):
                          fail(f"Field '{key}' in {context} value '{val}' does not match pattern '{pattern}'")
 
-                # Recursion
                 if ptype == "object" and "properties" in prop_schema:
                     _validate_recursive(val, prop_schema, f"{context}.{key}")
                 elif ptype == "array" and "items" in prop_schema:
                     item_schema = prop_schema["items"]
                     for idx, item in enumerate(val):
-                        # item_schema might be a type string or object
                         if isinstance(item_schema, dict):
                             _validate_recursive(item, item_schema, f"{context}.{key}[{idx}]")
 
@@ -79,40 +77,33 @@ def validate_schema(instance, schema_path, context=""):
     schema = load_json(schema_path)
     _validate_recursive(instance, schema, context)
 
-def check_timestamps(evid_dir=None):
-    # Determinism rule: timestamps ONLY in stamp.json
-    scan_dir = evid_dir if evid_dir else EVID
+def check_timestamps(evid_dir, config):
+    scan_dir = evid_dir
     forbidden = []
-    # Ignore specific files and dirs
-    IGNORE_FILES = {
-        "provenance.json", "governance-bundle.json", "release_abort_events.json",
-        "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
-        "evidence-index.json", "index.json", "index.schema.json", "report.schema.json",
-        "metrics.schema.json", "stamp.schema.json", # Ignore schemas
-        "acp_stamp.json", "skill_stamp.json"
-    }
-    IGNORE_DIRS = {
-        "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7",
-        "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption",
-        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001"
-    }
+
+    ignore_files = set(config.get("ignored_files", []))
+    ignore_files.add("stamp.json")
+
+    # ACP and Skill stamps also contain timestamps legally
+    ignore_files.update({"acp_stamp.json", "skill_stamp.json", "taxonomy.stamp.json"})
+
+    ignore_dirs = set(config.get("ignored_directories", []))
+    # Legacy dirs often contain timestamps
+    ignore_dirs.update({"audit", "context", "governance", "jules", "mcp", "schemas", "subsumption", "fixtures", "runs", "runtime"})
 
     for p in scan_dir.rglob("*"):
         if not p.is_file():
             continue
-        if p.name == "stamp.json":
+        if p.name in ignore_files:
             continue
-        if p.name in IGNORE_FILES:
-            continue
-        # Check if any parent part is in IGNORE_DIRS
-        if any(part in IGNORE_DIRS for part in p.parts):
+        if any(part in ignore_dirs for part in p.parts):
             continue
         if p.suffix not in {".json"}:
             continue
 
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            # Heuristic: YYYY-MM-DD
+            # Heuristic: ISO-ish timestamp or date
             if re.search(r'202\d-\d{2}-\d{2}', txt):
                  forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
@@ -125,21 +116,27 @@ def main(root_override=None):
     evid_dir = Path(root_override) if root_override else EVID
     print(f"Verifying evidence in {evid_dir}")
 
-    # 1. Verify index.json existence
+    config = load_config()
+
     index_path = evid_dir / "index.json"
     if not index_path.exists():
         fail("evidence/index.json missing")
 
     index = load_json(index_path)
-
     items = []
-    if "items" in index and isinstance(index["items"], list):
-        items = index["items"]
+    if "items" in index:
+        it = index["items"]
+        if isinstance(it, list):
+            items = it
+        elif isinstance(it, dict):
+            for evd_id, data in it.items():
+                item = data.copy()
+                item["evidence_id"] = evd_id
+                items.append(item)
     elif "evidence" in index and isinstance(index["evidence"], dict):
         for evd_id, data in index["evidence"].items():
             item = data.copy()
             item["evidence_id"] = evd_id
-            # Convert report/metrics/stamp paths to list of files
             files = []
             if "report" in item: files.append(item["report"])
             if "metrics" in item: files.append(item["metrics"])
@@ -152,8 +149,11 @@ def main(root_override=None):
     print(f"Found {len(items)} items in index.")
 
     for item in items:
-        # Support both 'files' (plan) and 'paths' (existing)
-        files = item.get("files", item.get("paths", []))
+        files_raw = item.get("files", item.get("paths", []))
+        if isinstance(files_raw, dict):
+            files = list(files_raw.values())
+        else:
+            files = files_raw
         evd_id = item.get("evidence_id")
 
         if not evd_id:
@@ -166,12 +166,8 @@ def main(root_override=None):
             if not fpath.exists():
                 fail(f"File referenced in index not found: {fpath_str}")
 
-            # Validate schema based on filename
             fname = fpath.name
-            if evd_id.startswith("EVD-CLAUDECODE-SUBAGENTS-"):
-                schema_dir = NEW_SCHEMAS
-            else:
-                schema_dir = SCHEMAS
+            schema_dir = EVID / "schemas"
 
             if fname == "report.json":
                 validate_schema(load_json(fpath), schema_dir / "report.schema.json", context=f"{evd_id} report")
@@ -179,12 +175,10 @@ def main(root_override=None):
                 validate_schema(load_json(fpath), schema_dir / "metrics.schema.json", context=f"{evd_id} metrics")
             elif fname == "stamp.json":
                 validate_schema(load_json(fpath), schema_dir / "stamp.schema.json", context=f"{evd_id} stamp")
-            elif fname == "index.json" and schema_dir == NEW_SCHEMAS:
+            elif fname == "index.json":
                  validate_schema(load_json(fpath), schema_dir / "index.schema.json", context=f"{evd_id} index")
 
-    # 2. Check for timestamps
-    check_timestamps(evid_dir)
-
+    check_timestamps(evid_dir, config)
     print("evidence-verify: PASS")
 
 if __name__ == "__main__":

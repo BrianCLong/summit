@@ -219,6 +219,5 @@ jobs:
     needs: release
     uses: ./.github/workflows/deploy-staging.yml
     with:
-      version: ${{ needs.release.outputs.new-release-version }}
       environment: staging
     secrets: inherit

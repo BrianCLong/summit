@@ -19,15 +19,19 @@ jobs:
   test-and-bench:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install
 
       - name: Run Unit Tests
         run: npx tsx tests/memalign/test_stores.ts && npx tsx tests/memalign/test_ingest.ts && npx tsx tests/memalign/test_judge_wrapper.ts

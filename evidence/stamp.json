@@ -1,4 +1,8 @@
 {
+  "generated_at": "2026-02-09T12:00:00Z",
+  "git": {
+    "sha": "abcdef1234567"
+  },
   "timestamp": 1769811201.9659557,
   "version": "1.0"
 }

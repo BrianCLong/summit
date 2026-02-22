@@ -2,9 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "summit evidence index",
   "type": "object",
-  "required": ["mappings"],
   "properties": {
-<<<<<<< HEAD
     "version": {
       "type": "string"
     },
@@ -29,10 +27,7 @@
         "additionalProperties": true
       }
     },
-    "map": {
-=======
     "mappings": {
->>>>>>> origin/main
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -45,5 +40,9 @@
       }
     }
   },
+  "anyOf": [
+    { "required": ["items"] },
+    { "required": ["mappings"] }
+  ],
   "additionalProperties": false
 }

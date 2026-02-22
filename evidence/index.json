@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "evidence": {
+  "items": {
     "EVD-001": {
       "evidence_id": "EVD-001",
       "files": {
@@ -12,17 +12,17 @@
     "EVD-002": {
       "evidence_id": "EVD-002",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-002/report.json",
+        "metrics": "evidence/EVD-002/metrics.json",
+        "stamp": "evidence/EVD-002/stamp.json"
       }
     },
     "EVD-003": {
       "evidence_id": "EVD-003",
       "files": {
-        "report": "evidence/report.json",
-        "metrics": "evidence/metrics.json",
-        "stamp": "evidence/stamp.json"
+        "report": "evidence/EVD-003/report.json",
+        "metrics": "evidence/EVD-003/metrics.json",
+        "stamp": "evidence/EVD-003/stamp.json"
       }
     },
     "EVD-MITTR-AGENTIC-WORKFORCE-001": {
