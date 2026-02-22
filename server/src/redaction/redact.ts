@@ -37,6 +37,15 @@ const FIELD_METADATA: Record<string, FieldMetadata> = {
   location: { type: 'object', sensitive: true },
   userId: { type: 'string', sensitive: true },
   sessionId: { type: 'string', sensitive: true },
+  password: { type: 'string', sensitive: true },
+  token: { type: 'string', sensitive: true },
+  accessToken: { type: 'string', sensitive: true },
+  refreshToken: { type: 'string', sensitive: true },
+  apiKey: { type: 'string', sensitive: true },
+  secret: { type: 'string', sensitive: true },
+  clientSecret: { type: 'string', sensitive: true },
+  authorization: { type: 'string', sensitive: true },
+  bearer: { type: 'string', sensitive: true },
 
   // Standard fields that are usually safe
   id: { type: 'string' },
