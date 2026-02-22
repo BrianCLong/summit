@@ -86,6 +86,7 @@ import { SummitInvestigate } from './services/SummitInvestigate.js';
 import { streamIngest } from './ingest/stream.js';
 import osintRouter from './routes/osint.js';
 import palettesRouter from './routes/palettes.js';
+import outreachRouter from './routes/outreach.js';
 
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
@@ -461,6 +462,7 @@ export const createApp = async () => {
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
+  app.use('/api/outreach', outreachRouter);
 
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);

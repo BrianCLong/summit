@@ -60,6 +60,7 @@ const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas
 const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
 const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
 const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
+const OutreachDashboard = React.lazy(() => import('@/pages/outreach-dashboard'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -261,6 +262,15 @@ function App() {
                           element={
                             <DataFetchErrorBoundary dataSourceName="Mission Control">
                               <MissionControlPage />
+                            </DataFetchErrorBoundary>
+                          }
+                        />
+
+                        <Route
+                          path="outreach"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="Outreach Dashboard">
+                              <OutreachDashboard />
                             </DataFetchErrorBoundary>
                           }
                         />
