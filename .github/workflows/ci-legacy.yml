@@ -239,7 +239,7 @@ jobs:
       - deprecated-checks
       - performance-regression
       - accessibility-audit
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (always())
+    if: ${{ (vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule') && always() }}
     steps:
       - name: Report results (non-blocking)
         run: |
