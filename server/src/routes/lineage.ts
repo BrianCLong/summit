@@ -163,7 +163,13 @@ const LINEAGE_UI_CONTRACT = process.env.LINEAGE_UI_CONTRACT === 'true';
 
 if (LINEAGE_UI_CONTRACT) {
   lineageRouter.get('/graph', (req, res) => {
-    const { entityId, fieldPath, collapse } = req.query;
+    const entityId = typeof req.query.entityId === 'string' ? req.query.entityId : null;
+    const fieldPath = typeof req.query.fieldPath === 'string' ? req.query.fieldPath : null;
+    const collapse = Array.isArray(req.query.collapse)
+      ? req.query.collapse.filter((v): v is string => typeof v === 'string').join(',')
+      : typeof req.query.collapse === 'string'
+        ? req.query.collapse
+        : '';
 
     if (!entityId || !fieldPath) {
       return res.status(400).json({
@@ -173,9 +179,9 @@ if (LINEAGE_UI_CONTRACT) {
 
     let response = { ...lineageGraphFixture };
 
-    if (collapse) {
+    if (collapse.length > 0) {
       const collapsedNodeIds = new Set<string>();
-      if ((collapse as string).includes('evidence')) {
+      if (collapse.includes('evidence')) {
         response.layoutHints?.grouping.forEach(group => {
           if (group.groupId === 'evidence-cluster') {
             group.nodeIds.forEach(id => collapsedNodeIds.add(id));

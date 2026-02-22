@@ -14,10 +14,29 @@ Dependencies:
 
 import argparse
 import json
-import os
+import re
 import subprocess
 import sys
 from datetime import datetime
+
+
+_SENSITIVE_PATTERNS = [
+    (re.compile(r"(?i)(authorization:\s*bearer\s+)[^\s]+"), r"\1[REDACTED]"),
+    (re.compile(r"(?i)(x-api-key:\s*)[^\s]+"), r"\1[REDACTED]"),
+    (re.compile(r"(?i)github_pat_[a-zA-Z0-9_]+"), "[REDACTED_GITHUB_TOKEN]"),
+    (re.compile(r"(?i)gh[pousr]_[a-zA-Z0-9_]+"), "[REDACTED_GITHUB_TOKEN]"),
+    (
+        re.compile(r"(?i)((?:api[_-]?key|token|secret|password)\s*[=:]\s*)[^\s]+"),
+        r"\1[REDACTED]",
+    ),
+]
+
+
+def redact_sensitive(text: str) -> str:
+    redacted = text
+    for pattern, replacement in _SENSITIVE_PATTERNS:
+        redacted = pattern.sub(replacement, redacted)
+    return redacted
 
 
 def run_command(cmd_list):
@@ -31,7 +50,8 @@ def run_command(cmd_list):
              # Dependabot/Secret scanning require specific scopes not always available
              return "PERMISSION_DENIED"
         print(f"Error running command: {' '.join(cmd_list)}", file=sys.stderr)
-        print(f"Stderr: {e.stderr}", file=sys.stderr)
+        if e.stderr:
+            print(f"Stderr: {redact_sensitive(e.stderr)}", file=sys.stderr)
         return None
 
 def get_alerts(repo, alert_type):

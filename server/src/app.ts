@@ -170,7 +170,7 @@ export const createApp = async () => {
     .filter(Boolean);
   const securityHeadersEnabled = process.env.SECURITY_HEADERS_ENABLED !== 'false';
   const cspReportOnly = process.env.SECURITY_HEADERS_CSP_REPORT_ONLY === 'true';
-  const cspEnabledFlag = process.env.SECURITY_HEADERS_CSP_ENABLED === 'true';
+  const cspEnabledFlag = process.env.SECURITY_HEADERS_CSP_ENABLED !== 'false';
 
   const safetyState = await resolveSafetyState();
   if (safetyState.killSwitch || safetyState.safeMode) {
@@ -191,7 +191,7 @@ export const createApp = async () => {
     securityHeaders({
       enabled: securityHeadersEnabled,
       allowedOrigins,
-      enableCsp: cspEnabledFlag || isProduction,
+      enableCsp: cspEnabledFlag,
       cspReportOnly,
     }),
   );

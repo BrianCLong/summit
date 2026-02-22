@@ -6,6 +6,7 @@ import json
 import time
 from collections import defaultdict
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any, cast
 
 import requests  # type: ignore[import-untyped]
@@ -26,7 +27,20 @@ async def _load_source(req: IngestJobRequest) -> str:
         resp = requests.get(req.source, timeout=10)
         resp.raise_for_status()
         return cast(str, resp.text)
-    with open(req.source, encoding="utf-8") as f:
+
+    source_path = Path(req.source)
+    if source_path.is_absolute():
+        resolved = source_path.resolve()
+    else:
+        resolved = (Path.cwd() / source_path).resolve()
+
+    workspace_root = Path.cwd().resolve()
+    if resolved != workspace_root and workspace_root not in resolved.parents:
+        raise ValueError("Local ingest source must be inside the current workspace")
+    if not resolved.is_file():
+        raise FileNotFoundError(f"Local ingest source does not exist: {resolved}")
+
+    with open(resolved, encoding="utf-8") as f:
         return f.read()
 
 
