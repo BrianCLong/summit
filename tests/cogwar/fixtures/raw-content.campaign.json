@@ -1,0 +1,31 @@
+{
+  "schema_version": "cogwar.campaign.v1",
+  "campaign_id": "CW-RAW0001",
+  "actors": [
+    { "actor_id": "ACT-RW0001", "label": "Test actor", "actor_type": "unknown" }
+  ],
+  "channels": [{ "channel_type": "web", "platform": "test" }],
+  "narratives": [
+    {
+      "narrative_id": "NAR-RW0001",
+      "theme": "Test",
+      "frames": ["Test frame"]
+    }
+  ],
+  "timing": { "event_hooks": [{ "event_type": "other" }] },
+  "indicators": [
+    { "indicator_id": "IND-RW0001", "kind": "keyword", "pattern": "test" }
+  ],
+  "attribution": {
+    "status": "UNATTRIBUTED",
+    "confidence": 0
+  },
+  "evidence": [
+    {
+      "evidence_id": "EVID-RAW00001",
+      "source": "Test source",
+      "locator": "https://example.com"
+    }
+  ],
+  "raw_content": "full text payload should be rejected"
+}

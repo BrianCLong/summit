@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["runId","agent","tool","start_ts","duration_ms","cpu_ms","mem_bytes","io_hash","decision","signature"],
+  "properties": {
+    "runId": {"type":"string"}, "agent": {"type":"string"}, "tool":{"type":"string"},
+    "start_ts":{"type":"integer"}, "duration_ms":{"type":"integer"},
+    "cpu_ms":{"type":"integer"}, "mem_bytes":{"type":"integer"},
+    "io_hash":{"type":"string"}, "decision":{"type":"string","enum":["allow","deny"]},
+    "signature":{"type":"string"}
+  }
+}

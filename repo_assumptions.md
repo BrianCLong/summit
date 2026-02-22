@@ -1,40 +1,27 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Reality Check
 
-## Verified vs Assumed Directory List
+## Verified
+- **Repo exists**: `BrianCLong/summit` (MIT licensed).
+- **Target Package**: `agents/orchestrator` (`@intelgraph/multi-llm-orchestrator`) is the real orchestrator.
+  - Confirmed via `grep` for "OpenAI" and "Anthropic" providers.
+  - Contains `src/providers/` with `OpenAIProvider.ts` and `ClaudeProvider.ts`.
+- **Test Runner**: `vitest` (v1.6.1).
+  - Configured in `agents/orchestrator/package.json`.
+  - Tests located in `agents/orchestrator/__tests__/`.
+- **Module System**: ESM (`type: "module"` in `package.json`).
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumed
+- **Feature Flags**: Likely environment variable based or a simple config object. No dedicated `launchdarkly` or similar service observed yet.
+- **Budget**: Enforced via caller-supplied `budget` parameter in the new DAAO router (as per plan).
+- **Telemetry**: Logging via `console` or custom logger (observed `Omniscience` logging in `agentic`, but `agents/orchestrator` uses standard logging or potentially `pino` based on dependencies). `agents/orchestrator` has no explicit logger import in the snippets seen, but likely uses `console` or injected logger.
 
-## CI Check Names (Exact)
+## Target Directory Structure for DAAO
+All DAAO components will be placed in `agents/orchestrator/src/daao/`:
+- `agents/orchestrator/src/daao/difficulty/`
+- `agents/orchestrator/src/daao/routing/`
+- `agents/orchestrator/src/daao/collaboration/`
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Test Placement
+- `agents/orchestrator/__tests__/daao/difficulty/*.test.ts`
+- `agents/orchestrator/__tests__/daao/routing/*.test.ts`
+- `agents/orchestrator/__tests__/daao/collaboration/*.test.ts`

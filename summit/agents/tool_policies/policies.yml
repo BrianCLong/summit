@@ -1,0 +1,11 @@
+policies:
+  web.search:
+    allowed_scope: [ "domain:gov", "domain:mil", "read" ]
+    budget_ms: 4000
+    max_calls: 2
+    sandbox: "wasm"        # wasm|gvisor|firecracker
+  github.read_prs:
+    allowed_scope: [ "read", "repo:public" ]
+    budget_ms: 3000
+    max_calls: 1
+    sandbox: "gvisor"

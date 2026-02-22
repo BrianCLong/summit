@@ -1,0 +1,15 @@
+{
+  "cognitive_surface": {
+    "channels": ["twitter", "telegram"],
+    "narratives": ["narrative_1"],
+    "audience_segments": ["segment_A"]
+  },
+  "threat_hypotheses": [
+    {
+      "type": "CIB",
+      "confidence": "HIGH",
+      "evidence_refs": ["EVD-123"]
+    }
+  ],
+  "mitigations_applied": ["gate.dual_use.blocked"]
+}

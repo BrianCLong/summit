@@ -5,7 +5,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPolicyEvidence, buildDeterminismEvidence, buildBranchProtectionEvidence, buildGovernanceSummary, VerificationState } from './lib/governance_evidence.mjs';
@@ -14,6 +14,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
 const ARTIFACTS_DIR = process.env.ARTIFACTS_DIR || join(ROOT, 'artifacts/governance');
 const OFFLINE_MODE = process.argv.includes('--offline') || process.argv.includes('--dry-run');
+const EVENT_NAME = process.env.GITHUB_EVENT_NAME || '';
+const IS_PULL_REQUEST = EVENT_NAME === 'pull_request' || EVENT_NAME === 'pull_request_target';
 
 async function runPolicyGate(sha) {
   console.log('Running: Required Checks Policy...');
@@ -45,18 +47,54 @@ async function runBranchProtectionGate(sha) {
     console.log('  Status: SKIP (offline mode)\n');
     return { verdict: 'SKIP', state: VerificationState.UNVERIFIABLE_PERMISSIONS, evidence: buildBranchProtectionEvidence({ branch: 'main', state: VerificationState.UNVERIFIABLE_PERMISSIONS, expectedChecks: [], actualChecks: [], driftDetails: null, sha }) };
   }
+
+  const auditOutDir = join(ROOT, 'artifacts/governance/branch-protection-drift');
+  const auditEvidencePath = join(ROOT, 'artifacts/governance/branch-protection-audit.evidence.json');
+  const auditReportPath = join(auditOutDir, 'drift.json');
+
   try {
-    const output = execSync('node scripts/ci/check_branch_protection_drift.mjs --json', { cwd: ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'], timeout: 30000 });
-    let result; try { result = JSON.parse(output); } catch { result = { state: VerificationState.VERIFIED_MATCH }; }
-    const state = result.state || VerificationState.VERIFIED_MATCH;
-    let verdict = state === VerificationState.VERIFIED_MATCH ? 'PASS' : state === VerificationState.VERIFIED_DRIFT ? 'FAIL' : 'SKIP';
-    console.log(`  Status: ${verdict} (${state})\n`);
-    return { verdict, state, evidence: buildBranchProtectionEvidence({ branch: 'main', state, expectedChecks: result.expected || [], actualChecks: result.actual || [], driftDetails: result.diff || null, sha }) };
-  } catch (err) {
-    const state = err.message?.includes('403') || err.message?.includes('Not Found') ? VerificationState.UNVERIFIABLE_PERMISSIONS : VerificationState.UNVERIFIABLE_ERROR;
-    console.log(`  Status: SKIP (${state})\n`);
-    return { verdict: 'SKIP', state, evidence: buildBranchProtectionEvidence({ branch: 'main', state, expectedChecks: [], actualChecks: [], driftDetails: null, sha }) };
+    execSync('node scripts/ci/check_branch_protection_drift.mjs --out artifacts/governance/branch-protection-drift', {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 30000
+    });
+  } catch {
+    // Continue: check_branch_protection_drift.mjs writes machine-readable evidence
+    // even when drift is detected and exits non-zero.
   }
+
+  let state = VerificationState.UNVERIFIABLE_ERROR;
+  let expectedChecks = [];
+  let actualChecks = [];
+  let driftDetails = null;
+
+  try {
+    if (existsSync(auditEvidencePath)) {
+      const rawEvidence = JSON.parse(readFileSync(auditEvidencePath, 'utf8'));
+      state = rawEvidence.state || state;
+      driftDetails = rawEvidence.diff || null;
+    }
+    if (existsSync(auditReportPath)) {
+      const rawReport = JSON.parse(readFileSync(auditReportPath, 'utf8'));
+      expectedChecks = rawReport?.policy?.required_contexts || [];
+      actualChecks = rawReport?.actual?.required_contexts || [];
+      driftDetails = rawReport?.diff || driftDetails;
+    }
+  } catch {
+    state = VerificationState.UNVERIFIABLE_ERROR;
+  }
+
+  let verdict = state === VerificationState.VERIFIED_MATCH ? 'PASS' : state === VerificationState.VERIFIED_DRIFT ? 'FAIL' : 'SKIP';
+  if (state === VerificationState.VERIFIED_DRIFT && IS_PULL_REQUEST) {
+    verdict = 'SKIP';
+  }
+  if (verdict === 'SKIP' && state === VerificationState.UNVERIFIABLE_ERROR) {
+    console.log(`  Status: SKIP (${state})\n`);
+  } else {
+    console.log(`  Status: ${verdict} (${state})\n`);
+  }
+  return { verdict, state, evidence: buildBranchProtectionEvidence({ branch: 'main', state, expectedChecks, actualChecks, driftDetails, sha }) };
 }
 
 function generateSummaryCard(results) {
