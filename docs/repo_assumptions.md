@@ -1,16 +1,18 @@
 # Repo Assumptions & Verification
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified Facts
+- **Repo Root Structure:** `summit/` exists and contains core modules.
+- **CLI Structure:** `summit/cli/` exists (contains `automation_verify.py`).
+- **Feature Flags:** `summit/flags.py` manages feature toggles.
+- **Documentation:** `docs/` contains subdirectories for standards, security, and ops.
+- **Tests:** `summit/tests/` uses `pytest` structure.
+- **Scripts:** `scripts/monitoring/` exists; `scripts/bench/` does not (will be created).
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Assumptions for IP Capture Feature
+- **Pipeline Location:** `summit/pipelines/ip_capture/` will be the home for the new logic.
+- **CLI Entry Point:** `summit/cli/main.py` or `summit/cli/__main__.py` will need to be created/updated to support `python -m summit.cli`.
+- **Testing:** `pytest` is the standard runner.
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Must-Not-Touch
+- `summit/cli/automation_verify.py` (unless adding imports carefully).
+- Existing evidence schemas in `docs/evidence/`.
