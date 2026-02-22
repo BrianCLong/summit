@@ -67,6 +67,7 @@ Validation: `gh issue list -L 50 -S "is:issue is:open (label:security OR label:g
 - Ran governance meta-gate on current HEAD. Result: Required Checks Policy FAIL; Determinism PASS; Branch Protection UNVERIFIABLE_ERROR. Evidence in `artifacts/governance/*`.
 - Attempted targeted server unit test for `UsageMeteringService`. Governed Exception: deferred pending `pnpm install` due to missing `cross-env` and `node_modules`.
 - Attempted issue scan for GA/security labels. Governed Exception: deferred pending api.github.com connectivity.
+- Registered daily sprint prompt at `prompts/automation/daily-sprint@v1.md` and updated `prompts/registry.yaml` for prompt integrity compliance.
 
 ## MAESTRO Alignment
 
