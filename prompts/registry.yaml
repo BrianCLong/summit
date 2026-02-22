@@ -1,22 +1,20 @@
 version: 1
 prompts:
-  - id: saas-crash-2026-positioning-pack
+  - id: governed-agent-integration-reference
     version: v1
-    path: prompts/positioning/saas-crash-2026@v1.md
-    sha256: 1acce34de92a05653ef32c23fed94b971bf06b529c6d76fcb9c8ad43c7d48ed8
-    description: Create the saas-crash-2026 positioning pack, claim registry, and repo validation alignment.
+    path: prompts/architecture/governed-agent-integration-reference@v1.md
+    sha256: b3cc1444eeaf4755f9a7912fb42feeb6f1726cf1212cf50d06b1f0ea49e2bd53
+    description: Publish governed agent integration reference architecture and update roadmap status.
     scope:
       paths:
-        - docs/positioning/saas-crash-2026.md
-        - docs/positioning/claim-registry.md
-        - repo_assumptions.md
+        - docs/architecture/governed-agent-integration-reference.md
         - docs/roadmap/STATUS.json
-        - prompts/positioning/saas-crash-2026@v1.md
+        - prompts/architecture/governed-agent-integration-reference@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
-        - positioning
         - governance
+        - architecture
     verification:
       tiers_required:
         - C
