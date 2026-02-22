@@ -1,106 +1,63 @@
-#!/usr/bin/env node
+import { readFileSync } from 'fs';
 
-import fs from 'fs';
-import path from 'path';
-
-// Valid labels map to SemVer effects
-const VALID_LABELS = {
-  'major': 'major',
-  'minor': 'minor',
-  'patch': 'patch',
-  'semver:major': 'major',
-  'semver:minor': 'minor',
-  'semver:patch': 'patch',
-  'norelease': 'none',
-  'documentation': 'none'
-};
-
-const WARN_ONLY = true; // Hardcoded for now as per requirements
-
-interface PREvent {
-  pull_request: {
-    labels: { name: string }[];
-    number: number;
-    title: string;
-  };
+const eventPath = process.env.GITHUB_EVENT_PATH;
+if (!eventPath) {
+  console.error('GITHUB_EVENT_PATH not set');
+  process.exit(1);
 }
 
-function main() {
-  const eventPath = process.env.GITHUB_EVENT_PATH;
+const eventData = JSON.parse(readFileSync(eventPath, 'utf8'));
+const pr = eventData.pull_request;
 
-  // Fixture mode: if a file path is passed as argument, use it
-  const fixturePath = process.argv[2];
-
-  let prLabels: string[] = [];
-  let prTitle: string = '';
-
-  if (fixturePath) {
-    // Read from fixture file (expected format: JSON array of strings or object mimicking PR event)
-    try {
-      const content = fs.readFileSync(fixturePath, 'utf8');
-      const json = JSON.parse(content);
-      if (Array.isArray(json)) {
-        prLabels = json;
-      } else if (json.pull_request) {
-        prLabels = (json.pull_request.labels || []).map((l: any) => l.name);
-        prTitle = json.pull_request.title || '';
-      } else {
-        console.error('Invalid fixture format.');
-        process.exit(1);
-      }
-    } catch (e) {
-      console.error(`Error reading fixture: ${e.message}`);
-      process.exit(1);
-    }
-  } else if (eventPath) {
-    // Read from GitHub Event
-    try {
-      const content = fs.readFileSync(eventPath, 'utf8');
-      const event: PREvent = JSON.parse(content);
-      if (event.pull_request) {
-        prLabels = (event.pull_request.labels || []).map(l => l.name);
-        prTitle = event.pull_request.title || '';
-      } else {
-        console.log('No pull_request found in event payload (not a PR event?). Exiting.');
-        process.exit(0);
-      }
-    } catch (e) {
-      console.error(`Error reading GITHUB_EVENT_PATH: ${e.message}`);
-      process.exit(1);
-    }
-  } else {
-    console.log('No GITHUB_EVENT_PATH or fixture argument provided.');
-    console.log('Usage: check-semver-label.ts [fixture.json]');
-    process.exit(1);
-  }
-
-  // Auto-infer from title if no labels found
-  if (prLabels.length === 0 && prTitle) {
-    if (prTitle.startsWith('feat:')) prLabels.push('minor');
-    else if (prTitle.startsWith('fix:')) prLabels.push('patch');
-    else if (prTitle.startsWith('docs:')) prLabels.push('documentation');
-    else if (prTitle.includes('BREAKING CHANGE')) prLabels.push('major');
-  }
-
-  const foundLabels = prLabels.filter(label => Object.keys(VALID_LABELS).includes(label));
-
-  if (foundLabels.length === 0) {
-    const msg = `::warning::No valid SemVer label found. Please add one of: ${Object.keys(VALID_LABELS).join(', ')}`;
-    console.log(msg);
-    if (!WARN_ONLY) {
-      process.exit(1);
-    }
-  } else if (foundLabels.length > 1) {
-    const msg = `::warning::Multiple SemVer labels found (${foundLabels.join(', ')}). Please ensure only one is applied to avoid ambiguity.`;
-    console.log(msg);
-    if (!WARN_ONLY) {
-      process.exit(1);
-    }
-  } else {
-    console.log(`Success: Found valid SemVer label "${foundLabels[0]}" -> ${VALID_LABELS[foundLabels[0] as keyof typeof VALID_LABELS]}`);
-  }
-
+if (!pr) {
+  console.log('Not a pull request, skipping');
   process.exit(0);
 }
 
-main();
+// Get labels from the PR event
+const labels = pr.labels ? pr.labels.map((l: any) => l.name) : [];
+
+// ALSO Check body/AGENT-METADATA for labels if none are found in the event
+if (labels.length === 0 && pr.body) {
+    const validLabels = ['major', 'minor', 'patch', 'semver:major', 'semver:minor', 'semver:patch', 'norelease', 'documentation'];
+
+    // Check Agent Metadata
+    const metadataMatch = pr.body.match(/<!-- AGENT-METADATA:START -->([\s\S]*?)<!-- AGENT-METADATA:END -->/);
+    if (metadataMatch) {
+        try {
+            const metadata = JSON.parse(metadataMatch[1]);
+            if (metadata.tags && Array.isArray(metadata.tags)) {
+                metadata.tags.forEach((tag: string) => {
+                    if (validLabels.includes(tag) || validLabels.includes(`semver:${tag}`)) {
+                         labels.push(tag.startsWith('semver:') ? tag : (validLabels.includes(tag) ? tag : `semver:${tag}`));
+                    }
+                });
+            }
+        } catch (e) {
+            // ignore parse error
+        }
+    }
+
+    // Simple body check
+    validLabels.forEach(validLabel => {
+        if (pr.body.includes(`[${validLabel}]`) || pr.body.includes(`label:${validLabel}`)) {
+            labels.push(validLabel);
+        }
+    });
+}
+
+const semverLabels = labels.filter((l: string) =>
+  ['major', 'minor', 'patch', 'semver:major', 'semver:minor', 'semver:patch', 'norelease', 'documentation'].includes(l)
+);
+
+if (semverLabels.length === 0) {
+  console.log('::warning::No valid SemVer label found. Please add one of: major, minor, patch, semver:major, semver:minor, semver:patch, norelease, documentation');
+  process.exit(1); // Fail the check
+}
+
+if (semverLabels.length > 1) {
+  console.log('::warning::Multiple SemVer labels found. Please use only one.');
+   process.exit(1);
+}
+
+console.log(`Found valid SemVer label: ${semverLabels[0]}`);

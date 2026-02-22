@@ -135,7 +135,7 @@ export class MediaUploadService {
 
     // Generate unique filename
     const fileId = uuidv4();
-    const ext = path.extname(filename || '');
+    const ext = this.getSafeExtension(mimetype);
     const uniqueFilename = `${fileId}${ext}`;
     const tempFilePath = path.join(
       this.config.uploadPath,
@@ -742,6 +742,61 @@ export class MediaUploadService {
       logger.error(`Failed to validate integrity for ${filename}:`, error);
       return false;
     }
+  }
+
+  /**
+   * Determine safe file extension based on MIME type.
+   * This prevents malicious file uploads (e.g., uploading HTML as image/jpeg).
+   */
+  private getSafeExtension(mimeType: string): string {
+    const mimeMap: Record<string, string> = {
+      // Images
+      'image/jpeg': '.jpg',
+      'image/png': '.png',
+      'image/gif': '.gif',
+      'image/webp': '.webp',
+      'image/svg+xml': '.svg',
+      'image/tiff': '.tiff',
+      'image/bmp': '.bmp',
+      'image/avif': '.avif',
+
+      // Documents
+      'application/pdf': '.pdf',
+      'application/msword': '.doc',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': '.docx',
+      'application/vnd.ms-excel': '.xls',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
+      'application/vnd.ms-powerpoint': '.ppt',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': '.pptx',
+
+      // Data
+      'application/json': '.json',
+      'application/xml': '.xml',
+      'text/csv': '.csv',
+
+      // Audio/Video
+      'video/mp4': '.mp4',
+      'video/quicktime': '.mov',
+      'video/webm': '.webm',
+      'video/x-msvideo': '.avi',
+      'audio/mpeg': '.mp3',
+      'audio/wav': '.wav',
+      'audio/ogg': '.ogg',
+      'audio/mp4': '.m4a',
+      'audio/aac': '.aac',
+    };
+
+    if (mimeMap[mimeType]) {
+      return mimeMap[mimeType];
+    }
+
+    // Treat all text types as plain text to prevent XSS via HTML upload
+    if (mimeType.startsWith('text/')) {
+      return '.txt';
+    }
+
+    // Default safe extension
+    return '.bin';
   }
 }
 
