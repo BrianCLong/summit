@@ -1,0 +1,22 @@
+[
+  {
+    "description": "Valid public asset",
+    "asset": {
+      "asset_id": "good-asset-1",
+      "license": { "name": "CC0", "url": "https://creativecommons.org/publicdomain/zero/1.0/" },
+      "provenance": { "source": "wikidata", "method": "api" },
+      "privacy": { "has_pii": false },
+      "shareability": "public"
+    }
+  },
+  {
+    "description": "Valid internal PII asset with retention",
+    "asset": {
+      "asset_id": "good-asset-2",
+      "license": { "name": "Proprietary" },
+      "provenance": { "source": "internal-db", "method": "api" },
+      "privacy": { "has_pii": true, "retention_policy": "restricted" },
+      "shareability": "internal"
+    }
+  }
+]
