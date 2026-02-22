@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck, History } from 'lucide-react'
 import { useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
 import { FilterPanel } from '@/components/panels/FilterPanel'
@@ -410,10 +411,10 @@ export default function ExplorePage(): React.ReactElement {
         {/* Center - Graph Canvas */}
         <div className="flex-1 relative">
           {loading ? (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="text-muted-foreground">Loading graph data...</p>
+            <div className="absolute inset-0 p-4">
+              <Skeleton className="w-full h-full rounded-xl bg-muted/50" />
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                 <span className="sr-only">Loading graph data...</span>
               </div>
             </div>
           ) : filteredEntities.length === 0 ? (

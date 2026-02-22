@@ -5,6 +5,7 @@ import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { SnapshotMenu } from '@/features/snapshots'
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour'
 import { GlobalStatusBanner } from '@/features/internal-command/components/GlobalStatusBanner'
 
 export function Layout() {
@@ -72,6 +73,7 @@ export function Layout() {
 
       {/* Global Search Modal */}
       <GlobalSearch />
+      <OnboardingTour />
     </div>
   )
 }
