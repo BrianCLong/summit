@@ -11,6 +11,12 @@ export default function ProductsPage() {
           product surfaces can be layered without reworking the core architecture.
         </p>
       </Card>
+      <Card title="Switchboard" subtitle="The provable personal agent">
+        <p className="text-sm text-[var(--muted)]">
+          Automate real work across your apps with signed receipts, governed skills, and policy guardrails. Delegate safely and
+          prove exactly what happened.
+        </p>
+      </Card>
     </div>
   );
 }

@@ -54,6 +54,7 @@ const ProfileSchema = z.object({
   postgres: PostgresConfigSchema.optional(),
   agent: AgentConfigSchema.optional(),
   export: ExportConfigSchema.optional(),
+  tier: z.enum(['community', 'pro', 'power', 'white-label-starter', 'white-label-team']).default('community'),
 });
 
 const CLIConfigSchema = z.object({

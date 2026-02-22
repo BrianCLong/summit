@@ -15,12 +15,15 @@ import {
 } from './switchboard-capsule.js';
 import { CapsuleLedger } from './switchboard-ledger.js';
 import { CapsulePolicyGate, CapsulePolicyAction } from './switchboard-policy.js';
+import { assertRun, assertAction, PricingTier } from './switchboard-quota.js';
 
 export interface CapsuleRunOptions {
   manifestPath: string;
   repoRoot: string;
   sessionsRoot?: string;
   waiverToken?: string;
+  tenantId?: string;
+  tier?: PricingTier;
 }
 
 export interface CapsuleRunResult {
@@ -187,6 +190,10 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
   ensureDir(workspaceDir);
   ensureDir(outputsDir);
 
+  // Assert Run Quota
+  const tenantId = options.tenantId || 'default-local-user';
+  assertRun(tenantId, options.tier);
+
   fs.writeFileSync(
     path.join(sessionDir, 'manifest.json'),
     `${JSON.stringify(manifest, null, 2)}\n`,
@@ -248,6 +255,9 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
 
       const secrets = loadSecrets(step, gate, ledger);
       const env = buildEnv(manifest, secrets);
+
+      // Assert Action Quota
+      assertAction(tenantId, options.tier);
 
       const start = Date.now();
       const result = spawnSync(step.command, step.args, {

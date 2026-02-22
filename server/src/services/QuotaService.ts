@@ -3,32 +3,19 @@
  *
  * Enforces usage quotas for tenants across different dimensions
  * (API calls, graph queries, storage, etc.).
- *
- * Implementation Status (P1-2 from audit report):
- * - ✅ In-memory quota tracking
- * - ✅ Per-tenant, per-dimension limits
- * - ✅ Quota assertion with exceptions
- * - ⚠️ MISSING: Redis persistence for multi-instance deployments
- * - ⚠️ MISSING: PostgreSQL history tracking
- * - ⚠️ MISSING: Quota renewal/reset scheduling
- *
- * @module services/QuotaService
  */
 
+import { Pool } from 'pg';
+import { getPostgresPool } from '../config/database.js';
+import { QuotaCheckInput, QuotaCheckResult, UsageKind } from '../types/usage.js';
+import PricingEngine from './PricingEngine.js';
+import logger from '../utils/logger.js';
+
 export interface QuotaDimension {
-  /** Dimension identifier (e.g., 'graph.queries', 'api.calls') */
   dimension: string;
-
-  /** Maximum allowed quantity per period */
   limit: number;
-
-  /** Current usage */
   used: number;
-
-  /** Renewal period ('hourly', 'daily', 'monthly') */
   period: 'hourly' | 'daily' | 'monthly';
-
-  /** Last renewal timestamp */
   lastRenewal: Date;
 }
 
@@ -37,6 +24,31 @@ export interface QuotaAssertionRequest {
   dimension: string;
   quantity: number;
 }
+
+export type PricingTier = 'community' | 'pro' | 'power' | 'white-label-starter' | 'white-label-team';
+
+export const TIER_LIMITS: Record<PricingTier, Record<string, { limit: number; period: QuotaDimension['period'] }>> = {
+  'community': {
+    'switchboard.runs': { limit: 10, period: 'daily' },
+    'switchboard.actions': { limit: 100, period: 'daily' },
+  },
+  'pro': {
+    'switchboard.runs': { limit: 100, period: 'daily' },
+    'switchboard.actions': { limit: 1000, period: 'daily' },
+  },
+  'power': {
+    'switchboard.runs': { limit: 300, period: 'daily' },
+    'switchboard.actions': { limit: 5000, period: 'daily' },
+  },
+  'white-label-starter': {
+    'switchboard.runs': { limit: 500, period: 'daily' },
+    'switchboard.actions': { limit: 10000, period: 'daily' },
+  },
+  'white-label-team': {
+    'switchboard.runs': { limit: 2000, period: 'daily' },
+    'switchboard.actions': { limit: 50000, period: 'daily' },
+  },
+};
 
 export class QuotaExceededException extends Error {
   constructor(
@@ -55,170 +67,111 @@ export class QuotaExceededException extends Error {
 }
 
 export class QuotaService {
-  // In-memory quota store: tenantId -> dimension -> QuotaDimension
-  private quotas: Map<string, Map<string, QuotaDimension>> = new Map();
+  private static instance: QuotaService | null = null;
+  private _pool?: Pool;
 
-  // Default quotas for new tenants
-  private defaultLimits: Record<string, { limit: number; period: QuotaDimension['period'] }> = {
-    'graph.queries': { limit: 1000, period: 'daily' },
-    'api.calls': { limit: 10000, period: 'daily' },
-    'graph.writes': { limit: 500, period: 'daily' },
-    'storage.bytes': { limit: 10_000_000_000, period: 'monthly' }, // 10GB
-    'ai.tokens': { limit: 1_000_000, period: 'monthly' },
-  };
+  private constructor() {}
 
-  constructor() {
-    console.info('[QuotaService] Initialized with in-memory quota tracking.');
+  public static getInstance(): QuotaService {
+    if (!QuotaService.instance) {
+      QuotaService.instance = new QuotaService();
+    }
+    return QuotaService.instance;
+  }
+
+  private get pool(): Pool {
+    if (!this._pool) {
+      this._pool = getPostgresPool();
+    }
+    return this._pool;
+  }
+
+  /**
+   * Check if tenant has quota available (Legacy/Test compatibility)
+   */
+  async checkQuota(input: QuotaCheckInput | (QuotaAssertionRequest & { kind?: UsageKind })): Promise<QuotaCheckResult> {
+    const tenantId = input.tenantId;
+    const kind = (input as any).kind || (input as any).dimension;
+    const quantity = input.quantity;
+
+    try {
+      const { plan } = await PricingEngine.getEffectivePlan(tenantId);
+
+      // Use TIER_LIMITS if it's a Switchboard dimension and the plan doesn't have it explicitly
+      // This ensures our new tiers are applied.
+      let limitConfig = plan.limits[kind];
+
+      if (!limitConfig && kind.startsWith('switchboard.')) {
+        const tier = (plan.name.toLowerCase() as PricingTier) || 'community';
+        const tierLimits = TIER_LIMITS[tier] || TIER_LIMITS['community'];
+        const switchboardLimit = tierLimits[kind];
+        if (switchboardLimit) {
+          limitConfig = {
+            hardCap: switchboardLimit.limit,
+          };
+        }
+      }
+
+      if (!limitConfig || limitConfig.hardCap === undefined) {
+        return { allowed: true };
+      }
+
+      const currentUsage = await this.getCurrentUsage(tenantId, kind as UsageKind);
+      const totalRequested = currentUsage + quantity;
+
+      const result: QuotaCheckResult = {
+        allowed: totalRequested <= limitConfig.hardCap,
+        remaining: Math.max(0, limitConfig.hardCap - totalRequested),
+        hardCap: limitConfig.hardCap,
+      };
+
+      if (limitConfig.softThresholds) {
+        for (const threshold of limitConfig.softThresholds) {
+          if (totalRequested > threshold) {
+            result.softThresholdTriggered = threshold;
+          }
+        }
+      }
+
+      return result;
+    } catch (error) {
+      logger.error(`Error checking quota for tenant ${tenantId}:`, error);
+      // Default to allowing if engine fails, or implement fallback
+      return { allowed: true };
+    }
   }
 
   /**
    * Assert that tenant has quota available for operation.
    * Throws QuotaExceededException if quota exceeded.
-   *
-   * @param request Quota assertion request
-   * @throws QuotaExceededException if quota exceeded
    */
   async assert(request: QuotaAssertionRequest): Promise<void> {
-    const { tenantId, dimension, quantity } = request;
-
-    // Get or initialize tenant quotas
-    if (!this.quotas.has(tenantId)) {
-      this.quotas.set(tenantId, new Map());
+    const result = await this.checkQuota(request);
+    if (!result.allowed) {
+      throw new QuotaExceededException(
+        request.tenantId,
+        request.dimension,
+        request.quantity,
+        result.hardCap || 0,
+        (result.hardCap || 0) - (result.remaining || 0)
+      );
     }
-
-    const tenantQuotas = this.quotas.get(tenantId)!;
-
-    // Get or initialize dimension quota
-    if (!tenantQuotas.has(dimension)) {
-      const defaults = this.defaultLimits[dimension] || { limit: 1000, period: 'daily' as const };
-      tenantQuotas.set(dimension, {
-        dimension,
-        limit: defaults.limit,
-        used: 0,
-        period: defaults.period,
-        lastRenewal: new Date(),
-      });
-    }
-
-    const quota = tenantQuotas.get(dimension)!;
-
-    // Check if quota needs renewal
-    this.checkAndRenewQuota(quota);
-
-    // Check if operation would exceed quota
-    if (quota.used + quantity > quota.limit) {
-      throw new QuotaExceededException(tenantId, dimension, quantity, quota.limit, quota.used);
-    }
-
-    // Increment usage
-    quota.used += quantity;
-
-    console.debug(
-      `[QuotaService] Tenant ${tenantId}, dimension ${dimension}: used ${quota.used}/${quota.limit}`
-    );
   }
 
-  /**
-   * Get current quota status for a tenant dimension
-   */
-  async getQuota(tenantId: string, dimension: string): Promise<QuotaDimension | null> {
-    const tenantQuotas = this.quotas.get(tenantId);
-    if (!tenantQuotas) return null;
-
-    const quota = tenantQuotas.get(dimension);
-    if (!quota) return null;
-
-    // Check and renew if needed
-    this.checkAndRenewQuota(quota);
-
-    return quota;
-  }
-
-  /**
-   * Get all quotas for a tenant
-   */
-  async getAllQuotas(tenantId: string): Promise<QuotaDimension[]> {
-    const tenantQuotas = this.quotas.get(tenantId);
-    if (!tenantQuotas) return [];
-
-    const quotas = Array.from(tenantQuotas.values());
-
-    // Check and renew all
-    quotas.forEach((q) => this.checkAndRenewQuota(q));
-
-    return quotas;
-  }
-
-  /**
-   * Set custom quota for a tenant dimension
-   */
-  async setQuota(
-    tenantId: string,
-    dimension: string,
-    limit: number,
-    period: QuotaDimension['period']
-  ): Promise<void> {
-    if (!this.quotas.has(tenantId)) {
-      this.quotas.set(tenantId, new Map());
-    }
-
-    const tenantQuotas = this.quotas.get(tenantId)!;
-
-    tenantQuotas.set(dimension, {
-      dimension,
-      limit,
-      used: 0,
-      period,
-      lastRenewal: new Date(),
-    });
-
-    console.info(`[QuotaService] Set quota for tenant ${tenantId}, dimension ${dimension}: ${limit} per ${period}`);
-  }
-
-  /**
-   * Reset quota usage (admin operation)
-   */
-  async resetQuota(tenantId: string, dimension: string): Promise<void> {
-    const tenantQuotas = this.quotas.get(tenantId);
-    if (!tenantQuotas) return;
-
-    const quota = tenantQuotas.get(dimension);
-    if (!quota) return;
-
-    quota.used = 0;
-    quota.lastRenewal = new Date();
-
-    console.info(`[QuotaService] Reset quota for tenant ${tenantId}, dimension ${dimension}`);
-  }
-
-  /**
-   * Check if quota needs renewal based on period
-   */
-  private checkAndRenewQuota(quota: QuotaDimension): void {
-    const now = new Date();
-    const lastRenewal = new Date(quota.lastRenewal);
-    let shouldRenew = false;
-
-    switch (quota.period) {
-      case 'hourly':
-        shouldRenew = now.getTime() - lastRenewal.getTime() > 60 * 60 * 1000;
-        break;
-      case 'daily':
-        shouldRenew = now.getTime() - lastRenewal.getTime() > 24 * 60 * 60 * 1000;
-        break;
-      case 'monthly':
-        shouldRenew =
-          now.getMonth() !== lastRenewal.getMonth() || now.getFullYear() !== lastRenewal.getFullYear();
-        break;
-    }
-
-    if (shouldRenew) {
-      quota.used = 0;
-      quota.lastRenewal = now;
-      console.info(`[QuotaService] Renewed quota: ${quota.dimension} (period: ${quota.period})`);
+  private async getCurrentUsage(tenantId: string, kind: UsageKind): Promise<number> {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        `SELECT SUM(quantity) as total FROM usage_events
+         WHERE tenant_id = $1 AND kind = $2
+         AND occurred_at > date_trunc('month', now())`,
+        [tenantId, kind]
+      );
+      return parseFloat(res.rows[0].total || '0');
+    } finally {
+      client.release();
     }
   }
 }
 
-// Singleton instance
-export const quotaService = new QuotaService();
+export const quotaService = QuotaService.getInstance();
