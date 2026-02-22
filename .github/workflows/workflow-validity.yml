@@ -1,0 +1,66 @@
+name: Workflow Validity Gate
+
+# CRITICAL GOVERNANCE GATE: Ensures all GitHub Actions workflows are valid.
+# This prevents global CI outages (startup_failure) caused by malformed YAML or duplicated keys.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Workflow Validity Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install actionlint
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          sudo mv ./actionlint /usr/local/bin/
+          actionlint -version
+
+      - name: Run actionlint
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            COMPARE_REF="origin/${{ github.base_ref }}...HEAD"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            COMPARE_REF="HEAD^...HEAD"
+          else
+            COMPARE_REF=""
+          fi
+
+          if [[ -n "$COMPARE_REF" ]]; then
+            mapfile -t WORKFLOWS < <(git diff --name-only "$COMPARE_REF" | grep -E '^\.github/workflows/.*\.ya?ml$' || true)
+          else
+            mapfile -t WORKFLOWS < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+          fi
+
+          if [[ "${#WORKFLOWS[@]}" -eq 0 ]]; then
+            echo "No workflow files changed; skipping actionlint."
+            exit 0
+          fi
+
+          printf '%s\n' "${WORKFLOWS[@]}" | xargs actionlint -shellcheck= -color -verbose
+
+      - name: Summary
+        if: always()
+        run: |
+          cat <<EOF >> $GITHUB_STEP_SUMMARY
+          ## Workflow Validity Gate
+          - actionlint: ${{ job.status }}
+          EOF
