@@ -1,40 +1,55 @@
 # Repo Assumptions & Validation
 
-## Verified vs Assumed Directory List
+## Sensing Mode (Evidence-First)
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+> This section records verified observations before any planning decisions.
 
-## CI Check Names (Exact)
+## Verified Structure & Tooling
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Plan Item | Verified Evidence | Status | Notes |
+| --- | --- | --- | --- |
+| Repo root | `/workspace/summit` | ✅ Verified | Monorepo root with extensive top-level modules. |
+| Node/TypeScript tooling | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` | ✅ Verified | pnpm workspace present; TypeScript config files in root. |
+| Python tooling | `pyproject.toml`, `pytest.ini`, `ruff.toml` | ✅ Verified | Python utilities and tests are present. |
+| Rust tooling | `Cargo.toml`, `Cargo.lock` | ✅ Verified | Rust workspace present. |
+| Docs tree | `docs/` | ✅ Verified | Governance, security, and ops documentation present. |
+| Scripts tree | `scripts/` | ✅ Verified | CI and utility scripts directory exists. |
+| Evidence store | `evidence/` | ✅ Verified | Evidence structure documented in `evidence/README.md`. |
+| CI workflows | `.github/workflows/` | ✅ Verified | Extensive GitHub Actions workflows, including PR quality gate. |
 
-## Evidence Schema Conventions (Exact)
+## Verified Evidence & Governance References
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+| Requirement | Verified Source | Status | Notes |
+| --- | --- | --- | --- |
+| Evidence ID policy | `docs/governance/EVIDENCE_ID_POLICY.yml` | ✅ Verified | Policy file referenced by governance docs. |
+| Evidence storage convention | `evidence/README.md` | ✅ Verified | Specifies `evidence/<EVIDENCE_ID>/` layout. |
+| CI required checks | `.github/workflows/pr-quality-gate.yml` | ✅ Verified | Declared as the standard quality gate workflow. |
+| GA guardrails | `docs/ga/` | ✅ Verified | GA guidance exists; follow guardrails for new agent work. |
 
-## Must-Not-Touch List (Guardrails)
+## CI Gate Reality Check (Verified)
 
-Deferred pending validation. Baseline expectations:
+- GitHub Actions is the CI platform (`.github/workflows/`).
+- `pr-quality-gate.yml` is the declared standard for PR validation.
+- Additional governance and evidence workflows exist (e.g., evidence, governance, supply chain).
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+## Repo Reality Assertions (Updated)
 
-## Validation Checklist
+- **Runtime mix**: Node/TypeScript + Python + Rust are all present and active. (Verified)
+- **Evidence system**: Dedicated `evidence/` tree with documented layout. (Verified)
+- **Governance**: Extensive governance docs and gate workflows exist. (Verified)
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Deferred Pending Validation
+
+- **Primary CLI entrypoint**: Identify canonical CLI (`summitctl` or other) for adding new commands.
+- **Existing graph/retrieval modules**: Locate any existing graph or retrieval subsystems to avoid duplication.
+- **Redaction utilities**: Confirm any central redaction/log-safety library to reuse.
+
+## Must-Not-Touch (Governed Exceptions Only)
+
+- `.github/workflows/*` (add-only unless explicitly authorized)
+- `LICENSE*`, `NOTICE*`
+- `SECURITY.md` / `SECURITY/` (owner review required)
+
+## Immediate Next Step (Repo-Scoped)
+
+- Update execution status in `docs/roadmap/STATUS.json` to log the repo-assumptions validation work.
