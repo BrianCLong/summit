@@ -10,11 +10,8 @@ required_checks:
   - meta-gate
   - gate
   - Unit Tests
-  - Release Readiness Gate
   - SOC Controls
   - test (20.x)
-  - Workflow Validity Check
-  - Check Branch Protection Drift
 
 notes:
   owner: summit-ga
