@@ -2,7 +2,6 @@
 import fs from "node:fs";
 import assert from "node:assert";
 import process from "node:process";
-import { parse as YAML } from "yaml";
 
 const {
   GITHUB_TOKEN,
@@ -17,11 +16,30 @@ assert(GITHUB_SHA, "GITHUB_SHA missing");
 
 const [owner, repo] = GITHUB_REPOSITORY.split("/");
 
-const manifest = YAML(
+function parseRequiredChecks(raw) {
+  const checks = [];
+  let inRequiredChecks = false;
+
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    if (/^[A-Za-z0-9_-]+:/.test(trimmed) && !trimmed.startsWith("- ")) {
+      inRequiredChecks = trimmed.startsWith("required_checks:");
+      continue;
+    }
+
+    if (inRequiredChecks && trimmed.startsWith("- ")) {
+      checks.push(trimmed.slice(2).trim());
+    }
+  }
+
+  return checks;
+}
+
+const checks = parseRequiredChecks(
   fs.readFileSync(".github/required-checks.yml", "utf8")
 );
-
-const checks = manifest.required_checks;
 assert(checks.length > 0, "No required checks defined");
 
 async function getCheckRuns() {
