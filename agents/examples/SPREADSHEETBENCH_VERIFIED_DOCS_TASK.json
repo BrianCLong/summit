@@ -1,0 +1,40 @@
+{
+  "task_id": "SPREADSHEETBENCH_VERIFIED_DOCS_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "spreadsheetbench-verified-docs",
+    "version": "v1",
+    "sha256": "a9600cb8fd1b0a7c0c0201a87e2e2bedc864e75569125b3f71eaec6482cbd1bf",
+    "path": "prompts/docs/spreadsheetbench-verified-docs@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "repo_assumptions.md",
+      "docs/standards/spreadsheetbench-verified.md",
+      "docs/security/data-handling/spreadsheetbench-verified.md",
+      "docs/ops/runbooks/spreadsheetbench-verified.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/docs/spreadsheetbench-verified-docs@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "security", "operations", "evaluation"],
+    "exclusions": ["pnpm-lock.yaml", "Cargo.lock"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["docs/standards/spreadsheetbench-verified.md", "docs/ops/runbooks/spreadsheetbench-verified.md"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "SpreadsheetBench Verified standards, data handling, and runbook docs are published.",
+    "Roadmap status updated with a SpreadsheetBench Verified initiative."
+  ],
+  "stop_conditions": [
+    "Scope mismatch with prompt registry.",
+    "Required governance files are unavailable."
+  ]
+}

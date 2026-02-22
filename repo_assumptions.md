@@ -1,40 +1,43 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (SpreadsheetBench Verified)
 
-## Verified vs Assumed Directory List
+## Readiness assertion
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+This validation respects the Summit Readiness Assertion and treats unverified paths as intentionally constrained until confirmed.
 
-## CI Check Names (Exact)
+## Verified vs assumed directory map
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Plan Path | Actual Path | Status | Notes |
+| --- | --- | --- | --- |
+| `docs/` | `docs/` | ✅ Verified | Documentation root exists. |
+| `docs/standards/` | `docs/standards/` | ✅ Verified | Standards directory exists. |
+| `docs/security/` | `docs/security/` | ✅ Verified | Security documentation root exists. |
+| `docs/ops/` | `docs/ops/` | ✅ Verified | Operations documentation root exists. |
+| `benchmarks/` | `benchmarks/` | ✅ Verified | Benchmark root exists. |
+| `runners/` | `runners/` | Deferred pending verification | Runner directory presence not confirmed. |
+| `scripts/` | `scripts/` | ✅ Verified | Scripts root exists. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Verified | CI workflows directory exists. |
 
-## Evidence Schema Conventions (Exact)
+## Existing CI gates (assumed until confirmed)
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+* `pr-quality-gate.yml` (referenced in AGENTS guidance).
+* `make smoke` golden path target.
 
-## Must-Not-Touch List (Guardrails)
+## Must-not-touch list (default)
 
-Deferred pending validation. Baseline expectations:
+* Lockfiles: `pnpm-lock.yaml`, `package-lock.json`, `Cargo.lock`.
+* Release automation: `release-please-config.json`, `release-policy.yml`.
+* Security policy baselines and evidence bundles under `docs/ga/`, `docs/governance/`, and `evidence/`.
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+## Validation checklist (SpreadsheetBench Verified PR1)
 
-## Validation Checklist
+1. Confirm benchmark abstraction location (expected: `benchmarks/`).
+2. Confirm runner abstraction location (expected: `runners/`).
+3. Confirm evidence schema conventions under `evidence/` or `docs/evidence/`.
+4. Confirm CI naming for smoke gates.
+5. Confirm formatting/lint rules for new documentation in `docs/`.
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Next steps (PR1)
+
+* Add SpreadsheetBench Verified standards and data-handling docs in `docs/`.
+* Add a SpreadsheetBench Verified runbook in `docs/ops/runbooks/`.
+* Update `docs/roadmap/STATUS.json` with the new initiative.
