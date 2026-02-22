@@ -2,7 +2,7 @@
 
 **Status:** Active (MVP-4)
 **Owner:** Platform Engineering
-**Last Updated:** 2026-02-04
+**Last Updated:** 2026-02-01
 
 ---
 
@@ -181,147 +181,30 @@ When drift is resolved, existing drift issues are automatically closed with a re
 
 ### GitHub App Authentication (Required)
 
-Branch protection APIs require elevated read permissions that the default `GITHUB_TOKEN` does not provide. You **must** configure a GitHub App to read branch protection settings.
+Branch protection APIs require elevated read permissions that the default `GITHUB_TOKEN` does not provide. Configure a GitHub App and store its credentials as repository secrets:
 
-#### Why GitHub App?
+- **BRANCH_PROTECTION_APP_ID** (GitHub App ID)
+- **BRANCH_PROTECTION_APP_PRIVATE_KEY** (PEM private key)
 
-The GitHub Actions `GITHUB_TOKEN` cannot read branch protection rules by default. This results in:
+The workflow generates an installation token via `actions/create-github-app-token@v1`. If token generation fails, the workflow falls back to `GITHUB_TOKEN` and records a warning in the workflow summary.
 
-```
-Insufficient permissions to read branch protection (requires admin or read:org scope)
-```
+### GitHub Token (Workflow Runtime)
 
-A GitHub App with the appropriate permissions solves this by generating installation tokens with elevated access.
+The workflow needs:
 
-#### Required Secrets
+- `contents: read` - To read policy files
+- `issues: write` - To create/update drift issues
+- `actions: read` - To access workflow context
 
-| Secret Name | Description |
-|-------------|-------------|
-| `BRANCH_PROTECTION_APP_ID` | The numeric App ID from your GitHub App settings |
-| `BRANCH_PROTECTION_APP_PRIVATE_KEY` | The PEM private key file contents |
+### Branch Protection API
 
-#### Step-by-Step GitHub App Setup
+Reading branch protection requires one of:
 
-1. **Create the GitHub App**
+- GitHub App with **Administration: Read-only** (recommended)
+- Admin access to the repository
+- `read:org` scope (for organization repos)
 
-   Navigate to your organization or user settings:
-   - Organization: `https://github.com/organizations/{ORG}/settings/apps/new`
-   - Personal: `https://github.com/settings/apps/new`
-
-2. **Configure App Settings**
-
-   | Setting | Value |
-   |---------|-------|
-   | GitHub App name | `branch-protection-drift-detector` (or similar unique name) |
-   | Homepage URL | Your repo URL |
-   | Webhook | Uncheck "Active" (not needed) |
-
-3. **Set Repository Permissions**
-
-   Under "Repository permissions", configure:
-
-   | Permission | Access Level | Purpose |
-   |------------|--------------|---------|
-   | **Administration** | Read-only | Read branch protection rules |
-   | **Contents** | Read-only | Read policy files |
-   | **Issues** | Read and write | Create/update drift issues |
-   | **Metadata** | Read-only | Required for all apps |
-   | **Pull requests** | Read and write | Comment on PRs if needed |
-
-4. **Create the App**
-
-   Click "Create GitHub App" at the bottom of the page.
-
-5. **Note the App ID**
-
-   After creation, you'll see the App ID on the app's settings page. Save this value.
-
-6. **Generate a Private Key**
-
-   Scroll down to "Private keys" and click "Generate a private key". A `.pem` file will download. Save this securely.
-
-7. **Install the App**
-
-   - Go to your app's settings page
-   - Click "Install App" in the left sidebar
-   - Select the repository/organization
-   - Choose "Only select repositories" and select your repo
-
-8. **Add Secrets to Repository**
-
-   In your repository, go to **Settings** → **Secrets and variables** → **Actions**:
-
-   ```bash
-   # Add BRANCH_PROTECTION_APP_ID
-   # Value: The numeric App ID (e.g., 123456)
-
-   # Add BRANCH_PROTECTION_APP_PRIVATE_KEY
-   # Value: The entire contents of the .pem file, including:
-   # -----BEGIN RSA PRIVATE KEY-----
-   # ... key content ...
-   # -----END RSA PRIVATE KEY-----
-   ```
-
-#### Validating the Setup
-
-Run the workflow manually to verify:
-
-```bash
-# Via GitHub CLI
-gh workflow run branch-protection-drift.yml -f dry_run=true
-
-# Check the workflow summary for:
-# ✅ GitHub App token acquired.
-# ✅ GitHub App installation verified.
-```
-
-If you see `⚠️ Fell back to GITHUB_TOKEN`, the app is not configured correctly.
-
-#### Local Validation
-
-Test your setup locally with the `gh` CLI:
-
-```bash
-# Authenticate with a token that has admin access
-gh auth login
-
-# Test the API endpoint
-gh api repos/OWNER/REPO/branches/main/protection/required_status_checks
-
-# Expected output: JSON with "contexts" or "checks" array
-```
-
-#### Key Rotation
-
-To rotate the private key:
-
-1. Go to your GitHub App settings
-2. Under "Private keys", click "Generate a private key"
-3. Update the `BRANCH_PROTECTION_APP_PRIVATE_KEY` secret
-4. Optionally revoke the old key
-
-### Workflow Permissions
-
-The workflow also requires these YAML permissions:
-
-```yaml
-permissions:
-  contents: read      # Read policy files
-  issues: write       # Create/update drift issues
-  pull-requests: write # Comment on PRs
-  checks: read        # Read check status
-  actions: read       # Access workflow context
-```
-
-### Failure Modes
-
-| Error | Cause | Solution |
-|-------|-------|----------|
-| `UNVERIFIABLE_PERMISSIONS` | App not installed or missing `Administration: Read-only` | Verify app installation and permissions |
-| `RATE_LIMITED` | Too many API requests | Wait and retry; check for runaway workflows |
-| `NO_PROTECTION` | Branch protection not configured | Configure branch protection in repo settings |
-| `403 Forbidden` | Token lacks required scope | Verify app permissions include Administration read |
-| `404 Not Found` | Branch or protection rule doesn't exist | Check branch name and protection configuration |
+If permissions are insufficient, the script reports the limitation and creates an issue explaining the access requirement.
 
 ### Governance Reference
 
@@ -467,11 +350,10 @@ The GitHub token lacks access to read branch protection.
 
 | Version | Date       | Changes                                                                                                                                                                                                             |
 | ------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.2.0   | 2026-02-04 | Add comprehensive GitHub App setup instructions; fix issue template links to use proper GitHub URLs; add workflow permissions for pull-requests:write and checks:read; add schema validation tests |
 | 1.1.0   | 2026-01-23 | Fix extraction to use `branch_protection.required_status_checks.contexts` instead of `always_required`; migrate from file-based state to issue-based state discovery; resolve "Could not push state update" warning |
 | 1.0.0   | 2026-01-08 | Initial branch protection drift detection                                                                                                                                                                           |
 
 ---
 
 **Document Authority**: Platform Engineering
-**Next Review**: 2026-02-15 (or before MVP-5 kickoff)
+**Next Review**: 2026-02-08 (or before MVP-5 kickoff)

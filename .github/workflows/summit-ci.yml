@@ -84,6 +84,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       CI: true
+      PLAYWRIGHT_USE_WEBSERVER: 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -97,6 +98,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build dependencies
+        run: pnpm --filter intelgraph-server^... build
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
