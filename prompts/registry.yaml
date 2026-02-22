@@ -1,21 +1,28 @@
 version: 1
 prompts:
-  - id: saas-crash-2026-positioning-pack
+  - id: implement-ui-fuzz-probe
     version: v1
-    path: prompts/positioning/saas-crash-2026@v1.md
-    sha256: 1acce34de92a05653ef32c23fed94b971bf06b529c6d76fcb9c8ad43c7d48ed8
-    description: Create the saas-crash-2026 positioning pack, claim registry, and repo validation alignment.
+    path: prompts/implement/ui-fuzz-probe@v1.md
+    sha256: 92cb1f09e3a18b9e2c454afa484fa837cdd33f75b1945d8cf5edcedb53ef01c6
+    description: Implement Bombadil-inspired deterministic UI fuzz probe, CI smoke, and drift monitoring.
     scope:
       paths:
-        - docs/positioning/saas-crash-2026.md
-        - docs/positioning/claim-registry.md
-        - repo_assumptions.md
+        - tools/ui_fuzz/
+        - scripts/monitoring/bombadil-ui-fuzz-drift.ts
+        - docs/standards/bombadil-ui-fuzz.md
+        - docs/security/data-handling/bombadil-ui-fuzz.md
+        - docs/ops/runbooks/bombadil-ui-fuzz.md
         - docs/roadmap/STATUS.json
-        - prompts/positioning/saas-crash-2026@v1.md
+        - .github/workflows/ui-fuzz.yml
+        - .github/workflows/ui-fuzz-drift.yml
+        - package.json
+        - prompts/implement/ui-fuzz-probe@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
-        - positioning
+        - tooling
+        - ci
+        - security
         - governance
     verification:
       tiers_required:

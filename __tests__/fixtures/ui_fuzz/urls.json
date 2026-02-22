@@ -1,0 +1,5 @@
+{
+  "withToken": "https://example.test/path?token=secret123",
+  "withBearer": "Bearer secret-token",
+  "withAccessToken": "https://example.test/path?access_token=secret456&foo=bar"
+}
