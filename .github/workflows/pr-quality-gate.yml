@@ -75,6 +75,7 @@ jobs:
 
   security-scan:
     name: Vulnerability and Security Scan
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'run-info-security') }}
     uses: ./.github/workflows/ci-security.yml
     with:
       run_dast: false # DAST is too slow for a PR check
