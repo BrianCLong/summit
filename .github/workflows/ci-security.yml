@@ -612,3 +612,18 @@ jobs:
         with:
           name: evidence
           path: evidence/
+
+  security-pass:
+    name: Security Pass
+    runs-on: ubuntu-latest
+    needs: [secret-scan, sast, semgrep, dependency-scan, filesystem-scan, container-scan, license-compliance, iac-scan, opa-policy, cis-benchmark, baseline, dast, sigstore-verify]
+    if: always()
+    steps:
+      - name: Check dependencies
+        run: |
+          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" || "${{ contains(needs.*.result, 'cancelled') }}" == "true" ]]; then
+            echo "One or more dependencies failed or were cancelled."
+            exit 1
+          fi
+          echo "All critical security jobs passed."
+          exit 0
