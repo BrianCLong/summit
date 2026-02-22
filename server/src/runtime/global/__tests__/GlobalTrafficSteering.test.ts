@@ -34,7 +34,7 @@ resolveTargetRegionMock.mockReturnValue('us-east-1');
 const { GlobalTrafficSteering } = await import('../GlobalTrafficSteering.js');
 
 describe('GlobalTrafficSteering', () => {
-    let steering: GlobalTrafficSteering;
+    let steering: GlobalTrafficSteering; // eslint-disable-line no-undef
 
     beforeEach(() => {
         jest.clearAllMocks();
