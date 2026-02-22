@@ -1,7 +1,0 @@
-[
-  {
-    "nl": "find all people",
-    "cypher": "MATCH (p:Person) RETURN p LIMIT $limit",
-    "params": { "limit": 25 }
-  }
-]
