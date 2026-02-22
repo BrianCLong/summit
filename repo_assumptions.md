@@ -1,40 +1,26 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (MARS)
 
-## Verified vs Assumed Directory List
+## Structure Validation
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| Plan Path | Actual Path | Status | Notes |
+|Str|Str|Str|Str|
+| `summit/` | `summit/` | ✅ Verified | Root feature package. |
+| `summit/mars/` | `summit/mars/` | ✅ Verified | Location of MARS implementation. |
+| `tests/` | `tests/` | ✅ Verified | Root test directory. |
+| `docs/` | `docs/` | ✅ Verified | Root documentation directory. |
 
-## CI Check Names (Exact)
+## Component Mapping (MARS)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Component | Implementation File | Verified |
+|Str|Str|Str|
+| Budget Ledger | `summit/mars/cost.py` | ✅ Verified |
+| MCTS Planner | `summit/mars/planner_mcts.py` | ✅ Verified |
+| Modular Pipeline | `summit/mars/pipeline.py` | ✅ Verified |
+| Reflective Memory | `summit/mars/reflect.py` | ✅ Verified |
+| Security Redaction | `summit/mars/redact.py` | ✅ Verified |
 
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## CI & Standards
+- **Test Runner**: `pytest` confirmed.
+- **Evidence Schema**: `summit/mars/schemas/` provides Draft-07 schemas (integrated into `evidence/index.json`).
+- **PII/Secrets**: `redact.py` implements mandatory redaction.
+- **Determinism**: Seeded MCTS verified in `test_mars_mcts_determinism.py`.
