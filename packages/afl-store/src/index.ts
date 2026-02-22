@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
 import neo4j, { Driver } from 'neo4j-driver';
-import { Fingerprint } from './types.js';
+import { Fingerprint } from './types';
 
 export class AFLStore {
   private redis: Redis;

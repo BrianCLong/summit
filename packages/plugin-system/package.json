@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "lint": "eslint src/**/*.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -24,6 +24,7 @@
     "zod": "^3.22.4",
     "eventemitter3": "^5.0.1",
     "semver": "^7.5.4",
+    "vm2": "^3.10.3",
     "isolated-vm": "^5.0.1"
   },
   "devDependencies": {

@@ -12,8 +12,8 @@
 import axios from 'axios';
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'node:crypto';
-import logger from '../config/logger.js';
-import { getPostgresPool } from '../config/database.js';
+import logger from '../config/logger';
+import { getPostgresPool } from '../config/database';
 import { writeAudit } from '../utils/audit.js';
 
 const log = logger.child({ name: 'OPAWithAppeals' });

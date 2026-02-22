@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit"
   },
@@ -20,7 +20,7 @@
     "typescript": "^5.9.3",
     "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.39.2"
+    "eslint": "^9.39.1"
   },
   "type": "module"
 }

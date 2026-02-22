@@ -1,4 +1,4 @@
-import { VoiceProvenance } from './types.js';
+import { VoiceProvenance } from './types.ts';
 import { v4 as uuidv4 } from 'uuid';
 import { createHash } from 'crypto';
 

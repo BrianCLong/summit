@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Counter, Gauge } from 'prom-client';
-import { redis } from '../subscriptions/pubsub.js';
+import { redis } from '../subscriptions/pubsub';
 
 // Token bucket rate limiter per tenant
 class TokenBucket {

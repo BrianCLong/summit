@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { predictiveThreatService } from '../services/PredictiveThreatService.js';
+import { predictiveThreatService } from '../services/PredictiveThreatService';
 
 describe('PredictiveThreatService', () => {
   describe('forecastSignal', () => {

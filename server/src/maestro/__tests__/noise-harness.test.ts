@@ -1,4 +1,4 @@
-import { applyNoise } from '../noise-harness.js';
+import { applyNoise } from '../noise-harness';
 
 describe('Noise harness', () => {
   it('deterministically applies field drift and overrides', () => {

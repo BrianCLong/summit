@@ -1,0 +1,19 @@
+{
+  "evidence_id": "EVD-graph-merge-DIST-001",
+  "item_slug": "graph-merge",
+  "summary": "Placeholder evidence",
+  "artifacts": [
+    {
+      "path": "report.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "metrics.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "stamp.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

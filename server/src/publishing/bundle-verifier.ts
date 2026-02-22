@@ -18,9 +18,9 @@ import type {
   VerificationResult,
   HashTree,
   Citation,
-} from './proof-carrying-types.js';
-import { HashTreeBuilder } from './hash-tree-builder.js';
-import { RevocationRegistry, DistributedRevocationChecker } from './revocation-registry.js';
+} from './proof-carrying-types';
+import { HashTreeBuilder } from './hash-tree-builder';
+import { RevocationRegistry, DistributedRevocationChecker } from './revocation-registry';
 
 export interface VerifierConfig {
   checkRevocation?: boolean;

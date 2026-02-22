@@ -1,4 +1,4 @@
-import { CorrectnessScorecard, DomainName, ExceptionWaiver, newIdentifier } from './types.js';
+import { CorrectnessScorecard, DomainName, ExceptionWaiver, newIdentifier } from './types';
 
 export class GovernanceTracker {
   private scorecards = new Map<DomainName, CorrectnessScorecard>();

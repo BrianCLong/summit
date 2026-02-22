@@ -1,4 +1,4 @@
-import { BehavioralDnaNetwork } from '../src/ai/behavioralDnaNetwork.js';
+import { BehavioralDnaNetwork } from '../src/ai/behavioralDnaNetwork';
 import { describe, test, expect } from '@jest/globals';
 
 describe('BehavioralDnaNetwork', () => {

@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { MaestroHandlers } from '../handlers.js';
-import { MaestroTask } from '../model.js';
-import { DiffusionCoderAdapter } from '../adapters/diffusion_coder.js';
+import { MaestroHandlers } from '../handlers';
+import { MaestroTask } from '../model';
+import { DiffusionCoderAdapter } from '../adapters/diffusion_coder';
 
 describe('Diffusion Edit Flow (Functional)', () => {
   let handlers: MaestroHandlers;

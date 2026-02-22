@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Gauge, Counter } from 'prom-client';
-import { getOrRegisterMetric } from '../utils/metrics.js';
+import { getOrRegisterMetric } from '../utils/metrics';
 
 export const graphDriftCount = getOrRegisterMetric(
   'graph_drift_count',

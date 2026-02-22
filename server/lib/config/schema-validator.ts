@@ -4,7 +4,7 @@ import addFormats from 'ajv-formats';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { SecretManager } from '../secrets/secret-manager.js';
+import { SecretManager } from '../secrets/secret-manager';
 
 export class SchemaValidator {
   private ajv: InstanceType<typeof Ajv>;

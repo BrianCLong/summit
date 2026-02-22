@@ -1,4 +1,0 @@
-detect narrative coordination
-measure spread/velocity
-track provenance
-produce evidence

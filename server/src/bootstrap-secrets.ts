@@ -1,5 +1,5 @@
-import { SecretManager } from './lib/secrets/SecretManager.js';
-import { logger } from './config/logger.js';
+import { SecretManager } from './lib/secrets/SecretManager.ts';
+import { logger } from './config/logger.ts';
 
 /**
  * Bootstraps the application secrets.

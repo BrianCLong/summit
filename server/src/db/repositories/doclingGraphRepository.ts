@@ -51,37 +51,31 @@ class DoclingGraphRepository {
       prId?: string;
     },
   ) {
-    if (fragments.length === 0) return;
     await this.ensureConstraints();
-
-    // BOLT: Use UNWIND for batched fragment creation/update.
-    // Reduces database round-trips from N to 1.
-    const params = {
-      batch: fragments.map((f) => ({
-        id: f.id,
-        sha256: f.sha256,
-        sourceType: f.sourceType,
-        requestId: f.requestId,
-        tenantId: f.tenantId,
-        text: f.text.slice(0, 2048),
-        sourceUri: f.sourceUri || null,
-      })),
-      buildId: context.buildId || null,
-      testId: context.testId || null,
-      prId: context.prId || null,
-    };
-
-    await neo.run(
-      `UNWIND $batch AS op
-       MERGE (f:DocFragment { id: op.id })
-       ON CREATE SET f.sha256 = op.sha256, f.sourceType = op.sourceType, f.requestId = op.requestId, f.tenantId = op.tenantId, f.textPreview = op.text, f.sourceUri = op.sourceUri, f.createdAt = datetime()
-       ON MATCH SET f.sha256 = op.sha256, f.sourceType = op.sourceType, f.requestId = op.requestId, f.tenantId = op.tenantId, f.textPreview = op.text, f.sourceUri = op.sourceUri, f.updatedAt = datetime()
-       WITH f, op
-       FOREACH (_ IN CASE WHEN $buildId IS NULL THEN [] ELSE [1] END | MERGE (b:Build { id: $buildId, tenantId: op.tenantId }) MERGE (f)-[:DESCRIBES]->(b))
-       FOREACH (_ IN CASE WHEN $testId IS NULL THEN [] ELSE [1] END | MERGE (t:TestRun { id: $testId, tenantId: op.tenantId }) MERGE (f)-[:DESCRIBES]->(t))
-       FOREACH (_ IN CASE WHEN $prId IS NULL THEN [] ELSE [1] END | MERGE (p:PullRequest { id: $prId, tenantId: op.tenantId }) MERGE (f)-[:DESCRIBES]->(p))`,
-      params,
-    );
+    for (const fragment of fragments) {
+      const params = {
+        id: fragment.id,
+        sha256: fragment.sha256,
+        sourceType: fragment.sourceType,
+        requestId: fragment.requestId,
+        tenantId: fragment.tenantId,
+        text: fragment.text.slice(0, 2048),
+        sourceUri: fragment.sourceUri || null,
+        buildId: context.buildId || null,
+        testId: context.testId || null,
+        prId: context.prId || null,
+      };
+      await neo.run(
+        `MERGE (f:DocFragment { id: $id })
+         ON CREATE SET f.sha256 = $sha256, f.sourceType = $sourceType, f.requestId = $requestId, f.tenantId = $tenantId, f.textPreview = $text, f.sourceUri = $sourceUri, f.createdAt = datetime()
+         ON MATCH SET f.sha256 = $sha256, f.sourceType = $sourceType, f.requestId = $requestId, f.tenantId = $tenantId, f.textPreview = $text, f.sourceUri = $sourceUri, f.updatedAt = datetime()
+         WITH f
+         FOREACH (_ IN CASE WHEN $buildId IS NULL THEN [] ELSE [1] END | MERGE (b:Build { id: $buildId, tenantId: $tenantId }) MERGE (f)-[:DESCRIBES]->(b))
+         FOREACH (_ IN CASE WHEN $testId IS NULL THEN [] ELSE [1] END | MERGE (t:TestRun { id: $testId, tenantId: $tenantId }) MERGE (f)-[:DESCRIBES]->(t))
+         FOREACH (_ IN CASE WHEN $prId IS NULL THEN [] ELSE [1] END | MERGE (p:PullRequest { id: $prId, tenantId: $tenantId }) MERGE (f)-[:DESCRIBES]->(p))`,
+        params,
+      );
+    }
   }
 
   async mergeSummary(
@@ -112,31 +106,25 @@ class DoclingGraphRepository {
     tenantId: string,
     links: TraceLinkGraphInput[],
   ) {
-    if (links.length === 0) return;
     await this.ensureConstraints();
-
-    // BOLT: Batch trace links using UNWIND.
-    const params = {
-      links: links.map((link) => ({
-        fragmentId: link.fragmentId,
-        targetId: link.targetId,
-        targetType: link.targetType,
-        relation: link.relation,
-        score: link.score || null,
-      })),
-      tenantId,
-      requestId,
-    };
-
-    await neo.run(
-      `UNWIND $links AS link
-       MATCH (f:DocFragment { id: link.fragmentId })
-       MERGE (t:DocTarget { id: link.targetId, tenantId: $tenantId })
-       SET t.type = link.targetType
-       MERGE (f)-[r:TRACE_LINK { requestId: $requestId, relation: link.relation }]->(t)
-       SET r.score = link.score, r.updatedAt = datetime()`,
-      params,
-    );
+    for (const link of links) {
+      await neo.run(
+        `MATCH (f:DocFragment { id: $fragmentId })
+         MERGE (t:DocTarget { id: $targetId, tenantId: $tenantId })
+         SET t.type = $targetType
+         MERGE (f)-[r:TRACE_LINK { requestId: $requestId, relation: $relation }]->(t)
+         SET r.score = $score, r.updatedAt = datetime()`,
+        {
+          fragmentId: link.fragmentId,
+          targetId: link.targetId,
+          targetType: link.targetType,
+          relation: link.relation,
+          score: link.score || null,
+          tenantId,
+          requestId,
+        },
+      );
+    }
   }
 }
 

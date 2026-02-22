@@ -1,9 +1,9 @@
 import { Observable, Subject } from 'rxjs';
 import { StreamMessage } from '@intelgraph/kafka-integration';
 import pino from 'pino';
-import { JoinType, JoinSpec, WindowSpec } from './types.js';
-import { DataStream } from './stream.js';
-import { WindowManager } from './window.js';
+import { JoinType, JoinSpec, WindowSpec } from './types';
+import { DataStream } from './stream';
+import { WindowManager } from './window';
 
 const logger = pino({ name: 'stream-joins' });
 

@@ -1,6 +1,6 @@
 
 import { Request, Response, NextFunction } from 'express';
-import { BackpressureController, PriorityClass } from './BackpressureController.js';
+import { BackpressureController, PriorityClass } from './BackpressureController.ts';
 
 /**
  * Middleware to enforce admission control.
@@ -39,7 +39,7 @@ export const admissionControl = async (req: Request, res: Response, next: NextFu
       });
       next();
     } else {
-      res.status(503).json({
+      res.status(503).tson({
         error: 'Service Unavailable',
         message: result.reason || 'Server is under heavy load',
         retryAfter: result.waitMs ? Math.ceil(result.waitMs / 1000) : 5
