@@ -1,0 +1,26 @@
+groups:
+  - name: summit-agent.alerts
+    rules:
+      - alert: SummitAgentHighFailureRate
+        expr: |
+          sum(rate(summit_agent_operations_total{result="error"}[5m]))
+          /
+          sum(rate(summit_agent_operations_total[5m]))
+          > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: summit-api
+        annotations:
+          summary: 'High Failure Rate for Summit Agents'
+          description: 'Summit Agents are failing at a rate of {{ $value | humanizePercentage }}.'
+
+      - alert: SummitFlowSlow
+        expr: histogram_quantile(0.95, sum(rate(summit_flow_duration_seconds_bucket[5m])) by (le)) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-api
+        annotations:
+          summary: 'Summit Flow Execution Slow'
+          description: '95th percentile of flow duration is {{ $value }}s, exceeding 5s.'

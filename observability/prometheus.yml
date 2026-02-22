@@ -12,6 +12,7 @@ global:
 rule_files:
   - 'alert-rules.yml'
   - 'summit-alerts.yml'
+  - 'summit-agent-alerts.yml'
   - 'alerts/maestro-alerts.yml'
 
 # Alert manager configuration
@@ -37,6 +38,16 @@ scrape_configs:
     scrape_interval: 15s
     metrics_path: /metrics
     scrape_timeout: 10s
+    honor_labels: true
+
+  # Summit API
+  - job_name: 'summit-api'
+    static_configs:
+      - targets: ['ai-worker:8000']
+        labels:
+          service: 'summit-api'
+    scrape_interval: 15s
+    metrics_path: /metrics
     honor_labels: true
 
   # OpenTelemetry Collector

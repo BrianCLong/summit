@@ -36,14 +36,19 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
 
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+        with:
+          python-version: "3.11"
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run Governance Checks
-        run: pnpm governance:check
+        run: python3 tools/ci/verify_evidence.py
 
       - name: Validate Evidence Schemas
-        run: pnpm governance:evidence:schemas
+        run: node scripts/ci/validate_policy_references.mjs
 
       - name: Golden Evidence Tests
         run: node --test scripts/ci/__tests__/governance_evidence_contracts.test.mjs
