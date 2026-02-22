@@ -1,79 +1,147 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { UsageKind } from '../../types/usage.js';
 
-// Track calls for assertions
-let queryCallCount = 0;
-let releaseCallCount = 0;
+// Define mocks inside factory or scoped correctly
+const mockGetClient = jest.fn();
+const mockSetex = jest.fn();
+const mockZadd = jest.fn();
+const mockExpire = jest.fn();
+const mockZrevrangebyscore = jest.fn();
+const mockMget = jest.fn();
 
-// Mock modules before imports
-jest.mock('../../config/database.js', () => ({
-  getPostgresPool: () => ({
-    connect: () => Promise.resolve({
-      query: () => {
-        queryCallCount++;
-        return Promise.resolve({ rowCount: 1 });
-      },
-      release: () => {
-        releaseCallCount++;
-      },
-    }),
-  }),
-}));
+// Configure default behavior
+mockGetClient.mockReturnValue({
+  setex: mockSetex,
+  zadd: mockZadd,
+  expire: mockExpire,
+  zrevrangebyscore: mockZrevrangebyscore,
+  mget: mockMget,
+});
 
-jest.mock('../../utils/logger.js', () => ({
-  default: {
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
+mockSetex.mockResolvedValue('OK');
+mockZadd.mockResolvedValue(1);
+mockExpire.mockResolvedValue(1);
+mockZrevrangebyscore.mockResolvedValue([]);
+mockMget.mockResolvedValue([]);
+
+const mockGetInstance = jest.fn().mockReturnValue({
+  getClient: mockGetClient,
+});
+
+jest.unstable_mockModule('../../cache/redis.js', () => ({
+  RedisService: {
+    getInstance: mockGetInstance,
   },
-  error: jest.fn(),
 }));
 
-jest.mock('../../utils/metrics.js', () => ({
-  PrometheusMetrics: class {
-    createCounter(): void {}
-    incrementCounter(): void {}
-  }
+jest.unstable_mockModule('../../config/logger.js', () => ({
+  logger: {
+    info: jest.fn(),
+    debug: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
-// Import after mocks
-import { UsageMeteringService } from '../UsageMeteringService.js';
+// Dynamic import
+const { UsageMeteringService } = await import('../UsageMeteringService.js');
 
 describe('UsageMeteringService', () => {
-  let service: UsageMeteringService;
+  let service: InstanceType<typeof UsageMeteringService>;
 
   beforeEach(() => {
-    // Reset call counts
-    queryCallCount = 0;
-    releaseCallCount = 0;
+    jest.clearAllMocks();
+    // Re-setup defaults if cleared
+    mockGetClient.mockReturnValue({
+        setex: mockSetex,
+        zadd: mockZadd,
+        expire: mockExpire,
+        zrevrangebyscore: mockZrevrangebyscore,
+        mget: mockMget,
+    });
+    mockGetInstance.mockReturnValue({
+        getClient: mockGetClient,
+    });
+    mockSetex.mockResolvedValue('OK');
+    mockZadd.mockResolvedValue(1);
+    mockExpire.mockResolvedValue(1);
+    mockZrevrangebyscore.mockResolvedValue([]);
+    mockMget.mockResolvedValue([]);
 
-    // Reset singleton
-    (UsageMeteringService as any).instance = null;
-
-    // Get fresh instance
-    service = UsageMeteringService.getInstance();
+    service = new UsageMeteringService();
   });
 
   it('should record a usage event', async () => {
-    await service.record({
+    const event = {
+      id: 'test-event-1',
       tenantId: 't1',
-      kind: 'custom' as UsageKind,
+      dimension: 'api_calls',
       quantity: 10,
-      unit: 'calls'
-    });
+      unit: 'calls',
+      source: 'test',
+      occurredAt: new Date().toISOString(),
+      recordedAt: new Date().toISOString(),
+    };
 
-    expect(queryCallCount).toBeGreaterThan(0);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    await service.record(event);
+
+    expect(mockGetInstance).toHaveBeenCalled();
+    expect(mockGetClient).toHaveBeenCalled();
+    expect(mockSetex).toHaveBeenCalledWith(
+      `usage:event:${event.id}`,
+      expect.any(Number),
+      JSON.stringify(event)
+    );
+    expect(mockZadd).toHaveBeenCalledWith(
+      `usage:events:zset:${event.tenantId}`,
+      expect.any(Number),
+      event.id
+    );
   });
 
-  it('should record a batch of events', async () => {
-    await service.recordBatch([
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 1, unit: 'u' },
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 2, unit: 'u' }
-    ]);
+  it('should retrieve events', async () => {
+    const tenantId = 't1';
+    const event1 = {
+      id: 'e1',
+      tenantId,
+      dimension: 'dim1',
+      quantity: 5,
+      occurredAt: new Date().toISOString(),
+    };
 
-    // BEGIN + 2 inserts + COMMIT = 4 calls
-    expect(queryCallCount).toBe(4);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    mockZrevrangebyscore.mockResolvedValue(['e1']);
+    mockMget.mockResolvedValue([JSON.stringify(event1)]);
+
+    const events = await service.getEvents(tenantId, { dimension: 'dim1' });
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toEqual(event1);
+    expect(mockZrevrangebyscore).toHaveBeenCalled();
+    expect(mockMget).toHaveBeenCalledWith('usage:event:e1');
+  });
+
+  it('should calculate aggregations', async () => {
+    const tenantId = 't1';
+    const event1 = {
+      id: 'e1',
+      tenantId,
+      dimension: 'dim1',
+      quantity: 5,
+      occurredAt: new Date().toISOString(),
+    };
+    const event2 = {
+      id: 'e2',
+      tenantId,
+      dimension: 'dim1',
+      quantity: 10,
+      occurredAt: new Date().toISOString(),
+    };
+
+    mockZrevrangebyscore.mockResolvedValue(['e1', 'e2']);
+    mockMget.mockResolvedValue([JSON.stringify(event1), JSON.stringify(event2)]);
+
+    const aggregation = await service.getAggregation(tenantId, 'dim1', '2023-01-01', '2023-01-31');
+
+    expect(aggregation.totalQuantity).toBe(15);
+    expect(aggregation.eventCount).toBe(2);
   });
 });

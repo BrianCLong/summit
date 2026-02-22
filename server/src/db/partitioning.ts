@@ -16,6 +16,17 @@ export class PartitionManager {
     const safeTenantId = tenantId.replace(/[^a-zA-Z0-9_]/g, '');
     const partitionName = `maestro_runs_${safeTenantId}`;
 
+    await this.createListPartition('maestro_runs', partitionName, [tenantId]);
+    logger.info(`Created partition ${partitionName} for tenant ${tenantId}`);
+  }
+
+  /**
+   * Generic method to create a list partition.
+   */
+  async createListPartition(tableName: string, partitionName: string, values: string[]): Promise<void> {
+    // Sanitize values to prevent SQL injection in partition definition
+    const valuesStr = values.map(v => `'${v.replace(/'/g, "''")}'`).join(', ');
+
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
@@ -27,24 +38,24 @@ export class PartitionManager {
       );
 
       if (checkRes.rows[0].to_regclass) {
-        logger.info(`Partition ${partitionName} already exists.`);
+        logger.debug(`Partition ${partitionName} already exists.`);
         await client.query('COMMIT');
         return;
       }
 
       const query = `
         CREATE TABLE ${partitionName}
-        PARTITION OF maestro_runs
-        FOR VALUES IN ('${tenantId}')
+        PARTITION OF ${tableName}
+        FOR VALUES IN (${valuesStr})
       `;
 
       await client.query(query);
-      logger.info(`Created partition ${partitionName} for tenant ${tenantId}`);
+      logger.info(`Created list partition ${partitionName} for values: ${valuesStr}`);
 
       await client.query('COMMIT');
     } catch (error: any) {
       await client.query('ROLLBACK');
-      logger.error(`Failed to create partition for tenant ${tenantId}`, error);
+      logger.error(`Failed to create list partition ${partitionName}`, error);
       throw error;
     } finally {
       client.release();
@@ -78,7 +89,7 @@ export class PartitionManager {
       );
 
       if (checkRes.rows[0].to_regclass) {
-        logger.info(`Partition ${partitionName} already exists.`);
+        logger.debug(`Partition ${partitionName} already exists.`);
         await client.query('COMMIT');
         return;
       }
@@ -125,7 +136,20 @@ export class PartitionManager {
         await this.createMonthlyPartition(table, monthAfterNext);
     }
 
+    await this.maintainOutboxPartitions();
+
     // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
+  }
+
+  async maintainOutboxPartitions(): Promise<void> {
+     try {
+         // Calls stored procedure to manage partitions (create future, drop old)
+         await this.pool.write('SELECT ensure_outbox_partition($1, $2)', [2, 6]);
+         logger.info({ tableName: 'outbox_events' }, 'Maintained outbox partitions');
+     } catch (error) {
+         // Log but don't throw to avoid stopping other maintenance
+         logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain outbox partitions');
+     }
   }
 
   async detachOldPartitions(
