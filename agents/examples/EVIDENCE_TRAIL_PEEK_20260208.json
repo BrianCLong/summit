@@ -1,0 +1,61 @@
+{
+  "task_id": "EVIDENCE_TRAIL_PEEK_20260208",
+  "agent_id": "codex-agent",
+  "prompt_ref": {
+    "id": "evidence-trail-peek",
+    "version": "v1",
+    "sha256": "2faa11e687cfb8778aea67883185c51b9f420149e9836fb451334ab0c0f157b1",
+    "path": "prompts/features/evidence-trail-peek@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "apps/web/src/components/evidence/EvidenceTrailPeek.tsx",
+      "apps/web/src/components/CopilotPanel.tsx",
+      "apps/web/src/panes/GraphPane.tsx",
+      "apps/web/src/telemetry/evidenceTrailPeek.ts",
+      "apps/web/src/config/features.ts",
+      "server/src/routes/evidence-trail-peek.ts",
+      "server/src/routes/__tests__/evidence-trail-peek.test.ts",
+      "server/src/app.ts",
+      "e2e/tests/evidence-trail-peek.cy.ts",
+      "docs/standards/evidence-trail-peek.md",
+      "docs/security/data-handling/evidence-trail-peek.md",
+      "docs/ops/runbooks/evidence-trail-peek.md",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "prompts/features/evidence-trail-peek@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["ui", "api", "telemetry", "documentation", "governance"],
+    "exclusions": [
+      ".github/workflows/codeql.yml",
+      ".github/workflows/*deploy*"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/ui/evidence-trail-peek/ui.test.report.json",
+      "artifacts/api/evidence-trail-peek/api.contract.report.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Read-only endpoints return deterministic responses scoped by tenant.",
+    "UI overlay renders provenance timeline, top artifacts, and three verifiable claims.",
+    "Feature flag defaults off and is gated by runtime configuration.",
+    "Telemetry emits runtime-only metrics without PII."
+  ],
+  "stop_conditions": [
+    "Missing tenant scoping for evidence queries.",
+    "Endpoints require new data model or writes."
+  ],
+  "dependencies": [
+    "prompts/features/evidence-trail-peek@v1.md"
+  ],
+  "approvals": []
+}
