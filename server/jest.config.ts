@@ -81,7 +81,7 @@ const config: Config = {
     'src/extensions/__tests__/',
     'src/feature-flags/__tests__/',
     'src/federation/__tests__/',
-    'src/graph/__tests__/',
+    // 'src/graph/__tests__/',
     'src/graphql/services/__tests__/',
     'src/ingest/__tests__/',
     'src/intel/cti/__tests__/',
