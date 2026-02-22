@@ -16,7 +16,6 @@ const path = require('path');
 const EXCLUDED_DIRS = new Set([
   'node_modules',
   '.git',
-  '_worktrees',
   'dist',
   'build',
   'coverage',

@@ -1,6 +1,0 @@
-{
-  "evidence_id": "EVD-CLAUDECODE-SUBAGENTS-FOUNDATION-001",
-  "summary": "PR1 test run",
-  "item_slug": "agent-harness",
-  "artifacts": ["report.json", "metrics.json", "stamp.json"]
-}

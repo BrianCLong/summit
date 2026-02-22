@@ -86,7 +86,7 @@ jobs:
   test-ubuntu-runners:
     name: Test Ubuntu Runners (when available)
     runs-on: self-hosted
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}  # Enable after Ubuntu runners are configured
+    if: false  # Enable after Ubuntu runners are configured
     strategy:
       matrix:
         test: [1, 2, 3]

@@ -1,6 +1,6 @@
 import express from 'express';
-import { EntityResolutionService } from '../services/entity-resolution/service.js';
-import { DataQualityService } from '../services/entity-resolution/quality.js';
+import { EntityResolutionService } from '../services/entity-resolution/service';
+import { DataQualityService } from '../services/entity-resolution/quality';
 import { EntityResolutionV2Service } from '../services/er/EntityResolutionV2Service.js';
 import { getPostgresPool } from '../config/database.js';
 

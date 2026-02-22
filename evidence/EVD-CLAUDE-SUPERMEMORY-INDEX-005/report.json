@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVD-CLAUDE-SUPERMEMORY-INDEX-005",
-  "item_slug": "claude-supermemory",
-  "summary": "Scaffolding for EVD-CLAUDE-SUPERMEMORY-INDEX-005",
-  "artifacts": {
-    "metrics": "evidence/EVD-CLAUDE-SUPERMEMORY-INDEX-005/metrics.json",
-    "stamp": "evidence/EVD-CLAUDE-SUPERMEMORY-INDEX-005/stamp.json"
-  }
-}

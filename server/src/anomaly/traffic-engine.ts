@@ -1,4 +1,4 @@
-import { TrafficFlow, TrafficFeatures, TrafficAnomalyResult } from './traffic-types.js';
+import { TrafficFlow, TrafficFeatures, TrafficAnomalyResult } from './traffic-types.ts';
 
 // Helper math functions since we might not have them imported
 function localMedian(values: number[]): number {

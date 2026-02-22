@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, jest } from '@jest/globals';
-import { Maestro } from '../core.js';
-import { Task } from '../types.js';
+import { Maestro } from '../core';
+import { Task } from '../types';
 
 describe('Maestro Orchestration Core', () => {
   let mockIg: any;

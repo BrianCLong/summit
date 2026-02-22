@@ -1,7 +1,7 @@
 import { ApolloServer } from '@apollo/server';
-import { typeDefs } from '../src/graphql/schema.js';
-import { resolvers } from '../src/graphql/resolvers.js';
-import * as neo from '../src/graph/neo4j.js';
+import { typeDefs } from '../src/graphql/schema';
+import { resolvers } from '../src/graphql/resolvers';
+import * as neo from '../src/graph/neo4j';
 import { jest, it, expect } from '@jest/globals';
 
 jest.spyOn(neo, 'runCypher').mockImplementation(async (c, p) => {

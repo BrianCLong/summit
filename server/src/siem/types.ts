@@ -11,7 +11,7 @@ export interface SIEMEvent {
   tenantId?: string;
   ipAddress?: string;
   userAgent?: string;
-  details: Record<string, unknown>;
+  details: Record<string, any>;
   tags?: string[];
 }
 
@@ -30,7 +30,7 @@ export interface Rule {
 export interface RuleCondition {
   field: string;
   operator: 'equals' | 'contains' | 'regex' | 'gt' | 'lt';
-  value: unknown;
+  value: any;
 }
 
 export interface RuleAction {

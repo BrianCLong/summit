@@ -6,6 +6,6 @@
  * @module analytics/engine
  */
 
-export { PredictiveExecutionEngine, getPredictiveEngine } from './PredictiveExecutionEngine.js';
-export type { PredictiveEngineConfig } from './PredictiveExecutionEngine.js';
-export * from './types.js';
+export { PredictiveExecutionEngine, getPredictiveEngine } from './PredictiveExecutionEngine.ts';
+export type { PredictiveEngineConfig } from './PredictiveExecutionEngine.ts';
+export * from './types.ts';

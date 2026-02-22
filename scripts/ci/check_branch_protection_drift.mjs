@@ -3,13 +3,11 @@ import { resolve } from 'node:path';
 import {
   computeDiff,
   fetchRequiredStatusChecks,
-  GitHubApiError,
   hashObject,
   inferRepoFromGit,
   loadPolicy,
   stableJson
 } from './lib/branch-protection.mjs';
-import { compareByCodeUnit, writeDeterministicJson } from './lib/governance_evidence.mjs';
 
 function parseArgs(argv) {
   const args = {};
@@ -54,10 +52,6 @@ function parseArgs(argv) {
       args.help = true;
       continue;
     }
-    if (current === '--offline') {
-      args.offline = true;
-      continue;
-    }
     throw new Error(`Unknown arg: ${current}`);
   }
   return args;
@@ -71,7 +65,6 @@ function printHelp() {
   console.log('  --branch name         Branch to check (default: main)');
   console.log('  --policy path         Policy file (default: docs/ci/REQUIRED_CHECKS_POLICY.yml)');
   console.log('  --out path            Output directory (default: artifacts/governance/branch-protection-drift)');
-  console.log('  --offline             Emit unverifiable evidence without API calls');
 }
 
 function writeReportFiles(outDir, report, markdown, stamp) {
@@ -79,20 +72,6 @@ function writeReportFiles(outDir, report, markdown, stamp) {
   writeFileSync(resolve(outDir, 'drift.json'), stableJson(report));
   writeFileSync(resolve(outDir, 'drift.md'), `${markdown}\n`);
   writeFileSync(resolve(outDir, 'stamp.json'), stableJson(stamp));
-}
-
-function writeErrorEvidence(evidencePath, branch, code) {
-  const evidence = {
-    schema_version: 1,
-    kind: 'branch_protection_audit',
-    target_branch: branch,
-    state: 'UNVERIFIABLE_ERROR',
-    error: {
-      code,
-      http_status: null
-    }
-  };
-  writeDeterministicJson(evidencePath, evidence);
 }
 
 function formatMarkdown(report, diff, remediationCommand, errorMessage) {
@@ -174,7 +153,6 @@ async function main() {
 
   const policyPath = args.policy ?? 'docs/ci/REQUIRED_CHECKS_POLICY.yml';
   const outDir = args.out ?? 'artifacts/governance/branch-protection-drift';
-  const evidencePath = 'artifacts/governance/branch-protection-audit.evidence.json';
 
   let policy;
   let repo = args.repo ?? process.env.GITHUB_REPOSITORY;
@@ -202,7 +180,6 @@ async function main() {
     const remediationCommand = `pnpm ci:branch-protection:check -- --policy ${policyPath}`;
     const markdown = formatMarkdown(report, { missing_in_github: [], extra_in_github: [], strict_mismatch: false }, remediationCommand, errorMessage);
     writeReportFiles(outDir, report, markdown, stamp);
-    writeErrorEvidence(evidencePath, branch, 'POLICY_ERROR');
     console.error(errorMessage);
     process.exit(2);
   }
@@ -227,7 +204,6 @@ async function main() {
     const remediationCommand = `pnpm ci:branch-protection:check -- --branch ${policy.branch} --policy ${policyPath}`;
     const markdown = formatMarkdown(report, { missing_in_github: [], extra_in_github: [], strict_mismatch: false }, remediationCommand, errorMessage);
     writeReportFiles(outDir, report, markdown, stamp);
-    writeErrorEvidence(evidencePath, branch, 'POLICY_BRANCH_MISMATCH');
     console.error(errorMessage);
     process.exit(2);
   }
@@ -255,38 +231,14 @@ async function main() {
     const remediationCommand = `pnpm ci:branch-protection:check -- --repo owner/name --branch ${branch} --policy ${policyPath}`;
     const markdown = formatMarkdown(report, { missing_in_github: [], extra_in_github: [], strict_mismatch: false }, remediationCommand, errorMessage);
     writeReportFiles(outDir, report, markdown, stamp);
-    writeErrorEvidence(evidencePath, branch, 'REPO_UNRESOLVED');
     console.error(errorMessage);
     process.exit(2);
-  }
-
-  if (args.offline) {
-    const evidence = {
-      schema_version: 1,
-      kind: 'branch_protection_audit',
-      target_branch: branch,
-      state: 'UNVERIFIABLE_PERMISSIONS',
-      error: {
-        code: 'MISSING_TOKEN',
-        http_status: null
-      }
-    };
-    writeDeterministicJson(evidencePath, evidence);
-    console.log('Branch protection audit skipped (offline).');
-    process.exit(0);
   }
 
   let actual;
   try {
     actual = await fetchRequiredStatusChecks({ repo, branch });
   } catch (error) {
-    const isApiError = error instanceof GitHubApiError;
-    const kind = isApiError ? error.kind : 'unknown';
-    const errorState = kind === 'permission'
-      ? 'UNVERIFIABLE_PERMISSIONS'
-      : kind === 'rate_limited'
-        ? 'UNVERIFIABLE_RATE_LIMIT'
-        : 'UNVERIFIABLE_ERROR';
     const errorMessage = `GitHub API error: ${error.message}`;
     const report = {
       repo,
@@ -310,19 +262,8 @@ async function main() {
     const remediationCommand = `pnpm ci:branch-protection:check -- --repo ${repo} --branch ${branch} --policy ${policyPath}`;
     const markdown = formatMarkdown(report, { missing_in_github: [], extra_in_github: [], strict_mismatch: false }, remediationCommand, errorMessage);
     writeReportFiles(outDir, report, markdown, stamp);
-    const evidence = {
-      schema_version: 1,
-      kind: 'branch_protection_audit',
-      target_branch: branch,
-      state: errorState,
-      error: {
-        code: kind,
-        http_status: isApiError ? error.status : null
-      }
-    };
-    writeDeterministicJson(evidencePath, evidence);
     console.error(errorMessage);
-    process.exit(errorState === 'UNVERIFIABLE_PERMISSIONS' || errorState === 'UNVERIFIABLE_RATE_LIMIT' ? 0 : 2);
+    process.exit(2);
   }
 
   const diff = computeDiff(policy, actual);
@@ -359,20 +300,6 @@ async function main() {
   const markdown = formatMarkdown(report, diff, remediationCommand);
 
   writeReportFiles(outDir, report, markdown, stamp);
-  const evidence = {
-    schema_version: 1,
-    kind: 'branch_protection_audit',
-    target_branch: branch,
-    state: driftDetected ? 'VERIFIED_DRIFT' : 'VERIFIED_MATCH'
-  };
-  if (driftDetected) {
-    evidence.diff = {
-      missing_in_github: diff.missing_in_github.slice().sort(compareByCodeUnit),
-      extra_in_github: diff.extra_in_github.slice().sort(compareByCodeUnit),
-      strict_mismatch: diff.strict_mismatch
-    };
-  }
-  writeDeterministicJson(evidencePath, evidence);
 
   if (driftDetected) {
     console.error('Branch protection drift detected. See drift.md for details.');

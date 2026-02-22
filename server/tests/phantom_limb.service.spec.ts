@@ -1,5 +1,5 @@
 // server/tests/phantom_limb.service.spec.ts
-import { PhantomLimbService } from '../src/phantom_limb/PhantomLimbService.js';
+import { PhantomLimbService } from '../src/phantom_limb/PhantomLimbService';
 import { AnalystArtifacts } from '../src/phantom_limb/phantom_limb.types';
 
 jest.useFakeTimers();

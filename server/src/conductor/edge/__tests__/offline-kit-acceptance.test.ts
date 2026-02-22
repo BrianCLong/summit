@@ -8,21 +8,21 @@ const RUN_ACCEPTANCE = process.env.RUN_ACCEPTANCE === 'true';
 const describeIf = RUN_ACCEPTANCE ? describe : describe.skip;
 
 describeIf('Offline Kit - Acceptance Criteria', () => {
-  let OfflineKit: typeof import('../offline-kit.js').OfflineKit;
-  let proofCarryingResultSystem: typeof import('../proof-carrying-results.js').proofCarryingResultSystem;
-  let policyLeakSimulator: typeof import('../policy-leak-simulator.js').policyLeakSimulator;
-  let claimSyncEngine: typeof import('../claim-sync.js').claimSyncEngine;
-  let crdtSyncEngine: typeof import('../crdt-sync.js').crdtSyncEngine;
+  let OfflineKit: typeof import('../offline-kit').OfflineKit;
+  let proofCarryingResultSystem: typeof import('../proof-carrying-results').proofCarryingResultSystem;
+  let policyLeakSimulator: typeof import('../policy-leak-simulator').policyLeakSimulator;
+  let claimSyncEngine: typeof import('../claim-sync').claimSyncEngine;
+  let crdtSyncEngine: typeof import('../crdt-sync').crdtSyncEngine;
   let offlineKit: any;
   const edgeNodeId = 'edge-test-node-001';
   const cloudNodeId = 'cloud-primary';
 
   beforeAll(async () => {
-    ({ OfflineKit } = await import('../offline-kit.js'));
-    ({ proofCarryingResultSystem } = await import('../proof-carrying-results.js'));
-    ({ policyLeakSimulator } = await import('../policy-leak-simulator.js'));
-    ({ claimSyncEngine } = await import('../claim-sync.js'));
-    ({ crdtSyncEngine } = await import('../crdt-sync.js'));
+    ({ OfflineKit } = await import('../offline-kit'));
+    ({ proofCarryingResultSystem } = await import('../proof-carrying-results'));
+    ({ policyLeakSimulator } = await import('../policy-leak-simulator'));
+    ({ claimSyncEngine } = await import('../claim-sync'));
+    ({ crdtSyncEngine } = await import('../crdt-sync'));
 
     // Initialize offline kit for edge node
     offlineKit = new OfflineKit({

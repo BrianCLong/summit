@@ -1,15 +1,15 @@
 // @ts-nocheck
-import { PipelineConfig, ConnectorContext } from '../data-model/types.js';
-import { FileConnector } from '../connectors/FileConnector.js';
-import { HttpConnector } from '../connectors/HttpConnector.js';
-import { SourceConnector } from '../connectors/types.js';
-import { NormalizationService } from './NormalizationService.js';
-import { EnrichmentService } from './EnrichmentService.js';
-import { IndexingService } from './IndexingService.js';
-import { ChunkingService } from './ChunkingService.js';
-import { EmbeddingStage } from './EmbeddingStage.js';
-import { DLQService } from './DLQService.js';
-import { ProcessorFactory } from './processors/ProcessorFactory.js';
+import { PipelineConfig, ConnectorContext } from '../data-model/types';
+import { FileConnector } from '../connectors/FileConnector';
+import { HttpConnector } from '../connectors/HttpConnector';
+import { SourceConnector } from '../connectors/types';
+import { NormalizationService } from './NormalizationService';
+import { EnrichmentService } from './EnrichmentService';
+import { IndexingService } from './IndexingService';
+import { ChunkingService } from './ChunkingService';
+import { EmbeddingStage } from './EmbeddingStage';
+import { DLQService } from './DLQService';
+import { ProcessorFactory } from './processors/ProcessorFactory';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'PipelineOrchestrator' });

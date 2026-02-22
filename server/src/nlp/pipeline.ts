@@ -1,10 +1,10 @@
 import { v4 as uuid } from 'uuid';
 import path from 'path';
 import fs from 'fs';
-import { ContextDisambiguator } from './resolution.js';
-import { ImplicitRelationshipExtractor } from './relationships.js';
-import { TransformerInferenceService } from './transformers.js';
-import { GraphUpdater } from './graph_updater.js';
+import { ContextDisambiguator } from './resolution';
+import { ImplicitRelationshipExtractor } from './relationships';
+import { TransformerInferenceService } from './transformers';
+import { GraphUpdater } from './graph_updater';
 
 export interface RawDocument {
   id?: string;

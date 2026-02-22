@@ -1,6 +1,6 @@
 
 import { EventEmitter } from 'events';
-import { logger } from '../utils/logger.js';
+import { logger } from '../utils/logger';
 
 export class MaestroEventBus extends EventEmitter {
   constructor() {

@@ -1,42 +1,44 @@
-# Required Checks Discovery
+# Required Checks Discovery (TODO)
 
-**Status:** ✅ COMPLETED (2026-02-06)
+1. Open repo settings → Branch protection rules.
+2. Record required status check names for default branch.
+3. Paste them into `ci/required_checks.json`.
+4. If names differ from our local gates, add a rename map.
 
-## Current Branch Protection Configuration
+## UI steps (GitHub)
 
-The following required status checks are configured on the `main` branch:
+1. Repo → Settings → Branches → Branch protection rule → "Require status checks"
+2. Copy the exact check names into `ci/verifier_spec.md`.
 
-| Check Name | App ID | Status |
-|------------|--------|--------|
-| Config Preflight | 15368 | ✅ Active |
-| Build & Package | 15368 | ✅ Active |
-| Verification Suite | 15368 | ✅ Active |
-| Governance Checks | 15368 | ✅ Active |
-| Schema Validation | 15368 | ✅ Active |
+## Discovered Checks (Preliminary)
 
-## Discovery Method
+- validate-release-policy
+- lint-reason-codes
+- security-scan
+- sbom
+- summit-influence-evidence
+- summit-influence-evals
+- summit-neverlog
+- summit-supply-chain
 
-Retrieved via GitHub API:
-```bash
-gh api repos/:owner/:repo/branches/main/protection/required_status_checks
-```
+## Temporary naming convention
 
-## Configuration Details
+Until discovered, gates are referenced as:
 
-- **Strict mode:** Enabled (requires branches to be up to date before merging)
-- **App ID 15368:** GitHub Actions workflow integration
+- summit/evidence
+- summit/evals_smoke
+- summit/promptpack_schema
+- summit/tool_spec_quality
+- summit/influence-evidence
+- summit/influence-evals
+- summit/neverlog
+- summit/supply-chain
 
-## Related Files
+## Rename plan
 
-- `.github/workflows/ci-core.yml` - Core CI pipeline
-- `.github/workflows/pr-gates.yml` - PR gate checks
-- `.github/workflows/server-typecheck.yml` - TypeScript validation
-- `.github/workflows/verify-claims.yml` - Claim verification
+Once the real names are known, update `ci/verifier_spec.md` and add a PR to map old→new for continuity.
 
-## Future Considerations
+## New Module Checks (pp_alerts)
 
-If additional checks need to be added:
-1. Create the workflow job in the appropriate workflow file
-2. Ensure the job name matches exactly what will be required
-3. Update branch protection via GitHub UI or API
-4. Document in this file
+- pp_alerts/tests (pending discovery of real name)
+- pp_alerts/privacy-scan (pending discovery of real name)
