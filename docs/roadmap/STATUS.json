@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-21T00:00:00Z",
+  "revision_note": "Expanded Summit Skills doctrine with judgment-packaging registry schema, evaluator requirements, and capability catalog guidance.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -70,7 +70,7 @@
       "id": "summit-skill-router-ga-orchestrator",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map. Added judgment-packaging doctrine alignment in docs/skills.md with registry schema, evaluator coupling, and governed rollback expectations."
     },
     {
       "id": "summit-ops-incident-console",

@@ -74,3 +74,66 @@ If a skill is staged before the upstream commit is pinned, mark it as a governed
 exception in `skills.lock.json` and `skills.manifest.json` with a clear rationale.
 Governed Exceptions are assets that must remain traceable until replaced by pinned
 commits before execution.
+
+## Judgment Packaging Doctrine (Operational Standard)
+
+Summit treats expertise as a versioned artifact, not a conversational side effect.
+Every skill must package judgment, checks, and rollback semantics so operators can
+inspect, test, and improve behavior over time.
+
+### Skill Registry Entry (Required Shape)
+
+```yaml
+skill:
+  name: source-credibility-assessment
+  version: 1.0.0
+  owner: intel-analysis
+  intent: score-source-credibility
+  inputs:
+    - document
+    - source_metadata
+  outputs:
+    - credibility_score
+    - rationale
+    - evidence_citations
+  evaluation:
+    rubric: OSINT_CREDIBILITY_V1
+    regression_set: evals/skills/source-credibility/*.json
+    acceptance_threshold: 0.85
+  guardrails:
+    - no speculation
+    - cite evidence
+    - bounded confidence statements
+  rollback:
+    trigger: "regression score < 0.85 or policy violation"
+    action: "revert to previous registry version and block apply runs"
+```
+
+### Pair Skills with Evaluators
+
+A skill without evaluation is folklore. Every skill rollout must include:
+
+- deterministic unit checks for structure and policy compliance
+- regression fixtures for judgment drift detection
+- human-review checkpoints for adjudicating ambiguous outputs
+
+### Capability Catalog Categories
+
+Use these default categories in the registry to maintain routing consistency:
+
+- OSINT validation
+- disinformation detection
+- risk scoring
+- narrative framing
+- legal triage
+- HUMINT lead scoring
+
+### Governance Outcomes
+
+Judgment-packaged skills are expected to improve:
+
+- auditability (evidence bundles per run)
+- reproducibility (version + lockfile integrity)
+- compliance (policy-as-code enforcement)
+- operational velocity (reusable, composable capability modules)
+
