@@ -1,13 +1,7 @@
 {
   "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "revision_note": "Expanded workflow optimization report with affected-only execution, pnpm store caching, and fast/full lane CI guidance.",
   "initiatives": [
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -189,12 +183,6 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -210,7 +198,7 @@
       "id": "cicd-signal-deltas-2026",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+      "notes": "Documented CI/CD high-signal deltas with enforced action register, evidence targets, and affected-only CI acceleration guidance."
     },
     {
       "id": "summit-architecture-brief",
@@ -224,7 +212,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
