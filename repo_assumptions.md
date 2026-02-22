@@ -1,40 +1,22 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation — CADDS Intake
 
-## Verified vs Assumed Directory List
+Reference: [Summit Readiness Assertion](docs/SUMMIT_READINESS_ASSERTION.md).
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Verified (inspected in repo)
 
-## CI Check Names (Exact)
+- `docs/` exists and is the primary documentation root.
+- `docs/standards/` exists for standards/interop documentation.
+- `docs/security/` exists for security and data-handling guidance.
+- `docs/ops/runbooks/` exists for operational runbooks.
+- `.github/pull_request_template.md` exists and includes the AGENT-METADATA block template.
+- `docs/roadmap/STATUS.json` exists and is the execution assignment ledger.
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+## Assumed (deferred pending validation)
 
-## Evidence Schema Conventions (Exact)
+- `docs/ci/REQUIRED_CHECKS_POLICY.yml` defines authoritative branch protection check names.
+- The repo’s primary test runner is `pnpm`-based with supplemental `make` targets.
+- Outbound HTTP is disallowed in CI by default; fixture-driven ingestion is required.
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+## Must-Not-Touch Files
 
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- None declared (list intentionally constrained; expand only with explicit governance direction).
