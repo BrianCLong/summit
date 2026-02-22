@@ -71,6 +71,72 @@ meteringRouter.get('/summary', ensureAuthenticated, async (req, res) => {
   }
 });
 
+// GET /finops/usage?tenant_id=&from=&to=
+meteringRouter.get('/finops/usage', ensureAuthenticated, async (req, res) => {
+  try {
+    const { tenant_id, from, to } = req.query;
+    const targetTenantId = (tenant_id as string) || req.user?.tenantId;
+
+    if (!targetTenantId) {
+      return res.status(400).json({ error: 'tenant_id required' });
+    }
+
+    // Auth check
+    const user = req.user as unknown as User;
+    if (user.role !== 'admin' && user.tenantId !== targetTenantId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const usage = await persistentUsageRepository.list(
+      targetTenantId,
+      from as string,
+      to as string,
+    );
+
+    res.json({
+      tenantId: targetTenantId,
+      from,
+      to,
+      data: usage,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /finops/costs?tenant_id=&from=&to=
+meteringRouter.get('/finops/costs', ensureAuthenticated, async (req, res) => {
+  try {
+    const { tenant_id, from, to } = req.query;
+    const targetTenantId = (tenant_id as string) || req.user?.tenantId;
+
+    if (!targetTenantId) {
+      return res.status(400).json({ error: 'tenant_id required' });
+    }
+
+    // Auth check
+    const user = req.user as unknown as User;
+    if (user.role !== 'admin' && user.tenantId !== targetTenantId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // In a real system, we'd join usage to pricing.
+    // For MVP, we use the BudgetManager spending report if available.
+    const { costAwareScheduler } = await import('../conductor/scheduling/cost-aware-scheduler.js');
+    const report = await costAwareScheduler.getSpendingReport(targetTenantId);
+
+    res.json({
+      tenantId: targetTenantId,
+      currency: 'USD',
+      totalCost: report.totalSpend,
+      breakdown: report.topCostDrivers,
+      daily: report.dailyBreakdown,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // POST /quotas (Admin only) - Sets overrides
 meteringRouter.post('/quotas', ensureAuthenticated, ensureAdmin, async (req, res) => {
   try {
