@@ -43,6 +43,9 @@ overrides:
   hono: '>=4.11.7'
   multer: '>=2.0.2'
   busboy: '>=1.6.0'
+  lodash: '>=4.17.21'
+  axios: '>=1.7.4'
+  diff: '>=5.2.0'
 
 pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
@@ -66,7 +69,7 @@ importers:
         specifier: ^3.13.0
         version: 3.13.0(express@5.2.1)(graphql@16.12.0)
       axios:
-        specifier: ^1.13.2
+        specifier: '>=1.7.4'
         version: 1.13.4
       cbor:
         specifier: ^9.0.2
@@ -271,8 +274,8 @@ importers:
         specifier: ^13.0.0
         version: 13.0.0
       zod:
-        specifier: 3.25.76
-        version: 3.25.76
+        specifier: ^4.2.1
+        version: 4.2.1
 
   agents/governance:
     devDependencies:
@@ -405,7 +408,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       moment:
         specifier: ^2.29.4
@@ -567,7 +570,7 @@ importers:
   apps/compliance-console:
     dependencies:
       axios:
-        specifier: ^1.7.7
+        specifier: '>=1.7.4'
         version: 1.13.4
       react:
         specifier: ^19.2.0
@@ -859,7 +862,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       mathjs:
         specifier: ^15.0.0
@@ -1038,7 +1041,7 @@ importers:
         specifier: ^5.24.1
         version: 5.90.12(react@18.3.1)
       axios:
-        specifier: ^1.6.7
+        specifier: '>=1.7.4'
         version: 1.13.4
       class-variance-authority:
         specifier: ^0.7.0
@@ -1159,7 +1162,7 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       moment:
         specifier: ^2.29.4
@@ -1298,7 +1301,7 @@ importers:
         specifier: ^7.2.0
         version: 7.3.1
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       class-variance-authority:
         specifier: ^0.7.1
@@ -1542,7 +1545,7 @@ importers:
         specifier: ^10.4.16
         version: 10.4.22(postcss@8.5.6)
       axios:
-        specifier: ^1.6.3
+        specifier: '>=1.7.4'
         version: 1.13.4
       clsx:
         specifier: ^2.0.0
@@ -1771,7 +1774,7 @@ importers:
         specifier: ^5.8.4
         version: 5.90.14(@tanstack/react-query@5.90.12(react@19.2.1))(react@19.2.1)
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       date-fns:
         specifier: ^4.1.0
@@ -1991,7 +1994,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       natural:
         specifier: ^8.1.0
@@ -2076,7 +2079,7 @@ importers:
         specifier: ^4.11.1
         version: 4.12.2(graphql@16.12.0)
       axios:
-        specifier: ^1.7.2
+        specifier: '>=1.7.4'
         version: 1.13.4
       body-parser:
         specifier: ^2.2.0
@@ -2167,7 +2170,7 @@ importers:
   apps/slo-exporter:
     dependencies:
       axios:
-        specifier: ^1.13.3
+        specifier: '>=1.7.4'
         version: 1.13.4
       express:
         specifier: '>=4.21.0'
@@ -2362,42 +2365,6 @@ importers:
       '@mui/material':
         specifier: ^7.3.6
         version: 7.3.6(@emotion/react@11.14.0(@types/react@18.3.11)(react@19.2.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.11)(react@19.2.1))(@types/react@18.3.11)(react@19.2.1))(@types/react@18.3.11)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@opentelemetry/api':
-        specifier: ~1.8.0
-        version: 1.8.0
-      '@opentelemetry/context-zone':
-        specifier: ~1.18.1
-        version: 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/core':
-        specifier: ~1.18.1
-        version: 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/exporter-trace-otlp-http':
-        specifier: ~0.45.1
-        version: 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation':
-        specifier: ~0.45.1
-        version: 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation-document-load':
-        specifier: ~0.35.0
-        version: 0.35.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation-fetch':
-        specifier: ~0.45.1
-        version: 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation-xml-http-request':
-        specifier: ~0.45.1
-        version: 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources':
-        specifier: ~1.18.1
-        version: 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base':
-        specifier: ~1.18.1
-        version: 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-web':
-        specifier: ~1.18.1
-        version: 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions':
-        specifier: ~1.18.1
-        version: 1.18.1
       '@radix-ui/react-dialog':
         specifier: 1.1.15
         version: 1.1.15(@types/react-dom@18.3.0)(@types/react@18.3.11)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -2486,7 +2453,7 @@ importers:
         specifier: 1.9.4
         version: 1.9.4
       lodash:
-        specifier: 4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       lucide-react:
         specifier: 0.554.0
@@ -2641,7 +2608,7 @@ importers:
         version: 5.1.1(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/coverage-v8':
         specifier: 4.0.16
-        version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       autoprefixer:
         specifier: 10.4.22
         version: 10.4.22(postcss@8.5.6)
@@ -2698,10 +2665,10 @@ importers:
         version: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest:
         specifier: 4.0.16
-        version: 4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vitest-axe:
         specifier: 0.1.0
-        version: 0.1.0(vitest@4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+        version: 0.1.0(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
 
   apps/webapp:
     dependencies:
@@ -2839,7 +2806,7 @@ importers:
   apps/workflow-engine:
     dependencies:
       axios:
-        specifier: ^1.6.2
+        specifier: '>=1.7.4'
         version: 1.13.4
       compression:
         specifier: ^1.7.4
@@ -2860,7 +2827,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       neo4j-driver:
         specifier: ^6.0.1
@@ -3132,7 +3099,7 @@ importers:
         specifier: 1.9.4
         version: 1.9.4
       lodash:
-        specifier: 4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       react:
         specifier: 18.3.1
@@ -3322,7 +3289,7 @@ importers:
   companyos/services/api-svc-template:
     dependencies:
       axios:
-        specifier: ^1.7.7
+        specifier: '>=1.7.4'
         version: 1.13.4
       config:
         specifier: ^3.3.11
@@ -3363,7 +3330,7 @@ importers:
         version: 9.1.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-import:
         specifier: ^2.30.0
-        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
+        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
       supertest:
         specifier: ^7.0.0
         version: 7.1.4
@@ -3383,7 +3350,7 @@ importers:
   companyos/services/companyos-api:
     dependencies:
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       express:
         specifier: '>=4.21.0'
@@ -3417,7 +3384,7 @@ importers:
   companyos/services/incident-api:
     dependencies:
       axios:
-        specifier: ^1.7.7
+        specifier: '>=1.7.4'
         version: 1.13.4
       config:
         specifier: ^3.3.11
@@ -3458,7 +3425,7 @@ importers:
         version: 9.1.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-import:
         specifier: ^2.30.0
-        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
+        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
       supertest:
         specifier: ^7.0.0
         version: 7.1.4
@@ -4360,7 +4327,7 @@ importers:
         specifier: workspace:*
         version: link:../osint-collector
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       email-validator:
         specifier: ^2.0.4
@@ -4572,7 +4539,7 @@ importers:
   packages/authz-core:
     dependencies:
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       pg:
         specifier: ^8.11.0
@@ -4825,7 +4792,7 @@ importers:
   packages/business-rules:
     dependencies:
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       uuid:
         specifier: ^13.0.0
@@ -5028,7 +4995,7 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       react:
         specifier: ^19.2.1
@@ -5491,7 +5458,7 @@ importers:
         specifier: ^7.11.0
         version: 7.13.0
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       nodemailer:
         specifier: ^7.0.12
@@ -5883,7 +5850,7 @@ importers:
         specifier: 1.7.0
         version: 1.7.0
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       bull:
         specifier: ^4.16.5
@@ -6685,7 +6652,7 @@ importers:
         specifier: workspace:*
         version: link:../knowledge-graph
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       neo4j-driver:
         specifier: 6.0.1
@@ -7534,7 +7501,7 @@ importers:
   packages/fztr-client:
     dependencies:
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
     devDependencies:
       '@types/jest':
@@ -8254,7 +8221,7 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
 
   packages/incentive-sim:
@@ -8272,7 +8239,7 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
     devDependencies:
       '@types/node':
@@ -8888,7 +8855,7 @@ importers:
         specifier: ^1.38.0
         version: 1.39.0
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       cheerio:
         specifier: ^1.0.0-rc.12
@@ -9553,7 +9520,7 @@ importers:
         specifier: workspace:*
         version: link:../threat-detection-core
       axios:
-        specifier: ^1.6.2
+        specifier: '>=1.7.4'
         version: 1.13.4
     devDependencies:
       '@types/jest':
@@ -9847,7 +9814,7 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
     devDependencies:
       '@types/node':
@@ -10020,7 +9987,7 @@ importers:
         specifier: ^8.17.1
         version: 8.17.1
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       uuid:
         specifier: ^13.0.0
@@ -10365,7 +10332,7 @@ importers:
   packages/osint-collector:
     dependencies:
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       cheerio:
         specifier: ^1.0.0
@@ -10901,7 +10868,7 @@ importers:
         specifier: workspace:*
         version: link:../synthetic-data
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
     devDependencies:
       '@types/lodash':
@@ -11016,7 +10983,7 @@ importers:
   packages/prov-ledger-client:
     dependencies:
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       axios-retry:
         specifier: ^3.8.0
@@ -11176,7 +11143,7 @@ importers:
         specifier: ^5.15.0
         version: 5.18.0(@emotion/react@11.14.0(@types/react@18.3.11)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.11)(react@18.3.1))(@types/react@18.3.11)(react@18.3.1))(@types/react@18.3.11)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       crypto-js:
         specifier: ^4.2.0
@@ -11771,7 +11738,7 @@ importers:
   packages/rpa:
     dependencies:
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       cheerio:
         specifier: ^1.0.0
@@ -11976,7 +11943,7 @@ importers:
         specifier: ^2.17.2
         version: 2.17.2
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
     devDependencies:
       '@types/node':
@@ -12096,7 +12063,7 @@ importers:
   packages/sim-harness:
     dependencies:
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       commander:
         specifier: ^11.0.0
@@ -12288,7 +12255,7 @@ importers:
         specifier: workspace:*
         version: link:../osint-collector
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       compromise:
         specifier: ^14.13.0
@@ -12409,7 +12376,7 @@ importers:
         specifier: workspace:*
         version: link:../audio-processing
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       microsoft-cognitiveservices-speech-sdk:
         specifier: ^1.0.0
@@ -12724,7 +12691,7 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       mathjs:
         specifier: ^12.0.0
@@ -12802,7 +12769,7 @@ importers:
   packages/task-routing:
     dependencies:
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       uuid:
         specifier: ^13.0.0
@@ -13033,7 +13000,7 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
     devDependencies:
       '@types/lodash':
@@ -13147,7 +13114,7 @@ importers:
         specifier: workspace:*
         version: link:../common-types
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       zod:
         specifier: ^4.1.12
@@ -13450,7 +13417,7 @@ importers:
         specifier: ^7.9.0
         version: 7.9.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       react:
         specifier: ^19.2.1
@@ -13538,7 +13505,7 @@ importers:
         specifier: ^0.6.0
         version: 0.6.0
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       cheerio:
         specifier: ^1.0.0
@@ -13977,7 +13944,7 @@ importers:
         version: 9.1.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-import:
         specifier: ^2.32.0
-        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
+        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -14267,7 +14234,7 @@ importers:
         specifier: ^0.44.0
         version: 0.44.0
       axios:
-        specifier: ^1.7.9
+        specifier: '>=1.7.4'
         version: 1.13.4
       bullmq:
         specifier: 5.66.1
@@ -14384,8 +14351,8 @@ importers:
         specifier: ^2.2.4
         version: 2.2.4
       lodash:
-        specifier: 4.17.21
-        version: 4.17.21
+        specifier: '>=4.17.21'
+        version: 4.17.23
       lru-cache:
         specifier: ^11.2.4
         version: 11.2.5
@@ -15074,7 +15041,7 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0
       lodash:
-        specifier: ^4.17.23
+        specifier: '>=4.17.21'
         version: 4.17.23
       mercurius:
         specifier: ^16.3.0
@@ -15818,7 +15785,7 @@ importers:
         specifier: latest
         version: 1.39.0
       axios:
-        specifier: ^1.6.7
+        specifier: '>=1.7.4'
         version: 1.13.4
       express:
         specifier: '>=4.21.0'
@@ -17070,7 +17037,7 @@ importers:
         version: 9.1.0(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-import:
         specifier: ^2.29.1
-        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
+        version: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
@@ -17738,7 +17705,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/neural-networks
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       express:
         specifier: '>=4.21.0'
@@ -17769,7 +17736,7 @@ importers:
         specifier: ^1.9.0
         version: 1.9.0
       axios:
-        specifier: ^1.7.7
+        specifier: '>=1.7.4'
         version: 1.13.4
       express:
         specifier: '>=4.21.0'
@@ -18139,7 +18106,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/esg-reporting
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       cors:
         specifier: ^2.8.5
@@ -18444,7 +18411,7 @@ importers:
   services/factcert:
     dependencies:
       axios:
-        specifier: ^1.13.2
+        specifier: '>=1.7.4'
         version: 1.13.4
 
   services/feature-flags:
@@ -18801,7 +18768,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/geospatial
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       cors:
         specifier: ^2.8.5
@@ -19779,7 +19746,7 @@ importers:
         specifier: ^5.7.7
         version: 5.7.9
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       bullmq:
         specifier: ^5.0.0
@@ -20382,7 +20349,7 @@ importers:
         specifier: ^9.0.4
         version: 9.3.0
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       bullmq:
         specifier: ^5.34.8
@@ -20516,7 +20483,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/sentiment-analysis
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       express:
         specifier: '>=4.21.0'
@@ -21022,7 +20989,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/etl-framework
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       bull:
         specifier: ^4.16.5
@@ -21495,7 +21462,7 @@ importers:
   services/privacy:
     dependencies:
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
     devDependencies:
       '@types/jest':
@@ -21896,7 +21863,7 @@ importers:
   services/regulatory-compliance-agents:
     dependencies:
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       bullmq:
         specifier: ^5.0.0
@@ -22578,7 +22545,7 @@ importers:
   services/self-upgrading-infrastructure:
     dependencies:
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       date-fns:
         specifier: ^2.30.0
@@ -22949,7 +22916,7 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1(ajv@8.17.1)
       axios:
-        specifier: ^1.6.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       https-proxy-agent:
         specifier: ^7.0.2
@@ -23043,7 +23010,7 @@ importers:
         specifier: 1.19.0
         version: 1.19.0(@opentelemetry/api@1.7.0)
       axios:
-        specifier: ^1.13.2
+        specifier: '>=1.7.4'
         version: 1.13.4
       commander:
         specifier: ^12.0.0
@@ -23606,7 +23573,7 @@ importers:
         specifier: workspace:*
         version: link:../license-registry
       axios:
-        specifier: ^1.11.0
+        specifier: '>=1.7.4'
         version: 1.13.4
       fastify:
         specifier: '>=5.7.2'
@@ -24433,7 +24400,7 @@ importers:
   tools/summitctl:
     dependencies:
       axios:
-        specifier: ^1.7.9
+        specifier: '>=1.7.4'
         version: 1.13.4
       chalk:
         specifier: ^4.1.2
@@ -30229,10 +30196,6 @@ packages:
     resolution: {integrity: sha512-swhLdhH/nftC/bNhc3bQ7cn4XJvVO1n8aidDJ7fSw+5ostDLSurDdHS2bY8dxVmb+oHndgBlYOvrx7Jx4OPO6A==}
     engines: {node: '>=14'}
 
-  '@opentelemetry/api-logs@0.45.1':
-    resolution: {integrity: sha512-zVGq/k70l+kB/Wuv3O/zhptP2hvDhEbhDu9EtHde1iWZJf3FedeYS/nWVcMBkkyPAjS/JKNk86WN4CBQLGUuOw==}
-    engines: {node: '>=14'}
-
   '@opentelemetry/api-logs@0.46.0':
     resolution: {integrity: sha512-+9BcqfiEDGPXEIo+o3tso/aqGM5dGbGwAkGVp3FPpZ8GlkK1YlaKRd9gMVyPaeRATwvO5wYGGnCsAc/sMMM9Qw==}
     engines: {node: '>=14'}
@@ -30260,10 +30223,6 @@ packages:
 
   '@opentelemetry/api@1.7.0':
     resolution: {integrity: sha512-AdY5wvN0P2vXBi3b29hxZgSFvdhdxPB9+f0B6s//P9Q8nibRWeA3cHm8UmLpio9ABigkVHJ5NMPk+Mz8VCCyrw==}
-    engines: {node: '>=8.0.0'}
-
-  '@opentelemetry/api@1.8.0':
-    resolution: {integrity: sha512-I/s6F7yKUDdtMsoBWXJe8Qz40Tui5vsuKCWJEWVL+5q9sSWRzzx6v2KeNsOBEwd94j0eWkpWCH4yB6rZg9Mf0w==}
     engines: {node: '>=8.0.0'}
 
   '@opentelemetry/api@1.9.0':
@@ -30356,23 +30315,12 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
-  '@opentelemetry/context-zone-peer-dep@1.18.1':
-    resolution: {integrity: sha512-0rqvBIW8+oMaWbVFTcEl96cpj3W3tuL4U9Mxf6PCtQctEPTGVzoFRYQ4gucYW29Ne7O2N7yit9rrrQuPja4rPA==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.8.0'
-      zone.js: ^0.10.2 || ^0.11.0
-
   '@opentelemetry/context-zone-peer-dep@2.5.0':
     resolution: {integrity: sha512-ZCBtCkfiHzKsUXutg2BhZzz4p7APCnWK+NZ6pjet+SmnwvKjGN8KqgH1Z+3hIMhbzbWGhkOxO6PQcYjIiqLvSQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
       zone.js: ^0.10.2 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^0.14.0 || ^0.15.0 || ^0.16.0
-
-  '@opentelemetry/context-zone@1.18.1':
-    resolution: {integrity: sha512-c/y2dyqlvMPMLFZL4oDJR87ayAt4otQy9W4pddrRrNPAq1mfG9z0GrS/nvDpK7qWK0ztqzFxis4rsmCl5arW3g==}
-    engines: {node: '>=14'}
 
   '@opentelemetry/context-zone@2.5.0':
     resolution: {integrity: sha512-wevPtv5up7I22YHg0rioRkniAiyN/smHA3Thol3nwC7769bqf6gUgIb5fI4c0gyAlzMZLQLSkG5woPInTdJVKw==}
@@ -30634,12 +30582,6 @@ packages:
 
   '@opentelemetry/exporter-trace-otlp-http@0.45.0':
     resolution: {integrity: sha512-wmnuyKZAMoJdNpdiUYuLLa8kUMVRTl4BQJ6zEb9HUkiusSQ8+h2q0s7rVtY2urvg2HxDjMrDdUgjFnRPmoyBkg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-
-  '@opentelemetry/exporter-trace-otlp-http@0.45.1':
-    resolution: {integrity: sha512-a6CGqSG66n5R1mghzLMzyzn3iGap1b0v+0PjKFjfYuwLtpHQBxh2PHxItu+m2mXSwnM4R0GJlk9oUW5sQkCE0w==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
@@ -30986,12 +30928,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/instrumentation-document-load@0.35.0':
-    resolution: {integrity: sha512-U3zQBjbAF0rm7GT7YJ8DPqgiCdBoshmld4c1pZe3tAGAMa5QPIjonIfSMSvJ2XMh6Nvi+8Rfe3XFCe0cuWIjsQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.3.0
-
   '@opentelemetry/instrumentation-document-load@0.56.0':
     resolution: {integrity: sha512-JWBBIuXyDiSQ6Q/pyp/i5kfM2Hs0UyCPQF99dmt3mwAVZixcuxeyxeXIZRBt1BaLodxTOY/n6rwztBTSMeHe/Q==}
     engines: {node: ^18.19.0 || >=20.6.0}
@@ -31063,12 +30999,6 @@ packages:
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
-
-  '@opentelemetry/instrumentation-fetch@0.45.1':
-    resolution: {integrity: sha512-BcLXMlZmGN5islwT+B1hHmgrizZbA7MgTUHhlvwLkZpAmlDeCBUdr779q2iOpxixD2AcpUTQ1RY54JArCZIB7w==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
 
   '@opentelemetry/instrumentation-fs@0.14.0':
     resolution: {integrity: sha512-pVc8P5AgliC1DphyyBUgsxXlm2XaPH4BpYvt7rAZDMIqUpRk8gs19SioABtKqqxvFzg5jPtgJfJsdxq0Y+maLw==}
@@ -31840,12 +31770,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/instrumentation-xml-http-request@0.45.1':
-    resolution: {integrity: sha512-gwX55apcB4d+2OpZsOEtct+eUAvtZ9wT8IyZVbzZyN471vSePacKNrGbQr8uFlyioPj+IAS/izv+LJyqw6PNxA==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-
   '@opentelemetry/instrumentation@0.202.0':
     resolution: {integrity: sha512-Uz3BxZWPgDwgHM2+vCKEQRh0R8WKrd/q6Tus1vThRClhlPO39Dyz7mDrOr6KuqGXAlBQ1e5Tnymzri4RMZNaWA==}
     engines: {node: ^18.19.0 || >=20.6.0}
@@ -31938,12 +31862,6 @@ packages:
 
   '@opentelemetry/otlp-exporter-base@0.45.0':
     resolution: {integrity: sha512-K+zr7juzDCyokUfneI2ufr7HAUL+YaF1bQ5at+SkCIt9LGnIGMDJSAq/LBbd/DBl4Rlfi2dwcjzP7/+ycN5a9Q==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': ^1.0.0
-
-  '@opentelemetry/otlp-exporter-base@0.45.1':
-    resolution: {integrity: sha512-Jvd6x8EwWGKEPWF4tkP4LpTPXiIkkafMNMvMJUfJd5DyNAftL1vAz+48jmi3URL2LMPkGryrvWPz8Tdu917gQw==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
@@ -32056,12 +31974,6 @@ packages:
 
   '@opentelemetry/otlp-transformer@0.45.0':
     resolution: {integrity: sha512-8nlKKDWB2Sp6GI+wZLlDhMl8leSJho1T59zFddyH3H9Mvqg3dycQnSrIzUVY7X0IiZaxAtZG2VJxMmuXwo49eg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.3.0 <1.8.0'
-
-  '@opentelemetry/otlp-transformer@0.45.1':
-    resolution: {integrity: sha512-FhIHgfC0b0XtoBrS5ISfva939yWffNl47ypXR8I7Ru+dunlySpmf2TLocKHYLHGcWiuoeSNO5O4dZCmSKOtpXw==}
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.8.0'
@@ -32368,13 +32280,6 @@ packages:
       '@opentelemetry/api': '>=1.4.0 <1.8.0'
       '@opentelemetry/api-logs': '>=0.39.1'
 
-  '@opentelemetry/sdk-logs@0.45.1':
-    resolution: {integrity: sha512-z0RRgW4LeKEKnhXS4F/HnqB6+7gsy63YK47F4XAJYHs4s1KKg8XnQ2RkbuL31i/a9nXkylttYtvsT50CGr487g==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.4.0 <1.8.0'
-      '@opentelemetry/api-logs': '>=0.39.1'
-
   '@opentelemetry/sdk-logs@0.46.0':
     resolution: {integrity: sha512-Knlyk4+G72uEzNh6GRN1Fhmrj+/rkATI5/lOrevN7zRDLgp4kfyZBGGoWk7w+qQjlYvwhIIdPVxlIcipivdZIg==}
     engines: {node: '>=14'}
@@ -32509,12 +32414,6 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.8.0'
 
-  '@opentelemetry/sdk-trace-base@1.18.1':
-    resolution: {integrity: sha512-tRHfDxN5dO+nop78EWJpzZwHsN1ewrZRVVwo03VJa3JQZxToRDH29/+MB24+yoa+IArerdr7INFJiX/iN4gjqg==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.8.0'
-
   '@opentelemetry/sdk-trace-base@1.19.0':
     resolution: {integrity: sha512-+IRvUm+huJn2KqfFW3yW/cjvRwJ8Q7FzYHoUNx5Fr0Lws0LxjMJG1uVB8HDpLwm7mg5XXH2M5MF+0jj5cM8BpQ==}
     engines: {node: '>=14'}
@@ -32598,12 +32497,6 @@ packages:
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
-
-  '@opentelemetry/sdk-trace-web@1.18.1':
-    resolution: {integrity: sha512-WN30vxy4NY8TqFWuICXaPXjBdy6A5kDhxOqp4NfhqXfpcWWT0GqSgv05Q42quWYOFgaulnmPRRJwxzAdhBliLQ==}
-    engines: {node: '>=14'}
-    peerDependencies:
-      '@opentelemetry/api': '>=1.0.0 <1.8.0'
 
   '@opentelemetry/sdk-trace-web@2.5.0':
     resolution: {integrity: sha512-xWibakHs+xbx6vxH7Q8TbFS6zjf812o/kIS4xBDB32qSL9wF+Z5IZl2ZAGu4rtmPBQ7coZcOd684DobMhf8dKw==}
@@ -41767,14 +41660,6 @@ packages:
     resolution: {integrity: sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  diff@3.5.0:
-    resolution: {integrity: sha512-A46qtFgd+g7pDZinpnwiRJtxbC1hpgf0uzP3iG89scHk0AUC7A1TGxf5OiiOUv/JMZR8GOt8hL900hV0bOy5xA==}
-    engines: {node: '>=0.3.1'}
-
-  diff@4.0.2:
-    resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
-    engines: {node: '>=0.3.1'}
-
   diff@8.0.2:
     resolution: {integrity: sha512-sSuxWU5j5SR9QQji/o2qMvqRNYRDOcBTgsJ/DeCf4iSN4gW+gNMXM7wFIP+fdXZxoNiAnHUTGjCr+TSWXdRDKg==}
     engines: {node: '>=0.3.1'}
@@ -46277,9 +46162,6 @@ packages:
 
   lodash.upperfirst@4.3.1:
     resolution: {integrity: sha512-sReKOYJIJf74dhJONhU4e0/shzi1trVbSWDOhKYE5XV2O+H7Sb2Dihwuc7xWxVl+DgFPyTqIN3zMfT9cq5iWDg==}
-
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
   lodash@4.17.23:
     resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
@@ -54546,9 +54428,6 @@ packages:
 
   zod@4.2.1:
     resolution: {integrity: sha512-0wZ1IRqGGhMP76gLqz8EyfBXKk0J2qo2+H3fi4mcUP/KtTocoX08nmIAHl1Z2kJIZbZee8KOpBCSNPRgauucjw==}
-
-  zone.js@0.11.8:
-    resolution: {integrity: sha512-82bctBg2hKcEJ21humWIkXRlLBBmrc3nN7DFh5LGGhcyycO2S7FN8NmdvlcKaGFDNVL4/9kFLmwmInTavdJERA==}
 
   zone.js@0.16.0:
     resolution: {integrity: sha512-LqLPpIQANebrlxY6jKcYKdgN5DTXyyHAKnnWWjE5pPfEQ4n7j5zn7mOEEpwNZVKGqx3kKKmvplEmoBrvpgROTA==}
@@ -65433,10 +65312,6 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
 
-  '@opentelemetry/api-logs@0.45.1':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-
   '@opentelemetry/api-logs@0.46.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -65462,8 +65337,6 @@ snapshots:
       '@opentelemetry/api': 1.9.0
 
   '@opentelemetry/api@1.7.0': {}
-
-  '@opentelemetry/api@1.8.0': {}
 
   '@opentelemetry/api@1.9.0': {}
 
@@ -65769,22 +65642,10 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
 
-  '@opentelemetry/context-zone-peer-dep@1.18.1(@opentelemetry/api@1.8.0)(zone.js@0.11.8)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      zone.js: 0.11.8
-
   '@opentelemetry/context-zone-peer-dep@2.5.0(@opentelemetry/api@1.9.0)(zone.js@0.16.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       zone.js: 0.16.0
-
-  '@opentelemetry/context-zone@1.18.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/context-zone-peer-dep': 1.18.1(@opentelemetry/api@1.8.0)(zone.js@0.11.8)
-      zone.js: 0.11.8
-    transitivePeerDependencies:
-      - '@opentelemetry/api'
 
   '@opentelemetry/context-zone@2.5.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -65807,11 +65668,6 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.18.0
-
-  '@opentelemetry/core@1.18.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/semantic-conventions': 1.18.1
 
   '@opentelemetry/core@1.18.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -65837,11 +65693,6 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.25.1
-
-  '@opentelemetry/core@1.30.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/semantic-conventions': 1.28.0
 
   '@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -66163,15 +66014,6 @@ snapshots:
       '@opentelemetry/resources': 1.18.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.18.0(@opentelemetry/api@1.9.0)
 
-  '@opentelemetry/exporter-trace-otlp-http@0.45.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/otlp-exporter-base': 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/otlp-transformer': 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.18.1(@opentelemetry/api@1.8.0)
-
   '@opentelemetry/exporter-trace-otlp-http@0.46.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -66325,7 +66167,7 @@ snapshots:
   '@opentelemetry/instrumentation-amqplib@0.33.5(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66334,7 +66176,7 @@ snapshots:
   '@opentelemetry/instrumentation-amqplib@0.39.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66401,7 +66243,7 @@ snapshots:
   '@opentelemetry/instrumentation-aws-sdk@0.36.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagation-utils': 0.30.16(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
@@ -66411,7 +66253,7 @@ snapshots:
   '@opentelemetry/instrumentation-aws-sdk@0.37.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagation-utils': 0.30.16(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
@@ -66421,7 +66263,7 @@ snapshots:
   '@opentelemetry/instrumentation-aws-sdk@0.43.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagation-utils': 0.30.16(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
@@ -66532,7 +66374,7 @@ snapshots:
   '@opentelemetry/instrumentation-connect@0.32.4(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@types/connect': 3.4.36
@@ -66542,7 +66384,7 @@ snapshots:
   '@opentelemetry/instrumentation-connect@0.38.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@types/connect': 3.4.36
@@ -66668,17 +66510,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-document-load@0.35.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation': 0.48.0(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.30.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-web': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.39.0
-    transitivePeerDependencies:
-      - supports-color
-
   '@opentelemetry/instrumentation-document-load@0.56.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -66692,7 +66523,7 @@ snapshots:
   '@opentelemetry/instrumentation-express@0.33.3(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@types/express': 4.17.18
@@ -66702,7 +66533,7 @@ snapshots:
   '@opentelemetry/instrumentation-express@0.34.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66711,7 +66542,7 @@ snapshots:
   '@opentelemetry/instrumentation-express@0.35.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.48.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66720,7 +66551,7 @@ snapshots:
   '@opentelemetry/instrumentation-express@0.41.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66747,7 +66578,7 @@ snapshots:
   '@opentelemetry/instrumentation-fastify@0.32.6(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66756,7 +66587,7 @@ snapshots:
   '@opentelemetry/instrumentation-fastify@0.38.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66790,20 +66621,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-fetch@0.45.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-web': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.18.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@opentelemetry/instrumentation-fs@0.14.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
@@ -66827,7 +66648,7 @@ snapshots:
   '@opentelemetry/instrumentation-fs@0.8.4(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -66947,7 +66768,7 @@ snapshots:
   '@opentelemetry/instrumentation-hapi@0.33.3(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@types/hapi__hapi': 20.0.13
@@ -66957,7 +66778,7 @@ snapshots:
   '@opentelemetry/instrumentation-hapi@0.40.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67139,7 +66960,7 @@ snapshots:
   '@opentelemetry/instrumentation-koa@0.36.4(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@types/koa': 2.13.9
@@ -67150,7 +66971,7 @@ snapshots:
   '@opentelemetry/instrumentation-koa@0.42.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67283,7 +67104,7 @@ snapshots:
   '@opentelemetry/instrumentation-mongoose@0.33.4(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67292,7 +67113,7 @@ snapshots:
   '@opentelemetry/instrumentation-mongoose@0.34.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67301,7 +67122,7 @@ snapshots:
   '@opentelemetry/instrumentation-mongoose@0.40.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67499,7 +67320,7 @@ snapshots:
   '@opentelemetry/instrumentation-pg@0.36.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.44.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.40.1(@opentelemetry/api@1.9.0)
@@ -67511,7 +67332,7 @@ snapshots:
   '@opentelemetry/instrumentation-pg@0.37.2(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.40.1(@opentelemetry/api@1.9.0)
@@ -67675,7 +67496,7 @@ snapshots:
   '@opentelemetry/instrumentation-restify@0.34.3(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67684,7 +67505,7 @@ snapshots:
   '@opentelemetry/instrumentation-restify@0.40.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
@@ -67849,7 +67670,7 @@ snapshots:
   '@opentelemetry/instrumentation-undici@0.4.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
@@ -67899,16 +67720,6 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.211.0
       '@opentelemetry/instrumentation': 0.211.0(@opentelemetry/api@1.9.0)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@opentelemetry/instrumentation-xml-http-request@0.45.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-web': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.18.1
     transitivePeerDependencies:
       - supports-color
 
@@ -67972,17 +67783,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation@0.45.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@types/shimmer': 1.2.0
-      import-in-the-middle: 1.4.2
-      require-in-the-middle: 7.5.2
-      semver: 7.7.3
-      shimmer: 1.2.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@opentelemetry/instrumentation@0.45.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -67997,17 +67797,6 @@ snapshots:
   '@opentelemetry/instrumentation@0.46.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@types/shimmer': 1.2.0
-      import-in-the-middle: 1.7.1
-      require-in-the-middle: 7.5.2
-      semver: 7.7.3
-      shimmer: 1.2.1
-    transitivePeerDependencies:
-      - supports-color
-
-  '@opentelemetry/instrumentation@0.48.0(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
       '@types/shimmer': 1.2.0
       import-in-the-middle: 1.7.1
       require-in-the-middle: 7.5.2
@@ -68084,11 +67873,6 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.0(@opentelemetry/api@1.9.0)
-
-  '@opentelemetry/otlp-exporter-base@0.45.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
 
   '@opentelemetry/otlp-exporter-base@0.46.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68231,16 +68015,6 @@ snapshots:
       '@opentelemetry/sdk-logs': 0.45.0(@opentelemetry/api-logs@0.45.0)(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 1.18.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 1.18.0(@opentelemetry/api@1.9.0)
-
-  '@opentelemetry/otlp-transformer@0.45.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/api-logs': 0.45.1
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-logs': 0.45.1(@opentelemetry/api-logs@0.45.1)(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-metrics': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.18.1(@opentelemetry/api@1.8.0)
 
   '@opentelemetry/otlp-transformer@0.46.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68388,7 +68162,7 @@ snapshots:
   '@opentelemetry/resource-detector-aws@1.12.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
 
@@ -68435,7 +68209,7 @@ snapshots:
   '@opentelemetry/resource-detector-gcp@0.29.13(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.39.0
       gcp-metadata: 6.1.1
@@ -68478,12 +68252,6 @@ snapshots:
       '@opentelemetry/core': 1.18.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.18.0
 
-  '@opentelemetry/resources@1.18.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.18.1
-
   '@opentelemetry/resources@1.18.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -68513,12 +68281,6 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.1
-
-  '@opentelemetry/resources@1.30.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.28.0
 
   '@opentelemetry/resources@1.30.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68566,13 +68328,6 @@ snapshots:
       '@opentelemetry/core': 1.18.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.18.0(@opentelemetry/api@1.9.0)
 
-  '@opentelemetry/sdk-logs@0.45.1(@opentelemetry/api-logs@0.45.1)(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/api-logs': 0.45.1
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.18.1(@opentelemetry/api@1.8.0)
-
   '@opentelemetry/sdk-logs@0.46.0(@opentelemetry/api-logs@0.46.0)(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -68613,13 +68368,6 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.18.0(@opentelemetry/api@1.9.0)
-      lodash.merge: 4.6.2
-
-  '@opentelemetry/sdk-metrics@1.18.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.18.1(@opentelemetry/api@1.8.0)
       lodash.merge: 4.6.2
 
   '@opentelemetry/sdk-metrics@1.18.1(@opentelemetry/api@1.9.0)':
@@ -68836,13 +68584,6 @@ snapshots:
       '@opentelemetry/resources': 1.18.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.18.0
 
-  '@opentelemetry/sdk-trace-base@1.18.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.18.1
-
   '@opentelemetry/sdk-trace-base@1.19.0(@opentelemetry/api@1.7.0)':
     dependencies:
       '@opentelemetry/api': 1.7.0
@@ -68870,13 +68611,6 @@ snapshots:
       '@opentelemetry/core': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.25.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.25.1
-
-  '@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.28.0
 
   '@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68973,13 +68707,6 @@ snapshots:
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.5.0(@opentelemetry/api@1.9.0)
 
-  '@opentelemetry/sdk-trace-web@1.18.1(@opentelemetry/api@1.8.0)':
-    dependencies:
-      '@opentelemetry/api': 1.8.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/sdk-trace-base': 1.18.1(@opentelemetry/api@1.8.0)
-      '@opentelemetry/semantic-conventions': 1.18.1
-
   '@opentelemetry/sdk-trace-web@2.5.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -69011,7 +68738,7 @@ snapshots:
   '@opentelemetry/sql-common@0.40.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
 
   '@opentelemetry/sql-common@0.41.2(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -78637,7 +78364,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-v8@4.0.16(vitest@4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/coverage-v8@4.0.16(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@bcoe/v8-coverage': 1.0.2
       '@vitest/utils': 4.0.16
@@ -78650,7 +78377,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - supports-color
 
@@ -83104,10 +82831,6 @@ snapshots:
 
   diff-sequences@29.6.3: {}
 
-  diff@3.5.0: {}
-
-  diff@4.0.2: {}
-
   diff@8.0.2: {}
 
   diffie-hellman@5.0.3:
@@ -83857,7 +83580,7 @@ snapshots:
       eslint: 9.39.2(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.39.2(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.39.2(jiti@2.6.1))
@@ -83910,7 +83633,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -83977,7 +83700,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.2(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.53.1(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)))(eslint@9.39.2(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -90168,8 +89891,6 @@ snapshots:
   lodash.uniqwith@4.5.0: {}
 
   lodash.upperfirst@4.3.1: {}
-
-  lodash@4.17.21: {}
 
   lodash@4.17.23: {}
 
@@ -98328,7 +98049,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98348,7 +98069,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.6.3
       v8-compile-cache-lib: 3.0.1
@@ -98368,7 +98089,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.8.3
       v8-compile-cache-lib: 3.0.1
@@ -98389,7 +98110,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98409,7 +98130,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98429,7 +98150,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98449,7 +98170,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98469,7 +98190,7 @@ snapshots:
       acorn-walk: 8.3.4
       arg: 4.1.3
       create-require: 1.1.1
-      diff: 4.0.2
+      diff: 8.0.2
       make-error: 1.3.6
       typescript: 5.9.3
       v8-compile-cache-lib: 3.0.1
@@ -98526,7 +98247,7 @@ snapshots:
       builtin-modules: 1.1.1
       chalk: 2.4.2
       commander: 2.20.3
-      diff: 3.5.0
+      diff: 8.0.2
       glob: 13.0.0
       js-yaml: 3.14.2
       minimatch: 3.1.2
@@ -100171,7 +99892,7 @@ snapshots:
       tsx: 4.21.0
       yaml: 2.8.2
 
-  vitest-axe@0.1.0(vitest@4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
+  vitest-axe@0.1.0(vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       aria-query: 5.3.2
       axe-core: 4.11.0
@@ -100179,7 +99900,7 @@ snapshots:
       dom-accessibility-api: 0.5.16
       lodash-es: 4.17.21
       redent: 3.0.0
-      vitest: 4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vitest: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   vitest@1.6.1(@types/node@18.19.130)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1):
     dependencies:
@@ -100665,7 +100386,7 @@ snapshots:
       - supports-color
       - terser
 
-  vitest@4.0.16(@opentelemetry/api@1.8.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.3.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
       '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -100688,7 +100409,7 @@ snapshots:
       vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@opentelemetry/api': 1.8.0
+      '@opentelemetry/api': 1.9.0
       '@types/node': 20.19.27
       happy-dom: 20.0.11
       jsdom: 27.3.0
@@ -101783,10 +101504,6 @@ snapshots:
   zod@3.25.76: {}
 
   zod@4.2.1: {}
-
-  zone.js@0.11.8:
-    dependencies:
-      tslib: 2.8.1
 
   zone.js@0.16.0: {}
 

@@ -72,11 +72,11 @@ jobs:
           # Check prod date pattern: prod-2026-01-28
           PROD_DATE_PATTERN="^prod-[0-9]{4}-[0-9]{2}-[0-9]{2}$"
 
-          if [[ "${TAG}" =~ ${SEMVER_PATTERN} ]]; then
+          if printf '%s\n' "${TAG}" | grep -Eq "${SEMVER_PATTERN}"; then
             echo "tag_valid=true" >> $GITHUB_OUTPUT
             echo "tag_type=semver" >> $GITHUB_OUTPUT
             echo "Tag matches semver pattern"
-          elif [[ "${TAG}" =~ ${PROD_DATE_PATTERN} ]]; then
+          elif printf '%s\n' "${TAG}" | grep -Eq "${PROD_DATE_PATTERN}"; then
             echo "tag_valid=true" >> $GITHUB_OUTPUT
             echo "tag_type=prod-date" >> $GITHUB_OUTPUT
             echo "Tag matches prod-date pattern"

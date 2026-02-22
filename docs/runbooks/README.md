@@ -103,6 +103,7 @@ Automated index of available runbooks.
 - [fraud-ring-detection.yaml](fraud-ring-detection.yaml)
 - [freshness-lag.md](freshness-lag.md)
 - [ga-cut-checklist.md](ga-cut-checklist.md)
+- [ga-prompt-00-ci-evidence-mode.md](ga-prompt-00-ci-evidence-mode.md)
 - [game-day.md](game-day.md)
 - [gateway-latency.md](gateway-latency.md)
 - [go-no-go-checklist.md](go-no-go-checklist.md)

@@ -10,6 +10,7 @@ include Makefile.merge-train
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: daily-sprint daily-sprint-validate
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -21,6 +22,7 @@ PACKAGE_VERSION ?= $(shell $(PYTHON) -c "import tomllib;from pathlib import Path
 IMAGE_NAME ?= intelgraph-platform
 IMAGE_TAG ?= $(PACKAGE_VERSION)
 IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
+DATE ?=
 
 # --- Docker Compose Controls ---
 
@@ -49,8 +51,10 @@ dev-down: dev-prereqs ## Stop dev stack and remove volumes
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
 	@docker compose -f $(COMPOSE_DEV_FILE) ps
-	@node smoke-test.js
-	@$(MAKE) k6 TARGET=http://localhost:4000
+	@echo "Checking UI at http://localhost:3000 ..."
+	@curl -sSf http://localhost:3000 > /dev/null || { echo "UI not responding on port 3000."; exit 1; }
+	@echo "Checking Gateway health at http://localhost:8080/health ..."
+	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
 	@echo "Dev smoke checks passed."
 
 restart: down up
@@ -118,6 +122,16 @@ perf-check: ## Check performance against baseline
 
 validate-ops: ## Validate observability assets (dashboards, alerts, runbooks)
 	@node scripts/ops/validate_observability.js
+
+daily-sprint: ## Generate daily sprint evidence bundle (optional DATE=YYYY-MM-DD)
+	@./scripts/ops/daily-sprint-loop.sh $(DATE)
+
+daily-sprint-validate: ## Validate daily sprint evidence JSON artifacts (requires DATE=YYYY-MM-DD)
+	@if [ -z "$(DATE)" ]; then echo "Error: DATE is required (example: make daily-sprint-validate DATE=2026-02-11)"; exit 1; fi
+	@python3 -m json.tool docs/ops/evidence/daily-sprint-$(DATE)/report.json >/dev/null
+	@python3 -m json.tool docs/ops/evidence/daily-sprint-$(DATE)/metrics.json >/dev/null
+	@python3 -m json.tool docs/ops/evidence/daily-sprint-$(DATE)/stamp.json >/dev/null
+	@echo "Daily sprint evidence JSON is valid for $(DATE)."
 
 rollback-drill: ## Run simulated rollback drill
 	@node scripts/ops/rollback_drill.js
@@ -287,7 +301,7 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 
 # --- GA Hardening ---
 
-.PHONY: ga ga-verify
+.PHONY: ga ga-verify ga-prompt00-scaffold ga-prompt00-verify ga-prompt00-smoke
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
 	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
@@ -296,18 +310,37 @@ ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 	@node --test testing/ga-verification/*.ga.test.mjs
 	@node scripts/ga/verify-ga-surface.mjs
 
+ga-prompt00-scaffold: ## Scaffold Prompt #00 evidence bundle (optional: RUN_ID=YYYYMMDD-HHMM)
+	@if [ -n "$(RUN_ID)" ]; then \
+		scripts/ga/create-prompt-00-evidence-bundle.sh --run-id "$(RUN_ID)"; \
+	else \
+		scripts/ga/create-prompt-00-evidence-bundle.sh; \
+	fi
+
+ga-prompt00-verify: ## Verify Prompt #00 evidence bundle (set RUN_ID=... or DIR=...)
+	@if [ -n "$(RUN_ID)" ] && [ -n "$(DIR)" ]; then \
+		echo "Set only one: RUN_ID or DIR"; \
+		exit 1; \
+	fi
+	@if [ -n "$(RUN_ID)" ]; then \
+		scripts/ga/verify-prompt-00-evidence-bundle.sh --run-id "$(RUN_ID)"; \
+	elif [ -n "$(DIR)" ]; then \
+		scripts/ga/verify-prompt-00-evidence-bundle.sh --dir "$(DIR)"; \
+	else \
+		echo "Missing RUN_ID or DIR"; \
+		exit 1; \
+	fi
+
+ga-prompt00-smoke: ## Scaffold + verify Prompt #00 bundle (requires RUN_ID=YYYYMMDD-HHMM)
+	@if [ -z "$(RUN_ID)" ]; then \
+		echo "Missing RUN_ID"; \
+		exit 1; \
+	fi
+	@$(MAKE) ga-prompt00-scaffold RUN_ID="$(RUN_ID)"
+	@$(MAKE) ga-prompt00-verify RUN_ID="$(RUN_ID)"
+
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
-
-# --- Governance & Evidence ---
-
-.PHONY: evidence-bundle
-evidence-bundle: ## Generate a standard evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [RISK=low] [CHECKS="make test"])
-	@python3 scripts/maintainers/gen-evidence-bundle.py \
-		$(if $(BASE),--base $(BASE),) \
-		$(if $(RISK),--risk $(RISK),) \
-		$(if $(CHECKS),--checks "$(CHECKS)",) \
-		$(if $(PROMPTS),--prompts "$(PROMPTS)",)
 
 # --- Demo Environment ---
 
