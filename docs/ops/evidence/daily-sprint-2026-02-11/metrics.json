@@ -1,0 +1,11 @@
+{
+  "counters": {
+    "open_prs_sampled": 20,
+    "labeled_open_issues": 0,
+    "tasks_planned": 4,
+    "tasks_completed": 4,
+    "schema_files_repaired": 4,
+    "docs_files_repaired": 1,
+    "check_boundaries_timeout": 1
+  }
+}

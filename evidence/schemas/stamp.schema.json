@@ -1,18 +1,16 @@
 {
+  "$id": "https://summit.local/schemas/stamp.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
+  "anyOf": [
+    { "required": ["evidence_id"] },
+    { "required": ["generated_at", "git"] }
+  ],
   "properties": {
     "evidence_id": { "type": "string" },
     "timestamp": { "type": "number" },
     "version": { "type": "string" },
-    "created_at": { "type": "string" }
-  },
-  "required": [],
-  "additionalProperties": true
-  "$id": "https://summit.local/schemas/stamp.schema.json",
-  "type": "object",
-  "required": ["generated_at", "git"],
-  "properties": {
+    "created_at": { "type": "string" },
     "generated_at": { "type": "string", "format": "date-time" },
     "git": {
       "type": "object",
@@ -24,5 +22,5 @@
       "additionalProperties": false
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-11T19:28:08Z",
+  "revision_note": "Daily sprint continuation repaired evidence schema merge corruption, refreshed triage evidence, and updated FactGov standards merge resolution.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
