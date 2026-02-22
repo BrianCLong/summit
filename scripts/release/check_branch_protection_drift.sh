@@ -285,7 +285,10 @@ if [[ "$API_ACCESSIBLE" == "true" ]]; then
     log "Missing in GitHub: ${#MISSING_IN_GITHUB[@]} (${#EXCEPTED_MISSING[@]} excepted)"
     log "Extra in GitHub: ${#EXTRA_IN_GITHUB[@]} (${#EXCEPTED_EXTRA[@]} excepted)"
 else
-    DRIFT_DETECTED=true  # Unknown state is treated as potential drift
+    # In PR contexts, GITHUB_TOKEN often cannot read branch protection.
+    # Treat inaccessible API as advisory-only rather than hard drift.
+    DRIFT_DETECTED=false
+    log_warn "Branch protection API inaccessible; running in advisory mode"
 fi
 
 # --- Step 5: Generate reports ---

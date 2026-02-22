@@ -13,8 +13,8 @@ set -euo pipefail
 
 BRANCH="main"
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
-SNAPSHOT_FILE="${REPO_ROOT}/docs/ci/snapshots/branch_protection.${BRANCH}.json"
 TEMP_FILE=$(mktemp)
+SNAPSHOT_FILE=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -22,6 +22,8 @@ while [[ $# -gt 0 ]]; do
         *) echo "Unknown option: $1"; exit 1 ;;
     esac
 done
+
+SNAPSHOT_FILE="${REPO_ROOT}/docs/ci/snapshots/branch_protection.${BRANCH}.json"
 
 if [[ ! -f "$SNAPSHOT_FILE" ]]; then
     echo "Snapshot file not found: $SNAPSHOT_FILE"
@@ -31,8 +33,25 @@ fi
 echo "Fetching current branch protection for $BRANCH..."
 # Normalize current settings: strip IDs, URLs, and volatile fields
 # Note: We must be careful with the rate limit here too.
-gh api "repos/:owner/:repo/branches/${BRANCH}/protection" | 
-jq 'del(.url, .required_status_checks.url, .required_status_checks.contexts_url, .required_pull_request_reviews.url, .required_signatures.url, .enforce_admins.url, .required_status_checks.checks[].app_id, .required_status_checks.contexts_url)' | 
+set +e
+API_RESPONSE=$(gh api "repos/:owner/:repo/branches/${BRANCH}/protection" 2>&1)
+API_EXIT_CODE=$?
+set -e
+
+if [[ $API_EXIT_CODE -ne 0 ]]; then
+    if echo "$API_RESPONSE" | grep -qE "Resource not accessible by integration|HTTP 403|insufficient permissions"; then
+        echo "⚠️ Branch protection API not accessible in this context; skipping snapshot drift check."
+        rm -f "$TEMP_FILE" "${TEMP_FILE}.snapshot"
+        exit 0
+    fi
+    echo "Failed to fetch branch protection for $BRANCH:"
+    echo "$API_RESPONSE"
+    rm -f "$TEMP_FILE" "${TEMP_FILE}.snapshot"
+    exit 1
+fi
+
+echo "$API_RESPONSE" |
+jq 'del(.url, .required_status_checks.url, .required_status_checks.contexts_url, .required_pull_request_reviews.url, .required_signatures.url, .enforce_admins.url, .required_status_checks.checks[].app_id, .required_status_checks.contexts_url)' |
 jq -S . > "$TEMP_FILE"
 
 echo "Comparing against snapshot: $SNAPSHOT_FILE"

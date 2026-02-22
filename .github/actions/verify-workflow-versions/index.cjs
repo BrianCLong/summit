@@ -28,8 +28,10 @@ if (fs.existsSync(workflowsDir)) {
       if (match) {
         const action = match[1];
         const version = match[3];
-        if (!version.startsWith('v4')) {
-          console.error(`::error file=${filepath},line=${index+1}::${action} must use @v4, found @${version}`);
+        const isV4Tag = /^v4(\.|$)/.test(version);
+        const isPinnedSha = /^[a-f0-9]{40}$/i.test(version);
+        if (!isV4Tag && !isPinnedSha) {
+          console.error(`::error file=${filepath},line=${index+1}::${action} must use @v4 or a pinned commit SHA, found @${version}`);
           hasError = true;
         }
       }
@@ -42,5 +44,5 @@ if (fs.existsSync(workflowsDir)) {
 if (hasError) {
   process.exit(1);
 } else {
-  console.log("All checked actions are using v4.");
+  console.log("All checked actions are using @v4 or pinned commit SHAs.");
 }
