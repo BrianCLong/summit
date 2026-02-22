@@ -1,4 +1,4 @@
-name: PR Quality Gate
+name: "[info] PR Quality Gate"
 
 on:
   pull_request:
@@ -24,6 +24,13 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -45,6 +52,13 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -77,7 +91,6 @@ jobs:
     # TODO: Re-enable when ga-risk-gate.yml is created
 
   security-scan:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
     with:
@@ -86,7 +99,6 @@ jobs:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
   sbom:
-    if: ${{ vars.MERGE_SURGE != 'true' }}
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:
