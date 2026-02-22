@@ -4,7 +4,19 @@
 
 <!-- Brief 1-2 sentence description of the change -->
 
-## Scope (Atomic)
+## Assumption Ledger
+
+<!-- Required: list assumptions made before coding. See .claude/skills/assumption-ledger.md -->
+
+| Assumption | Justification | Verified? |
+|------------|---------------|-----------|
+|            |               |           |
+
+**Ambiguities encountered:** <!-- List any ambiguities and the interpretation chosen, or "None" -->
+
+**Stop conditions:** <!-- What would have caused you to stop and ask instead of proceeding? -->
+
+## Scope
 
 <!-- Confirm this PR is atomic and follows the roadmap. No drive-by refactors. -->
 
@@ -13,6 +25,25 @@
 - [ ] **Self-contained:** Change works end-to-end
 
 **Intent:** <!-- bugfix | feature | refactor | docs | security | chore -->
+
+**In scope:**
+<!-- Bulleted list of what this PR does -->
+
+**Out of scope:**
+<!-- Bulleted list of what this PR explicitly does NOT do -->
+
+## Diff Budget
+
+<!-- Required: declare expected vs actual diff. See .claude/skills/diff-budget.md -->
+
+| Metric | Expected | Actual |
+|--------|----------|--------|
+| Files touched | | |
+| LOC added | | |
+| LOC removed | | |
+| New public APIs | | |
+
+**Budget exceeded?** <!-- If yes, explain why -->
 
 ## Verification
 

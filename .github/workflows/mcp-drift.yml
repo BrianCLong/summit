@@ -1,0 +1,26 @@
+name: mcp-drift-detector
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Drift Detector
+        run: npx tsx scripts/monitoring/createos-drift.ts
+      - name: Upload Drift Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp-drift-report
+          path: artifacts/metrics/mcp_drift.json
