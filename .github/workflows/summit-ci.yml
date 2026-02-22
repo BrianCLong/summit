@@ -5,11 +5,13 @@ on:
     paths:
       - 'summit/**'
       - 'client/**'
+      - 'apps/web/**'
       - '.github/workflows/summit-ci.yml'
   pull_request:
     paths:
       - 'summit/**'
       - 'client/**'
+      - 'apps/web/**'
       - '.github/workflows/summit-ci.yml'
 
 concurrency:
@@ -32,16 +34,17 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.in ]; then
             pip install -r requirements.in
+            pip install pytest-asyncio # Ensure pytest-asyncio is installed
           else
-            pip install pytest pytest-cov fastapi httpx opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
+            pip install pytest pytest-cov fastapi httpx opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp pytest-asyncio
           fi
 
       - name: Run Tests with Coverage
         env:
           PYTHONPATH: .
         run: |
-          # Targeting 80% coverage is the goal, but starting with current baseline to prevent regression
-          pytest --cov=summit --cov-report=xml --cov-fail-under=9 summit/tests/
+          # Targeting 80% coverage is the goal, but starting with 12% baseline to prevent regression
+          pytest --cov=summit --cov-report=xml --cov-fail-under=12 summit/tests/
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -49,8 +52,27 @@ jobs:
           name: coverage-report
           path: coverage.xml
 
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Frontend Tests
+        run: pnpm -C apps/web test:coverage
+
   test-e2e:
-    needs: test-python
+    needs: [test-python, test-frontend]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -84,6 +106,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       CI: true
+      PLAYWRIGHT_USE_WEBSERVER: 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -102,4 +125,4 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test e2e/summit-smoke.spec.ts
+        run: npx playwright test e2e/summit-smoke.spec.ts e2e/summit-comprehensive.spec.ts
