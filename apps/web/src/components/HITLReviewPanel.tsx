@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 
 interface HITLReviewPanelProps {
   taskId: string;
   workflowId: string;
   data: any; // Data to be reviewed
   onDecision: (taskId: string, decision: 'approved' | 'rejected', reason?: string) => void;
+  isSubmitting?: boolean;
 }
 
-export const HITLReviewPanel: React.FC<HITLReviewPanelProps> = ({ taskId, workflowId, data, onDecision }) => {
+export const HITLReviewPanel: React.FC<HITLReviewPanelProps> = ({ taskId, workflowId, data, onDecision, isSubmitting }) => {
   const [decision, setDecision] = useState<'approved' | 'rejected' | undefined>(undefined);
   const [reason, setReason] = useState<string>('');
 
@@ -18,16 +23,23 @@ export const HITLReviewPanel: React.FC<HITLReviewPanelProps> = ({ taskId, workfl
   };
 
   return (
-    <div className="p-4 border rounded-lg shadow-md">
+    <div className="p-4 border rounded-lg shadow-md bg-card text-card-foreground">
       <h3 className="text-lg font-semibold">Review Task: {taskId}</h3>
-      <p className="text-sm text-gray-600">Workflow: {workflowId}</p>
-      <div className="mt-4 p-3 bg-gray-100 rounded-md">
-        <pre className="text-xs overflow-auto">{JSON.stringify(data, null, 2)}</pre>
+      <p className="text-sm text-muted-foreground">Workflow: {workflowId}</p>
+      <div
+        className="mt-4 p-3 bg-muted rounded-md"
+        role="region"
+        aria-label="Task Data"
+      >
+        <pre className="text-xs overflow-auto font-mono text-muted-foreground">{JSON.stringify(data, null, 2)}</pre>
       </div>
-      <div className="mt-4">
-        <label className="block text-sm font-medium text-gray-700">Decision:</label>
+      <div className="mt-4 space-y-2">
+        <Label htmlFor={`decision-${taskId}`}>Decision</Label>
         <select
-          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+          id={`decision-${taskId}`}
+          className={cn(
+            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          )}
           value={decision || ''}
           onChange={(e) => setDecision(e.target.value as 'approved' | 'rejected')}
         >
@@ -37,24 +49,26 @@ export const HITLReviewPanel: React.FC<HITLReviewPanelProps> = ({ taskId, workfl
         </select>
       </div>
       {decision === 'rejected' && (
-        <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700">Reason for Rejection:</label>
-          <textarea
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        <div className="mt-4 space-y-2">
+          <Label htmlFor={`reason-${taskId}`}>Reason for Rejection</Label>
+          <Textarea
+            id={`reason-${taskId}`}
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-          ></textarea>
+            placeholder="Please provide a reason for rejecting this task..."
+          />
         </div>
       )}
-      <div className="mt-4">
-        <button
-          className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+      <div className="mt-6">
+        <Button
           onClick={handleSubmit}
-          disabled={!decision}
+          disabled={!decision || isSubmitting}
+          loading={isSubmitting}
+          className="w-full sm:w-auto"
         >
           Submit Decision
-        </button>
+        </Button>
       </div>
     </div>
   );
