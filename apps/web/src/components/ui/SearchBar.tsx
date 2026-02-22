@@ -8,6 +8,7 @@ interface SearchBarProps {
   onChange?: (value: string) => void
   onClear?: () => void
   showShortcut?: boolean
+  shortcut?: string
   className?: string
   debounceTime?: number
 }
@@ -18,11 +19,50 @@ export function SearchBar({
   onChange,
   onClear,
   showShortcut = true,
+  shortcut = '/',
   className,
   debounceTime = 300,
 }: SearchBarProps) {
   const [internalValue, setInternalValue] = React.useState(value)
   const onChangeRef = React.useRef(onChange)
+  const inputRef = React.useRef<HTMLInputElement>(null)
+
+  // Focus on shortcut using useEffect
+  React.useEffect(() => {
+    if (!shortcut) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input/textarea
+      if (
+        document.activeElement?.tagName === 'INPUT' ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
+        return
+      }
+
+      let isMatch = false
+      if (shortcut === '/') {
+        if (e.key === '/') isMatch = true
+      } else if (shortcut.toLowerCase().includes('meta') || shortcut.toLowerCase().includes('ctrl')) {
+          // simple check for Cmd+K or Ctrl+K
+          const key = shortcut.split('+').pop()?.toLowerCase()
+          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === key) {
+             isMatch = true
+          }
+      } else if (e.key.toLowerCase() === shortcut.toLowerCase()) {
+         isMatch = true
+      }
+
+      if (isMatch) {
+        e.preventDefault()
+        inputRef.current?.focus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [shortcut])
 
   // Keep the latest onChange reference
   React.useEffect(() => {
@@ -53,6 +93,35 @@ export function SearchBar({
     setInternalValue('')
     onChangeRef.current?.('')
     onClear?.()
+    inputRef.current?.focus()
+  }
+
+  const renderShortcut = () => {
+    if (!shortcut) return null
+
+    if (shortcut === '/') {
+      return (
+        <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <span className="text-xs">/</span>
+        </kbd>
+      )
+    }
+
+    if (shortcut.toLowerCase().includes('meta') || shortcut.toLowerCase().includes('ctrl')) {
+      const key = shortcut.split('+').pop()?.toUpperCase() || 'K'
+      return (
+        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+          <Command className="h-3 w-3" />
+          <span>{key}</span>
+        </div>
+      )
+    }
+
+    return (
+      <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+        <span className="text-xs">{shortcut.toUpperCase()}</span>
+      </kbd>
+    )
   }
 
   return (
@@ -65,6 +134,7 @@ export function SearchBar({
           aria-hidden="true"
         />
         <input
+          ref={inputRef}
           type="search"
           aria-label={placeholder || 'Search'}
           value={internalValue}
@@ -83,12 +153,7 @@ export function SearchBar({
               <span className="sr-only">Clear search</span>
             </button>
           )}
-          {showShortcut && !internalValue && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Command className="h-3 w-3" />
-              <span>K</span>
-            </div>
-          )}
+          {showShortcut && !internalValue && renderShortcut()}
         </div>
       </div>
     </div>
