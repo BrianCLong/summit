@@ -1,7 +1,25 @@
 {
   "version": 1,
-  "generated_at": "2026-01-14T20:10:00Z",
+  "generated_at": "2026-02-07T22:38:01Z",
   "skills": [
+    {
+      "name": "artifacts-builder",
+      "source": "https://github.com/SkillsMP/artifacts-builder",
+      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
+      "sha256": "DEFERRED_PENDING_SHA256",
+      "path": "skills/external/artifacts-builder",
+      "governed_exception": true,
+      "exception_reason": "Deferred pending upstream commit pin."
+    },
+    {
+      "name": "devops-iac-engineer",
+      "source": "https://github.com/SkillsMP/devops-iac-engineer",
+      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
+      "sha256": "DEFERRED_PENDING_SHA256",
+      "path": "skills/external/devops-iac-engineer",
+      "governed_exception": true,
+      "exception_reason": "Deferred pending upstream commit pin."
+    },
     {
       "name": "eks-skill",
       "source": "https://github.com/SkillsMP/eks-skill",
@@ -30,15 +48,6 @@
       "exception_reason": "Deferred pending upstream commit pin."
     },
     {
-      "name": "devops-iac-engineer",
-      "source": "https://github.com/SkillsMP/devops-iac-engineer",
-      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
-      "sha256": "DEFERRED_PENDING_SHA256",
-      "path": "skills/external/devops-iac-engineer",
-      "governed_exception": true,
-      "exception_reason": "Deferred pending upstream commit pin."
-    },
-    {
       "name": "knowledge-graph-builder",
       "source": "https://github.com/SkillsMP/knowledge-graph-builder",
       "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
@@ -57,15 +66,6 @@
       "exception_reason": "Deferred pending upstream commit pin."
     },
     {
-      "name": "artifacts-builder",
-      "source": "https://github.com/SkillsMP/artifacts-builder",
-      "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
-      "sha256": "DEFERRED_PENDING_SHA256",
-      "path": "skills/external/artifacts-builder",
-      "governed_exception": true,
-      "exception_reason": "Deferred pending upstream commit pin."
-    },
-    {
       "name": "shadcn-ui-expert",
       "source": "https://github.com/SkillsMP/shadcn-ui-expert",
       "commit": "DEFERRED_PENDING_UPSTREAM_SHA",
@@ -73,6 +73,24 @@
       "path": "skills/external/shadcn-ui-expert",
       "governed_exception": true,
       "exception_reason": "Deferred pending upstream commit pin."
+    },
+    {
+      "name": "summit-ga-preflight-hard-gate-auditor",
+      "source": "local://skills/summit-ga-preflight-hard-gate-auditor",
+      "commit": "DEFERRED_PENDING_LOCAL",
+      "sha256": "11bb8560cb006eef66a8848091c610fc9bbe491a1f08126fcc25221c91a6b6cc",
+      "path": "skills/external/summit-ga-preflight-hard-gate-auditor",
+      "governed_exception": true,
+      "exception_reason": "Local skill pending external source pin and overlay governance review."
+    },
+    {
+      "name": "summit-pr-stack-sequencer",
+      "source": "local://skills/summit-pr-stack-sequencer",
+      "commit": "DEFERRED_PENDING_LOCAL",
+      "sha256": "5fbb80328febf40c71241fb2248534bc4e1bd0265bfd06e7ec3e29f60dd580f2",
+      "path": "skills/external/summit-pr-stack-sequencer",
+      "governed_exception": true,
+      "exception_reason": "Local skill pending external source pin and overlay governance review."
     }
   ]
 }

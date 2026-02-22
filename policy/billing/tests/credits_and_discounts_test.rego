@@ -1,5 +1,7 @@
 package billing.credits_and_discounts_test
 
+import future.keywords.if
+
 import data.billing.credits_and_discounts
 
 credits := [

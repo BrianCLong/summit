@@ -1,5 +1,8 @@
 package summit.policy.simulation
 
+import future.keywords.contains
+import future.keywords.if
+
 default decision := "deny"
 default allow := false
 

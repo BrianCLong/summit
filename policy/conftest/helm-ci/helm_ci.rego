@@ -1,5 +1,8 @@
 package helm_ci
 
+import future.keywords.contains
+import future.keywords.if
+
 deny contains msg if {
   not input.kind
   msg := "resource is missing a kind"

@@ -1,5 +1,7 @@
 package summit.provenance
 
+import future.keywords.if
+
 import data.summit.provenance
 
 test_valid_deploy_prov if {

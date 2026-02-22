@@ -121,7 +121,7 @@ jobs:
       - name: Install OPA
         uses: open-policy-agent/setup-opa@v1
         with:
-          version: v0.66.0
+          version: v0.68.0
 
       - name: Evaluate pilot gate
         env:

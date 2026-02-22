@@ -1,5 +1,7 @@
 package billing.credits_and_discounts
 
+import future.keywords.if
+
 import data.billing.invariants
 
 allowed_roles := {"finance_analyst", "finance_manager", "revops_lead", "cfo"}

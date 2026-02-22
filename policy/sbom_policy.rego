@@ -1,5 +1,7 @@
 package summit.sbom
 
+import future.keywords.if
+
 default allow := false
 
 #

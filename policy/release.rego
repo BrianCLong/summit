@@ -1,5 +1,7 @@
 package summit.release
 
+import future.keywords.if
+
 default allow := false
 
 # A release is permitted when canary safeguards are satisfied and rollback is ready.

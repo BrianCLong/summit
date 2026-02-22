@@ -1,5 +1,7 @@
 package revops.segments
 
+import future.keywords.if
+
 # Segment rules centralize SMB/Mid/Enterprise classification for reuse across decisions.
 # Segments can be overridden via tenant config using tenant_overrides.rego.
 

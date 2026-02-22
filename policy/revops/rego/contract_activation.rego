@@ -1,5 +1,7 @@
 package revops.contract_activation
 
+import future.keywords.in
+
 import future.keywords.if
 import future.keywords.contains
 import data.revops.config

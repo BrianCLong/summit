@@ -26,7 +26,7 @@ jobs:
       - name: Set up k6
         uses: grafana/setup-k6-action@v1
         with:
-          k6-version: v0.52.0
+          k6-version: v0.68.0
 
       - name: Run baseline
         run: |

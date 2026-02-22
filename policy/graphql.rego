@@ -1,5 +1,7 @@
 package intelgraph.graphql
 
+import future.keywords.if
+
 default allow := false
 
 # Allow if tenant matches and user has read permission

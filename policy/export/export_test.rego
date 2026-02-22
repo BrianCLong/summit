@@ -1,5 +1,7 @@
 package export
 
+import future.keywords.if
+
 import data.export
 
 test_deny_without_permission if {

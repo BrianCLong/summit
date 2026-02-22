@@ -1,5 +1,7 @@
 package billing.cost_model_changes
 
+import future.keywords.if
+
 import data.billing.invariants
 
 allowed_roles := {"finops_owner", "finance_manager", "cfo"}

@@ -1,5 +1,7 @@
 package intelgraph.authz
 
+import future.keywords.if
+
 test_auditor_can_read_audit_logs if {
     allow with input as {
         "subject": {"role": "auditor"},

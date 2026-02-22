@@ -1,5 +1,8 @@
 package kubernetes.admission
 
+import future.keywords.contains
+import future.keywords.if
+
 deny contains msg if {
   input.request.kind.kind == "Pod"
   image := input.request.object.spec.containers[_].image

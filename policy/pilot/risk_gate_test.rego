@@ -1,5 +1,7 @@
 package pilot.gate
 
+import future.keywords.if
+
 import data.pilot.gate
 
 # Happy path: no violations, allow is true.

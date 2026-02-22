@@ -1,5 +1,9 @@
 package dockersecurity
 
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
+
 # Deny final images running as root
 deny contains msg if {
     input.Stage == "final"
