@@ -107,7 +107,7 @@ jobs:
   staleness-report:
     name: Weekly Staleness Report
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    if: (github.event_name == 'schedule') && (failure())
 
     steps:
       - name: Checkout repository
@@ -151,7 +151,6 @@ jobs:
             --format text
 
       - name: Create issue for stale models
-        if: failure()
         uses: actions/github-script@v7
         with:
           script: |

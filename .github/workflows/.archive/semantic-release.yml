@@ -112,7 +112,7 @@ jobs:
             conventional-changelog-conventionalcommits@7
 
       - name: Create release bundle
-        if: steps.semantic.outputs.new-release-published == 'true'
+        if: (((steps.semantic.outputs.new-release-published == 'true') && (steps.semantic.outputs.new-release-published == 'true')) && (steps.semantic.outputs.new-release-published == 'true' && env.SLACK_WEBHOOK_URL != '')) && (needs.release.outputs.new-release-published == 'true' && github.ref == 'refs/heads/main')
         run: |
           VERSION=${{ steps.semantic.outputs.new-release-version }}
           mkdir -p release-bundle
@@ -154,7 +154,6 @@ jobs:
           tar -tzf summit-${VERSION}.tgz
 
       - name: Upload release artifact
-        if: steps.semantic.outputs.new-release-published == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: release-bundle-${{ steps.semantic.outputs.new-release-version }}
@@ -162,7 +161,6 @@ jobs:
           retention-days: 90
 
       - name: Notify Slack
-        if: steps.semantic.outputs.new-release-published == 'true' && env.SLACK_WEBHOOK_URL != ''
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
@@ -219,7 +217,6 @@ jobs:
   trigger-staging-deployment:
     name: Trigger Staging Deployment
     needs: release
-    if: needs.release.outputs.new-release-published == 'true' && github.ref == 'refs/heads/main'
     uses: ./.github/workflows/deploy-staging.yml
     with:
       version: ${{ needs.release.outputs.new-release-version }}
