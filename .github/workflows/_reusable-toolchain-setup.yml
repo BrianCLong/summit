@@ -14,7 +14,7 @@ on:
         description: "PNPM version (optional, defaults to repo pin)"
         required: false
         type: string
-        default: "9.12.0"
+        default: "10.0.0"
       install-deps:
         description: "Whether to install dependencies (defaults to true)"
         required: false
@@ -106,8 +106,8 @@ jobs:
             fi
           fi
 
-          echo "pnpm=9.12.0" >> "$GITHUB_OUTPUT"
-          echo "⚠️  Falling back to pinned pnpm 9.12.0"
+          echo "pnpm=10.0.0" >> "$GITHUB_OUTPUT"
+          echo "⚠️  Falling back to pinned pnpm 10.0.0"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4

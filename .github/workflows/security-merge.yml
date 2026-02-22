@@ -1,0 +1,91 @@
+name: Security Merge Automation
+
+on:
+  pull_request:
+    types: [labeled, synchronize, opened, reopened]
+
+jobs:
+  security-gate:
+    name: Security Gate Enforcement
+    if: contains(github.event.pull_request.labels.*.name, 'security-approved')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Dependency Audit
+        id: audit
+        run: |
+          echo "Running pnpm audit (High/Critical)..."
+          pnpm audit --audit-level=high
+
+      - name: Check CI Status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: checks } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.pull_request.head.sha
+            });
+            const allChecks = checks.check_runs.filter(run =>
+              run.name !== 'Security Gate Enforcement' &&
+              run.name !== 'security-gate'
+            );
+            const stillRunning = allChecks.filter(run => run.status !== 'completed');
+            const failed = allChecks.filter(run => run.status === 'completed' && run.conclusion !== 'success');
+
+            if (stillRunning.length > 0) {
+              core.setFailed(`CI checks still in progress: ${stillRunning.map(r => r.name).join(', ')}`);
+            } else if (failed.length > 0) {
+              core.setFailed(`CI checks failed: ${failed.map(r => r.name).join(', ')}`);
+            }
+
+      - name: Verify CIS Benchmarks
+        id: benchmarks
+        run: |
+          echo "Verifying CIS Benchmark artifacts..."
+          if [ ! -d "server/cis-benchmarks" ]; then
+            echo "Error: server/cis-benchmarks directory missing"
+            exit 1
+          fi
+          if [ ! -f "server/cis-benchmarks/triage.md" ]; then
+            echo "Error: triage.md missing"
+            exit 1
+          fi
+          echo "CIS Benchmarks verified."
+
+      - name: Auto-merge PR
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              merge_method: 'squash',
+              commit_title: `${pr.title} (#${pr.number})`,
+              commit_message: 'Auto-merged by Security Merge Automation after passing all security gates.'
+            });
+            console.log(`Successfully merged PR #${pr.number}`);

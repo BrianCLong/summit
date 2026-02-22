@@ -12,10 +12,6 @@ on:
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
-<<<<<<< HEAD
-concurrency:
-  group: ci-preflight-${{ github.ref }}
-=======
   push:
     branches: [main]
     paths:
@@ -24,11 +20,14 @@ concurrency:
       - "docker-compose.dev.yaml"
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
 
 jobs:
   validate-compose:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: dummy-secret
+      POSTGRES_PASSWORD: dummy-password
+      DATABASE_URL: postgresql://postgres:dummy-password@localhost:5432/summit_dev
     steps:
       - uses: actions/checkout@v4
 
@@ -56,6 +55,10 @@ jobs:
 
   verify-gateway-build:
     runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: dummy-secret
+      POSTGRES_PASSWORD: dummy-password
+      DATABASE_URL: postgresql://postgres:dummy-password@localhost:5432/summit_dev
     steps:
       - uses: actions/checkout@v4
 
