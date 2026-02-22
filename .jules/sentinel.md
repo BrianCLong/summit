@@ -70,3 +70,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `validateAndScopeQuery` function in `server/src/db/query-scope.ts` naively appended `WHERE tenant_id = ...` to the end of SQL queries. This allowed attackers to use SQL comments (`--`) to neutralize the tenant scoping clause, effectively bypassing tenant isolation.
 **Learning:** Naive string concatenation for security controls is fragile. Security logic must be robust against input variations (like comments) or structural manipulation.
 **Prevention:** When auto-injecting security clauses into SQL, validate that the query structure is safe (e.g., no comments) and sanitize inputs (e.g., strip trailing semicolons). Use parser-based modification or strict validation instead of simple concatenation where possible.
+
+## 2026-03-01 - [HIGH] Hardening Evidence Search and RBAC
+**Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
+**Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
+**Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
