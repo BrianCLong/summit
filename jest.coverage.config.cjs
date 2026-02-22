@@ -5,7 +5,7 @@
  * coverage testing across the entire IntelGraph platform.
  *
  * Coverage Thresholds:
- * - Global: 70% minimum coverage
+ * - Global: 85% minimum coverage
  *
  * Usage:
  *   npm run test:coverage
@@ -70,10 +70,10 @@ module.exports = {
   // Coverage Thresholds - minimum CI guardrails
   coverageThreshold: {
     global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
     },
   },
 

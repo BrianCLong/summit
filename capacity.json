@@ -1,1 +1,30 @@
-{}
+{
+  "version": "1.0.0",
+  "last_updated": "2026-01-24T12:00:00Z",
+  "system_limits": {
+    "max_concurrent_users": 5000,
+    "max_throughput_req_per_sec": 1000,
+    "max_graph_nodes": 10000000,
+    "max_graph_edges": 50000000
+  },
+  "performance_baselines": {
+    "api_p95_ms": 120,
+    "graph_traversal_p95_ms": 200,
+    "error_rate": 0.005
+  },
+  "budgets": {
+    "p95_ms": 200,
+    "p99_ms": 500,
+    "error_rate": 0.01
+  },
+  "headroom": {
+    "throughput": "75%",
+    "latency": "40%",
+    "storage": "60%"
+  },
+  "verification_artifacts": [
+    "k6/ga_readiness.js",
+    "k6/golden-baseline.js",
+    "current_metrics.json"
+  ]
+}
