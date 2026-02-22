@@ -34,6 +34,6 @@
  * ```
  */
 
-export * from './types.js';
-export * from './websocket.js';
-export * from './sse.js';
+export * from './types';
+export * from './websocket';
+export * from './sse';

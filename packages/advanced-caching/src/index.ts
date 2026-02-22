@@ -12,10 +12,10 @@
  * - TTL management
  */
 
-export { MultiTierCache } from './MultiTierCache.js';
-export { CacheWarmer } from './CacheWarmer.js';
-export { StampedeProtection } from './StampedeProtection.js';
-export { CacheInvalidator } from './CacheInvalidator.js';
-export { CacheVersionManager } from './CacheVersionManager.js';
-export { CDNIntegration } from './CDNIntegration.js';
-export * from './types.js';
+export { MultiTierCache } from './MultiTierCache';
+export { CacheWarmer } from './CacheWarmer';
+export { StampedeProtection } from './StampedeProtection';
+export { CacheInvalidator } from './CacheInvalidator';
+export { CacheVersionManager } from './CacheVersionManager';
+export { CDNIntegration } from './CDNIntegration';
+export * from './types';

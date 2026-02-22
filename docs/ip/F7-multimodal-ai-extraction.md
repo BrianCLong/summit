@@ -12,7 +12,6 @@
 This disclosure describes an **automated entity and relationship extraction pipeline** that processes multimodal content (text documents, images, videos, audio files, PDFs) and feeds structured data directly into investigation graphs. The system combines OCR, object detection, face recognition, speech-to-text, named entity recognition (NER), and sentiment analysis with **quality scoring, validation workflows, and cross-modal matching**.
 
 **Core Innovation**:
-
 1. **Unified Pipeline Architecture**: Single API for processing any content type with automatic format detection
 2. **Cross-Modal Entity Linking**: Match entities across modalities (face in video → person in text doc → voice in audio)
 3. **Quality-Aware Extraction**: Confidence scores and validation workflows for low-confidence results
@@ -20,7 +19,6 @@ This disclosure describes an **automated entity and relationship extraction pipe
 5. **Streaming Support**: Real-time extraction for live video/audio feeds
 
 **Differentiation**:
-
 - **AWS Rekognition**: Video-only → We support text, image, video, audio, PDFs
 - **Google Cloud Vision**: Image/PDF → We do cross-modal linking
 - **Azure Cognitive Services**: Separate APIs per modality → We unify into single pipeline
@@ -33,27 +31,23 @@ This disclosure describes an **automated entity and relationship extraction pipe
 ### 1.1 Technical Problem
 
 Intelligence analysts receive content in **dozens of formats**:
-
 - Text: PDFs, Word docs, emails, chat logs
 - Images: JPEG, PNG, TIFF (scanned documents, photos, screenshots)
 - Video: MP4, AVI, MOV (surveillance footage, news clips, social media)
 - Audio: MP3, WAV, M4A (wiretaps, podcasts, voice memos)
 
 **Manual processing is infeasible**:
-
 - A 2-hour video requires 8 hours of manual transcription + entity tagging
 - Extracting entities from 100-page PDF takes 4+ hours
 - Cross-referencing entities across 50 documents requires weeks
 
 **Existing tools are siloed**:
-
 - Use AWS Rekognition for video → Extract faces
 - Use Google Cloud Vision for documents → Extract text
 - Use Whisper for audio → Transcribe speech
 - Manually combine results in Excel (no entity resolution!)
 
 **Pain points**:
-
 - **No unified API**: Must integrate 5+ services
 - **No cross-modal linking**: Cannot link "John Smith" (text) to face in video to voice in audio
 - **No quality scoring**: Tools return results without confidence → analysts trust blindly
@@ -62,7 +56,6 @@ Intelligence analysts receive content in **dozens of formats**:
 ### 1.2 User Experience Problem
 
 Analysts spend 70% of time on **data wrangling** instead of analysis:
-
 1. Upload content to multiple services (AWS, Google, Azure)
 2. Wait for async processing (5-30 minutes)
 3. Download results in different formats (JSON, CSV, XML)
@@ -163,16 +156,16 @@ export class ExtractionService {
     // 2. Route to appropriate pipeline
     let extraction_result: RawExtractionResult;
     switch (file_type) {
-      case "VIDEO":
+      case 'VIDEO':
         extraction_result = await this.videoExtractor.extract(file_path, options);
         break;
-      case "IMAGE":
+      case 'IMAGE':
         extraction_result = await this.imageExtractor.extract(file_path, options);
         break;
-      case "DOCUMENT":
+      case 'DOCUMENT':
         extraction_result = await this.documentExtractor.extract(file_path, options);
         break;
-      case "AUDIO":
+      case 'AUDIO':
         extraction_result = await this.audioExtractor.extract(file_path, options);
         break;
       default:
@@ -180,7 +173,9 @@ export class ExtractionService {
     }
 
     // 3. Normalize entities (resolve duplicates)
-    const normalized_entities = await this.entityNormalizer.normalize(extraction_result.entities);
+    const normalized_entities = await this.entityNormalizer.normalize(
+      extraction_result.entities
+    );
 
     // 4. Quality scoring
     const scored_entities = this.qualityScorer.score(normalized_entities);
@@ -193,10 +188,11 @@ export class ExtractionService {
     for (const entity of scored_entities) {
       if (entity.confidence >= threshold) {
         // Auto-add to investigation
-        const added = await this.investigationService.addEntity(investigation_id, entity, {
-          source: "EXTRACTION",
-          source_file: file_path,
-        });
+        const added = await this.investigationService.addEntity(
+          investigation_id,
+          entity,
+          { source: 'EXTRACTION', source_file: file_path }
+        );
         added_entities.push(added);
       } else {
         // Flag for manual review
@@ -215,8 +211,8 @@ export class ExtractionService {
       provenance: {
         extraction_timestamp: new Date(),
         models_used: extraction_result.models_used,
-        processing_time_ms: extraction_result.processing_time_ms,
-      },
+        processing_time_ms: extraction_result.processing_time_ms
+      }
     };
   }
 }
@@ -319,9 +315,9 @@ class CrossModalEntityLinker:
 ```typescript
 // server/src/services/extraction/QualityScorer.ts
 interface QualityMetrics {
-  confidence: number; // Model's raw confidence
+  confidence: number;           // Model's raw confidence
   cross_modal_agreement: number; // Do multiple modalities agree?
-  context_plausibility: number; // Is entity plausible in context?
+  context_plausibility: number;  // Is entity plausible in context?
   overall_score: number;
 }
 
@@ -348,7 +344,9 @@ export class QualityScorer {
 
     // 4. Overall score (weighted average)
     const overall_score =
-      model_confidence * 0.5 + cross_modal_agreement * 0.3 + context_plausibility * 0.2;
+      model_confidence * 0.5 +
+      cross_modal_agreement * 0.3 +
+      context_plausibility * 0.2;
 
     return {
       ...entity,
@@ -356,8 +354,8 @@ export class QualityScorer {
         confidence: model_confidence,
         cross_modal_agreement,
         context_plausibility,
-        overall_score,
-      },
+        overall_score
+      }
     };
   }
 
@@ -369,13 +367,13 @@ export class QualityScorer {
     let plausibility = 1.0;
 
     // Check 1: Is entity type consistent with source?
-    if (entity.entity_type === "Person" && entity.face_sources.length === 0) {
-      plausibility *= 0.8; // Person without face is less plausible
+    if (entity.entity_type === 'Person' && entity.face_sources.length === 0) {
+      plausibility *= 0.8;  // Person without face is less plausible
     }
 
     // Check 2: Are there conflicting attributes?
-    if (entity.attributes.nationality === "Russian" && entity.text_sources[0].language !== "ru") {
-      plausibility *= 0.7; // Suspicious
+    if (entity.attributes.nationality === 'Russian' && entity.text_sources[0].language !== 'ru') {
+      plausibility *= 0.7;  // Suspicious
     }
 
     return plausibility;
@@ -384,7 +382,6 @@ export class QualityScorer {
 ```
 
 **Validation workflow UI**:
-
 ```typescript
 // client/src/components/ExtractionReviewPanel.tsx
 export const ExtractionReviewPanel: React.FC<{ extraction_id: string }> = ({ extraction_id }) => {
@@ -448,15 +445,14 @@ export const ExtractionReviewPanel: React.FC<{ extraction_id: string }> = ({ ext
 
 ## 4. Performance Benchmarks
 
-| Content Type        | Size          | Processing Time (p95) | Entities Extracted |
-| ------------------- | ------------- | --------------------- | ------------------ |
-| Text document (PDF) | 100 pages     | 45 seconds            | 150-300 entities   |
-| Image (JPEG)        | 4K resolution | 3 seconds             | 10-50 entities     |
-| Video (MP4)         | 30 minutes    | 12 minutes            | 200-500 entities   |
-| Audio (MP3)         | 60 minutes    | 8 minutes             | 50-150 entities    |
+| Content Type | Size | Processing Time (p95) | Entities Extracted |
+|--------------|------|----------------------|-------------------|
+| Text document (PDF) | 100 pages | 45 seconds | 150-300 entities |
+| Image (JPEG) | 4K resolution | 3 seconds | 10-50 entities |
+| Video (MP4) | 30 minutes | 12 minutes | 200-500 entities |
+| Audio (MP3) | 60 minutes | 8 minutes | 50-150 entities |
 
 **Accuracy**:
-
 - NER (text): Precision 0.91, Recall 0.87
 - Face recognition: Precision 0.94, Recall 0.89
 - OCR: 97% character accuracy
@@ -467,19 +463,16 @@ export const ExtractionReviewPanel: React.FC<{ extraction_id: string }> = ({ ext
 ## 5. Competitive Advantages
 
 **vs. AWS Rekognition**:
-
 - We support all modalities (not just video)
 - We do cross-modal linking (AWS doesn't)
 - We integrate directly with investigation graphs
 
 **vs. Google Cloud Vision**:
-
 - We provide unified API (vs. separate APIs per service)
 - We have quality scoring + validation workflow
 - We maintain provenance trails
 
 **vs. Azure Cognitive Services**:
-
 - We're open-source friendly (can swap models)
 - We support streaming extraction
 - We have tighter integration with graph analytics
@@ -499,7 +492,6 @@ export const ExtractionReviewPanel: React.FC<{ extraction_id: string }> = ({ ext
 ### Patentability Assessment
 
 **Preliminary opinion**: Moderate patentability
-
 - **Novel combination**: Unified API + cross-modal linking + quality workflow
 - **Technical improvement**: 70% reduction in analyst data wrangling time
 - **Non-obvious**: Cross-modal entity resolution with confidence boosting is non-obvious

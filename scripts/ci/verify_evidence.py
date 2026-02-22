@@ -13,7 +13,6 @@ else:
     EVID = ROOT / "evidence"
 
 SCHEMAS = EVID / "schemas"
-NEW_SCHEMAS = EVID / "schema"
 
 def fail(msg):
     print(f"evidence-verify: FAIL: {msg}", file=sys.stderr)
@@ -79,25 +78,19 @@ def validate_schema(instance, schema_path, context=""):
     schema = load_json(schema_path)
     _validate_recursive(instance, schema, context)
 
-def check_timestamps(evid_dir=None):
+def check_timestamps():
     # Determinism rule: timestamps ONLY in stamp.json
-    scan_dir = evid_dir if evid_dir else EVID
     forbidden = []
     # Ignore specific files and dirs
     IGNORE_FILES = {
         "provenance.json", "governance-bundle.json", "release_abort_events.json",
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json", "index.json", "index.schema.json", "report.schema.json",
-        "metrics.schema.json", "stamp.schema.json", # Ignore schemas
-        "acp_stamp.json", "skill_stamp.json"
+        "metrics.schema.json", "stamp.schema.json" # Ignore schemas
     }
-    IGNORE_DIRS = {
-        "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7",
-        "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption",
-        "EVD-POSTIZ-GATE-004", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-POSTIZ-GROWTH-001"
-    }
+    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
 
-    for p in scan_dir.rglob("*"):
+    for p in EVID.rglob("*"):
         if not p.is_file():
             continue
         if p.name == "stamp.json":
@@ -121,37 +114,22 @@ def check_timestamps(evid_dir=None):
     if forbidden:
         fail(f"Possible timestamps found outside stamp.json in: {forbidden}")
 
-def main(root_override=None):
-    evid_dir = Path(root_override) if root_override else EVID
-    print(f"Verifying evidence in {evid_dir}")
+def main():
+    print(f"Verifying evidence in {EVID}")
 
     # 1. Verify index.json existence
-    index_path = evid_dir / "index.json"
+    index_path = EVID / "index.json"
     if not index_path.exists():
         fail("evidence/index.json missing")
 
     index = load_json(index_path)
 
-    items = []
-    if "items" in index and isinstance(index["items"], list):
-        items = index["items"]
-    elif "evidence" in index and isinstance(index["evidence"], dict):
-        for evd_id, data in index["evidence"].items():
-            item = data.copy()
-            item["evidence_id"] = evd_id
-            # Convert report/metrics/stamp paths to list of files
-            files = []
-            if "report" in item: files.append(item["report"])
-            if "metrics" in item: files.append(item["metrics"])
-            if "stamp" in item: files.append(item["stamp"])
-            item["files"] = files
-            items.append(item)
-    else:
-        fail("index.json must have 'items' list or 'evidence' object")
+    if "items" not in index or not isinstance(index["items"], list):
+        fail("index.json must have 'items' list")
 
-    print(f"Found {len(items)} items in index.")
+    print(f"Found {len(index['items'])} items in index.")
 
-    for item in items:
+    for item in index["items"]:
         # Support both 'files' (plan) and 'paths' (existing)
         files = item.get("files", item.get("paths", []))
         evd_id = item.get("evidence_id")
@@ -168,24 +146,17 @@ def main(root_override=None):
 
             # Validate schema based on filename
             fname = fpath.name
-            if evd_id.startswith("EVD-CLAUDECODE-SUBAGENTS-"):
-                schema_dir = NEW_SCHEMAS
-            else:
-                schema_dir = SCHEMAS
-
             if fname == "report.json":
-                validate_schema(load_json(fpath), schema_dir / "report.schema.json", context=f"{evd_id} report")
+                validate_schema(load_json(fpath), SCHEMAS / "report.schema.json", context=f"{evd_id} report")
             elif fname == "metrics.json":
-                validate_schema(load_json(fpath), schema_dir / "metrics.schema.json", context=f"{evd_id} metrics")
+                validate_schema(load_json(fpath), SCHEMAS / "metrics.schema.json", context=f"{evd_id} metrics")
             elif fname == "stamp.json":
-                validate_schema(load_json(fpath), schema_dir / "stamp.schema.json", context=f"{evd_id} stamp")
-            elif fname == "index.json" and schema_dir == NEW_SCHEMAS:
-                 validate_schema(load_json(fpath), schema_dir / "index.schema.json", context=f"{evd_id} index")
+                validate_schema(load_json(fpath), SCHEMAS / "stamp.schema.json", context=f"{evd_id} stamp")
 
     # 2. Check for timestamps
-    check_timestamps(evid_dir)
+    check_timestamps()
 
     print("evidence-verify: PASS")
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else None)
+    main()

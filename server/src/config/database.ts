@@ -10,7 +10,7 @@ import {
   getPostgresPool as getManagedPostgresPool,
   closePostgresPool as closeManagedPostgresPool,
   ManagedPostgresPool,
-} from '../db/postgres.js';
+} from '../db/postgres';
 import {
   getNeo4jDriver as getSharedNeo4jDriver,
   initializeNeo4jDriver,
@@ -263,13 +263,12 @@ async function connectRedis(): Promise<Redis | null> {
 }
 
 function getNeo4jDriver(): Neo4jDriver {
-  return getSharedNeo4jDriver();
+  if (!neo4jDriver) throw new Error('Neo4j driver not initialized');
+  return neo4jDriver;
 }
 
 function getPostgresPool(): ManagedPostgresPool {
-  if (!postgresPool) {
-    postgresPool = getManagedPostgresPool();
-  }
+  if (!postgresPool) throw new Error('PostgreSQL pool not initialized');
   return postgresPool;
 }
 

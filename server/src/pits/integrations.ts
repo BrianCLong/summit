@@ -2,7 +2,7 @@ import {
   IntegrationAdapter,
   IntegrationArtifact,
   IntegrationContext,
-} from './types.js';
+} from './types';
 
 function formatLag(hours: number): number {
   return Math.round(hours * 100) / 100;

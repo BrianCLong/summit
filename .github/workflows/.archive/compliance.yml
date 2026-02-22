@@ -30,7 +30,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-
+          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -76,7 +76,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-
+          version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -103,7 +103,7 @@ jobs:
   fossa:
     name: FOSSA Scan
     runs-on: ubuntu-latest
-    if: (${{ vars.FOSSA_API_KEY != '' }}) && (github.event_name == 'release')
+    if: ${{ vars.FOSSA_API_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -122,6 +122,7 @@ jobs:
   container-sbom:
     name: Container SBOM
     runs-on: ubuntu-latest
+    if: github.event_name == 'release'
     needs: [sbom]
     steps:
       - uses: actions/checkout@v4

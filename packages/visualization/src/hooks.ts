@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { DataPoint, DataFilter, Dimension } from './types.js';
+import { DataPoint, DataFilter, Dimension } from './types';
 
 // Hook for managing visualization dimensions with responsive resize
 export function useVisualizationDimensions(

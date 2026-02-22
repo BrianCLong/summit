@@ -10,17 +10,17 @@ const mockDriver = {
 };
 const mockFindSimilar = jest.fn();
 
-let InventionService: typeof import('../services/InventionService.js').InventionService;
-let dbModule: typeof import('../../config/database.js');
-let priorArtModule: typeof import('../services/PriorArtService.js');
+let InventionService: typeof import('../services/InventionService.ts').InventionService;
+let dbModule: typeof import('../../config/database.ts');
+let priorArtModule: typeof import('../services/PriorArtService.ts');
 
 describe('InventionService', () => {
   let service: ReturnType<typeof InventionService.getInstance>;
 
   beforeAll(async () => {
-    dbModule = await import('../../config/database.js');
-    priorArtModule = await import('../services/PriorArtService.js');
-    ({ InventionService } = await import('../services/InventionService.js'));
+    dbModule = await import('../../config/database.ts');
+    priorArtModule = await import('../services/PriorArtService.ts');
+    ({ InventionService } = await import('../services/InventionService.ts'));
   });
 
   beforeEach(() => {

@@ -1,5 +1,5 @@
-import { rollup } from '../ops/capacity.js';
-import { PredictiveService } from '../predictive/PredictiveService.js';
+import { rollup } from '../ops/capacity';
+import { PredictiveService } from '../predictive/PredictiveService';
 import { Logger } from 'pino';
 
 export enum SignalConfidence {

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { VendorService } from '../VendorService.js';
-import { Vendor, FinanceRecord } from '../types.js';
+import { VendorService } from '../VendorService';
+import { Vendor, FinanceRecord } from '../types';
 
 describe('VendorService Inventory', () => {
   let service: VendorService;

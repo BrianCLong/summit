@@ -10,8 +10,8 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import { GovernanceVerdict } from '../../governance/types.js';
-import logger from '../../utils/logger.js';
+import { GovernanceVerdict } from '../../governance/types.ts';
+import logger from '../../utils/logger.ts';
 import {
   PolicySuggestion,
   PolicySuggestionType,
@@ -24,12 +24,12 @@ import {
   AIGovernanceConfig,
   ProvenanceMetadata,
   ChainOfCustodyEntry,
-} from './types.js';
+} from './types.ts';
 import {
   GovernanceLLMClient,
   getGovernanceLLMClient,
   GovernanceLLMError,
-} from './llm/index.js';
+} from './llm/index.ts';
 
 // =============================================================================
 // Types

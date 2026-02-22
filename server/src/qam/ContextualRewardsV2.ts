@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import baseLogger from '../config/logger.js';
+import baseLogger from '../config/logger';
 
 const logger = baseLogger.child({ module: 'ContextualRewardsV2' });
 

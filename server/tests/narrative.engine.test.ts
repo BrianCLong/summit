@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { NarrativeSimulationEngine } from '../src/narrative/engine.js';
-import { PredictivePsyOpsLayer } from '../src/narrative/psyops-layer.js';
+import { NarrativeSimulationEngine } from '../src/narrative/engine';
+import { PredictivePsyOpsLayer } from '../src/narrative/psyops-layer';
 import type {
   NarrativeEvent,
   SimulationConfig,
   SimulationEntity,
-} from '../src/narrative/types.js';
+} from '../src/narrative/types';
 
 describe('NarrativeSimulationEngine', () => {
   let config: SimulationConfig;

@@ -1,4 +1,0 @@
-{
-  "input": {"example": "negative"},
-  "expected": {"status": "not_implemented"}
-}

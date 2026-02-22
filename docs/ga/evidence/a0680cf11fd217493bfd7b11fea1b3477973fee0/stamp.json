@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVID::lineage::sdk::a0680cf11fd217493bfd7b11fea1b3477973fee0::pr1_verification::v1",
-  "git_sha": "a0680cf11fd217493bfd7b11fea1b3477973fee0",
-  "build_toolchain_versions": {
-    "node": "v22.22.0"
-  },
-  "timestamp_utc": "2026-01-31T20:23:36.901Z",
-  "repro_command": "node scripts/ci/generate_pr1_evidence.mjs"
-}
