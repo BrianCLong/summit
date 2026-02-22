@@ -380,3 +380,4 @@ packages/osint-collector/src/core/*.js
 packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
+*.js.map
