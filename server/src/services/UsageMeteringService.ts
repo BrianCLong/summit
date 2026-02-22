@@ -26,6 +26,8 @@ export interface UsageAggregation {
 
 export class UsageMeteringService {
   private events: Map<string, UsageEvent> = new Map();
+  // Optimization: Index events by tenantId for O(1) lookup
+  private eventsByTenant: Map<string, UsageEvent[]> = new Map();
 
   constructor() {
     console.info('[UsageMeteringService] Initialized');
@@ -38,6 +40,15 @@ export class UsageMeteringService {
       event.id = 'usage_' + timestamp + '_' + random;
     }
     this.events.set(event.id, event);
+
+    // Add to tenant index
+    let tenantEvents = this.eventsByTenant.get(event.tenantId);
+    if (!tenantEvents) {
+      tenantEvents = [];
+      this.eventsByTenant.set(event.tenantId, tenantEvents);
+    }
+    tenantEvents.push(event);
+
     console.debug('[UsageMeteringService] Recorded:', event.tenantId, event.dimension, event.quantity);
   }
 
@@ -47,8 +58,11 @@ export class UsageMeteringService {
     let totalQuantity = 0;
     let eventCount = 0;
 
-    for (const event of this.events.values()) {
-      if (event.tenantId !== tenantId || event.dimension !== dimension) continue;
+    // Use tenant index instead of iterating all events
+    const tenantEvents = this.eventsByTenant.get(tenantId) || [];
+
+    for (const event of tenantEvents) {
+      if (event.dimension !== dimension) continue;
       const occurredTime = new Date(event.occurredAt).getTime();
       if (occurredTime < start || occurredTime > end) continue;
       totalQuantity += event.quantity;
@@ -64,8 +78,10 @@ export class UsageMeteringService {
     const end = options?.endDate ? new Date(options.endDate).getTime() : Date.now();
     const limit = options?.limit || 1000;
 
-    for (const event of this.events.values()) {
-      if (event.tenantId !== tenantId) continue;
+    // Use tenant index instead of iterating all events
+    const tenantEvents = this.eventsByTenant.get(tenantId) || [];
+
+    for (const event of tenantEvents) {
       if (options?.dimension && event.dimension !== options.dimension) continue;
       const occurredTime = new Date(event.occurredAt).getTime();
       if (occurredTime < start || occurredTime > end) continue;
