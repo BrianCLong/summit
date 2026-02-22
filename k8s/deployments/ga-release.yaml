@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-ga
+  labels:
+    app: summit
+    version: ga
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: summit
+  template:
+    metadata:
+      labels:
+        app: summit
+    spec:
+      containers:
+      - name: summit
+        image: summit:ga
+        ports:
+        - containerPort: 3000
