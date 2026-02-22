@@ -1,40 +1,14 @@
-# Repo Assumptions & Validation
+# Repository Assumptions
 
-## Verified vs Assumed Directory List
+## Agent Governance Structure
+- **Workspace Package**: A workspace package exists at `agents/governance` (`@intelgraph/agent-governance`). This appears to be a library providing governance capabilities.
+- **Runtime Integration**: The Summit "Hive Runtime" is assumed to be implemented in `src/agents`. We are implementing runtime-specific governance contracts (ATF levels, identity manifests) in `src/agents/governance` to govern these specific agents. This is distinct from the library package.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Testing
+- **Runner**: `vitest` is used for testing.
+- **Imports**: Tests must explicitly import `describe`, `test`, `expect` from `vitest` as globals are not enabled by default.
+- **Command**: `pnpm test` runs the tests.
 
-## CI Check Names (Exact)
-
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Directories
+- `src/agents` contains the agent implementations.
+- `src/agents/governance` will contain the runtime governance logic.
