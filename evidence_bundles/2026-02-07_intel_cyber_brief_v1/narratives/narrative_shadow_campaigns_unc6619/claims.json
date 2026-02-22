@@ -1,0 +1,48 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_70_networks_37_countries",
+      "claim_normal_form": "A state-sponsored group infiltrated 70 government networks across 37 countries as part of 'Shadow Campaigns'.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.6,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_shadow_0001"
+    },
+    {
+      "claim_id": "c_kernel_rootkit_shadowguard",
+      "claim_normal_form": "The operation uses ShadowGuard rootkit malware enabling kernel-level evasion.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.62,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_shadow_0001"
+    },
+    {
+      "claim_id": "c_recon_155_countries",
+      "claim_normal_form": "Reconnaissance targeted 155 countries in late 2025, focusing on ministries, law enforcement, border control, and infrastructure.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.58,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_shadow_0001"
+    },
+    {
+      "claim_id": "c_disclosure_unit42_triggers_reviews",
+      "claim_normal_form": "Disclosure prompted government investigations and reviews such as Malaysia NACSA's review; no disruptions were reported.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.56,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_shadow_0001"
+    }
+  ]
+}

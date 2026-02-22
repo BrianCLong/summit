@@ -1,0 +1,55 @@
+{
+  "handoff_model": {
+    "model_id": "handoff_risk_v1",
+    "features": [
+      "official_attribution_present",
+      "geopolitical_salience",
+      "violence_or_kinetic_event",
+      "negotiation_linkage",
+      "cross-domain linkage (cyber + kinetic)",
+      "evidence_completeness_penalty"
+    ],
+    "scoring": "0..100 weighted sum with penalties"
+  },
+  "handoff_assessment": {
+    "narrative_id": "n_gru_assassination_attempt",
+    "risk_score": 78,
+    "risk_band": "high",
+    "feature_contributions": [
+      {
+        "feature": "official_attribution_present",
+        "weight": 18,
+        "value": 1
+      },
+      {
+        "feature": "geopolitical_salience",
+        "weight": 16,
+        "value": 1
+      },
+      {
+        "feature": "violence_or_kinetic_event",
+        "weight": 14,
+        "value": 1
+      },
+      {
+        "feature": "negotiation_linkage",
+        "weight": 12,
+        "value": 1
+      },
+      {
+        "feature": "cross-domain linkage (cyber + kinetic)",
+        "weight": 8,
+        "value": 1
+      },
+      {
+        "feature": "evidence_completeness_penalty",
+        "weight": -10,
+        "value": 1
+      }
+    ],
+    "alerts": [
+      "Potential rapid handoff into policy and mainstream media discourse due to negotiation linkage and senior-intel targeting."
+    ],
+    "provenance_id": "p_gru_0001"
+  }
+}

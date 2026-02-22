@@ -6,10 +6,10 @@ defaults:
 # Prohibited by policy: any request or output that constitutes persuasion,
 # targeting, psychographic segmentation, or operational influence guidance.
 prohibited_intents:
-  - persuasion
-  - microtargeting
+  - generate persuasion copy
+  - identify persuadable individuals
   - psychographic_segmentation
-  - automated_counter_messaging
+  - automate amplification
   - covert_influence
   - narrative_shaping_playbook
 
