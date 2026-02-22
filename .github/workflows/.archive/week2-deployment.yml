@@ -94,7 +94,7 @@ jobs:
   canary-deployment:
     runs-on: ubuntu-latest
     needs: pre-deployment-checks
-    if: needs.pre-deployment-checks.outputs.deploy-ready == 'true'
+    if: (((needs.pre-deployment-checks.outputs.deploy-ready == 'true') && (needs.canary-deployment.result == 'success')) && (needs.canary-deployment.result == 'success')) && (always() && needs.canary-deployment.result == 'success' && needs.performance-validation.result == 'success' && needs.security-validation.result == 'success')
     environment:
       name: ${{ github.event.inputs.environment || 'canary' }}
       url: ${{ steps.deploy.outputs.url }}
@@ -185,7 +185,6 @@ jobs:
   performance-validation:
     runs-on: ubuntu-latest
     needs: [pre-deployment-checks, canary-deployment]
-    if: needs.canary-deployment.result == 'success'
 
     steps:
       - name: Checkout
@@ -241,7 +240,6 @@ jobs:
   security-validation:
     runs-on: ubuntu-latest
     needs: [pre-deployment-checks, canary-deployment]
-    if: needs.canary-deployment.result == 'success'
 
     steps:
       - name: Checkout
@@ -274,7 +272,6 @@ jobs:
   promotion-gate:
     runs-on: ubuntu-latest
     needs: [canary-deployment, performance-validation, security-validation]
-    if: always() && needs.canary-deployment.result == 'success' && needs.performance-validation.result == 'success' && needs.security-validation.result == 'success'
 
     steps:
       - name: Promotion Decision
