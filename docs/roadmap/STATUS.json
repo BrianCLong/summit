@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "revision_note": "Hardened HTTP ingest idempotency by switching fallback IDs to deterministic content hashing; added regression coverage.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
