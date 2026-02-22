@@ -8,7 +8,10 @@ interface CursorProps {
   label?: string;
 }
 
-const Cursor: React.FC<CursorProps> = ({ x, y, color = '#f00', label }) => {
+// Optimized with React.memo to prevent unnecessary re-renders of all cursors
+// when only one cursor moves. This significantly improves performance when
+// multiple users are collaborating.
+const Cursor = React.memo<CursorProps>(({ x, y, color = '#f00', label }) => {
   return (
     <div
       className="absolute pointer-events-none transition-transform duration-100 ease-linear z-50"
@@ -41,7 +44,9 @@ const Cursor: React.FC<CursorProps> = ({ x, y, color = '#f00', label }) => {
       )}
     </div>
   );
-};
+});
+
+Cursor.displayName = 'Cursor';
 
 interface CollaborativeCursorsProps {
   cursors: Array<{
