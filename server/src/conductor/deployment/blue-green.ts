@@ -672,8 +672,8 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
 
       // v2: ML-driven Automated Canary Analysis (ACA)
       const acaResult = await automatedCanaryService.analyze(canaryMetrics, productionMetrics);
-      
-      this.addLog(execution.phases.find(p => p.name === 'canary_traffic_management')!, 
+
+      this.addLog(execution.phases.find(p => p.name === 'canary_traffic_management')!,
         `ACA Result: Score=${acaResult.score}, Decision=${acaResult.decision}, Reason=${acaResult.reason}`);
 
       if (acaResult.decision === 'ROLLBACK') {

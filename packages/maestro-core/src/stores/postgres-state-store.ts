@@ -43,8 +43,8 @@ export class PostgresStateStore implements StateStore {
           await client.query(
             `
             INSERT INTO workflow_runs (
-              run_id, workflow_name, workflow_version, tenant_id, 
-              triggered_by, environment, parameters, budget, 
+              run_id, workflow_name, workflow_version, tenant_id,
+              triggered_by, environment, parameters, budget,
               status, created_at, idempotency_key, workflow_definition
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'running', NOW(), $9, $10)
             ON CONFLICT (idempotency_key) DO NOTHING
@@ -90,7 +90,7 @@ export class PostgresStateStore implements StateStore {
         await this.withTransaction(async (client) => {
           await client.query(
             `
-            UPDATE workflow_runs 
+            UPDATE workflow_runs
             SET status = $1, error = $2, completed_at = CASE WHEN $1 IN ('completed', 'failed', 'cancelled') THEN NOW() ELSE completed_at END
             WHERE run_id = $3
           `,
@@ -182,8 +182,8 @@ export class PostgresStateStore implements StateStore {
         await this.withTransaction(async (client) => {
           await client.query(
             `
-            UPDATE step_executions 
-            SET status = $1, started_at = $2, completed_at = $3, 
+            UPDATE step_executions
+            SET status = $1, started_at = $2, completed_at = $3,
                 output = $4, error = $5, cost_usd = $6, metadata = $7,
                 updated_at = NOW(), last_heartbeat = $8, worker_id = $9
             WHERE step_id = $10 AND run_id = $11 AND attempt = $12

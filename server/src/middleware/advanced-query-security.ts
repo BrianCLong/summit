@@ -414,7 +414,7 @@ export const advancedInputValidation = (schema: any) => {
             ip: req.ip,
             errors: result.error.errors
           }, 'Input validation failed');
-          
+
           trackError('validation', 'InputValidationError');
           return res.status(400).json({
             error: 'Input validation failed',

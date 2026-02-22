@@ -31,8 +31,8 @@ fi
 echo "Fetching current branch protection for $BRANCH..."
 # Normalize current settings: strip IDs, URLs, and volatile fields
 # Note: We must be careful with the rate limit here too.
-gh api "repos/:owner/:repo/branches/${BRANCH}/protection" | 
-jq 'del(.url, .required_status_checks.url, .required_status_checks.contexts_url, .required_pull_request_reviews.url, .required_signatures.url, .enforce_admins.url, .required_status_checks.checks[].app_id, .required_status_checks.contexts_url)' | 
+gh api "repos/:owner/:repo/branches/${BRANCH}/protection" |
+jq 'del(.url, .required_status_checks.url, .required_status_checks.contexts_url, .required_pull_request_reviews.url, .required_signatures.url, .enforce_admins.url, .required_status_checks.checks[].app_id, .required_status_checks.contexts_url)' |
 jq -S . > "$TEMP_FILE"
 
 echo "Comparing against snapshot: $SNAPSHOT_FILE"

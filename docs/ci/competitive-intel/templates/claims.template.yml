@@ -11,4 +11,3 @@ claims:
     evidence:
       - path: "docs/ci/evidence/<target_slug>/EVIDENCE.md"
         excerpt: "<verbatim quote or summary with exact pointer>"
-

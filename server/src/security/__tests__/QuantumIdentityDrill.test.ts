@@ -17,10 +17,10 @@ describe('Quantum Identity Drill (Task #110)', () => {
 
   it('should reject tampered identities', () => {
     const identity = quantumIdentityManager.issueIdentity('auth-service');
-    
+
     // Tamper with the public key
     const tamperedIdentity = { ...identity, publicKey: 'pqc-kyber-v1:TAMPERED' };
-    
+
     const isValid = quantumIdentityManager.verifyIdentity(tamperedIdentity);
     expect(isValid).toBe(false);
   });

@@ -5,7 +5,7 @@ import { RBACManager } from '../../../../../packages/authentication/src/rbac/rba
 import { requirePermission } from '../../middleware/security.js';
 
 export function createReceiptRouter(
-  store: ReceiptStore, 
+  store: ReceiptStore,
   rbacManager: RBACManager,
   logger = pino()
 ): express.Router {

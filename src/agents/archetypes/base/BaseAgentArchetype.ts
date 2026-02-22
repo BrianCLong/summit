@@ -75,7 +75,7 @@ export abstract class BaseAgentArchetype {
    */
   protected async validateInput(input: string, context: AgentContext): Promise<boolean> {
     const result = this.injectionDetector.detect(input);
-    
+
     if (result.injectionDetected) {
       await auditSink.securityAlert('Prompt injection detected in agent input', {
         agentRole: this.role,
@@ -86,10 +86,10 @@ export abstract class BaseAgentArchetype {
         threatLevel: result.confidence,
         matchedPatterns: result.patterns,
       });
-      
+
       return false;
     }
-    
+
     return true;
   }
 

@@ -1,6 +1,6 @@
 /**
  * Gateway OPA ABAC Enforcement Middleware
- * 
+ *
  * Implements attribute-based access control enforcement at the API gateway layer
  * using Open Policy Agent (OPA) to evaluate ABAC policies for all incoming requests
  */
@@ -46,7 +46,7 @@ class OpaClient {
           statusText: response.statusText,
           url: `${this.baseUrl}/v1/data/baseline_abac/allow`,
         });
-        
+
         // Fail closed - if OPA is unavailable, deny the request
         return {
           allow: false,
@@ -55,9 +55,9 @@ class OpaClient {
       }
 
       const result = await response.json();
-      
+
       if (typeof result.result === 'boolean') {
-        return { 
+        return {
           allow: result.result,
           reason: result.result ? 'Access granted by ABAC policy' : 'Access denied by ABAC policy'
         };
@@ -69,9 +69,9 @@ class OpaClient {
         };
       } else {
         logger.warn('Unexpected OPA result format', { result });
-        return { 
-          allow: false, 
-          reason: 'Invalid policy evaluation result' 
+        return {
+          allow: false,
+          reason: 'Invalid policy evaluation result'
         };
       }
     } catch (error: any) {
@@ -80,7 +80,7 @@ class OpaClient {
         stack: error.stack,
         input: JSON.stringify(input, null, 2).substring(0, 500), // Truncate for safety
       });
-      
+
       // Fail closed - if OPA is unreachable, deny the request
       return {
         allow: false,
@@ -114,7 +114,7 @@ const httpMethodToAction = (method: string): string => {
 const pathToResourceType = (path: string): string => {
   // Normalize path by removing trailing slashes
   const normalizedPath = path.replace(/\/$/, '');
-  
+
   // Common resource mappings
   const resourceMap: { [key: string]: string } = {
     '/api/users': 'user',
@@ -125,7 +125,7 @@ const pathToResourceType = (path: string): string => {
     '/api/investigation': 'investigation',
     '/api/entities': 'entity',
     '/api/entity': 'entity',
-    '/api/relationships': 'relationship', 
+    '/api/relationships': 'relationship',
     '/api/relationship': 'relationship',
     '/api/cases': 'case',
     '/api/case': 'case',
@@ -161,7 +161,7 @@ const pathToResourceType = (path: string): string => {
 // Extract resource ID from path
 const extractResourceId = (path: string): string | null => {
   const segments = path.split('/').filter(segment => segment.length > 0);
-  
+
   // Look for patterns like /api/entities/123 or /api/investigations/xyz
   if (segments.length >= 3) {
     const idSegment = segments[segments.length - 1]; // Last segment
@@ -170,7 +170,7 @@ const extractResourceId = (path: string): string | null => {
       return idSegment;
     }
   }
-  
+
   return null;
 };
 
@@ -189,7 +189,7 @@ const extractTenantId = (req: Request): string => {
 // Extract sensitive data tags
 const extractSensitiveTags = (req: Request): string[] => {
   const tags: string[] = [];
-  
+
   // Check headers
   if (req.headers['x-data-classification']) {
     const classification = req.headers['x-data-classification'].toString().toLowerCase();
@@ -197,13 +197,13 @@ const extractSensitiveTags = (req: Request): string[] => {
       tags.push('sensitive');
     }
   }
-  
+
   // Check request body for sensitive indicators
   if (req.body && typeof req.body === 'object') {
     for (const [key, value] of Object.entries(req.body)) {
-      if (typeof key === 'string' && 
-          (key.toLowerCase().includes('ssn') || 
-           key.toLowerCase().includes('credit') || 
+      if (typeof key === 'string' &&
+          (key.toLowerCase().includes('ssn') ||
+           key.toLowerCase().includes('credit') ||
            key.toLowerCase().includes('card') ||
            key.toLowerCase().includes('email') ||
            key.toLowerCase().includes('phone') ||
@@ -213,7 +213,7 @@ const extractSensitiveTags = (req: Request): string[] => {
       }
     }
   }
-  
+
   return tags;
 };
 
@@ -234,11 +234,11 @@ const defaultOptions: AbacMiddlewareOptions = {
 
 export const createAbacMiddleware = (options: AbacMiddlewareOptions = {}) => {
   const config = { ...defaultOptions, ...options };
-  
+
   return async (req: Request, res: Response, next: NextFunction) => {
     const startTime = Date.now();
     const requestId = req.headers['x-request-id'] as string || uuidv4();
-    
+
     try {
       // Skip health checks and public endpoints
       if (req.path === '/health' || req.path === '/ping' || req.path === '/metrics') {
@@ -254,11 +254,11 @@ export const createAbacMiddleware = (options: AbacMiddlewareOptions = {}) => {
         if (config.enableLogging) {
           logger.warn('Request without user context', { requestId, path: req.path, method: req.method });
         }
-        
+
         if (config.enableMetrics) {
           metrics.policyEvaluations.labels('error', 'missing_user_context', req.method).inc();
         }
-        
+
         return res.status(401).json({
           error: 'Authentication required',
           code: 'MISSING_AUTH_CONTEXT',
@@ -313,9 +313,9 @@ export const createAbacMiddleware = (options: AbacMiddlewareOptions = {}) => {
       };
 
       if (config.enableLogging) {
-        logger.debug('ABAC policy evaluation input', { 
-          requestId, 
-          userId: policyInput.user.id, 
+        logger.debug('ABAC policy evaluation input', {
+          requestId,
+          userId: policyInput.user.id,
           resource: policyInput.resource.type,
           action: policyInput.action,
           tenantId: tenantId,
@@ -329,7 +329,7 @@ export const createAbacMiddleware = (options: AbacMiddlewareOptions = {}) => {
       if (config.enableMetrics) {
         const outcome = evaluationResult.allow ? 'allowed' : 'denied';
         const resourceType = policyInput.resource.type || 'unknown';
-        
+
         metrics.policyEvaluations.labels(outcome, resourceType, policyInput.action).inc();
         metrics.policyEvaluationDuration.observe(Date.now() - startTime);
       }
@@ -405,9 +405,9 @@ export const abacMiddleware = createAbacMiddleware();
 
 // Convenience function for programmatic policy checks
 export const checkAbacPermission = async (
-  userId: string, 
-  userRoles: string[], 
-  resourceType: string, 
+  userId: string,
+  userRoles: string[],
+  resourceType: string,
   action: string,
   tenantId: string,
   additionalContext: any = {}

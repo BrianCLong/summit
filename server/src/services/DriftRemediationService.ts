@@ -37,7 +37,7 @@ export class DriftRemediationService {
       // 1. Audit tenant_partitions against tenant_partition_map
       // Ensure every mapping points to a valid partition
       const orphanedMappings = await pool.query(`
-        SELECT m.tenant_id, m.partition_key 
+        SELECT m.tenant_id, m.partition_key
         FROM tenant_partition_map m
         LEFT JOIN tenant_partitions p ON m.partition_key = p.partition_key
         WHERE p.partition_key IS NULL
@@ -45,7 +45,7 @@ export class DriftRemediationService {
 
       if (orphanedMappings.rows.length > 0) {
         logger.warn({ count: orphanedMappings.rows.length }, 'DriftRemediation: Found orphaned tenant mappings');
-        
+
         for (const mapping of orphanedMappings.rows) {
           logger.info({ tenantId: mapping.tenant_id }, 'DriftRemediation: Resetting orphaned mapping to primary');
           await pool.query(
@@ -59,7 +59,7 @@ export class DriftRemediationService {
       // 2. Audit residency configs for missing defaults
       // (Simplified example: ensure every tenant has a residency config)
       const missingConfigs = await pool.query(`
-        SELECT t.id 
+        SELECT t.id
         FROM tenants t
         LEFT JOIN data_residency_configs c ON t.id = c.tenant_id
         WHERE c.tenant_id IS NULL AND t.is_active = true
@@ -67,7 +67,7 @@ export class DriftRemediationService {
 
       if (missingConfigs.rows.length > 0) {
         logger.warn({ count: missingConfigs.rows.length }, 'DriftRemediation: Missing data residency configs');
-        
+
         for (const tenant of missingConfigs.rows) {
           logger.info({ tenantId: tenant.id }, 'DriftRemediation: Creating default residency config');
           await pool.query(`

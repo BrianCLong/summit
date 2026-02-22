@@ -260,13 +260,13 @@ tenant_can_execute_workflow {
     input.attributes.tenant_id
     input.attributes.workflow
     input.attributes.environment
-    
+
     # Check tenant limits
     tenant_within_limits
-    
+
     # Check environment permissions
     environment_allowed
-    
+
     # Check workflow permissions
     workflow_allowed
 }
@@ -274,8 +274,8 @@ tenant_can_execute_workflow {
 tenant_within_limits {
     # Budget check
     input.attributes.budget.max_cost_usd <= data.tenants[input.subject].max_budget_usd
-    
-    # Concurrent run check  
+
+    # Concurrent run check
     count(data.active_runs[input.subject]) < data.tenants[input.subject].max_concurrent_runs
 }
 
@@ -301,10 +301,10 @@ allow {
 
 step_execution_allowed {
     input.attributes.step.plugin in data.plugins.allowed
-    
+
     # Plugin-specific policies
     plugin_policy_satisfied
-    
+
     # Resource limits
     within_resource_limits
 }

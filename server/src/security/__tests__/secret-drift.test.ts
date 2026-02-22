@@ -5,7 +5,7 @@ import path from 'path';
 describe('SecretDriftDetector', () => {
   const mockEnvPath = '/test/.env';
   let detector: SecretDriftDetector;
-  
+
   const mockFs = {
     existsSync: jest.fn<any>(),
     readFileSync: jest.fn<any>(),
@@ -13,15 +13,15 @@ describe('SecretDriftDetector', () => {
     statSync: jest.fn<any>(),
     writeFileSync: jest.fn<any>(),
   };
-  
+
   const mockEnv: NodeJS.ProcessEnv = {};
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockEnv.SECRET_KEY = 'super_secret_value_123';
-    detector = new SecretDriftDetector(mockEnvPath, { 
-      fs: mockFs as any, 
-      env: mockEnv 
+    detector = new SecretDriftDetector(mockEnvPath, {
+      fs: mockFs as any,
+      env: mockEnv
     });
     mockFs.existsSync.mockReturnValue(true);
   });
@@ -63,7 +63,7 @@ describe('SecretDriftDetector', () => {
     it('should detect insecure defaults', () => {
       mockEnv.JWT_SECRET = 'changeme_but_longer_to_pass_zod_if_needed';
       mockEnv.JWT_REFRESH_SECRET = 'changeme_but_longer_to_pass_zod_if_needed';
-      
+
       const expired = detector.detectExpiredSecrets();
       expect(expired.some(e => e.includes('insecure default detected'))).toBe(true);
     });

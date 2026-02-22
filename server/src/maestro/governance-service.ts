@@ -161,9 +161,9 @@ export class AgentGovernanceService {
         const pool = getPostgresPool();
         // Check for approved record in the approvals table
         const result = await pool.query(
-          `SELECT status FROM approvals 
+          `SELECT status FROM approvals
            WHERE (payload->>'taskId' = $1 OR run_id = $2)
-           AND status = 'approved' 
+           AND status = 'approved'
            ORDER BY created_at DESC LIMIT 1`,
           [context.taskId, context.runId]
         );
@@ -405,7 +405,7 @@ export class AgentGovernanceService {
   getAgentConfig(agent: MaestroAgent): AgentGovernanceConfig {
     const tenantId = agent.tenantId || 'system';
     const tenantPolicies = this.policies.get(tenantId) || this.policies.get('system');
-    
+
     if (!tenantPolicies) return this.defaultConfig;
 
     const policyId = agent.metadata?.governanceTier || '*';
@@ -447,7 +447,7 @@ export class AgentGovernanceService {
   getRecentViolations(agentId: string, tenantId: string = 'system', sinceDays: number = 7): SafetyViolation[] {
     const cutoffTime = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
     const tenantViolations = this.safetyViolations.get(tenantId) || [];
-    
+
     return tenantViolations
       .filter(violation => violation.agentId === agentId && violation.timestamp > cutoffTime)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());

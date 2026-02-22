@@ -10,29 +10,29 @@ Summit is already certified for deployment in controlled environments under the 
 
 ## 0.1 23rd-Order Implications (Condensed)
 
-1. **Authority Cascade:** Every artifact must align to the governance chain or it is invalid.  
-2. **Causality as Product:** The governance graph becomes the system of record for change truth.  
-3. **Agent Accountability:** Agents are provable actors with enforceable constraints, not automations.  
-4. **Evidence-Locked Claims:** Claims without live evidence are automatically deprecated.  
-5. **Policy-First Execution:** Policies are gatekeepers, not post-hoc documentation.  
-6. **Auditability by Default:** All execution pathways emit immutable provenance.  
-7. **Temporal Consistency:** Every decision is time-versioned, enabling replay.  
-8. **Bounded Autonomy:** Agents operate only within chartered mandates.  
-9. **Risk Pricing:** Risk-adjusted budgets define execution feasibility.  
-10. **Drift Immunity:** Governance drift triggers remediation events.  
-11. **Cross-Org Readiness:** Trust fabric expansion is gated, not assumed.  
-12. **Operational Memory:** Runbooks become executable and self-correcting.  
-13. **Epistemic Controls:** Actions require verified, independent evidence.  
-14. **Surface Reduction:** Policy-as-code consolidates and simplifies compliance logic.  
-15. **Data Lineage Supremacy:** Lineage is a prerequisite for action validity.  
-16. **Immutable Records:** WORM governance ledger becomes the canonical archive.  
-17. **Replayable Decisions:** Forensics rely on event replay, not testimony.  
-18. **Defensible Automation:** Automated outcomes are defensible via linked evidence.  
-19. **Explicit Exceptions:** Deviations are cataloged as governed exceptions.  
-20. **Minimal First-Mover Spec:** Scope is intentionally constrained for speed.  
-21. **Verification Economy:** Evidence artifacts become first-class deliverables.  
-22. **Governed Expansion:** New capabilities require policy and evidence gates.  
-23. **Strategic Differentiation:** Governance becomes the market-defining feature.  
+1. **Authority Cascade:** Every artifact must align to the governance chain or it is invalid.
+2. **Causality as Product:** The governance graph becomes the system of record for change truth.
+3. **Agent Accountability:** Agents are provable actors with enforceable constraints, not automations.
+4. **Evidence-Locked Claims:** Claims without live evidence are automatically deprecated.
+5. **Policy-First Execution:** Policies are gatekeepers, not post-hoc documentation.
+6. **Auditability by Default:** All execution pathways emit immutable provenance.
+7. **Temporal Consistency:** Every decision is time-versioned, enabling replay.
+8. **Bounded Autonomy:** Agents operate only within chartered mandates.
+9. **Risk Pricing:** Risk-adjusted budgets define execution feasibility.
+10. **Drift Immunity:** Governance drift triggers remediation events.
+11. **Cross-Org Readiness:** Trust fabric expansion is gated, not assumed.
+12. **Operational Memory:** Runbooks become executable and self-correcting.
+13. **Epistemic Controls:** Actions require verified, independent evidence.
+14. **Surface Reduction:** Policy-as-code consolidates and simplifies compliance logic.
+15. **Data Lineage Supremacy:** Lineage is a prerequisite for action validity.
+16. **Immutable Records:** WORM governance ledger becomes the canonical archive.
+17. **Replayable Decisions:** Forensics rely on event replay, not testimony.
+18. **Defensible Automation:** Automated outcomes are defensible via linked evidence.
+19. **Explicit Exceptions:** Deviations are cataloged as governed exceptions.
+20. **Minimal First-Mover Spec:** Scope is intentionally constrained for speed.
+21. **Verification Economy:** Evidence artifacts become first-class deliverables.
+22. **Governed Expansion:** New capabilities require policy and evidence gates.
+23. **Strategic Differentiation:** Governance becomes the market-defining feature.
 
 ## 1. First-Mover Focus (2–3 fundamentals)
 
@@ -141,66 +141,66 @@ graph TD
 ```
 
 ### 7.1 Core Services
-- **Charter Service:** manages agent mandates and constraints.  
-- **Policy Engine (OPA):** evaluates actions against charter + governance rules.  
-- **Governance Graph:** canonical store for agents, humans, systems, policies, changes.  
-- **Evidence Ingestion:** attaches telemetry and test results to claims.  
-- **Drift Detector:** raises governed events when claims diverge from evidence.  
+- **Charter Service:** manages agent mandates and constraints.
+- **Policy Engine (OPA):** evaluates actions against charter + governance rules.
+- **Governance Graph:** canonical store for agents, humans, systems, policies, changes.
+- **Evidence Ingestion:** attaches telemetry and test results to claims.
+- **Drift Detector:** raises governed events when claims diverge from evidence.
 
 ### 7.2 Data Model (Minimal)
-- **Agent** (id, charter_ref, owner, scope)  
-- **Policy** (id, rule, authority, version)  
-- **Change** (id, type, actor_ref, policy_eval_ref, hash)  
-- **Evidence** (id, source, timestamp, hash, claim_ref)  
-- **Claim** (id, statement, evidence_refs, status)  
-- **Decision** (id, action, policy_eval, outcome)  
+- **Agent** (id, charter_ref, owner, scope)
+- **Policy** (id, rule, authority, version)
+- **Change** (id, type, actor_ref, policy_eval_ref, hash)
+- **Evidence** (id, source, timestamp, hash, claim_ref)
+- **Claim** (id, statement, evidence_refs, status)
+- **Decision** (id, action, policy_eval, outcome)
 
 ## 8. Implementation (Documentation-Only, Execution-Ready)
 
 ### 8.1 Work Packages
-- **WP1:** Charter registry + policy gate wiring.  
-- **WP2:** Event stream → governance graph ingestion.  
-- **WP3:** Claim–evidence–action schema + drift detection rule.  
-- **WP4:** Demo storyboard + deterministic replay output.  
+- **WP1:** Charter registry + policy gate wiring.
+- **WP2:** Event stream → governance graph ingestion.
+- **WP3:** Claim–evidence–action schema + drift detection rule.
+- **WP4:** Demo storyboard + deterministic replay output.
 
 ### 8.2 Evidence Artifacts
-- Charter registry snapshot (JSON).  
-- Policy evaluation logs (OPA).  
-- Governance graph query outputs (JSON).  
-- Drift detection event log.  
-- Deterministic replay trace.  
+- Charter registry snapshot (JSON).
+- Policy evaluation logs (OPA).
+- Governance graph query outputs (JSON).
+- Drift detection event log.
+- Deterministic replay trace.
 
 ## 9. Verification & Tests (Tier C)
 
-- **Policy Tests:** verify charter constraint enforcement.  
-- **Event Integrity:** validate hash-chain integrity for actions.  
-- **Claim Validation:** ensure claims are rejected without evidence links.  
-- **Demo Replay:** deterministic replay of the canonical scenario.  
+- **Policy Tests:** verify charter constraint enforcement.
+- **Event Integrity:** validate hash-chain integrity for actions.
+- **Claim Validation:** ensure claims are rejected without evidence links.
+- **Demo Replay:** deterministic replay of the canonical scenario.
 
 ## 10. Documentation Deliverables
 
-- **Spec:** this document.  
-- **Runbook Schema:** claim–evidence–action model definition.  
-- **Governance Queries:** example query catalog for causality analysis.  
-- **Exception Register:** governed exceptions list with authority links.  
+- **Spec:** this document.
+- **Runbook Schema:** claim–evidence–action model definition.
+- **Governance Queries:** example query catalog for causality analysis.
+- **Exception Register:** governed exceptions list with authority links.
 
 ## 11. CI/CD Alignment (Minimal)
 
-- Validate prompt integrity against registry.  
-- Validate PR metadata against task spec.  
-- Ensure documentation drift checks pass.  
+- Validate prompt integrity against registry.
+- Validate PR metadata against task spec.
+- Ensure documentation drift checks pass.
 
 ## 12. PR Package (Required)
 
-- **What:** introduce the first-mover governed agentic spec and demo plan.  
-- **Why:** establish market differentiation and execution alignment.  
-- **How:** doc-only change with governance-anchored scope and evidence artifacts.  
-- **Risks:** documentation-only; no runtime risk.  
-- **Rollback:** revert spec and status update.  
-- **Reviewer Checklist:** verify governance alignment, evidence artifacts, and readiness references.  
+- **What:** introduce the first-mover governed agentic spec and demo plan.
+- **Why:** establish market differentiation and execution alignment.
+- **How:** doc-only change with governance-anchored scope and evidence artifacts.
+- **Risks:** documentation-only; no runtime risk.
+- **Rollback:** revert spec and status update.
+- **Reviewer Checklist:** verify governance alignment, evidence artifacts, and readiness references.
 
 ## 13. Future Roadmap (Governed Expansion)
 
-- **Cross-Org Trust Fabric:** deferred pending cryptographic attestation and liability model.  
-- **Agent Work Market:** deferred pending risk-adjusted bidding policy suite.  
-- **Forensics Acceleration:** deferred pending graph replay optimization.  
+- **Cross-Org Trust Fabric:** deferred pending cryptographic attestation and liability model.
+- **Agent Work Market:** deferred pending risk-adjusted bidding policy suite.
+- **Forensics Acceleration:** deferred pending graph replay optimization.

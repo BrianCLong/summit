@@ -119,4 +119,3 @@ jobs:
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14
-

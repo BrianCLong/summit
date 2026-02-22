@@ -14,3 +14,8 @@ FINANCE_SHADOW_AGENT_ENABLED = is_feature_enabled("FINANCE_SHADOW_AGENT_ENABLED"
 FEATURE_QWEN3_ASR = is_feature_enabled("FEATURE_QWEN3_ASR", default=False)
 FEATURE_QWEN3_TTS = is_feature_enabled("FEATURE_QWEN3_TTS", default=False)
 REDIS_CACHE_ENABLED = is_feature_enabled("REDIS_CACHE_ENABLED", default=True)
+SUMMIT_AGENTKIT_ENABLED = is_feature_enabled("SUMMIT_AGENTKIT_ENABLED", default=False)
+SUMMIT_TOOLS_ENABLED = is_feature_enabled("SUMMIT_TOOLS_ENABLED", default=False)
+SUMMIT_TYPED_OUTPUTS = is_feature_enabled("SUMMIT_TYPED_OUTPUTS", default=False)
+SUMMIT_EVALS_ENABLED = is_feature_enabled("SUMMIT_EVALS_ENABLED", default=False)
+SUMMIT_EXPERIMENTAL = is_feature_enabled("SUMMIT_EXPERIMENTAL", default=False)

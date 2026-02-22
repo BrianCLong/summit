@@ -11,10 +11,10 @@ default allow := false
 # Core system resources that require authorization
 protected_resources := {
     "user",
-    "tenant", 
-    "investigation", 
-    "entity", 
-    "relationship", 
+    "tenant",
+    "investigation",
+    "entity",
+    "relationship",
     "case",
     "workflow",
     "export",
@@ -28,12 +28,12 @@ protected_resources := {
 
 # Core actions that require authorization
 protected_actions := {
-    "read", 
-    "write", 
-    "create", 
-    "update", 
-    "delete", 
-    "execute", 
+    "read",
+    "write",
+    "create",
+    "update",
+    "delete",
+    "execute",
     "administer",
     "export",
     "import",
@@ -73,22 +73,22 @@ role_privileges := {
 allow if {
     # Validate input structure
     valid_input
-    
+
     # Check if resource is protected
     input.resource.type in protected_resources
-    
+
     # Check if action is protected
     input.action in protected_actions
-    
+
     # Validate user has a recognized role
     user_has_valid_role
-    
+
     # Perform role-based authorization
     role_based_authorization
-    
+
     # Enforce tenant isolation
     tenant_isolation_compliant
-    
+
     # Apply additional constraints if needed
     additional_constraints_pass
 }
@@ -129,7 +129,7 @@ tenant_isolation_compliant if {
 
 tenant_isolation_compliant if {
     # Auditors may have cross-tenant access for compliance functions
-    user_has_role("auditor") and 
+    user_has_role("auditor") and
     input.resource.type in {"audit", "export", "policy"}
 }
 
@@ -169,7 +169,7 @@ rate_limit_exceeded if {
 }
 
 rate_limit_exceeded if {
-    # Tenant admin rate limits  
+    # Tenant admin rate limits
     user_has_role("tenant_admin") and input.user.hourly_requests > 2000
 }
 

@@ -57,13 +57,13 @@ export class MaestroService {
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
-    
+
     // Initialize the orchestrator store
     await this.orchestratorStore.initialize();
-    
+
     // Initialize Drift Detection
     driftDetectionService.startMonitoring();
-    
+
     this.initialized = true;
   }
 

@@ -99,7 +99,7 @@ PostgreSQL WAL (Write Ahead Log) files are shipped to a warm standby server and 
    ```bash
    # Restore from latest backup
    pg_restore --clean --if-exists --dbname=restored_db /backup/latest.backup
-   
+
    # Replay transactions up to just before corruption
    pg_rewind --source-server="host=primary dbname=restored_db" --target-pgdata=/var/lib/pgsql/data
    ```
@@ -125,7 +125,7 @@ PostgreSQL WAL (Write Ahead Log) files are shipped to a warm standby server and 
    # Restore from encrypted backup stored in S3
    aws s3 cp s3://summit-backups/postgres/backup.gpg /tmp/
    gpg --decrypt --output /tmp/backup.backup /tmp/backup.gpg
-   
+
    # Restore to fresh database instance
    pg_restore --verbose --clean --if-exists --dbname=dr_db /tmp/backup.backup
    ```

@@ -78,10 +78,10 @@ export function classifyHttpError(status, headers, body) {
   const normalizedMessage = String(typeof body === 'string' ? body : body?.message || '').toLowerCase();
   if (status === 403) {
     const remaining = headers?.get?.('X-RateLimit-Remaining') ?? headers?.['x-ratelimit-remaining'];
-    if (remaining === '0' || remaining === 0 || normalizedMessage.includes('rate limit')) 
+    if (remaining === '0' || remaining === 0 || normalizedMessage.includes('rate limit'))
       return { state: VerificationState.RATE_LIMITED, message: 'Rate limit exceeded' };
     const message = typeof body === 'string' ? body : body?.message ?? 'Forbidden';
-    if (message.includes('Must have admin rights') || message.includes('Resource not accessible')) 
+    if (message.includes('Must have admin rights') || message.includes('Resource not accessible'))
       return { state: VerificationState.UNVERIFIABLE_PERMISSIONS, message };
     return { state: VerificationState.UNVERIFIABLE_ERROR, message: `403: ${message}` };
   }
@@ -104,7 +104,7 @@ export async function fetchRequiredStatusChecks({ repo, branch }) {
       throw err;
     }
   }
-  
+
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
   if (!token) {
     return { state: VerificationState.UNVERIFIABLE_ERROR, required_contexts: [], strict: false, error: 'Missing GITHUB_TOKEN or GH_TOKEN' };
