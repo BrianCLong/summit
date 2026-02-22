@@ -75,15 +75,42 @@ router.post('/ingest-feed', ensureAuthenticated, async (req: Request, res: Respo
     const iocs = result.data as any[];
     let insertedCount = 0;
 
-    // Batch insert would be better but simple loop for MVP slice
-    for (const ioc of iocs) {
-      await pg.query(
-        `INSERT INTO iocs (type, value, source, created_at, updated_at)
-         VALUES ($1, $2, $3, NOW(), NOW())
-         ON CONFLICT DO NOTHING`, // simplified handling
-        [ioc.type, ioc.value, ioc.source]
-      );
-      insertedCount++;
+    // BOLT: Optimized batched insertion with chunking and fallback.
+    // Reduces database round-trips from N to ceil(N/100).
+    if (iocs && iocs.length > 0) {
+      const CHUNK_SIZE = 100;
+      for (let i = 0; i < iocs.length; i += CHUNK_SIZE) {
+        const chunk = iocs.slice(i, i + CHUNK_SIZE);
+        try {
+          const values: any[] = [];
+          const placeholders = chunk
+            .map((ioc, index) => {
+              const offset = index * 3;
+              values.push(ioc.type, ioc.value, ioc.source);
+              return `($${offset + 1}, $${offset + 2}, $${offset + 3}, NOW(), NOW())`;
+            })
+            .join(', ');
+
+          const batchQuery = `
+            INSERT INTO iocs (type, value, source, created_at, updated_at)
+            VALUES ${placeholders}
+            ON CONFLICT DO NOTHING
+          `;
+          const result = await pg.query(batchQuery, values);
+          insertedCount += result.rowCount || 0;
+        } catch (batchError) {
+          console.warn('Batched IOC insert failed, falling back to sequential', batchError);
+          for (const ioc of chunk) {
+            const result = await pg.query(
+              `INSERT INTO iocs (type, value, source, created_at, updated_at)
+               VALUES ($1, $2, $3, NOW(), NOW())
+               ON CONFLICT DO NOTHING`,
+              [ioc.type, ioc.value, ioc.source],
+            );
+            if (result.rowCount) insertedCount++;
+          }
+        }
+      }
     }
 
     res.json({
