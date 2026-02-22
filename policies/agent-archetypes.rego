@@ -9,6 +9,8 @@
 
 package agents.archetypes
 
+import future.keywords
+
 import future.keywords.if
 import future.keywords.in
 

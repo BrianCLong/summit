@@ -1,44 +1,9 @@
 """Maestro governance and release gate checks."""
 
-import json
-import os
-import urllib.request
 from typing import Any
 
 from .models import Artifact
 from .storage import MaestroStore
-
-
-def check_companyos_policy(
-    tenant_id: str, actor_id: str, kind: str, resource: str, context: dict = None
-) -> dict:
-    """Consult companyOS PDP for a policy decision."""
-    base_url = os.environ.get("COMPANYOS_BASE_URL", "http://localhost:3000")
-    url = f"{base_url}/api/v1/pdp/decide"
-    payload = {
-        "tenantId": tenant_id,
-        "actorId": actor_id,
-        "kind": kind,
-        "resource": resource,
-        "context": context or {},
-    }
-
-    try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-        )
-        with urllib.request.urlopen(req, timeout=2) as f:
-            return json.loads(f.read().decode("utf-8"))
-    except Exception as e:
-        # Advisory mode fallback (fail-open)
-        return {
-            "decision": "allow",
-            "reasons": [f"companyOS unreachable: {str(e)}"],
-            "policyVersion": "fallback",
-            "auditEventId": f"fallback-{os.getpid()}",
-        }
 
 
 class ReleaseGateResult:
@@ -135,60 +100,6 @@ def check_release_gate(store: MaestroStore, run_id: str) -> ReleaseGateResult:
             "total_artifacts": len(artifacts),
             "compliant_artifacts": len(compliant_artifacts),
             "compliant_artifact_ids": [a.id for a in compliant_artifacts],
-        },
-    )
-
-
-def emit_evidence_to_intelgraph(evidence: dict):
-    """Emit governance evidence to IntelGraph."""
-    url = f"{os.environ.get('INTELGRAPH_URL', 'http://localhost:4000')}/api/v1/ingest/companyos-decision"
-    try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(evidence).encode("utf-8"),
-            headers={"Content-Type": "application/json"},
-        )
-        with urllib.request.urlopen(req, timeout=2) as f:
-            pass
-    except Exception as e:
-        print(f"Warning: Failed to emit evidence to IntelGraph: {str(e)}")
-
-
-def check_run_policy_gate(
-    tenant_id: str, actor_id: str, run_id: str, resource: str
-) -> ReleaseGateResult:
-    """Evaluate companyOS policy gate for a run."""
-    decision = check_companyos_policy(tenant_id, actor_id, "JobStart", resource)
-
-    passed = decision["decision"] == "allow" or os.environ.get("COMPANYOS_ENFORCE") != "1"
-    message = f"companyOS policy {decision['decision']}"
-    if decision["decision"] == "deny":
-        message += f": {', '.join(decision['reasons'])}"
-
-    # Emit evidence
-    import datetime
-    evidence = {
-        "evidenceId": f"EVID:{tenant_id}:JobStart:{decision['auditEventId']}",
-        "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
-        "tenantId": tenant_id,
-        "actorId": actor_id,
-        "kind": "JobStart",
-        "resource": resource,
-        "decision": decision["decision"],
-        "reasons": decision["reasons"],
-        "policyVersion": decision["policyVersion"],
-        "auditEventId": decision["auditEventId"],
-    }
-    emit_evidence_to_intelgraph(evidence)
-
-    return ReleaseGateResult(
-        passed=passed,
-        message=message,
-        details={
-            "run_id": run_id,
-            "audit_event_id": decision["auditEventId"],
-            "policy_version": decision["policyVersion"],
-            "enforced": os.environ.get("COMPANYOS_ENFORCE") == "1",
         },
     )
 
