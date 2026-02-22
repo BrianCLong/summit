@@ -57,14 +57,7 @@ jobs:
           case "${{ matrix.task }}" in
             lint) pnpm -r lint ;;
             typecheck) pnpm -r typecheck ;;
-            test)
-              if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                echo "PR context: unit test coverage is enforced by the separate required 'test (20.x)' check."
-                echo "Skipping recursive workspace test fanout here to avoid duplicate and non-deterministic package-runner failures."
-              else
-                pnpm -r test -- --ci
-              fi
-              ;;
+            test) pnpm -r test -- --ci ;;
             build) pnpm -r build ;;
           esac
 
@@ -262,12 +255,11 @@ jobs:
         run: pnpm ci:docs-governance
 
   soc-controls:
-    name: SOC Controls (ci-pr)
+    name: SOC Controls
     runs-on: ubuntu-latest
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"

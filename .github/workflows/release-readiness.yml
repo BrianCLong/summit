@@ -68,7 +68,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pnpm install --no-frozen-lockfile
+          pnpm install --frozen-lockfile
 
       - name: Download actionlint
         run: |
@@ -82,83 +82,30 @@ jobs:
           echo "Starting Release Readiness Gate..."
           echo ""
 
-          STRICT_MODE=true
-          SKIP_HEAVY=false
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            STRICT_MODE=false
-            SKIP_HEAVY=true
-            echo "PR advisory mode enabled: failures are warnings here and remain blocking on push/main and merge_group."
-            echo ""
-          fi
-
           # Step 1: GA Verification (typecheck, lint, build, unit tests)
           echo "::group::GA Verification (typecheck, lint, build, unit tests)"
-          if [[ "$SKIP_HEAVY" == "true" ]]; then
-            echo "Skipping heavy GA verification in pull_request advisory mode."
-          elif ! pnpm ga:verify; then
-            if [[ "$STRICT_MODE" == "true" ]]; then
-              echo "::error::GA verification failed."
-              exit 1
-            fi
-            echo "::warning::GA verification failed in pull_request advisory mode."
-          fi
+          pnpm ga:verify
           echo "::endgroup::"
           echo ""
 
           # Step 2: Server CI Tests (full test suite with coverage)
           echo "::group::Server CI Tests (full test suite with coverage)"
-          if [[ "$SKIP_HEAVY" == "true" ]]; then
-            echo "Skipping heavy server CI tests in pull_request advisory mode."
-          elif ! PATH="$GITHUB_WORKSPACE/node_modules/.bin:$PATH" pnpm --filter intelgraph-server test:ci; then
-            if [[ "$STRICT_MODE" == "true" ]]; then
-              echo "::error::Server CI tests failed."
-              exit 1
-            fi
-            echo "::warning::Server CI tests failed in pull_request advisory mode."
-          fi
+          pnpm --filter intelgraph-server test:ci
           echo "::endgroup::"
           echo ""
 
           # Step 3: Workflow Validation (actionlint)
           echo "::group::Workflow Validation (actionlint)"
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
-            COMPARE_REF="origin/${{ github.base_ref }}...HEAD"
-          elif git rev-parse HEAD^ >/dev/null 2>&1; then
-            COMPARE_REF="HEAD^...HEAD"
-          else
-            COMPARE_REF=""
-          fi
-
-          if [[ -n "$COMPARE_REF" ]]; then
-            mapfile -t WORKFLOWS < <(git diff --name-only "$COMPARE_REF" | grep -E '^\.github/workflows/.*\.ya?ml$' || true)
-          else
-            mapfile -t WORKFLOWS < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
-          fi
-
-          if [[ "${#WORKFLOWS[@]}" -eq 0 ]]; then
-            echo "No workflow files changed; skipping actionlint."
-          else
-            if ! printf '%s\n' "${WORKFLOWS[@]}" | xargs actionlint -color -verbose -shellcheck=; then
-              if [[ "$STRICT_MODE" == "true" ]]; then
-                echo "::error::Workflow validation failed."
-                exit 1
-              fi
-              echo "::warning::Workflow validation failed in pull_request advisory mode."
-            fi
-          fi
+          actionlint -color -verbose .github/workflows/**/*.yml .github/workflows/*.yml || {
+            echo "::error::Workflow validation failed. Run 'actionlint .github/workflows/' locally to debug."
+            exit 1
+          }
           echo "::endgroup::"
           echo ""
 
           # Step 4: Workflow Filter Safety Check
           echo "::group::Workflow Filter Safety Check"
-          if ! bash scripts/ci/validate-workflow-filters.sh; then
-            if [[ "$STRICT_MODE" == "true" ]]; then
-              echo "::error::Workflow filter safety validation failed."
-              exit 1
-            fi
-            echo "::warning::Workflow filter safety validation failed in pull_request advisory mode."
-          fi
+          bash scripts/ci/validate-workflow-filters.sh
           echo "::endgroup::"
           echo ""
 
@@ -255,7 +202,6 @@ jobs:
 
       - name: Update PR Comment
         if: github.event_name == 'pull_request' && always()
-        continue-on-error: true
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
