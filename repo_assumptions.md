@@ -1,40 +1,46 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (CogWar MWS)
 
-## Verified vs Assumed Directory List
+## Verified vs Assumed Paths / Modules / Checks
 
-| Path | Status | Notes |
+### ✅ Verified (observed in-repo)
+
+| Area | Verified Path / Name | Evidence |
 | --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| CI workflows | `.github/workflows/*` includes `pr-quality-gate.yml`, `ci-core.yml`, `ci-security.yml`, `ci-pr.yml`, `ci.yml`, and many additional gates | `.github/workflows/` directory listing | 
+| Workspace root | `package.json` defines `intelgraph-platform` scripts and Node/Pnpm versions | `package.json` | 
+| Pnpm workspace | `pnpm-workspace.yaml` defines workspaces including `apps/*`, `packages/*`, `services/*`, `client`, `server`, `cli` | `pnpm-workspace.yaml` |
+| Evidence schemas | `schemas/evidence_*.schema.json`, `schemas/evidence/*.schema.json`, and `schemas/cogwar/campaign.v1.schema.json` | `schemas/` + evidence ID search | 
+| Evidence artifacts | `report.json`, `metrics.json`, `stamp.json` patterns are enforced in multiple standards and examples | `docs/standards/*`, `docs/evidence/*`, `examples/cogwar/*` |
+| Examples | `examples/cogwar/ru-ua/*.campaign.json` exists | `examples/cogwar/ru-ua/` |
 
-## CI Check Names (Exact)
+### ❓ Deferred (pending targeted verification)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Area | Planned / Assumed | Status |
+| --- | --- | --- |
+| Required status checks | Exact GitHub branch protection required checks | **Deferred pending branch protection policy export** |
+| Evidence bundle schema location | Canonical evidence bundle schema for new CogWar artifacts | **Deferred pending evidence contract decision** |
+| Primary CogWar implementation path | Whether `src/cogwar/` is the canonical module path | **Deferred pending maintainers’ module boundary decision** |
 
-## Evidence Schema Conventions (Exact)
+## Must-Not-Touch Files / Areas (verified via CODEOWNERS)
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+Use human-owner review for any changes to the following ownership-controlled areas:
 
-## Must-Not-Touch List (Guardrails)
+- `/policy/`, `/opa/`, `/server/src/middleware/auth.ts`, `/server/src/lib/permissions/` (policy owners)
+- `/security/`, `/server/src/provenance/`, `/server/src/security/` (security owners)
+- `/server/src/db/`, `/migrations/`, `/schema/` (data owners)
+- `/server/src/agents/`, `/server/src/services/`, `/tools/ultra-agent/`, `/agents/` (platform core)
+- `/client/`, `/apps/web/`, `/conductor-ui/` (frontend owners)
+- `/services/*` specific service owners (see `CODEOWNERS` for exact scopes)
 
-Deferred pending validation. Baseline expectations:
+## Validation Checklist (executed)
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+1. ✅ Listed `.github/workflows/` to confirm workflow names.
+2. ✅ Read `package.json` and `pnpm-workspace.yaml` to confirm workspace layout and scripts.
+3. ✅ Searched for evidence artifacts/schema patterns (`evidence_id`, `report.json`, `stamp.json`).
+4. ✅ Confirmed primary pipeline code locations via workspace config and top-level directories (`apps/`, `packages/`, `services/`, `client/`, `server/`, `cli`).
 
-## Validation Checklist
+## Notes for CogWar MWS alignment
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- Evidence artifacts must remain deterministic: `report.json` and `metrics.json` should exclude unstable timestamps; `stamp.json` is the approved metadata container.
+- Existing CogWar schemas and example campaigns are already present under `schemas/cogwar/` and `examples/cogwar/`, indicating a precedent for CogWar-specific schema evolution.
+
