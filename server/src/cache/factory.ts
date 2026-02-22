@@ -55,12 +55,10 @@ export function getTenantDistributedCache(explicitTenantId?: string): Distribute
  * Get the singleton instance of the advanced CacheManager.
  * Initializes it if it doesn't exist.
  * This manager uses the AdvancedCachingStrategy pattern.
- * Uses the 'cache' Redis partition (REDIS_CACHE_HOST or defaults to REDIS_HOST).
  */
 export function getCacheManager(): CacheManager {
   if (!cacheManagerInstance) {
-    // Partitioning: Use 'cache' specific Redis client
-    const redisClient = getRedisClient('cache');
+    const redisClient = getRedisClient();
 
     // We need to adapt the existing Redis client (which is ioredis) to the RedisClientInterface
     // expected by CacheManager.
@@ -76,12 +74,10 @@ export function getCacheManager(): CacheManager {
 /**
  * Get the singleton instance of the DistributedCacheService.
  * This service implements L1/L2 caching with Data Governance envelopes.
- * Uses the 'dist' Redis partition (REDIS_DIST_HOST or defaults to REDIS_HOST).
  */
 export function getDistributedCache(): DistributedCacheService {
   if (!distributedCacheInstance) {
-    // Partitioning: Use 'dist' specific Redis client
-    const redisClient = getRedisClient('dist');
+    const redisClient = getRedisClient();
 
     distributedCacheInstance = new DistributedCacheService(redisClient as any, {
       keyPrefix: 'summit:dist:',

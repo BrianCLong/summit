@@ -1,6 +1,10 @@
 # actionlint configuration
 # https://github.com/rhysd/actionlint/blob/main/usage.md#config-file
 
+self-hosted-runner:
+  labels:
+    - self-hosted
+
 rules:
   # Enforce action pinning by SHA
   # This requires custom check or using a plugin if actionlint supports it directly.

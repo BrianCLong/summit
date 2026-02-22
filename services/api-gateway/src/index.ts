@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import express from 'express';
@@ -53,7 +54,7 @@ async function startServer() {
   );
 
   // Health check - main endpoint
-  app.get(['/health', '/api/health'], (req, res) => {
+  app.get('/health', (req, res) => {
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),

@@ -83,7 +83,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9
           run_install: false
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -127,18 +127,19 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          version: 9
           run_install: false
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Snyk Open Source scan
         uses: snyk/actions/node@master
-        if: (((env.SNYK_TOKEN != '') && (env.SNYK_TOKEN != '' && github.event_name == 'push')) && (success())) && (github.event_name != 'pull_request')
+        if: env.SNYK_TOKEN != ''
         with:
           command: test
           args: --all-projects --severity-threshold=medium
       - name: Snyk monitor (optional)
         uses: snyk/actions/node@master
+        if: env.SNYK_TOKEN != '' && github.event_name == 'push'
         with:
           command: monitor
           args: --all-projects --severity-threshold=medium
@@ -165,6 +166,7 @@ jobs:
     name: Build and publish container image
     runs-on: ubuntu-latest
     needs: [test-and-coverage, security, context]
+    if: success()
     permissions:
       contents: read
       packages: write
@@ -176,6 +178,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Log in to GHCR
         uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
