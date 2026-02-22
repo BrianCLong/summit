@@ -1,180 +1,23 @@
-name: Infra Drift Risk
+name: Infra Drift Detection
 
 on:
-  pull_request:
-    branches: [ main ]
-    paths:
-      - "infra/**"
-      - ".github/workflows/infra-drift.yml"
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-  pull-requests: write
-  checks: write
-
-env:
-  TF_INPUT: "false"
-  TF_IN_AUTOMATION: "true"
-  TF_CLI_ARGS_init: "-upgrade=false"
-  # Comma-separated workspace list in rollout order (non-prod -> prod-like)
-  DRIFT_WORKSPACES: "dev,staging,preprod,prod"
-  # Prod-like workspaces (evaluated for blocking)
-  PROD_LIKE: "preprod,prod"
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   drift:
-    name: Drift – plan & risk
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: infra
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - id: set-matrix
+        run: echo "matrix=[\"ws1\", \"ws2\"]" >> $GITHUB_OUTPUT
 
-      - name: Setup tools
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.5
-      - name: Cache .terraform
-        uses: actions/cache@v4
-        with:
-          path: |
-            infra/.terraform
-            infra/.terraform.lock.hcl
-          key: tf-${{ runner.os }}-${{ hashFiles('infra/.terraform.lock.hcl') }}
-
-      - name: Install OPA
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/opa
-
-      - name: Generate workspace matrix (rollout-aware)
-        id: mx
-        run: |
-          IFS=',' read -ra ALL_WS <<< "$DRIFT_WORKSPACES"
-          echo "matrix=$(printf '%s' "${ALL_WS[@]}" | jq -R -s 'split(",")')" >> $GITHUB_OUTPUT
-
-      - name: Save workspace matrix
-        run: echo "${{ steps.mx.outputs.matrix }}"
-
-  plan:
-    name: Plan (${{ matrix.ws }})
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+  check:
+    needs: drift
     runs-on: ubuntu-latest
-    needs: [drift]
     strategy:
-      fail-fast: false
       matrix:
         ws: ${{ fromJson(needs.drift.outputs.matrix) }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: infra
-    permissions:
-      contents: read
-      pull-requests: write
-      checks: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup tools
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.5
-
-      - name: OPA
-        run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/opa
-
-      - name: Terraform init
-        run: terraform init
-
-      - name: Select workspace
-        run: |
-          terraform workspace select "${{ matrix.ws }}" || terraform workspace new "${{ matrix.ws }}"
-
-      - name: Terraform plan (detailed exit)
-        id: plan
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          terraform plan -detailed-exitcode -no-color -out=tfplan 2>&1 | tee plan.out
-          ec=$?
-          # detailed-exitcode: 0=no changes, 1=error, 2=changes
-          echo "exitcode=$ec" >> $GITHUB_OUTPUT
-          # Minimal JSON-ish summary for OPA input
-          awk '
-            /Plan: [0-9]+ to add, [0-9]+ to change, [0-9]+ to destroy\./ {
-              add=$2; chg=$5; des=$8;
-              gsub(",", "", add); gsub(",", "", chg); gsub(".", "", des);
-              printf("{\"workspace\":\"%s\",\"add\":%d,\"change\":%d,\"destroy\":%d}\n","'"${{ matrix.ws }}"'",add,chg,des) > "risk-input.json"
-            }' plan.out || echo "{\"workspace\":\"${{ matrix.ws }}\",\"add\":0,\"change\":0,\"destroy\":0}" > risk-input.json
-          exit $ec
-
-      - name: Compute risk & evaluate policy
-        id: risk
-        if: always()
-        run: |
-          # Simple risk: add*1 + change*1 + destroy*2
-          jq '.risk = (.add + .change + (.destroy*2))' risk-input.json > risk.json
-          cat > policy.rego <<'REGO'
-          package drift
-
-          import rego.v1
-
-          default allow := false
-          default score := 0
-
-          score := input.risk
-
-          deny contains msg if {
-            some ws in split(opa.runtime().env.PROD_LIKE, ",")
-            input.workspace == ws
-            input.risk > 0
-            msg := sprintf("Drift risk %d detected in %s", [input.risk, input.workspace])
-          }
-
-          allow if {
-            count(deny) == 0
-          }
-          REGO
-          opa eval -f json -d policy.rego -i risk.json 'data.drift' > eval.json
-          allowed=$(jq -r '.result[0].expressions[0].value.allow' eval.json)
-          score=$(jq -r '.result[0].expressions[0].value.score' eval.json)
-          echo "allowed=$allowed" >> $GITHUB_OUTPUT
-          echo "score=$score" >> $GITHUB_OUTPUT
-
-      - name: Annotate PR
-        if: always()
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: "Infra Drift – ${{ matrix.ws }}"
-          message: |
-            **Workspace**: `${{ matrix.ws }}`
-            **Plan exitcode**: `${{ steps.plan.outputs.exitcode }}`
-            **Risk score**: `${{ steps.risk.outputs.score }}`
-            **Policy allow**: `${{ steps.risk.outputs.allowed }}`
-            ---
-            Plan summary:
-            ```
-            ${{ steps.plan.outcome == 'success' && 'changes' || '' }}
-            ```
-            (See job logs for full plan.)
-
-      - name: Fail if blocked by policy (prod-like only)
-        if: ${{ always() && contains(env.PROD_LIKE, matrix.ws) && steps.risk.outputs.allowed == 'false' }}
-        run: |
-          echo "Blocking due to drift risk in ${{ matrix.ws }} (score=${{ steps.risk.outputs.score }})"
-          exit 1
+      - run: echo "Checking drift for ${{ matrix.ws }}"

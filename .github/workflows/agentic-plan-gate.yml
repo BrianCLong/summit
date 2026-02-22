@@ -2,56 +2,30 @@ name: Agentic Plan Gate
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
+    types: [opened, synchronize, reopened, edited]
 
 jobs:
-  plan-check:
-    name: Agentic Policy Check
+  verify-plan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-<<<<<<< HEAD
-=======
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
 
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
+          node-version: 20
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Get changed files
-        id: changed-files
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            # Get list of changed files, filtering for existing files
-            FILES=$(git diff --name-only origin/${{ github.base_ref }} HEAD | tr '\n' ' ')
-            echo "files=$FILES" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run Agentic Plan Gate
-        run: |
-          npx tsx scripts/agentic_policy/agentic_plan_gate.ts ${{ steps.changed-files.outputs.files }}
+      - name: Verify Plan
+        run: node scripts/ci/verify_agentic_plan.mjs
         env:
-          GITHUB_SHA: ${{ github.sha }}
-          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-
-      - name: Upload Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: agentic-policy-report
-          path: artifacts/agentic_policy/
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
