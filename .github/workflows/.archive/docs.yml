@@ -38,27 +38,23 @@ jobs:
           fetch-depth: 0
 
       - name: Maybe skip docs (toggle via DOCS_DISABLE)
-        if: ${{ vars.DOCS_DISABLE == '1' }}
+        if: ((((((((((((((((((((${{ vars.DOCS_DISABLE == '1' }}) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (${{ vars.DOCS_DISABLE != '1' }})) && (always())) && (always())) && (github.ref == 'refs/heads/main' && github.event_name == 'push')) && (always())
         run: echo "Docs build disabled (DOCS_DISABLE=1). Skipping."
 
       - name: Set up Node.js
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
 
       - name: Install pnpm
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         uses: pnpm/action-setup@v3
         with:
 
       - name: Install dependencies
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: pnpm install --frozen-lockfile
 
       - name: Install Vale
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           wget https://github.com/errata-ai/vale/releases/download/v2.29.7/vale_2.29.7_Linux_64-bit.tar.gz
           tar -xzf vale_2.29.7_Linux_64-bit.tar.gz
@@ -66,13 +62,11 @@ jobs:
           vale --version
 
       - name: Install markdownlint-cli
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           npm install -g markdownlint-cli
           markdownlint --version
 
       - name: Install additional documentation tools
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           # Install doctoc for table of contents generation
           npm install -g doctoc
@@ -84,7 +78,6 @@ jobs:
           npm install -g alex
 
       - name: Setup Vale configuration
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "📝 Setting up Vale configuration..."
 
@@ -106,7 +99,6 @@ jobs:
           fi
 
       - name: Run markdownlint
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "🔍 Running markdownlint..."
 
@@ -126,7 +118,6 @@ jobs:
           markdownlint '**/*.md' --ignore node_modules --ignore .turbo || true
 
       - name: Run Vale linting
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "📚 Running Vale linting..."
 
@@ -139,14 +130,12 @@ jobs:
           vale --output=line *.md >> vale-report.txt 2>&1 || true
 
       - name: Check for inclusive language
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "🌈 Checking for inclusive language with Alex..."
           alex docs/ --why || true
           alex *.md --why || true
 
       - name: Validate markdown links
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "🔗 Validating markdown links..."
 
@@ -179,7 +168,6 @@ jobs:
             xargs -I {} markdown-link-check {} --config .markdown-link-check.json || true
 
       - name: Generate table of contents
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "📋 Generating table of contents..."
 
@@ -196,7 +184,6 @@ jobs:
           find docs/ -name "*.md" -exec doctoc {} --github \; || true
 
       - name: Build documentation site
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "🏗️  Building documentation site..."
 
@@ -212,7 +199,6 @@ jobs:
           fi
 
       - name: Check documentation coverage
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "📊 Checking documentation coverage..."
 
@@ -242,7 +228,6 @@ jobs:
           fi
 
       - name: Validate documentation structure
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "🏗️  Validating documentation structure..."
 
@@ -277,7 +262,6 @@ jobs:
           echo "Documentation structure score: $structure_score/5"
 
       - name: Run custom documentation checks
-        if: ${{ vars.DOCS_DISABLE != '1' }}
         run: |
           echo "🎯 Running custom documentation checks..."
 
@@ -300,7 +284,6 @@ jobs:
             done
 
       - name: Generate documentation report
-        if: always()
         run: |
           echo "📋 Documentation Quality Report" > docs-report.md
           echo "===============================" >> docs-report.md
@@ -323,7 +306,6 @@ jobs:
           fi
 
       - name: Upload documentation artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: documentation-artifacts
@@ -337,7 +319,6 @@ jobs:
           retention-days: 14
 
       - name: Deploy to GitHub Pages (main branch only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB.TOKEN }}
@@ -346,7 +327,6 @@ jobs:
           cname: docs.intelgraph.dev
 
       - name: Generate step summary
-        if: always()
         run: |
           echo "## 📚 Documentation CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
