@@ -742,6 +742,36 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: front-run-governance-rails
+    version: v1
+    path: prompts/io/front-run-governance-rails@v1.md
+    sha256: 7153ebc2d161ac63eec7e9b6fba2335cf97215b5ff4cd690c90107a0ba227c21
+    description: Establish defensive front-run IO governance rails with policy gates and roadmap update.
+    scope:
+      paths:
+        - docs/io/front_run_bands.md
+        - policy/dual_use_policy.md
+        - policy/segment_governance.yaml
+        - ci/policy_checks/dual_use_policy_gate.py
+        - ci/policy_checks/segment_policy_gate.py
+        - docs/roadmap/STATUS.json
+        - prompts/io/front-run-governance-rails@v1.md
+        - prompts/registry.yaml
+        - agents/examples/FRONT_RUN_GOVERNANCE_RAILS_TASK.json
+      domains:
+        - documentation
+        - governance
+        - policy
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: sar-agentic-app-runtime
     version: v1
     path: prompts/architecture/sar-agentic-app-runtime@v1.md
