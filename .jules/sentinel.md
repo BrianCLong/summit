@@ -75,3 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-03-05 - [HIGH] Broken Access Control on Legacy and Operational Endpoints
+**Vulnerability:** Several sensitive endpoints (e.g., `/dr/*`, `/airgap/*`, and `/analytics/*`) were mounted directly at the root in `server/src/app.ts` without authentication or role-based access control middleware. This exposed disaster recovery, data export/import, and graph analytics capabilities to unauthenticated users.
+**Learning:** Routes mounted outside the global `/api` protection block are easily overlooked. Relying on internal router protection is less secure than a "deny-by-default" posture at the application entry point.
+**Prevention:** Apply consistent authentication (`authenticateToken`) and role-based (`ensureRole`) middleware to all routes at the time of mounting in the main application file. Regularly audit root-level route definitions for missing security wrappers.
