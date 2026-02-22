@@ -73,7 +73,7 @@ jobs:
           sha256sum build/image.tar | awk '{print "sha256:"$1}' > build/digest.txt
 
       - name: Generate SBOM
-        if: env.SBOM_ENABLED == 'true'
+        if: ((env.SBOM_ENABLED == 'true') && (env.SIGN_ENABLED == 'true')) && (env.SIGN_ENABLED == 'true')
         uses: anchore/sbom-action@v0
         with:
           image: oci-archive:build/image.tar
@@ -81,13 +81,11 @@ jobs:
           output-file: build/sbom.cdx.json
 
       - name: Install cosign
-        if: env.SIGN_ENABLED == 'true'
         uses: sigstore/cosign-installer@v3.5.0
         with:
           cosign-release: 'v2.4.1'
 
       - name: Keyless sign digest
-        if: env.SIGN_ENABLED == 'true'
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
@@ -137,7 +135,7 @@ jobs:
     needs:
       - build_and_sign
       - policy_gate
-    if: github.event.inputs.verify_stage != 'false'
+    if: (((github.event.inputs.verify_stage != 'false') && (env.VERIFY_ENABLED_STAGE == 'true')) && (env.VERIFY_ENABLED_STAGE == 'true')) && (env.SBOM_ENABLED == 'true')
     permissions:
       contents: read
       id-token: write
@@ -149,13 +147,11 @@ jobs:
           path: build
 
       - name: Install cosign
-        if: env.VERIFY_ENABLED_STAGE == 'true'
         uses: sigstore/cosign-installer@v3.5.0
         with:
           cosign-release: 'v2.4.1'
 
       - name: Verify signature
-        if: env.VERIFY_ENABLED_STAGE == 'true'
         env:
           COSIGN_EXPERIMENTAL: "true"
         run: |
@@ -167,7 +163,6 @@ jobs:
             build/digest.txt
 
       - name: Check SBOM presence
-        if: env.SBOM_ENABLED == 'true'
         run: |
           test -f build/sbom.cdx.json
 
