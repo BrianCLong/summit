@@ -1,7 +1,0 @@
-{
-  "id": "alert-1",
-  "indicator": "Narrative shift anomaly",
-  "severity": "low",
-  "confidence": 0.4,
-  "references": ["source-1"]
-}
