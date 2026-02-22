@@ -39,6 +39,8 @@ export function CopilotPanel() {
   const [activeTab, setActiveTab] = useState('prompt');
   const { toast } = useToast();
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   // jQuery ref for the action panel
   const actionPanelRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +147,9 @@ export function CopilotPanel() {
           <CardTitle className="flex justify-between items-center">
             <span>Copilot v0.9</span>
             {result?.isValid === false && (
-              <Badge variant="destructive">Invalid Syntax</Badge>
+              <Badge variant="destructive">
+                <AlertTriangle className="w-3 h-3 mr-1" aria-hidden="true" /> Invalid Syntax
+              </Badge>
             )}
             {result?.isValid === true && (
               <Badge variant="outline" className="text-green-600 border-green-600">
@@ -169,6 +173,7 @@ export function CopilotPanel() {
               <div className="grid w-full gap-1.5 flex-1">
                 <Label htmlFor="copilot-prompt">Prompt</Label>
                 <Textarea
+                  ref={textareaRef}
                   id="copilot-prompt"
                   placeholder="Ask a question about the graph (e.g., 'find User where email is ...')"
                   value={prompt}
@@ -185,7 +190,10 @@ export function CopilotPanel() {
                       <button
                         key={p}
                         type="button"
-                        onClick={() => setPrompt(p)}
+                        onClick={() => {
+                          setPrompt(p);
+                          setTimeout(() => textareaRef.current?.focus(), 0);
+                        }}
                         aria-label={`Use prompt: ${p}`}
                         className="rounded-full border border-input bg-background px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
@@ -195,8 +203,12 @@ export function CopilotPanel() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleTranslate} disabled={loading} className="w-full">
-                {loading ? 'Thinking...' : 'Generate Cypher'}
+              <Button
+                onClick={handleTranslate}
+                loading={loading}
+                className="w-full"
+              >
+                Generate Cypher
               </Button>
             </TabsContent>
 
@@ -270,10 +282,14 @@ export function CopilotPanel() {
                     <Button
                       className="action-btn bg-green-600 hover:bg-green-700 text-white"
                       onClick={handleSandboxRun}
-                      disabled={loading || !result?.isValid}
+                      loading={loading}
+                      disabled={!result?.isValid}
                       aria-label="Run Cypher query in sandbox"
                     >
-                      <Play className="w-4 h-4 mr-1" aria-hidden="true" /> Run in Sandbox
+                      {!loading && (
+                        <Play className="w-4 h-4 mr-1" aria-hidden="true" />
+                      )}
+                      Run in Sandbox
                     </Button>
                   </div>
                 </div>
