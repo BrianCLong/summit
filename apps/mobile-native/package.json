@@ -50,7 +50,7 @@
     "@tanstack/query-async-storage-persister": "^5.8.4",
     "@tanstack/react-query": "^5.8.4",
     "@tanstack/react-query-persist-client": "^5.8.4",
-    "axios": "^1.11.0",
+    "axios": "^1.13.5",
     "date-fns": "^4.1.0",
     "graphql": "^16.12.0",
     "graphql-ws": "^6.0.6",
