@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   semantic-title:
-    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false
+    if: ((github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false) && (github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false)) && (github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     steps:
       - name: Enforce Conventional Commit titles
@@ -42,7 +42,6 @@ jobs:
           subjectPatternError: "PR title must use Conventional Commits (e.g., feat: add gate)."
 
   linked-issue:
-    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Require linked issue in PR body
@@ -56,7 +55,6 @@ jobs:
             }
 
   merge-gates:
-    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
