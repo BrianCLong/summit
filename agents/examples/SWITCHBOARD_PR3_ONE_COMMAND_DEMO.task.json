@@ -1,0 +1,48 @@
+{
+  "task_id": "SWITCHBOARD_PR3_ONE_COMMAND_DEMO",
+  "agent_id": "jules",
+  "prompt_ref": {
+    "id": "switchboard-demo-quickstart",
+    "version": "v1",
+    "sha256": "eba25fdd495fac2d0faaeda97c78766a73955009644afde177216b9e95448fe1",
+    "path": "prompts/switchboard/switchboard-demo-quickstart@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "cli/src/lib/switchboard-registry.ts",
+      "cli/src/lib/switchboard-demo.ts",
+      "cli/src/commands/switchboard.ts",
+      "cli/__tests__/switchboard-demo.test.ts",
+      "fixtures/registry.demo.json",
+      "fixtures/policy.deny-all.json",
+      "fixtures/policy.allow-demo.json",
+      "README.md",
+      "package.json",
+      "cli/package.json",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/SWITCHBOARD_PR3_ONE_COMMAND_DEMO.task.json",
+      "prompts/switchboard/switchboard-demo-quickstart@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["cli", "switchboard", "documentation", "governance", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["cli-demo-smoke-test"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Running switchboard demo loads fixtures, validates registry, and prints PASS counts.",
+    "Demo shows deny-by-default policy and allowlisted policy outcomes in order.",
+    "Receipts and events are written to a local .switchboard/demo path.",
+    "Smoke test asserts ordered output markers for the demo command."
+  ],
+  "stop_conditions": [
+    "Demo command attempts to execute real network/tool calls.",
+    "Registry validation or policy evaluation is non-deterministic."
+  ]
+}
