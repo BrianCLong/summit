@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example/schema/io/account.schema.json",
+  "title": "IO Account",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["entity_id", "platform", "handle", "created_at", "provenance"],
+  "properties": {
+    "entity_id": {
+      "type": "string",
+      "description": "Stable canonical entity ID."
+    },
+    "platform": {
+      "type": "string"
+    },
+    "handle": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "profile_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "labels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json"
+    }
+  }
+}
