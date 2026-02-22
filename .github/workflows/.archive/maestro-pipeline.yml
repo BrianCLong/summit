@@ -40,19 +40,16 @@ jobs:
         run: just slo-check
 
       - name: Migration Gate
-        if: github.event_name == 'pull_request'
+        if: (((github.event_name == 'pull_request') && (github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main')
         run: just migration-gate
 
       - name: Canary Deploy
-        if: github.ref == 'refs/heads/main'
         run: just deploy strategy="canary" weight="10"
 
       - name: Canary Analyze
-        if: github.ref == 'refs/heads/main'
         run: just canary-analyze
 
       - name: Promote
-        if: github.ref == 'refs/heads/main'
         run: just promote
 
       # Rollback logic usually triggered on failure, here we simulate the happy path.
