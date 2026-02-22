@@ -1,4 +1,4 @@
-name: "[info] PR Quality Gate"
+name: PR Quality Gate
 
 on:
   pull_request:
@@ -24,13 +24,8 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-<<<<<<< HEAD
-=======
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -52,13 +47,8 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-<<<<<<< HEAD
-=======
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -77,6 +67,8 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

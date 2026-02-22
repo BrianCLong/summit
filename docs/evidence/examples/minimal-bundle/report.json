@@ -1,0 +1,21 @@
+{
+  "evidence_id": "EVD-GOV-EVIDENCE-DOC-001",
+  "summary": "Minimal evidence bundle for schema validation in documentation.",
+  "artifacts": [
+    {
+      "name": "report",
+      "path": "report.json",
+      "description": "Summary of the evidence bundle contents."
+    },
+    {
+      "name": "metrics",
+      "path": "metrics.json",
+      "description": "Quantitative metrics for validation."
+    },
+    {
+      "name": "stamp",
+      "path": "stamp.json",
+      "description": "Provenance stamp for deterministic verification."
+    }
+  ]
+}

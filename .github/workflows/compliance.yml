@@ -3,15 +3,9 @@ name: Compliance
 on:
   push:
     branches: [main]
-    # SAFETY: Conservative paths-ignore to prevent skipping compliance checks
-    # This workflow MUST run on any code/config/policy changes
     paths-ignore:
       - "**.md"
       - "docs/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
   pull_request:
     branches: [main]
     paths-ignore:
@@ -19,10 +13,6 @@ on:
       - "docs/**"
       - ".github/ISSUE_TEMPLATE/**"
       - ".github/PULL_REQUEST_TEMPLATE/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml (dependency changes must trigger this)
-      # - policy/**, scripts/compliance/** (policy/compliance changes must trigger this)
   schedule:
     - cron: "0 0 * * 1" # Weekly on Mondays
 
@@ -36,9 +26,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
 
       - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
@@ -52,11 +48,10 @@ jobs:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: "20"
-          cache: "pnpm"
+          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

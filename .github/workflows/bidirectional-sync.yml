@@ -15,10 +15,10 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
 
     steps:
       - name: Checkout main repository

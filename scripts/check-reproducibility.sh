@@ -34,7 +34,7 @@ perform_build() {
     mkdir -p "$build_dir"
     
     # Copy source to build directory to isolate
-    rsync -a --exclude="$TEMP_DIR" --exclude="node_modules" --exclude=".git" . "$build_dir/"
+    rsync -a --exclude="build-test" --exclude="$(basename "$TEMP_DIR")" --exclude="node_modules" --exclude=".git" . "$build_dir/"
     
     # Change to build directory
     cd "$build_dir"
