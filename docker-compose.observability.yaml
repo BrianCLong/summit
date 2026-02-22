@@ -8,7 +8,7 @@ services:
       - "9090:9090"
     volumes:
       - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./monitoring/alerts.yaml:/etc/prometheus/alerts.yaml
+      - ./monitoring/rules:/etc/prometheus/rules
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -17,6 +17,17 @@ services:
       - '--web.console.templates=/usr/share/prometheus/consoles'
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  alertmanager:
+    image: prom/alertmanager:v0.25.0
+    container_name: summit-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./monitoring/alertmanager/alertmanager.yml:/etc/alertmanager/config.yml
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
 
   grafana:
     image: grafana/grafana:10.0.0
@@ -45,6 +56,56 @@ services:
       - "4318:4318"   # OTLP HTTP
     environment:
       - COLLECTOR_OTLP_ENABLED=true
+
+  node-exporter:
+    image: prom/node-exporter:v1.6.1
+    container_name: summit-node-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: summit-cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    devices:
+      - /dev/kmsg
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.52.0
+    container_name: summit-redis-exporter
+    environment:
+      - REDIS_ADDR=redis://maestro-redis:6379
+      - REDIS_PASSWORD=redis-dev-secret
+    ports:
+      - "9121:9121"
+    depends_on:
+      - redis # Assumes redis is running in the same network context or accessible via hostname
+
+  neo4j-exporter:
+    image: kbloomberg/neo4j-prometheus-exporter:latest
+    container_name: summit-neo4j-exporter
+    environment:
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=let-me-in
+    ports:
+      - "9308:9308"
+    depends_on:
+      - neo4j # Assumes neo4j is running in the same network context or accessible via hostname
 
 volumes:
   prometheus_data:
