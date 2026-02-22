@@ -8,14 +8,28 @@ import { Pool } from 'pg';
 import { createIncidentRoutes } from './incidentRoutes';
 import { createDeploymentRoutes } from './deploymentRoutes';
 import { createAlertRoutes } from './alertRoutes';
+import { createPolicyRoutes } from './policyRoutes';
+import { createApprovalRoutes } from './approvalRoutes';
+import { createReceiptRoutes } from './receiptRoutes';
+import { PolicyService } from '../services/policyService';
+import { ApprovalService } from '../services/approvalService';
+import { ReceiptService } from '../services/receiptService';
 
 export function createCompanyOSRouter(db: Pool): Router {
   const router = Router();
+
+  // Initialize services
+  const policyService = new PolicyService();
+  const approvalService = new ApprovalService(db);
+  const receiptService = new ReceiptService(db);
 
   // Mount route modules
   router.use('/incidents', createIncidentRoutes(db));
   router.use('/deployments', createDeploymentRoutes(db));
   router.use('/alerts', createAlertRoutes(db));
+  router.use('/policy', createPolicyRoutes(policyService));
+  router.use('/approvals', createApprovalRoutes(approvalService));
+  router.use('/receipts', createReceiptRoutes(receiptService));
 
   // Health check endpoint
   router.get('/health', (req, res) => {
