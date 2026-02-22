@@ -76,6 +76,35 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: ttt-discover-intake
+    version: v1
+    path: prompts/discover/ttt-discover-intake@v1.md
+    sha256: 60eb0cedb63d31a8079263ae5da6713838d5afdcf855abcb80cc489aa9827413
+    description: Scaffold TTT-Discover runner with toy evaluator, evidence artifacts, and docs.
+    scope:
+      paths:
+        - summit/discover/
+        - tests/test_ttt_discover_runner.py
+        - docs/standards/ttt-discover.md
+        - docs/security/data-handling/ttt-discover.md
+        - docs/ops/runbooks/ttt-discover.md
+        - docs/roadmap/STATUS.json
+        - repo_assumptions.md
+        - prompts/discover/ttt-discover-intake@v1.md
+        - prompts/registry.yaml
+      domains:
+        - discovery
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md
