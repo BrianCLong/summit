@@ -116,7 +116,7 @@ jobs:
 
       - name: Upload coverage
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        if: always()
+        if: github.event_name != 'pull_request' && always()
         continue-on-error: true
         with:
           files: ./coverage/coverage-final.json

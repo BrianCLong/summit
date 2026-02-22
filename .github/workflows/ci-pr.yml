@@ -38,7 +38,7 @@ jobs:
             task: lint
           - name: Typecheck
             task: typecheck
-          - name: Unit Tests
+          - name: Unit Tests (ci-pr)
             task: test
           - name: Build
             task: build
