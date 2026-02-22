@@ -1,5 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/report.schema.json",
+  "title": "Summit Evidence Report",
   "type": "object",
   "properties": {
     "evidence_id": { "type": "string" },
@@ -10,14 +12,4 @@
   },
   "required": [],
   "additionalProperties": true
-  "$id": "https://summit.local/schemas/report.schema.json",
-  "type": "object",
-  "required": ["version", "classification", "summary"],
-  "properties": {
-    "version": { "type": "integer" },
-    "classification": { "type": "string", "enum": ["public", "internal", "restricted"] },
-    "summary": { "type": "string" },
-    "notes": { "type": "array", "items": { "type": "string" } }
-  },
-  "additionalProperties": false
 }
