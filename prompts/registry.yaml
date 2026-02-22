@@ -76,6 +76,44 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: competitor-signal-pack-reddit-ma-adtech-2026-02-06
+    version: v1
+    path: prompts/intel/competitor-signal-pack@v1.md
+    sha256: d22dd9a84addc9fdce59db7fa742284d79068152ab1da67a3eb767eafd2b0ee7
+    description: Deterministic competitor signal pack ingestion, drift detection, and docs for Reddit M&A intent.
+    scope:
+      paths:
+        - intel/items/reddit-ma-adtech-2026-02-06/
+        - intel/schema/competitor_signal.schema.json
+        - intel/pipelines/
+        - cli/src/intel/
+        - cli/src/commands/intel.ts
+        - cli/src/summit.ts
+        - scripts/monitoring/reddit-ma-adtech-2026-02-06-drift.py
+        - docs/standards/reddit-ma-adtech-2026-02-06.md
+        - docs/security/data-handling/reddit-ma-adtech-2026-02-06.md
+        - docs/ops/runbooks/reddit-ma-adtech-2026-02-06.md
+        - .github/workflows/intel-drift.yml
+        - artifacts/intel/reddit-ma-adtech-2026-02-06/
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/intel/competitor-signal-pack@v1.md
+        - prompts/registry.yaml
+        - agents/examples/COMPETITOR_SIGNAL_PACK_REDDIT_20260206.json
+      domains:
+        - intel
+        - docs
+        - ci
+        - ops
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md
