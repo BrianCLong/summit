@@ -3,7 +3,7 @@ set -eo pipefail
 
 # Configuration
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-BACKUP_ROOT="/backups"
+BACKUP_ROOT="./tmp_backups"
 BACKUP_DIR="$BACKUP_ROOT/$TIMESTAMP"
 LOG_FILE="$BACKUP_ROOT/backup.log"
 RETENTION_DAYS=${RETENTION_DAYS:-7}
@@ -57,36 +57,64 @@ REDIS_HOST=${REDIS_HOST:-redis}
 REDIS_PORT=${REDIS_PORT:-6379}
 REDIS_PASSWORD=${REDIS_PASSWORD:-devpassword}
 
-REDIS_CLI_CMD="redis-cli -h $REDIS_HOST -p $REDIS_PORT"
-if [ ! -z "$REDIS_PASSWORD" ] && [ "$REDIS_PASSWORD" != "devpassword" ]; then
-    REDIS_CLI_CMD="$REDIS_CLI_CMD -a $REDIS_PASSWORD --no-auth-warning"
-fi
+if command -v redis-cli &> /dev/null; then
+    REDIS_CLI_CMD="redis-cli -h $REDIS_HOST -p $REDIS_PORT"
+    if [ ! -z "$REDIS_PASSWORD" ] && [ "$REDIS_PASSWORD" != "devpassword" ]; then
+        REDIS_CLI_CMD="$REDIS_CLI_CMD -a $REDIS_PASSWORD --no-auth-warning"
+    fi
 
-if $REDIS_CLI_CMD --rdb "$BACKUP_DIR/redis.rdb"; then
-    log "Redis RDB backup successful."
-    REDIS_HASH=$(sha256sum "$BACKUP_DIR/redis.rdb" | cut -d ' ' -f 1)
-    log "Redis RDB SHA256: $REDIS_HASH"
+    log "Triggering Redis RDB transfer..."
+    if $REDIS_CLI_CMD --rdb "$BACKUP_DIR/redis.rdb"; then
+        log "Redis RDB backup successful."
+        REDIS_HASH=$(sha256sum "$BACKUP_DIR/redis.rdb" | cut -d ' ' -f 1)
+        log "Redis RDB SHA256: $REDIS_HASH"
+    else
+        log "Warning: Redis backup command failed. Check connection or permissions."
+    fi
 else
-    log "Warning: Redis backup failed or not available. Continuing..."
-    # Don't fail the whole backup for Redis if it's optional, but here we assume it's critical if we want "comprehensive"
-    # But often Redis is just cache. I'll warn but not exit, unless strictly required.
+    log "Warning: redis-cli not found. Skipping Redis backup."
 fi
 
 # Neo4j Backup
 log "Backing up Neo4j..."
-if [ -d "/neo4j_data" ]; then
-    log "Archiving /neo4j_data..."
-    # Create archive of the mounted volume
-    if tar -czf "$BACKUP_DIR/neo4j_data.tar.gz" -C / neo4j_data; then
-        log "Neo4j backup successful."
-        NEO4J_HASH=$(sha256sum "$BACKUP_DIR/neo4j_data.tar.gz" | cut -d ' ' -f 1)
-        log "Neo4j SHA256: $NEO4J_HASH"
+NEO4J_BACKED_UP=false
+
+# Attempt Logical Export if cypher-shell is available (Preferred for consistency)
+if command -v cypher-shell &> /dev/null; then
+    log "cypher-shell found. Attempting logical export (APOC)..."
+    NEO4J_USER=${NEO4J_USER:-neo4j}
+    NEO4J_PASSWORD=${NEO4J_PASSWORD:-test1234}
+    NEO4J_URI=${NEO4J_URI:-bolt://neo4j:7687}
+
+    # Try APOC export
+    if cypher-shell -a "$NEO4J_URI" -u "$NEO4J_USER" -p "$NEO4J_PASSWORD" "CALL apoc.export.json.all(null, {stream:true}) YIELD data RETURN data" > "$BACKUP_DIR/neo4j_export.json" 2>/dev/null; then
+         if [ -s "$BACKUP_DIR/neo4j_export.json" ]; then
+             log "Neo4j logical export successful."
+             NEO4J_BACKED_UP=true
+         else
+             log "Neo4j logical export empty (APOC might be missing). Falling back to volume backup."
+             rm -f "$BACKUP_DIR/neo4j_export.json"
+         fi
     else
-        log "Error: Neo4j backup failed."
-        exit 1
+         log "Neo4j cypher-shell execution failed. Falling back to volume backup."
     fi
-else
-    log "Warning: /neo4j_data not found. Skipping Neo4j backup."
+fi
+
+if [ "$NEO4J_BACKED_UP" = false ]; then
+    if [ -d "/neo4j_data" ]; then
+        log "Archiving /neo4j_data (Volume Backup)..."
+        # Create archive of the mounted volume
+        if tar -czf "$BACKUP_DIR/neo4j_data.tar.gz" -C / neo4j_data; then
+            log "Neo4j volume backup successful."
+            NEO4J_HASH=$(sha256sum "$BACKUP_DIR/neo4j_data.tar.gz" | cut -d ' ' -f 1)
+            log "Neo4j SHA256: $NEO4J_HASH"
+        else
+            log "Error: Neo4j volume backup failed."
+            exit 1
+        fi
+    else
+        log "Warning: /neo4j_data not found and cypher-shell unavailable. Skipping Neo4j backup."
+    fi
 fi
 
 # Archive
@@ -98,9 +126,6 @@ tar -czf "$BACKUP_ROOT/$ARCHIVE_NAME" -C "$BACKUP_ROOT" "$TIMESTAMP"
 ARCHIVE_HASH=$(sha256sum "$BACKUP_ROOT/$ARCHIVE_NAME" | cut -d ' ' -f 1)
 log "Archive SHA256: $ARCHIVE_HASH"
 
-# Update Metadata
-# We can't easily update the json inside the tar, but we can log it.
-
 # Clean up temp dir
 rm -rf "$BACKUP_DIR"
 
@@ -109,7 +134,11 @@ if [ ! -z "$S3_BUCKET" ]; then
     log "Uploading to S3..."
     AWS_ARGS=""
     if [ ! -z "$S3_ENDPOINT" ]; then
-        AWS_ARGS="--endpoint-url $S3_ENDPOINT"
+        AWS_ARGS="$AWS_ARGS --endpoint-url $S3_ENDPOINT"
+    fi
+
+    if [ ! -z "$S3_REGION" ]; then
+        AWS_ARGS="$AWS_ARGS --region $S3_REGION"
     fi
 
     # Upload with metadata

@@ -73,7 +73,7 @@ describe('PartitionManager', () => {
       await partitionManager.createTenantPartition('tenant-1');
 
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
-      expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE maestro_runs_tenant1'));
+      expect(mockClient.query).toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE IF NOT EXISTS maestro_runs_tenant1'));
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     });
 
