@@ -922,3 +922,44 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: serious-client-tone-pack
+    version: v1
+    path: prompts/promptpacks/serious-client-tone-pack@v1.md
+    sha256: 6f9d3c448afe78bca234776d5a85176c7816cb21526875453131c4436aed62d2
+    description: Clean-room serious client tone prompt pack with deterministic evaluator and governance docs.
+    scope:
+      paths:
+        - summit/promptpacks/serious_client_tone/
+        - summit/cli/run_promptpack.py
+        - summit/flags.py
+        - prompts/packs/serious-client-tone/
+        - prompts/promptpacks/serious-client-tone-pack@v1.md
+        - prompts/registry.yaml
+        - fixtures/serious_client_tone/
+        - tests/promptpacks/test_serious_client_tone.py
+        - tests/golden/serious_client_tone/
+        - docs/standards/forbes-serious-clients-prompts-2026-02-06.md
+        - docs/security/data-handling/forbes-serious-clients-prompts-2026-02-06.md
+        - docs/ops/runbooks/forbes-serious-clients-prompts-2026-02-06.md
+        - scripts/monitoring/forbes-serious-clients-prompts-2026-02-06-drift.py
+        - scripts/monitoring/fixtures/serious-client-tone-baseline.json
+        - .github/workflows/serious-client-tone-drift.yml
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - agents/examples/SERIOUS_CLIENT_TONE_PACK_20260206.json
+      domains:
+        - promptpack
+        - eval
+        - governance
+        - documentation
+        - ci
+        - monitoring
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "serious-client-tone-pack-20260206",
+    "timestamp": "2026-02-06T20:20:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiAiYWRkIHNlcmlvdXMgY2xpZW50IHRvbmUgcHJvbXB0IHBhY2ssIGV2YWx1YXRvciwgZml4dHVyZXMsIGRvY3MsIGRyaWZ0IG1vbml0b3JpbmcsIGFuZCBwcm9tcHQgcmVnaXN0cnkiLCAiZmlsZXMiOiBbInN1bW1pdC9wcm9tcHRwYWNrcy9zZXJpb3VzX2NsaWVudF90b25lL19faW5pdF9fLnB5IiwgInN1bW1pdC9wcm9tcHRwYWNrcy9zZXJpb3VzX2NsaWVudF90b25lL2V2YWx1YXRvci5weSIsICJzdW1taXQvcHJvbXB0cGFja3Mvc2VyaW91c19jbGllbnRfdG9uZS9ydWxlcy5weSIsICJzdW1taXQvcHJvbXB0cGFja3Mvc2VyaW91c19jbGllbnRfdG9uZS9ydW5uZXIucHkiLCAic3VtbWl0L3Byb21wdHBhY2tzL19faW5pdF9fLnB5IiwgInN1bW1pdC9jbGkvcnVuX3Byb21wdHBhY2sucHkiLCAic3VtbWl0L2ZsYWdzLnB5IiwgInByb21wdHMvcGFja3Mvc2VyaW91cy1jbGllbnQtdG9uZS9tYW5pZmVzdC5qc29uIiwgInByb21wdHMvcGFja3Mvc2VyaW91cy1jbGllbnQtdG9uZS90ZW1wbGF0ZS5tZCIsICJwcm9tcHRzL3Byb21wdHBhY2tzL3NlcmlvdXMtY2xpZW50LXRvbmUtcGFja0B2MS5tZCIsICJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCAiYWdlbnRzL2V4YW1wbGVzL1NFUklPVVNfQ0xJRU5UX1RPTkVfUEFDS18yMDI2MDIwNi5qc29uIiwgImZpeHR1cmVzL3NlcmlvdXNfY2xpZW50X3RvbmUvYXZhaWxhYmlsaXR5X25ld2JpZS5qc29uIiwgImZpeHR1cmVzL3NlcmlvdXNfY2xpZW50X3RvbmUvdHJhbnNmb3JtYXRpb25fc3Ryb25nLmpzb24iLCAidGVzdHMvcHJvbXB0cGFja3MvdGVzdF9zZXJpb3VzX2NsaWVudF90b25lLnB5IiwgInRlc3RzL2dvbGRlbi9zZXJpb3VzX2NsaWVudF90b25lL3JlcG9ydC5qc29uIiwgInRlc3RzL2dvbGRlbi9zZXJpb3VzX2NsaWVudF90b25lL21ldHJpY3MuanNvbiIsICJ0ZXN0cy9nb2xkZW4vc2VyaW91c19jbGllbnRfdG9uZS9wcm9maWxlLmpzb24iLCAiZG9jcy9zdGFuZGFyZHMvZm9yYmVzLXNlcmlvdXMtY2xpZW50cy1wcm9tcHRzLTIwMjYtMDItMDYubWQiLCAiZG9jcy9zZWN1cml0eS9kYXRhLWhhbmRsaW5nL2ZvcmJlcy1zZXJpb3VzLWNsaWVudHMtcHJvbXB0cy0yMDI2LTAyLTA2Lm1kIiwgImRvY3Mvb3BzL3J1bmJvb2tzL2ZvcmJlcy1zZXJpb3VzLWNsaWVudHMtcHJvbXB0cy0yMDI2LTAyLTA2Lm1kIiwgInNjcmlwdHMvbW9uaXRvcmluZy9mb3JiZXMtc2VyaW91cy1jbGllbnRzLXByb21wdHMtMjAyNi0wMi0wNi1kcmlmdC5weSIsICJzY3JpcHRzL21vbml0b3JpbmcvZml4dHVyZXMvc2VyaW91cy1jbGllbnQtdG9uZS1iYXNlbGluZS5qc29uIiwgIi5naXRodWIvd29ya2Zsb3dzL3NlcmlvdXMtY2xpZW50LXRvbmUtZHJpZnQueW1sIiwgImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiJdfQ==",
+    "decision": {
+      "action": "add_promptpack",
+      "rule": {
+        "condition": "prompt pack requires deterministic evaluator and governance artifacts",
+        "action": "add_promptpack",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Added clean-room serious client tone prompt pack with deterministic evaluator, fixtures, governance docs, prompt registry entry, and drift monitoring; rollback via feature flag and revert.",
+    "reverted": false
   }
 ]
