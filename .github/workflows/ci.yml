@@ -9,7 +9,7 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # Global environment for all jobs - prevents V8 heap exhaustion
@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
@@ -65,7 +67,7 @@ jobs:
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
@@ -125,7 +127,7 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls
+    name: SOC Controls (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
