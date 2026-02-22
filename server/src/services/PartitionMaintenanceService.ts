@@ -12,8 +12,8 @@ export class PartitionMaintenanceService {
   private job: CronJob;
 
   constructor() {
-    // Run daily at 2 AM
-    this.job = new CronJob('0 2 * * *', () => {
+    // Run daily at 1 AM to avoid conflict with backups at 3 AM
+    this.job = new CronJob('0 1 * * *', () => {
       this.maintainPartitions().catch((err) => {
         logger.error({ err }, 'Partition maintenance job failed');
       });
@@ -22,7 +22,7 @@ export class PartitionMaintenanceService {
 
   public start() {
     this.job.start();
-    logger.info('PartitionMaintenanceService started');
+    logger.info('PartitionMaintenanceService started (Schedule: 0 1 * * *)');
     // Run once on startup to ensure coverage
     this.maintainPartitions().catch((err) => {
       logger.error({ err }, 'Initial partition maintenance failed');
@@ -37,7 +37,24 @@ export class PartitionMaintenanceService {
     logger.info('Starting partition maintenance');
     const pool = getPostgresPool();
 
-    // Outbox Events (using DB function)
+    // 1. Event Store Partitions (using DB function)
+    try {
+      // maintain 2 months ahead, keep 12 months history
+      await pool.write('SELECT ensure_event_store_partitions_for_all($1, $2)', [2, 12]);
+      logger.info('Event Store partition maintenance successful');
+    } catch (error) {
+      logger.error({ error }, 'Failed to maintain Event Store partitions');
+    }
+
+    // 2. HIPAA Log Partitions
+    try {
+      await pool.write('SELECT ensure_hipaa_log_partitions_for_all()');
+      logger.info('HIPAA Log partition maintenance successful');
+    } catch (error) {
+      logger.error({ error }, 'Failed to maintain HIPAA Log partitions');
+    }
+
+    // 3. Outbox Events (using DB function)
     try {
       await pool.write('SELECT ensure_outbox_partition($1, $2)', [2, 6]);
       logger.info({ tableName: 'outbox_events' }, 'Partition maintenance successful');
@@ -45,7 +62,7 @@ export class PartitionMaintenanceService {
       logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain partitions for table');
     }
 
-    // Other tables (manual logic)
+    // 4. Other tables (manual logic)
     for (const tableName of TABLES_TO_MAINTAIN) {
       try {
         await this.ensureNextMonthPartition(pool, tableName);
