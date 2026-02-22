@@ -26,8 +26,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install actionlint
         run: |
@@ -37,8 +35,27 @@ jobs:
 
       - name: Run actionlint
         run: |
-          # Run actionlint on all active workflow files
-          find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -shellcheck= -color -verbose
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            git fetch --no-tags --depth=1 origin "${{ github.base_ref }}"
+            COMPARE_REF="origin/${{ github.base_ref }}...HEAD"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            COMPARE_REF="HEAD^...HEAD"
+          else
+            COMPARE_REF=""
+          fi
+
+          if [[ -n "$COMPARE_REF" ]]; then
+            mapfile -t WORKFLOWS < <(git diff --name-only "$COMPARE_REF" | grep -E '^\.github/workflows/.*\.ya?ml$' || true)
+          else
+            mapfile -t WORKFLOWS < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+          fi
+
+          if [[ "${#WORKFLOWS[@]}" -eq 0 ]]; then
+            echo "No workflow files changed; skipping actionlint."
+            exit 0
+          fi
+
+          printf '%s\n' "${WORKFLOWS[@]}" | xargs actionlint -shellcheck= -color -verbose
 
       - name: Summary
         if: always()

@@ -25,8 +25,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup pnpm
@@ -39,13 +37,6 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-<<<<<<< HEAD
-=======
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -63,13 +54,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-<<<<<<< HEAD
-=======
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -83,24 +67,14 @@ jobs:
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-<<<<<<< HEAD
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-=======
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -133,8 +107,6 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -155,31 +127,13 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls
+    name: SOC Controls (CI)
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
-<<<<<<< HEAD
     services:
       postgres:
         image: postgres:15
-=======
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: SOC Control Unit Tests
-        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -203,8 +157,6 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -229,8 +181,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: Verify Versions
         uses: ./.github/actions/verify-workflow-versions
       - name: Attach evidence
