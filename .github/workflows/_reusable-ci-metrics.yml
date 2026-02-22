@@ -49,7 +49,7 @@ jobs:
     timeout-minutes: 5
 
     outputs:
-      artifact_name: ${{ steps.upload.outputs.artifact_name }}
+      artifact_name: ${{ inputs.evidence-artifact-name }}
       duration_minutes: ${{ steps.metrics.outputs.duration_minutes }}
       success_rate: ${{ steps.metrics.outputs.success_rate }}
 

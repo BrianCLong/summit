@@ -36,7 +36,7 @@ export class PrivacyPreservingML {
 
     // 2. Add Gaussian/Laplace noise
     const epsilon = 1.0 / config.noiseMultiplier; // Inverse relationship
-    const privatized = clippedGradients.map(g => 
+    const privatized = clippedGradients.map(g =>
       g + dpEngine.generateLaplaceNoise(epsilon, config.l2NormClip / config.batchSize)
     );
 

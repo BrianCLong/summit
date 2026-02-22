@@ -405,7 +405,7 @@ export class AgentGovernanceService {
   getAgentConfig(agent: MaestroAgent): AgentGovernanceConfig {
     const tenantId = agent.tenantId || 'system';
     const tenantPolicies = this.policies.get(tenantId) || this.policies.get('system');
-    
+
     if (!tenantPolicies) return this.defaultConfig;
 
     const policyId = agent.metadata?.governanceTier || '*';
@@ -447,7 +447,7 @@ export class AgentGovernanceService {
   getRecentViolations(agentId: string, tenantId: string = 'system', sinceDays: number = 7): SafetyViolation[] {
     const cutoffTime = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
     const tenantViolations = this.safetyViolations.get(tenantId) || [];
-    
+
     return tenantViolations
       .filter(violation => violation.agentId === agentId && violation.timestamp > cutoffTime)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());

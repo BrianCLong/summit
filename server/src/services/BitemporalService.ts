@@ -57,10 +57,10 @@ export class BitemporalService {
 
       // 1. Retire previous system knowledge about this specific valid-time slice
       await client.query(
-        `UPDATE bitemporal_entities 
+        `UPDATE bitemporal_entities
          SET transaction_to = $5
-         WHERE id = $1 AND tenant_id = $2 
-         AND transaction_to = $3 
+         WHERE id = $1 AND tenant_id = $2
+         AND transaction_to = $3
          AND valid_from = $4`,
         [params.id, params.tenantId, this.FAR_FUTURE, validFromStr, transactionFromStr]
       );
@@ -88,15 +88,15 @@ export class BitemporalService {
    * Finds what the system knew (asOfTransaction) about facts that were true at (asOfValid).
    */
   public async queryAsOf(
-    id: string, 
-    tenantId: string, 
-    asOfValid: Date = new Date(), 
+    id: string,
+    tenantId: string,
+    asOfValid: Date = new Date(),
     asOfTransaction: Date = new Date()
   ): Promise<BitemporalEntity | null> {
     const pool = getPostgresPool();
-    
+
     const result = await pool.query(
-      `SELECT * FROM bitemporal_entities 
+      `SELECT * FROM bitemporal_entities
        WHERE id = $1 AND tenant_id = $2
        AND valid_from <= $3 AND valid_to > $3
        AND transaction_from <= $4 AND transaction_to > $4

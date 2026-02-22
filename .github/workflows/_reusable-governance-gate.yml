@@ -1,4 +1,14 @@
 name: Governance Gate
+<<<<<<< HEAD
+on:
+  workflow_call:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Governance gate passed"
+=======
 
 # Reusable workflow for governance verification in release pipelines
 # Ensures all governance checks pass before allowing release to proceed
@@ -231,3 +241,4 @@ jobs:
         run: |
           echo "Governance gate did not pass. See summary for details."
           exit 1
+>>>>>>> main

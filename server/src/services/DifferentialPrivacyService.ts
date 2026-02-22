@@ -31,7 +31,7 @@ export class DifferentialPrivacyService {
     const scale = config.sensitivity / config.epsilon;
     const u = Math.random() - 0.5;
     const noise = -scale * Math.sign(u) * Math.log(1 - 2 * Math.abs(u));
-    
+
     logger.debug({ value, noise, epsilon: config.epsilon }, 'DP: Applied Laplace noise');
     return value + noise;
   }
@@ -48,7 +48,7 @@ export class DifferentialPrivacyService {
         isApproximation: true
       };
     }
-    
+
     // For detailed queries crossing sovereign boundaries, we might redact PII
     // For now, we pass through but flag it.
     return result;
