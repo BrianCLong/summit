@@ -15,6 +15,8 @@ PyYAML==6.0.3
 prometheus_client
 langchain_community
 pytest-cov
+pytest-asyncio
+fakeredis
 requests
 urllib3>=2.6.0
 openlineage-dbt
