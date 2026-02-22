@@ -41,7 +41,7 @@ When `MERGE_SURGE=true`, the following behaviors are active:
 ### Critical Safety: Workflow Validity Gate
 Regardless of `MERGE_SURGE` status, the **Workflow Validity Gate** is **ALWAYS ACTIVE** and **MANDATORY** for any PR touching `.github/workflows/**`.
 *   This catches duplicated `if:` keys, malformed YAML, and invalid expressions *before* they can cause a global CI outage.
-*   **Check Name:** `Workflow Validity Gate / Workflow Validity Check`
+*   **Check Name:** `Workflow Validity Check`
 
 ### Exit Ramp: Disabling Surge Mode
 To return the repository to standard CI behavior (e.g., after a release crunch or when runner capacity increases):
@@ -56,43 +56,23 @@ Some sidecar workflows were temporarily suppressed to free up slots.
 *   **CodeQL:** Gated by `MERGE_SURGE`.
 
 ### Enforcement
-
 The branch protection for `main` is strictly enforced and monitored for drift.
-
 *   **Last Verified:** 2026-02-10
-
 *   **Verified By:** Gemini CLI Agent
-
 *   **Snapshot:** `docs/ci/snapshots/branch_protection.main.json`
-
 *   **Drift Gate:** `.github/workflows/branch-protection-drift.yml` (Runs daily and on policy changes)
 
-
-
 ### Appendix: Known-Good Drill Evidence (2026-02-10)
-
 To validate the Surge architecture, a reference drill was performed:
 
-
-
 1.  **Standard PR Push:**
-
     *   **Result:** `CI Core Gate ✅` passed in **~8 minutes**.
-
     *   **Evidence:** Heavy jobs (`Deterministic Build`, `E2E`) were correctly **skipped**.
-
     *   **Status:** PR was marked as "Mergeable" by GitHub.
-
 2.  **Merge Queue (`merge_group`):**
-
-    *   **Result:** All 7 required gates passed.
-
+    *   **Result:** All 8 required gates passed.
     *   **Evidence:** Heavy jobs activated and completed successfully before merging to `main`.
-
     *   **Status:** Code integrated into `main` with full provenance.
 
-
-
 ### Maintenance
-
 Platform Engineering should audit the `MERGE_SURGE` status weekly. It is intended as a tactical tool, not a permanent baseline.
