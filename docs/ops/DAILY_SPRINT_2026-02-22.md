@@ -60,17 +60,21 @@ Validation: JSON lint via write/read.
 4. Goal: Prepare merge-ready daily sprint log with blockers and next steps.
 Files: `docs/ops/DAILY_SPRINT_2026-02-22.md`.
 Validation: Markdown review.
+5. Goal: Register daily sprint prompt and prompt integrity hash.
+Files: `prompts/automation/daily-sprint@v1.md`, `prompts/registry.yaml`.
+Validation: `shasum -a 256 prompts/automation/daily-sprint@v1.md`.
 
 Execution Log
 - Captured PR evidence snapshot for open PRs.
 - Issue scan deferred pending GitHub API connectivity.
 - Updated `docs/roadmap/STATUS.json` timestamp and revision note.
+- Registered daily sprint prompt and updated prompt registry entry.
 - Authored daily sprint log with evidence, plan, and blockers.
 
 Blockers / Governed Exceptions
 - Governed Exception: GitHub issue scan deferred pending api.github.com connectivity.
 
 End-of-Day Report
-Completed: PR evidence snapshot; daily sprint log; STATUS.json refresh.
+Completed: PR evidence snapshot; daily sprint log; STATUS.json refresh; prompt registry update.
 In progress: Issue backlog scan (deferred pending GitHub API connectivity).
 Blocked: None.
