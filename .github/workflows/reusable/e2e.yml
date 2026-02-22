@@ -77,10 +77,9 @@ jobs:
       - name: Golden path smoke tests
         run: make smoke
       - name: Compose logs on failure
-        if: failure()
+        if: (failure()) && (always())
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
       - name: Tear down stack
-        if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
 name: e2e
 
@@ -187,9 +186,8 @@ jobs:
         run: make smoke
 
       - name: Compose logs on failure
-        if: failure()
+        if: (failure()) && (always())
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
 
       - name: Tear down stack
-        if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
