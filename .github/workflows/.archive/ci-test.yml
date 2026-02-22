@@ -82,12 +82,11 @@ jobs:
       run: npm ci
 
     - name: Install server dependencies
-      if: steps.changes.outputs.server == 'true'
+      if: ((((((((((((((steps.changes.outputs.server == 'true') && (steps.changes.outputs.client == 'true')) && (steps.changes.outputs.server == 'true')) && (steps.changes.outputs.server == 'true')) && (steps.changes.outputs.server == 'true')) && (steps.changes.outputs.server == 'true')) && (steps.changes.outputs.client == 'true')) && (steps.changes.outputs.python == 'true')) && (steps.changes.outputs.client == 'true')) && (steps.changes.outputs.client == 'true')) && (steps.changes.outputs.server == 'true')) && (steps.changes.outputs.client == 'true')) && (steps.changes.outputs.server == 'true')) && (steps.changes.outputs.client == 'true')) && (always())
       working-directory: ./server
       run: npm ci
 
     - name: Install client dependencies
-      if: steps.changes.outputs.client == 'true'
       working-directory: ./client
       run: npm ci
 
@@ -102,17 +101,14 @@ jobs:
         redis-cli -h localhost -p 6379 ping
 
     - name: Setup test database
-      if: steps.changes.outputs.server == 'true'
       run: |
         PGPASSWORD=test_password psql -h localhost -U test_user -d intelgraph_test -f server/src/database/init.sql || true
         
     - name: Setup test Neo4j constraints
-      if: steps.changes.outputs.server == 'true'
       run: |
         cypher-shell -a bolt://localhost:7687 -u neo4j -p test_password -f server/src/database/multimodalConstraints.cypher || true
 
     - name: Verify metrics endpoint
-      if: steps.changes.outputs.server == 'true'
       run: |
         npx ts-node --esm server/src/index.ts &
         SERVER_PID=$!
@@ -128,7 +124,6 @@ jobs:
         JWT_SECRET: test_jwt_secret
 
     - name: Run unit and integration tests
-      if: steps.changes.outputs.server == 'true'
       working-directory: ./server
       run: npm test -- --coverage
       env:
@@ -142,12 +137,10 @@ jobs:
         TEST_MODE: unit
 
     - name: Run client tests
-      if: steps.changes.outputs.client == 'true'
       working-directory: ./client
       run: npm test
 
     - name: Run Python ML tests
-      if: steps.changes.outputs.python == 'true'
       uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868
       with: 
         python-version: '3.12'
@@ -161,17 +154,14 @@ jobs:
           if [ -f python/pyproject.toml ]; then poetry run pytest -q; fi
 
     - name: Install Playwright browsers
-      if: steps.changes.outputs.client == 'true'
       working-directory: ./client
       run: npx playwright install --with-deps
 
     - name: Run E2E tests
-      if: steps.changes.outputs.client == 'true'
       working-directory: ./client
       run: npm run test:e2e
 
     - name: Upload server coverage reports
-      if: steps.changes.outputs.server == 'true'
       uses: codecov/codecov-action@94d76d3bc1
       with:
         directory: ./server/coverage
@@ -179,7 +169,6 @@ jobs:
         name: Server-Coverage
 
     - name: Upload client coverage reports
-      if: steps.changes.outputs.client == 'true'
       uses: codecov/codecov-action@94d76d3bc1
       with:
         directory: ./client/coverage
@@ -187,14 +176,12 @@ jobs:
         name: Client-Coverage
 
     - name: Upload server JUnit report
-      if: steps.changes.outputs.server == 'true'
       uses: actions/upload-artifact@0b7f8f6
       with:
         name: server-junit-report
         path: server/junit.xml
 
     - name: Upload client JUnit report
-      if: steps.changes.outputs.client == 'true'
       uses: actions/upload-artifact@0b7f8f6
       with:
         name: client-junit-report
@@ -202,7 +189,6 @@ jobs:
 
     - name: Publish Test Report
       uses: dorny/test-reporter@31a54ee
-      if: always()
       with:
         name: Test Results
         path: 'server/junit.xml,client/junit.xml'
