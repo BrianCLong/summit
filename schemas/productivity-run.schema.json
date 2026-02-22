@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Productivity Run Metrics",
+  "description": "Deterministic productivity metrics for AI assist evaluation",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["baseline", "assist"],
+      "description": "The operating mode of the workflow"
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "duration_seconds": {
+          "type": "number",
+          "description": "Total duration of the measured workflow segment"
+        },
+        "tests_passed": {
+          "type": "integer"
+        },
+        "tests_failed": {
+          "type": "integer"
+        },
+        "lint_issues": {
+          "type": "integer"
+        },
+        "review_friction_index": {
+          "type": "number",
+          "description": "Composite score of review rounds and comments"
+        }
+      },
+      "required": ["duration_seconds"]
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Categorization tags for the task (e.g. 'security', 'refactor')"
+    }
+  },
+  "required": ["mode", "metrics"],
+  "additionalProperties": false
+}
