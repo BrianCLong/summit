@@ -110,6 +110,7 @@ services:
     volumes:
       - ./backups:/backups
       - redis_data:/redis_data
+      - neo4j_data:/neo4j_data
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=postgres
