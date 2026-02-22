@@ -60,7 +60,7 @@ jobs:
           "
 
       - name: Check for breaking changes
-        if: github.event_name == 'pull_request'
+        if: ((github.event_name == 'pull_request') && (github.event_name == 'pull_request')) && (github.event_name == 'pull_request' && always())
         run: |
           echo "Checking for breaking changes..."
           git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
@@ -197,7 +197,6 @@ jobs:
           "
 
       - name: Generate schema changelog
-        if: github.event_name == 'pull_request'
         run: |
           echo "Generating schema changelog..."
           node -e "
@@ -242,7 +241,6 @@ jobs:
           "
 
       - name: Comment PR with schema changes
-        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
         with:
           script: |
