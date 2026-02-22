@@ -1,0 +1,444 @@
+openapi: 3.0.3
+info:
+  title: Switchboard Approvals + Command Palette API
+  version: 0.1.0
+  description: |
+    Policy-gated command execution, approvals, timeline, and receipts for Switchboard.
+servers:
+  - url: https://api.summit.example.com
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Commands
+  - name: Approvals
+  - name: Timeline
+  - name: Receipts
+  - name: Policy
+
+paths:
+  /commands/execute:
+    post:
+      tags: [Commands]
+      summary: Execute a command (policy preflight + workflow enqueue)
+      operationId: executeCommand
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Idempotency key for request de-duplication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandExecuteRequest'
+            examples:
+              requestAccess:
+                summary: Request elevated access
+                value:
+                  idempotency_key: req-6b82f1
+                  tenant_id: tenant-acme
+                  actor:
+                    id: user-42
+                    type: user
+                    roles: [operator]
+                    email: ops@acme.example
+                  command:
+                    name: access.request
+                    parameters:
+                      resource: production-db
+                      duration_minutes: 60
+                      justification: incident-response
+                  context:
+                    trace_id: 7ff0f9ab
+      responses:
+        '202':
+          description: Command accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommandExecuteResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /approvals/{id}:decide:
+    post:
+      tags: [Approvals]
+      summary: Approve or deny a request
+      operationId: decideApproval
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionRequest'
+      responses:
+        '200':
+          description: Approval decision recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalDecisionResponse'
+        '404':
+          description: Approval not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /timeline:
+    get:
+      tags: [Timeline]
+      summary: Fetch timeline entries
+      operationId: listTimeline
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: actor_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: entity_id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+      responses:
+        '200':
+          description: Timeline entries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelineResponse'
+  /receipts/{id}:
+    get:
+      tags: [Receipts]
+      summary: Fetch a receipt by ID
+      operationId: getReceipt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipt'
+        '404':
+          description: Receipt not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /receipts:verify:
+    post:
+      tags: [Receipts]
+      summary: Verify a receipt signature
+      operationId: verifyReceipt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReceiptVerifyRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptVerifyResponse'
+  /policy/simulate:
+    post:
+      tags: [Policy]
+      summary: Simulate policy decision for a command
+      operationId: simulatePolicy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicySimulationRequest'
+      responses:
+        '200':
+          description: Policy simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    CommandExecuteRequest:
+      type: object
+      required: [idempotency_key, tenant_id, actor, command]
+      properties:
+        idempotency_key:
+          type: string
+        tenant_id:
+          type: string
+        actor:
+          $ref: '#/components/schemas/Actor'
+        command:
+          $ref: '#/components/schemas/Command'
+        context:
+          type: object
+          additionalProperties: true
+    CommandExecuteResponse:
+      type: object
+      required: [request_id, status, policy_decision]
+      properties:
+        request_id:
+          type: string
+        status:
+          type: string
+          enum: [queued, requires_approval, denied]
+        policy_decision:
+          $ref: '#/components/schemas/PolicyDecision'
+        receipt_id:
+          type: string
+    ApprovalDecisionRequest:
+      type: object
+      required: [idempotency_key, decision, rationale, actor]
+      properties:
+        idempotency_key:
+          type: string
+        decision:
+          type: string
+          enum: [approve, deny]
+        rationale:
+          type: string
+        actor:
+          $ref: '#/components/schemas/Actor'
+    ApprovalDecisionResponse:
+      type: object
+      required: [approval_id, status]
+      properties:
+        approval_id:
+          type: string
+        status:
+          type: string
+          enum: [approved, denied]
+        receipt_id:
+          type: string
+    TimelineResponse:
+      type: object
+      required: [entries]
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineEntry'
+    TimelineEntry:
+      type: object
+      required: [id, timestamp, type, summary]
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        type:
+          type: string
+          enum: [command, approval, receipt]
+        summary:
+          type: string
+        receipt_id:
+          type: string
+    Receipt:
+      type: object
+      required: [id, spec_version, tenant_id, actor, command, policy, result, signatures]
+      properties:
+        id:
+          type: string
+        spec_version:
+          type: string
+        tenant_id:
+          type: string
+        correlation_id:
+          type: string
+        actor:
+          $ref: '#/components/schemas/Actor'
+        command:
+          $ref: '#/components/schemas/Command'
+        policy:
+          $ref: '#/components/schemas/PolicyDecision'
+        approvals:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApprovalSummary'
+        result:
+          $ref: '#/components/schemas/CommandResult'
+        signatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Signature'
+    ReceiptVerifyRequest:
+      type: object
+      required: [receipt]
+      properties:
+        receipt:
+          $ref: '#/components/schemas/Receipt'
+    ReceiptVerifyResponse:
+      type: object
+      required: [valid]
+      properties:
+        valid:
+          type: boolean
+        reason:
+          type: string
+    PolicySimulationRequest:
+      type: object
+      required: [tenant_id, actor, command]
+      properties:
+        tenant_id:
+          type: string
+        actor:
+          $ref: '#/components/schemas/Actor'
+        command:
+          $ref: '#/components/schemas/Command'
+        context:
+          type: object
+          additionalProperties: true
+    PolicySimulationResponse:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          $ref: '#/components/schemas/PolicyDecision'
+        rationale:
+          type: string
+    Actor:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [user, service_account, system]
+        roles:
+          type: array
+          items:
+            type: string
+        email:
+          type: string
+        ip_address:
+          type: string
+    Command:
+      type: object
+      required: [name, parameters]
+      properties:
+        name:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+        role_scope:
+          type: array
+          items:
+            type: string
+        privileged:
+          type: boolean
+    PolicyDecision:
+      type: object
+      required: [decision_id, outcome, policy_bundle, evaluated_at]
+      properties:
+        decision_id:
+          type: string
+        outcome:
+          type: string
+          enum: [allow, deny, require_approval]
+        policy_bundle:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high]
+        evaluated_at:
+          type: string
+          format: date-time
+        required_approver_roles:
+          type: array
+          items:
+            type: string
+    ApprovalSummary:
+      type: object
+      required: [approval_id, decision, actor_id]
+      properties:
+        approval_id:
+          type: string
+        decision:
+          type: string
+          enum: [approve, deny]
+        actor_id:
+          type: string
+        rationale_hash:
+          type: string
+    CommandResult:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [success, failure, denied]
+        details:
+          type: string
+    Signature:
+      type: object
+      required: [key_id, algorithm, value]
+      properties:
+        key_id:
+          type: string
+        algorithm:
+          type: string
+        value:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true

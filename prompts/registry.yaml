@@ -922,3 +922,40 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: switchboard-approvals-command-palette
+    version: v1
+    path: prompts/switchboard/switchboard-approvals-command-palette@v1.md
+    sha256: 79b4df8f5a869097218a931b2aac1de7e2b538f62637a4ee6d5cca4c856cd9f1
+    description: Deliver the Switchboard approvals + command palette delivery pack with policy, receipts, and operability artifacts.
+    scope:
+      paths:
+        - sprint/sprint-next-switchboard-approvals-command-palette.md
+        - openapi/switchboard-approvals-command-palette.yaml
+        - opa/policies/switchboard.rego
+        - opa/policies/switchboard_test.rego
+        - packages/decision-policy/policy.switchboard.v1.yaml
+        - provenance/receipt_schema_switchboard_v0_1.json
+        - provenance/examples/switchboard-receipt.example.json
+        - docs/switchboard/
+        - grafana/dashboards/switchboard-approvals.json
+        - grafana/alerts/switchboard-approvals-alerts.yaml
+        - RUNBOOKS/switchboard-*.md
+        - docs/roadmap/STATUS.json
+        - prompts/switchboard/switchboard-approvals-command-palette@v1.md
+        - prompts/registry.yaml
+        - agents/examples/SWITCHBOARD_APPROVALS_COMMAND_PALETTE_SPRINT_NEXT_20260206.json
+      domains:
+        - switchboard
+        - policy
+        - provenance
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
