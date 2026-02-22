@@ -1,0 +1,36 @@
+@startuml INTELGRAPH_C4_CONTAINER
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(user, "Intelligence Analyst", "Uses the platform to analyze entities and narratives.")
+
+System_Boundary(intelgraph_boundary, "IntelGraph Platform") {
+    Container(ui, "Frontend UI", "React, MUI, Cytoscape", "Interactive graph visualization and dashboard.")
+    Container(gateway, "API Gateway", "Node.js, Apollo GraphQL", "Aggregates services and enforces ABAC via OPA.")
+    Container(ingest, "Ingest Workers", "Node.js/Python", "Processes batch and streaming data.")
+    Container(ai_svc, "AI/Analytics Service", "Python, LangChain", "RAG, embeddings, and narrative extraction.")
+    Container(prov_svc, "Provenance Service", "Node.js", "Manages the immutable audit ledger.")
+
+    ContainerDb(neo4j, "Graph Database", "Neo4j", "Stores entities and relationships.")
+    ContainerDb(postgres, "Metadata Store", "PostgreSQL", "Stores case metadata and user info.")
+    ContainerDb(redis, "Cache & PubSub", "Redis", "Session storage and real-time updates.")
+    ContainerDb(vector, "Vector Store", "Qdrant/Milvus", "Stores semantic embeddings.")
+
+    ContainerQueue(kafka, "Streaming Backbone", "Kafka/Redpanda", "Message bus for ingestion and events.")
+}
+
+Rel(user, ui, "Uses", "HTTPS")
+Rel(ui, gateway, "Queries/Mutates", "GraphQL/HTTPS")
+Rel(gateway, neo4j, "Queries", "Cypher/Bolt")
+Rel(gateway, postgres, "Queries", "SQL")
+Rel(gateway, redis, "Caches", "RESP")
+Rel(gateway, ai_svc, "Requests analytics", "gRPC/HTTPS")
+Rel(gateway, prov_svc, "Logs audit", "HTTPS")
+
+Rel(ingest, kafka, "Publishes/Subscribes", "Kafka Protocol")
+Rel(ingest, neo4j, "Writes data", "Cypher/Bolt")
+Rel(ingest, s3, "Reads files", "HTTPS")
+
+Rel(ai_svc, vector, "Queries/Writes", "HTTPS")
+Rel(ai_svc, neo4j, "Augments graph", "Bolt")
+
+@enduml

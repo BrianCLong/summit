@@ -1,0 +1,16 @@
+@startuml INTELGRAPH_C4_CONTEXT
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+Person(user, "Intelligence Analyst", "Uses the platform to analyze entities and narratives.")
+System(intelgraph, "IntelGraph Platform", "Core intelligence analysis platform.")
+
+System_Ext(osint, "OSINT Sources", "Twitter, Telegram, YouTube, blogs, etc.")
+System_Ext(oidc, "OIDC Provider", "Authentication and identity management.")
+System_Ext(s3, "S3 / External Storage", "Large-scale data storage for batch ingest.")
+
+Rel(user, intelgraph, "Analyzes data, builds narratives", "HTTPS/GraphQL")
+Rel(intelgraph, osint, "Ingests data from", "HTTPS/Streaming")
+Rel(intelgraph, oidc, "Authenticates users via", "OIDC/JWT")
+Rel(intelgraph, s3, "Pulls files from", "HTTPS/SDK")
+
+@enduml
