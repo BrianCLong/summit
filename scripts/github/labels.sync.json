@@ -1,0 +1,62 @@
+[
+  {
+    "name": "lane:bizdev",
+    "color": "0E8A16",
+    "description": "GTM, Sales Enablement, Partnerships"
+  },
+  {
+    "name": "lane:pilot",
+    "color": "FBCA04",
+    "description": "Pilot deployment and requirements"
+  },
+  {
+    "name": "lane:engineering",
+    "color": "1D76DB",
+    "description": "Core product engineering"
+  },
+  {
+    "name": "lane:governance",
+    "color": "B60205",
+    "description": "Compliance, Policy, Audit Readiness"
+  },
+  {
+    "name": "level:foundation",
+    "color": "5319E7",
+    "description": "Core open-source platform"
+  },
+  {
+    "name": "level:agents",
+    "color": "D93F0B",
+    "description": "Agentic capabilities and skills"
+  },
+  {
+    "name": "level:enterprise",
+    "color": "000000",
+    "description": "Paid features (SSO, Audit, RBAC)"
+  },
+  {
+    "name": "compliance:audit-ready",
+    "color": "006B75",
+    "description": "Must produce immutable audit logs"
+  },
+  {
+    "name": "compliance:gdpr",
+    "color": "006B75",
+    "description": "Affects data retention or privacy"
+  },
+  {
+    "name": "security:neverlog",
+    "color": "B60205",
+    "description": "Flags sensitive data handling (PII/Secrets)"
+  },
+  {
+    "name": "agent:approved",
+    "color": "0E8A16",
+    "description": "Verified by human operator"
+  },
+  {
+    "name": "agent:blocked",
+    "color": "B60205",
+    "description": "Waiting on human input"
+  }
+]
