@@ -262,7 +262,11 @@ jobs:
         run: pnpm ci:docs-governance
 
   soc-controls:
+<<<<<<< HEAD
     name: SOC Controls (ci-pr)
+=======
+    name: SOC Controls
+>>>>>>> origin/main
     runs-on: ubuntu-latest
     needs: [config-guard]
     steps:
