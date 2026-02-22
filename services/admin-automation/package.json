@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@apollo/server": "^4.12.2",
+    "@apollo/server": "^4.16.0",
     "cors": "^2.8.5",
     "express": "^4.22.1",
     "graphql": "^16.12.0",

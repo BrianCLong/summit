@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@apollo/server": "^4.9.0",
+    "@apollo/server": "^4.16.0",
     "@graphql-tools/schema": "^10.0.30",
     "@intelgraph/battle-types": "workspace:*",
     "cors": "^2.8.5",

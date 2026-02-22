@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "playwright": "^1.44.0",
-    "axios": "^1.7.2",
+    "axios": "^1.7.9",
     "prom-client": "^15.1.0"
   },
   "devDependencies": {

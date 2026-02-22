@@ -26,7 +26,7 @@
   "author": "Summit/IntelGraph Team",
   "license": "PROPRIETARY",
   "dependencies": {
-    "@apollo/server": "^4.9.5",
+    "@apollo/server": "^4.16.0",
     "graphql": "^16.8.1",
     "neo4j-driver": "^5.15.0",
     "mathjs": "^12.2.0",

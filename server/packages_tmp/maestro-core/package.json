@@ -31,7 +31,7 @@
     "@opentelemetry/resources": "^2.1.0",
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
-    "axios": "^1.6.0",
+    "axios": "^1.7.9",
     "cheerio": "^1.0.0-rc.12",
     "crypto": "^1.0.1",
     "events": "^3.3.0",

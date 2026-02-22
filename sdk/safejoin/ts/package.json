@@ -8,7 +8,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "axios": "^1.6.2",
+    "axios": "^1.7.9",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {

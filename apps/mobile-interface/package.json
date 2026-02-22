@@ -31,7 +31,7 @@
     "react-hook-form": "^7.48.2",
     "zod": "^4.1.12",
     "@hookform/resolvers": "^5.2.1",
-    "axios": "^1.6.3",
+    "axios": "^1.7.9",
     "socket.io-client": "^4.7.4",
     "react-hot-toast": "^2.4.1",
     "date-fns": "^4.1.0",

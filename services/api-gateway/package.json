@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@as-integrations/express4": "^1.1.2",
-    "@apollo/server": "^5.1.0",
+    "@apollo/server": "^4.16.0",
     "express": "^5.2.0",
     "graphql": "^16.12.0",
     "graphql-tag": "^2.12.0",

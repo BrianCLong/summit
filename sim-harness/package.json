@@ -20,7 +20,7 @@
     "intelgraph"
   ],
   "dependencies": {
-    "axios": "^1.6.0",
+    "axios": "^1.7.9",
     "uuid": "^9.0.0",
     "winston": "^3.11.0",
     "js-yaml": "^4.1.0",

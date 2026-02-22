@@ -16,7 +16,7 @@
     "docker:build": "docker build -t ghcr.io/companyos/companyos-service-template:dev ."
   },
   "dependencies": {
-    "axios": "^1.7.2",
+    "axios": "^1.7.9",
     "cls-hooked": "^4.2.2",
     "express": "^4.19.2",
     "helmet": "^7.1.0",

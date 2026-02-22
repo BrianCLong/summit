@@ -27,7 +27,7 @@
     "pdf-lib": "^1.17.1",
     "jszip": "^3.10.1",
     "date-fns": "^4.1.0",
-    "axios": "^1.6.0"
+    "axios": "^1.7.9"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "zod": "^4.1.12",
-    "axios": "^1.11.0",
+    "axios": "^1.7.9",
     "@intelgraph/common-types": "workspace:*"
   },
   "devDependencies": {
