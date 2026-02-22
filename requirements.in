@@ -31,3 +31,5 @@ opentelemetry-instrumentation-logging
 prometheus-fastapi-instrumentator
 python-json-logger
 structlog
+fakeredis>=2.20.0
+pytest-asyncio>=0.23.0

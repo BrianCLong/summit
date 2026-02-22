@@ -41,7 +41,8 @@ jobs:
           PYTHONPATH: .
         run: |
           # Targeting 80% coverage is the goal, but starting with current baseline to prevent regression
-          pytest --cov=summit --cov-report=xml --cov-fail-under=9 summit/tests/
+          # Current coverage is ~28%
+          pytest --cov=summit --cov-report=xml --cov-fail-under=25 summit/tests/
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -102,4 +103,6 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test e2e/summit-smoke.spec.ts
+        env:
+          PLAYWRIGHT_USE_WEBSERVER: 'true'
+        run: npx playwright test e2e/
