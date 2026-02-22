@@ -181,6 +181,26 @@ export const createApp = async () => {
   app.use(correlationIdMiddleware);
   app.use(featureFlagContextMiddleware);
 
+  // SEC: Stripe webhook requires raw body for signature verification.
+  // Mount it BEFORE express.json() to avoid consuming the stream.
+  app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const { handleStripeWebhook } = await import('./webhooks/stripe.js');
+    const { stripe } = await import('@summit/billing');
+    const sig = req.headers['stripe-signature'];
+    try {
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig as string,
+        process.env.STRIPE_WEBHOOK_SECRET || ''
+      );
+      await handleStripeWebhook(event);
+      res.json({ received: true });
+    } catch (err: any) {
+      console.error(`Stripe webhook error: ${err.message}`);
+      res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+  });
+
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
   app.use(compression());
