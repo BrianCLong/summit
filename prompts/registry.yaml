@@ -76,6 +76,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: evening-standup-note
+    version: v1
+    path: prompts/standup/evening-standup-note@v1.md
+    sha256: 21fa98c95f01b43f5fa52d1ae9b725d2a35a27b9a6d6cd4a9c7323cac19198fa
+    description: Create an evening standup note and update roadmap status metadata.
+    scope:
+      paths:
+        - docs/standups/
+        - docs/roadmap/STATUS.json
+        - prompts/standup/evening-standup-note@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - documentation
+        - governance
+        - standup
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: semhl-required-checks
     version: v1
     path: prompts/ci/semhl-required-checks@v1.md
