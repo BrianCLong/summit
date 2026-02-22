@@ -36,6 +36,11 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
+## 2026-03-05 - [HIGH] Unprotected Operational and Analytics Routes
+**Vulnerability:** The `/airgap`, `/analytics`, and `/dr` routes in `server/src/app.ts` were mounted without authentication or role-based access control middleware, despite handling sensitive data export/import, graph analytics, and disaster recovery status.
+**Learning:** High-level operational routes mounted outside the `/api` prefix can easily bypass global security middleware if not explicitly protected at the mount point.
+**Prevention:** Always apply `authenticateToken` and `ensureRole` middleware to all administrative and operational route mounting points in `app.ts`.
+
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
