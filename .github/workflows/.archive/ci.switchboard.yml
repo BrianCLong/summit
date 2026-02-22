@@ -41,9 +41,7 @@ jobs:
             pol:
               - 'policies/**'
       - name: Skip (no policy changes)
-        if: steps.pol.outputs.pol != 'true'
+        if: ((steps.pol.outputs.pol != 'true') && (steps.pol.outputs.pol == 'true')) && (steps.pol.outputs.pol == 'true')
         run: echo "No policy changes; skipping OPA tests"
       - uses: open-policy-agent/setup-opa@v2
-        if: steps.pol.outputs.pol == 'true'
       - run: opa fmt -w policies && opa test policies -v
-        if: steps.pol.outputs.pol == 'true'
