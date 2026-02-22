@@ -522,6 +522,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: sandboxed-runtime-edge-router-docs
+    version: v1
+    path: prompts/docs/sandboxed-runtime-edge-router@v1.md
+    sha256: 1729438234199739c33ee5a331d3e48df0900ddeb98ad39bcb4958387a2ef391
+    description: Document sandboxed agent runtime edge router standards, runbook, and data handling.
+    scope:
+      paths:
+        - docs/standards/cloudflare-moltworker.md
+        - docs/ops/runbooks/cloudflare-moltworker.md
+        - docs/security/data-handling/cloudflare-moltworker.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/SANDBOXED_RUNTIME_EDGE_ROUTER_DOCS_TASK.json
+        - prompts/docs/sandboxed-runtime-edge-router@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
