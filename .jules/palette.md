@@ -36,6 +36,6 @@
 **Learning:** In projects with a mix of JS/JSX and TS/TSX, Tailwind configurations may only target TS/TSX files. This causes utility classes in JS/JSX files to be purged, breaking accessibility features (like `sr-only`) or layout styles.
 **Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.
 
-## 2026-02-07 - Accessibility for Loading States
-**Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
-**Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
+## 2025-10-30 - Global Component Constraints
+**Learning:** Automated global UI changes (like adding icons to all Badges) can have unforeseen layout side effects and violate "micro-UX" scope boundaries.
+**Action:** Prioritize non-visual accessibility improvements (like ARIA attributes) for micro-UX tasks unless a specific visual change is requested or vetted for a single instance.

@@ -1,0 +1,22 @@
+{
+  "run_date": "2026-02-11",
+  "scope": "daily-sprint",
+  "status": "partial",
+  "completed": [
+    "Captured top-20 open PR triage snapshot",
+    "Captured labeled issue triage snapshot for security/ga/governance/osint/bolt",
+    "Cleaned PR #18468 by removing unintended pnpm-lock.yaml churn",
+    "Posted PR #18468 execution comment with validation evidence"
+  ],
+  "in_progress": [
+    "Select next merge-ready GA/security PR for follow-on execution"
+  ],
+  "blockers": [],
+  "artifacts": {
+    "pr_list": "docs/ops/evidence/daily-sprint-2026-02-11/gh_pr_list.txt",
+    "issue_list": "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list.txt",
+    "pr_18468_after_fix": "docs/ops/evidence/daily-sprint-2026-02-11/pr_18468_after_fix.json",
+    "legacy_pr_error_log": "docs/ops/evidence/daily-sprint-2026-02-11/gh_pr_list_error.txt",
+    "legacy_issue_error_log": "docs/ops/evidence/daily-sprint-2026-02-11/gh_issue_list_error.txt"
+  }
+}
