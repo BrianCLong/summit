@@ -52,7 +52,6 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
     // Register connection
     connectionManager.register(authSocket);
     metrics.recordConnectionStart(authSocket.tenantId);
-    metrics.recordSecuritySensitiveEvent('connection', authSocket.tenantId);
 
     // Send connection established event
     authSocket.emit('connection:established', {

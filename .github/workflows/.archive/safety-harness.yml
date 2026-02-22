@@ -61,7 +61,7 @@ jobs:
           pnpm build
 
       - name: Start services (if local)
-        if: ((((((${{ github.event.inputs.environment == 'staging' || github.event_name == 'pull_request' }}) && (always())) && (always())) && (always())) && (github.event_name == 'pull_request' && always())) && (always())) && (always())
+        if: ${{ github.event.inputs.environment == 'staging' || github.event_name == 'pull_request' }}
         run: |
           make up
           ./scripts/wait-for-stack.sh
@@ -91,6 +91,7 @@ jobs:
             --packs ${{ matrix.component }}-*
 
       - name: Generate HTML report
+        if: always()
         run: |
           cd safety-harness
           pnpm report \
@@ -99,6 +100,7 @@ jobs:
             --format html
 
       - name: Upload test results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: safety-reports-${{ matrix.component }}
@@ -106,6 +108,7 @@ jobs:
           retention-days: 30
 
       - name: Publish test results
+        if: always()
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
           files: safety-reports/safety-junit.xml
@@ -113,6 +116,7 @@ jobs:
           comment_mode: off
 
       - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
         uses: actions/github-script@v7
         with:
           script: |
@@ -151,6 +155,7 @@ jobs:
             });
 
       - name: Fail if critical issues found
+        if: always()
         run: |
           cd safety-reports
           CRITICAL_FAILURES=$(jq '.summary.byRiskLevel.critical.failed' safety-${{ matrix.component }}.json)
@@ -163,6 +168,7 @@ jobs:
     name: Aggregate Safety Results
     needs: safety-tests
     runs-on: ubuntu-latest
+    if: always()
 
     steps:
       - name: Download all artifacts

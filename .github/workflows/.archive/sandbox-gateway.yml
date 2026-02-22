@@ -267,7 +267,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Container Registry
-        if: (((((github.event_name != 'pull_request') && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main')) && (always())
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -302,6 +302,7 @@ jobs:
             COMMIT_SHA=${{ github.sha }}
 
       - name: Generate SBOM
+        if: github.event_name != 'pull_request'
         uses: anchore/sbom-action@v0
         with:
           image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
@@ -309,6 +310,7 @@ jobs:
           output-file: ./sbom-sandbox-gateway.spdx.json
 
       - name: Upload SBOM
+        if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v3
         with:
           name: sbom
@@ -318,6 +320,7 @@ jobs:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     needs: [build, integration-test]
+    if: github.ref == 'refs/heads/main'
     environment:
       name: staging
       url: https://sandbox-api.staging.intelgraph.io/health
@@ -355,6 +358,7 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main'
     environment:
       name: production
       url: https://sandbox-api.intelgraph.io/health
@@ -390,6 +394,7 @@ jobs:
           curl -f https://sandbox-api.intelgraph.io/health/ready || exit 1
 
       - name: Notify deployment
+        if: always()
         uses: slackapi/slack-github-action@v1.24.0
         with:
           payload: |

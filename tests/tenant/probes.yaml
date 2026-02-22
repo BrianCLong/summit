@@ -1,0 +1,82 @@
+probes:
+  - name: search-entities
+    description: Graph search should scope results to the requesting tenant.
+    method: POST
+    path: /api/search/entities
+    tenantHeader: x-tenant-id
+    responsePath: items
+    fixtureKey: searchResults
+    expectedFilters:
+      - tenantId
+      - scope.tenant
+    payload:
+      query: 'threat actor'
+      limit: 5
+
+  - name: graph-paths
+    description: Graph traversal must only return paths for the requesting tenant graph slice.
+    method: POST
+    path: /api/graph/paths
+    tenantHeader: x-tenant-id
+    responsePath: paths
+    fixtureKey: graphPaths
+    expectedFilters:
+      - tenantId
+      - scope.tenant
+    payload:
+      maxDepth: 4
+      includeScores: true
+
+  - name: graph-neighbors
+    description: Neighborhood lookups should enforce tenant-aware node filtering.
+    method: POST
+    path: /api/graph/neighbors
+    tenantHeader: x-tenant-id
+    responsePath: neighbors
+    fixtureKey: graphNeighbors
+    expectedFilters:
+      - tenantId
+      - scope.tenant
+    payload:
+      direction: BOTH
+      limit: 10
+
+  - name: rag-answers
+    description: RAG answers must never surface citations from other tenants.
+    method: POST
+    path: /api/rag/answers
+    tenantHeader: x-tenant-id
+    responsePath: answers
+    fixtureKey: ragAnswers
+    expectedFilters:
+      - tenantId
+      - scope.tenant
+    payload:
+      question: 'How are we breached?'
+      topK: 3
+
+  - name: export-artifacts
+    description: Exports listing should be partitioned per tenant storage bucket.
+    method: POST
+    path: /api/exports
+    tenantHeader: x-tenant-id
+    responsePath: exports
+    fixtureKey: exports
+    expectedFilters:
+      - tenantId
+      - scope.tenant
+    payload:
+      includeChecksums: true
+
+  - name: audit-events
+    description: Audit feed must restrict events to the actor tenant.
+    method: POST
+    path: /api/audit/events
+    tenantHeader: x-tenant-id
+    responsePath: events
+    fixtureKey: auditEvents
+    expectedFilters:
+      - tenantId
+      - scope.tenant
+    payload:
+      limit: 20

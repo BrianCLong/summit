@@ -1,4 +1,4 @@
-name: "[info] Post-Release Canary"
+name: Post-Release Canary
 
 on:
   schedule:

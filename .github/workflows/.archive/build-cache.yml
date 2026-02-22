@@ -92,7 +92,7 @@ jobs:
   # Build packages with Turbo remote caching
   build-packages:
     needs: [install, changes]
-    if: ((needs.changes.outputs.packages == 'true' || github.ref == 'refs/heads/main') && (needs.changes.outputs.services == 'true' || github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
+    if: needs.changes.outputs.packages == 'true' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -141,6 +141,7 @@ jobs:
   # Build services (depends on packages)
   build-services:
     needs: [build-packages, changes]
+    if: needs.changes.outputs.services == 'true' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -188,6 +189,7 @@ jobs:
   # Build Docker images with layer caching
   build-docker:
     needs: [build-services]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read

@@ -42,20 +42,13 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: write
   pull-requests: write
-  issues: write
-  actions: read
 
 jobs:
   audit:
     name: Type Safety Audit
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     outputs:
       total_any: ${{ steps.audit.outputs.total_any }}

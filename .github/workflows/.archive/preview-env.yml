@@ -39,7 +39,7 @@ concurrency:
 jobs:
   context:
     name: Gather preview context
-    if: (((github.event_name == 'pull_request' && github.event.action != 'closed') && (needs.context.result == 'success')) && (needs.context.result == 'success')) && (needs.deploy-preview.result == 'success')
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
     runs-on: ubuntu-latest
     outputs:
       ttl-hours: ${{ steps.ttl.outputs.ttl_hours }}
@@ -116,6 +116,7 @@ JSON
           echo "budget_usd=$(jq -r '.budget_usd' cost.json)" >> $GITHUB_OUTPUT
 
   build-images:
+    if: needs.context.result == 'success'
     needs: context
     runs-on: ubuntu-latest
     outputs:
@@ -163,6 +164,7 @@ JSON
           cache-to: type=gha,mode=max
 
   deploy-preview:
+    if: needs.context.result == 'success'
     needs: [context, build-images]
     runs-on: ubuntu-latest
     environment: preview
@@ -224,6 +226,7 @@ JSON
           kubectl rollout status deployment/intelgraph-pr-${{ github.event.number }} -n ${NAMESPACE} --timeout=300s
 
   update-pr:
+    if: needs.deploy-preview.result == 'success'
     needs: [context, deploy-preview]
     runs-on: ubuntu-latest
     steps:

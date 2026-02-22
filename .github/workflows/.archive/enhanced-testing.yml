@@ -42,7 +42,7 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
-    if: ((((((((${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == '' }}) && (always())) && (${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'integration' || github.event.inputs.test_type == '' }})) && (always())) && (${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'graphql' || github.event.inputs.test_type == '' }})) && (always())) && (${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'error-scenarios' || github.event.inputs.test_type == '' }})) && (always())) && (always())
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == '' }}
 
     steps:
       - name: Checkout code
@@ -70,6 +70,7 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: unit-test-results
           path: test-results/
@@ -79,6 +80,7 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'integration' || github.event.inputs.test_type == '' }}
     needs: unit-tests
 
     services:
@@ -162,6 +164,7 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: integration-test-results
           path: test-results/
@@ -171,6 +174,7 @@ jobs:
   graphql-tests:
     name: GraphQL Resolver Tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'graphql' || github.event.inputs.test_type == '' }}
     needs: unit-tests
 
     steps:
@@ -199,6 +203,7 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: graphql-test-results
           path: test-results/
@@ -208,6 +213,7 @@ jobs:
   error-scenario-tests:
     name: Error Scenario Tests
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'error-scenarios' || github.event.inputs.test_type == '' }}
     needs: unit-tests
 
     steps:
@@ -236,6 +242,7 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: error-scenario-test-results
           path: test-results/
@@ -246,6 +253,7 @@ jobs:
     name: Coverage Report
     runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests, graphql-tests, error-scenario-tests]
+    if: always()
 
     steps:
       - name: Checkout code

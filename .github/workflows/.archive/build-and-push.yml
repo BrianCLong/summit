@@ -47,7 +47,7 @@ jobs:
         uses: sigstore/cosign-installer @v3.5.0
 
       - name: Sign image (keyless via GitHub OIDC)
-        if: (${{ steps.login-ecr.outcome == 'success' }}) && (${{ steps.login-ecr.outcome == 'success' }})
+        if: ${{ steps.login-ecr.outcome == 'success' }}
         env:
           COSIGN_EXPERIMENTAL: 'true'
         run: |
@@ -61,6 +61,7 @@ jobs:
           cosign sign --yes $IMAGE
 
       - name: Generate SLSA Provenance (keyless via GitHub OIDC)
+        if: ${{ steps.login-ecr.outcome == 'success' }}
         env:
           COSIGN_EXPERIMENTAL: 'true'
         run: |

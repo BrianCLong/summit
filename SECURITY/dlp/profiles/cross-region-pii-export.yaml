@@ -1,0 +1,350 @@
+# Cross-Region PII Export Policy
+# Blocks PII data from being exported across regional boundaries without proper controls
+#
+# @policy cross-region-pii-export
+# @version 1.0.0
+# @compliance GDPR, CCPA, Privacy Shield
+
+apiVersion: dlp.intelgraph.io/v1
+kind: DLPPolicy
+metadata:
+  name: cross-region-pii-export
+  description: |
+    Prevents unauthorized transfer of Personally Identifiable Information (PII)
+    across regional boundaries. Enforces GDPR cross-border transfer requirements,
+    CCPA compliance, and data residency controls.
+  labels:
+    compliance: gdpr,ccpa
+    category: cross-border
+    sensitivity: high
+  annotations:
+    contact: privacy-team@company.com
+    review-date: "2026-01-01"
+
+spec:
+  enabled: true
+  priority: 100
+  mode: ENFORCE  # ENFORCE | AUDIT | SHADOW
+
+  # Scope - where this policy applies
+  scope:
+    tenants: ["*"]  # All tenants
+    environments:
+      - production
+      - staging
+    operations:
+      - EXPORT
+      - EXTERNAL_TRANSFER
+      - BULK_EXPORT
+      - SHARE
+      - EMAIL_ATTACHMENT
+
+  # Detection configuration
+  detection:
+    dataTypes:
+      # Direct PII that triggers this policy
+      - SSN
+      - PASSPORT
+      - DRIVER_LICENSE
+      - DATE_OF_BIRTH
+      - EMAIL
+      - PHONE
+      - ADDRESS
+      # Quasi-identifiers when combined
+      - IP_ADDRESS
+
+    # Minimum confidence to trigger
+    confidenceThreshold: 0.85
+
+    # Aggregation detection
+    aggregation:
+      enabled: true
+      quasiIdentifierThreshold: 3
+
+  # Regional boundary definitions
+  regions:
+    # EU region - GDPR jurisdiction
+    eu:
+      countries:
+        - AT  # Austria
+        - BE  # Belgium
+        - BG  # Bulgaria
+        - HR  # Croatia
+        - CY  # Cyprus
+        - CZ  # Czechia
+        - DK  # Denmark
+        - EE  # Estonia
+        - FI  # Finland
+        - FR  # France
+        - DE  # Germany
+        - GR  # Greece
+        - HU  # Hungary
+        - IE  # Ireland
+        - IT  # Italy
+        - LV  # Latvia
+        - LT  # Lithuania
+        - LU  # Luxembourg
+        - MT  # Malta
+        - NL  # Netherlands
+        - PL  # Poland
+        - PT  # Portugal
+        - RO  # Romania
+        - SK  # Slovakia
+        - SI  # Slovenia
+        - ES  # Spain
+        - SE  # Sweden
+      # EEA additions
+        - IS  # Iceland
+        - LI  # Liechtenstein
+        - NO  # Norway
+      adequacyDecisions:
+        - UK   # Post-Brexit adequacy
+        - CH   # Switzerland
+        - JP   # Japan
+        - KR   # South Korea
+        - NZ   # New Zealand
+        - AR   # Argentina
+        - CA   # Canada (commercial orgs)
+        - IL   # Israel
+
+    # US region
+    us:
+      countries:
+        - US
+      states_with_special_rules:
+        - CA  # CCPA/CPRA
+        - VA  # VCDPA
+        - CO  # CPA
+        - CT  # CTDPA
+
+    # APAC region
+    apac:
+      countries:
+        - AU  # Australia
+        - JP  # Japan
+        - SG  # Singapore
+        - HK  # Hong Kong
+        - KR  # South Korea
+        - IN  # India
+        - NZ  # New Zealand
+
+    # Restricted destinations (blocked entirely)
+    restricted:
+      countries:
+        - RU  # Russia - sanctions
+        - BY  # Belarus - sanctions
+        - CN  # China - data localization
+        - IR  # Iran - sanctions
+        - KP  # North Korea - sanctions
+        - SY  # Syria - sanctions
+        - CU  # Cuba - sanctions
+
+  # Rules for cross-region transfers
+  rules:
+    # Block transfers to restricted countries
+    - name: block-restricted-destinations
+      description: Block all PII transfers to sanctioned/restricted countries
+      condition:
+        targetRegion:
+          in: ["RU", "BY", "CN", "IR", "KP", "SY", "CU"]
+      action: BLOCK
+      notification:
+        user: true
+        security: true
+        compliance: true
+      auditLevel: FULL
+
+    # EU to non-adequate third country
+    - name: eu-to-third-country
+      description: |
+        Block EU PII transfer to countries without adequacy decision
+        unless proper safeguards are in place
+      condition:
+        sourceRegion: eu
+        targetRegion:
+          notIn:
+            - eu
+            - UK
+            - CH
+            - JP
+            - KR
+            - NZ
+            - AR
+            - CA
+            - IL
+        safeguards:
+          none:
+            - SCC_IN_PLACE
+            - BCR_APPROVED
+            - EXPLICIT_CONSENT
+      action: BLOCK
+      violation:
+        type: GDPR_TRANSFER_VIOLATION
+        message: |
+          Transfer of EU personal data to {target_country} requires adequate safeguards.
+          Ensure Standard Contractual Clauses (SCCs), Binding Corporate Rules (BCRs),
+          or explicit consent from data subjects.
+        remediation: |
+          1. Verify SCCs are signed with the receiving party
+          2. Confirm BCRs are approved if internal transfer
+          3. Obtain explicit consent from data subjects
+          4. Consider data anonymization before transfer
+      notification:
+        user: true
+        manager: true
+        dpo: true
+
+    # EU to US - special DPF requirements
+    - name: eu-to-us-dpf
+      description: EU to US transfers require Data Privacy Framework certification
+      condition:
+        sourceRegion: eu
+        targetCountry: US
+        recipientCertification:
+          missing: DPF_CERTIFIED
+      action: WARN
+      warning:
+        title: EU-US Data Transfer
+        message: |
+          Recipient organization should be certified under the EU-US Data Privacy Framework.
+          If not certified, ensure SCCs or other valid transfer mechanism is in place.
+        requireAcknowledgment: true
+        requireJustification: true
+
+    # California data special handling
+    - name: ccpa-consumer-data
+      description: California consumer data requires CCPA compliance verification
+      condition:
+        dataSubjectResidence: CA
+        operation: EXTERNAL_TRANSFER
+      action: REQUIRE_JUSTIFICATION
+      justification:
+        fields:
+          - name: business_purpose
+            type: select
+            options:
+              - service_provider
+              - business_purpose
+              - consumer_direction
+              - merger_acquisition
+            required: true
+          - name: recipient_contract
+            type: boolean
+            label: "Service Provider Agreement in place"
+            required: true
+          - name: consumer_opted_out
+            type: boolean
+            label: "Verified consumer has not opted out of sale"
+            required: true
+
+    # Bulk export restrictions
+    - name: bulk-pii-export
+      description: Bulk exports of PII require additional approval
+      condition:
+        operation: BULK_EXPORT
+        volume:
+          piiRecords:
+            greaterThan: 100
+      action: REQUIRE_APPROVAL
+      approval:
+        levels:
+          - role: DATA_OWNER
+            required: true
+          - role: PRIVACY_OFFICER
+            condition:
+              volume.piiRecords:
+                greaterThan: 1000
+          - role: LEGAL
+            condition:
+              crossBorder: true
+        slaHours: 48
+        escalation:
+          after: 24
+          to: COMPLIANCE_MANAGER
+
+    # Allow with redaction
+    - name: allow-with-anonymization
+      description: Allow cross-region transfer if data is properly anonymized
+      condition:
+        resource:
+          anonymized: true
+          anonymizationMethod:
+            in: [K_ANONYMITY, DIFFERENTIAL_PRIVACY, SYNTHETIC]
+          reidentificationRisk:
+            lessThan: 0.01
+      action: ALLOW
+      obligations:
+        - type: AUDIT_ENHANCED
+          capture:
+            - anonymization_method
+            - reidentification_risk_score
+            - sample_hash
+
+  # Redaction configuration for partial transfers
+  redaction:
+    enabled: true
+    strategy: PARTIAL_MASK
+    fields:
+      SSN: FULL_MASK
+      PASSPORT: FULL_MASK
+      DRIVER_LICENSE: PARTIAL_MASK
+      EMAIL: PARTIAL_DOMAIN
+      PHONE: PARTIAL_AREA_CODE
+      DATE_OF_BIRTH: YEAR_ONLY
+      ADDRESS: CITY_STATE_ONLY
+
+  # Exceptions workflow
+  exceptions:
+    enabled: true
+    maxDuration: 90  # days
+    requireApprovals:
+      - DATA_OWNER
+      - PRIVACY_OFFICER
+      - LEGAL
+    requireJustification: true
+    minJustificationLength: 100
+    auditAllUsage: true
+
+  # Monitoring and alerting
+  monitoring:
+    metrics:
+      - name: cross_region_pii_transfers_total
+        type: counter
+        labels: [source_region, target_region, action]
+      - name: cross_region_pii_blocked_total
+        type: counter
+        labels: [source_region, target_region, reason]
+      - name: cross_region_pii_volume
+        type: histogram
+        labels: [source_region, target_region]
+        buckets: [10, 50, 100, 500, 1000, 5000]
+
+    alerts:
+      - name: high_volume_cross_region_transfer
+        condition: rate(cross_region_pii_transfers_total[1h]) > 50
+        severity: warning
+        notification:
+          - security-team
+          - privacy-team
+
+      - name: repeated_blocked_attempts
+        condition: increase(cross_region_pii_blocked_total[15m]) > 10
+        severity: critical
+        notification:
+          - security-team
+          - soc
+
+  # Audit configuration
+  audit:
+    enabled: true
+    level: DETAILED
+    retention: 7  # years
+    fields:
+      - actor
+      - source_location
+      - target_location
+      - data_types_detected
+      - volume
+      - action_taken
+      - justification
+      - approval_chain

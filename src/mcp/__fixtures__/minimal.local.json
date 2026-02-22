@@ -1,0 +1,19 @@
+{
+  "id": "local-fixture-server",
+  "url": "stdio://./tools/my-tool.js",
+  "description": "A minimal fixture server for testing",
+  "tools": [
+    {
+      "name": "echo",
+      "description": "Echoes back the input",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" }
+        },
+        "required": ["message"]
+      }
+    }
+  ],
+  "riskTier": "low"
+}
