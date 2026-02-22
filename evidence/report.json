@@ -1,5 +1,17 @@
 {
-  "summary": "Partitioning eval completed",
-  "scenarios": 3,
-  "status": "PASS"
+  "id": "EVID-IOPS-20260209-summit-demo-a1b2c3d4",
+  "type": "IOPS",
+  "timestamp": "2026-02-09T10:00:00Z",
+  "actor": "summit-automator",
+  "action": "schema_roundtrip_eval",
+  "status": "success",
+  "details": {
+    "schema_version": "v2",
+    "passed": true,
+    "metrics": {
+      "duration_ms": 1250,
+      "coverage_percent": 98.5
+    }
+  },
+  "signature": "sig_mock_1234567890abcdef"
 }

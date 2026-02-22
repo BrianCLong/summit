@@ -1,0 +1,7 @@
+# This file defines the Helm chart for the Summit application.
+apiVersion: v2
+name: summit
+description: A Helm chart for Summit
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
