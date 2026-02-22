@@ -1,9 +1,9 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SchemaValidator } from '../lib/config/schema-validator.js';
-import { MigrationEngine, MigrationError } from '../lib/config/migration-engine.js';
-import { ConfigWatcher } from '../lib/config/config-watcher.js';
+import { SchemaValidator } from '../lib/config/schema-validator';
+import { MigrationEngine, MigrationError } from '../lib/config/migration-engine';
+import { ConfigWatcher } from '../lib/config/config-watcher';
 import * as yaml from 'js-yaml';
 
 // Use process.cwd() since tests run from server directory
@@ -146,10 +146,11 @@ describe('Configuration System', () => {
             }
           });
 
-          setImmediate(() => {
+          // Simulate a change with a shorter delay
+          setTimeout(() => {
             const updatedConfig = { version: 1, foo: 'baz' };
             fs.writeFileSync(CONFIG_FILE, yaml.dump(updatedConfig));
-          });
+          }, 50);
         });
       } finally {
         watcher?.stop();

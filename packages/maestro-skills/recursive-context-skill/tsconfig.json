@@ -8,7 +8,7 @@
     "baseUrl": ".",
     "paths": {
       "@maestro/recursive-context-runtime": ["../../../packages/recursive-context-runtime/dist/index.d.ts"],
-      "@intelgraph/maestro-core": ["../../../packages/maestro-core/dist/engine.d.ts"]
+      "@maestro/core": ["../../../packages/maestro-core/dist/engine.d.ts"]
     }
   },
   "include": ["src/**/*"]

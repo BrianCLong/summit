@@ -9,8 +9,8 @@
 
 package agents.archetypes
 
-import future.keywords.if
-import future.keywords.in
+import future.keywords
+
 
 # Default deny
 default allow = false
@@ -248,19 +248,7 @@ allow if {
     not deny_impersonation
     not deny_policy_modification
     not deny_credential_access
-    (
-        allow_chief_of_staff_read
-        or allow_chief_of_staff_create
-        or allow_coo_read_ops
-        or allow_coo_triage_incident
-        or allow_coo_create_incident
-        or allow_coo_send_reminder
-        or allow_coo_process_analysis
-        or allow_revops_read_revenue
-        or allow_revops_create_tasks
-        or allow_revops_analytics
-        or allow_revops_reports
-    )
+    any_role_allowed
 }
 
 # Determine required approvers based on action and resource
@@ -304,4 +292,38 @@ audit_metadata := metadata if {
         "policy_version": "1.0",
         "evaluated_at": time.now_ns(),
     }
+}
+
+any_role_allowed if {
+    allow_chief_of_staff_read
+}
+any_role_allowed if {
+    allow_chief_of_staff_create
+}
+any_role_allowed if {
+    allow_coo_read_ops
+}
+any_role_allowed if {
+    allow_coo_triage_incident
+}
+any_role_allowed if {
+    allow_coo_create_incident
+}
+any_role_allowed if {
+    allow_coo_send_reminder
+}
+any_role_allowed if {
+    allow_coo_process_analysis
+}
+any_role_allowed if {
+    allow_revops_read_revenue
+}
+any_role_allowed if {
+    allow_revops_create_tasks
+}
+any_role_allowed if {
+    allow_revops_analytics
+}
+any_role_allowed if {
+    allow_revops_reports
 }

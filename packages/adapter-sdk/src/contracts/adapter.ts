@@ -1,6 +1,6 @@
-import type { AdapterReceiptEmitter } from './receipts.js';
-import { AdapterLifecycleStage } from './lifecycle.js';
-import type { PolicyDecision, PolicyEvaluator } from './policy.js';
+import type { AdapterReceiptEmitter } from './receipts';
+import { AdapterLifecycleStage } from './lifecycle';
+import type { PolicyDecision, PolicyEvaluator } from './policy';
 
 export interface AdapterDescriptor {
   name: string;

@@ -10,9 +10,9 @@ import {
   HallucinationMitigationService,
   HallucinationMitigationRequest,
   HallucinationMitigationResponse,
-} from '../HallucinationMitigationService.js';
-import { GraphRAGService, GraphRAGResponse } from '../GraphRAGService.js';
-import { IntelCorroborationService } from '../IntelCorroborationService.js';
+} from '../HallucinationMitigationService';
+import { GraphRAGService, GraphRAGResponse } from '../GraphRAGService';
+import { IntelCorroborationService } from '../IntelCorroborationService';
 
 // Mock dependencies
 const createMockGraphRAGService = (): any => ({

@@ -1,0 +1,22 @@
+name: Evidence Verification
+
+on:
+  pull_request:
+    paths:
+      - 'evidence/**'
+
+jobs:
+  evidence-validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Validate Evidence
+      run: |
+        pip install jsonschema
+        python3 tools/evidence_validate.py --schemas evidence/schemas --index evidence/index.json

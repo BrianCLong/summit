@@ -1,6 +1,6 @@
-import { TenantId } from '../graph/types.js';
-import { getPostgresPool } from '../db/postgres.js';
-import logger from '../utils/logger.js';
+import { TenantId } from '../graph/types';
+import { getPostgresPool } from '../db/postgres';
+import logger from '../utils/logger';
 
 export interface InvestigationSession {
   id: string;

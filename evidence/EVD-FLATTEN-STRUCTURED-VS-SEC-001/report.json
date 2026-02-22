@@ -1,6 +1,0 @@
-{
-  "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-SEC-001",
-  "item": "flatten-structured-vector-search",
-  "summary": "PII redaction and never-embed key enforcement fixtures.",
-  "artifacts": ["summit/security/pii.py"]
-}

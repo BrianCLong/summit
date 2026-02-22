@@ -17,8 +17,8 @@ import {
   GovernanceResult,
   DataClassification,
   createDataEnvelope,
-} from '../types/data-envelope.js';
-import logger from '../utils/logger.js';
+} from '../types/data-envelope.ts';
+import logger from '../utils/logger.ts';
 
 // ============================================================================
 // Types

@@ -1,6 +1,6 @@
 // server/src/aurora/AuroraService.ts
 
-import { CortexOverlay, NeuralImplant, ThoughtPacket, ThoughtStream } from './aurora.types.js';
+import { CortexOverlay, NeuralImplant, ThoughtPacket, ThoughtStream } from './aurora.types';
 import { randomUUID } from 'crypto';
 
 /**

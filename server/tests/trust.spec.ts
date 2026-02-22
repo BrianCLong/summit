@@ -1,4 +1,4 @@
-import { verifyTrustContract } from '../src/conductor/contracts/trust.js';
+import { verifyTrustContract } from '../src/conductor/contracts/trust';
 
 test('rejects expired contract', async () => {
   await expect(

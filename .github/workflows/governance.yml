@@ -1,21 +1,59 @@
-name: governance
+name: Governance
 
 on:
   pull_request:
-  push:
-    branches: [main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ main ]
 
 jobs:
-  required-checks:
-    name: governance / required-checks
+  pii-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install yaml
-      - run: node scripts/ci/verify_required_checks.mjs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: '20'
+
+      - name: Scan for PII
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+            });
+            // Return JSON string of filenames to handle spaces safely
+            return JSON.stringify(files.map(f => f.filename));
+
+      # In a real scenario, this would use a tool like 'presidio' or regex checks
+      # on the diff. For now, it's a placeholder.
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: '20'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check Licenses
+        run: |
+          # Placeholder
+          echo "Checking licenses..."

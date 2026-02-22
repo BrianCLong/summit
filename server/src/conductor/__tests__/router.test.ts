@@ -1,8 +1,8 @@
 // Tests for MoE Router
 // Comprehensive test suite for routing decisions and feature extraction
 
-import { MoERouter } from '../router.js';
-import { ConductInput } from '../types.js';
+import { MoERouter } from '../router';
+import { ConductInput } from '../types';
 import { describe, test, expect, beforeEach } from '@jest/globals';
 
 describe('MoERouter', () => {

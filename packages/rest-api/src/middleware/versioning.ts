@@ -4,7 +4,7 @@
  * Handles API version extraction and routing
  */
 
-import type { Request, Response, NextFunction, VersioningOptions, VersionInfo } from '../types.js';
+import type { Request, Response, NextFunction, VersioningOptions, VersionInfo } from '../types';
 
 export function versioningMiddleware(options: VersioningOptions) {
   return (req: Request, res: Response, next: NextFunction) => {

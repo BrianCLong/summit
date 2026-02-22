@@ -59,6 +59,6 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with: { node-version: ${{ inputs.node_version }}, cache: 'pnpm' }
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with: { version: 9.12.0 }
+        with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true

@@ -237,7 +237,7 @@ jobs:
           STAGING_URL=https://staging.intelgraph.io scripts/health-check.sh
 
       - name: Run smoke tests
-        if: ((((((${{ !inputs.skip-tests }}) && (always())) && (needs.health-check.result == 'success')) && (needs.health-check.result != 'success')) && (needs.health-check.result == 'success')) && (needs.health-check.result != 'success')) && (needs.health-check.result != 'success')
+        if: ${{ !inputs.skip-tests }}
         run: |
           chmod +x scripts/smoke-tests.sh
           STAGING_URL=https://staging.intelgraph.io scripts/smoke-tests.sh
@@ -246,9 +246,11 @@ jobs:
     name: Update Deployment Status
     needs: [prepare, deploy, health-check]
     runs-on: ubuntu-latest
+    if: always()
 
     steps:
       - name: Update deployment status (success)
+        if: needs.health-check.result == 'success'
         uses: actions/github-script@v7
         with:
           script: |
@@ -262,6 +264,7 @@ jobs:
             });
 
       - name: Update deployment status (failure)
+        if: needs.health-check.result != 'success'
         uses: actions/github-script@v7
         with:
           script: |
@@ -275,6 +278,7 @@ jobs:
             });
 
       - name: Notify Slack (success)
+        if: needs.health-check.result == 'success'
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
@@ -295,6 +299,7 @@ jobs:
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
       - name: Notify Slack (failure)
+        if: needs.health-check.result != 'success'
         uses: slackapi/slack-github-action@v1
         with:
           payload: |
@@ -315,6 +320,7 @@ jobs:
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
       - name: Rollback on failure
+        if: needs.health-check.result != 'success'
         run: |
           echo "Deployment failed, initiating rollback..."
           chmod +x scripts/rollback-deployment.sh

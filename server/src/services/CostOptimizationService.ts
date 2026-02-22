@@ -1,9 +1,9 @@
 // @ts-nocheck
-import { pg } from '../db/pg.js';
-import { neo } from '../db/neo4j.js';
+import { pg } from '../db/pg';
+import { neo } from '../db/neo4j';
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Gauge, Histogram } from 'prom-client';
-import { costTracker, costOptimizationSavings } from '../metrics/cost.js';
+import { costTracker, costOptimizationSavings } from '../metrics/cost';
 
 const tracer = trace.getTracer('cost-optimization-service', '24.2.0');
 

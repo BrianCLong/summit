@@ -1,6 +1,7 @@
 {
+  "version": 1,
   "evidence_id": "EVD-ITEMUNKNOWN-CI-001",
-  "metrics": {
+  "counters": {
     "files_checked": 34,
     "fixtures_checked": 4,
     "fixtures_passed": 4,

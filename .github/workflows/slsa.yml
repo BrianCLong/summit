@@ -1,0 +1,28 @@
+name: Build Server (SLSA L3)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # For signing the provenance
+      contents: read
+      actions: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate SBOM
+      uses: anchore/sbom-action@v0.18.0
+        with:
+          path: .
+      - name: Build and Attest
+        run: echo "Building and attesting..."

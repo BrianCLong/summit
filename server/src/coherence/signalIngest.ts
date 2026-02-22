@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { Request, Response } from 'express';
 import { z } from 'zod';
-import { Neo4jService } from '../db/neo4j.js';
-import { RedisService } from '../cache/redis.js';
-import logger from '../utils/logger.js';
+import { Neo4jService } from '../db/neo4j';
+import { RedisService } from '../cache/redis';
+import logger from '../utils/logger';
 import { randomUUID as uuidv4 } from 'crypto';
 
 const CoherenceSignalSchema = z.object({

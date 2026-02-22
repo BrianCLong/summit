@@ -5,7 +5,7 @@
  * Represents an organized campaign (marketing, influence, political)
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface CanonicalCampaign extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'Campaign';

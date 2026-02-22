@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-FLATTEN-STRUCTURED-VS-INGEST-001",
-  "metrics": {
-    "unit_tests_passed": 6,
-    "determinism_verified": true,
-    "nesting_depth_supported": 5
-  }
-}

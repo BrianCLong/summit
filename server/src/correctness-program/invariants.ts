@@ -6,7 +6,7 @@ import {
   StateMachineDefinition,
   StateTransition,
   newIdentifier,
-} from './types.js';
+} from './types';
 
 export class InvariantRegistry {
   private invariants = new Map<string, InvariantDefinition>();

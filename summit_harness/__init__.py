@@ -1,1 +1,0 @@
-# Summit Agent Harness package

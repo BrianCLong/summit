@@ -1,7 +1,0 @@
-{
-  "evidence_id": "SUB-INVALID-001",
-  "bundle_type": "subsumption",
-  "created_at": "2026-02-06T10:00:00Z",
-  "description": "Invalid bundle - missing stamp.json",
-  "artifacts": []
-}

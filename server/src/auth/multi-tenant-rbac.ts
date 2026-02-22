@@ -13,7 +13,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
-import logger from '../config/logger.js';
+import logger from '../config/logger.ts';
 
 // ============================================================================
 // Types and Interfaces
@@ -683,7 +683,7 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {
-        res.status(401).json({
+        res.status(401).tson({
           error: 'Authentication required',
           code: 'AUTH_REQUIRED',
         });
@@ -701,7 +701,7 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
             userTenants: user.tenantIds,
           });
 
-          res.status(403).json({
+          res.status(403).tson({
             error: 'Access to tenant denied',
             code: 'TENANT_ACCESS_DENIED',
           });
@@ -717,7 +717,7 @@ export function createMultiTenantAuth(rbac: MultiTenantRBACManager) {
       logger.error('Multi-tenant auth middleware error', {
         error: error instanceof Error ? error.message : String(error),
       });
-      res.status(500).json({
+      res.status(500).tson({
         error: 'Authentication service error',
         code: 'AUTH_SERVICE_ERROR',
       });
@@ -735,7 +735,7 @@ export function requireTenantPermission(rbac: MultiTenantRBACManager, permission
       const user = authReq.user;
 
       if (!user) {
-        res.status(401).json({
+        res.status(401).tson({
           error: 'Authentication required',
           code: 'AUTH_REQUIRED',
         });
@@ -751,7 +751,7 @@ export function requireTenantPermission(rbac: MultiTenantRBACManager, permission
           permission,
         });
 
-        res.status(403).json({
+        res.status(403).tson({
           error: 'Insufficient permissions',
           code: 'PERMISSION_DENIED',
           required: permission,
@@ -765,7 +765,7 @@ export function requireTenantPermission(rbac: MultiTenantRBACManager, permission
         error: error instanceof Error ? error.message : String(error),
         permission,
       });
-      res.status(500).json({
+      res.status(500).tson({
         error: 'Authorization service error',
         code: 'AUTHZ_SERVICE_ERROR',
       });
@@ -788,7 +788,7 @@ export function requireResourceAccess(
       const user = authReq.user;
 
       if (!user) {
-        res.status(401).json({
+        res.status(401).tson({
           error: 'Authentication required',
           code: 'AUTH_REQUIRED',
         });
@@ -809,7 +809,7 @@ export function requireResourceAccess(
 
       if (!decision.allowed) {
         if (decision.stepUpRequired) {
-          res.status(403).json({
+          res.status(403).tson({
             error: 'Step-up authentication required',
             code: 'STEP_UP_REQUIRED',
             reason: decision.reason,
@@ -817,7 +817,7 @@ export function requireResourceAccess(
           return;
         }
 
-        res.status(403).json({
+        res.status(403).tson({
           error: 'Access denied',
           code: 'ACCESS_DENIED',
           reason: decision.reason,
@@ -832,7 +832,7 @@ export function requireResourceAccess(
         resourceType,
         action,
       });
-      res.status(500).json({
+      res.status(500).tson({
         error: 'Authorization service error',
         code: 'AUTHZ_SERVICE_ERROR',
       });
