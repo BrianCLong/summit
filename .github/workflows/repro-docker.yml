@@ -14,7 +14,9 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+          # If version is omitted, it will be extracted from package.json
+          # See https://github.com/pnpm/action-setup#use-version-from-packagejson
+          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

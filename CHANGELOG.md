@@ -200,3 +200,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
+
+## [Unreleased]
+- Fixed CI workflow conflicts, configuration errors, and security issues.

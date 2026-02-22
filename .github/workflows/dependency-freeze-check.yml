@@ -97,10 +97,10 @@ jobs:
 
           # Run verification
           EXIT_CODE=0
-          OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS 2>&1) || EXIT_CODE=$?
+          OUTPUT=$(./scripts/release/verify_dependency_freeze.sh $ARGS) || EXIT_CODE=$?
 
           # Parse JSON output
-          JSON_OUTPUT=$(echo "$OUTPUT" | tail -1)
+          JSON_OUTPUT="$OUTPUT"
 
           STATUS=$(echo "$JSON_OUTPUT" | jq -r '.status')
           HAS_CHANGES=$(echo "$JSON_OUTPUT" | jq -r '.has_changes')
