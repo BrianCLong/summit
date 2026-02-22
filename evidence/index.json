@@ -401,6 +401,30 @@
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
     },
+    "EVD-NBLM-PI-SCOPE-001": {
+      "evidence_id": "EVD-NBLM-PI-SCOPE-001",
+      "files": {
+        "report": "evidence/personal-intelligence/report.json",
+        "metrics": "evidence/personal-intelligence/metrics.json",
+        "stamp": "evidence/personal-intelligence/stamp.json"
+      }
+    },
+    "EVD-NBLM-PI-PRIV-001": {
+      "evidence_id": "EVD-NBLM-PI-PRIV-001",
+      "files": {
+        "report": "evidence/personal-intelligence/report.json",
+        "metrics": "evidence/personal-intelligence/metrics.json",
+        "stamp": "evidence/personal-intelligence/stamp.json"
+      }
+    },
+    "EVD-NBLM-PI-PROMPT-001": {
+      "evidence_id": "EVD-NBLM-PI-PROMPT-001",
+      "files": {
+        "report": "evidence/personal-intelligence/report.json",
+        "metrics": "evidence/personal-intelligence/metrics.json",
+        "stamp": "evidence/personal-intelligence/stamp.json"
+      }
+    },
     "EVD-NARRATIVE-CI-METRICS-001": {
       "evidence_id": "EVD-NARRATIVE-CI-METRICS-001",
       "files": {
