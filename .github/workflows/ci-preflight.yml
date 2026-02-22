@@ -2,9 +2,16 @@ name: CI Preflight Validation
 
 on:
   workflow_dispatch:
-
   pull_request:
-    branches: [main]
+    branches: [ main ]
+    paths:
+      - "server/**"
+      - "apps/gateway/**"
+      - "docker-compose.dev.yaml"
+      - "services/opa/**"
+      - ".github/workflows/ci-preflight.yml"
+  push:
+    branches: [ main ]
     paths:
       - "server/**"
       - "apps/gateway/**"
@@ -12,19 +19,8 @@ on:
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
-<<<<<<< HEAD
 concurrency:
   group: ci-preflight-${{ github.ref }}
-=======
-  push:
-    branches: [main]
-    paths:
-      - "server/**"
-      - "apps/gateway/**"
-      - "docker-compose.dev.yaml"
-      - "services/opa/**"
-      - ".github/workflows/ci-preflight.yml"
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
 
 jobs:
   validate-compose:
@@ -40,15 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Install Dependencies
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4      - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Verify Server Build

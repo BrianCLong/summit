@@ -22,16 +22,21 @@ jobs:
               - '**/package-lock.json'
               - '**/pnpm-lock.yaml'
       - name: Skip (no manifest changes)
-        if: (((((steps.pkg.outputs.manifests != 'true') && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')
+        if: steps.pkg.outputs.manifests != 'true'
         run: echo "No manifest changes; skipping audit"
       - uses: actions/setup-node@v4
+        if: steps.pkg.outputs.manifests == 'true'
         with:
           cache: 'pnpm'
           node-version: 20
       - run: npm install --ignore-scripts || true
+        if: steps.pkg.outputs.manifests == 'true'
       - run: npm audit --audit-level=critical || true
+        if: steps.pkg.outputs.manifests == 'true'
       - run: npm audit --json > audit.json || echo '{}' > audit.json
+        if: steps.pkg.outputs.manifests == 'true'
       - uses: actions/upload-artifact@v4
+        if: steps.pkg.outputs.manifests == 'true'
         with:
           name: npm-audit
           path: audit.json

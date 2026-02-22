@@ -24,11 +24,10 @@ on:
       - "scripts/scan-vulnerabilities.sh"
       - "scripts/check-reproducibility.sh"
       - ".github/workflows/supply-chain-integrity.yml"
-  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -37,7 +36,6 @@ permissions:
 
 jobs:
   supply-chain-integrity:
-    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.vars.outputs.release_version }}
@@ -64,7 +62,7 @@ jobs:
           python-version: "3.11"
 
       - name: Set up Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5.0.1
+        uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v5.0.1
         with:
           go-version: "1.21"
 

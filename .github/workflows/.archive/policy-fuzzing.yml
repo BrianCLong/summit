@@ -28,12 +28,13 @@ jobs:
           python main.py --iterations 50
 
       - name: Run Policy Fuzzer (Aggressive)
-        if: (success()) && (always())
+        if: success()
         run: |
           cd policy-fuzzer
           python main.py --iterations 20 --enable-synonym-dodges --enable-field-aliasing
 
       - name: Archive Fuzzing Reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: fuzzing-reports

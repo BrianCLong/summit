@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "nodes": [
+    {
+      "id": "state-1",
+      "type": "narrative_state",
+      "attrs": {"title": "Seed"},
+      "lifecycle": "seeding",
+      "classification": "internal"
+    }
+  ],
+  "edges": []
+}

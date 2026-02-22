@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-TEST-002",
+  "item_slug": "fixture",
+  "summary": {
+    "what_ran": "fixture",
+    "result": "pass"
+  },
+  "artifacts": {
+    "metrics": "evidence/EVD-TEST-002/metrics.json",
+    "stamp": "evidence/EVD-TEST-002/stamp.json"
+  }
+}

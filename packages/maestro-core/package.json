@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/maestro-core",
+  "name": "@maestro/core",
   "version": "4.2.3",
   "description": "Maestro orchestration engine core",
   "main": "dist/index.js",

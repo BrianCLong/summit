@@ -1,40 +1,22 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Reality Check
 
-## Verified vs Assumed Directory List
+## Verified
+* **Build System**: `pnpm` is used (lockfile present). `package.json` defines `build` script invoking `npm run build:client` and `npm run build:server`.
+* **CI Workflows**: Existing workflows include `ci-security.yml`, `release-ga.yml`, `evidence.yml`.
+* **Release Artifacts**: `release-ga.yml` assembles a `ga-release-bundle-${TAG}`.
+* **Signing**: No explicit usage of `minisign` found in existing workflows. `cosign` mentioned in memory for images.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumptions
+* **Build Output**: `client` and `server` likely build to `dist/` or `build/`. We will assume `dist/` for the purpose of the evidence bundle or we will invoke the build and check.
+* **Evidence Directory**: We will create and use `evidence/` for evidence JSON files.
+* **Artifacts Directory**: We will use `artifacts/` for intermediate and final artifacts.
+* **Node Version**: Workflows use node, exact version assumed to be compatible with recent LTS (based on `actions/setup-node`).
 
-## CI Check Names (Exact)
+## Must-Not-Touch
+* `.github/workflows/release-ga.yml` (except for reading/referencing).
+* Existing secrets handling.
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Plan
+* Create parallel `evidence-bundle` workflow.
+* Use `minisign` for evidence signing (as requested).
+* Implement deterministic packaging for build outputs.

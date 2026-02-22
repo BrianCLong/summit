@@ -224,11 +224,12 @@ jobs:
           OUTPUT_JSON: true
 
       - name: Upload SLO Results
-        if: (always()) && (always())
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: slo-results
           path: slo-results.json
 
       - name: Teardown
+        if: always()
         run: make down

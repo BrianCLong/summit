@@ -4,10 +4,6 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -20,12 +16,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
-<<<<<<< HEAD
-=======
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4      - uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'pnpm'
