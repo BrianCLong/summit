@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "revision_note": "Seeded evidence bundle schemas, verifier workflow, and required checks discovery placeholder.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -64,7 +64,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Seeded artifacts/evidence bundle, schemas, and CI verifier workflow with required checks TODO."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",

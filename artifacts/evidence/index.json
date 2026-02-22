@@ -1,0 +1,14 @@
+{
+  "version": "1.0",
+  "evidence": [
+    {
+      "id": "EVD-SUMMIT-EVIDENCE-001",
+      "area": "evidence-system",
+      "files": [
+        "artifacts/evidence/report.json",
+        "artifacts/evidence/metrics.json",
+        "artifacts/evidence/stamp.json"
+      ]
+    }
+  ]
+}
