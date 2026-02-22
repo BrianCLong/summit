@@ -279,3 +279,25 @@ jobs:
           name: soc-compliance-report
           path: soc-compliance-reports
           retention-days: 90
+
+  mcp-pack-gates:
+    name: MCP & Pack Gates
+    runs-on: ubuntu-latest
+    needs: [build-test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run MCP Contract Tests
+        run: npx jest tests/mcp/server.contract.test.ts
+      - name: Run Pack Determinism Tests
+        run: npx jest tests/packs/determinism.test.ts
+      - name: Determinism Check
+        run: npx tsx .github/scripts/check-determinism.ts
+      - name: Never-log Scan
+        run: npx tsx .github/scripts/check-never-log.ts

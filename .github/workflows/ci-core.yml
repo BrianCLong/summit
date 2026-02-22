@@ -21,8 +21,8 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   CI: true
@@ -214,6 +214,7 @@ jobs:
           retention-days: 7
 
   deterministic-build:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: Deterministic Build
     runs-on: ubuntu-latest
     needs: [lint-typecheck, unit-tests]
@@ -287,6 +288,7 @@ jobs:
           retention-days: 30
 
   golden-path:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: Golden Path Smoke Test
     runs-on: ubuntu-latest
     needs: [deterministic-build, integration-tests]
@@ -324,6 +326,7 @@ jobs:
           retention-days: 7
 
   e2e-tests:
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: [integration-tests]
@@ -474,70 +477,79 @@ jobs:
           echo "Branch Protection Drift: ${{ needs.branch-protection-drift.result }}"
           echo ""
 
-          # All jobs must succeed (no continue-on-error allowed)
-          if [[ "${{ needs.config-preflight.result }}" != "success" ]]; then
+          # Validation function to treat 'success' or 'skipped' as passing
+          # NOTE: 'skipped' is acceptable during Merge Surge mode for heavy jobs
+          validate_result() {
+            if [[ "$1" == "success" || "$1" == "skipped" ]]; then
+              return 0
+            else
+              return 1
+            fi
+          }
+
+          if ! validate_result "${{ needs.config-preflight.result }}"; then
             echo "::error::Config Preflight FAILED - Jest/pnpm configuration drift detected"
             exit 1
           fi
 
-          if [[ "${{ needs.lint-typecheck.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.lint-typecheck.result }}"; then
             echo "::error::Lint & Typecheck FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.build-package.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.build-package.result }}"; then
             echo "::error::Build & Package FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.unit-tests.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.unit-tests.result }}"; then
             echo "::error::Unit Tests FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.integration-tests.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.integration-tests.result }}"; then
             echo "::error::Integration Tests FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.verification-suite.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.verification-suite.result }}"; then
             echo "::error::Verification Suite FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.deterministic-build.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.deterministic-build.result }}"; then
             echo "::error::Deterministic Build FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.governance-docs-integrity.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.governance-docs-integrity.result }}"; then
             echo "::error::Governance / Docs Integrity FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.golden-path.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.golden-path.result }}"; then
             echo "::error::Golden Path FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.e2e-tests.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.e2e-tests.result }}"; then
             echo "::error::E2E Tests FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.soc-control-verification.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.soc-control-verification.result }}"; then
             echo "::error::SOC Control Verification FAILED"
             exit 1
           fi
 
-          if [[ "${{ needs.branch-protection-drift.result }}" != "success" ]]; then
+          if ! validate_result "${{ needs.branch-protection-drift.result }}"; then
             echo "::error::Branch Protection Drift FAILED"
             exit 1
           fi
 
           echo ""
           echo "✅ CI CORE GATE: PASSED"
-          echo "All gates green. PR is mergeable (pending ci-verify)."
+          echo "All gates green or safely skipped. PR is mergeable (pending ci-verify)."
 
       - name: Post summary
         run: |

@@ -1,4 +1,4 @@
-name: PR Quality Gate
+name: "[info] PR Quality Gate"
 
 on:
   pull_request:
@@ -16,14 +16,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -37,14 +44,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
