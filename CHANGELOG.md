@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Fixed CI conflicts and updated pnpm lockfile.
 
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
@@ -200,3 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
+- Fixed CI conflicts and updated dependencies.
+- Fixed CI lockfile and evidence verification issues.
+- Fixed CI conflicts and updated lockfiles
+- Fixed CI conflicts and updated dependencies.
