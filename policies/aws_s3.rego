@@ -1,6 +1,8 @@
 
 package maestro.governance
 
+import rego.v1
+
 # Deny public S3 buckets
 deny[msg] {
     input.asset_type == "aws_s3_bucket"

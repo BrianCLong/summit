@@ -89,17 +89,6 @@ export function generateId(prefix?: string): string {
 }
 
 /**
- * Constant-time comparison to prevent timing side-channel attacks.
- */
-export function safeCompare(a: string, b: string): boolean {
-  try {
-    return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-  } catch (err) {
-    return false;
-  }
-}
-
-/**
  * SECURITY WARNING: This function is for non-cryptographic purposes only
  * Use for things like jitter in retry logic, sampling, etc.
  * For security-sensitive operations, use the cryptographically secure alternatives above

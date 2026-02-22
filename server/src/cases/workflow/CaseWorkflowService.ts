@@ -75,7 +75,7 @@ export class CaseWorkflowService {
 
     const caseWithWorkflow: CaseWithWorkflow = {
       ...baseCase,
-      priority: baseCase.priority,
+      priority: 'medium', // These come from extended fields in cases table
       caseType: 'investigation',
       tags: [],
     };
@@ -126,7 +126,7 @@ export class CaseWorkflowService {
 
     return baseCases.map((c) => ({
       ...c,
-      priority: c.priority,
+      priority: 'medium',
       caseType: 'investigation',
       tags: [],
     }));

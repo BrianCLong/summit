@@ -1,6 +1,8 @@
 # (same as in sprint doc)
 package abac.authz
 
+import rego.v1
+
 default allow = false
 
 # Rule to check if tenant is isolated
