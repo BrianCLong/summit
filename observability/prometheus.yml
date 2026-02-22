@@ -39,6 +39,14 @@ scrape_configs:
     scrape_timeout: 10s
     honor_labels: true
 
+  # Summit AI Worker
+  - job_name: 'summit-ai-worker'
+    static_configs:
+      - targets: ['summit-ai-worker:8000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+
   # OpenTelemetry Collector
   - job_name: 'otel-collector'
     static_configs:

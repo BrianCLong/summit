@@ -47,6 +47,7 @@ services:
         condition: service_started
     networks:
       - summit
+      - intelgraph
 
   strategic-foresight:
     build:
@@ -70,3 +71,5 @@ services:
 networks:
   summit:
     driver: bridge
+  intelgraph:
+    external: true
