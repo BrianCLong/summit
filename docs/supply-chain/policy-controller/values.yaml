@@ -1,0 +1,30 @@
+policyController:
+  replicaCount: 2
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+policies:
+  - name: require-pr-provenance
+    images:
+      - "ghcr.io/ORG/REPO*"
+    authorities:
+      - keyless:
+          identities:
+            - issuer: https://token.actions.githubusercontent.com
+              subject: https://github.com/ORG/REPO/.github/workflows/pr-provenance-sbom.yml@refs/heads/main
+        attestations:
+          - name: spdx
+            predicateType: https://spdx.dev/Document
+            policy:
+              type: rego
+              data: |
+                package sigstore
+                default allow = false
+                allow {
+                  input.predicateType == "https://spdx.dev/Document"
+                }

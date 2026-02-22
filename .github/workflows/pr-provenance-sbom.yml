@@ -1,0 +1,64 @@
+name: pr-provenance-sbom
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+jobs:
+  build_sign_sbom:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set image reference
+        run: echo "IMAGE=ghcr.io/${{ github.repository }}:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: Build image
+        run: docker build -t "$IMAGE" .
+
+      - name: Log in to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Push image
+        run: docker push "$IMAGE"
+
+      - uses: imjasonh/setup-crane@v0.3
+
+      - uses: sigstore/cosign-installer@v3
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Sign and attest SBOM
+        run: |
+          DIGEST=$(crane digest "$IMAGE")
+          IMAGE_DIGEST="ghcr.io/${{ github.repository }}@${DIGEST}"
+          cosign sign --yes "$IMAGE_DIGEST"
+          cosign attest --yes --predicate sbom.spdx.json --type spdx "$IMAGE_DIGEST"
+
+      - name: Publish evidence badge
+        run: |
+          mkdir -p evidence/${{ github.sha }}
+          jq -n \
+            --arg status "pass" \
+            --arg link "https://ghcr.io/${{ github.repository }}" \
+            --arg commit "${{ github.sha }}" \
+            --arg pr "${{ github.event.number }}" \
+            '{schema:"v1",pr:$pr,commit:$commit,attestations:"spdx",sbom:"spdx",status:$status,link:$link}' \
+            > evidence/${{ github.sha }}/badge.json
+
+      - name: Upload evidence artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ github.sha }}
+          path: |
+            evidence/${{ github.sha }}/badge.json
+            sbom.spdx.json
