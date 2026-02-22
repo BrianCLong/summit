@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-AZURETURINV7-DOC-001",
-  "item_slug": "azure-turin-v7",
-  "timestamp": "2026-02-03T09:11:44.440Z",
-  "tool_versions": {
-    "node": "v22.22.0"
-  }
-}

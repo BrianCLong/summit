@@ -22,9 +22,7 @@ STATUS=$(jq -r --argjson policy "$(cat "$POLICY_FILE")" '
   def bad(msg): {ok:false, reason: msg};
 
   . as $m
-  | if ($m.sample_size < 1)
-      then {ok:true, reason:"insufficient data (0 runs)"}
-    elif ($m.queue_s.p50 != null and $m.queue_s.p50 > $policy.max_queue_p50_s)
+  | if ($m.queue_s.p50 != null and $m.queue_s.p50 > $policy.max_queue_p50_s)
       then bad("Queue p50 exceeds threshold: \($m.queue_s.p50)s > \($policy.max_queue_p50_s)s")
     elif ($m.success_rate_pct < $policy.min_success_rate_pct)
       then bad("Success rate below min: \($m.success_rate_pct)% < \($policy.min_success_rate_pct)%")

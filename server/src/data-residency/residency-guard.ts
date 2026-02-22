@@ -1,7 +1,6 @@
 import { DataResidencyService } from './residency-service.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-import { REGIONAL_CATALOG } from '../config/regional.js';
 
 export interface ResidencyContext {
     operation: 'storage' | 'compute' | 'logs' | 'backup' | 'export';
@@ -71,18 +70,6 @@ export class ResidencyGuard {
                 // Check exceptions
                 const activeException = await this.checkExceptions(tenantId, context.targetRegion, context.operation);
                 if (!activeException) {
-                    // v2: Cross-check with Regional Catalog for sovereign boundaries
-                    if (context.operation === 'export' && config.country) {
-                        const regionalPolicy = REGIONAL_CATALOG[config.country];
-                        if (regionalPolicy && !regionalPolicy.residency.allowedTransferTargets.includes(context.targetRegion)) {
-                             throw new ResidencyViolationError(
-                                `Export to ${context.targetRegion} is prohibited by sovereign policy for ${config.country}.`,
-                                tenantId,
-                                context
-                            );
-                        }
-                    }
-
                     const errorMsg = `Region ${context.targetRegion} is not allowed for tenant ${tenantId}.`;
 
                     if (isStrict) {
@@ -194,25 +181,15 @@ export class ResidencyGuard {
         // Authoritative region is from shard configuration, falling back to policy config
         const primaryRegion = row.shard_region || row.region;
 
-        const parseSafe = (val: any) => {
-            if (!val || val === '') return [];
-            try {
-                return typeof val === 'string' ? JSON.parse(val) : val;
-            } catch (e) {
-                return [];
-            }
-        };
-
-        const allowedRegions = parseSafe(row.allowed_regions || row.allowed_transfers);
+        const allowedRegions = row.allowed_regions ? JSON.parse(row.allowed_regions) : (row.allowed_transfers ? JSON.parse(row.allowed_transfers) : []);
         // Ensure primary region is in allowed list if not explicitly there
-        if (primaryRegion && !allowedRegions.includes(primaryRegion)) {
+        if (!allowedRegions.includes(primaryRegion)) {
             allowedRegions.push(primaryRegion);
         }
 
         const config = {
             primaryRegion,
             allowedRegions,
-            country: row.country,
             residencyMode: row.residency_mode || 'strict',
             dataClassifications: {
                 'confidential': {
@@ -235,19 +212,6 @@ export class ResidencyGuard {
         });
 
         return config;
-    }
-
-    /**
-     * Checks if a specific feature is allowed for a tenant based on their regional policy.
-     */
-    async validateFeatureAccess(tenantId: string, feature: 'aiFeatures' | 'betaFeatures'): Promise<boolean> {
-        const config = await this.getResidencyConfig(tenantId);
-        if (!config || !config.country) return true; // Default to true if unknown
-
-        const regionalPolicy = REGIONAL_CATALOG[config.country];
-        if (!regionalPolicy) return true;
-
-        return !!(regionalPolicy.features as any)[feature];
     }
 
     private async checkExceptions(tenantId: string, region: string, operation: string): Promise<boolean> {

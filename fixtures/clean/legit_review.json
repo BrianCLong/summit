@@ -1,9 +1,0 @@
-{
-  "kind": "review",
-  "text": "The authors present a novel approach to graph neural networks by incorporating temporal dynamics. The experimental results on the OGB dataset show a 5% improvement over the state-of-the-art. However, the scalability of the proposed method to larger graphs remains an open question.",
-  "meta": {
-    "llm_assisted": false,
-    "llm_tools": [],
-    "human_verifier": "dr_smith"
-  }
-}
