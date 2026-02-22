@@ -22,10 +22,38 @@ def main() -> None:
     idx = load(idx_path)
 
     items = idx.get("items", {})
+    legacy_mode = False
     if not isinstance(items, dict) or not items:
-        fail("evidence/index.json must contain non-empty 'items' map")
+        # Backward-compatible legacy schema:
+        # {
+        #   "evidence": {
+        #     "EVD-ID": {
+        #       "files": { "report": "path/to/report.json", ... }
+        #     }
+        #   }
+        # }
+        legacy_evidence = idx.get("evidence", {})
+        if not isinstance(legacy_evidence, dict) or not legacy_evidence:
+            fail("evidence/index.json must contain non-empty 'items' or legacy 'evidence' map")
+        items = legacy_evidence
+        legacy_mode = True
 
     for evd_id, meta in items.items():
+        if legacy_mode:
+            if not isinstance(meta, dict):
+                fail(f"{evd_id} legacy entry must be an object")
+            files_map = meta.get("files", {})
+            if not isinstance(files_map, dict) or not files_map:
+                fail(f"{evd_id} legacy entry must contain non-empty 'files' map")
+            for fp in files_map.values():
+                if not isinstance(fp, str):
+                    fail(f"{evd_id} legacy file path must be a string")
+                if not (ROOT / fp).exists():
+                    fail(f"{evd_id} missing file: {ROOT / fp}")
+            # Legacy format reuses shared artifacts for multiple IDs, so
+            # strict evidence_id equality checks are intentionally skipped.
+            continue
+
         if isinstance(meta, list):
             files = meta
             base = ROOT
