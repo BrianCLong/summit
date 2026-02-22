@@ -191,6 +191,34 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: llm-council-evidence-scaffold
+    version: v1
+    path: prompts/evidence/llm-council-evidence-scaffold@v1.md
+    sha256: a909d1d18643e1838aecc887e57674776df080bb55e8ff34077121ed46e1b08b
+    description: Evidence scaffolding for LLM council subsumption lane-1.
+    scope:
+      paths:
+        - evidence/schemas/council-*.schema.json
+        - .github/scripts/validate-evidence.ts
+        - .github/workflows/ci-council-evidence.yml
+        - required_checks.todo.md
+        - docs/roadmap/STATUS.json
+        - prompts/evidence/llm-council-evidence-scaffold@v1.md
+        - prompts/registry.yaml
+        - agents/examples/LLM_COUNCIL_EVIDENCE_SCAFFOLDING_20260208.json
+      domains:
+        - evidence
+        - governance
+        - ci
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: svc-repo-recon
     version: v1
     path: prompts/governance/svc-repo-recon@v1.md
