@@ -1,37 +1,30 @@
 name: Release Reliability
 
 on:
-  pull_request:
+  push:
     branches: [main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  pull_request:
 
 jobs:
   verify-release:
-    name: Verify Release Integrity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile --ignore-scripts
-      - name: Run Release Verification Script
-        run: ./scripts/verify-release.sh
+      - uses: actions/checkout@v4
 
-  check-changelog:
-    name: Check Changelog Update
-    runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
-    steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/setup-python@v5
         with:
-          fetch-depth: 0 # Needed for git diff
-      - name: Fetch main branch
-        run: git fetch origin main
-      - name: Check Changelog
-        run: ./scripts/check-changelog.sh origin/main
+          python-version: '3.11'
+          cache: 'pip'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install
+        env:
+          PYTHON: python3

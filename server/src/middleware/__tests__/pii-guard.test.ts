@@ -16,7 +16,7 @@ const buildLogger = () => {
   return logger;
 };
 
-let createPiiGuardMiddleware: typeof import('../pii-guard.js').createPiiGuardMiddleware;
+let createPiiGuardMiddleware: typeof import('../pii-guard').createPiiGuardMiddleware;
 
 beforeAll(async () => {
   process.env.NODE_ENV = process.env.NODE_ENV || 'test';
@@ -29,7 +29,7 @@ beforeAll(async () => {
   process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'b'.repeat(32);
   process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
 
-  ({ createPiiGuardMiddleware } = await import('../pii-guard.js'));
+  ({ createPiiGuardMiddleware } = await import('../pii-guard'));
 });
 
 const loggerMock = buildLogger;

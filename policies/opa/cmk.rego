@@ -1,4 +1,5 @@
 package composer.cmk
+import future.keywords
 
 # Require CMK for artifacts in protected namespaces
 
@@ -30,4 +31,3 @@ decision := {
 {
   missing := [ {"code": "CMK_REQUIRED", "artifact": input.artifact.digest} | data.composer.cmk.missing_cmk ]
 }
-

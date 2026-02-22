@@ -29,7 +29,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },
@@ -49,6 +49,6 @@
     "@types/node": "20.19.27",
     "jest": "^30.2.0",
     "typescript": "^5.9.3",
-    "eslint": "9.39.2"
+    "eslint": "9.39.1"
   }
 }

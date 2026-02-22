@@ -1,4 +1,3 @@
-version: 1
 item:
   slug: claim-level-graphrag
   title: "Claim-level grounding for GraphRAG"

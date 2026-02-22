@@ -1,7 +1,7 @@
 import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { ShardManager } from '../ShardManager.js';
-import { GraphRouter } from '../GraphRouter.js';
-import { LocalityAwarePartitionStrategy } from '../PartitionStrategy.js';
+import { ShardManager } from '../ShardManager';
+import { GraphRouter } from '../GraphRouter';
+import { LocalityAwarePartitionStrategy } from '../PartitionStrategy';
 import neo4j from 'neo4j-driver';
 
 // Mock Neo4j driver

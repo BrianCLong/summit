@@ -280,9 +280,7 @@ function AppHeader({ onMenuClick }) {
   );
 
   // Show demo walkthrough link only in demo mode
-  const showDemoWalkthrough =
-    import.meta.env.VITE_DEMO_MODE === '1' ||
-    import.meta.env.VITE_DEMO_MODE === 'true';
+  const showDemoWalkthrough = import.meta.env.VITE_DEMO_MODE === '1' || import.meta.env.VITE_DEMO_MODE === 'true';
 
   return (
     <AppBar position="fixed">
@@ -290,7 +288,6 @@ function AppHeader({ onMenuClick }) {
         <IconButton
           edge="start"
           color="inherit"
-          aria-label="Open navigation menu"
           onClick={onMenuClick}
           sx={{ mr: 2 }}
         >
@@ -750,13 +747,6 @@ function MainLayout() {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[10001] focus:bg-white focus:text-blue-600 focus:px-4 focus:py-2 focus:border focus:border-blue-600 focus:rounded shadow-md"
-        style={{ textDecoration: 'none' }}
-      >
-        Skip to main content
-      </a>
       <AppHeader onMenuClick={() => setDrawerOpen(true)} />
       <NavigationDrawer
         open={drawerOpen}
@@ -765,7 +755,6 @@ function MainLayout() {
 
       <Box
         component="main"
-        id="main-content"
         role="main"
         tabIndex={a11yGuardrailsEnabled ? -1 : undefined}
         ref={mainRef}

@@ -1,9 +1,14 @@
 {
   "evidence_id": "EVD-SOT-EVAL-001",
-  "summary": "Smoke test results for SOT evaluation.",
   "mode": "smoke",
   "results": [
-    {"case": "arithmetic-001", "status": "pass"},
-    {"case": "plan-001", "status": "pass"}
+    {
+      "case": "arithmetic-001",
+      "status": "pass"
+    },
+    {
+      "case": "plan-001",
+      "status": "pass"
+    }
   ]
 }

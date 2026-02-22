@@ -1,4 +1,5 @@
 package composer.residency
+import future.keywords
 
 # Input contract (example):
 # input = {
@@ -38,4 +39,3 @@ decision := {
   mode := input.mode
   allow_val := r.allow
 }
-

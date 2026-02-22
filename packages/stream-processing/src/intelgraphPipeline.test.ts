@@ -6,7 +6,7 @@ import {
   IntelGraphPipeline,
   SourceRegistry,
   TokenBucketRateShaper,
-} from './intelgraphPipeline.js';
+} from './intelgraphPipeline';
 
 describe('IntelGraphPipeline', () => {
   const schema = z.object({

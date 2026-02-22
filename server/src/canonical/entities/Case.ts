@@ -5,7 +5,7 @@
  * Represents investigations, legal cases, or analytical case files
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface CaseParticipant {
   /** Participant entity ID */

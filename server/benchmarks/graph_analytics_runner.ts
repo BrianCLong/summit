@@ -1,5 +1,5 @@
 
-import { Neo4jGraphAnalyticsService } from '../src/services/GraphAnalyticsService.js';
+import { Neo4jGraphAnalyticsService } from '../src/services/GraphAnalyticsService';
 
 // Define the mock delay and delay function
 const MOCK_DB_DELAY_MS = 10;

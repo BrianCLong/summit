@@ -1,4 +1,5 @@
 package maestro.deploy
+import future.keywords
 
 import data.maestro.deploy.allow
 import data.maestro.deploy.deny

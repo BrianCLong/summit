@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { InfluenceChannelService, ActivityMetric } from '../InfluenceChannelService.js';
+import { InfluenceChannelService, ActivityMetric } from '../InfluenceChannelService';
 
 describe('InfluenceChannelService', () => {
   let service: InfluenceChannelService;

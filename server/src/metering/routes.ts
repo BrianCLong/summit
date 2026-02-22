@@ -1,8 +1,8 @@
 import express from 'express';
-import { persistentUsageRepository } from './persistence.js';
-import { quotaManager } from './quotas.js';
-import { planService } from '../usage/plans.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import { persistentUsageRepository } from './persistence';
+import { quotaManager } from './quotas';
+import { planService } from '../usage/plans';
+import { ensureAuthenticated } from '../middleware/auth';
 
 import { User } from '../lib/auth.js';
 

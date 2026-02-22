@@ -1,7 +1,7 @@
 // @ts-nocheck
 import * as v8 from 'v8';
 import * as os from 'os';
-import { logger } from '../config/logger.js';
+import { logger } from '../config/logger';
 
 export interface SystemHealth {
   isOverloaded: boolean;

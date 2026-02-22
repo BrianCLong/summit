@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVID::lineage::sdk::a0680cf11fd217493bfd7b11fea1b3477973fee0::pr1_verification::v1",
-  "status": "PASS",
-  "validation_target": "packages/lineage/openlineage/examples/run-complete.json",
-  "sdk_version": "0.1.0",
-  "schema_validation": "PASS"
-}

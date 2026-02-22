@@ -1,31 +1,29 @@
 name: Reproducible Builds Check
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  pull_request:
 
 jobs:
   repro-check:
-    name: Reproducibility Sanity Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
-      - uses: actions/setup-node@v4 # v6
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v4
         with:
-          node-version: "20"
-          cache: pnpm
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Run Reproducible Builds Check
-        run: ./scripts/repro-check.sh || echo "::warning::Reproducible build check failed, but this is currently non-blocking."
+          python-version: '3.11'
+          cache: 'pip'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - run: pnpm install
+      - run: python3 tools/evidence_pack.py

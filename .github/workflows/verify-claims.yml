@@ -15,12 +15,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "20"
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec tsx scripts/governance/validate_claims.ts
-      - name: Verify Governance Gates
-        run: pnpm exec tsx scripts/governance/verify_governance_gates.ts

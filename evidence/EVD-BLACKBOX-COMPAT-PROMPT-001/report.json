@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-BLACKBOX-COMPAT-PROMPT-001",
+  "summary": "Prompt contract present and stable",
+  "steps": [
+    {
+      "name": "check_contract_exists",
+      "status": "pass",
+      "details": "prompt_contract.md found"
+    }
+  ],
+  "run_id": "manual-1769812117",
+  "item_slug": "blackbox-compat-prompt-001"
+}

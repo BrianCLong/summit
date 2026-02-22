@@ -21,7 +21,7 @@
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
-    "test": "vitest run",
+    "test": "vitest",
     "extract": "node scripts/extract-strings.js",
     "validate": "node scripts/validate-translations.js",
     "coverage": "node scripts/translation-coverage.js"

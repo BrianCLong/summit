@@ -1,4 +1,5 @@
 package summit.provenance.gate
+import future.keywords
 
 # Default deny
 default allow = false
