@@ -15,6 +15,7 @@ import { registerAuditCommands } from './commands/audit.js';
 import { registerRunCommands } from './commands/run.js';
 import { registerDeterminismCommands } from './commands/determinism.js';
 import { registerSwitchboardCommands } from './commands/switchboard.js';
+import { registerRegulatoryCommands } from './commands/regulatory.js';
 import { VERSION } from './lib/constants.js';
 import { setupErrorHandling } from './utils/errors.js';
 
@@ -46,6 +47,7 @@ async function main(): Promise<void> {
   registerRunCommands(program);
   registerDeterminismCommands(program);
   registerSwitchboardCommands(program);
+  registerRegulatoryCommands(program);
 
   // Parse and execute
   await program.parseAsync(process.argv);
