@@ -25,9 +25,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.1.1
+        uses: sigstore/cosign-installer@v3.4.0
         with:
-          cosign-release: 'v2.2.0'
+          cosign-release: 'v3.4.0'
 
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0.14.3
@@ -42,8 +42,8 @@ jobs:
 
       - name: Sign SBOMs
         run: |
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.spdx.json.sig sbom.spdx.json
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.cdx.json.sig sbom.cdx.json
+          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.spdx.json.sig --bundle sbom.spdx.json.bundle.json sbom.spdx.json
+          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.cdx.json.sig --bundle sbom.cdx.json.bundle.json sbom.cdx.json
         env:
           SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
 
@@ -55,7 +55,7 @@ jobs:
 
       - name: Sign Provenance
         run: |
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature attestation.json.sig attestation.json
+          cosign sign-blob --key env://SIGSTORE_KEY --output-signature attestation.json.sig --bundle attestation.json.bundle.json attestation.json
         env:
           SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
 
@@ -71,10 +71,13 @@ jobs:
             dist/
             sbom.spdx.json
             sbom.spdx.json.sig
+            sbom.spdx.json.bundle.json
             sbom.cdx.json
             sbom.cdx.json.sig
+            sbom.cdx.json.bundle.json
             attestation.json
             attestation.json.sig
+            attestation.json.bundle.json
 
   provenance:
     needs: [build]
@@ -100,16 +103,37 @@ jobs:
     runs-on: ubuntu-latest
     needs: [provenance]
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.4.0
+        with:
+          cosign-release: 'v3.4.0'
+
       - name: Download artifacts
         uses: actions/download-artifact@v7
         with:
           name: summit-artifacts
           path: dist
+
       - name: Verify checksums
         run: |
           cd dist
           sha256sum -c checksums.txt
-      - name: Verify Attestation
+
+      - name: Verify Bundles (Cosign)
+        run: |
+          echo "${SIGSTORE_KEY}" > cosign.key
+          cosign public-key --key cosign.key > cosign.pub
+
+          chmod +x scripts/supply-chain/verify_bundle.sh
+          ./scripts/supply-chain/verify_bundle.sh dist/sbom.spdx.json dist/sbom.spdx.json.bundle.json cosign.pub
+          ./scripts/supply-chain/verify_bundle.sh dist/sbom.cdx.json dist/sbom.cdx.json.bundle.json cosign.pub
+          ./scripts/supply-chain/verify_bundle.sh dist/attestation.json dist/attestation.json.bundle.json cosign.pub
+        env:
+          SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
+
+      - name: Verify Attestation (GitHub)
         run: |
           gh attestation verify dist/checksums.txt --repo ${{ github.repository }}
         env:

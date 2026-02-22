@@ -1,0 +1,276 @@
+{
+  "project": "Summit",
+  "updated_by": "codex",
+  "skills": [
+    {
+      "name": "artifacts-builder",
+      "intent_tags": [
+        "external",
+        "artifacts",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "context-engineering-pack",
+      "intent_tags": [
+        "context-engineering",
+        "skills-routing",
+        "long-horizon",
+        "ga-readiness"
+      ],
+      "inputs": [
+        "user_request",
+        "skill_catalog"
+      ],
+      "outputs": [
+        "skill_selection",
+        "routing_plan",
+        "context_rules"
+      ]
+    },
+    {
+      "name": "devops-iac-engineer",
+      "intent_tags": [
+        "external",
+        "devops",
+        "iac",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "eks-skill",
+      "intent_tags": [
+        "external",
+        "eks",
+        "kubernetes",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "github-actions-templates",
+      "intent_tags": [
+        "external",
+        "github-actions",
+        "ci",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "iac-terraform",
+      "intent_tags": [
+        "external",
+        "terraform",
+        "iac",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "knowledge-graph-builder",
+      "intent_tags": [
+        "external",
+        "knowledge-graph",
+        "graph",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "mcp-auth",
+      "intent_tags": [
+        "mcp",
+        "auth",
+        "scopes",
+        "least-privilege"
+      ],
+      "inputs": [
+        "tenant_identifier",
+        "actor_identity",
+        "requested_scopes",
+        "purpose_string"
+      ],
+      "outputs": [
+        "scope_set",
+        "denied_scopes",
+        "break_glass_eligibility"
+      ]
+    },
+    {
+      "name": "mcp-evidence",
+      "intent_tags": [
+        "mcp",
+        "evidence",
+        "provenance",
+        "audit"
+      ],
+      "inputs": [
+        "session_id",
+        "tool_invocation_metadata",
+        "policy_decisions"
+      ],
+      "outputs": [
+        "evidence_bundle",
+        "trace_ids"
+      ]
+    },
+    {
+      "name": "mcp-policy",
+      "intent_tags": [
+        "mcp",
+        "policy-as-code",
+        "authorization",
+        "audit"
+      ],
+      "inputs": [
+        "tool_metadata",
+        "actor_scopes",
+        "declared_purpose",
+        "break_glass_request"
+      ],
+      "outputs": [
+        "decision_with_rationale",
+        "required_scopes_checklist",
+        "evidence_log_entries"
+      ]
+    },
+    {
+      "name": "mcp-transport",
+      "intent_tags": [
+        "mcp",
+        "transport",
+        "stdio",
+        "sse"
+      ],
+      "inputs": [
+        "transport_selection",
+        "max_bytes_per_event",
+        "session_concurrency_limits"
+      ],
+      "outputs": [
+        "ordered_event_streams",
+        "backpressure_safe_writes",
+        "transport_health_signals"
+      ]
+    },
+    {
+      "name": "query-expert",
+      "intent_tags": [
+        "external",
+        "query",
+        "analysis",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "react-best-practices-pack",
+      "intent_tags": [
+        "react",
+        "nextjs",
+        "performance",
+        "optimization",
+        "ga-readiness"
+      ],
+      "inputs": [
+        "frontend_change_context",
+        "rule_category"
+      ],
+      "outputs": [
+        "rule_selection",
+        "optimization_recommendations",
+        "verification_steps"
+      ]
+    },
+    {
+      "name": "shadcn-ui-expert",
+      "intent_tags": [
+        "external",
+        "ui",
+        "shadcn",
+        "governed-exception",
+        "pending-upstream-pin"
+      ],
+      "inputs": [
+        "pnpm_skill_add",
+        "upstream_source"
+      ],
+      "outputs": [
+        "upstream_skill_locked"
+      ]
+    },
+    {
+      "name": "Summit Skill Router (GA Orchestrator)",
+      "intent_tags": [
+        "router",
+        "ga",
+        "governance",
+        "deterministic",
+        "evidence-first"
+      ],
+      "inputs": [
+        "user_request",
+        "optional_repo_snippets",
+        "optional_ci_links"
+      ],
+      "outputs": [
+        "plan",
+        "skill_chain",
+        "deliverables",
+        "verification_steps"
+      ]
+    }
+  ]
+}

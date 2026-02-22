@@ -1,0 +1,26 @@
+{
+  "id": "example.minimal",
+  "version": "0.1.0",
+  "description": "Minimal PromptSpec example for schema validation.",
+  "inputs_schema": {
+    "type": "object",
+    "properties": {
+      "task": {"type": "string"}
+    },
+    "required": ["task"],
+    "additionalProperties": false
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "summary": {"type": "string"}
+    },
+    "required": ["summary"],
+    "additionalProperties": false
+  },
+  "prompt_template": "Summarize the task: {{task}}",
+  "policies": {
+    "tools_allowed": false,
+    "deny_guaranteed_earnings": true
+  }
+}
