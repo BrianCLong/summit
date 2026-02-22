@@ -15,9 +15,9 @@ const tenantDistributedCaches = new Map<string, DistributedCacheService>();
  * Get a tenant-aware CacheManager.
  * Automatically scopes keys to the current tenant from correlation context.
  */
-export function getTenantCacheManager(): CacheManager {
+export function getTenantCacheManager(explicitTenantId?: string): CacheManager {
   const store = correlationStorage.getStore();
-  const tenantId = store?.get('tenantId') || 'global';
+  const tenantId = explicitTenantId || store?.get('tenantId') || 'global';
 
   if (!tenantCacheManagers.has(tenantId)) {
     const redisClient = getRedisClient('cache');
@@ -35,9 +35,9 @@ export function getTenantCacheManager(): CacheManager {
  * Get a tenant-aware DistributedCacheService.
  * Automatically scopes keys to the current tenant from correlation context.
  */
-export function getTenantDistributedCache(): DistributedCacheService {
+export function getTenantDistributedCache(explicitTenantId?: string): DistributedCacheService {
   const store = correlationStorage.getStore();
-  const tenantId = store?.get('tenantId') || 'global';
+  const tenantId = explicitTenantId || store?.get('tenantId') || 'global';
 
   if (!tenantDistributedCaches.has(tenantId)) {
     const redisClient = getRedisClient('dist');
