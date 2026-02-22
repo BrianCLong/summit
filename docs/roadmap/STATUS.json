@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-08T00:45:00Z",
+  "revision_note": "Added CSE graph extensions standard and schema reference for cogwar lab alignment.",
   "initiatives": [
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -168,7 +162,7 @@
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
+      "notes": "Cognitive campaign schema plus CSE graph extensions standard/schema alignment for RU-UA lab."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
@@ -187,12 +181,6 @@
       "area": "docs/runbooks",
       "status": "complete",
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
-    },
-    {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
     },
     {
       "id": "ip-defense-claims-c391-s420",
@@ -224,7 +212,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/cogwar/cse.graph.v1.schema.json",
+  "title": "Cognitive Security Engine Graph Extensions v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "campaigns",
+    "cognitive_vulns",
+    "audience_segments",
+    "cognitive_states",
+    "relationships"
+  ],
+  "properties": {
+    "schema_version": { "const": "cse.graph.v1" },
+    "campaigns": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/campaign" }
+    },
+    "cognitive_vulns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/cognitive_vuln" }
+    },
+    "audience_segments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/audience_segment" }
+    },
+    "cognitive_states": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/cognitive_state" }
+    },
+    "relationships": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/relationship" }
+    }
+  },
+  "$defs": {
+    "campaign": {
+      "type": "object",
+      "required": ["campaign_id", "playbook_id", "phase", "start_date", "evidence_refs"],
+      "properties": {
+        "campaign_id": { "type": "string", "pattern": "^CSE-CAMP-[A-Z0-9]{6}$" },
+        "playbook_id": { "type": "string" },
+        "phase": {
+          "type": "string",
+          "enum": ["shaping", "seeding", "amplification"]
+        },
+        "start_date": { "type": "string", "format": "date" },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^EVID-[A-Z0-9]{10}$" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "cognitive_vuln": {
+      "type": "object",
+      "required": ["vuln_id", "type", "bias", "strength"],
+      "properties": {
+        "vuln_id": { "type": "string", "pattern": "^CSE-VULN-[A-Z0-9]{6}$" },
+        "type": {
+          "type": "string",
+          "enum": ["dissonance", "exposure", "threat", "identity"]
+        },
+        "bias": { "type": "string" },
+        "strength": { "type": "number", "minimum": -1, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "audience_segment": {
+      "type": "object",
+      "required": ["segment_id", "demographics", "vulnerability_score", "platform_reach"],
+      "properties": {
+        "segment_id": { "type": "string", "pattern": "^CSE-AUD-[A-Z0-9]{6}$" },
+        "demographics": { "type": "string" },
+        "vulnerability_score": { "type": "number", "minimum": 0, "maximum": 1 },
+        "platform_reach": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "cognitive_state": {
+      "type": "object",
+      "required": ["state_id", "trust_level", "polarization", "salience_shift"],
+      "properties": {
+        "state_id": { "type": "string", "pattern": "^CSE-STATE-[A-Z0-9]{6}$" },
+        "trust_level": { "type": "number", "minimum": 0, "maximum": 1 },
+        "polarization": { "type": "number", "minimum": -1, "maximum": 1 },
+        "salience_shift": { "type": "number", "minimum": -1, "maximum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "relationship": {
+      "type": "object",
+      "required": [
+        "relationship_id",
+        "type",
+        "from_id",
+        "to_id",
+        "evidence_refs"
+      ],
+      "properties": {
+        "relationship_id": {
+          "type": "string",
+          "pattern": "^CSE-REL-[A-Z0-9]{6}$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "EXPLOITS",
+            "TARGETS",
+            "EXPLOITED_IN",
+            "RECEPTIVE_TO",
+            "INFLUENCED_BY",
+            "DRIVES",
+            "TRANSITIONS_TO"
+          ]
+        },
+        "from_id": { "type": "string" },
+        "to_id": { "type": "string" },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^EVID-[A-Z0-9]{10}$" },
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
