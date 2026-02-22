@@ -18,7 +18,6 @@ import {
 } from './types/index.js';
 import { GraphRetriever } from './retrieval/GraphRetriever.js';
 import { DocumentRetriever } from './retrieval/DocumentRetriever.js';
-import { Kg2RagPipeline } from './kg2rag/kg2ragPipeline.js';
 import { TemporalRetriever, TemporalScope } from './retrieval/TemporalRetriever.js';
 import { PolicyRetriever, PolicyContext } from './retrieval/PolicyRetriever.js';
 import { CitationManager } from './citation/CitationManager.js';
@@ -61,7 +60,6 @@ export class GraphRAGOrchestrator {
   private citationManager: CitationManager;
   private contextFusion: ContextFusion;
   private counterfactualEngine: CounterfactualEngine;
-  private kg2ragPipeline: Kg2RagPipeline;
   private llm: LLMIntegration;
   private config: GraphRAGConfig;
 
@@ -116,10 +114,6 @@ export class GraphRAGOrchestrator {
       maxTokens: config.generation.maxTokens * 2,
     });
     this.counterfactualEngine = new CounterfactualEngine(this.driver, this.llm);
-    this.kg2ragPipeline = new Kg2RagPipeline({
-      documentRetriever: this.documentRetriever,
-      driver: this.driver,
-    });
   }
 
   /**
@@ -228,9 +222,6 @@ export class GraphRAGOrchestrator {
     query: RetrievalQuery,
     options: QueryOptions,
   ): Promise<RetrievalResult> {
-    if (query.strategy === 'KG2RAG') {
-      return this.performKg2RagRetrieval(query, options);
-    }
     // Run retrievers in parallel
     const [graphResult, documentChunks, temporalChunks] = await Promise.all([
       this.graphRetriever.retrieve(query),
@@ -425,67 +416,6 @@ export class GraphRAGOrchestrator {
   /**
    * Close connections
    */
-
-    /**
-   * Perform KG2RAG retrieval
-   */
-  private async performKg2RagRetrieval(
-    query: RetrievalQuery,
-    options: QueryOptions,
-  ): Promise<RetrievalResult> {
-    const startTime = Date.now();
-
-    const seed = await this.kg2ragPipeline.buildSeedSet(query.query, {
-      tenantId: query.tenantId,
-      query: query.query,
-      maxHops: query.maxHops,
-      maxNodes: query.maxNodes,
-    });
-
-    const subgraph = await this.kg2ragPipeline.expandViaGraph(seed, {
-      tenantId: query.tenantId,
-      query: query.query,
-      maxHops: query.maxHops,
-      maxNodes: query.maxNodes,
-    });
-
-    const context = this.kg2ragPipeline.organizeContext(subgraph, query.query, {
-      tenantId: query.tenantId,
-      query: query.query,
-    });
-
-    // Map back to RetrievalResult format
-    const evidenceChunks = context.paragraphs.map((p, i) => {
-        // Calculate a score based on rank (Reciprocal Rank-ish or linear decay)
-        const rank = i + 1;
-        const relevanceScore = 1.0 / (1 + Math.log(rank));
-
-        return {
-            id: `kg2rag-${i}-${Date.now()}`,
-            content: p,
-            citations: [],
-            graphPaths: [],
-            relevanceScore,
-            tenantId: query.tenantId,
-        } as EvidenceChunk;
-    });
-
-    const processingTimeMs = Date.now() - startTime;
-
-    return {
-      id: `res-${Date.now()}`,
-      query: query.query,
-      evidenceChunks,
-      subgraph: {
-        nodes: subgraph.nodes,
-        edges: subgraph.edges,
-      },
-      totalDocumentsSearched: seed.seedChunks.length,
-      totalNodesTraversed: subgraph.nodes.length,
-      processingTimeMs,
-    };
-  }
-
   async close(): Promise<void> {
     await this.driver.close();
     await this.documentRetriever.close();

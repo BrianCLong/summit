@@ -8,10 +8,6 @@ on:
       - ".github/workflows/infra-drift.yml"
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write
@@ -29,7 +25,6 @@ env:
 jobs:
   drift:
     name: Drift – plan & risk
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -60,15 +55,14 @@ jobs:
       - name: Generate workspace matrix (rollout-aware)
         id: mx
         run: |
-          IFS=',' read -ra ALL_WS <<< "$DRIFT_WORKSPACES"
-          echo "matrix=$(printf '%s' "${ALL_WS[@]}" | jq -R -s 'split(",")')" >> $GITHUB_OUTPUT
+          # IFS=... removed
+          echo "matrix=$(echo "$DRIFT_WORKSPACES" | jq -R .split(",").)" >> $GITHUB_OUTPUT
 
       - name: Save workspace matrix
         run: echo "${{ steps.mx.outputs.matrix }}"
 
   plan:
     name: Plan (${{ matrix.ws }})
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     needs: [drift]
     strategy:

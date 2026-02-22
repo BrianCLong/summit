@@ -16,6 +16,10 @@
       "@summitsec/vcr-kit/*": ["packages/vcr-kit/src/*"],
       "@intelgraph/flags/*": ["libs/flags/node/*"],
       "@intelgraph/audit/*": ["libs/audit/node/*"],
+      "@intelgraph/llm-gateway": ["libs/llm-gateway/src/index.ts"],
+      "@intelgraph/llm-gateway/*": ["libs/llm-gateway/src/*"],
+      "@intelgraph/openai-responses": ["libs/providers/openai-responses/src/index.ts"],
+      "@intelgraph/openai-responses/*": ["libs/providers/openai-responses/src/*"],
       "@summit/agent-gym": ["packages/agent-gym/src/index.ts"],
       "@summit/agent-gym-metrics": ["packages/agent-gym-metrics/src/index.ts"]
     }

@@ -6,7 +6,6 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { createHash, randomUUID } from 'crypto';
 import { getPostgresPool } from '../config/database.js';
-import { quantumIdentityManager } from '../security/quantum-identity-manager.js';
 import logger from '../config/logger.js';
 
 const execAsync = promisify(exec);
@@ -54,36 +53,13 @@ export class AirgapService {
       const manifestStr = readFileSync(manifestPath, 'utf-8');
       const manifest: ExportManifest = JSON.parse(manifestStr);
 
-      // 3. Verify PQC Signature (Task #114)
-      if (!manifest.pqcSignature) {
-        throw new Error('Security Violation: Airgap bundle missing PQC signature');
-      }
-
-      // Reconstruct identity for verification
-      const serviceId = manifest.pqcServiceId || 'unknown';
-      const signedPayload = `service=${serviceId};hash=${manifest.integrity.manifestHash}`;
-
-      const identityToVerify = {
-        serviceId: signedPayload,
-        publicKey: 'simulated-key',
-        algorithm: 'KYBER-768' as const,
-        issuedAt: manifest.createdAt,
-        expiresAt: new Date(Date.now() + 1000).toISOString(),
-        signature: manifest.pqcSignature
-      };
-
-      const isPqcValid = quantumIdentityManager.verifyIdentity(identityToVerify);
-      if (!isPqcValid) {
-        throw new Error('Security Violation: Invalid PQC signature on airgap bundle');
-      }
-      log.info({ importId, serviceId: manifest.pqcServiceId }, 'PQC Signature verified');
-
-      // 4. Verify Tenant Binding
+      // 3. Verify Tenant Binding
+      // The manifest request params should contain tenantId
       if (manifest.request.tenantId !== tenantId) {
         throw new Error(`Tenant mismatch: Bundle belongs to ${manifest.request.tenantId}, but importing into ${tenantId}`);
       }
 
-      // 5. Verify Integrity (Hashes)
+      // 4. Verify Integrity (Hashes)
       // Bundle hash check skipped as it causes circular dependency.
       // We rely on file hash verification.
       const bundleHash = await this.calculateFileHash(filePath);

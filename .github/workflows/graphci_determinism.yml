@@ -9,15 +9,11 @@ on:
     paths:
       - 'ci/graphci/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   determinism-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4

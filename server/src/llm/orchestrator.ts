@@ -65,12 +65,6 @@ export class SummitLlmOrchestrator implements LlmOrchestrator {
 
         console.log(`[LLM] Routing ${request.purpose} (Risk: ${request.riskLevel}) to ${decision.provider}/${decision.model} because: ${decision.reason}`);
 
-        // Innovation: Mode-aware routing for NVIDIA NIM
-        if (decision.provider === 'nvidia-nim') {
-            const isHardPrompt = request.purpose === 'agent' || request.purpose === 'tool_call' || inputTokens > 4000;
-            request.mode = isHardPrompt ? 'thinking' : 'instant';
-        }
-
         // 4. Execute
         const result = await provider.chat({
             ...request,
