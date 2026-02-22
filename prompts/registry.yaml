@@ -546,6 +546,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: narrative-operationalization-schema
+    version: v1
+    path: prompts/implement/narrative-operationalization-schema@v1.md
+    sha256: f347be271f5a4a2732a7930871f5e28fd12ef84819211564ebed9613ba8d1658
+    description: Implement narrative-operationalization schema primitives, evidence IDs, and standards docs.
+    scope:
+      paths:
+        - server/src/services/graphrag/
+        - docs/standards/narrative-operationalization.md
+        - docs/roadmap/STATUS.json
+        - prompts/implement/narrative-operationalization-schema@v1.md
+        - prompts/registry.yaml
+      domains:
+        - graphrag
+        - narrative
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: maestro-longrun-job-engine
     version: v1
     path: prompts/engineering/maestro-longrun-job-engine.md
