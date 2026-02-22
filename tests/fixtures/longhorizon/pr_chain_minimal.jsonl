@@ -1,0 +1,1 @@
+{"repo": {"name": "summit-minimal"}, "objective": "Implement long-horizon fixtures", "prs": [{"title": "feat: add schema", "commits": [{"sha": "sha1", "message": "feat: init schema", "files_changed": [{"path": "schema.ts", "additions": 50, "deletions": 0}]}]}]}

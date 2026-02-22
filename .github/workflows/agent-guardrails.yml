@@ -3,9 +3,11 @@ name: agent-guardrails
 on:
   pull_request:
     types: [opened, reopened, synchronize, edited, labeled]
+  schedule:
+    - cron: "0 4 * * *" # Daily at 4 AM
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -78,8 +80,10 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "18"
 
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs
@@ -93,12 +97,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-      - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
 
@@ -132,3 +134,19 @@ jobs:
           # Parse the JSON array of files and pass each as an argument to the script
           files='${{ steps.files.outputs.result }}'
           echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+
+  long-horizon-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Long-Horizon Drift Detector
+        run: npx tsx scripts/monitoring/davinci-agency-2602-02619-drift.ts
+        env:
+          LONGHORIZON_PR_CHAINS_ENABLED: "true"

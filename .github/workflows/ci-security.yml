@@ -479,6 +479,7 @@ jobs:
       - cis-benchmark
       - baseline
       - dast
+      - long-horizon-policy
     if: ${{ always() }}
     outputs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
@@ -505,6 +506,7 @@ jobs:
           CIS_STATUS: ${{ needs.cis-benchmark.result }}
           BASELINE_STATUS: ${{ needs.baseline.result }}
           DAST_STATUS: ${{ needs.dast.result }}
+          LONG_HORIZON_STATUS: ${{ needs.long-horizon-policy.result }}
         run: |
           python - <<'PY'
             import json
@@ -526,6 +528,7 @@ jobs:
                 "CIS benchmark": os.environ.get('CIS_STATUS', 'unknown'),
                 "Baseline": os.environ.get('BASELINE_STATUS', 'unknown'),
                 "DAST": os.environ.get('DAST_STATUS', 'skipped'),
+                "Long-horizon": os.environ.get('LONG_HORIZON_STATUS', 'unknown'),
             }
             summary = {
                 "reportCount": len(files),
@@ -567,6 +570,22 @@ jobs:
           DASHBOARD_URL: https://github.com/${{ github.repository }}/security/code-scanning
         run: echo "dashboard_url=$DASHBOARD_URL" >> "$GITHUB_OUTPUT"
 
+  long-horizon-policy:
+    name: Long-horizon agent policy checks
+    runs-on: ubuntu-22.04
+    needs: context
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run policy and redaction tests
+        run: NODE_OPTIONS=--experimental-vm-modules pnpm jest tests/security/longhorizon_redaction.test.ts
+
   production-approval:
     name: Security gate approval for deployments
     runs-on: ubuntu-22.04
@@ -581,34 +600,3 @@ jobs:
           DASHBOARD_URL: ${{ needs.security-summary.outputs.dashboard_url }}
         run: |
           echo "All security controls succeeded. Approvers can review ${DASHBOARD_URL} before promoting to production."
-
-  sigstore-verify:
-    name: Sigstore bundle verification
-    runs-on: ubuntu-latest
-    if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      # Demo: Verify cosign itself (if we could download it)
-      # For now, we just download a dummy or use the action to verify a test artifact
-      - name: Download test artifact
-        run: |
-          echo "test artifact" > artifact.bin
-          echo "{}" > bundle.sigstore.json # Dummy bundle
-
-      - name: Run Sigstore Verification
-        uses: ./.github/actions/sigstore-verify
-        with:
-          cosign_version: "3.0.4"
-          artifact: "artifact.bin"
-          bundle: "bundle.sigstore.json"
-          evidence_id: "EVD-SIGSTORE-BUNDLEFIRST-CI-001"
-
-      - name: Upload Evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence
-          path: evidence/
