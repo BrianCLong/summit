@@ -1,24 +1,40 @@
 {
-  "evidence": {
-    "type": "array",
-    "description": "List of evidence items",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["version", "items"],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
     "items": {
-      "$ref": "#/definitions/EvidenceItem"
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/EvidenceItem"
+      }
     }
   },
   "definitions": {
     "EvidenceItem": {
       "type": "object",
-      "required": ["id", "type", "data"],
+      "required": ["evidence_id", "files"],
       "properties": {
-        "id": {
+        "evidence_id": {
           "type": "string"
         },
-        "type": {
-          "type": "string"
-        },
-        "data": {
-          "type": "object"
+        "files": {
+          "type": "object",
+          "properties": {
+            "report": {
+              "type": "string"
+            },
+            "metrics": {
+              "type": "string"
+            },
+            "stamp": {
+              "type": "string"
+            }
+          },
+          "required": ["report"]
         }
       }
     }

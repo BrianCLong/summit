@@ -172,7 +172,7 @@ jobs:
           fi
 
           ./scripts/release/update_governance_audit_log.sh \
-            --event-type guard \
+            --event-type gate \
             --status "${LOG_STATUS}" \
             --message "${MESSAGE}" \
             --run-id "${{ github.run_id }}" \

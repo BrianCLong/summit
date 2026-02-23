@@ -65,7 +65,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install Dependencies
-        run: pip install pyyaml
+        run: npm install yaml --no-workspaces
 
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
