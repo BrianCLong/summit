@@ -1,0 +1,7 @@
+id: "item-unknown"
+version: "1.0.0"
+description: "A placeholder bundle for testing verification"
+items:
+  - id: "test-item"
+    type: "test"
+    content: "test content"

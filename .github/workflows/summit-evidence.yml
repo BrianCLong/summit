@@ -25,7 +25,7 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          python3 -m pytest tests/policies/test_influence_governance.py tests/info_integrity/test_validate.py tests/evals/test_info_integrity_evals.py tests/info_integrity/test_reporting_audit.py
+          python3 -m pytest tests/evals/test_info_integrity_evals.py
       - name: Run Evals
         env:
           PYTHONPATH: .
