@@ -922,3 +922,29 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: ef0f275c5369f095bbe2ea6b5d05f98e148b9bfc16cdc9eed2c6bef2db6bc242
+    description: Orchestrate the daily sprint evidence, plan, execution log, and end-of-day report.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_2026-02-23.md
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+        - agents/examples/DAILY_SPRINT_20260223_RUN1.json
+      domains:
+        - automation
+        - ops
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

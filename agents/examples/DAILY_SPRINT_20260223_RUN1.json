@@ -1,0 +1,38 @@
+{
+  "task_id": "DAILY_SPRINT_20260223_RUN1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-orchestrator",
+    "version": "v1",
+    "sha256": "ef0f275c5369f095bbe2ea6b5d05f98e148b9bfc16cdc9eed2c6bef2db6bc242",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260223_RUN1.json"
+    ],
+    "domains": ["automation", "ops", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["daily_sprint_log"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log includes evidence, plan, and end-of-day report.",
+    "Roadmap status timestamp updated to reflect the run.",
+    "Prompt registry and task spec updated for prompt integrity."
+  ],
+  "stop_conditions": [
+    "Scope expands beyond declared paths.",
+    "GitHub API connectivity blocks issue/PR evidence capture without logging a Governed Exception."
+  ]
+}
