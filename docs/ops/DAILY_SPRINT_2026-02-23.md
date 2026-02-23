@@ -133,3 +133,22 @@ Continuation run timestamp (UTC): 2026-02-23T00:33:19Z
 - Completed: deterministic gate remediation inputs applied.
 - In progress: waiting for fresh non-canceled workflow completions.
 - Blocked: none (queue latency only).
+
+## Continuation Run 3 (2026-02-23)
+
+### Monitoring + Blocker Isolation
+1. Monitored latest PR #18594 check matrix and workflow queue state.
+2. Isolated one persistent non-canceled failure: `Golden Path Supply Chain` run `22289055276`.
+3. Reran failed run; attempt 2 failed immediately with no jobs.
+4. Direct run inspection reports: `This run likely failed because of a workflow file issue.`
+
+### Governed Exception
+- Blocker: workflow-level configuration/runtime issue outside this PR's changed files.
+- Evidence:
+  - https://github.com/BrianCLong/summit/actions/runs/22289055276
+  - `gh run view 22289055276 -R BrianCLong/summit` output indicates workflow file issue.
+
+### Continuation Status
+- Completed: monitoring pass, blocker reproduction, and evidence capture.
+- In progress: waiting for workflow-owner remediation or workflow-file hotfix.
+- Blocked: `Golden Path Supply Chain` workflow currently fails before jobs start.
