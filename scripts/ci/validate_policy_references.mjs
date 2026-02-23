@@ -89,8 +89,10 @@ export function normalizeCheckName(value) {
 function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
+    // Key might contain dots (e.g. in some matrix structures), so we escape them for the regex
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp('\$\s*\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
+    // Use double-escaped backslashes for new RegExp() constructor to ensure they are passed to the regex engine
+    const regex = new RegExp('\\$\\s*\\{\\{\\s*matrix\\.' + escapedKey + '\\s*\\}\\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
