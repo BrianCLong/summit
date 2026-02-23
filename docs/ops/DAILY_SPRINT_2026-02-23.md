@@ -389,3 +389,32 @@ Timestamp: 2026-02-23T18:16:40Z
 - Completed: Daily sprint run 8 artifacts are now PR-backed and merge-reviewable.
 - In progress: CI/check signal collection on PR #18616.
 - Blocked: Labeled issue scan command remains recorded as intermittent connectivity Governed Exception from earlier in this run.
+
+## Continuation Run 10
+Timestamp: 2026-02-23T19:20:00Z
+
+### Evidence: PR #18616 Checks Snapshot
+Command: gh pr checks -R BrianCLong/summit 18616
+Result summary:
+- Status mix: widespread `fail`, a few `pending`, several `skipping`, `CodeRabbit=pass`.
+- Representative failing checks:
+  - Build: https://github.com/BrianCLong/summit/actions/runs/22321113647/job/64579324904
+  - Compliance & Security: https://github.com/BrianCLong/summit/actions/runs/22321104175/job/64579291176
+  - Gitleaks baseline scan (blocking): https://github.com/BrianCLong/summit/actions/runs/22321106618/job/64579308099
+  - pr-metadata-check: https://github.com/BrianCLong/summit/actions/runs/22321113692/job/64579324710
+  - pii-scan: https://github.com/BrianCLong/summit/actions/runs/22321113692/job/64579324708
+- Representative pending checks:
+  - Check Changelog Update: https://github.com/BrianCLong/summit/actions/runs/22321108877/job/64579307933
+  - Check SemVer Label: https://github.com/BrianCLong/summit/actions/runs/22321104153/job/64579290929
+
+### Evidence: Labeled Issue Scan Retry
+Command: gh issue list -R BrianCLong/summit -L 50 --state open --label security --label ga --label bolt --label osint --label governance --json number,title,labels,createdAt,updatedAt,url
+Result: [] (no matching open issues).
+
+### Status Update
+- Completed: PR #18616 check-state snapshot captured and labeled issue scan exception cleared.
+- In progress: CI triage for failing checks on #18616.
+- Blocked: None.
+
+### Continuation Note
+- 2026-02-23T19:21:00Z: Initial PR status comment command had shell-escaping artifact from inline backticks; corrected with follow-up comment at https://github.com/BrianCLong/summit/pull/18616#issuecomment-3946897876.
