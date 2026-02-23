@@ -4,9 +4,8 @@
   "type": "object",
   "required": ["mappings"],
   "properties": {
-<<<<<<< HEAD
     "version": {
-      "type": "string"
+      "type": "integer"
     },
     "items": {
       "type": "object",
@@ -15,24 +14,21 @@
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
+            "type": "object",
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            }
           }
         },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
         "additionalProperties": true
       }
     },
-    "map": {
-=======
+    "evidence": {
+      "type": "object"
+    },
     "mappings": {
->>>>>>> origin/main
       "type": "object",
       "additionalProperties": {
         "type": "object",
