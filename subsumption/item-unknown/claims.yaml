@@ -1,0 +1,5 @@
+# ITEM-UNKNOWN Claims Registry
+claims:
+  - id: "ITEM-UNKNOWN:CLAIM-01"
+    description: "Item completeness verification"
+    status: "verified"

@@ -352,6 +352,8 @@ if (existsSync(sumsPath)) {
         } catch (e) {
             if (e instanceof ReleaseBundleError) {
                 addError(e.code, e.message);
+            } else if (e instanceof SyntaxError) {
+                addError('INVALID_JSON', `Malformed bundle-index.json: ${e.message}`);
             } else {
                 addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
             }
