@@ -1,12 +1,11 @@
 import pytest
-from summit.precision.detectors import MismatchReport, compute_mismatch_metrics
-
 
 def test_mismatch_metrics_shape_smoke():
-    try:
-        import torch
-    except ImportError:
-        pytest.skip("torch is required for this test")
+    # Skip if torch is not installed
+    pytest.importorskip("torch")
+
+    # Import inside the test to avoid ModuleNotFoundError at collection time
+    from summit.precision.detectors import MismatchReport, compute_mismatch_metrics
 
     r = compute_mismatch_metrics({}, {})
     assert isinstance(r, MismatchReport)
