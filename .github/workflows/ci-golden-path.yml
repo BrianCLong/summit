@@ -29,6 +29,8 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          # Setup environment
+          cp .env.example .env
           make golden-path
         env:
           CI: true
