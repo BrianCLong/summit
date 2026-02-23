@@ -371,3 +371,6 @@ supply-chain-integrity	skipping	0	https://github.com/BrianCLong/summit/actions/r
 
 ### Validation
 - 2026-02-23T18:08:10Z: jq . docs/roadmap/STATUS.json (pass)
+
+### Governed Exception
+- 2026-02-23T18:08:50Z: PR creation via gh pr create failed (Deferred pending api.github.com connectivity).
