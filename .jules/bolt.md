@@ -1,3 +1,7 @@
+## 2026-10-24 - [Batched PostgreSQL Signal Inserts]
+**Learning:** Inserting risk signals individually in a loop was a major performance bottleneck ($O(N)$ round-trips). Refactoring to a multi-row `INSERT` with chunking (100 items) reduces round-trips to $O(N/100)$. Preserving `RETURNING *` is essential to keep legacy internal arrays populated for side effects without extra queries.
+**Action:** Always use multi-row `INSERT` for bulk data associations in PostgreSQL repositories, and manually map/collect results if the repository method returns the inserted entities.
+
 ## 2025-12-29 - [Debouncing Controlled Components]
 
 **Learning:** When debouncing a controlled input in React, you must decouple the input's display value (internal state) from the prop value (external state). If you bind the input directly to the prop value while debouncing the callback, the UI will freeze or lag because the prop updates are delayed.
