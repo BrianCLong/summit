@@ -1,4 +1,5 @@
 
+import future.keywords
 package conductor
 
 test_allow_known_good {

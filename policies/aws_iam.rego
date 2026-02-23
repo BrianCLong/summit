@@ -1,4 +1,5 @@
 
+import future.keywords
 package maestro.governance
 
 # Deny overly permissive IAM roles

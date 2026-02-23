@@ -1,3 +1,4 @@
+import future.keywords
 package summit.capability.maestro_runs_read
 
 default allow = false

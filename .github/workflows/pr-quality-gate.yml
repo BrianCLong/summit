@@ -1,4 +1,4 @@
-name: "[info] PR Quality Gate"
+name: PR Quality Gate
 
 on:
   pull_request:
@@ -24,13 +24,6 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-<<<<<<< HEAD
-=======
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -52,13 +45,6 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-<<<<<<< HEAD
-=======
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
->>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -69,54 +55,90 @@ jobs:
     name: LongRunJob Spec Advisory Validation
     runs-on: ubuntu-latest
     steps:
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
           node-version: 20
           cache: "pnpm"
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Validate LongRunJob Specs (dry-run)
         run: node scripts/ci/validate-longrun-job.mjs
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
     # NOTE: ga-risk-gate job removed - referenced workflow file does not exist
     # TODO: Re-enable when ga-risk-gate.yml is created
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
   security-scan:
     name: Vulnerability and Security Scan
     uses: ./.github/workflows/ci-security.yml
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
     with:
       run_dast: false # DAST is too slow for a PR check
     secrets:
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       snyk_token: ${{ secrets.SNYK_TOKEN }}
 
   sbom:
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
     name: SBOM (warn-only policy)
     runs-on: ubuntu-latest
     steps:
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4 # v6
 
       - name: Install Syft
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         continue-on-error: true
         env:
           SBOM_FILE: artifacts/sbom/sbom.json
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
           path: artifacts/sbom/sbom.json
           retention-days: 14
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4

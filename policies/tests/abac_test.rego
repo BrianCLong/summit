@@ -1,4 +1,5 @@
 
+import future.keywords
 package policies
 
 # Test tenant isolation: user from tenant A cannot access tenant B data

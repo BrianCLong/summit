@@ -1,3 +1,4 @@
+import future.keywords
 package compliance.lib_time
 
 # Calculate elapsed days between two ISO timestamps

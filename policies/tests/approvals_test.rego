@@ -1,3 +1,4 @@
+import future.keywords
 package companyos.provenance
 
 test_approval_required {

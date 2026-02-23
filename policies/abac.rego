@@ -1,4 +1,5 @@
 # (same as in sprint doc)
+import future.keywords
 package abac.authz
 
 default allow = false

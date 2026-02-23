@@ -1,3 +1,4 @@
+import future.keywords
 package summit.capability.mcp_invoke
 
 default allow = false
