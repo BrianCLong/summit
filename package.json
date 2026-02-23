@@ -310,7 +310,9 @@
       "tough-cookie": ">=4.1.3",
       "validator": ">=13.15.20",
       "ws": ">=8.17.1",
-      "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+      "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+      "@types/hapi__catbox": "npm:@hapi/catbox@^12.1.1",
+      "@types/hapi__shot": "npm:@hapi/shot@^6.0.0"
     }
   }
 }
