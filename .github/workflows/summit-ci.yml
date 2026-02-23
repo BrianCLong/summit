@@ -62,7 +62,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -101,5 +101,12 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: Run DB Migrations
+        run: pnpm run db:migrate -- --no-backup
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/intelgraph_test?sslmode=disable
+
       - name: Run Playwright tests
         run: npx playwright test e2e/summit-smoke.spec.ts
+        env:
+          PLAYWRIGHT_USE_WEBSERVER: true

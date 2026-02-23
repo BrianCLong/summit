@@ -34,7 +34,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test
+        run: pnpm run test:e2e
         env:
           CI: true
           PLAYWRIGHT_USE_WEBSERVER: true
