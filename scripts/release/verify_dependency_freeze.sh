@@ -288,7 +288,7 @@ main() {
     has_changes=true
     echo "" >&2
     echo "Changes detected in lockfile:" >&2
-    echo "$diff_output" | head -50 >&2
+    printf '%s\n' "$diff_output" | sed -n '1,50p' >&2
 
     if [[ "$ALLOW_PATCH" == "true" ]] && is_patch_only "$diff_output"; then
       status="WARN"
