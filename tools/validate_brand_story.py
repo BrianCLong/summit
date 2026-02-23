@@ -27,8 +27,9 @@ def main() -> int:
         print(f"Error reading evidence/index.json: {e}")
         return 3
 
-    if not isinstance(idx, dict) or "items" not in idx:
-        print("evidence/index.json must contain top-level key 'items'")
+    items = idx.get("items") or idx.get("evidence")
+    if not isinstance(items, dict):
+        print("evidence/index.json must contain top-level key 'items' or 'evidence'")
         return 3
 
     # Check that our IDs are present
@@ -40,7 +41,7 @@ def main() -> int:
         "EVD-SPB500250-POLICY-001"
     ]
 
-    missing_ids = [rid for rid in required_ids if rid not in idx["items"]]
+    missing_ids = [rid for rid in required_ids if rid not in items]
     if missing_ids:
         print(f"Missing IDs in evidence/index.json: {missing_ids}")
         return 4

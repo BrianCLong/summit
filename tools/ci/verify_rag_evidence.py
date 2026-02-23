@@ -21,10 +21,10 @@ def main() -> None:
         fail("missing evidence/index.json")
 
     idx = load_json(idx_path)
-    items = idx.get("items", {})
+    items = idx.get("items") or idx.get("evidence", {})
 
     if not isinstance(items, dict):
-        fail("evidence/index.json 'items' must be a dictionary")
+        fail("evidence/index.json 'items' or 'evidence' must be a dictionary")
 
     rag_items_found = 0
 

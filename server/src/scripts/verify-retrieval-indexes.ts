@@ -33,7 +33,7 @@ async function verifyNeo4jIndexes() {
   const session = driver.session();
   try {
     const res = await session.run('SHOW INDEXES');
-    const indexes = res.records.map(r => r.get('name'));
+    const indexes = res.records.map((r: any) => r.get('name'));
 
     const required = ['entity_investigation_id_index', 'entity_fulltext_idx'];
     let allFound = true;

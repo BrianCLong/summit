@@ -112,6 +112,7 @@ interface LLMService {
     model?: string;
     maxTokens?: number;
     temperature?: number;
+    seed?: number;
     responseFormat?: 'json';
   }): Promise<string>;
 }
