@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const verifier = "scripts/ci/verify_subsumption_bundle.mjs";
-const manifest = "subsumption/item-unknown/manifest.yaml";
+const manifest = "subsumption/ingress-nginx-retirement/manifest.yaml";
 
 function run(args) {
   return spawnSync("node", [verifier, ...args], { encoding: "utf8" });
@@ -34,7 +34,7 @@ console.log("Running Verifier Tests...");
 
 // Test 3: Missing fixture (negative test)
 {
-  const denyPath = "subsumption/item-unknown/fixtures/deny/README.md";
+  const denyPath = "subsumption/ingress-nginx-retirement/fixtures/deny";
   const tempPath = denyPath + ".bak";
 
   if (!fs.existsSync(denyPath)) {
