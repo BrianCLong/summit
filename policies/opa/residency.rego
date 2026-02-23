@@ -10,13 +10,17 @@ package composer.residency
 default allow := true
 
 violation[msg] {
-  not input.artifact.region in input.tenant.allowed_regions
+  not region_allowed
   msg := {
     "code": "RESIDENCY_VIOLATION",
     "region": input.artifact.region,
     "allowed": input.tenant.allowed_regions,
     "artifact": input.artifact.digest,
   }
+}
+
+region_allowed {
+  input.tenant.allowed_regions[_] == input.artifact.region
 }
 
 allow {
@@ -38,4 +42,3 @@ decision := {
   mode := input.mode
   allow_val := r.allow
 }
-

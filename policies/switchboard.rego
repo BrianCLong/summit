@@ -6,8 +6,13 @@ allow {
   input.subject.authenticated
   input.subject.webauthn_verified
   input.action == "render_widget"
-  input.resource.widget in {"AgentRoster", "LiveTiles", "MeetingStage"}
+  is_valid_widget(input.resource.widget)
   input.context.classification <= data.labels.allow_max
+}
+
+is_valid_widget(w) {
+  widgets := {"AgentRoster", "LiveTiles", "MeetingStage"}
+  widgets[w]
 }
 
 deny[msg] {

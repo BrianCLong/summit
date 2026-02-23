@@ -9,9 +9,6 @@
 
 package agents.archetypes
 
-import future.keywords.if
-import future.keywords.in
-
 # Default deny
 default allow = false
 
@@ -20,30 +17,30 @@ default allow = false
 # ============================================================================
 
 # Chief of Staff can read user's own calendar, email, tasks
-allow_chief_of_staff_read if {
+allow_chief_of_staff_read {
     input.agent.role == "chief_of_staff"
-    input.action in ["read", "query", "list", "get", "analyze"]
-    input.resource.type in ["calendar", "email", "task", "meeting", "message"]
+    input.action == ["read", "query", "list", "get", "analyze"][_]
+    input.resource.type == ["calendar", "email", "task", "meeting", "message"][_]
     input.resource.owner_id == input.user.id
 }
 
 # Chief of Staff can create tasks/meetings for user
-allow_chief_of_staff_create if {
+allow_chief_of_staff_create {
     input.agent.role == "chief_of_staff"
-    input.action in ["create", "schedule"]
-    input.resource.type in ["task", "meeting", "reminder"]
+    input.action == ["create", "schedule"][_]
+    input.resource.type == ["task", "meeting", "reminder"][_]
     input.resource.owner_id == input.user.id
 }
 
 # Chief of Staff CANNOT modify existing tasks/meetings without approval
-require_approval_chief_of_staff_modify if {
+require_approval_chief_of_staff_modify {
     input.agent.role == "chief_of_staff"
-    input.action in ["update", "delete", "reschedule"]
-    input.resource.type in ["task", "meeting"]
+    input.action == ["update", "delete", "reschedule"][_]
+    input.resource.type == ["task", "meeting"][_]
 }
 
 # Chief of Staff CANNOT assign tasks to others without approval
-require_approval_chief_of_staff_assign if {
+require_approval_chief_of_staff_assign {
     input.agent.role == "chief_of_staff"
     input.action == "assign"
     input.resource.type == "task"
@@ -55,55 +52,55 @@ require_approval_chief_of_staff_assign if {
 # ============================================================================
 
 # COO can read all operational metrics, SLAs, incidents
-allow_coo_read_ops if {
+allow_coo_read_ops {
     input.agent.role == "coo"
-    input.action in ["read", "query", "list", "monitor"]
-    input.resource.type in ["sla", "incident", "approval", "process", "metric"]
+    input.action == ["read", "query", "list", "monitor"][_]
+    input.resource.type == ["sla", "incident", "approval", "process", "metric"][_]
 }
 
 # COO can triage incidents P2-P4 without approval
-allow_coo_triage_incident if {
+allow_coo_triage_incident {
     input.agent.role == "coo"
     input.action == "triage_incident"
-    input.resource.severity in ["P2", "P3", "P4"]
+    input.resource.severity == ["P2", "P3", "P4"][_]
 }
 
 # COO requires approval for P0/P1 incidents (critical)
-require_approval_coo_critical_incident if {
+require_approval_coo_critical_incident {
     input.agent.role == "coo"
     input.action == "triage_incident"
-    input.resource.severity in ["P0", "P1"]
+    input.resource.severity == ["P0", "P1"][_]
 }
 
 # COO can create incidents without approval
-allow_coo_create_incident if {
+allow_coo_create_incident {
     input.agent.role == "coo"
     input.action == "create_incident"
 }
 
 # COO can send reminders for approvals without approval
-allow_coo_send_reminder if {
+allow_coo_send_reminder {
     input.agent.role == "coo"
     input.action == "send_reminder"
     input.resource.type == "approval"
 }
 
 # COO requires approval to escalate incidents
-require_approval_coo_escalate if {
+require_approval_coo_escalate {
     input.agent.role == "coo"
     input.action == "escalate_incident"
 }
 
 # COO can query process drift but cannot modify processes
-allow_coo_process_analysis if {
+allow_coo_process_analysis {
     input.agent.role == "coo"
-    input.action in ["analyze", "query"]
+    input.action == ["analyze", "query"][_]
     input.resource.type == "process"
 }
 
-deny_coo_modify_process if {
+deny_coo_modify_process {
     input.agent.role == "coo"
-    input.action in ["create", "update", "delete"]
+    input.action == ["create", "update", "delete"][_]
     input.resource.type == "process"
 }
 
@@ -112,44 +109,44 @@ deny_coo_modify_process if {
 # ============================================================================
 
 # RevOps can read pipeline, forecast, account data
-allow_revops_read_revenue if {
+allow_revops_read_revenue {
     input.agent.role == "revops"
-    input.action in ["read", "query", "list", "analyze"]
-    input.resource.type in ["opportunity", "forecast", "account", "lead", "pipeline", "attribution"]
+    input.action == ["read", "query", "list", "analyze"][_]
+    input.resource.type == ["opportunity", "forecast", "account", "lead", "pipeline", "attribution"][_]
 }
 
 # RevOps CANNOT create or modify opportunities
-deny_revops_modify_opportunity if {
+deny_revops_modify_opportunity {
     input.agent.role == "revops"
-    input.action in ["create", "update", "delete"]
+    input.action == ["create", "update", "delete"][_]
     input.resource.type == "opportunity"
 }
 
 # RevOps can create tasks for sales reps (pipeline cleanup)
-allow_revops_create_tasks if {
+allow_revops_create_tasks {
     input.agent.role == "revops"
     input.action == "create_tasks"
-    input.resource.task_type in ["update_opportunity", "follow_up", "data_cleanup"]
+    input.resource.task_type == ["update_opportunity", "follow_up", "data_cleanup"][_]
 }
 
 # RevOps can calculate churn risk and attribution (read-only analysis)
-allow_revops_analytics if {
+allow_revops_analytics {
     input.agent.role == "revops"
-    input.action in ["calculate", "predict", "score", "analyze"]
-    input.resource.type in ["churn_risk", "lead_score", "attribution", "forecast_variance"]
+    input.action == ["calculate", "predict", "score", "analyze"][_]
+    input.resource.type == ["churn_risk", "lead_score", "attribution", "forecast_variance"][_]
 }
 
 # RevOps requires approval for intervention plans (high-value accounts)
-require_approval_revops_intervention if {
+require_approval_revops_intervention {
     input.agent.role == "revops"
     input.action == "create_intervention_plan"
 }
 
 # RevOps can generate reports without approval
-allow_revops_reports if {
+allow_revops_reports {
     input.agent.role == "revops"
     input.action == "generate_report"
-    input.resource.type in ["variance_report", "pipeline_report", "churn_report"]
+    input.resource.type == ["variance_report", "pipeline_report", "churn_report"][_]
 }
 
 # ============================================================================
@@ -157,40 +154,40 @@ allow_revops_reports if {
 # ============================================================================
 
 # All agents require user authentication
-require_authenticated_user if {
+require_authenticated_user {
     input.user.id != ""
     input.user.roles != []
 }
 
 # All agents must operate within organization context
-require_organization_context if {
+require_organization_context {
     input.organization.id != ""
 }
 
 # All agents must have valid role
-valid_agent_role if {
-    input.agent.role in ["chief_of_staff", "coo", "revops"]
+valid_agent_role {
+    input.agent.role == ["chief_of_staff", "coo", "revops"][_]
 }
 
 # Agents cannot access data outside their organization
-deny_cross_org_access if {
+deny_cross_org_access {
     input.resource.organization_id != input.organization.id
 }
 
 # Agents cannot impersonate users
-deny_impersonation if {
+deny_impersonation {
     input.action == "impersonate"
 }
 
 # Agents cannot modify policies
-deny_policy_modification if {
-    input.action in ["create", "update", "delete"]
+deny_policy_modification {
+    input.action == ["create", "update", "delete"][_]
     input.resource.type == "policy"
 }
 
 # Agents cannot access credentials or secrets
-deny_credential_access if {
-    input.resource.type in ["credential", "secret", "api_key", "password", "token"]
+deny_credential_access {
+    input.resource.type == ["credential", "secret", "api_key", "password", "token"][_]
 }
 
 # ============================================================================
@@ -198,40 +195,40 @@ deny_credential_access if {
 # ============================================================================
 
 # Agents can only access data at or below their classification level
-allow_classification_read if {
-    input.action in ["read", "query", "list"]
+allow_classification_read {
+    input.action == ["read", "query", "list"][_]
     classification_level(input.resource.classification) <= classification_level(input.agent.max_classification)
 }
 
-classification_level(level) := 0 if { level == "UNCLASSIFIED" }
-classification_level(level) := 1 if { level == "CONFIDENTIAL" }
-classification_level(level) := 2 if { level == "SECRET" }
-classification_level(level) := 3 if { level == "TOP_SECRET" }
-classification_level(level) := 4 if { level == "SCI" }
-classification_level(level) := 5 if { level == "SAP" }
+classification_level("UNCLASSIFIED") = 0
+classification_level("CONFIDENTIAL") = 1
+classification_level("SECRET") = 2
+classification_level("TOP_SECRET") = 3
+classification_level("SCI") = 4
+classification_level("SAP") = 5
 
 # ============================================================================
 # APPROVAL REQUIREMENTS
 # ============================================================================
 
 # Aggregate all approval requirements
-requires_approval if {
+requires_approval {
     require_approval_chief_of_staff_modify
 }
 
-requires_approval if {
+requires_approval {
     require_approval_chief_of_staff_assign
 }
 
-requires_approval if {
+requires_approval {
     require_approval_coo_critical_incident
 }
 
-requires_approval if {
+requires_approval {
     require_approval_coo_escalate
 }
 
-requires_approval if {
+requires_approval {
     require_approval_revops_intervention
 }
 
@@ -240,7 +237,7 @@ requires_approval if {
 # ============================================================================
 
 # Allow if any allow rule matches and no deny rules match
-allow if {
+allow {
     require_authenticated_user
     require_organization_context
     valid_agent_role
@@ -248,60 +245,55 @@ allow if {
     not deny_impersonation
     not deny_policy_modification
     not deny_credential_access
-    (
-        allow_chief_of_staff_read
-        or allow_chief_of_staff_create
-        or allow_coo_read_ops
-        or allow_coo_triage_incident
-        or allow_coo_create_incident
-        or allow_coo_send_reminder
-        or allow_coo_process_analysis
-        or allow_revops_read_revenue
-        or allow_revops_create_tasks
-        or allow_revops_analytics
-        or allow_revops_reports
-    )
+    any_allow_rule
 }
+
+any_allow_rule { allow_chief_of_staff_read }
+any_allow_rule { allow_chief_of_staff_create }
+any_allow_rule { allow_coo_read_ops }
+any_allow_rule { allow_coo_triage_incident }
+any_allow_rule { allow_coo_create_incident }
+any_allow_rule { allow_coo_send_reminder }
+any_allow_rule { allow_coo_process_analysis }
+any_allow_rule { allow_revops_read_revenue }
+any_allow_rule { allow_revops_create_tasks }
+any_allow_rule { allow_revops_analytics }
+any_allow_rule { allow_revops_reports }
 
 # Determine required approvers based on action and resource
-required_approvers := approvers if {
+required_approvers = ["VP_Engineering", "CTO"] {
     require_approval_coo_critical_incident
-    approvers := ["VP_Engineering", "CTO"]
 }
-
-required_approvers := approvers if {
+else = ["VP_Engineering", "CTO"] {
     require_approval_coo_escalate
-    approvers := ["VP_Engineering", "CTO"]
 }
-
-required_approvers := approvers if {
+else = ["VP_Sales", "VP_Customer_Success"] {
     require_approval_revops_intervention
-    approvers := ["VP_Sales", "VP_Customer_Success"]
 }
-
-required_approvers := approvers if {
+else = [input.resource.assignee_manager] {
     require_approval_chief_of_staff_assign
-    approvers := [input.resource.assignee_manager]
 }
-
-required_approvers := [] if {
-    not requires_approval
-}
+else = []
 
 # ============================================================================
 # AUDIT METADATA
 # ============================================================================
 
 # Generate audit metadata for logging
-audit_metadata := metadata if {
-    metadata := {
-        "agent_role": input.agent.role,
-        "action": input.action,
-        "resource_type": input.resource.type,
-        "allowed": allow,
-        "requires_approval": requires_approval,
-        "required_approvers": required_approvers,
-        "policy_version": "1.0",
-        "evaluated_at": time.now_ns(),
-    }
+audit_metadata := {
+    "agent_role": input.agent.role,
+    "action": input.action,
+    "resource_type": input.resource.type,
+    "allowed": allow,
+    "requires_approval": requires_approval_val,
+    "required_approvers": required_approvers,
+    "policy_version": "1.0",
+    "evaluated_at": time.now_ns(),
+} {
+  requires_approval_val := is_requires_approval
 }
+
+is_requires_approval {
+  requires_approval
+}
+else = false

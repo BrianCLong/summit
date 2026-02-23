@@ -7,7 +7,8 @@ simulate := input.simulate
 
 # Sensitivity tiers requiring step-up auth
 requires_step_up {
-  input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
+  sensitivity_tiers := {"Sensitive", "Restricted"}
+  sensitivity_tiers[input.bundle.sensitivity]
 }
 
 has_webauthn := input.user.webauthn == true
@@ -38,14 +39,13 @@ deny_reason["step_up_required"] {
 
 deny_reason[reason] {
   input.export.options.disallow_unmasked
-  some f
   should_redact_field(f)
   input.record[f]
   reason := sprintf("unmasked_field:%s", [f])
 }
 
 would_allow {
-  not deny_reason[_]
+  count(deny_reason) == 0
 }
 
 allow {
@@ -56,10 +56,11 @@ decision := {
   "simulate": simulate,
   "would_allow": would_allow,
   "allow": allow_effective,
-  "reasons": {r | r := deny_reason[_]},
+  "reasons": reasons_set,
   "policy_version": input.policy.version,
-  "redacted": redact_record(input.record),
+  "redacted": redacted_rec,
 } {
   allow_effective := (would_allow or simulate)
+  reasons_set := {r | r := deny_reason[_]}
+  redacted_rec := redact_record(input.record)
 }
-

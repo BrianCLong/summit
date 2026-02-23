@@ -21,13 +21,14 @@ is_simulate := input.mode == "simulate"
 is_enforce  := input.mode == "enforce"
 
 sens := lower(input.resource.sensitivity)
-needs_step_up := sens == "sensitive" or sens == "restricted"
+needs_step_up { sens == "sensitive" }
+needs_step_up { sens == "restricted" }
+
 has_step_up := input.auth.webauthn_verified == true
 
 # Collect DLP redactions from pii:* tags on fields
 redactions_from_tags[entry] {
   f := input.resource.fields[_]
-  some t
   t := f.tags[_]
   startswith(t, "pii:")
   entry := {"path": f.path, "reason": t}
@@ -39,10 +40,8 @@ redactions_from_explicit[entry] {
   entry := {"path": p, "reason": "explicit"}
 }
 
-redactions := r {
-  r := redactions_from_tags
-  r2 := redactions_from_explicit
-  r := r | r2
+redactions = r {
+  r := redactions_from_tags | redactions_from_explicit
 }
 
 # Reasons (human-readable)
@@ -55,18 +54,31 @@ decision := {
   "allow": allow,
   "redactions": redactions,
   "step_up": {
-    "required": needs_step_up,
+    "required": needs_step_up_val,
     "satisfied": has_step_up
   },
   "reasons": reasons
+} {
+  needs_step_up_val := is_needs_step_up
 }
 
-reasons := r {
+is_needs_step_up {
+  needs_step_up
+}
+else = false
+
+reasons = r {
   base := []
-  rs := base
-  rs := cond_append(rs, needs_step_up, reason_step_up)
-  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
-  r := rs
+  cond1 := is_needs_step_up
+  rs := cond_append(base, cond1, reason_step_up)
+  cond2 := should_show_no_step_reason
+  r := cond_append(rs, cond2, reason_no_step)
+}
+
+should_show_no_step_reason {
+  needs_step_up
+  not has_step_up
+  is_enforce
 }
 
 # allow rules
@@ -77,4 +89,3 @@ allow { is_enforce; needs_step_up; has_step_up }
 # Utility: append iff condition true
 cond_append(arr, cond, v) = out { cond; out := array.concat(arr, [v]) }
 cond_append(arr, cond, _) = arr { not cond }
-

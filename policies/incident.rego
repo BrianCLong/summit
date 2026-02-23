@@ -35,5 +35,5 @@ is_owner_or_admin(user, resource) {
     user.id == resource.owner_id
 }
 is_owner_or_admin(user, resource) {
-    "admin" in user.roles
+    user.roles[_] == "admin"
 }

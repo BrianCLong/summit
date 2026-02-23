@@ -2,26 +2,24 @@ package composer.policy_shadow
 
 # Combine sub-decisions and emit a consolidated verdict
 
+decisions = [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+
+any_deny {
+  dec := decisions[_]
+  dec.allow == false
+}
+
 verdict := {
-  "mode": input.mode,
-  "allow": allow_all,
-  "decisions": [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision],
-}
-{
-  # In shadow mode, we never block — but we keep per-policy decisions
-  input.mode == "shadow"
-  allow_all := true
-} else = verdict {
-  input.mode == "enforce"
-  some dec in [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
-  allow_all := all(decisions, func(x){ x.allow })
-  decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+  "mode": mode,
+  "allow": allow_val,
+  "decisions": decisions,
+} {
+  mode := input.mode
+  allow_val := is_allowed(mode)
 }
 
-# Helper: all()
-all(arr, fn) = ok {
-  ok := true
-  some i
-  ok = ok & fn(arr[i])
+is_allowed("shadow") = true
+is_allowed("enforce") = true {
+  not any_deny
 }
-
+else = false

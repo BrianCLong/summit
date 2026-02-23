@@ -1,16 +1,17 @@
 
 package maestro.governance
 
-# Deny public S3 buckets
+# Deny S3 buckets with PublicRead or PublicReadWrite ACLs
 deny[msg] {
     input.asset_type == "aws_s3_bucket"
-    some acl in input.attributes.acl
-    acl.grantee.uri == "http://acs.amazonaws.com/groups/global/AllUsers"
-    msg := sprintf("S3 bucket '%s' has a public ACL grant, which is forbidden.", [input.name])
+    acl := input.attributes.acl[_]
+    acl == "PublicRead"
+    msg := sprintf("S3 Bucket '%s' has a PublicRead ACL, which is forbidden.", [input.name])
 }
 
 deny[msg] {
     input.asset_type == "aws_s3_bucket"
-    input.attributes.policy.Statement[_].Principal == "*"
-    msg := sprintf("S3 bucket '%s' has a public policy statement, which is forbidden.", [input.name])
+    acl := input.attributes.acl[_]
+    acl == "PublicReadWrite"
+    msg := sprintf("S3 Bucket '%s' has a PublicReadWrite ACL, which is forbidden.", [input.name])
 }

@@ -3,10 +3,11 @@ package maestro.deploy
 # Allow dev deploys only from maintainers and CI bots
 allow {
   input.env == "dev"
-  some role
-  role := input.actor.role
-  role == "maintainer" or role == "ci-bot"
+  is_authorized_role(input.actor.role)
 }
+
+is_authorized_role("maintainer")
+is_authorized_role("ci-bot")
 
 deny[msg] {
   not allow

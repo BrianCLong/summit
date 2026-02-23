@@ -13,7 +13,6 @@ packages:
   - 'tools/*'
   - 'devtools/*'
   - 'agents/*'
-  - 'platform/*'
 exclude:
   - 'archive/**'
   - 'apps/desktop-electron'

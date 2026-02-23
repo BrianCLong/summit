@@ -5,9 +5,6 @@
 
 package intelgraph.abac
 
-import future.keywords.if
-import future.keywords.in
-
 # ============================================================================
 # MAIN AUTHORIZATION DECISION
 # ============================================================================
@@ -16,7 +13,7 @@ import future.keywords.in
 default allow = false
 
 # Allow if all checks pass
-allow if {
+allow {
   tenant_isolation_check
   rbac_permission_check
   policy_tag_check
@@ -29,155 +26,151 @@ allow if {
 # TENANT ISOLATION
 # ============================================================================
 
-tenant_isolation_check if {
+tenant_isolation_check {
   input.user.tenant == input.resource.tenant
 }
 
-tenant_isolation_check if {
+tenant_isolation_check {
   # Allow cross-tenant access for super admins
-  "super_admin" in input.user.roles
+  input.user.roles[_] == "super_admin"
 }
 
 # ============================================================================
 # RBAC PERMISSION CHECK
 # ============================================================================
 
-rbac_permission_check if {
+rbac_permission_check {
   has_permission(input.user.roles, input.resource.type, input.operation_type)
 }
 
-has_permission(roles, resource_type, operation) if {
-  some role in roles
-  role == "admin"  # Admin has all permissions
+has_permission(roles, resource_type, operation) {
+  roles[_] == "admin"  # Admin has all permissions
 }
 
-has_permission(roles, resource_type, operation) if {
-  some role in roles
+has_permission(roles, resource_type, operation) {
+  role := roles[_]
   permission := concat(":", [resource_type, operation])
-  permission in data.rbac.role_permissions[role]
+  data.rbac.role_permissions[role][_] == permission
 }
 
-has_permission(roles, resource_type, operation) if {
-  some role in roles
+has_permission(roles, resource_type, operation) {
+  role := roles[_]
   wildcard := concat(":", [resource_type, "*"])
-  wildcard in data.rbac.role_permissions[role]
+  data.rbac.role_permissions[role][_] == wildcard
 }
 
-has_permission(roles, _, _) if {
-  "*" in roles
+has_permission(roles, _, _) {
+  roles[_] == "*"
 }
 
 # ============================================================================
 # POLICY TAG VALIDATION
 # ============================================================================
 
-policy_tag_check if {
+policy_tag_check {
   resource_sensitivity_allowed
   legal_basis_valid
   purpose_alignment_valid
 }
 
 # Check if user has required clearance for resource sensitivity
-resource_sensitivity_allowed if {
+resource_sensitivity_allowed {
   not input.resource.policy_sensitivity
 }
 
-resource_sensitivity_allowed if {
+resource_sensitivity_allowed {
   input.resource.policy_sensitivity == "public"
 }
 
-resource_sensitivity_allowed if {
+resource_sensitivity_allowed {
   input.resource.policy_sensitivity == "internal"
-  input.user.clearance_levels
-  "internal" in input.user.clearance_levels
+  input.user.clearance_levels[_] == "internal"
 }
 
-resource_sensitivity_allowed if {
+resource_sensitivity_allowed {
   input.resource.policy_sensitivity == "confidential"
-  input.user.clearance_levels
-  "confidential" in input.user.clearance_levels
+  input.user.clearance_levels[_] == "confidential"
 }
 
-resource_sensitivity_allowed if {
+resource_sensitivity_allowed {
   input.resource.policy_sensitivity == "restricted"
-  input.user.clearance_levels
-  "restricted" in input.user.clearance_levels
+  input.user.clearance_levels[_] == "restricted"
 }
 
-resource_sensitivity_allowed if {
+resource_sensitivity_allowed {
   input.resource.policy_sensitivity == "top_secret"
-  input.user.clearance_levels
-  "top_secret" in input.user.clearance_levels
+  input.user.clearance_levels[_] == "top_secret"
 }
 
 # Validate that resource has a valid legal basis
-legal_basis_valid if {
+legal_basis_valid {
   not input.resource.policy_legal_basis
 }
 
-legal_basis_valid if {
+legal_basis_valid {
   count(input.resource.policy_legal_basis) > 0
   valid_legal_bases := {"investigation", "court_order", "consent", "legitimate_interest", "legal_obligation", "public_interest"}
-  some basis in input.resource.policy_legal_basis
-  basis in valid_legal_bases
+  basis := input.resource.policy_legal_basis[_]
+  valid_legal_bases[basis]
 }
 
 # Check if request purpose aligns with resource purposes
-purpose_alignment_valid if {
+purpose_alignment_valid {
   not input.resource.policy_purpose
 }
 
-purpose_alignment_valid if {
+purpose_alignment_valid {
   count(input.resource.policy_purpose) == 0
 }
 
-purpose_alignment_valid if {
-  input.context.purposes
-  some resource_purpose in input.resource.policy_purpose
-  some request_purpose in input.context.purposes
+purpose_alignment_valid {
+  resource_purpose := input.resource.policy_purpose[_]
+  request_purpose := input.context.purposes[_]
   resource_purpose == request_purpose
 }
 
 # Allow if user has wildcard purpose scope
-purpose_alignment_valid if {
-  "purpose:*" in input.user.scopes
+purpose_alignment_valid {
+  input.user.scopes[_] == "purpose:*"
 }
 
 # ============================================================================
 # WARRANT VALIDATION
 # ============================================================================
 
-warrant_validation_check if {
+warrant_validation_check {
   not requires_warrant
 }
 
-warrant_validation_check if {
+warrant_validation_check {
   requires_warrant
   input.context.warrant_id
   warrant_is_valid
 }
 
 # Determine if warrant is required
-requires_warrant if {
-  input.resource.policy_sensitivity in {"restricted", "top_secret"}
+requires_warrant {
+  sensitivity_high := {"restricted", "top_secret"}
+  sensitivity_high[input.resource.policy_sensitivity]
 }
 
-requires_warrant if {
-  "court_order" in input.resource.policy_legal_basis
+requires_warrant {
+  input.resource.policy_legal_basis[_] == "court_order"
 }
 
-requires_warrant if {
+requires_warrant {
   input.operation_type == "export"
   input.resource.policy_data_classification == "pii"
 }
 
-requires_warrant if {
+requires_warrant {
   input.operation_type == "export"
-  input.resource.policy_sensitivity in {"confidential", "restricted", "top_secret"}
+  sensitivity_conf := {"confidential", "restricted", "top_secret"}
+  sensitivity_conf[input.resource.policy_sensitivity]
 }
 
 # Check if provided warrant is valid (simplified - actual validation done in WarrantService)
-warrant_is_valid if {
+warrant_is_valid {
   input.context.warrant_id
   # In production, this would call out to warrant service
   # For now, trust that warrant_id presence means it was pre-validated
@@ -188,12 +181,12 @@ warrant_is_valid if {
 # PURPOSE LIMITATION
 # ============================================================================
 
-purpose_limitation_check if {
+purpose_limitation_check {
   input.context.purpose
   purpose_allowed(input.context.purpose, input.operation_type)
 }
 
-purpose_allowed(purpose, operation) if {
+purpose_allowed(purpose, operation) {
   # Allow specific purpose/operation combinations
   valid_combinations := {
     {"purpose": "investigation", "operations": {"read", "write", "export"}},
@@ -206,74 +199,74 @@ purpose_allowed(purpose, operation) if {
     {"purpose": "maintenance", "operations": {"read"}},
   }
 
-  some combo in valid_combinations
+  combo := valid_combinations[_]
   combo.purpose == purpose
-  operation in combo.operations
+  combo.operations[operation]
 }
 
 # ============================================================================
 # DATA RESIDENCY
 # ============================================================================
 
-data_residency_check if {
+data_residency_check {
   not input.resource.policy_jurisdiction
 }
 
-data_residency_check if {
+data_residency_check {
   input.resource.policy_jurisdiction == input.user.residency
 }
 
 # Allow US users to access US data
-data_residency_check if {
+data_residency_check {
   input.resource.policy_jurisdiction == "US"
   input.user.residency == "US"
 }
 
 # Allow if user has global data access scope
-data_residency_check if {
-  "scope:global_data" in input.user.scopes
+data_residency_check {
+  input.user.scopes[_] == "scope:global_data"
 }
 
 # ============================================================================
 # DENY REASONS (for audit and user feedback)
 # ============================================================================
 
-deny_reason contains "tenant_isolation_violation" if {
+deny_reason["tenant_isolation_violation"] {
   not tenant_isolation_check
 }
 
-deny_reason contains "insufficient_rbac_permissions" if {
+deny_reason["insufficient_rbac_permissions"] {
   not rbac_permission_check
 }
 
-deny_reason contains "insufficient_clearance" if {
+deny_reason["insufficient_clearance"] {
   not resource_sensitivity_allowed
 }
 
-deny_reason contains "invalid_legal_basis" if {
+deny_reason["invalid_legal_basis"] {
   not legal_basis_valid
 }
 
-deny_reason contains "purpose_mismatch" if {
+deny_reason["purpose_mismatch"] {
   not purpose_alignment_valid
 }
 
-deny_reason contains "warrant_required" if {
+deny_reason["warrant_required"] {
   requires_warrant
   not input.context.warrant_id
 }
 
-deny_reason contains "invalid_warrant" if {
+deny_reason["invalid_warrant"] {
   requires_warrant
   input.context.warrant_id
   not warrant_is_valid
 }
 
-deny_reason contains "purpose_not_allowed" if {
+deny_reason["purpose_not_allowed"] {
   not purpose_limitation_check
 }
 
-deny_reason contains "jurisdiction_mismatch" if {
+deny_reason["jurisdiction_mismatch"] {
   not data_residency_check
 }
 
@@ -281,41 +274,49 @@ deny_reason contains "jurisdiction_mismatch" if {
 # FIELD-LEVEL REDACTIONS
 # ============================================================================
 
-redact_fields contains field_name if {
+redact_fields[field_name] {
   # Redact PII fields if user doesn't have PII scope
   input.resource.policy_pii_flags
-  not "scope:pii" in input.user.scopes
+  not user_has_pii_scope
   field_name := "email"
   input.resource.policy_pii_flags.has_emails == true
 }
 
-redact_fields contains field_name if {
+user_has_pii_scope {
+    input.user.scopes[_] == "scope:pii"
+}
+
+redact_fields[field_name] {
   input.resource.policy_pii_flags
-  not "scope:pii" in input.user.scopes
+  not user_has_pii_scope
   field_name := "phone"
   input.resource.policy_pii_flags.has_phones == true
 }
 
-redact_fields contains field_name if {
+redact_fields[field_name] {
   input.resource.policy_pii_flags
-  not "scope:pii" in input.user.scopes
+  not user_has_pii_scope
   field_name := "ssn"
   input.resource.policy_pii_flags.has_ssn == true
 }
 
-redact_fields contains field_name if {
+redact_fields[field_name] {
   input.resource.policy_pii_flags
-  not "scope:pii" in input.user.scopes
+  not user_has_pii_scope
   field_name := "address"
   input.resource.policy_pii_flags.has_addresses == true
 }
 
 # Redact sensitive fields based on clearance
-redact_fields contains field_name if {
+redact_fields[field_name] {
   input.resource.policy_sensitivity == "restricted"
-  not "restricted" in input.user.clearance_levels
+  not user_has_restricted_clearance
   sensitive_fields := {"intelligence_source", "classified_notes", "source_identity"}
-  some field_name in sensitive_fields
+  field_name := sensitive_fields[_]
+}
+
+user_has_restricted_clearance {
+    input.user.clearance_levels[_] == "restricted"
 }
 
 # ============================================================================
@@ -323,19 +324,19 @@ redact_fields contains field_name if {
 # ============================================================================
 
 # Check if resource has expired
-resource_expired if {
+resource_expired {
   input.resource.policy_expiry_date
   time.now_ns() > time.parse_rfc3339_ns(input.resource.policy_expiry_date)
 }
 
 # Check if access is during business hours (optional constraint)
-is_business_hours if {
+is_business_hours {
   hour := time.clock([time.now_ns()])[0]
   hour >= 8
   hour <= 18
 }
 
 # Check if user is from same jurisdiction as resource
-same_jurisdiction if {
+same_jurisdiction {
   input.user.residency == input.resource.policy_jurisdiction
 }
