@@ -349,12 +349,15 @@ Mitigations: evidence-first capture before analysis, explicit Governed Exception
 - Captured PR checks for #18622 and #18603 via `gh pr checks`.
 - Issue scan failed due to api.github.com connectivity; recorded Governed Exception.
 - Updated docs/roadmap/STATUS.json timestamp and revision note.
+- Registered daily sprint prompt in prompts/automation/daily-sprint@v1.md and prompts/registry.yaml.
+- Created agents/examples/DAILY_SPRINT_20260223_RUN9.json task spec.
 
 **Status Summary**
 Completed:
 - Evidence bundle refresh for PRs (#18622, #18603, #18615) and top-20 PR list.
 - CI snapshot capture for #18622 and #18603.
 - STATUS.json timestamp and revision note refreshed.
+- Daily sprint prompt + task spec recorded.
 
 In Progress:
 - None.
