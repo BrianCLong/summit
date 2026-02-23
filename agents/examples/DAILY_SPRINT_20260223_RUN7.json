@@ -1,0 +1,49 @@
+{
+  "task_id": "DAILY_SPRINT_20260223_RUN7",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint",
+    "version": "v1",
+    "sha256": "16b4785299fe3e0ba05f151988e637b03bea9873934dcbc923ff1ce832ce0664",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260223_RUN7.json"
+    ],
+    "domains": [
+      "operations",
+      "governance",
+      "documentation"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260223_RUN7.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log recorded with evidence bundle and execution log.",
+    "Prompt registry updated with daily sprint prompt hash.",
+    "Roadmap status timestamp updated per execution invariant."
+  ],
+  "stop_conditions": [
+    "GitHub API connectivity failure blocks PR or issue scans.",
+    "Missing required prompt registry or schema prevents validation."
+  ]
+}
