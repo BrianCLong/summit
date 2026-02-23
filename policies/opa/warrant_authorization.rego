@@ -2,10 +2,11 @@
 # Enforces legal authority requirements for sensitive actions
 
 package intelgraph.warrant
-
-import future.keywords.contains
-import future.keywords.if
 import future.keywords.in
+
+
+
+
 
 # =============================================================================
 # Main Decision Rules
@@ -19,7 +20,7 @@ allow := {
   "allow": true,
   "reason": "Access granted with valid warrant",
   "obligations": obligations
-} if {
+} {
   warrant_required
   valid_warrant
   warrant_permits_action
@@ -33,12 +34,12 @@ allow := {
   "allow": true,
   "reason": "No warrant required for this action",
   "obligations": []
-} if {
+} {
   not warrant_required
 }
 
 # Explicit denial reasons
-deny contains msg if {
+deny[msg] {
   warrant_required
   not input.context.warrantId
   msg := sprintf(
@@ -47,7 +48,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   warrant_required
   input.context.warrantId
   not valid_warrant
@@ -57,7 +58,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   warrant_required
   input.context.warrantId
   valid_warrant
@@ -68,7 +69,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   warrant_required
   input.context.warrantId
   valid_warrant
@@ -79,7 +80,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   warrant_required
   input.context.warrantId
   valid_warrant
@@ -95,7 +96,7 @@ deny contains msg if {
 # =============================================================================
 
 # Actions that always require warrants
-warrant_required if {
+warrant_required {
   input.action in [
     "EXPORT",
     "SHARE",
@@ -105,7 +106,7 @@ warrant_required if {
 }
 
 # Export of classified data requires warrant
-warrant_required if {
+warrant_required {
   input.action == "EXPORT"
   input.resource.classification in [
     "CONFIDENTIAL",
@@ -115,13 +116,13 @@ warrant_required if {
 }
 
 # Queries targeting specific subjects may require warrant
-warrant_required if {
+warrant_required {
   input.action == "QUERY"
   count(input.resource.targetSubjects) > 0
 }
 
 # Context explicitly requires warrant
-warrant_required if {
+warrant_required {
   input.context.warrantRequired == true
 }
 
@@ -134,18 +135,18 @@ warrant_required if {
 warrant_data := input.context.warrant
 
 # Warrant exists and is provided
-warrant_exists if {
+warrant_exists {
   input.context.warrantId
   warrant_data
 }
 
 # Warrant has valid status
-valid_warrant if {
+valid_warrant {
   warrant_exists
   warrant_data.status in ["ACTIVE", "PENDING"]
 }
 
-warrant_status := warrant_data.status if {
+warrant_status := warrant_data.status {
   warrant_data
 } else := "NOT_PROVIDED"
 
@@ -154,32 +155,32 @@ warrant_status := warrant_data.status if {
 # =============================================================================
 
 # Check if warrant permits the requested action
-warrant_permits_action if {
+warrant_permits_action {
   warrant_exists
   input.action in warrant_data.permittedActions
 }
 
 # Check if warrant covers the resource type
-warrant_covers_resource if {
+warrant_covers_resource {
   warrant_exists
   # If no target data types specified, warrant covers all
   not warrant_data.targetDataTypes
 }
 
-warrant_covers_resource if {
+warrant_covers_resource {
   warrant_exists
   warrant_data.targetDataTypes
   input.resource.type in warrant_data.targetDataTypes
 }
 
 # Check if warrant covers specific subjects (if applicable)
-warrant_covers_subject if {
+warrant_covers_subject {
   warrant_exists
   # If no target subjects specified, warrant covers all
   not warrant_data.targetSubjects
 }
 
-warrant_covers_subject if {
+warrant_covers_subject {
   warrant_exists
   warrant_data.targetSubjects
   input.resource.id in warrant_data.targetSubjects
@@ -190,14 +191,14 @@ warrant_covers_subject if {
 # =============================================================================
 
 # Check if warrant is expired
-warrant_expired if {
+warrant_expired {
   warrant_exists
   warrant_data.expiryDate
   time.parse_rfc3339_ns(warrant_data.expiryDate) < time.now_ns()
 }
 
 # Check if warrant is not yet effective
-warrant_not_yet_effective if {
+warrant_not_yet_effective {
   warrant_exists
   warrant_data.effectiveDate
   time.parse_rfc3339_ns(warrant_data.effectiveDate) > time.now_ns()
@@ -208,13 +209,13 @@ warrant_not_yet_effective if {
 # =============================================================================
 
 # Check geographic restrictions
-has_geographic_restrictions if {
+has_geographic_restrictions {
   warrant_exists
   warrant_data.geographicScope
   count(warrant_data.geographicScope) > 0
 }
 
-geographic_restriction_reason := msg if {
+geographic_restriction_reason := msg {
   has_geographic_restrictions
   not user_in_permitted_geography
   msg := sprintf(
@@ -224,18 +225,18 @@ geographic_restriction_reason := msg if {
 }
 
 # User is in permitted geography (would need to check IP geolocation in production)
-user_in_permitted_geography if {
+user_in_permitted_geography {
   has_geographic_restrictions
   # This is a simplified check - in production would use IP geolocation
   input.subject.residency in warrant_data.geographicScope
 }
 
 # No geographic restrictions
-no_geographic_restrictions if {
+no_geographic_restrictions {
   not has_geographic_restrictions
 }
 
-no_geographic_restrictions if {
+no_geographic_restrictions {
   user_in_permitted_geography
 }
 
@@ -244,7 +245,7 @@ no_geographic_restrictions if {
 # =============================================================================
 
 # Emergency warrants have shorter validity and require additional logging
-emergency_warrant if {
+emergency_warrant {
   warrant_exists
   warrant_data.warrantType == "EMERGENCY"
 }
@@ -266,7 +267,7 @@ emergency_warrant_obligations := [
 ] if emergency_warrant
 
 # Subpoenas may have specific compliance requirements
-subpoena_warrant if {
+subpoena_warrant {
   warrant_exists
   warrant_data.warrantType == "SUBPOENA"
 }
@@ -281,7 +282,7 @@ subpoena_obligations := [
 ] if subpoena_warrant
 
 # Court orders require strict audit trail
-court_order_warrant if {
+court_order_warrant {
   warrant_exists
   warrant_data.warrantType == "COURT_ORDER"
 }
@@ -306,23 +307,23 @@ obligations := array.concat(
     subpoena_obligations
   ),
   court_order_obligations
-) if {
+) {
   warrant_exists
 }
 
-obligations := [] if {
+obligations := [] {
   not warrant_exists
 }
 
-emergency_obligations := emergency_warrant_obligations if {
+emergency_obligations := emergency_warrant_obligations {
   emergency_warrant
 } else := []
 
-subpoena_obligations := subpoena_warrant_obligations if {
+subpoena_obligations := subpoena_warrant_obligations {
   subpoena_warrant
 } else := []
 
-court_order_obligations := court_order_obligations if {
+court_order_obligations := court_order_obligations {
   court_order_warrant
 } else := []
 
@@ -345,18 +346,18 @@ warrant_metadata := {
 # =============================================================================
 
 # Some warrants require two-person authorization
-requires_two_person if {
+requires_two_person {
   warrant_exists
   warrant_data.requiresTwoPerson == true
 }
 
-second_approver_present if {
+second_approver_present {
   requires_two_person
   input.context.secondApproverId
   input.context.secondApproverId != input.subject.id
 }
 
-deny contains msg if {
+deny[msg] {
   requires_two_person
   not second_approver_present
   msg := "This warrant requires two-person authorization. Second approver must be present."
@@ -376,7 +377,7 @@ appeal_info := {
     "Legal basis for warrant request",
     "Supervisor approval"
   ]
-} if {
+} {
   warrant_required
   not valid_warrant
 }

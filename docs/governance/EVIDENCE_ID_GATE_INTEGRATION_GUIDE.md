@@ -290,7 +290,7 @@ DASHSCOPE_API_KEY=your-key-here
 ### For Document Authors
 - Use consistent Evidence-ID naming conventions
 - Reference only registered Evidence-IDs
-- Include `Evidence-IDs: none` for docs that don't need evidence
+- Include `Evidence-IDs: GAV-NONE` for docs that don't need evidence
 - Update `Last-Reviewed` date regularly
 
 ### For Governance Maintainers

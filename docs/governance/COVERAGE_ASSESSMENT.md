@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Coverage Assessment
 
 | Signal | Status | Evidence/File | Remediation |

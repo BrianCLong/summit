@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Final War Game Evaluation: Phase 4 (Q1 2026)
 
 ## Overview

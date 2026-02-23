@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Summit Governance Control Catalog
 
 **Canonical Source:** `docs/governance/control_domain_map.yaml`

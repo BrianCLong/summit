@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Executive Readout: 2026 Regulatory Landscape
 **Date:** January 25, 2026
 **To:** Summit Leadership / Board

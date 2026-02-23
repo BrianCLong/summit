@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # External Signals Integration Report (2026-01-25)
 
 **Executor:** Jules (Release Captain)

@@ -1,6 +1,6 @@
 Owner: Governance
 Last-Reviewed: 2026-01-14
-Evidence-IDs: none
+Evidence-IDs: GAV-NONE
 Status: active
 
 # Epic 8: Regulated AI & High-Stakes Use Cases (compliance by design)

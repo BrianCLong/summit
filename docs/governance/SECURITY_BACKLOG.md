@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Security & Governance Backlog
 
 This is the deterministic backlog for security vulnerabilities, governance gaps, and compliance action items.

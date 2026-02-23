@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Summit Agent Tool Policy (v1)
 
 This policy defines which developer/CI tools AI agents (Codex, Claude Code, Gemini, Qwen) may invoke, under what constraints, and how evidence must be produced.

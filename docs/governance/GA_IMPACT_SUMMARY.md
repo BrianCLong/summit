@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # GA Impact Summary: AI Governance & Compliance
 
 **Date:** 2026-01-23

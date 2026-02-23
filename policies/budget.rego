@@ -1,16 +1,12 @@
-# IntelGraph Budget Policy: OPA Rego rules for tenant caps + four-eyes approval
-# Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
-
 package intelgraph.budget
 
-import future.keywords.if
 import future.keywords.in
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false
 
 # Main authorization decision
-allow if {
+allow {
     # Check basic budget constraints first
     within_budget_limits
     
@@ -18,52 +14,52 @@ allow if {
     not requires_four_eyes
 }
 
-allow if {
+allow {
     # Allow with four-eyes approval even if over normal limits
     within_emergency_limits
     has_valid_four_eyes_approval
 }
 
 # Core budget constraint checking
-within_budget_limits if {
+within_budget_limits {
     input.est_usd <= monthly_room[input.tenant_id]
     input.est_usd <= daily_room[input.tenant_id]
 }
 
 # Emergency budget limits (higher thresholds for four-eyes scenarios)
-within_emergency_limits if {
+within_emergency_limits {
     input.est_usd <= emergency_monthly_room[input.tenant_id]
     input.est_usd <= emergency_daily_room[input.tenant_id]
 }
 
 # Four-eyes requirement logic
-requires_four_eyes if {
+requires_four_eyes {
     # High-cost operations always require approval
     input.est_usd > data.global_config.four_eyes_threshold_usd
 }
 
-requires_four_eyes if {
+requires_four_eyes {
     # Destructive operations require approval regardless of cost
     input.risk_tag in ["destructive", "bulk_delete", "merge_entities", "purge"]
 }
 
-requires_four_eyes if {
+requires_four_eyes {
     # Operations on sensitive tenants require approval
     input.tenant_id in data.sensitive_tenants
 }
 
-requires_four_eyes if {
+requires_four_eyes {
     # Large token operations require approval
     input.est_total_tokens > data.global_config.four_eyes_threshold_tokens
 }
 
-requires_four_eyes if {
+requires_four_eyes {
     # Critical infrastructure mutations require approval
     input.mutation_category in ["infrastructure", "configuration", "security"]
 }
 
 # Four-eyes approval validation
-has_valid_four_eyes_approval if {
+has_valid_four_eyes_approval {
     count(valid_approvers) >= 2
     # Approvers must be different from requestor
     not input.user_id in valid_approver_ids
@@ -80,61 +76,76 @@ valid_approvers := {approver |
 valid_approver_ids := {approver.user_id | some approver in valid_approvers}
 
 # Approver role validation
-approver_has_sufficient_role(approver) if {
+approver_has_sufficient_role(approver) {
     approver.role in ["admin", "finance_admin", "senior_analyst"]
 }
 
-approver_has_sufficient_role(approver) if {
+approver_has_sufficient_role(approver) {
     # Team leads can approve for their own team/tenant
     approver.role == "team_lead"
     approver.tenant_id == input.tenant_id
 }
 
 # Approval recency check (within 1 hour)
-approval_is_recent(approver) if {
+approval_is_recent(approver) {
     approval_time := time.parse_rfc3339_ns(approver.approved_at)
     current_time := time.now_ns()
     approval_time > (current_time - (60 * 60 * 1000000000)) # 1 hour in nanoseconds
 }
 
 # Approver authentication validation
-approver_is_authenticated(approver) if {
+approver_is_authenticated(approver) {
     # Must have valid session token
     approver.session_token != ""
     approver.session_token != null
 }
 
 # Budget calculations - monthly room remaining
-monthly_room[tenant] := room if {
+monthly_room[tenant] := room {
     some tenant
     budget := data.tenant_budgets[tenant]
     spent := monthly_spending[tenant]
     room := budget.monthly_usd_limit - spent
     room >= 0
+}
+
+# Default for monthly_room
+get_monthly_room(tenant) := room {
+    room := monthly_room[tenant]
 } else := 0
 
 # Emergency monthly room (120% of normal limit)
-emergency_monthly_room[tenant] := room if {
+emergency_monthly_room[tenant] := room {
     some tenant
     budget := data.tenant_budgets[tenant]
     spent := monthly_spending[tenant]
     emergency_limit := budget.monthly_usd_limit * 1.2
     room := emergency_limit - spent
     room >= 0
+}
+
+get_emergency_monthly_room(tenant) := room {
+    room := emergency_monthly_room[tenant]
 } else := 0
 
 # Budget calculations - daily room remaining
-daily_room[tenant] := room if {
+daily_room[tenant] := room {
     some tenant
     budget := data.tenant_budgets[tenant]
     budget.daily_usd_limit # Ensure daily limit is set
     spent := daily_spending[tenant]
     room := budget.daily_usd_limit - spent
     room >= 0
-} else := monthly_room[tenant] / 30 # Fallback to 1/30th of monthly
+}
+
+get_daily_room(tenant) := room {
+    room := daily_room[tenant]
+} else := monthly_room[tenant] / 30 {
+    monthly_room[tenant]
+} else := 0
 
 # Emergency daily room (150% of normal daily limit)
-emergency_daily_room[tenant] := room if {
+emergency_daily_room[tenant] := room {
     some tenant
     budget := data.tenant_budgets[tenant]
     budget.daily_usd_limit
@@ -142,10 +153,16 @@ emergency_daily_room[tenant] := room if {
     emergency_limit := budget.daily_usd_limit * 1.5
     room := emergency_limit - spent
     room >= 0
-} else := emergency_monthly_room[tenant] / 30
+}
+
+get_emergency_daily_room(tenant) := room {
+    room := emergency_daily_room[tenant]
+} else := emergency_monthly_room[tenant] / 30 {
+    emergency_monthly_room[tenant]
+} else := 0
 
 # Current month spending calculation
-monthly_spending[tenant] := total if {
+monthly_spending[tenant] := total {
     some tenant
     entries := data.spending_ledger[tenant]
     current_month := time.format(time.now_ns(), "2006-01", "UTC")
@@ -155,10 +172,14 @@ monthly_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in monthly_entries])
+}
+
+get_monthly_spending(tenant) := total {
+    total := monthly_spending[tenant]
 } else := 0
 
 # Current day spending calculation  
-daily_spending[tenant] := total if {
+daily_spending[tenant] := total {
     some tenant
     entries := data.spending_ledger[tenant]
     current_date := time.format(time.now_ns(), "2006-01-02", "UTC")
@@ -168,33 +189,37 @@ daily_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in daily_entries])
+}
+
+get_daily_spending(tenant) := total {
+    total := daily_spending[tenant]
 } else := 0
 
 # Risk assessment for operations
-operation_risk_level := "high" if {
+operation_risk_level := "high" {
     input.est_usd > 10.0
-} else := "medium" if {
+} else := "medium" {
     input.est_usd > 1.0
 } else := "low"
 
 # Violation reasons for debugging
-violation_reasons contains reason if {
+violation_reasons [reason] {
     not within_budget_limits
     reason := sprintf("Monthly budget exceeded: $%.2f requested, $%.2f available", [
         input.est_usd, 
-        monthly_room[input.tenant_id]
+        get_monthly_room(input.tenant_id)
     ])
 }
 
-violation_reasons contains reason if {
+violation_reasons [reason] {
     not within_budget_limits  
     reason := sprintf("Daily budget exceeded: $%.2f requested, $%.2f available", [
         input.est_usd,
-        daily_room[input.tenant_id]  
+        get_daily_room(input.tenant_id)
     ])
 }
 
-violation_reasons contains reason if {
+violation_reasons [reason] {
     requires_four_eyes
     not has_valid_four_eyes_approval
     reason := sprintf("Four-eyes approval required but not provided (risk: %s, cost: $%.2f)", [
@@ -203,7 +228,7 @@ violation_reasons contains reason if {
     ])
 }
 
-violation_reasons contains reason if {
+violation_reasons [reason] {
     requires_four_eyes
     count(valid_approvers) < 2
     reason := sprintf("Insufficient approvers: %d valid, 2 required", [count(valid_approvers)])
@@ -214,8 +239,8 @@ decision := {
     "allow": allow,
     "tenant_id": input.tenant_id,
     "estimated_usd": input.est_usd,
-    "monthly_room": monthly_room[input.tenant_id],
-    "daily_room": daily_room[input.tenant_id],
+    "monthly_room": get_monthly_room(input.tenant_id),
+    "daily_room": get_daily_room(input.tenant_id),
     "requires_four_eyes": requires_four_eyes,
     "valid_approvers": count(valid_approvers),
     "risk_level": operation_risk_level,
@@ -225,14 +250,14 @@ decision := {
 }
 
 # Tenant-specific overrides for special cases
-tenant_override[tenant] := override if {
+tenant_override[tenant] := override {
     some tenant
     override := data.tenant_overrides[tenant]
     override.active == true
     override_is_current(override)
 }
 
-override_is_current(override) if {
+override_is_current(override) {
     start_time := time.parse_rfc3339_ns(override.valid_from)
     end_time := time.parse_rfc3339_ns(override.valid_until)
     current_time := time.now_ns()
@@ -241,7 +266,7 @@ override_is_current(override) if {
 }
 
 # Allow with tenant override
-allow if {
+allow {
     override := tenant_override[input.tenant_id]
     input.est_usd <= override.override_limit_usd
     override.bypass_four_eyes == true

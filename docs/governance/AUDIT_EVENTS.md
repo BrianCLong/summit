@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Governance Audit Event Definitions
 
 This document defines the schema and semantics for new audit event types associated with continuous compliance, authenticity verification, and human accountability.

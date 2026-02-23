@@ -51,6 +51,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4
 
       - name: Generate SBOM with Syft

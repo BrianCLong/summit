@@ -18,6 +18,8 @@ jobs:
       matrix:
         test: [1, 2]
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -91,6 +93,8 @@ jobs:
       matrix:
         test: [1, 2, 3]
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -119,6 +123,8 @@ jobs:
     needs: [test-macos-runners]
     if: always()
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Summary
         run: |
           echo "========================================"
@@ -128,6 +134,8 @@ jobs:
           echo "⏳ Ubuntu runners: PENDING SETUP"
           echo ""
           echo "Next steps:"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
           echo "1. Run setup scripts on 3 Ubuntu boxes"
           echo "2. Verify runners at: https://github.com/BrianCLong/summit/actions/runners"
           echo "3. Enable test-ubuntu-runners job in this workflow"

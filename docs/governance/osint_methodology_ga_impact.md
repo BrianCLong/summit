@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # OSINT Methodology GA Impact Assessment
 
 **Methodology Source:** Automation Turn #5 (2026-01-26)

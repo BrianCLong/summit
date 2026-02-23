@@ -2,10 +2,11 @@
 # Enforces data license restrictions and TOS compliance
 
 package intelgraph.license
-
-import future.keywords.contains
-import future.keywords.if
 import future.keywords.in
+
+
+
+
 
 # =============================================================================
 # Main Decision Rules
@@ -20,7 +21,7 @@ allow := {
   "reason": "Action permitted by license",
   "obligations": obligations,
   "conditions": conditions
-} if {
+} {
   license_required
   valid_license
   license_permits_action
@@ -34,12 +35,12 @@ allow := {
   "reason": "No license restrictions apply",
   "obligations": [],
   "conditions": []
-} if {
+} {
   not license_required
 }
 
 # Explicit denial reasons
-deny contains msg if {
+deny[msg] {
   license_required
   not input.context.licenseId
   not license_data
@@ -49,7 +50,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   license_required
   license_data
   not valid_license
@@ -59,7 +60,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   license_required
   valid_license
   not license_permits_action
@@ -69,7 +70,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   license_required
   valid_license
   license_permits_action
@@ -80,7 +81,7 @@ deny contains msg if {
   )
 }
 
-deny contains msg if {
+deny[msg] {
   license_required
   tos_required
   not tos_accepted
@@ -95,7 +96,7 @@ deny contains msg if {
 # =============================================================================
 
 # Actions that require license check
-license_required if {
+license_required {
   input.action in [
     "EXPORT",
     "SHARE",
@@ -107,7 +108,7 @@ license_required if {
 }
 
 # Context explicitly requires license check
-license_required if {
+license_required {
   input.context.licenseRequired == true
 }
 
@@ -119,19 +120,19 @@ license_required if {
 license_data := input.context.license
 
 # License exists
-license_exists if {
+license_exists {
   license_data
 }
 
 # License is valid (active and not expired)
-valid_license if {
+valid_license {
   license_exists
   license_data.status == "ACTIVE"
   not license_expired
 }
 
 # Check if license is expired
-license_expired if {
+license_expired {
   license_exists
   license_data.expiryDate
   time.parse_rfc3339_ns(license_data.expiryDate) < time.now_ns()
@@ -158,19 +159,19 @@ action_to_permission := {
 }
 
 # Get the permission key for the action
-permission_key := action_to_permission[input.action] if {
+permission_key := action_to_permission[input.action] {
   input.action in object.keys(action_to_permission)
 }
 
 # Check if license permits the action
-license_permits_action if {
+license_permits_action {
   license_exists
   permission_key
   license_data.permissions[permission_key] == true
 }
 
 # Generate explanation for permission denial
-permission_explanation := msg if {
+permission_explanation := msg {
   license_exists
   permission_key
   license_data.permissions[permission_key] == false
@@ -185,7 +186,7 @@ permission_explanation := msg if {
 # =============================================================================
 
 # Check attribution requirement
-requires_attribution if {
+requires_attribution {
   license_exists
   license_data.requiresAttribution == true
 }
@@ -201,7 +202,7 @@ attribution_obligation := {
 } if requires_attribution
 
 # Check share-alike requirement
-requires_share_alike if {
+requires_share_alike {
   license_exists
   license_data.restrictions.shareAlike == true
   input.action in ["CREATE_DERIVATIVES", "MODIFY"]
@@ -221,13 +222,13 @@ share_alike_obligation := {
 } if requires_share_alike
 
 # Check non-commercial restriction
-non_commercial_restriction if {
+non_commercial_restriction {
   license_exists
   license_data.restrictions.nonCommercial == true
 }
 
 # Deny commercial use if restricted
-deny contains msg if {
+deny[msg] {
   non_commercial_restriction
   input.action == "COMMERCIAL_USE"
   msg := sprintf(
@@ -237,12 +238,12 @@ deny contains msg if {
 }
 
 # Check no-derivatives restriction
-no_derivatives_restriction if {
+no_derivatives_restriction {
   license_exists
   license_data.restrictions.noDerivatives == true
 }
 
-deny contains msg if {
+deny[msg] {
   no_derivatives_restriction
   input.action in ["CREATE_DERIVATIVES", "MODIFY"]
   msg := sprintf(
@@ -252,7 +253,7 @@ deny contains msg if {
 }
 
 # Check notice requirement
-requires_notice if {
+requires_notice {
   license_exists
   license_data.requiresNotice == true
 }
@@ -272,32 +273,32 @@ notice_obligation := {
 # =============================================================================
 
 # Check if data is export controlled
-export_controlled if {
+export_controlled {
   license_exists
   license_data.exportControlled == true
 }
 
 # Check for export control violations
-export_control_violation if {
+export_control_violation {
   export_controlled
   input.action in ["EXPORT", "SHARE", "DISTRIBUTE"]
   violates_country_restrictions
 }
 
 # Check country restrictions
-violates_country_restrictions if {
+violates_country_restrictions {
   export_controlled
   license_data.prohibitedCountries
   input.subject.residency in license_data.prohibitedCountries
 }
 
-violates_country_restrictions if {
+violates_country_restrictions {
   export_controlled
   license_data.permittedCountries
   not input.subject.residency in license_data.permittedCountries
 }
 
-export_control_reason := msg if {
+export_control_reason := msg {
   violates_country_restrictions
   license_data.prohibitedCountries
   input.subject.residency in license_data.prohibitedCountries
@@ -307,7 +308,7 @@ export_control_reason := msg if {
   )
 }
 
-export_control_reason := msg if {
+export_control_reason := msg {
   violates_country_restrictions
   license_data.permittedCountries
   not input.subject.residency in license_data.permittedCountries
@@ -336,23 +337,23 @@ export_control_condition := {
 # =============================================================================
 
 # Check if TOS acceptance required
-tos_required if {
+tos_required {
   license_exists
   license_data.requiresSignature == true
 }
 
-tos_required if {
+tos_required {
   license_exists
   license_data.licenseType in ["CUSTOM", "PROPIN"]
 }
 
 # Check if TOS accepted
-tos_accepted if {
+tos_accepted {
   input.context.tosAccepted == true
 }
 
 # TOS not required
-tos_accepted if {
+tos_accepted {
   not tos_required
 }
 
@@ -361,12 +362,12 @@ tos_accepted if {
 # =============================================================================
 
 # INTERNAL_ONLY - cannot be shared externally
-internal_only if {
+internal_only {
   license_exists
   license_data.licenseType == "INTERNAL_ONLY"
 }
 
-deny contains msg if {
+deny[msg] {
   internal_only
   input.action in ["EXPORT", "SHARE", "DISTRIBUTE"]
   # Check if sharing outside organization
@@ -375,7 +376,7 @@ deny contains msg if {
 }
 
 # ORCON - Originator Controlled
-orcon if {
+orcon {
   license_exists
   license_data.licenseType == "ORCON"
 }
@@ -390,12 +391,12 @@ orcon_condition := {
 } if orcon
 
 # NOFORN - No Foreign Nationals
-noforn if {
+noforn {
   license_exists
   license_data.licenseType == "NOFORN"
 }
 
-deny contains msg if {
+deny[msg] {
   noforn
   input.subject.residency
   input.subject.residency != "US"
@@ -407,24 +408,24 @@ deny contains msg if {
 # =============================================================================
 
 # Check if combining data from multiple licenses
-multiple_licenses if {
+multiple_licenses {
   input.action == "CREATE_DERIVATIVES"
   count(input.context.sourceLicenses) > 1
 }
 
 # Check compatibility between licenses
-licenses_compatible if {
+licenses_compatible {
   multiple_licenses
   # In production, this would query the license_compatibility_matrix
   all_combinations_compatible
 }
 
-all_combinations_compatible if {
+all_combinations_compatible {
   # Simplified check - in production would check each pair
   not incompatible_license_types
 }
 
-incompatible_license_types if {
+incompatible_license_types {
   multiple_licenses
   has_share_alike := [l | l := input.context.sourceLicenses[_]; l.restrictions.shareAlike]
   count(has_share_alike) > 0
@@ -432,13 +433,13 @@ incompatible_license_types if {
   not all_same_license_family
 }
 
-all_same_license_family if {
+all_same_license_family {
   multiple_licenses
   families := [l.licenseFamily | l := input.context.sourceLicenses[_]]
   count({f | f := families[_]}) == 1
 }
 
-deny contains msg if {
+deny[msg] {
   multiple_licenses
   not licenses_compatible
   msg := "Source data licenses are incompatible. Cannot create derivative work."
@@ -500,7 +501,7 @@ appeal_info := {
     "Intended use description",
     "Data handling procedures"
   ]
-} if {
+} {
   license_required
   not license_permits_action
 }

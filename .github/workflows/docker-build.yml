@@ -43,6 +43,8 @@ jobs:
         platform: [linux/amd64, linux/arm64]
 
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 

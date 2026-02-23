@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Governance Signal Inventory
 
 | Signal Name | Source Concept | Type | Regulatory Drivers | Summit Relevance |

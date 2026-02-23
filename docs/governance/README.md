@@ -1,6 +1,6 @@
 Owner: Governance
 Last-Reviewed: 2026-01-14
-Evidence-IDs: none
+Evidence-IDs: GAV-NONE
 Status: deprecated
 
 Deprecated as of 2026-01-14. Authoritative source: docs/governance/INDEX.md.

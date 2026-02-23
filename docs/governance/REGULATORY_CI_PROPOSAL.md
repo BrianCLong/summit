@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Regulatory CI/Automation Proposal
 
 ## 1. AI Risk Classification Gate

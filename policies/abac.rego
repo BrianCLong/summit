@@ -1,95 +1,99 @@
 # (same as in sprint doc)
 package abac.authz
+import future.keywords.in
+
+
+
 
 default allow = false
 
 # Rule to check if tenant is isolated
-tenant_isolated if {
+tenant_isolated {
   input.jwt.tenant == input.resource.tenant
 }
 
 # Simplified purpose allowed rules to avoid variable conflicts
-purpose_investigation if {
+purpose_investigation {
   input.jwt.purpose[_] == "investigation" 
 }
 
-purpose_threat_intel if {
+purpose_threat_intel {
   input.jwt.purpose[_] == "threat-intel"
 }
 
-purpose_fraud_risk if {
+purpose_fraud_risk {
   input.jwt.purpose[_] == "fraud-risk"
 }
 
-purpose_t_and_s if {
+purpose_t_and_s {
   input.jwt.purpose[_] == "t&s"
 }
 
-purpose_benchmarking if {
+purpose_benchmarking {
   input.jwt.purpose[_] == "benchmarking"
 }
 
-purpose_training if {
+purpose_training {
   input.jwt.purpose[_] == "training"
 }
 
-purpose_demo if {
+purpose_demo {
   input.jwt.purpose[_] == "demo"
 }
 
-purpose_allowed if { purpose_investigation }
-purpose_allowed if { purpose_threat_intel }
-purpose_allowed if { purpose_fraud_risk }
-purpose_allowed if { purpose_t_and_s }
-purpose_allowed if { purpose_benchmarking }
-purpose_allowed if { purpose_training }
-purpose_allowed if { purpose_demo }
+purpose_allowed { purpose_investigation }
+purpose_allowed { purpose_threat_intel }
+purpose_allowed { purpose_fraud_risk }
+purpose_allowed { purpose_t_and_s }
+purpose_allowed { purpose_benchmarking }
+purpose_allowed { purpose_training }
+purpose_allowed { purpose_demo }
 
 # Role checks
-role_admin_write if {
+role_admin_write {
   input.action == "write"
   input.jwt.roles[_] == "admin"
 }
 
-role_editor_write if {
+role_editor_write {
   input.action == "write"
   input.jwt.roles[_] == "editor"
 }
 
-role_can_write if { role_admin_write }
-role_can_write if { role_editor_write }
+role_can_write { role_admin_write }
+role_can_write { role_editor_write }
 
 # Sensitive data read checks
-sensitive_read_basic_ok if {
+sensitive_read_basic_ok {
   input.action == "read"
   not ("pii" in input.resource.labels)
 }
 
-sensitive_read_privileged_ok if {
+sensitive_read_privileged_ok {
   input.action == "read"
   ("pii" in input.resource.labels)
   input.jwt.roles[_] == "admin"
 }
 
-sensitive_read_officer_ok if {
+sensitive_read_officer_ok {
   input.action == "read"
   ("pii" in input.resource.labels)
   input.jwt.roles[_] == "privacy-officer"
 }
 
-sensitive_read_ok if { sensitive_read_basic_ok }
-sensitive_read_ok if { sensitive_read_privileged_ok }
-sensitive_read_ok if { sensitive_read_officer_ok }
+sensitive_read_ok { sensitive_read_basic_ok }
+sensitive_read_ok { sensitive_read_privileged_ok }
+sensitive_read_ok { sensitive_read_officer_ok }
 
 # Main authorization rules
-allow if {
+allow {
   tenant_isolated
   purpose_allowed
   input.action == "read"
   sensitive_read_ok
 }
 
-allow if {
+allow {
   tenant_isolated
   purpose_allowed
   role_can_write

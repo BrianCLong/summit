@@ -1,6 +1,6 @@
 Owner: Governance
 Last-Reviewed: 2026-01-14
-Evidence-IDs: none
+Evidence-IDs: GAV-NONE
 Status: active
 
 # Epic 4 — Error Handling & Recoverability (no stuck states, no mystery failures)

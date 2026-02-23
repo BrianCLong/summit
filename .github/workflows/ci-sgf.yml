@@ -34,7 +34,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build SGF
         run: |
-          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
+          find . -name "@types/hapi__catbox" -o -name "@types/hapi__shot" -type d -prune -exec rm -rf {} +
           pnpm --filter "@summit/sgf-*" build
       - name: Test SGF
         run: pnpm --filter "@summit/sgf-*" test

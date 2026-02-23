@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Control Spec: DT-001 Zero-Trust Data Governance
 
 ## Control Objective

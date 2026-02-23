@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Media Authenticity & Provenance (Governance Module)
 
 **Summit Readiness Assertion:** This control is asserted as mandatory under the Summit Readiness Assertion and therefore inherits the governance authority chain defined in `docs/SUMMIT_READINESS_ASSERTION.md`. The present state is enforceable and future work is explicitly sequenced.

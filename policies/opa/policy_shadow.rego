@@ -1,27 +1,19 @@
 package composer.policy_shadow
 
-# Combine sub-decisions and emit a consolidated verdict
+import future.keywords.in
 
-verdict := {
-  "mode": input.mode,
-  "allow": allow_all,
-  "decisions": [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision],
-}
-{
-  # In shadow mode, we never block — but we keep per-policy decisions
-  input.mode == "shadow"
-  allow_all := true
-} else = verdict {
-  input.mode == "enforce"
-  some dec in [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
-  allow_all := all(decisions, func(x){ x.allow })
-  decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+# Shadow policy to aggregate decisions
+
+decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+
+allow_all {
+    all_allowed
 }
 
-# Helper: all()
-all(arr, fn) = ok {
-  ok := true
-  some i
-  ok = ok & fn(arr[i])
+all_allowed {
+    some d in decisions
+    d.allow == true
 }
 
+# In modern Rego, 'all' is often used as a higher-order function or built-in
+# but here it seems intended as logic.

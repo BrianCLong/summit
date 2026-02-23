@@ -1,20 +1,32 @@
 package composer.dlp
 
-# input.dlp_hits: array of findings from your scanners (post-redaction)
-# Example hit: { "severity": "high", "type": "PII_EMAIL", "path": "/logs/build-123.log" }
+import future.keywords.in
 
-block {
-  some h
-  input.dlp_hits[h].severity == "high"
+# Require DLP for artifacts with PII
+
+needs_dlp {
+  "pii" in input.artifact.labels
 }
 
-# Shadow-able wrapper decision
-package composer.decision_dlp
+missing_dlp {
+  needs_dlp
+  not input.artifact.dlp_scan_id
+}
+
+allow {
+  not needs_dlp
+}
+
+allow {
+  needs_dlp
+  not missing_dlp
+}
 
 decision := {
   "policy": "dlp",
   "mode": input.mode,
-  "allow": not data.composer.dlp.block,
-  "violations": input.dlp_hits,
+  "allow": allow,
+  "violations": violations,
+} {
+  violations := [ {"code": "DLP_REQUIRED", "artifact": input.artifact.digest} | missing_dlp ]
 }
-

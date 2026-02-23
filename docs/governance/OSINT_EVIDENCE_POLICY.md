@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 **Owner**: @intelgraph/provenance-team
 **Last-Reviewed**: 2026-01-27
 **Evidence-IDs**: EVID-GOV-OSINT-POLICY-001

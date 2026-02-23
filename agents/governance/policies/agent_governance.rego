@@ -3,10 +3,8 @@
 # Aligned with IC FY28 validation requirements
 
 package agents.governance
-
-import future.keywords.if
 import future.keywords.in
-import future.keywords.contains
+
 
 # ============================================================================
 # Default Deny
@@ -21,7 +19,7 @@ default provenance_valid := false
 # ============================================================================
 
 # Allow action if all conditions are met
-action_allowed if {
+action_allowed {
     agent_identity_valid
     user_clearance_sufficient
     action_permitted_for_trust_level
@@ -30,7 +28,7 @@ action_allowed if {
 }
 
 # Validate agent identity
-agent_identity_valid if {
+agent_identity_valid {
     input.agent.id != ""
     input.agent.fleetId != ""
     input.agent.trustLevel in valid_trust_levels
@@ -39,7 +37,7 @@ agent_identity_valid if {
 valid_trust_levels := {"untrusted", "basic", "elevated", "privileged", "sovereign"}
 
 # Check user clearance against data classification
-user_clearance_sufficient if {
+user_clearance_sufficient {
     clearance_level(input.user.clearance) >= classification_level(input.agent.classification)
 }
 
@@ -60,7 +58,7 @@ classification_level(c) := 5 if c == "SCI"
 classification_level(c) := 6 if c == "SAP"
 
 # Check if action is permitted for trust level
-action_permitted_for_trust_level if {
+action_permitted_for_trust_level {
     trust_level_num(input.agent.trustLevel) >= required_trust_for_action(input.action)
 }
 
@@ -85,11 +83,11 @@ action_actions := {"execute", "create", "update", "delete", "modify"}
 admin_actions := {"admin", "configure", "deploy", "terminate"}
 
 # Check if action is blocked
-action_blocked if {
+action_blocked {
     input.action in blocked_actions
 }
 
-action_blocked if {
+action_blocked {
     input.agent.trustLevel == "untrusted"
     input.action in restricted_actions
 }
@@ -98,7 +96,7 @@ blocked_actions := {"exfiltrate", "bypass_security", "disable_audit"}
 restricted_actions := {"execute", "create", "update", "delete", "admin"}
 
 # Rate limit check (would integrate with actual rate limiter)
-rate_limit_not_exceeded if {
+rate_limit_not_exceeded {
     true # Placeholder - actual implementation would check rate limit store
 }
 
@@ -107,20 +105,20 @@ rate_limit_not_exceeded if {
 # ============================================================================
 
 # Detect potential misuse patterns
-misuse_detected if {
+misuse_detected {
     suspicious_action_pattern
 }
 
-misuse_detected if {
+misuse_detected {
     classification_escalation_attempt
 }
 
-misuse_detected if {
+misuse_detected {
     cross_tenant_violation
 }
 
 # Check for suspicious action patterns
-suspicious_action_pattern if {
+suspicious_action_pattern {
     input.action in sensitive_actions
     input.agent.trustLevel in {"untrusted", "basic"}
 }
@@ -128,19 +126,19 @@ suspicious_action_pattern if {
 sensitive_actions := {"export", "bulk_download", "admin", "configure"}
 
 # Detect classification escalation attempts
-classification_escalation_attempt if {
+classification_escalation_attempt {
     input.resource.attributes.classification
     classification_level(input.resource.attributes.classification) > clearance_level(input.user.clearance)
 }
 
 # Detect cross-tenant violations
-cross_tenant_violation if {
+cross_tenant_violation {
     input.resource.attributes.tenantId
     input.resource.attributes.tenantId != input.user.organization
     not cross_tenant_allowed
 }
 
-cross_tenant_allowed if {
+cross_tenant_allowed {
     input.user.roles[_] == "cross_tenant_admin"
 }
 
@@ -149,7 +147,7 @@ cross_tenant_allowed if {
 # ============================================================================
 
 # Allow chain execution if conditions met
-chain_allowed if {
+chain_allowed {
     chain_governance_valid
     chain_cost_within_limit
     chain_classification_allowed
@@ -157,7 +155,7 @@ chain_allowed if {
 }
 
 # Validate chain governance configuration
-chain_governance_valid if {
+chain_governance_valid {
     input.resource.attributes.chainId != ""
     input.resource.attributes.stepCount > 0
     input.resource.attributes.stepCount <= max_chain_steps
@@ -166,19 +164,19 @@ chain_governance_valid if {
 max_chain_steps := 10
 
 # Check chain cost is within limit
-chain_cost_within_limit if {
+chain_cost_within_limit {
     input.resource.attributes.totalCost <= max_chain_cost_usd
 }
 
 max_chain_cost_usd := 100
 
 # Check chain classification is allowed
-chain_classification_allowed if {
+chain_classification_allowed {
     clearance_level(input.user.clearance) >= classification_level(input.agent.classification)
 }
 
 # Verify chain providers are trusted (placeholder)
-chain_providers_trusted if {
+chain_providers_trusted {
     true # Would verify against trusted provider list
 }
 
@@ -187,24 +185,24 @@ chain_providers_trusted if {
 # ============================================================================
 
 # Validate provenance requirements
-provenance_valid if {
+provenance_valid {
     provenance_has_slsa3
     provenance_signed
     provenance_builder_trusted
 }
 
 # Check SLSA level
-provenance_has_slsa3 if {
+provenance_has_slsa3 {
     input.resource.attributes.provenance.slsaLevel in {"SLSA_3", "SLSA_4"}
 }
 
 # Check provenance is signed
-provenance_signed if {
+provenance_signed {
     input.resource.attributes.provenance.signed == true
 }
 
 # Check builder is trusted
-provenance_builder_trusted if {
+provenance_builder_trusted {
     input.resource.attributes.provenance.trusted == true
 }
 
@@ -213,7 +211,7 @@ provenance_builder_trusted if {
 # ============================================================================
 
 # Overall compliance check
-icfy28_compliant if {
+icfy28_compliant {
     identity_control_met
     access_control_met
     audit_control_met
@@ -221,25 +219,25 @@ icfy28_compliant if {
     ai_safety_control_met
 }
 
-identity_control_met if {
+identity_control_met {
     input.agent.id != ""
     input.agent.trustLevel != ""
 }
 
-access_control_met if {
+access_control_met {
     user_clearance_sufficient
     action_permitted_for_trust_level
 }
 
-audit_control_met if {
+audit_control_met {
     true # Audit logging is mandatory in framework
 }
 
-supply_chain_control_met if {
+supply_chain_control_met {
     input.environment.slsaLevel in {"SLSA_3", "SLSA_4"}
 }
 
-ai_safety_control_met if {
+ai_safety_control_met {
     not misuse_detected
 }
 
@@ -267,7 +265,7 @@ reason := "Rate limit exceeded" if not rate_limit_not_exceeded
 reason := "Unknown denial reason" if not action_allowed
 
 # Conditions to apply
-conditions := conds if {
+conditions := conds {
     conds := [c | c := condition_checks[_]; c.enforced]
 }
 
@@ -283,7 +281,7 @@ audit_level := "warn" if not action_allowed
 audit_level := "info" if action_allowed
 
 # Determine mitigations
-mitigations := mitigation_list if {
+mitigations := mitigation_list {
     misuse_detected
     mitigation_list := [
         {"action": "block", "severity": "high", "description": "Misuse pattern detected", "automated": true},
@@ -291,7 +289,7 @@ mitigations := mitigation_list if {
     ]
 }
 
-mitigations := [] if {
+mitigations := [] {
     not misuse_detected
 }
 
@@ -304,11 +302,11 @@ tenant_isolation := {
     "violations": tenant_violations,
 }
 
-tenant_properly_isolated if {
+tenant_properly_isolated {
     not cross_tenant_violation
 }
 
-tenant_violations contains v if {
+tenant_violations contains v {
     cross_tenant_violation
     v := {
         "type": "cross_tenant_access",

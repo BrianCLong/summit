@@ -1,6 +1,6 @@
 Owner: Governance
 Last-Reviewed: 2026-01-14
-Evidence-IDs: none
+Evidence-IDs: GAV-NONE
 Status: active
 
 # Epic 1: AI Usage Inventory & Policy Baseline (stop shadow AI)

@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Cloud Authorization Strategy (FedRAMP 20x)
 **Status:** Strategic Draft
 **Target:** FedRAMP Moderate / High

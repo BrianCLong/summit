@@ -1,3 +1,8 @@
+> Owner: Bolt
+> Status: active
+> Last-Reviewed: 2026-02-23
+> Evidence-IDs: GAV-NONE
+
 # Privacy Enforcement Readiness Strategy
 **Status:** Active
 **Effective Date:** January 1, 2026

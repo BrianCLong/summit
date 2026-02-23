@@ -1,33 +1,37 @@
 package export.v2
 
+import future.keywords.in
+
 default allow := false
 
-# Simulation mode: when true, decision.allow_effective may be true even if would_allow is false
+# Simulation mode
 simulate := input.simulate
 
-# Sensitivity tiers requiring step-up auth
 requires_step_up {
-  input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
+  input.bundle.sensitivity in ["Sensitive", "Restricted"]
 }
 
-has_webauthn := input.user.webauthn == true
+has_webauthn { input.user.webauthn == true }
 
-# DLP: fields to redact (pii prefixes and explicit list)
+# DLP
 pii_prefix := "pii:"
 
 explicit_pii[field] {
-  field := input.policy.pii[_]
+  some i
+  field := input.policy.pii[i]
 }
 
 should_redact_field(field) {
   startswith(field, pii_prefix)
-} else {
+}
+
+should_redact_field(field) {
   explicit_pii[field]
 }
 
-# Build a redacted copy of the record by removing/masking pii fields
-redact_record(obj) = out {
-  out := object.remove(obj, [f | f := keys(obj)[_]; should_redact_field(f)])
+# Redact record
+redact_record(obj) := out if {
+  out := {f: v | some f; v := obj[f]; not should_redact_field(f)}
 }
 
 # Deny reasons
@@ -52,14 +56,16 @@ allow {
   would_allow
 }
 
+allow_effective { would_allow }
+allow_effective { simulate }
+
 decision := {
   "simulate": simulate,
   "would_allow": would_allow,
-  "allow": allow_effective,
-  "reasons": {r | r := deny_reason[_]},
+  "allow": allow_effective_val,
+  "reasons": {r | some r; r := deny_reason[_]},
   "policy_version": input.policy.version,
   "redacted": redact_record(input.record),
 } {
-  allow_effective := (would_allow or simulate)
+    allow_effective_val := val { allow_effective; val := true } else := false
 }
-

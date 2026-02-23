@@ -1,10 +1,13 @@
 # IntelGraph Approval Policy: Four-eyes enforcement with emergency overrides
+
+
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.approval"
 
 package intelgraph.approval
-
-import future.keywords.if
 import future.keywords.in
+
+
+
 
 # Default deny - all operations must be explicitly allowed
 default allow := false
@@ -22,55 +25,55 @@ risk_tags := {
 }
 
 # Four-eyes requirement logic
-requires_four_eyes if {
+requires_four_eyes {
   # High-risk operations always require approval
   input.risk_tag != ""
   input.risk_tag in risk_tags
 }
 
-requires_four_eyes if {
+requires_four_eyes {
   # Cost threshold: any operation >$5.00 requires approval
   input.est_usd > 5.0
 }
 
-requires_four_eyes if {
+requires_four_eyes {
   # Large token operations require approval (configurable threshold)
   input.est_total_tokens > data.config.four_eyes_token_threshold
 }
 
-requires_four_eyes if {
+requires_four_eyes {
   # Cross-tenant operations always require approval
   input.affects_multiple_tenants == true
 }
 
 # Main authorization logic
-allow if {
+allow {
   # Standard path: within budget and no four-eyes required
   not requires_four_eyes
   within_budget_limits
 }
 
-allow if {
+allow {
   # Four-eyes path: within budget with valid approvals
   requires_four_eyes
   within_budget_limits
   has_valid_four_eyes_approval
 }
 
-allow if {
+allow {
   # Emergency override path: active time-limited override
   within_emergency_budget_limits
   has_active_override
 }
 
 # Budget constraint checking
-within_budget_limits if {
+within_budget_limits {
   input.est_usd <= input.daily_room
   input.est_usd <= input.monthly_room
 }
 
 # Emergency budget limits (with override multiplier)
-within_emergency_budget_limits if {
+within_emergency_budget_limits {
   override := active_overrides[_]
   multiplier := override.budget_multiplier
   input.est_usd <= (input.daily_room * multiplier)
@@ -78,7 +81,7 @@ within_emergency_budget_limits if {
 }
 
 # Four-eyes approval validation
-has_valid_four_eyes_approval if {
+has_valid_four_eyes_approval {
   count(valid_approvers) >= 2
   # Approvers must be different from requestor
   not input.user_id in {approver.user_id | approver := valid_approvers[_]}
@@ -95,31 +98,31 @@ valid_approvers := {approver |
 }
 
 # Approver role validation
-approver_has_sufficient_role(approver) if {
+approver_has_sufficient_role(approver) {
   approver.role in {"admin", "finance_admin", "senior_analyst", "security_admin"}
 }
 
-approver_has_sufficient_role(approver) if {
+approver_has_sufficient_role(approver) {
   # Team leads can approve for their own tenant/team
   approver.role == "team_lead"
   approver.tenant_id == input.tenant_id
 }
 
-approver_has_sufficient_role(approver) if {
+approver_has_sufficient_role(approver) {
   # Special case: cross-tenant operations require higher privilege
   input.affects_multiple_tenants == true
   approver.role in {"admin", "security_admin"}
 }
 
 # Approver authentication validation
-approver_is_authenticated(approver) if {
+approver_is_authenticated(approver) {
   approver.session_token != ""
   approver.session_token != null
   # Could add session validation logic here
 }
 
 # Approval recency check (within 1 hour by default)
-approval_is_recent(approver) if {
+approval_is_recent(approver) {
   approval_time_ns := time.parse_rfc3339_ns(approver.approved_at)
   current_time_ns := time.now_ns()
   max_age_ns := data.config.approval_max_age_seconds * 1000000000  # Convert to nanoseconds
@@ -127,7 +130,7 @@ approval_is_recent(approver) if {
 }
 
 # All approvers must be recent
-all_approvers_recent if {
+all_approvers_recent {
   count(valid_approvers) > 0
   count([approver | 
     some approver in valid_approvers
@@ -136,7 +139,7 @@ all_approvers_recent if {
 }
 
 # Active override detection
-has_active_override if {
+has_active_override {
   count(active_overrides) > 0
 }
 
@@ -148,7 +151,7 @@ active_overrides := [override |
 ]
 
 # Override validity check
-is_override_active(override) if {
+is_override_active(override) {
   current_time_ns := time.now_ns()
   expires_at_ns := time.parse_rfc3339_ns(override.expires_at)
   current_time_ns < expires_at_ns
@@ -156,13 +159,13 @@ is_override_active(override) if {
 }
 
 # Override permission check
-override_permits_operation(override) if {
+override_permits_operation(override) {
   # Check if override allows unapproved operations
   requires_four_eyes
   override.allow_unapproved_ops == true
 }
 
-override_permits_operation(override) if {
+override_permits_operation(override) {
   # Override always allows budget increases
   override.budget_multiplier > 1.0
 }
@@ -197,16 +200,16 @@ decision := {
 }
 
 # Risk level assessment
-risk_level := "critical" if {
+risk_level := "critical" {
   input.risk_tag in {"destructive", "purge", "cross_tenant_move"}
-} else := "high" if {
+} else := "high" {
   input.est_usd > 10.0
-} else := "medium" if {
+} else := "medium" {
   input.est_usd > 1.0
 } else := "low"
 
 # Violation reasons for debugging
-violation_reasons contains reason if {
+violation_reasons [reason] {
   not within_budget_limits
   reason := sprintf("Budget exceeded: daily $%.2f/$%.2f, monthly $%.2f/$%.2f", [
     input.est_usd, input.daily_room,
@@ -214,7 +217,7 @@ violation_reasons contains reason if {
   ])
 }
 
-violation_reasons contains reason if {
+violation_reasons [reason] {
   requires_four_eyes
   not has_valid_four_eyes_approval
   not has_active_override
@@ -225,7 +228,7 @@ violation_reasons contains reason if {
   ])
 }
 
-violation_reasons contains reason if {
+violation_reasons [reason] {
   requires_four_eyes
   has_valid_four_eyes_approval
   count(valid_approvers) < 2
@@ -235,14 +238,14 @@ violation_reasons contains reason if {
   ])
 }
 
-violation_reasons contains reason if {
+violation_reasons [reason] {
   not within_budget_limits
   not within_emergency_budget_limits
   reason := "Emergency budget limits also exceeded"
 }
 
 # Helper queries for monitoring/debugging
-tenant_status[tenant] := status if {
+tenant_status[tenant] := status {
   some tenant
   budget := data.tenant_budgets[tenant]
   spending := data.daily_spending[tenant]

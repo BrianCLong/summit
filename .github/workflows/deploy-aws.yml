@@ -46,6 +46,8 @@ jobs:
             path: gateway/policy-lac
 
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4
 
       - name: Configure AWS Credentials
@@ -92,6 +94,8 @@ jobs:
     needs: [build-and-push, pre-deploy-gate]
     runs-on: ubuntu-latest
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4
 
       - name: Setup Terraform
@@ -107,6 +111,8 @@ jobs:
     needs: deploy-infra
     runs-on: ubuntu-latest
     steps:
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - uses: actions/checkout@v4
 
       - name: Configure AWS Credentials

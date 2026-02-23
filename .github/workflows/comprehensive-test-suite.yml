@@ -49,7 +49,10 @@ jobs:
           NODE_OPTIONS: '--experimental-vm-modules'
           # Ensure color output in CI
           FORCE_COLOR: 3
-        run: pnpm -r test --coverage
+        run: |
+          # BOLT: Ensure jest is executable across all workspaces
+          pnpm -r exec chmod +x node_modules/.bin/jest || true
+          pnpm -r test --coverage
 
       - name: Verify Coverage Thresholds
         run: node scripts/coverage-aggregate.js

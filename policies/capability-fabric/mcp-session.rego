@@ -1,4 +1,5 @@
 package summit.capability.mcp_session
+import future.keywords.in
 
 default allow = false
 
