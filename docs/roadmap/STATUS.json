@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-22T04:05:18Z",
-  "revision_note": "Daily sprint 2026-02-22 ops log + prompt registration.",
+  "last_updated": "2026-02-23T02:23:36Z",
+  "revision_note": "Daily sprint 2026-02-23 evidence refresh; live GH scans restored; PR #18569 test remains blocked by worktree dependency install instability.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
