@@ -1,4 +1,5 @@
 package intelgraph.sku
+import future.keywords
 
 default allow_feature := false
 

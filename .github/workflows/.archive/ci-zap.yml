@@ -184,7 +184,7 @@ jobs:
           PY
 
       - name: Upload ZAP artifacts
-        if: ((((always()) && (github.event_name == 'pull_request')) && (steps.evaluate.outputs.has_blockers == 'true')) && (steps.evaluate.outputs.has_blockers != 'true')) && (steps.evaluate.outputs.has_blockers == 'true')
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-${{ matrix.name }}-report
@@ -195,6 +195,7 @@ jobs:
             zap-status-${{ matrix.name }}.json
 
       - name: Comment on PR with ZAP summary
+        if: github.event_name == 'pull_request'
         env:
           SERVICE_NAME: ${{ matrix.name }}
         uses: actions/github-script@v7
@@ -211,6 +212,7 @@ jobs:
             });
 
       - name: Update remediation tracker
+        if: steps.evaluate.outputs.has_blockers == 'true'
         env:
           SERVICE_NAME: ${{ matrix.name }}
         uses: actions/github-script@v7
@@ -244,6 +246,7 @@ jobs:
             }
 
       - name: Close resolved remediation tracker
+        if: steps.evaluate.outputs.has_blockers != 'true'
         env:
           SERVICE_NAME: ${{ matrix.name }}
         uses: actions/github-script@v7
@@ -267,6 +270,7 @@ jobs:
             }
 
       - name: Block on high/critical findings
+        if: steps.evaluate.outputs.has_blockers == 'true'
         run: |
           echo "Blocking high/critical OWASP ZAP findings detected. See summary for remediation details."
           exit 1
