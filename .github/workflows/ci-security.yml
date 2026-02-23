@@ -506,8 +506,7 @@ jobs:
           BASELINE_STATUS: ${{ needs.baseline.result }}
           DAST_STATUS: ${{ needs.dast.result }}
         run: |
-          python - <<'PY'
-            import json
+          python3 -c "import json
             import os
             from pathlib import Path
 
