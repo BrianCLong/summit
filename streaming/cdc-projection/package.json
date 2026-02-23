@@ -4,7 +4,6 @@
   "main": "src/manager.ts",
   "dependencies": {
     "pg-logical-replication": "^2.0.0",
-    "@summit/graph": "workspace:*",
     "@intelgraph/graph": "workspace:*"
   }
 }
