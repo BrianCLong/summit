@@ -291,7 +291,7 @@ export const createApp = async () => {
           console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
-            email: 'dev@intelgraph.local',
+            email: 'dev-intelgraph-local',
             role: 'admin',
             tenantId: 'global',
             id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
