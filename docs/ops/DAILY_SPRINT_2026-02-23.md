@@ -73,6 +73,8 @@ SLA: 3-6 tasks, scoped to one zone (docs/ops + governance metadata).
 - Issue scan failed due to GitHub API connectivity (Governed Exception).
 - Updated `docs/roadmap/STATUS.json` timestamp + revision note.
 - Created daily sprint log with evidence-first ordering.
+- Registered daily sprint prompt in `prompts/automation/daily-sprint@v1.md` and `prompts/registry.yaml`.
+- Added task spec at `agents/examples/DAILY_SPRINT_20260223_RUN1.json`.
 
 ## Governed Exceptions / Blockers
 - GitHub API connectivity blocked issue scan (api.github.com unreachable).
