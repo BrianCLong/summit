@@ -15,47 +15,43 @@
 - **📈 CompanyOS SDK**: Enterprise intelligence APIs
 - **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
-## 🚀 Quickstart
+## ⚡️ Start in 10 Minutes
 
 ### Prerequisites
-
-- Node.js 18+
+- Node.js 18+ (via `pnpm`)
 - Docker & Docker Compose
-- Neo4j 5.x (via Docker)
 
-### Install & Run
-
+### 1. Launch Foundation
 ```bash
-# Clone repository
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-
-# Install dependencies
 pnpm install
-
-# Start infrastructure (Neo4j, Postgres, Redis)
 docker-compose up -d
-
-# Run migrations
 pnpm db:migrate
-
-# Start dev server
-pnpm dev
 ```
 
-Server runs at `http://localhost:4000`
+### 2. Connect Data
+Navigate to `http://localhost:3000/data/sources` and enable the **RSS Connector** to start ingesting public OSINT feeds.
 
-### First Query
+### 3. Run Your First Agent
+Open the **Command Center** at `http://localhost:3000/dashboards/command-center` and ask:
+> "Analyze recent crypto-mining activity in Eastern Europe based on the ingested feeds."
 
-```bash
-# GraphQL playground
-curl -X POST http://localhost:4000/api/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query": "{ health { status version } }"}'
+## 📚 Documentation by Tier
 
-# Or use the web UI
-open http://localhost:3000
-```
+Summit is structured into three capability tiers:
+
+| Tier | Focus | Documentation |
+| :--- | :--- | :--- |
+| **Foundation** | Data Ingestion, Knowledge Graph, API | [docs/FOUNDATION.md](docs/FOUNDATION.md) |
+| **Agents** | Orchestration, Cognitive Skills, Workflow | [docs/AGENTS.md](docs/AGENTS.md) |
+| **Enterprise** | Sovereignty, Governance, Audit, RBAC | [docs/ENTERPRISE.md](docs/ENTERPRISE.md) |
+
+## 🚀 Deployment
+
+- **On-Premises / Air-Gapped**: See [deploy/onprem](deploy/onprem/README.md)
+- **VPC / Private Cloud**: See [deploy/vpc](deploy/vpc/README.md)
+- **Security & Sovereignty**: See [docs/SECURITY_AND_SOVEREIGNTY.md](docs/SECURITY_AND_SOVEREIGNTY.md)
 
 ## 🏛 Architecture
 
@@ -103,40 +99,6 @@ Summit follows a modular microservices architecture:
 - [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
 - [🔒 Security](docs/security/README.md)
 
-## 📚 Key Components
-
-### Connectors
-
-Ingest data from multiple sources:
-
-- **REST APIs**: Poll external services
-- **CSV/S3**: Batch file processing
-- **Neo4j/Postgres**: Database replication
-- **Webhooks**: Real-time event streaming
-
-See: [Connector Documentation](docs/connectors/README.md)
-
-### GraphRAG
-
-Retrieval-augmented generation with knowledge graphs:
-
-- Entity extraction & linking
-- Multi-hop graph traversal
-- Vector similarity search
-- LLM-powered synthesis
-
-See: [GraphRAG Guide](docs/graphrag/README.md)
-
-### Agents
-
-Autonomous AI agents for research and analysis:
-
-- **Jules**: PR reviewer, code analyzer
-- **Codex**: Task brief generator
-- **Observer**: Telemetry and monitoring
-
-See: [Agent Development](docs/agents/README.md)
-
 ## 📡 API Reference
 
 - [GraphQL Schema](docs/api/graphql.md)
@@ -168,26 +130,12 @@ Summit follows security best practices:
 
 See: [Security Policy](SECURITY.md)
 
-## 🚀 Deployment
-
-```bash
-# Build for production
-pnpm build
-
-# Docker deployment
-docker-compose -f docker-compose.prod.yml up -d
-
-# Kubernetes
-kubectl apply -f k8s/
-```
-
-See: [Deployment Guide](docs/deployment/README.md)
-
 ## 🤝 Contributing
 
 We welcome contributions! Please see:
 
 - [Contributing Guidelines](CONTRIBUTING.md)
+- [Agent Contributing Guidelines](AGENT_CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Development Setup](docs/development/setup.md)
 

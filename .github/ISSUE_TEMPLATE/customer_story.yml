@@ -1,0 +1,57 @@
+name: Customer Story / Success Metric
+description: Capture a customer win, efficiency gain, or use case for the Gain Index
+title: "[Story]: <Customer/Use Case>"
+labels: ["lane:bizdev", "type:docs"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to record a measurable success or specific use case deployment.
+        This feeds into the Summit Gain Index and case studies.
+
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Summit Tier
+      options:
+        - Foundation
+        - Agents
+        - Enterprise
+    validations:
+      required: true
+
+  - type: input
+    id: vertical
+    attributes:
+      label: Industry / Vertical
+      placeholder: e.g. Finserv, Defense, Logistics
+    validations:
+      required: true
+
+  - type: textarea
+    id: challenge
+    attributes:
+      label: The Challenge
+      description: What was the manual process or risk before Summit?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Summit Solution
+      description: Which agents or workflows were deployed?
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Measurable Impact (Gain Index)
+      description: e.g. "Reduced triage time by 40%", "Saved 15 hours/week"
+      placeholder: |
+        - Metric: Time Saved
+        - Value:
+        - Context:
+    validations:
+      required: true

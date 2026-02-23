@@ -85,7 +85,6 @@
 - name: "triage:duplicate"
   color: "6e7781"
   description: "Duplicate issue"
-
 - name: needs-canary-plan
   color: CC9900
   description: Canary plan required before merge
@@ -104,9 +103,6 @@
 - name: type/runbook
   color: c2e0c6
   description: Documentation/runbook
-# Standard set of labels for Summit repo
-# Use with actions/labeler or a label sync tool
-
 - name: "type: bug"
   color: "d73a4a"
   description: "Something isn't working"
@@ -122,7 +118,6 @@
 - name: "type: security"
   color: "e99695"
   description: "Security vulnerability or hardening"
-
 - name: "priority: critical"
   color: "b60205"
   description: "Must handle immediately"
@@ -134,31 +129,24 @@
   description: "Normal priority"
 - name: "priority: low"
   description: "Monthly operational hygiene tasks"
-
-- name: needs-canary-plan
+- name: "needs-canary-plan"
   color: "0b7285"
   description: "Requires a documented canary and rollback plan before merge"
-
-- name: migration-gate
+- name: "migration-gate"
   color: "e11d48"
   description: "Schema-impacting change that must clear the migration gate"
-
 - name: "cadence:weekly"
   color: "5319e7"
   description: "Weekly recurring tasks"
-
 - name: "cadence:monthly"
   color: "5319e7"
   description: "Monthly recurring tasks"
-
 - name: "priority:high"
   color: "b60205"
   description: "High priority items"
-
 - name: "priority:normal"
   color: "c2e0c6"
   description: "Nice to have"
-
 - name: "status: blocked"
   color: "000000"
   description: "Waiting on something else"
@@ -168,7 +156,6 @@
 - name: "status: needs-triage"
   color: "ffffff"
   description: "Needs initial review/categorization"
-
 - name: "area: frontend"
   color: "1d76db"
   description: "Frontend/UI code"
@@ -181,7 +168,6 @@
 - name: "area: data"
   color: "bfdadc"
   description: "Database, migration, data integrity"
-
 - name: "needs-canary-plan"
   color: "bfd4f2"
   description: "Requires a canary deployment plan before merge"
@@ -191,37 +177,37 @@
 - name: security
   color: "6610f2"
   description: "Security-related tasks"
-
-# Ops hardening week 1 labels
-- name: needs-canary-plan
-  color: "CC9900"
-  description: Canary plan required before merge
-- name: migration-gate
-  color: "5319e7"
-  description: DB/contract migration present — gate applies
-- name: ops/preview
-  color: "0e8a16"
-  description: Preview environment work
-- name: ops/release-train
-  color: "1f77b4"
-  description: Release train tasks
-- name: risk/high
-  color: "d73a4a"
-  description: Elevated risk change
-- name: type/runbook
-  color: "c2e0c6"
-  description: Documentation/runbook
-
-# Backport labels
-- name: backport/needed
+- name: "backport/needed"
   color: "3e4b9e"
   description: "Indicates a PR should be backported"
-- name: backport/done
+- name: "backport/done"
   color: "0e8a16"
   description: "Backport has been successfully applied"
-- name: backport/release-0.3
+- name: "backport/release-0.3"
   color: "5319e7"
   description: "Backport target: release 0.3"
-- name: backport/release-0.4
+- name: "backport/release-0.4"
   color: "5319e7"
   description: "Backport target: release 0.4"
+# Bizdev and GTM Labels
+- name: "lane:bizdev"
+  color: "0052cc"
+  description: "Business development and GTM tasks"
+- name: "lane:pilot"
+  color: "fbca04"
+  description: "Active pilot engagement"
+- name: "lane:enterprise"
+  color: "5319e7"
+  description: "Enterprise deployment or requirement"
+- name: "lane:partner"
+  color: "c5def5"
+  description: "Partner ecosystem integration"
+- name: "tier:foundation"
+  color: "bfd4f2"
+  description: "Summit Foundation (Base Platform)"
+- name: "tier:agents"
+  color: "d93f0b"
+  description: "Summit Agents (Orchestration & Logic)"
+- name: "tier:enterprise"
+  color: "b60205"
+  description: "Summit Enterprise (Sovereignty & Governance)"

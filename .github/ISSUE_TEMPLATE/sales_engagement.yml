@@ -1,0 +1,41 @@
+name: Sales Engagement Request
+description: Request engineering support for a pilot or enterprise deal
+title: "[Sales]: <Prospect Name>"
+labels: ["lane:bizdev"]
+body:
+  - type: input
+    id: prospect
+    attributes:
+      label: Prospect Name
+    validations:
+      required: true
+
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Deal Stage
+      options:
+        - Discovery
+        - Technical Validation (POV)
+        - Pilot
+        - Security Review
+        - Deployment
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Target Deployment Model
+      options:
+        - Summit Cloud (SaaS)
+        - VPC (Private Cloud)
+        - Air-gapped / On-prem
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Technical Requirements / Gaps
+      description: What specific connectors, agents, or compliance certifications are needed?
