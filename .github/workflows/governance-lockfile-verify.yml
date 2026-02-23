@@ -95,7 +95,7 @@ jobs:
           fi
 
           # Run verification
-          RESULT=$(./scripts/release/verify_governance_lockfile.sh ${ARGS} 2>&1) || EXIT_CODE=$?
+          RESULT=$(./scripts/release/verify_governance_lockfile.sh ${ARGS}) || EXIT_CODE=$?
 
           echo "${RESULT}" > verification_report.json
 
