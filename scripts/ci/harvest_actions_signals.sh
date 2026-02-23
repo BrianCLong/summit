@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Usage: harvest_actions_signals.sh <REPO> <LIMIT>
 # REPO: owner/repo (defaults to current repo if not set, or attempts to detect)
@@ -21,8 +21,23 @@ fi
 
 echo "Harvesting signals for $REPO (limit: $LIMIT)..."
 
-gh run list -R "$REPO" \
+if ! gh run list -R "$REPO" \
   --json createdAt,startedAt,updatedAt,status,conclusion,workflowName \
-  -L "$LIMIT" > runs_raw.json
+  -L "$LIMIT" > runs_raw.json.tmp 2> runs_raw.err; then
+  if grep -Eqi "API rate limit exceeded|HTTP 403|rate limit" runs_raw.err; then
+    echo "GitHub API rate-limited while harvesting runs; emitting empty dataset."
+    echo "[]" > runs_raw.json
+    rm -f runs_raw.json.tmp runs_raw.err
+    echo "Wrote runs_raw.json (empty due to rate limit)"
+    exit 0
+  fi
+
+  cat runs_raw.err >&2 || true
+  rm -f runs_raw.json.tmp runs_raw.err
+  exit 1
+fi
+
+mv runs_raw.json.tmp runs_raw.json
+rm -f runs_raw.err
 
 echo "Wrote runs_raw.json"
