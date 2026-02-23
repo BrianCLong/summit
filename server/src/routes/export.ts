@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import crypto from 'crypto';
+import { createRequire } from 'node:module';
 import { getPostgresPool } from '../db/postgres.js';
 import { ProvenanceRepo, ProvenanceFilter } from '../repos/ProvenanceRepo.js';
 import { tenantHeader } from '../middleware/tenantHeader.js';
+
+const require = createRequire(import.meta.url);
 
 function sign(params: Record<string, string>, secret: string) {
   const base = Object.keys(params)
