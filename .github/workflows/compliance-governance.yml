@@ -26,13 +26,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify Governance Rules
         run: pnpm verify:governance
@@ -45,16 +50,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
-          node-version: "20"
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
           node-version: "20"
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
       - name: Install dependencies
-        run: npm install -g pnpm && pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Verify Compliance Drift
         run: pnpm verify:compliance
