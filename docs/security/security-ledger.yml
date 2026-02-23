@@ -1,0 +1,8 @@
+version: 1.0
+status: active
+updated_at: 2026-02-23
+entries:
+  - id: SEC-LEDGER-001
+    control: governance-artifact-presence
+    description: Security ledger artifact path present for CI gate validation.
+    owner: security-council

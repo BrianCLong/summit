@@ -1,0 +1,5 @@
+version: 1.0
+source_of_truth: docs/evidence/evidence-map.yml
+notes: >
+  Compatibility shim for CI workflows expecting docs/governance/evidence-map.yml.
+  Canonical evidence definitions are maintained in docs/evidence/evidence-map.yml.
