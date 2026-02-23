@@ -508,24 +508,37 @@ export class IngestService {
             break;
           }
 
-          // Process entity batch
-          // We could use UNWIND in Cypher for better performance, but keeping logic similar for now
-          // to minimize risk, just fixing the memory issue.
+          // Process entity batch using UNWIND for performance
+          // Group by kind to allow dynamic labeling with backticks
+          const entitiesByKind = new Map<string, any[]>();
           for (const entity of entities) {
-             await session.run(
-              `MERGE (n {id: $id, tenantId: $tenantId})
-               SET n += $properties, n:${entity.kind}
-               RETURN n`,
-              {
-                id: entity.id,
-                tenantId: entity.tenant_id,
-                properties: {
-                  ...JSON.parse(entity.props),
-                  labels: entity.labels,
-                  createdAt: entity.created_at.toISOString(),
-                  updatedAt: entity.updated_at.toISOString(),
-                },
+            const kind = entity.kind;
+            if (!entitiesByKind.has(kind)) {
+              entitiesByKind.set(kind, []);
+            }
+            entitiesByKind.get(kind)!.push({
+              id: entity.id,
+              tenantId: entity.tenant_id,
+              properties: {
+                ...JSON.parse(entity.props),
+                labels: entity.labels,
+                createdAt: entity.created_at.toISOString(),
+                updatedAt: entity.updated_at.toISOString(),
               },
+            });
+          }
+
+          for (const [kind, batch] of entitiesByKind.entries()) {
+            // Validate kind to prevent Cypher injection
+            if (!/^[A-Za-z0-9_]+$/.test(kind)) {
+              ingestLogger.error({ kind }, 'Invalid entity kind for Neo4j sync');
+              continue;
+            }
+            await session.run(
+              `UNWIND $batch AS item
+               MERGE (n {id: item.id, tenantId: item.tenantId})
+               SET n += item.properties, n:\`${kind}\``,
+              { batch },
             );
           }
 
@@ -547,25 +560,43 @@ export class IngestService {
             break;
           }
 
+          // Process relationship batch using UNWIND for performance
+          // Group by relationship_type to allow dynamic typing with backticks
+          const relsByType = new Map<string, any[]>();
           for (const rel of relationships) {
-            await session.run(
-              `MATCH (from {id: $fromId, tenantId: $tenantId})
-               MATCH (to {id: $toId, tenantId: $tenantId})
-               MERGE (from)-[r:${rel.relationship_type}]->(to)
-               SET r += $properties
-               RETURN r`,
-              {
-                fromId: rel.from_entity_id,
-                toId: rel.to_entity_id,
-                tenantId: rel.tenant_id,
-                properties: {
-                  ...JSON.parse(rel.props),
-                  confidence: rel.confidence,
-                  source: rel.source,
-                  firstSeen: rel.first_seen.toISOString(),
-                  lastSeen: rel.last_seen ? rel.last_seen.toISOString() : new Date().toISOString()
-                },
+            const type = rel.relationship_type;
+            if (!relsByType.has(type)) {
+              relsByType.set(type, []);
+            }
+            relsByType.get(type)!.push({
+              fromId: rel.from_entity_id,
+              toId: rel.to_entity_id,
+              tenantId: rel.tenant_id,
+              properties: {
+                ...JSON.parse(rel.props),
+                confidence: rel.confidence,
+                source: rel.source,
+                firstSeen: rel.first_seen.toISOString(),
+                lastSeen: rel.last_seen
+                  ? rel.last_seen.toISOString()
+                  : new Date().toISOString(),
               },
+            });
+          }
+
+          for (const [type, batch] of relsByType.entries()) {
+            // Validate relationship type to prevent Cypher injection
+            if (!/^[A-Za-z0-9_]+$/.test(type)) {
+              ingestLogger.error({ type }, 'Invalid relationship type for Neo4j sync');
+              continue;
+            }
+            await session.run(
+              `UNWIND $batch AS item
+               MATCH (from {id: item.fromId, tenantId: item.tenantId})
+               MATCH (to {id: item.toId, tenantId: item.tenantId})
+               MERGE (from)-[r:\`${type}\`]->(to)
+               SET r += item.properties`,
+              { batch },
             );
           }
 
