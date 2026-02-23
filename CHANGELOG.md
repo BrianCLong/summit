@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
+- GA candidate hardening: pinned the external SLSA reusable workflow to an immutable SHA, bumped `anchore/scan-action` to `7.3.2`, and stabilized local GA validation by pinning non-stub Hapi type packages plus shared Jest setup.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
