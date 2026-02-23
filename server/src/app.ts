@@ -479,8 +479,8 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
-  app.use('/airgap', airgapRouter);
-  app.use('/analytics', analyticsRouter);
+  app.use('/airgap', authenticateToken, ensureRole(['ADMIN', 'admin']), airgapRouter);
+  app.use('/analytics', authenticateToken, ensureRole(['ADMIN', 'admin', 'ANALYST', 'analyst']), analyticsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
@@ -490,7 +490,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', drRouter);
+  app.use('/dr', authenticateToken, ensureRole(['ADMIN', 'admin']), drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
