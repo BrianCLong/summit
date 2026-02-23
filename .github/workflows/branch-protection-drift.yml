@@ -155,7 +155,7 @@ jobs:
 
       - name: Check Deduplication
         id: dedup
-        if: steps.check.outputs.drift_detected == 'true'
+        if: steps.check.outputs.drift_detected == 'true' && github.event_name != 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
@@ -320,7 +320,7 @@ jobs:
           REMEDIATION_EOF
 
       - name: Create Issue
-        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true'
+        if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true' && github.event_name != 'pull_request'
         id: create
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
@@ -343,7 +343,7 @@ jobs:
             return issue.data.number;
 
       - name: Update Issue
-        if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true'
+        if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true' && github.event_name != 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
@@ -363,7 +363,7 @@ jobs:
             }
 
       - name: Auto-Close on Resolution
-        if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true'
+        if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true' && github.event_name != 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
         with:
           script: |
