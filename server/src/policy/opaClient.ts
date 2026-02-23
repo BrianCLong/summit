@@ -12,11 +12,15 @@ export type OpaInput = {
   tenant?: string;
   user?: { id?: string; roles?: string[] };
   resource?: string;
-  meta?: { region?: string; residency?: string; [key: string]: unknown };
+  meta?: { region?: string; residency?: string;[key: string]: unknown };
   labels?: string[];
 };
 
-export type OpaDecision = { allow: boolean; reason?: string };
+export type OpaDecision = {
+  allow: boolean;
+  reason?: string;
+  metadata?: Record<string, unknown>;
+};
 
 export type OpaOptions = {
   timeoutMs?: number;
@@ -43,9 +47,8 @@ function stableStringify(obj: unknown): string {
 function buildCacheKey(path: string, input: OpaInput) {
   const normalizedInput = stableStringify(input);
   const hash = createHash('sha256').update(normalizedInput).digest('hex');
-  return `${path}|${input.action}|tenant:${input.tenant || 'none'}|user:${
-    input.user?.id || 'anonymous'
-  }|${hash}`;
+  return `${path}|${input.action}|tenant:${input.tenant || 'none'}|user:${input.user?.id || 'anonymous'
+    }|${hash}`;
 }
 
 async function fetchWithTimeout(url: string, body: string, timeoutMs: number, abortController?: AbortController) {
@@ -79,6 +82,7 @@ async function executeWithRetry(
       const j = await res.json();
       const allow = !!(j.result?.allow ?? j.result === true);
       const reason = j.result?.reason || undefined;
+      const metadata = j.result?.metadata || undefined;
 
       if (process.env.POLICY_DEBUG === '1') {
         console.log(
@@ -86,13 +90,14 @@ async function executeWithRetry(
             component: 'policy.opa-client',
             decision: allow ? 'allow' : 'deny',
             reason,
+            metadata,
             latencyMs: Date.now() - start,
             attempt,
           }),
         );
       }
 
-      return { allow, reason };
+      return { allow, reason, metadata };
     } catch (error: any) {
       lastError = error;
       if (attempt >= options.maxRetries) break;

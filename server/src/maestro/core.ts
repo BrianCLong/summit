@@ -224,6 +224,53 @@ export class Maestro {
         }
       );
 
+      // If requires approval, set task to pending_approval state (Story 1.3)
+      if (!governanceDecision.allowed && governanceDecision.isHitl) {
+        logger.warn({
+          taskId: task.id,
+          runId: task.runId,
+          agentId: task.agent.id,
+          requiredApprovals: governanceDecision.requiredApprovals,
+          riskScore: governanceDecision.riskScore
+        }, 'Task requires human approval');
+
+        await this.ig.updateTask(task.id, {
+          status: 'pending_approval',
+          errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s). Risk score: ${governanceDecision.riskScore.toFixed(2)}. Reason: ${governanceDecision.reason}`,
+          updatedAt: now
+        });
+
+        // === HITL INTEGRATION (Task #102) ===
+        try {
+          const { createApproval } = await import('../services/approvals.js');
+          await createApproval({
+            requesterId: task.agent.id,
+            action: 'maestro_task_execution',
+            payload: {
+              taskId: task.id,
+              taskKind: task.kind,
+              riskScore: governanceDecision.riskScore,
+              riskFactors: governanceDecision.violations?.map(v => v.details) || []
+            },
+            reason: `Governance policy flagged for review. Risk: ${governanceDecision.riskScore.toFixed(2)}. ${governanceDecision.reason}`,
+            runId: task.runId
+          });
+        } catch (approvalError) {
+          logger.error({ taskId: task.id, error: (approvalError as Error).message }, 'Maestro: Failed to create approval record');
+        }
+
+        // Return task in pending_approval state - execution halts here
+        return {
+          task: {
+            ...task,
+            status: 'pending_approval' as TaskStatus,
+            errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s)`,
+            updatedAt: now
+          },
+          artifact: null
+        };
+      }
+
       // If governance check fails, fail the task
       if (!governanceDecision.allowed) {
         const errorMessage = `Governance policy violation: ${governanceDecision.reason}. ` +
@@ -244,48 +291,6 @@ export class Maestro {
         });
 
         throw new Error(errorMessage);
-      }
-
-      // If requires approval, set task to pending_approval state (Story 1.3)
-      if (governanceDecision.requiredApprovals && governanceDecision.requiredApprovals > 0) {
-        logger.warn({
-          taskId: task.id,
-          runId: task.runId,
-          agentId: task.agent.id,
-          requiredApprovals: governanceDecision.requiredApprovals,
-          riskScore: governanceDecision.riskScore
-        }, 'Task requires human approval');
-
-        await this.ig.updateTask(task.id, {
-          status: 'pending_approval',
-          errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s). Risk score: ${governanceDecision.riskScore.toFixed(2)}`,
-          updatedAt: now
-        });
-
-        // === HITL INTEGRATION (Task #102) ===
-        try {
-          const { createApproval } = await import('../services/approvals.js');
-          await createApproval({
-            requesterId: task.agent.id,
-            action: 'maestro_task_execution',
-            payload: { taskId: task.id, taskKind: task.kind, riskScore: governanceDecision.riskScore },
-            reason: `Governance policy flagged for review. Risk: ${governanceDecision.riskScore.toFixed(2)}. ${governanceDecision.reason}`,
-            runId: task.runId
-          });
-        } catch (approvalError) {
-          logger.error({ taskId: task.id, error: (approvalError as Error).message }, 'Maestro: Failed to create approval record');
-        }
-
-        // Return task in pending_approval state - execution halts here
-        return {
-          task: {
-            ...task,
-            status: 'pending_approval' as TaskStatus,
-            errorMessage: `Awaiting ${governanceDecision.requiredApprovals} approval(s)`,
-            updatedAt: now
-          },
-          artifact: null
-        };
       }
 
       logger.info({

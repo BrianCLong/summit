@@ -1,6 +1,6 @@
 
 import {
-  MaestroTemplate, MaestroRun, MaestroTask,
+  MaestroTemplate, MaestroRun, MaestroTask, MaestroAgent,
   RunId, TaskId, TemplateId, TenantId
 } from './model.js';
 import { MaestroDSL } from './dsl.js';
@@ -101,7 +101,7 @@ export class MaestroEngine {
       [templateId, tenantId]
     );
     if (res.rows.length === 0) throw new Error(`Template not found: ${templateId}`);
-    
+
     const row = res.rows[0];
     const template: MaestroTemplate = {
       id: row.id,
@@ -191,6 +191,25 @@ export class MaestroEngine {
     await this.dispatchReadyTasks(runId);
 
     return run;
+  }
+
+  async resumeTask(taskId: string): Promise<void> {
+    const res = await this.db.query(`SELECT status, run_id FROM maestro_tasks WHERE id = $1`, [taskId]);
+    if (res.rows.length === 0) throw new Error(`Task not found: ${taskId}`);
+
+    const { status, run_id: runId } = res.rows[0];
+    if (status !== 'pending_approval') {
+      logger.warn({ taskId, status }, 'Maestro: Attempted to resume task that is not in pending_approval state');
+      return;
+    }
+
+    await this.db.query(
+      `UPDATE maestro_tasks SET status = 'ready', error = NULL WHERE id = $1`,
+      [taskId]
+    );
+
+    logger.info({ taskId, runId }, 'Maestro: Task resumed after human approval');
+    await this.dispatchReadyTasks(runId);
   }
 
   // --- Internal Engine Logic ---
@@ -283,6 +302,59 @@ export class MaestroEngine {
     });
 
     try {
+      // 2.2 GOVERNANCE GATE (Glass Box Middleware)
+      const { agentGovernance } = await import('./governance-service.js');
+      const governanceDecision = await agentGovernance.evaluateAction(
+        {
+          id: (task.metadata?.agentId as string) || 'maestro-system',
+          tenantId: task.tenantId,
+          name: (task.metadata?.agentName as string) || 'Maestro System',
+          capabilities: [],
+          templateId: '',
+          config: {},
+          metadata: task.metadata
+        } as MaestroAgent,
+        task.kind,
+        {
+          taskId: task.id,
+          runId: task.runId,
+          tenantId: task.tenantId,
+          payload: task.payload,
+          ...task.metadata
+        }
+      );
+
+      if (!governanceDecision.allowed) {
+        if (governanceDecision.isHitl) {
+          logger.warn({ taskId, runId, reason: governanceDecision.reason }, 'Governance: Task requires human approval');
+
+          await this.db.query(
+            `UPDATE maestro_tasks SET status = 'pending_approval', error = $2 WHERE id = $1`,
+            [taskId, `Awaiting human approval: ${governanceDecision.reason}`]
+          );
+
+          const { createApproval } = await import('../services/approvals.js');
+          await createApproval({
+            requesterId: (task.metadata?.agentId as string) || 'maestro-system',
+            action: 'maestro_task_execution',
+            payload: {
+              taskId,
+              runId,
+              action: task.kind,
+              riskScore: governanceDecision.riskScore,
+              riskFactors: governanceDecision.violations?.map(v => v.details) || []
+            },
+            reason: governanceDecision.reason,
+            runId
+          });
+
+          return; // Stop processing, wait for approval
+        }
+
+        logger.error({ taskId, runId, reason: governanceDecision.reason }, 'Governance denial: Task execution blocked');
+        throw new Error(`Governance Violation: ${governanceDecision.reason}`);
+      }
+
       // 2.5 Check Coordination Constraints (Budget, Kill-Switch)
       if (task.metadata?.coordinationId) {
         const coordId = task.metadata.coordinationId as string;

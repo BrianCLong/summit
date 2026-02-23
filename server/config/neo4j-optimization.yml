@@ -14,6 +14,42 @@ indexes:
   - label: Investigation
     property: status
     type: INDEX
+  - label: AudienceSegment
+    property: id
+    type: CONSTRAINT
+  - label: AudienceSegment
+    property: name
+    type: INDEX
+  - label: CognitiveState
+    property: id
+    type: CONSTRAINT
+  - label: CognitiveAttack
+    property: id
+    type: CONSTRAINT
+  - label: NarrativeCascade
+    property: id
+    type: CONSTRAINT
+  - label: NarrativeCascade
+    property: narrativeId
+    type: INDEX
+  - label: CascadeHop
+    property: id
+    type: CONSTRAINT
+  - label: CascadeHop
+    property: cascadeId
+    type: INDEX
+  - label: TippingPointIndicator
+    property: id
+    type: CONSTRAINT
+  - label: TippingPointIndicator
+    property: narrativeId
+    type: INDEX
+  - label: IOActor
+    property: id
+    type: CONSTRAINT
+  - label: IOActor
+    property: name
+    type: INDEX
 
 # Query Monitoring
 monitoring:

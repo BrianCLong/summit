@@ -559,10 +559,10 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
-  app.use('/api/approvals', authenticateToken, buildApprovalsRouter(maestro)); // Re-mount with maestro context
   process.stdout.write('[DEBUG] Maestro router built\n');
 
   // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)
+  let engineV2: any = undefined;
   try {
     const { MaestroEngine } = await import('./maestro/engine.js');
     const { MaestroHandlers } = await import('./maestro/handlers.js');
@@ -574,7 +574,7 @@ export const createApp = async () => {
     const pool = getPostgresPool();
     const redis = getRedisClient();
 
-    const engineV2 = new MaestroEngine({
+    engineV2 = new MaestroEngine({
       db: pool as any,
       redisConnection: redis
     });
@@ -607,6 +607,9 @@ export const createApp = async () => {
   } catch (err) {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
+
+  // Final Approvals Router mount with both V1 and V2 context
+  app.use('/api/approvals', authenticateToken, buildApprovalsRouter(maestro, engineV2));
 
   app.get('/search/evidence', authenticateToken, ensureRole(['admin', 'analyst']), async (req, res) => {
     const { q } = req.query;

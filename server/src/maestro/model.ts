@@ -45,7 +45,7 @@ export interface MaestroTask {
   tenantId: TenantId;
   name: string;
   kind: "llm_call" | "rag_query" | "graph_job" | "http_request" | "script" | "subflow" | "delay" | "decision" | "agent_call" | "custom" | "diffusion_edit";
-  status: "pending" | "ready" | "queued" | "running" | "succeeded" | "failed" | "skipped" | "cancelled";
+  status: "pending" | "ready" | "queued" | "running" | "succeeded" | "failed" | "skipped" | "cancelled" | "pending_approval";
   dependsOn: TaskId[]; // Array of parent task IDs
   attempt: number;
   maxAttempts: number;

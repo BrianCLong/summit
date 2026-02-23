@@ -494,6 +494,14 @@ export interface CognitiveState {
   arousalLevel: number;      // 0.0 (Calm) to 1.0 (Agitated)
 }
 
+export interface ExposureInput {
+  segmentId: string;
+  narrativeId: string;
+  timestamp: string;
+  reactionType?: string;
+  sentimentShift?: number;
+}
+
 export type CognitiveAttackType =
   | 'OVERLOAD'
   | 'CONFUSION'

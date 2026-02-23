@@ -1,5 +1,6 @@
 import express from 'express';
 import { Maestro } from '../maestro/core.js';
+import { MaestroEngine } from '../maestro/engine.js';
 import logger from '../config/logger.js';
 import {
   ApprovalStatus,
@@ -36,7 +37,7 @@ const ensureApprover = (
   next();
 };
 
-export function buildApprovalsRouter(maestro?: Maestro): express.Router {
+export function buildApprovalsRouter(maestro?: Maestro, engine?: MaestroEngine): express.Router {
   const router = express.Router();
   router.use(express.json());
 
@@ -98,7 +99,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await approveApproval(
-        req.params.id,
+        req.params.id as string,
         approverId,
         req.body?.reason,
       );
@@ -119,16 +120,20 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
           String(payload.requestText || ''),
         );
       } else if (
-        maestro &&
         approval.action === 'maestro_task_execution' &&
         approval.payload
       ) {
         const payload = approval.payload as { taskId: string };
-        const task = await maestro.getTask(payload.taskId);
-        if (task) {
-          // Re-execute the task now that it has been approved
-          // Governance flip check will allow it this time because of the manual approval record
-          actionResult = await maestro.executeTask(task);
+
+        // Priority to Engine V2 if available
+        if (engine) {
+          await engine.resumeTask(payload.taskId);
+          actionResult = { status: 'resumed_via_engine' };
+        } else if (maestro) {
+          const task = await maestro.getTask(payload.taskId);
+          if (task) {
+            actionResult = await maestro.executeTask(task);
+          }
         }
       }
 
@@ -156,7 +161,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await rejectApproval(
-        req.params.id,
+        req.params.id as string,
         approverId,
         req.body?.reason,
       );

@@ -11,6 +11,7 @@
 import { MaestroAgent } from './model.js';
 import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
 import logger from '../utils/logger.js';
+import { opaAllow } from '../policy/opaClient.js';
 
 interface Agent extends MaestroAgent {
   status: string;
@@ -48,6 +49,7 @@ export interface GovernanceDecision {
   allowed: boolean;
   reason: string;
   requiredApprovals?: number;
+  isHitl?: boolean;
   riskScore: number;
   violations?: SafetyViolation[];
 }
@@ -153,13 +155,11 @@ export class AgentGovernanceService {
     context: any,
     metadata?: Record<string, any>
   ): Promise<GovernanceDecision> {
-    // === HITL OVERRIDE (Task #104) ===
-    // Check if there is an existing human approval for this task/action
-    if (context.taskId) {
+    // 1. Check for Human-in-the-Loop Override
+    if (context.taskId || context.runId) {
       try {
         const { getPostgresPool } = await import('../db/postgres.js');
         const pool = getPostgresPool();
-        // Check for approved record in the approvals table
         const result = await pool.query(
           `SELECT status FROM approvals 
            WHERE (payload->>'taskId' = $1 OR run_id = $2)
@@ -169,7 +169,7 @@ export class AgentGovernanceService {
         );
 
         if (result.rows && result.rows.length > 0) {
-          logger.info({ taskId: context.taskId }, 'Governance: Human approval detected, allowing action');
+          logger.info({ taskId: context.taskId, runId: context.runId }, 'Governance: Human approval detected');
           return {
             allowed: true,
             reason: 'Action manually authorized by human operator',
@@ -178,138 +178,73 @@ export class AgentGovernanceService {
           };
         }
       } catch (err) {
-        logger.warn({ taskId: context.taskId, error: (err as Error).message }, 'Governance: Approval check failed, falling back to policy');
+        logger.warn({ taskId: context.taskId, error: (err as Error).message }, 'Governance: Approval check failed');
       }
     }
 
-    const config = this.getAgentConfig(agent);
-    const violations: SafetyViolation[] = [];
-
-    // Check 1: Capability whitelist
-    if (!config.capabilitiesWhitelist.includes(action)) {
-      const violation: SafetyViolation = {
-        id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        agentId: agent.id,
-        violationType: 'UNAUTHORIZED_CAPABILITY',
-        severity: 'high',
-        details: `Agent attempted to use unauthorized capability: ${action}`,
-        timestamp: new Date(),
-        context
-      };
-
-      violations.push(violation);
-      logger.warn({
-        agentId: agent.id,
-        action,
-        violationId: violation.id
-      }, 'Unauthorized capability attempt detected');
-    }
-
-    // Check 2: Budget constraints if applicable
-    const estimatedCost = this.estimateActionCost(action, context);
-    if (estimatedCost > config.maxBudget) {
-      const violation: SafetyViolation = {
-        id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        agentId: agent.id,
-        violationType: 'BUDGET_EXCEEDED',
-        severity: 'medium',
-        details: `Estimated cost $${estimatedCost} exceeds max budget $${config.maxBudget}`,
-        timestamp: new Date(),
-        context
-      };
-
-      violations.push(violation);
-      logger.warn({
-        agentId: agent.id,
-        estimatedCost,
-        maxBudget: config.maxBudget,
-        violationId: violation.id
-      }, 'Budget constraint violation detected');
-    }
-
-    // Check 3: Risk assessment
-    const riskScore = this.calculateRiskScore(agent, action, context);
-
-    // Check 4: Required approvals
-    let requiredApprovals = config.requiredApprovals;
-    if (riskScore > this.riskThresholds.high) {
-      requiredApprovals = Math.max(requiredApprovals, 2); // Increase approvals for high risk
-    }
-
-    if (riskScore > this.riskThresholds.critical) {
-      const violation: SafetyViolation = {
-        id: `violation-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        agentId: agent.id,
-        violationType: 'ETHICAL_VIOLATION',
-        severity: 'critical',
-        details: `Action risk score ${riskScore} exceeds critical threshold ${this.riskThresholds.critical}`,
-        timestamp: new Date(),
-        context
-      };
-
-      violations.push(violation);
-      logger.error({
-        agentId: agent.id,
-        riskScore,
-        criticalThreshold: this.riskThresholds.critical,
-        violationId: violation.id
-      }, 'Critical risk threshold exceeded');
-    }
-
-    // Record violations in provenance ledger and local cache
-    const tenantId = agent.tenantId || 'system';
-    if (violations.length > 0) {
-      if (!this.safetyViolations.has(tenantId)) {
-        this.safetyViolations.set(tenantId, []);
+    // 2. Evaluate via OPA (Glass Box Policy)
+    const opaInput = {
+      action,
+      tenant: context.tenantId || 'system',
+      user: { id: agent.id, roles: [agent.role || 'agent'] },
+      resource: context.resourceId || 'unknown',
+      meta: {
+        ...context,
+        agentKind: agent.kind,
+        agentVersion: agent.version
       }
-      this.safetyViolations.get(tenantId)!.push(...violations);
-    }
-
-    for (const violation of violations) {
-      await this.ledger.appendEntry({
-        tenantId: tenantId,
-        actionType: 'GOVERNANCE_VIOLATION',
-        resourceType: 'SafetyViolation',
-        resourceId: violation.id,
-        actorId: agent.id,
-        actorType: 'system',
-        timestamp: new Date(),
-        payload: {
-          mutationType: 'CREATE',
-          entityId: violation.id,
-          entityType: 'SafetyViolation',
-          violationType: violation.violationType,
-          severity: violation.severity,
-          details: violation.details
-        },
-        metadata: {
-          agentId: agent.id,
-          action,
-          riskScore,
-          originalContext: context,
-          ...metadata
-        }
-      });
-    }
-
-    const allowed = violations.length === 0 && riskScore <= this.riskThresholds.critical;
-    const decision: GovernanceDecision = {
-      allowed,
-      reason: allowed ? 'Action passes all governance checks' : `Action violates ${violations.length} governance policies`,
-      riskScore,
-      requiredApprovals: riskScore > this.riskThresholds.high ? requiredApprovals : config.requiredApprovals,
-      violations
     };
 
-    logger.info({
-      agentId: agent.id,
-      action,
-      allowed,
-      riskScore,
-      violationCount: violations.length
-    }, 'Governance decision made');
+    const opaDecision = await opaAllow('maestro/governance', opaInput);
 
-    return decision;
+    // 3. Log to Provenance Ledger
+    await this.ledger.appendEntry({
+      tenantId: context.tenantId || 'system',
+      actionType: 'GOVERNANCE_EVALUATION',
+      resourceType: 'AgentAction',
+      resourceId: context.taskId || context.runId || 'unknown',
+      actorId: agent.id,
+      actorType: 'agent',
+      timestamp: new Date(),
+      payload: {
+        action,
+        input: opaInput,
+        decision: opaDecision
+      },
+      metadata: {
+        opaStatus: opaDecision.allow ? 'allowed' : 'denied',
+        reason: opaDecision.reason
+      }
+    });
+
+    if (!opaDecision.allow) {
+      const requiredApprovals = opaDecision.metadata?.required_approvals as number;
+      const isHitl = !!requiredApprovals;
+
+      return {
+        allowed: false,
+        reason: opaDecision.reason || 'Denied by OPA governance policy',
+        requiredApprovals,
+        isHitl,
+        riskScore: 1.0,
+        violations: [{
+          id: `violation-${Date.now()}`,
+          agentId: agent.id,
+          violationType: 'SECURITY_BYPASS_ATTEMPT',
+          severity: 'high',
+          details: opaDecision.reason || 'OPA policy denial',
+          timestamp: new Date(),
+          context
+        }]
+      };
+    }
+
+    return {
+      allowed: true,
+      reason: 'Allowed by OPA governance policy',
+      riskScore: 0.1,
+      violations: []
+    };
   }
 
   /**
@@ -405,7 +340,7 @@ export class AgentGovernanceService {
   getAgentConfig(agent: MaestroAgent): AgentGovernanceConfig {
     const tenantId = agent.tenantId || 'system';
     const tenantPolicies = this.policies.get(tenantId) || this.policies.get('system');
-    
+
     if (!tenantPolicies) return this.defaultConfig;
 
     const policyId = agent.metadata?.governanceTier || '*';
@@ -447,7 +382,7 @@ export class AgentGovernanceService {
   getRecentViolations(agentId: string, tenantId: string = 'system', sinceDays: number = 7): SafetyViolation[] {
     const cutoffTime = new Date(Date.now() - sinceDays * 24 * 60 * 60 * 1000);
     const tenantViolations = this.safetyViolations.get(tenantId) || [];
-    
+
     return tenantViolations
       .filter(violation => violation.agentId === agentId && violation.timestamp > cutoffTime)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
