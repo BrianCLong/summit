@@ -269,7 +269,7 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
 - Captured PR snapshot (gh pr list) earlier in run; subsequent API calls failed with api.github.com connectivity error.
 - Created prompts/automation/daily-sprint@v1.md and registered prompt hash in prompts/registry.yaml.
 - Generated docs/ops/DAILY_SPRINT_2026-02-23.md with evidence bundle, plan, MAESTRO alignment, and blockers.
-- Pending: PR creation after branch/commit.
+- PR creation failed due to api.github.com connectivity error (gh pr create).
 
 ## Blockers / Governed Exceptions
 
@@ -278,8 +278,8 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
 ## End-of-Day Report
 
 - Completed: Prompt registry entry, daily sprint log draft, STATUS.json refresh.
-- In progress: Daily sprint PR creation.
-- Blocked: Issue scan (api.github.com connectivity).
+- In progress: Daily sprint PR creation (deferred until GitHub API recovers).
+- Blocked: Issue scan (api.github.com connectivity), PR creation (api.github.com connectivity).
 
 ## Finality
 
