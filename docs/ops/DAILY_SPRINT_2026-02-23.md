@@ -147,6 +147,7 @@ Continuation run timestamp (UTC): 2026-02-23T00:33:19Z
 - Evidence:
   - https://github.com/BrianCLong/summit/actions/runs/22289055276
   - `gh run view 22289055276 -R BrianCLong/summit` output indicates workflow file issue.
+- Tracking issue: https://github.com/BrianCLong/summit/issues/18597
 
 ### Continuation Status
 - Completed: monitoring pass, blocker reproduction, and evidence capture.
