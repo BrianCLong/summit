@@ -163,7 +163,8 @@
     "validator": "^13.11.0",
     "winston": "3.19.0",
     "ws": "8.18.3",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "@intelgraph/osint-collector": "workspace:*"
   },
   "devDependencies": {
     "@aws-sdk/client-glue": "^3.958.0",
@@ -237,7 +238,8 @@
     "ts-node": "10.9.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "8.50.0",
-    "wait-for-expect": "3.0.2"
+    "wait-for-expect": "3.0.2",
+    "tsx": "^4.21.0"
   },
   "engines": {
     "node": ">=18.0.0"
