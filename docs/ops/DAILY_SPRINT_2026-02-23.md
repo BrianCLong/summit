@@ -46,6 +46,7 @@ Validation: JSON structure retained.
 - Task 1: Completed PR evidence capture. Issue scan blocked by GitHub connectivity; logged Governed Exception.
 - Task 2: Registered prompt hash and created task spec.
 - Task 3: Updated STATUS.json timestamp and revision note.
+- PR creation deferred pending GitHub API connectivity; branch pushed.
 
 ## End-of-Day Report
 
@@ -59,6 +60,7 @@ In progress:
 
 Blocked:
 - GitHub issue scan blocked by api.github.com connectivity.
+- GitHub PR creation blocked by api.github.com connectivity.
 
 Commands:
 - `gh pr list -L 20 --json number,title,author,labels,updatedAt,baseRefName,headRefName,url,state`
