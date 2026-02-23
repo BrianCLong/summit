@@ -428,7 +428,7 @@ jobs:
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
         run: |
-          docker compose -f docker-compose.yml up -d server client
+          docker compose -f docker-compose.yml up -d server web
       - name: Wait for application
         run: |
           for i in {1..30}; do
