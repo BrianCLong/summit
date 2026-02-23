@@ -170,9 +170,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -322,6 +320,9 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Ensure evidence bundle exists
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"
