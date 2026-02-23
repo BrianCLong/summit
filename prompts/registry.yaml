@@ -922,3 +922,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: d47a0b75e3e20415eab72d1a905393adb5c9a4aa4489a25c3941034a2f3d6840
+    description: Run the daily sprint loop, capture evidence, and produce merge-ready ops artifacts.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_*.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/DAILY_SPRINT_20260223_RUN2.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - operations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

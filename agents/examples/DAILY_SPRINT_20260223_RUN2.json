@@ -1,0 +1,53 @@
+{
+  "task_id": "DAILY_SPRINT_20260223_RUN2",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-orchestrator",
+    "version": "v1",
+    "sha256": "d47a0b75e3e20415eab72d1a905393adb5c9a4aa4489a25c3941034a2f3d6840",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/DAILY_SPRINT_20260223_RUN2.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": [
+      "operations",
+      "governance",
+      "documentation"
+    ],
+    "exclusions": [
+      "server/",
+      "apps/",
+      "packages/"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-23.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint plan and evidence recorded in docs/ops/DAILY_SPRINT_2026-02-23.md",
+    "Prompts registry updated with daily sprint prompt entry",
+    "Roadmap status updated with latest run note"
+  ],
+  "stop_conditions": [
+    "GitHub API connectivity failure prevents PR/issue evidence collection",
+    "Local environment missing required tooling for validation"
+  ]
+}
