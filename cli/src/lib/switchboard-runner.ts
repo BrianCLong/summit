@@ -14,6 +14,7 @@ import {
 } from './switchboard-capsule.js';
 import { CapsuleLedger } from './switchboard-ledger.js';
 import { CapsulePolicyGate, CapsulePolicyAction } from './switchboard-policy.js';
+import { TelemetryEmitter } from './telemetry.js';
 
 export interface CapsuleRunOptions {
   manifestPath: string;
@@ -130,28 +131,46 @@ function computeHash(content: string): string {
 
 function evaluatePolicy(
   ledger: CapsuleLedger,
+  telemetry: TelemetryEmitter,
   gate: CapsulePolicyGate,
   action: CapsulePolicyAction,
-  target: string
+  target: string,
+  ids?: { job_id?: string; action_id?: string }
 ): void {
   const decision = gate.evaluate(action);
-  ledger.append('policy_decision', {
+  const decisionData = {
     action: action.type,
     target,
     allow: decision.allow,
     reason: decision.reason,
     waiver_token: decision.waiver_token ?? null,
     waiver_reason: decision.waiver_reason ?? null,
-  });
+  };
+
+  ledger.append('policy_decision', decisionData);
+
+  telemetry.emitPreflightDecision({
+    rule: action.type,
+    allow: decision.allow,
+    reason: decision.reason,
+  }, ids);
+
   if (!decision.allow) {
     throw new Error(`Policy denied ${action.type} for ${target}: ${decision.reason}`);
   }
 }
 
-function loadSecrets(step: CapsuleStep, gate: CapsulePolicyGate, ledger: CapsuleLedger): Record<string, string> {
+function loadSecrets(
+  step: CapsuleStep,
+  gate: CapsulePolicyGate,
+  ledger: CapsuleLedger,
+  telemetry: TelemetryEmitter,
+  job_id: string
+): Record<string, string> {
   const secrets: Record<string, string> = {};
   for (const handle of step.secrets) {
-    evaluatePolicy(ledger, gate, { type: 'secret', secret_handle: handle }, handle);
+    const action_id = crypto.randomUUID();
+    evaluatePolicy(ledger, telemetry, gate, { type: 'secret', secret_handle: handle }, handle, { job_id, action_id });
     const value = process.env[`SWITCHBOARD_SECRET_${handle}`];
     if (!value) {
       throw new Error(`Secret handle missing in environment: ${handle}`);
@@ -161,12 +180,20 @@ function loadSecrets(step: CapsuleStep, gate: CapsulePolicyGate, ledger: Capsule
   return secrets;
 }
 
-function evaluatePathActions(step: CapsuleStep, gate: CapsulePolicyGate, ledger: CapsuleLedger): void {
+function evaluatePathActions(
+  step: CapsuleStep,
+  gate: CapsulePolicyGate,
+  ledger: CapsuleLedger,
+  telemetry: TelemetryEmitter,
+  job_id: string
+): void {
   for (const filePath of step.reads) {
-    evaluatePolicy(ledger, gate, { type: 'read', path: filePath }, filePath);
+    const action_id = crypto.randomUUID();
+    evaluatePolicy(ledger, telemetry, gate, { type: 'read', path: filePath }, filePath, { job_id, action_id });
   }
   for (const filePath of step.writes) {
-    evaluatePolicy(ledger, gate, { type: 'write', path: filePath }, filePath);
+    const action_id = crypto.randomUUID();
+    evaluatePolicy(ledger, telemetry, gate, { type: 'write', path: filePath }, filePath, { job_id, action_id });
   }
 }
 
@@ -193,6 +220,8 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
   );
 
   const ledger = new CapsuleLedger(sessionDir, sessionId);
+  const telemetry = new TelemetryEmitter(repoRoot, sessionId);
+
   ledger.append('capsule_start', {
     manifest_path: path.resolve(options.manifestPath),
     network_mode: manifest.network_mode,
@@ -240,13 +269,24 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       const step = manifest.steps[index];
       const stepId = step.id ?? `step-${index + 1}`;
       const stepLabel = step.name ?? stepId;
+      const jobId = stepId;
 
-      evaluatePolicy(ledger, gate, { type: 'exec', command: step.command }, step.command);
-      evaluatePolicy(ledger, gate, { type: 'network', allow_network: step.allow_network }, 'network');
-      evaluatePathActions(step, gate, ledger);
+      const execActionId = crypto.randomUUID();
+      evaluatePolicy(ledger, telemetry, gate, { type: 'exec', command: step.command }, step.command, { job_id: jobId, action_id: execActionId });
 
-      const secrets = loadSecrets(step, gate, ledger);
+      const netActionId = crypto.randomUUID();
+      evaluatePolicy(ledger, telemetry, gate, { type: 'network', allow_network: step.allow_network }, 'network', { job_id: jobId, action_id: netActionId });
+
+      evaluatePathActions(step, gate, ledger, telemetry, jobId);
+
+      const secrets = loadSecrets(step, gate, ledger, telemetry, jobId);
       const env = buildEnv(manifest, secrets);
+
+      const toolActionId = crypto.randomUUID();
+      telemetry.emitToolExecutionStart({
+        tool: step.command,
+        args: step.args,
+      }, { job_id: jobId, action_id: toolActionId });
 
       const start = Date.now();
       const result = spawnSync(step.command, step.args, {
@@ -271,6 +311,12 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
         stdout_path: path.relative(sessionDir, stdoutPath),
         stderr_path: path.relative(sessionDir, stderrPath),
       });
+
+      telemetry.emitToolExecutionEnd({
+        tool: step.command,
+        exit_code: result.status ?? 0,
+        duration_ms: durationMs,
+      }, { job_id: jobId, action_id: toolActionId });
 
       if (step.category === 'test') {
         ledger.append('test_result', {
@@ -312,19 +358,29 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
 
     const policyViolations: string[] = [];
     for (const filePath of changedFiles) {
+      const action_id = crypto.randomUUID();
       const decision = gate.evaluate({ type: 'write', path: filePath });
+
+      const decisionData = {
+        action: 'write',
+        target: filePath,
+        allow: decision.allow,
+        reason: decision.reason,
+        waiver_token: decision.waiver_token ?? null,
+        waiver_reason: decision.waiver_reason ?? null,
+      };
+
       if (!decision.allow) {
-        ledger.append('policy_decision', {
-          action: 'write',
-          target: filePath,
-          allow: false,
-          reason: decision.reason,
-          waiver_token: decision.waiver_token ?? null,
-          waiver_reason: decision.waiver_reason ?? null,
-        });
+        ledger.append('policy_decision', decisionData);
         policyViolations.push(filePath);
         status = 'failed';
       }
+
+      telemetry.emitPreflightDecision({
+        rule: 'write',
+        allow: decision.allow,
+        reason: decision.reason,
+      }, { action_id });
     }
 
     ledger.append('capsule_end', {

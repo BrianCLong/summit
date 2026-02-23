@@ -12,7 +12,7 @@
     "igraph-run": "./dist/bin/run.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x dist/cli.js dist/summit.js dist/bin/run.js",
+    "build": "tsc && chmod +x dist/cli.js dist/summit.js",
     "dev": "tsx watch src/cli.ts",
     "start": "node dist/cli.js",
     "test": "jest",

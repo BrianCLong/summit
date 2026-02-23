@@ -3,7 +3,58 @@ import fs from 'fs/promises';
 import path from 'path';
 import yaml from 'yaml';
 import { Server } from 'http';
-import { detectRepoRoot } from './sandbox';
+import { detectRepoRoot } from './sandbox.js';
+import { readEvents } from './telemetry.js';
+
+async function getAllEntries(repoRoot: string): Promise<any[]> {
+  const recentExecutions: any[] = [];
+  const capsuleDir = path.join(repoRoot, '.switchboard', 'capsules');
+  try {
+    if (await fs.access(capsuleDir).then(() => true).catch(() => false)) {
+      const entries = await fs.readdir(capsuleDir, { withFileTypes: true });
+      const capsules = entries.filter(e => e.isDirectory());
+
+      for (const capsule of capsules) {
+        const ledgerPath = path.join(capsuleDir, capsule.name, 'ledger.jsonl');
+        try {
+          const content = await fs.readFile(ledgerPath, 'utf8');
+          const lines = content.trim().split('\n');
+          for (const line of lines) {
+            if (!line) continue;
+            const entry = JSON.parse(line);
+            recentExecutions.push({
+              capsuleId: capsule.name,
+              ...entry
+            });
+          }
+        } catch (e) {
+          // Ignore
+        }
+      }
+    }
+  } catch (e) {
+    // Error reading receipts
+  }
+  // Also get global telemetry events
+  const telemetryFile = path.join(repoRoot, '.switchboard', 'events', 'events.jsonl');
+  try {
+    const events = readEvents(telemetryFile);
+    for (const event of events) {
+      recentExecutions.push({
+        capsuleId: event.run_id,
+        timestamp: event.ts,
+        type: `telemetry_${event.type}`,
+        data: event.data,
+        job_id: event.job_id,
+        action_id: event.action_id
+      });
+    }
+  } catch (e) {
+    // Ignore
+  }
+
+  return recentExecutions.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+}
 
 export async function startDashboard(port: number = 3000): Promise<Server> {
   const app = express();
@@ -44,37 +95,7 @@ export async function startDashboard(port: number = 3000): Promise<Server> {
       }
 
       // 2. Get recent tool executions and policy decisions from receipts
-      const recentExecutions: any[] = [];
-      const capsuleDir = path.join(repoRoot, '.switchboard', 'capsules');
-      try {
-        if (await fs.access(capsuleDir).then(() => true).catch(() => false)) {
-          const entries = await fs.readdir(capsuleDir, { withFileTypes: true });
-          const capsules = entries.filter(e => e.isDirectory());
-
-          for (const capsule of capsules) {
-            const ledgerPath = path.join(capsuleDir, capsule.name, 'ledger.jsonl');
-            try {
-              const content = await fs.readFile(ledgerPath, 'utf8');
-              const lines = content.trim().split('\n');
-              for (const line of lines) {
-                if (!line) continue;
-                const entry = JSON.parse(line);
-                recentExecutions.push({
-                  capsuleId: capsule.name,
-                  ...entry
-                });
-              }
-            } catch (e) {
-              // Ignore missing or invalid ledgers
-            }
-          }
-        }
-      } catch (e) {
-        // Error reading receipts
-      }
-
-      // Sort by timestamp descending
-      recentExecutions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      const recentExecutions = await getAllEntries(repoRoot);
 
       // Render HTML
       const html = `
@@ -127,24 +148,38 @@ export async function startDashboard(port: number = 3000): Promise<Server> {
               </thead>
               <tbody>
                 ${recentExecutions.slice(0, 50).map(e => {
-                  if (e.type === 'preflight_decision') {
+                  if (e.type === 'policy_decision') {
+                    const decision = e.data.allow ? 'ALLOW' : 'DENY';
                     return `
                       <tr>
                         <td>${new Date(e.timestamp).toLocaleString()}</td>
                         <td><strong>Decision</strong></td>
                         <td><code>${e.capsuleId.slice(0, 8)}...</code></td>
-                        <td><span class="tag tag-${e.decision.toLowerCase()}">${e.decision}</span></td>
-                        <td>${e.reason || 'N/A'}</td>
+                        <td><span class="tag tag-${decision.toLowerCase()}">${decision}</span></td>
+                        <td>${e.data.action} on ${e.data.target}: ${e.data.reason || 'N/A'}</td>
                       </tr>
                     `;
-                  } else if (e.type === 'tool_execution') {
+                  } else if (e.type === 'tool_exec' || e.type === 'telemetry_tool_execution_end') {
+                    const success = e.data.exit_code === 0;
+                    const command = e.data.command || e.data.tool;
                     return `
                       <tr>
                         <td>${new Date(e.timestamp).toLocaleString()}</td>
                         <td>Tool Exec</td>
                         <td><code>${e.capsuleId.slice(0, 8)}...</code></td>
-                        <td><code>${e.tool}</code></td>
-                        <td>${e.success ? '✅ Success' : '❌ Failed'}</td>
+                        <td><code>${command}</code></td>
+                        <td>${success ? '✅ Success' : '❌ Failed'} (${e.data.exit_code})</td>
+                      </tr>
+                    `;
+                  } else if (e.type === 'telemetry_mcp_server_health') {
+                    const healthy = e.data.status === 'healthy';
+                    return `
+                      <tr>
+                        <td>${new Date(e.timestamp).toLocaleString()}</td>
+                        <td>MCP Health</td>
+                        <td>N/A</td>
+                        <td><code>${e.data.server_name}</code></td>
+                        <td>${healthy ? '✅' : '❌'} ${e.data.status} ${e.data.message || ''}</td>
                       </tr>
                     `;
                   }
@@ -160,6 +195,41 @@ export async function startDashboard(port: number = 3000): Promise<Server> {
       res.send(html);
     } catch (error) {
       res.status(500).send(`Error rendering dashboard: ${error}`);
+    }
+  });
+
+  // API Endpoints for testing and future use
+  app.get('/api/health', async (_req, res) => {
+    try {
+      const allowlistPath = path.join(repoRoot, 'mcp', 'allowlist.yaml');
+      const content = await fs.readFile(allowlistPath, 'utf8');
+      const config = yaml.parse(content);
+      const mcpServers = Object.entries(config.mcpServers || {}).map(([name, config]: [string, any]) => ({
+        name,
+        url: config.url || 'stdio',
+        status: 'Healthy'
+      }));
+      res.json({ mcp_servers: mcpServers });
+    } catch (e) {
+      res.json({ mcp_servers: [] });
+    }
+  });
+
+  app.get('/api/receipts', async (_req, res) => {
+    try {
+      const allEntries = await getAllEntries(repoRoot);
+      res.json(allEntries.filter(e => e.type === 'tool_exec'));
+    } catch (e) {
+      res.status(500).json({ error: String(e) });
+    }
+  });
+
+  app.get('/api/decisions', async (_req, res) => {
+    try {
+      const allEntries = await getAllEntries(repoRoot);
+      res.json(allEntries.filter(e => e.type === 'policy_decision'));
+    } catch (e) {
+      res.status(500).json({ error: String(e) });
     }
   });
 

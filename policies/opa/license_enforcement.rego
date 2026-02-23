@@ -459,9 +459,9 @@ obligations := array.concat(
 
 obligations := [] if not license_exists
 
-attribution_obligations := [attribution_obligation] if requires_attribution else := []
-share_alike_obligations := [share_alike_obligation] if requires_share_alike else := []
-notice_obligations := [notice_obligation] if requires_notice else := []
+attribution_obligations := [ao | requires_attribution; ao := attribution_obligation]
+share_alike_obligations := [sao | requires_share_alike; sao := share_alike_obligation]
+notice_obligations := [no | requires_notice; no := notice_obligation]
 
 # Collect all conditions
 conditions := array.concat(
@@ -471,8 +471,8 @@ conditions := array.concat(
 
 conditions := [] if not license_exists
 
-export_control_conditions := [export_control_condition] if export_controlled else := []
-orcon_conditions := [orcon_condition] if orcon else := []
+export_control_conditions := [ecc | export_controlled; ecc := export_control_condition]
+orcon_conditions := [oc | orcon; oc := orcon_condition]
 
 # =============================================================================
 # License Metadata for Audit

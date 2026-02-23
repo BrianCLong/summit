@@ -61,7 +61,7 @@ export function registerAdapterCommands(program: Command): void {
           console.log(`  Signature: ${result.signaturePath}`);
           console.log(`  Digest: ${result.bundleDigest}`);
         }
-      } catch (err: unknown) {
+      } catch (err: any) {
         spinner.fail('Failed to build bundle');
         if (err instanceof BundleValidationError) {
           error(err.message);
@@ -101,7 +101,7 @@ export function registerAdapterCommands(program: Command): void {
             console.log(`  • ${line}`);
           }
         }
-      } catch (err: unknown) {
+      } catch (err: any) {
         spinner.fail('Bundle verification failed');
         if (err instanceof BundleValidationError) {
           error(err.message);
