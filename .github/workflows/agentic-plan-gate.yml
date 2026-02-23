@@ -4,15 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 jobs:
-  plan-check:
+  agentic-policy-check:
     name: Agentic Policy Check
     runs-on: ubuntu-latest
     steps:

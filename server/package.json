@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-server",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "IntelGraph Platform Backend API",
   "main": "dist/src/index.js",
   "type": "module",
@@ -166,6 +166,8 @@
     "zod": "3.25.76"
   },
   "devDependencies": {
+    "@types/hapi__catbox": "^12.0.6",
+    "@types/hapi__shot": "^4.1.6",
     "@aws-sdk/client-glue": "^3.958.0",
     "@babel/core": "^7.28.5",
     "@babel/preset-env": "^7.28.5",
