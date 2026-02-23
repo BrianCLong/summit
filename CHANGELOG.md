@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
+### Fixed
+- CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
+
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
 ### Fixed
