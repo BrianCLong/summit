@@ -75,3 +75,16 @@ check your internet connection or https://githubstatus.com
 - Blocked: Issue scan (api.github.com connectivity).
 - PRs touched: none (documentation-only changes on new branch).
 - Commands run: gh pr list, gh pr view (success), gh issue list (failed).
+
+## Continuation: PR Creation Failure
+- Timestamp (UTC): 2026-02-23T04:05:35Z
+- Command:
+```
+gh pr create -R BrianCLong/summit --title "chore(ops): daily sprint log 2026-02-23 (run 6)" --body-file /tmp/pr-body-daily-sprint-2026-02-23-6.md
+```
+- Error:
+```
+error connecting to api.github.com
+check your internet connection or https://githubstatus.com
+```
+- Status: Governed Exception recorded; PR creation deferred.
