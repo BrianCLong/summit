@@ -32,12 +32,12 @@ log_test() {
 
 log_pass() {
     echo -e "${GREEN}[PASS]${NC} $1"
-    ((TESTS_PASSED++))
+    TESTS_PASSED=$((TESTS_PASSED + 1))
 }
 
 log_fail() {
     echo -e "${RED}[FAIL]${NC} $1"
-    ((TESTS_FAILED++))
+    TESTS_FAILED=$((TESTS_FAILED + 1))
 }
 
 assert_exit_code() {
@@ -45,7 +45,7 @@ assert_exit_code() {
     local actual="$2"
     local message="$3"
 
-    ((TESTS_RUN++))
+    TESTS_RUN=$((TESTS_RUN + 1))
     if [[ "${actual}" -eq "${expected}" ]]; then
         log_pass "${message}"
     else
@@ -58,7 +58,7 @@ assert_output_contains() {
     local output="$2"
     local message="$3"
 
-    ((TESTS_RUN++))
+    TESTS_RUN=$((TESTS_RUN + 1))
     if echo "${output}" | grep -q "${pattern}"; then
         log_pass "${message}"
     else
@@ -71,7 +71,7 @@ assert_output_not_contains() {
     local output="$2"
     local message="$3"
 
-    ((TESTS_RUN++))
+    TESTS_RUN=$((TESTS_RUN + 1))
     if ! echo "${output}" | grep -q "${pattern}"; then
         log_pass "${message}"
     else
@@ -93,7 +93,7 @@ test_docs_only_change() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_all_success.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_docs_only.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_docs_only.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -124,7 +124,7 @@ test_workflow_change() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_all_success.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_workflow.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_workflow.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -152,7 +152,7 @@ test_workflow_change_failed_lint() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_workflow_lint_failed.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_workflow.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_workflow.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -180,7 +180,7 @@ test_server_change() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_all_success.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_server.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_server.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -211,7 +211,7 @@ test_dockerfile_change() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_all_success.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_dockerfile.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_dockerfile.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -242,7 +242,7 @@ test_always_required() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_all_success.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_docs_only.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_docs_only.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -270,7 +270,7 @@ test_output_stability() {
         --tag "v1.0.0-rc.1" \
         --offline-policy-file "${FIXTURES_DIR}/test_policy.json" \
         --offline-status-file "${FIXTURES_DIR}/status_all_success.json" \
-        --offline-changed-files "${FIXTURES_DIR}/changed_docs_only.txt" \
+        --offline-changed-files "${FIXTURES_DIR}/changed_docs_only.lst" \
         --base "test-base" \
         --commit "abc123" \
         2>&1)
@@ -284,7 +284,7 @@ test_output_stability() {
     assert_output_contains "WORKFLOW" "${output}" "Should contain WORKFLOW column header"
 
     # Output should contain GREEN FOR PROMOTION or BLOCKED
-    ((TESTS_RUN++))
+    TESTS_RUN=$((TESTS_RUN + 1))
     if echo "${output}" | grep -qE "(GREEN FOR PROMOTION|BLOCKED)"; then
         log_pass "Should contain final verdict"
     else
