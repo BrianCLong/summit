@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-09T09:00:00Z",
-  "revision_note": "Added Switchboard control-plane skeleton; resolved evidence index corruption and version mismatch; updated doclinkignore for CI stability.",
+  "last_updated": "2026-02-22T14:00:00Z",
+  "revision_note": "Completed Switchboard control-plane skeleton and CI hardening; established deny-by-default architecture and deterministic receipts.",
   "initiatives": [
     {
       "id": "switchboard-control-plane",
-      "status": "in_progress",
+      "status": "complete",
       "owner": "Jules",
-      "notes": "Land Summit Switchboard control-plane skeleton, deny-by-default policy, deterministic receipts, and registry scaffolding."
+      "notes": "Landed Summit Switchboard control-plane skeleton, deny-by-default policy, deterministic receipts, and registry scaffolding."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -214,7 +214,7 @@
     }
   ],
   "summary": {
-    "rc_ready": 8,
+    "rc_ready": 9,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
