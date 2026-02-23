@@ -265,6 +265,10 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
    - Goal: Deliver merge-ready changes with PR metadata.
    - Expected scope: docs/ops/DAILY_SPRINT_2026-02-23.md, prompts/automation/daily-sprint@v1.md, prompts/registry.yaml, docs/roadmap/STATUS.json.
    - Validation: git status clean, PR template compliance.
+5. De-risk PR #18555 by removing unrelated scope and retaining server batching changes only.
+   - Goal: Keep PR #18555 in one primary zone (server/) and reduce merge and CI risk.
+   - Expected scope: server/src/db/repositories/RiskRepository.ts, server/src/db/__tests__/RiskRepository.performance.test.ts.
+   - Validation: git diff --name-only origin/main...HEAD on PR branch; targeted test command.
 
 ## Execution Log
 
@@ -274,10 +278,15 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
 - Generated docs/ops/DAILY_SPRINT_2026-02-23.md with evidence bundle, plan, MAESTRO alignment, and blockers.
 - Created PR #18595: https://github.com/BrianCLong/summit/pull/18595
 - Added labels to PR #18595: codex, patch.
+- Rebased and force-updated PR #18555 branch to current main with intended server-only scope:
+  - server/src/db/repositories/RiskRepository.ts
+  - server/src/db/__tests__/RiskRepository.performance.test.ts
+- Posted PR update comment for #18555 with scope cleanup summary and validation status.
 
 ## PRs Touched
 
 - #18595 docs: daily sprint 2026-02-23 log and prompt registry https://github.com/BrianCLong/summit/pull/18595
+- #18555 feat(server): batch risk signal inserts https://github.com/BrianCLong/summit/pull/18555
 
 ## Commands Run
 
@@ -287,21 +296,28 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
 - shasum -a 256 prompts/automation/daily-sprint@v1.md
 - gh pr create -R BrianCLong/summit --title "docs: daily sprint 2026-02-23 log and prompt registry" --body-file /tmp/daily_sprint_pr_body.md
 - gh pr edit -R BrianCLong/summit 18595 --add-label codex --add-label patch
+- git checkout -B fix/pr-18555-clean origin/main
+- git checkout origin/bolt/batched-risk-signals-9011684001867115646 -- server/src/db/repositories/RiskRepository.ts server/src/db/__tests__/RiskRepository.performance.test.ts
+- git push origin fix/pr-18555-clean:bolt/batched-risk-signals-9011684001867115646 --force-with-lease
+- gh pr edit -R BrianCLong/summit 18555 --title "feat(server): batch risk signal inserts"
+- gh pr comment -R BrianCLong/summit 18555 --body "<scope cleanup + validation>"
 - Failed (transient, earlier in run):
 - gh issue list -R BrianCLong/summit -S "label:security OR label:ga OR label:bolt OR label:osint OR label:governance" --state open --limit 50 --json number,title,labels,updatedAt,url
 - gh pr create -R BrianCLong/summit --title "docs: daily sprint 2026-02-23 log and prompt registry" --body-file /tmp/daily_sprint_pr_body.md
+- pnpm --filter intelgraph-server test -- server/src/db/__tests__/RiskRepository.performance.test.ts (missing cross-env; node_modules not installed in this worktree)
 
 ## Blockers / Governed Exceptions
 
 - Earlier API outage was a transient Governed Exception and is now resolved.
 - codex-automation label is not present in repository label set; codex label was applied.
+- Local targeted server test execution remains blocked until dependencies are installed in this worktree.
 
 ## End-of-Day Report
 
-- Completed: Prompt registry entry, daily sprint log, STATUS.json refresh, issue scan, and PR #18595 creation.
-- In progress: Awaiting review/merge for PR #18595.
-- Blocked: None.
+- Completed: Prompt registry entry, daily sprint log, STATUS.json refresh, issue scan, PR #18595 creation, and PR #18555 scope cleanup.
+- In progress: Awaiting review/merge for PR #18595 and PR #18555.
+- Blocked: Local targeted server test for PR #18555 due missing dependencies in this worktree.
 
 ## Finality
 
-- Sprint log recorded; prompt registry aligned; PR opened and labeled for review.
+- Sprint log recorded; prompt registry aligned; docs PR opened and labeled; server PR scope reduced for merge safety.
