@@ -75,9 +75,11 @@ SLA: 3-6 tasks, scoped to one zone (docs/ops + governance metadata).
 - Created daily sprint log with evidence-first ordering.
 - Registered daily sprint prompt in `prompts/automation/daily-sprint@v1.md` and `prompts/registry.yaml`.
 - Added task spec at `agents/examples/DAILY_SPRINT_20260223_RUN1.json`.
+- Attempted PR creation via `gh pr create`; blocked by api.github.com connectivity.
 
 ## Governed Exceptions / Blockers
 - GitHub API connectivity blocked issue scan (api.github.com unreachable).
+- GitHub API connectivity blocked PR creation (api.github.com unreachable).
 - Validation commands deferred pending local dependency installation.
 
 ## End-of-Day Report
@@ -85,11 +87,13 @@ Completed:
 - Evidence capture for top-20 PRs and PR #18594.
 - Daily sprint log created.
 - Roadmap status refreshed.
+- Daily sprint prompt registry + task spec registered.
 
 In progress:
 - None.
 
 Blocked:
 - Issue scan for security/GA/governance labels (api.github.com connectivity).
+- PR creation for branch `chore/daily-sprint-2026-02-23-3` (api.github.com connectivity).
 
 Run end (UTC): 2026-02-23T01:01:51Z
