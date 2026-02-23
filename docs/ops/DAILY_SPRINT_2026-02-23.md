@@ -238,7 +238,9 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
 ```
 
 ### Evidence: Issue Scan
-- Governed Exception: api.github.com connectivity failure. Issue scan deferred pending restoration.
+- Source: gh issue list -R BrianCLong/summit -S "label:security OR label:ga OR label:bolt OR label:osint OR label:governance" --state open --limit 20 --json number,title,labels,updatedAt,url
+- Result count: 1
+- Open issue: #193 "OSINT data integration" (updatedAt: 2026-01-16T18:18:04Z) https://github.com/BrianCLong/summit/issues/193
 
 ## MAESTRO Alignment (Reasoning)
 - MAESTRO Layers: Foundation, Tools, Observability, Security
@@ -267,20 +269,39 @@ Source: gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --li
 ## Execution Log
 
 - Captured PR snapshot (gh pr list) earlier in run; subsequent API calls failed with api.github.com connectivity error.
+- Re-ran issue scan after API recovery and captured one matching open issue (#193).
 - Created prompts/automation/daily-sprint@v1.md and registered prompt hash in prompts/registry.yaml.
 - Generated docs/ops/DAILY_SPRINT_2026-02-23.md with evidence bundle, plan, MAESTRO alignment, and blockers.
-- PR creation failed due to api.github.com connectivity error (gh pr create).
+- Created PR #18595: https://github.com/BrianCLong/summit/pull/18595
+- Added labels to PR #18595: codex, patch.
+
+## PRs Touched
+
+- #18595 docs: daily sprint 2026-02-23 log and prompt registry https://github.com/BrianCLong/summit/pull/18595
+
+## Commands Run
+
+- Succeeded:
+- gh pr list -R BrianCLong/summit -S "sort:updated-desc" --state open --limit 20 --json number,title,author,updatedAt,headRefName,baseRefName,labels,reviewDecision,url
+- gh issue list -R BrianCLong/summit -S "label:security OR label:ga OR label:bolt OR label:osint OR label:governance" --state open --limit 20 --json number,title,labels,updatedAt,url
+- shasum -a 256 prompts/automation/daily-sprint@v1.md
+- gh pr create -R BrianCLong/summit --title "docs: daily sprint 2026-02-23 log and prompt registry" --body-file /tmp/daily_sprint_pr_body.md
+- gh pr edit -R BrianCLong/summit 18595 --add-label codex --add-label patch
+- Failed (transient, earlier in run):
+- gh issue list -R BrianCLong/summit -S "label:security OR label:ga OR label:bolt OR label:osint OR label:governance" --state open --limit 50 --json number,title,labels,updatedAt,url
+- gh pr create -R BrianCLong/summit --title "docs: daily sprint 2026-02-23 log and prompt registry" --body-file /tmp/daily_sprint_pr_body.md
 
 ## Blockers / Governed Exceptions
 
-- Governed Exception: GitHub API connectivity failure prevented live issue scan (gh issue list).
+- Earlier API outage was a transient Governed Exception and is now resolved.
+- codex-automation label is not present in repository label set; codex label was applied.
 
 ## End-of-Day Report
 
-- Completed: Prompt registry entry, daily sprint log draft, STATUS.json refresh.
-- In progress: Daily sprint PR creation (deferred until GitHub API recovers).
-- Blocked: Issue scan (api.github.com connectivity), PR creation (api.github.com connectivity).
+- Completed: Prompt registry entry, daily sprint log, STATUS.json refresh, issue scan, and PR #18595 creation.
+- In progress: Awaiting review/merge for PR #18595.
+- Blocked: None.
 
 ## Finality
 
-- Sprint log recorded; prompt registry aligned; PR creation required to close loop.
+- Sprint log recorded; prompt registry aligned; PR opened and labeled for review.
