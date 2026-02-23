@@ -52,6 +52,7 @@ Deferred pending api.github.com connectivity (Governed Exception).
 - Task 2: Completed.
 - Task 3: Deferred pending api.github.com connectivity (Governed Exception).
 - Task 4: Completed.
+- PR creation: Deferred pending api.github.com connectivity (Governed Exception).
 
 ## Validations
 - `gh pr list --limit 20 -S "is:open sort:updated-desc" --json number,title,updatedAt,author,labels,headRefName,baseRefName,url`
@@ -61,10 +62,11 @@ Deferred pending api.github.com connectivity (Governed Exception).
 
 ## Blockers
 - Governed Exception: api.github.com connectivity blocked issue scan for labeled GA/security backlog.
+- Governed Exception: api.github.com connectivity blocked PR creation for branch `chore/daily-sprint-2026-02-23-5`.
 
 ## End-of-Day Report
 - Planned: 4 tasks.
 - Completed: Task 1, Task 2, Task 4.
 - Deferred: Task 3 (Governed Exception: api.github.com connectivity).
 - PRs touched: None (new branch prepared for PR).
-- Commands: `gh pr list`, `gh run list`, `shasum` succeeded; `gh issue list` deferred.
+- Commands: `gh pr list`, `gh run list`, `shasum` succeeded; `gh issue list` and `gh pr create` deferred.
