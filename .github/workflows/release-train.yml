@@ -66,7 +66,9 @@ jobs:
 
       - name: Build Packages
         id: build
-        run: pnpm run build
+        run: |
+          pnpm run build
+          echo "DIGEST=sha256:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
@@ -100,14 +102,15 @@ jobs:
         uses: anchore/sbom-action/download-syft@62ad5284b8ced813296287a0b63906cb364b73ee # v0
 
       - name: Generate SBOMs
+        id: image
         run: |
           docker build -t registry/app:${{ github.sha }} .
           DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' registry/app:${{ github.sha }})
           echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
       - name: Generate provenance
-        run: scripts/ci/release-train/provenance_attest.sh ${{ steps.build.outputs.DIGEST }}
+        run: scripts/ci/release-train/provenance_attest.sh ${{ steps.image.outputs.DIGEST }}
       - name: Push + record artifact
-        run: scripts/ci/release-train/publish_and_record.sh ${{ steps.build.outputs.DIGEST }} scripts/ci/records/artifacts.json
+        run: scripts/ci/release-train/publish_and_record.sh ${{ steps.image.outputs.DIGEST }} scripts/ci/records/artifacts.json
 
   canary_rollout:
     needs: build_and_sign
