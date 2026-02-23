@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/memory/facts.schema.json",
+  "title": "Summit Memory Facts Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "facts"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$"
+    },
+    "facts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "fact_id",
+          "claim",
+          "source_id",
+          "quote_pointer",
+          "confidence",
+          "classification",
+          "created_by"
+        ],
+        "properties": {
+          "fact_id": {
+            "type": "string",
+            "pattern": "^EVID-[A-Z0-9]{6,64}$"
+          },
+          "claim": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 5000
+          },
+          "source_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quote_pointer": {
+            "type": "string",
+            "minLength": 1,
+            "description": "URI/offset/hash pointer to source excerpt."
+          },
+          "confidence": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "verified"]
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["public", "internal", "restricted"]
+          },
+          "created_by": {
+            "type": "string",
+            "enum": ["agent", "human"]
+          }
+        }
+      }
+    }
+  }
+}
