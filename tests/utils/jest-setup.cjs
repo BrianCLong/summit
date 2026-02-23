@@ -1,1 +1,1 @@
-process.env.TZ = process.env.TZ || 'UTC';
+process.env.TZ = process.env.TZ || "UTC";
