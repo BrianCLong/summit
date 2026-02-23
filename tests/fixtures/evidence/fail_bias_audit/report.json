@@ -1,0 +1,7 @@
+{
+  "run_id": "test-run",
+  "item_slug": "aidisinfo25",
+  "evd_ids": ["EVD-AIDISINFO25-EVID-001"],
+  "summary": {"what_ran": "test", "result": "pass"},
+  "artifacts": {"metrics": "metrics.json", "stamp": "stamp.json"}
+}
