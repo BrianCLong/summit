@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   smoke-and-load:
-    if: ((((((github.event.workflow_run.conclusion == 'success') && (always())) && (always())) && (always())) && (steps.release_tag.outputs.upload_url)) && (always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0])) && (steps.summary.outputs.status == 'failure')
+    if: github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -118,6 +118,7 @@ jobs:
           echo "status=$status" >> $GITHUB_OUTPUT
 
       - name: Build deploy verification report
+        if: always()
         run: |
           node - <<'NODE'
           const fs = require('fs');
@@ -168,6 +169,7 @@ jobs:
           WORKFLOW_EVENT: ${{ github.event.workflow_run.event }}
 
       - name: Upload deploy verification artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: deploy-verification-${{ steps.target.outputs.target }}-${{ github.run_id }}
@@ -179,6 +181,7 @@ jobs:
           retention-days: 14
 
       - name: Locate release for deployment tag
+        if: always()
         id: release_tag
         uses: actions/github-script@v7
         with:
@@ -210,6 +213,7 @@ jobs:
             core.setOutput('upload_url', release.data.upload_url);
 
       - name: Attach verification to release
+        if: steps.release_tag.outputs.upload_url
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -220,6 +224,7 @@ jobs:
           asset_content_type: application/json
 
       - name: Comment results on PR
+        if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -250,6 +255,7 @@ jobs:
             });
 
       - name: Fail if checks failed
+        if: steps.summary.outputs.status == 'failure'
         run: |
           echo "Post-deploy verification failed (smoke/load/synthetic)." >&2
           exit 1

@@ -1,0 +1,252 @@
+# Flaky Test Kill List
+# Sprint 27B: Zero-tolerance flaky test management
+# Tests on this list are systematically tracked and eliminated
+
+metadata:
+  last_updated: '2024-09-19T00:00:00Z'
+  total_quarantined: 0
+  total_fixed: 0
+  stability_target: 99.5%
+
+# Quarantined tests - temporarily disabled but tracked for resolution
+quarantined_tests:
+  # Template for new entries:
+  # - test_file: "path/to/test.spec.ts"
+  #   test_name: "specific test case description"
+  #   reason: "root cause of flakiness"
+  #   quarantine_date: "2024-MM-DD"
+  #   assigned_to: "team-name"
+  #   github_issue: "#1234"
+  #   priority: "high|medium|low"
+  #   estimated_fix_date: "2024-MM-DD"
+  #   flake_rate: "X%" # failure rate over last 100 runs
+
+# Recently fixed tests - kept for monitoring regression
+recently_fixed:
+  # Example of fixed test tracking:
+  # - test_file: "services/auth/tests/webauthn.test.ts"
+  #   test_name: "WebAuthn authentication with biometric fallback"
+  #   fixed_date: "2024-09-15"
+  #   fix_description: "Added explicit wait for biometric prompt"
+  #   pr_link: "https://github.com/BrianCLong/intelgraph/pull/1234"
+  #   monitoring_until: "2024-10-15"
+
+# Retry strategies for different test categories
+retry_strategies:
+  network_dependent:
+    description: 'Tests that make external HTTP calls'
+    max_retries: 3
+    retry_delay_ms: 1000
+    exponential_backoff: true
+    patterns:
+      - '**/*api*.test.ts'
+      - '**/*http*.test.ts'
+      - '**/*fetch*.test.ts'
+
+  database_dependent:
+    description: 'Tests that interact with database'
+    max_retries: 2
+    retry_delay_ms: 500
+    reset_db_state: true
+    patterns:
+      - '**/*db*.test.ts'
+      - '**/*repository*.test.ts'
+      - '**/*migration*.test.ts'
+
+  file_system_dependent:
+    description: 'Tests that read/write files'
+    max_retries: 5
+    retry_delay_ms: 200
+    cleanup_files: true
+    patterns:
+      - '**/*file*.test.ts'
+      - '**/*upload*.test.ts'
+      - '**/*export*.test.ts'
+
+  time_dependent:
+    description: 'Tests with timing requirements'
+    max_retries: 3
+    retry_delay_ms: 100
+    allow_time_variance: true
+    patterns:
+      - '**/*timeout*.test.ts'
+      - '**/*schedule*.test.ts'
+      - '**/*timer*.test.ts'
+
+  browser_dependent:
+    description: 'End-to-end browser tests'
+    max_retries: 2
+    retry_delay_ms: 2000
+    reset_browser_state: true
+    patterns:
+      - '**/*e2e*.test.ts'
+      - '**/*playwright*.test.ts'
+      - '**/*selenium*.test.ts'
+
+# Stability requirements by test type
+stability_requirements:
+  unit_tests:
+    target_stability: 99.9%
+    measurement_window_days: 7
+    min_runs_for_assessment: 50
+
+  integration_tests:
+    target_stability: 99.5%
+    measurement_window_days: 14
+    min_runs_for_assessment: 30
+
+  e2e_tests:
+    target_stability: 98.0%
+    measurement_window_days: 30
+    min_runs_for_assessment: 20
+
+  performance_tests:
+    target_stability: 95.0%
+    measurement_window_days: 30
+    min_runs_for_assessment: 10
+
+# Flaky test detection configuration
+detection_config:
+  # Automatically flag tests as potentially flaky
+  auto_detection:
+    enabled: true
+    failure_rate_threshold: 5% # Flag if >5% failure rate
+    min_runs_for_detection: 20
+    consecutive_failure_threshold: 3
+
+  # Patterns that indicate flakiness
+  flaky_indicators:
+    - 'timeout'
+    - 'race condition'
+    - 'timing'
+    - 'intermittent'
+    - 'sometimes fails'
+    - 'CI only'
+
+  # Exclude patterns from flaky detection
+  exclude_from_detection:
+    - '**/*manual*.test.ts'
+    - '**/*stress*.test.ts'
+    - '**/*load*.test.ts'
+
+# Monitoring and reporting
+monitoring:
+  slack_notifications:
+    channel: '#engineering-quality'
+    notify_on_quarantine: true
+    notify_on_fix: true
+    daily_digest: true
+
+  metrics_collection:
+    track_test_duration: true
+    track_retry_counts: true
+    track_failure_patterns: true
+
+  reports:
+    weekly_stability_report: true
+    monthly_trend_analysis: true
+    quarterly_deep_dive: true
+
+# Test environment settings
+environment_config:
+  # CI-specific timeouts (often longer than local)
+  ci_timeout_multiplier: 2.0
+
+  # Parallel execution settings
+  max_parallel_workers: 4
+  test_isolation: true
+
+  # Resource limits
+  memory_limit_mb: 1024
+  cpu_limit_percent: 80
+
+# Tools integration
+tools:
+  jest:
+    retry_config:
+      retries: 2
+      retry_immediately: false
+
+  playwright:
+    retry_config:
+      retries: 2
+      global_timeout: 30000
+      expect_timeout: 5000
+
+  vitest:
+    retry_config:
+      retry: 2
+      timeout: 10000
+
+# Escalation procedures
+escalation:
+  # When to escalate flaky tests
+  escalation_triggers:
+    - high_impact_test_flaky: '24 hours'
+    - multiple_tests_flaky: '48 hours'
+    - stability_below_target: '72 hours'
+
+  # Who to escalate to
+  escalation_contacts:
+    level_1: 'team-lead'
+    level_2: 'engineering-manager'
+    level_3: 'cto'
+
+# Historical data for trending
+historical_tracking:
+  # Keep track of patterns over time
+  trend_analysis:
+    track_by_file: true
+    track_by_author: true
+    track_by_time_of_day: true
+    track_by_day_of_week: true
+
+  # Identify systemic issues
+  pattern_detection:
+    detect_team_patterns: true
+    detect_feature_patterns: true
+    detect_infrastructure_patterns: true
+
+# Quality gates integration
+quality_gates:
+  # Block merges if flaky tests detected
+  block_merge_on_flaky: true
+
+  # Require fixes before deadline
+  fix_deadline_days: 14
+
+  # Maximum allowed quarantined tests
+  max_quarantined_tests: 5
+
+# Automation rules
+automation:
+  # Auto-quarantine severely flaky tests
+  auto_quarantine:
+    enabled: true
+    failure_rate_threshold: 20%
+    min_runs: 10
+
+  # Auto-create GitHub issues
+  auto_issue_creation:
+    enabled: true
+    template: '.github/ISSUE_TEMPLATE/flaky-test.md'
+    labels: ['bug', 'flaky-test', 'quality']
+
+  # Auto-assign to test authors
+  auto_assignment:
+    enabled: true
+    fallback_assignee: 'qa-team'
+
+# Documentation and training
+documentation:
+  best_practices_link: 'docs/testing/best-practices.md'
+  flaky_test_guide: 'docs/testing/flaky-tests.md'
+  debugging_guide: 'docs/testing/debugging-flaky-tests.md'
+
+# Example commands for managing flaky tests
+commands:
+  detect_flaky: 'npm run test:detect-flaky'
+  quarantine_test: "npm run test:quarantine -- --test-pattern='pattern'"
+  run_quarantined: 'npm run test:quarantined'
+  stability_report: 'npm run test:stability-report'
+  fix_validation: "npm run test:validate-fix -- --test-pattern='pattern'"
