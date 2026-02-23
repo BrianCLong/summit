@@ -549,6 +549,14 @@ export const webVitalValue = createGauge({
   labelNames: ['metric', 'id'],
 });
 
+export const webVitalDurationSeconds = createHistogram({
+  registers: [],
+  name: 'web_vital_duration_seconds',
+  help: 'Distribution of Web Vitals values in seconds',
+  labelNames: ['metric'],
+  buckets: [0.1, 0.5, 1, 2.5, 4, 10],
+});
+
 // Real-time updates metrics
 export const realtimeConflictsTotal = createCounter({
   registers: [],
@@ -658,6 +666,7 @@ try {
   register.registerMetric(graphqlResolverErrorsTotal);
   register.registerMetric(graphqlResolverCallsTotal);
   register.registerMetric(webVitalValue);
+  register.registerMetric(webVitalDurationSeconds);
   register.registerMetric(realtimeConflictsTotal);
   register.registerMetric(idempotentHitsTotal);
   register.registerMetric(businessUserSignupsTotal);
@@ -1200,6 +1209,7 @@ export const metrics = {
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
   webVitalValue,
+  webVitalDurationSeconds,
   realtimeConflictsTotal,
   idempotentHitsTotal,
   graphqlQueryCostHistogram,
