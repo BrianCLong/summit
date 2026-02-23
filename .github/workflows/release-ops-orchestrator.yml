@@ -21,6 +21,52 @@ on:
 
   # Manual trigger with configuration options
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run in dry-run mode"
+        required: false
+        default: false
+        type: boolean
+      threshold_minutes:
+        description: "Blocker threshold in minutes"
+        required: false
+        default: "90"
+        type: string
+      enable_issue_writes:
+        description: "Allow issue create/update actions"
+        required: false
+        default: true
+        type: boolean
+      enable_routing:
+        description: "Enable routing label automation"
+        required: false
+        default: true
+        type: boolean
+      enable_escalation:
+        description: "Enable escalation automation"
+        required: false
+        default: true
+        type: boolean
+      enable_notify:
+        description: "Enable notifications"
+        required: false
+        default: false
+        type: boolean
+      verbose:
+        description: "Verbose logging"
+        required: false
+        default: false
+        type: boolean
+      force_digest:
+        description: "Force digest generation"
+        required: false
+        default: false
+        type: boolean
+      force_handoff:
+        description: "Force handoff generation"
+        required: false
+        default: false
+        type: boolean
 
 # Prevent concurrent runs - only one orchestrator cycle at a time
 concurrency:
