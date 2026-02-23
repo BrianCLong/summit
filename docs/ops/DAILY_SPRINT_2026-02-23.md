@@ -37,6 +37,11 @@ Deferred pending api.github.com connectivity (Governed Exception).
 - Expected touch points: `docs/ops/DAILY_SPRINT_2026-02-23.md`
 - Validation: `gh issue list`
 
+### Task 4: Register daily sprint prompt for prompt integrity
+- Goal: Ensure the daily sprint orchestrator prompt is registered in `prompts/registry.yaml`.
+- Expected touch points: `prompts/automation/daily-sprint@v1.md`, `prompts/registry.yaml`
+- Validation: `shasum -a 256 prompts/automation/daily-sprint@v1.md`
+
 ## MAESTRO Security Alignment (Reasoning)
 - **MAESTRO Layers**: Agents, Tools, Observability, Security
 - **Threats Considered**: prompt injection, tool abuse, evidence tampering
@@ -46,18 +51,20 @@ Deferred pending api.github.com connectivity (Governed Exception).
 - Task 1: Completed.
 - Task 2: Completed.
 - Task 3: Deferred pending api.github.com connectivity (Governed Exception).
+- Task 4: Completed.
 
 ## Validations
 - `gh pr list --limit 20 -S "is:open sort:updated-desc" --json number,title,updatedAt,author,labels,headRefName,baseRefName,url`
 - `gh run list --limit 20 --json name,displayTitle,conclusion,status,updatedAt,url`
 - `gh issue list --limit 50 --state open --label "security,ga,bolt,osint,governance" --json number,title,updatedAt,author,labels,url` (Deferred)
+- `shasum -a 256 prompts/automation/daily-sprint@v1.md`
 
 ## Blockers
 - Governed Exception: api.github.com connectivity blocked issue scan for labeled GA/security backlog.
 
 ## End-of-Day Report
-- Planned: 3 tasks.
-- Completed: Task 1, Task 2.
+- Planned: 4 tasks.
+- Completed: Task 1, Task 2, Task 4.
 - Deferred: Task 3 (Governed Exception: api.github.com connectivity).
-- PRs touched: None (evidence-only update staged locally).
-- Commands: `gh pr list`, `gh run list` succeeded; `gh issue list` deferred.
+- PRs touched: None (new branch prepared for PR).
+- Commands: `gh pr list`, `gh run list`, `shasum` succeeded; `gh issue list` deferred.

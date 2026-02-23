@@ -1,5 +1,29 @@
 version: 1
 prompts:
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: c6159e03e6bab0e6a5642c1118b7761bd9f9e56c68142decbce0934b205bb3be
+    description: Daily sprint orchestrator for Summit repo operations.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - automation
+        - ops
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: saas-crash-2026-positioning-pack
     version: v1
     path: prompts/positioning/saas-crash-2026@v1.md
