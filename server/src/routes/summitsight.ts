@@ -18,7 +18,7 @@ const dataService = new SummitsightDataService();
 
 router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const definitions = await dataService.getKPIDefinitions(req.query.category as string);
+    const definitions = await dataService.getKPIDefinitions((req.query.category as string) as string);
     res.json(definitions);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });

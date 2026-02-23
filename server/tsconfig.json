@@ -5,8 +5,8 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "rootDir": ".",
-    "outDir": "./dist",
+    "rootDir": "..",
+    "outDir": "../../dist",
     "esModuleInterop": true,
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,
@@ -17,8 +17,14 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["ES2022", "DOM"],
-    "types": ["node", "jest"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true
@@ -26,7 +32,9 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",

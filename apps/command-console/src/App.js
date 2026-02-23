@@ -83,3 +83,4 @@ export default function App() {
                                 { label: 'Generated', value: new Date(snapshot.evidence.lastGeneratedAt).toLocaleString() },
                             ] }), _jsxs("div", { style: cardStyle, children: [_jsx("strong", { children: "LLM Usage (per tenant)" }), _jsx("ul", { style: { paddingLeft: 16, margin: '8px 0' }, children: snapshot.llm.tenants.map((tenant) => (_jsxs("li", { style: { marginBottom: 4 }, children: [_jsx(StatusPill, { status: tenant.rateLimitStatus }), " ", tenant.tenantId, ":", ' ', tenant.tokens.toLocaleString(), " tokens ($", tenant.cost.toFixed(2), ")"] }, tenant.tenantId))) })] })] }) }), _jsxs("footer", { style: { marginTop: 24, color: '#64748b' }, children: ["Generated ", new Date(snapshot.generatedAt).toLocaleString(), " \u2022 Internal visibility only"] })] }));
 }
+//# sourceMappingURL=App.js.map

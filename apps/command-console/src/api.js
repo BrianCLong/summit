@@ -11,3 +11,4 @@ export async function fetchSnapshot() {
     }
     return res.json();
 }
+//# sourceMappingURL=api.js.map

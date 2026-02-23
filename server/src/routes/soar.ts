@@ -80,8 +80,8 @@ router.get('/runs', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
         const runs = await service.listRuns(user!.tenantId, {
-            playbookId: req.query.playbookId as string,
-            caseId: req.query.caseId as string
+            playbookId: (req.query.playbookId as string) as string,
+            caseId: (req.query.caseId as string) as string
         });
         res.json(runs);
     } catch (err: any) {

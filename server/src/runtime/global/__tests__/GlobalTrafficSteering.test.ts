@@ -1,3 +1,4 @@
+import { GlobalTrafficSteering } from '../GlobalTrafficSteering';
 import { jest } from '@jest/globals';
 
 const getResidencyConfigMock = jest.fn();

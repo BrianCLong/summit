@@ -5,3 +5,4 @@ const root = document.getElementById('root');
 if (root) {
     createRoot(root).render(_jsx(App, {}));
 }
+//# sourceMappingURL=main.js.map

@@ -8,3 +8,4 @@ export default defineConfig({
         setupFiles: ['./vitest.setup.ts'],
     },
 });
+//# sourceMappingURL=vitest.config.js.map

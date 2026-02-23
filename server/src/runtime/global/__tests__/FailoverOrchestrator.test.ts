@@ -1,3 +1,4 @@
+import { FailoverOrchestrator } from '../FailoverOrchestrator';
 import { jest } from '@jest/globals';
 
 const axiosGetMock = jest.fn();

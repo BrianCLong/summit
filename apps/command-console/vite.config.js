@@ -5,4 +5,10 @@ export default defineConfig({
     server: {
         port: 4300,
     },
+    test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: ['./src/setupTests.ts'],
+    },
 });
+//# sourceMappingURL=vite.config.js.map
