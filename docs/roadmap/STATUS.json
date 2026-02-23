@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-23T00:00:00Z",
+  "revision_note": "Added summit-memory-contract initiative with LangChain-aligned schemas, policy guardrails, and OSINT threat model artifacts.",
   "initiatives": [
+    {
+      "id": "summit-memory-contract",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implements governed memory contract mapping (procedural/semantic/episodic/tiered), schema artifacts, and memory write guardrails with proposal workflow."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
