@@ -61,7 +61,8 @@ jobs:
           node-version: "20"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4      - name: Setup Go
+        uses: pnpm/action-setup@v4 # v4
+      - name: Setup Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5
         with:
           go-version: "1.21"

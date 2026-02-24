@@ -27,7 +27,8 @@ jobs:
           node-version: "20"
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4      - name: Install Dependencies
+        uses: pnpm/action-setup@v4
+      - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
 
       - name: Run Regression Pack

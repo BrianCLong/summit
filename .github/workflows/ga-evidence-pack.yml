@@ -24,7 +24,8 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4.0.0      - name: Install dependencies
+        uses: pnpm/action-setup@v4 # v4.0.0
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run Evidence Pack with Determinism Check
