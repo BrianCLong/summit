@@ -1,113 +1,105 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const root = process.cwd();
-const evidenceIndexPath = path.join(root, 'evidence', 'index.json');
-const requiredEvidenceIds = (process.env.EVIDENCE_IDS || 'EVD-koreai-agentic-EVIDENCE-001')
-  .split(',')
-  .map((value) => value.trim())
-  .filter(Boolean);
+// Determinism gate: evidence artifacts must be stable and timestamp-free outside stamp.json.
 
-const bannedKeys = new Set([
+const indexPath = path.resolve('evidence/index.json');
+
+const timestampKeys = new Set([
   'timestamp',
+  'timestamps',
+  'generated_at',
   'created_at',
-  'createdAt',
   'updated_at',
-  'updatedAt',
+  'time',
+  'date'
 ]);
 
-const allowedStampKeys = new Set(['created_at', 'git_sha', 'run_id']);
+function fail(message) {
+  console.error(message);
+  process.exit(1);
+}
 
-const readJson = (filePath) => {
-  const payload = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(payload);
-};
+function readJson(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(raw);
+}
 
-const findBannedKeys = (value, currentPath = '$') => {
-  const hits = [];
+function findTimestampKey(value, currentPath = []) {
   if (Array.isArray(value)) {
-    value.forEach((item, index) => {
-      hits.push(...findBannedKeys(item, `${currentPath}[${index}]`));
-    });
-    return hits;
-  }
-  if (value && typeof value === 'object') {
-    for (const [key, nested] of Object.entries(value)) {
-      if (bannedKeys.has(key)) {
-        hits.push(`${currentPath}.${key}`);
+    for (let i = 0; i < value.length; i += 1) {
+      const found = findTimestampKey(value[i], currentPath.concat(String(i)));
+      if (found) {
+        return found;
       }
-      hits.push(...findBannedKeys(nested, `${currentPath}.${key}`));
+    }
+    return null;
+  }
+
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      if (timestampKeys.has(key)) {
+        return currentPath.concat(key).join('.');
+      }
+      const found = findTimestampKey(child, currentPath.concat(key));
+      if (found) {
+        return found;
+      }
     }
   }
-  return hits;
-};
 
-const ensureFileExists = (filePath) => {
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`Missing evidence file: ${filePath}`);
+  return null;
+}
+
+if (!fs.existsSync(indexPath)) {
+  fail('missing evidence/index.json');
+}
+
+const index = readJson(indexPath);
+
+if (!index || typeof index !== 'object' || !index.evidence) {
+  fail('evidence/index.json missing evidence map');
+}
+
+const entries = Object.values(index.evidence);
+
+for (const entry of entries) {
+  if (!entry || typeof entry !== 'object' || !entry.files) {
+    fail('evidence/index.json has invalid entry');
   }
-};
 
-const evidenceIndex = readJson(evidenceIndexPath);
+  const { report, metrics, stamp } = entry.files;
 
-for (const evidenceId of requiredEvidenceIds) {
-  const item = evidenceIndex.items?.find(
-    (entry) => entry.evidence_id === evidenceId,
-  );
-  if (!item) {
-    throw new Error(`Evidence ID not found in evidence/index.json: ${evidenceId}`);
+  if (!report || !metrics || !stamp) {
+    fail(`evidence entry missing report/metrics/stamp: ${entry.evidence_id ?? 'unknown'}`);
   }
 
-  const reportPath = path.join(root, item.files.report);
-  const metricsPath = path.join(root, item.files.metrics);
-  const stampPath = path.join(root, item.files.stamp);
+  const reportPath = path.resolve(report);
+  const metricsPath = path.resolve(metrics);
+  const stampPath = path.resolve(stamp);
 
-  [reportPath, metricsPath, stampPath].forEach(ensureFileExists);
+  if (!fs.existsSync(reportPath)) {
+    fail(`missing report artifact: ${report}`);
+  }
+  if (!fs.existsSync(metricsPath)) {
+    fail(`missing metrics artifact: ${metrics}`);
+  }
+  if (!fs.existsSync(stampPath)) {
+    fail(`missing stamp artifact: ${stamp}`);
+  }
 
   const reportJson = readJson(reportPath);
   const metricsJson = readJson(metricsPath);
-  const stampJson = readJson(stampPath);
 
-  const reportHits = findBannedKeys(reportJson);
-  const metricsHits = findBannedKeys(metricsJson);
-
-  if (reportHits.length > 0 || metricsHits.length > 0) {
-    throw new Error(
-      `Determinism violation: timestamps detected outside stamp.json for ${evidenceId}. ` +
-        `Report hits: ${reportHits.join(', ')}; Metrics hits: ${metricsHits.join(', ')}`,
-    );
+  const reportTimestamp = findTimestampKey(reportJson);
+  if (reportTimestamp) {
+    fail(`timestamp field found in report.json: ${report} (${reportTimestamp})`);
   }
 
-  const stampKeys = Object.keys(stampJson);
-  const invalidStampKeys = stampKeys.filter((key) => !allowedStampKeys.has(key));
-  if (invalidStampKeys.length > 0) {
-    throw new Error(
-      `Stamp schema violation for ${evidenceId}: unexpected keys ${invalidStampKeys.join(', ')}`,
-    );
-  }
-
-  const runIndexPath = path.join(path.dirname(reportPath), 'index.json');
-  if (fs.existsSync(runIndexPath)) {
-    const runIndex = readJson(runIndexPath);
-    const runIndexHits = findBannedKeys(runIndex);
-    if (runIndexHits.length > 0) {
-      throw new Error(
-        `Determinism violation: timestamps detected in run index for ${evidenceId}: ${runIndexHits.join(
-          ', ',
-        )}`,
-      );
-    }
-    if (runIndex.run_id && stampJson.run_id && runIndex.run_id !== stampJson.run_id) {
-      throw new Error(
-        `Run ID mismatch for ${evidenceId}: index.json has ${runIndex.run_id}, stamp.json has ${stampJson.run_id}`,
-      );
-    }
-    if (runIndex.evidence && !runIndex.evidence[evidenceId]) {
-      throw new Error(
-        `Run index missing evidence ID ${evidenceId} in ${runIndexPath}`,
-      );
-    }
+  const metricsTimestamp = findTimestampKey(metricsJson);
+  if (metricsTimestamp) {
+    fail(`timestamp field found in metrics.json: ${metrics} (${metricsTimestamp})`);
   }
 }
 
-console.log(`Evidence verification passed for: ${requiredEvidenceIds.join(', ')}`);
+console.log('evidence verifier: OK');

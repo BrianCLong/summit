@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:10:00Z",
-  "revision_note": "Added workflow-graph evidence lane-1 tracking entry.",
+  "last_updated": "2026-02-08T12:30:00Z",
+  "revision_note": "Added GA evidence system contract, schemas, and CI verifier skeleton for deterministic evidence artifacts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -100,13 +100,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Added Switchboard MCP control-plane evidence contract and determinism scaffolding."
-    },
-    {
-      "id": "workflow-graphs-evidence-lane1",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Workflow graph evidence scaffolding with deterministic verifier and index registration."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Added GA evidence system contract, schemas, and CI verifier skeleton for evidence index integrity."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",

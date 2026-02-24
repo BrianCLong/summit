@@ -1,48 +1,43 @@
 # Evidence System (GA Hardening)
 
-This document establishes the deterministic evidence bundle format and verification posture used to
-prove agentic governance readiness. This aligns with the Summit Readiness Assertion and must remain
-compatible with GA guardrails. See `docs/SUMMIT_READINESS_ASSERTION.md` for the authoritative
-readiness posture.
+## Purpose
 
-## Deterministic Evidence Bundle
+The Summit Evidence System standardizes deterministic evidence artifacts for CI and governance gates.
+Evidence is **authoritative** only when it is indexed, schema-validated, and timestamped exclusively
+in a stamp artifact. This is a governed requirement aligned to the Summit Readiness Assertion.
 
-**Directory layout:** `evidence/runs/<run_id>/`
+## Canonical Artifacts
 
-Required files:
+Each evidence run must produce the following, stored under `evidence/<run_id>/` and indexed in
+`evidence/index.json`:
 
-- `report.json` — semantic summary (no timestamps)
-- `metrics.json` — quantitative metrics (no timestamps)
-- `stamp.json` — the *only* file that may contain timestamps
-- `index.json` — maps evidence IDs to run files
+- `report.json` (see `evidence/schemas/report.schema.json`)
+- `metrics.json` (see `evidence/schemas/metrics.schema.json`)
+- `stamp.json` (see `evidence/schemas/stamp.schema.json`)
 
-**Determinism rule:** timestamp fields are confined to `stamp.json`. Any timestamp fields discovered
-in other files are treated as build-blocking defects.
+## Determinism & Timestamp Rules
 
-## Evidence IDs
+- **Timestamps are allowed only in `stamp.json`.**
+- `report.json` and `metrics.json` must be deterministic and free of time-based values.
+- Evidence IDs must match the `EVD-<AREA>-<TOPIC>-<NNN>` pattern and be registered in the index.
 
-Evidence IDs use the canonical slug `koreai-agentic`:
+## CI Verification
 
-- `EVD-koreai-agentic-EVIDENCE-001` — schema validation and determinism proof
+The evidence verifier (`.github/scripts/verify-evidence.mjs`) enforces:
 
-## Verification Gate
-
-The evidence verifier is a deterministic script that enforces:
-
-- Evidence ID presence in `evidence/index.json`
-- Required files exist per evidence entry
-- No timestamps outside `stamp.json`
-- Run index references align with `stamp.json` values
-
-## Rollback
-
-Rollback is a revert of the evidence bundle and verification script changes, followed by removal of
-any references in `evidence/index.json`.
+- `evidence/index.json` exists and is valid JSON.
+- Every indexed entry references `report`, `metrics`, and `stamp` files.
+- All referenced files exist.
+- `report.json` and `metrics.json` are free of timestamp fields.
 
 ## MAESTRO Alignment
 
-- **MAESTRO Layers:** Foundation, Data, Agents, Observability, Security
-- **Threats Considered:** prompt injection via evidence payloads, tool abuse via unverified scripts,
-  integrity drift from non-deterministic evidence
-- **Mitigations:** deterministic schema checks, restricted timestamp surface, explicit evidence ID
-  mapping in `evidence/index.json`, and CI verification gating
+- **MAESTRO Layers:** Foundation, Data, Observability, Security.
+- **Threats Considered:** Evidence tampering, timestamp leakage, non-deterministic artifacts.
+- **Mitigations:** Schema validation, index verification, timestamp isolation in `stamp.json`, CI gate.
+
+## Governance Notes
+
+- Evidence schema updates require a corresponding update to `agent-contract.json` verification
+  surfaces.
+- Evidence gates are Tier C by default and executed via `make ga-verify`.

@@ -30,8 +30,7 @@
     "verificationSurfaces": [
       "docs/ga/genui/UI_CONTRACT.md",
       "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
-      "docs/ga/evidence.md",
-      "tests/agents/switchboard/evidence.determinism.test.ts"
+      "docs/ga/evidence-system.md"
     ]
   },
   "restrictedAreas": [

@@ -1,5 +1,23 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SummitEvidenceStamp",
   "type": "object",
-  "additionalProperties": true
+  "required": ["evidence_id", "generated_at", "git"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$"
+    },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "git": {
+      "type": "object",
+      "required": ["sha"],
+      "properties": {
+        "sha": { "type": "string", "minLength": 7 },
+        "ref": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
 }

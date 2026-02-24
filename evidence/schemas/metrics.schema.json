@@ -1,5 +1,17 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SummitEvidenceMetrics",
   "type": "object",
-  "additionalProperties": true
+  "required": ["evidence_id", "counters"],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$"
+    },
+    "counters": {
+      "type": "object",
+      "additionalProperties": { "type": "number" }
+    }
+  },
+  "additionalProperties": false
 }

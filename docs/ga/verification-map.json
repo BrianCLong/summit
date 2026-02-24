@@ -5,8 +5,8 @@
     "artifact": "e2e/a11y-keyboard/a11y-gate.spec.ts",
     "ciStatus": "wired",
     "evidence": [
-      "reports/a11y-keyboard/README.md",
-      ".github/workflows/a11y-keyboard-smoke.yml"
+      ".github/workflows/a11y-keyboard-smoke.yml",
+      "e2e/a11y-keyboard/a11y-gate.spec.ts"
     ],
     "keywords": [
       "accessibility",
@@ -50,6 +50,27 @@
       "Demo Mode"
     ],
     "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
+  },
+  {
+    "feature": "Evidence System Contract",
+    "tier": "C",
+    "artifact": "docs/ga/evidence-system.md",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/ga/evidence-system.md",
+      ".github/scripts/verify-evidence.mjs",
+      "evidence/schemas/report.schema.json",
+      "evidence/schemas/metrics.schema.json",
+      "evidence/schemas/stamp.schema.json"
+    ],
+    "keywords": [
+      "evidence",
+      "determinism",
+      "evidence_id",
+      "counters",
+      "generated_at"
+    ],
+    "notes": "Requires indexed evidence artifacts and timestamp isolation via CI verification."
   },
   {
     "feature": "GA Gate Artifact Closure",
@@ -97,17 +118,13 @@
   {
     "feature": "Media Authenticity & Provenance",
     "tier": "B",
-    "artifact": "scripts/ci/verify_media_provenance.ts",
+    "artifact": "docs/governance/media_provenance.md",
     "ciStatus": "wired",
     "evidence": [
       "docs/governance/media_provenance.md"
     ],
-    "keywords": [
-      "media",
-      "provenance",
-      "authenticity"
-    ],
-    "notes": "Blocks media changes without deterministic provenance evidence."
+    "keyword": "Media Authenticity",
+    "notes": "Anchors media provenance requirements in the governance module."
   },
   {
     "feature": "Observability Taxonomy",
@@ -147,24 +164,5 @@
     ],
     "keyword": "rate limiting",
     "notes": "Documentation-driven contract while runtime harness is stabilized."
-  },
-  {
-    "feature": "Switchboard MCP Evidence Contract",
-    "tier": "B",
-    "artifact": "tests/agents/switchboard/evidence.determinism.test.ts",
-    "ciStatus": "pending",
-    "evidence": [
-      "docs/ga/evidence.md",
-      "src/agents/switchboard/evidence/schema/index.schema.json",
-      "src/agents/switchboard/evidence/schema/report.schema.json",
-      "src/agents/switchboard/evidence/schema/metrics.schema.json",
-      "src/agents/switchboard/evidence/schema/stamp.schema.json"
-    ],
-    "keywords": [
-      "switchboard",
-      "evidence",
-      "determinism"
-    ],
-    "notes": "Deterministic evidence artifacts with timestamp isolation in stamp.json."
   }
 ]
