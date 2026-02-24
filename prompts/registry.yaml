@@ -1151,25 +1151,34 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: nonpublic-data-access-standards
+  - id: switchboard-approvals-command-palette
     version: v1
-    path: prompts/standards/nonpublic-data-access@v1.md
-    sha256: cde11a8ac62de3c4b235c96a26d9a4658bf674e5580be4ca0032e3903c4f42f3
-    description: Define non-public data access standards, data handling guidance, and runbook with roadmap update.
+    path: prompts/switchboard/switchboard-approvals-command-palette@v1.md
+    sha256: 79b4df8f5a869097218a931b2aac1de7e2b538f62637a4ee6d5cca4c856cd9f1
+    description: Deliver the Switchboard approvals + command palette delivery pack with policy, receipts, and operability artifacts.
     scope:
       paths:
-        - docs/standards/nonpublic-data-access.md
-        - docs/security/data-handling/nonpublic-data-access.md
-        - docs/ops/runbooks/nonpublic-data-access.md
-        - repo_assumptions.md
+        - sprint/sprint-next-switchboard-approvals-command-palette.md
+        - openapi/switchboard-approvals-command-palette.yaml
+        - opa/policies/switchboard.rego
+        - opa/policies/switchboard_test.rego
+        - packages/decision-policy/policy.switchboard.v1.yaml
+        - provenance/receipt_schema_switchboard_v0_1.json
+        - provenance/examples/switchboard-receipt.example.json
+        - docs/switchboard/
+        - grafana/dashboards/switchboard-approvals.json
+        - grafana/alerts/switchboard-approvals-alerts.yaml
+        - RUNBOOKS/switchboard-*.md
         - docs/roadmap/STATUS.json
-        - prompts/standards/nonpublic-data-access@v1.md
+        - prompts/switchboard/switchboard-approvals-command-palette@v1.md
         - prompts/registry.yaml
+        - agents/examples/SWITCHBOARD_APPROVALS_COMMAND_PALETTE_SPRINT_NEXT_20260206.json
       domains:
-        - documentation
+        - switchboard
+        - policy
+        - provenance
+        - observability
         - governance
-        - security
-        - operations
     verification:
       tiers_required:
         - C
