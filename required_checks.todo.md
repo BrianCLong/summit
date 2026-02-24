@@ -15,9 +15,6 @@ GitHub Actions currently executes many checks, but we need to verify their exact
 
 ## Temporary names (Mapping needed)
 We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
-- `gate/evidence` (PR2)
-- `gate/supplychain` (PR4)
-- `gate/fimi` (PR7)
 - `lint`
 - `typecheck`
 - `build`
@@ -38,4 +35,3 @@ Once official names are known, we will alias these jobs or rename them in the wo
 2) GitHub API: GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks
 3) Update: ci/gates/memory_privacy_gates.yml to match exact check names
 4) Add PR to rename temporary checks to required names once known
-- agent-guardrails-no-deception

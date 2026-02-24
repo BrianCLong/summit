@@ -1,0 +1,16 @@
+version: "0.1"
+Event:
+  required: [id, name, window]
+  properties:
+    id: {type: string}
+    name: {type: string}
+    tags: {type: array, items: {type: string}}
+    window:
+      type: object
+      required: [pre_start, start, end, post_end]
+EventPlaybookRun:
+  required: [event_id, detectors, outputs]
+  properties:
+    event_id: {type: string}
+    detectors: {type: array, items: {type: string}}
+    outputs: {type: object}

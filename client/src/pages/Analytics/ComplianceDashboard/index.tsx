@@ -185,7 +185,11 @@ const ComplianceDashboard: React.FC = () => {
           </Typography>
         </Box>
         <Tooltip title="Refresh">
-          <IconButton onClick={handleRefresh} disabled={isLoading}>
+          <IconButton
+            onClick={handleRefresh}
+            disabled={isLoading}
+            aria-label="Refresh compliance data"
+          >
             <RefreshIcon />
           </IconButton>
         </Tooltip>

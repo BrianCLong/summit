@@ -1,0 +1,19 @@
+{
+  "evidence_id": "EVD-WSJ-AI-FUNDRAISING-FRENZY-MKT-001",
+  "item_slug": "WSJ-AI-FUNDRAISING-FRENZY",
+  "summary": "WSJ Technology newsletter edition metadata captured; body not stored (restricted).",
+  "sources": [
+    {
+      "publisher": "WSJ (metadata only)",
+      "published_at": "2026-02-01",
+      "url": "https://www.wsj.com/tech/ai/ais-fundraising-frenzy-continues-911af613",
+      "restricted_body": true
+    }
+  ],
+  "claims": [],
+  "artifacts": [
+    "evidence/WSJ-AI-FUNDRAISING-FRENZY/report.json",
+    "evidence/WSJ-AI-FUNDRAISING-FRENZY/metrics.json",
+    "evidence/WSJ-AI-FUNDRAISING-FRENZY/stamp.json"
+  ]
+}
