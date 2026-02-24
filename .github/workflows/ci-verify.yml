@@ -155,6 +155,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
+        with:
           version: 9
       - uses: actions/setup-node@v4 # v6
         with:
@@ -283,6 +284,30 @@ jobs:
           fi
         continue-on-error: true # Non-blocking until implementation complete
 
+  long-horizon-agency:
+    name: Long-Horizon Agency Evaluation
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Long-Horizon evaluation fixture
+        run: npx tsx scripts/agents/longhorizon/run-fixture.ts
+        env:
+          LONGHORIZON_PR_CHAINS_ENABLED: "true"
+      - name: Upload Long-Horizon artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: long-horizon-artifacts
+          path: artifacts/longhorizon
+          retention-days: 30
+
   compliance-evidence:
     name: Compliance Evidence
     runs-on: ubuntu-22.04
@@ -321,6 +346,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
+        with:
           version: 9
       - uses: actions/setup-node@v4 # v6
         with:
@@ -412,6 +438,7 @@ jobs:
       - schema-validation
       - compliance-evidence
       - ga-evidence-completeness
+      - long-horizon-agency
     if: always()
     steps:
       - name: Check critical gates passed
@@ -425,6 +452,7 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
+          echo "Long-Horizon Agency: ${{ needs.long-horizon-agency.result }}"
           echo ""
 
           # Critical gates (BLOCKING)

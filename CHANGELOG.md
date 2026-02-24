@@ -15,12 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Added SAGE (Self-Hint Aligned GRPO) RL training support.
+- Long-Horizon Agency evaluation track based on daVinci-Agency (arXiv:2602.02619).
+- PR-chain schema and validation logic in `src/agents/longhorizon/schema/`.
+- Staged task builder for multi-PR decomposition in `src/agents/longhorizon/builder/`.
+- Deterministic evaluation metrics (decomposition, consistency, refinement) in `src/agents/longhorizon/evaluator/`.
+- Deny-by-default tool policy and artifact redaction in `src/agents/longhorizon/policies/`.
+- Drift detector for long-horizon track in `scripts/monitoring/`.
+- Evaluation execution harness in `scripts/agents/longhorizon/run-fixture.ts`.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
 ### Added
-- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
@@ -45,14 +50,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All governance and security checks pass
 
 ### Added
-- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - Generated SBOM at `.evidence/sbom.json`
 - CLI test suite: 262 tests passing
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 
 ### Added
-- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 - **Reliability Hardening**:
   - Added exponential backoff retry logic (3 attempts) to Maestro LLM execution with cancellation support.
   - Added 60s timeout to Maestro LLM calls to prevent hanging jobs.
@@ -101,7 +104,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2024-12-28
 
 ### Added
-- Added SAGE (Self-Hint Aligned GRPO) RL training support.
 
 #### Core Platform
 - Multi-tenant architecture with strict tenant isolation
