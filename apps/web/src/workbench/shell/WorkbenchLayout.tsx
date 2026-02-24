@@ -8,13 +8,13 @@ import type { Entity, Relationship } from '@/types'
 
 // Mock Data for Shell Dev
 const MOCK_NODES: Entity[] = [
-  { id: '1', name: 'John Doe', type: 'PERSON', confidence: 0.9 },
-  { id: '2', name: 'Acme Corp', type: 'ORGANIZATION', confidence: 0.95 },
-  { id: '3', name: 'Project X', type: 'PROJECT', confidence: 0.8 },
+  { id: '1', name: 'John Doe', type: 'PERSON', confidence: 0.9, properties: {}, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+  { id: '2', name: 'Acme Corp', type: 'ORGANIZATION', confidence: 0.95, properties: {}, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
+  { id: '3', name: 'Project X', type: 'PROJECT', confidence: 0.8, properties: {}, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z' },
 ]
 const MOCK_EDGES: Relationship[] = [
-  { id: 'e1', sourceId: '1', targetId: '2', type: 'WORKS_FOR', confidence: 0.9 },
-  { id: 'e2', sourceId: '1', targetId: '3', type: 'LEADS', confidence: 0.7 },
+  { id: 'e1', sourceId: '1', targetId: '2', type: 'WORKS_FOR', confidence: 0.9, properties: {}, createdAt: '2026-01-01T00:00:00Z', direction: 'directed' },
+  { id: 'e2', sourceId: '1', targetId: '3', type: 'RELATED_TO', confidence: 0.7, properties: {}, createdAt: '2026-01-01T00:00:00Z', direction: 'directed' },
 ]
 
 export function WorkbenchShell() {

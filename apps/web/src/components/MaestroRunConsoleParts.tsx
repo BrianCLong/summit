@@ -171,7 +171,7 @@ export const RunSummary: React.FC<RunPartProps> = React.memo(({ selectedRun }) =
                 By model
               </p>
               <div className="space-y-1">
-                {Object.entries(selectedRun.costSummary.byModel).map(
+                {(Object.entries(selectedRun.costSummary.byModel) as Array<[string, any]>).map(
                   ([model, stats]) => (
                     <div
                       key={model}
