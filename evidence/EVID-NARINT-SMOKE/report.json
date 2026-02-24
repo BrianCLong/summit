@@ -3,7 +3,6 @@
     "doc_id": "1",
     "tenant_id": "t1",
     "lang": "en",
-    "timestamp": "2023-10-27T10:00:00Z",
     "setting": {
       "time_refs": [],
       "place_refs": [],
@@ -29,7 +28,6 @@
     "doc_id": "2",
     "tenant_id": "t1",
     "lang": "en",
-    "timestamp": "2023-10-27T10:00:00Z",
     "setting": {
       "time_refs": [],
       "place_refs": [],
