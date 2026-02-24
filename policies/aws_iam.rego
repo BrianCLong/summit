@@ -4,6 +4,8 @@ import future.keywords
 package maestro.governance
 import future.keywords
 
+import rego.v1
+
 # Deny overly permissive IAM roles
 deny[msg] {
     input.asset_type == "aws_iam_role"

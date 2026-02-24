@@ -2,6 +2,8 @@
 package abac.authz
 import future.keywords
 
+import rego.v1
+
 default allow = false
 
 # Rule to check if tenant is isolated

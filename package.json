@@ -4,7 +4,6 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
@@ -116,6 +115,8 @@
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "regulatory:build": "npx tsx cli/src/cli.ts regulatory build",
+    "regulatory:diff": "npx tsx cli/src/cli.ts regulatory diff",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
@@ -136,6 +137,7 @@
   ],
   "author": "IntelGraph Team",
   "license": "MIT",
+  "packageManager": "pnpm@9.12.0",
   "engines": {
     "node": ">=18.18",
     "npm": ">=8.0.0"
@@ -191,7 +193,7 @@
     "typescript-eslint": "^8.50.1",
     "uuid": "^13.0.0",
     "vitest": "^4.0.16",
-    "zod": "^4.2.1"
+    "zod": "3.25.76"
   },
   "lint-staged": {
     "server/**/*.{ts,js}": [
@@ -276,6 +278,7 @@
       ]
     },
     "overrides": {
+      "@orval/core": ">=7.21.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
       "ws": ">=8.17.1",

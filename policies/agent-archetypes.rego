@@ -1,5 +1,3 @@
-import future.keywords
-
 # Agent Archetypes Policy
 #
 # Defines authorization rules for Summit's AI agent archetypes:
@@ -11,7 +9,10 @@ import future.keywords
 
 package agents.archetypes
 
-import future.keywords
+import rego.v1
+
+import future.keywords.if
+import future.keywords.in
 
 # Default deny
 default allow = false

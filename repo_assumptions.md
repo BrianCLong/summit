@@ -1,27 +1,27 @@
-# Repo Assumptions & Verification
+# Repo Assumptions & Reality Check
 
-## 1. Agent Runtime / Tool Invocation
-**Assumption:** Summit has an agent runtime we can instrument.
-**Verification:** Found `src/agents/index.ts` which contains `AgentOrchestrator`. It has phases (planning, implementation, testing, review) and logs a summary.
-**Plan:** Instrument `AgentOrchestrator` or wrap `runAgentPipeline` to capture metrics.
+## Verified
+- **Repo exists**: `BrianCLong/summit` (MIT licensed).
+- **Target Package**: `agents/orchestrator` (`@intelgraph/multi-llm-orchestrator`) is the real orchestrator.
+  - Confirmed via `grep` for "OpenAI" and "Anthropic" providers.
+  - Contains `src/providers/` with `OpenAIProvider.ts` and `ClaudeProvider.ts`.
+- **Test Runner**: `vitest` (v1.6.1).
+  - Configured in `agents/orchestrator/package.json`.
+  - Tests located in `agents/orchestrator/__tests__/`.
+- **Module System**: ESM (`type: "module"` in `package.json`).
 
-## 2. CI Environment
-**Assumption:** GitHub Actions CI exists.
-**Verification:** Found `.github/workflows/`.
-**Plan:** Create new workflow `ai_productivity_evidence.yml`.
+## Assumed
+- **Feature Flags**: Likely environment variable based or a simple config object. No dedicated `launchdarkly` or similar service observed yet.
+- **Budget**: Enforced via caller-supplied `budget` parameter in the new DAAO router (as per plan).
+- **Telemetry**: Logging via `console` or custom logger (observed `Omniscience` logging in `agentic`, but `agents/orchestrator` uses standard logging or potentially `pino` based on dependencies). `agents/orchestrator` has no explicit logger import in the snippets seen, but likely uses `console` or injected logger.
 
-## 3. Telemetry
-**Assumption:** Existing telemetry conventions (OpenTelemetry? JSON logs?).
-**Verification:** `src/telemetry/CostCarbonTelemetry.ts` exists but seems specific. `AgentOrchestrator` uses `console.log`.
-**Plan:** Implement a dedicated JSON artifact writer for productivity metrics, independent of existing logs to ensure determinism.
+## Target Directory Structure for DAAO
+All DAAO components will be placed in `agents/orchestrator/src/daao/`:
+- `agents/orchestrator/src/daao/difficulty/`
+- `agents/orchestrator/src/daao/routing/`
+- `agents/orchestrator/src/daao/collaboration/`
 
-## 4. Test Runner
-**Assumption:** Jest is used.
-**Verification:** `AGENTS.md` confirms `pnpm test:unit` uses Jest.
-**Plan:** Use Jest for testing new components.
-
-## 5. Artifact Storage
-**Assumption:** CI can upload artifacts.
-**Verification:** Standard GitHub Actions capability.
-**Plan:** Use `actions/upload-artifact` in the new workflow.
-
+## Test Placement
+- `agents/orchestrator/__tests__/daao/difficulty/*.test.ts`
+- `agents/orchestrator/__tests__/daao/routing/*.test.ts`
+- `agents/orchestrator/__tests__/daao/collaboration/*.test.ts`

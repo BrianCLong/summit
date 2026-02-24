@@ -1,6 +1,12 @@
+# IntelGraph Budget Policy: OPA Rego rules for tenant caps + four-eyes approval
+# Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
+
 package intelgraph.budget
 
-import future.keywords
+import rego.v1
+
+import future.keywords.if
+import future.keywords.in
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false
@@ -105,18 +111,9 @@ monthly_room[tenant] := room if {
     some tenant
     budget := data.tenant_budgets[tenant]
     spent := monthly_spending[tenant]
-    calc_room := budget.monthly_usd_limit - spent
-    calc_room >= 0
-    room := calc_room
-}
-
-monthly_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    spent := monthly_spending[tenant]
-    calc_room := budget.monthly_usd_limit - spent
-    calc_room < 0
-}
+    room := budget.monthly_usd_limit - spent
+    room >= 0
+} else := 0
 
 # Emergency monthly room (120% of normal limit)
 emergency_monthly_room[tenant] := room if {
@@ -124,49 +121,19 @@ emergency_monthly_room[tenant] := room if {
     budget := data.tenant_budgets[tenant]
     spent := monthly_spending[tenant]
     emergency_limit := budget.monthly_usd_limit * 1.2
-    calc_room := emergency_limit - spent
-    calc_room >= 0
-    room := calc_room
-}
-
-emergency_monthly_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    spent := monthly_spending[tenant]
-    emergency_limit := budget.monthly_usd_limit * 1.2
-    calc_room := emergency_limit - spent
-    calc_room < 0
-}
+    room := emergency_limit - spent
+    room >= 0
+} else := 0
 
 # Budget calculations - daily room remaining
-# Case 1: Daily limit exists and room >= 0
 daily_room[tenant] := room if {
     some tenant
     budget := data.tenant_budgets[tenant]
     budget.daily_usd_limit # Ensure daily limit is set
     spent := daily_spending[tenant]
-    calc_room := budget.daily_usd_limit - spent
-    calc_room >= 0
-    room := calc_room
-}
-
-# Case 2: Daily limit exists but room < 0
-daily_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    budget.daily_usd_limit
-    spent := daily_spending[tenant]
-    calc_room := budget.daily_usd_limit - spent
-    calc_room < 0
-}
-
-# Case 3: No daily limit, fallback to monthly/30
-daily_room[tenant] := fallback if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    not budget.daily_usd_limit
-    fallback := monthly_room[tenant] / 30
-}
+    room := budget.daily_usd_limit - spent
+    room >= 0
+} else := monthly_room[tenant] / 30 # Fallback to 1/30th of monthly
 
 # Emergency daily room (150% of normal daily limit)
 emergency_daily_room[tenant] := room if {
@@ -175,28 +142,9 @@ emergency_daily_room[tenant] := room if {
     budget.daily_usd_limit
     spent := daily_spending[tenant]
     emergency_limit := budget.daily_usd_limit * 1.5
-    calc_room := emergency_limit - spent
-    calc_room >= 0
-    room := calc_room
-}
-
-emergency_daily_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    budget.daily_usd_limit
-    spent := daily_spending[tenant]
-    emergency_limit := budget.daily_usd_limit * 1.5
-    calc_room := emergency_limit - spent
-    calc_room < 0
-}
-
-emergency_daily_room[tenant] := fallback if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    not budget.daily_usd_limit
-    fallback := emergency_monthly_room[tenant] / 30
-}
-
+    room := emergency_limit - spent
+    room >= 0
+} else := emergency_monthly_room[tenant] / 30
 
 # Current month spending calculation
 monthly_spending[tenant] := total if {
@@ -209,17 +157,7 @@ monthly_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in monthly_entries])
-}
-
-# Default 0 if no spending data or other issue (not ideal but mimics original else behavior for ledger)
-# Wait, original had else := 0. If data.spending_ledger[tenant] is missing, the above rule fails.
-# We need to handle missing ledger too.
-monthly_spending[tenant] := 0 if {
-    some tenant
-    not data.spending_ledger[tenant]
-}
-# Also if ledger exists but entries are empty? sum([]) is 0. So that's fine.
-
+} else := 0
 
 # Current day spending calculation  
 daily_spending[tenant] := total if {
@@ -232,28 +170,14 @@ daily_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in daily_entries])
-}
-
-daily_spending[tenant] := 0 if {
-    some tenant
-    not data.spending_ledger[tenant]
-}
-
+} else := 0
 
 # Risk assessment for operations
 operation_risk_level := "high" if {
     input.est_usd > 10.0
-}
-
-operation_risk_level := "medium" if {
-    input.est_usd <= 10.0
+} else := "medium" if {
     input.est_usd > 1.0
-}
-
-operation_risk_level := "low" if {
-    input.est_usd <= 1.0
-}
-
+} else := "low"
 
 # Violation reasons for debugging
 violation_reasons contains reason if {

@@ -5,6 +5,8 @@ import future.keywords
 
 package intelgraph.approval
 
+import rego.v1
+
 import future.keywords.if
 import future.keywords.if
 import future.keywords.in

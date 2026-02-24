@@ -1,6 +1,8 @@
 package composer.cmk
 import future.keywords
 
+import rego.v1
+
 # Require CMK for artifacts in protected namespaces
 
 needs_cmk {

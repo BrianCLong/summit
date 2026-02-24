@@ -4,6 +4,8 @@ import future.keywords
 package policies
 import future.keywords
 
+import rego.v1
+
 default allow = false
 
 # Allow if the principal's tenant_id matches the resource's tenant_id

@@ -2,6 +2,8 @@ import future.keywords
 
 package intelgraph.export
 
+import rego.v1
+
 import future.keywords.every
 
 test_simulate_allows_without_step_up {
