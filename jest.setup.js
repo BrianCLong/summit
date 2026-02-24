@@ -12,6 +12,14 @@ if (!global.__TEST_SEED_LOGGED__) {
   global.__TEST_SEED_LOGGED__ = true;
 }
 
+// Minimal Vitest compatibility for shared test helpers.
+if (!global.vi) {
+  global.vi = {
+    fn: jest.fn,
+    spyOn: jest.spyOn,
+  };
+}
+
 // Import jest-dom for extended matchers (toBeInTheDocument, toHaveTextContent, etc.)
 require('@testing-library/jest-dom');
 

@@ -1,13 +1,12 @@
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
       {
-        useESM: true,
-        tsconfig: 'tsconfig.test.json',
+        useESM: false,
+        tsconfig: 'tsconfig.jest.json',
       },
     ],
   },
@@ -18,6 +17,8 @@ module.exports = {
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
     '<rootDir>/packages/cli/',
+    '<rootDir>/packages/work-graph/packages/',
+    '<rootDir>/server/packages_tmp/',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
