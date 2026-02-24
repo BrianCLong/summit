@@ -1,50 +1,92 @@
-version: "3.9"
+version: '3.8'
+
 services:
-  gateway:
-    build:
-      context: .
-      dockerfile: apps/gateway/Dockerfile
-    ports: [ "8080:8080" ]
+  # ==========================================
+  # Core Infrastructure
+  # ==========================================
+
+  postgres:
+    image: postgres:15-alpine
     environment:
-      FEATURE_LAC_ENFORCE: "true"
-      COPILOT_NLQ: "true"
-      UI_TRIPANE: "true"
-      POLICY_COMPILER_URL: "http://policy-compiler:8080"
-    depends_on: [ policy-compiler ]
-
-  ui:
-    build: ./apps/ui
-    ports: [ "3000:80" ]
-
-  prov-ledger:
-    build: ./services/prov-ledger
-    ports: [ "8101:8080" ]
-
-  policy-compiler:
-    build: ./services/policy-compiler
-    ports: [ "8102:8080" ]
-
-  ai-nlq:
-    build: ./services/ai-nlq
-    ports: [ "8103:8080" ]
-
-  er-service:
-    build: ./services/er-service
-    ports: [ "8104:8080" ]
-
-  ingest:
-    build: ./services/ingest
-    ports: [ "8105:8080" ]
-
-  zk-tx:
-    build: ./services/zk-tx
-    ports: [ "8106:8080" ]
-
-  predictd:
-    build:
-      context: .
-      dockerfile: services/predictd/Dockerfile
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: summit_db
     ports:
-      - "4001:4001"
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U summit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ==========================================
+  # Summit Services
+  # ==========================================
+
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+      target: builder
+    command: ["pnpm", "dev:server"]
+    ports:
+      - "3000:3000"
     environment:
-      - PREDICTD_PORT=4001
+      - DATABASE_URL=postgresql://summit:password@postgres:5432/summit_db
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=development
+    volumes:
+      - ./server:/app/server
+      - ./packages:/app/packages
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ==========================================
+  # Observability
+  # ==========================================
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.50
+    ports:
+      - "16686:16686" # Web UI
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    ports:
+      - "9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./infra/observability/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:

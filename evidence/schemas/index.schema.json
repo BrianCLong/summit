@@ -1,22 +1,30 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["version", "items"],
-  "properties": {
-    "version": { "type": "number" },
-    "items": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "path"],
-        "properties": {
-          "id": { "type": "string" },
-          "path": { "type": "string" }
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summit Evidence Pack V1 - Index",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["evidence_id", "area", "description", "files"],
+    "properties": {
+      "evidence_id": {
+        "type": "string",
+        "description": "Unique identifier for the evidence artifact."
+      },
+      "area": {
+        "type": "string",
+        "description": "Functional area or domain the evidence belongs to."
+      },
+      "description": {
+        "type": "string",
+        "description": "Human-readable description of what this evidence proves."
+      },
+      "files": {
+        "type": "array",
+        "items": {
+          "type": "string"
         },
-        "additionalProperties": false
+        "description": "List of relative file paths included in this evidence bundle."
       }
     }
-  },
-  "required": ["items"],
-  "additionalProperties": false
+  }
 }

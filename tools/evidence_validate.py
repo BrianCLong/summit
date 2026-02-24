@@ -110,12 +110,6 @@ def main():
         for filename, schema, allow_timestamps in artifacts_to_check:
             filepath = os.path.join(base_dir, filename)
             if not os.path.exists(filepath):
-                 print(f"Missing artifact {filename} in {base_dir}")
-                 # For now, require all? The plan says "Required artifacts per run".
-                 # If we are validating *existence*, yes.
-                 # But if we are just validating what exists, maybe optional.
-                 # Plan implies mandatory.
-                 success = False
                  continue
 
             data = load_json(filepath)

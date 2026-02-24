@@ -33,7 +33,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -75,7 +75,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.45.0 # Updated to support modern Rego syntax (e.g. 'in')
+          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
 
       - name: OPA policy check
         run: |
@@ -110,7 +110,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -146,11 +146,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: "20"
 
       - name: Run MCP UX Linter
         run: |
@@ -169,7 +168,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -251,7 +250,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -283,7 +282,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -312,11 +311,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: "20"
       - name: Ensure evidence bundle exists
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"

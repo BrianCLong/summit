@@ -1,6 +1,8 @@
 package summit.governance.mvp4
 import future.keywords.if
 
+import future.keywords
+
 # Goal: Ensure EVERY mutation has an explicit governance verdict.
 
 default allow = false

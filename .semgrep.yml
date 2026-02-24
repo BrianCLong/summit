@@ -19,14 +19,24 @@ rules:
     languages: [javascript, typescript, python, go]
     severity: ERROR
 
-  - id: dangerous-sql-execution
+  - id: dangerous-sql-execution-py
     patterns:
       - pattern-either:
           - pattern: $DB.execute("..." + $USER_INPUT)
           - pattern: $DB.query(f"...{$USER_INPUT}...")
     message: >-
       Potential SQL injection detected via string concatenation. Use parameterized queries instead.
-    languages: [python, javascript, typescript]
+    languages: [python]
+    severity: WARNING
+
+  - id: dangerous-sql-execution-js
+    patterns:
+      - pattern-either:
+          - pattern: $DB.execute("..." + $USER_INPUT)
+          - pattern: $DB.query(`...${$USER_INPUT}...`)
+    message: >-
+      Potential SQL injection detected via string concatenation. Use parameterized queries instead.
+    languages: [javascript, typescript]
     severity: WARNING
 
   - id: no-console-log-in-production

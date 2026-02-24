@@ -1,10 +1,4 @@
 package composer.residency
-import future.keywords.in
-
-import rego.v1
-
-import future.keywords
-
 
 import future.keywords
 
@@ -17,7 +11,7 @@ import future.keywords
 
 default allow := true
 
-violation contains msg if {
+violation[msg] {
   not input.artifact.region in input.tenant.allowed_regions
   msg := {
     "code": "RESIDENCY_VIOLATION",
@@ -27,21 +21,18 @@ violation contains msg if {
   }
 }
 
-allow if {
+allow {
   count(violation) == 0
 }
 
 # Top-level decision with shadow support
-package composer.decision
+package composer.decision_residency_policy
 
 import data.composer.residency as r
 
-decision := {
+decision = {
   "policy": "residency",
-  "mode": mode,
-  "allow": allow_val,
+  "mode": input.mode,
+  "allow": r.allow,
   "violations": r.violation,
-} if {
-  mode := input.mode
-  allow_val := r.allow
-}
+} { true }

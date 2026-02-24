@@ -2,9 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Summit Evidence Stamp",
   "type": "object",
-  "required": ["evidence_id", "created_at"],
+  "required": ["evidence_id"],
   "properties": {
-    "evidence_id": {"type": "string"},
-    "created_at": {"type": "string"}
-  }
+    "evidence_id": {"type": "string", "pattern": "^EVD-[a-zA-Z0-9-]+$"},
+    "created_at": {"type": "string"},
+    "generated_at": {"type": "string"}
+  },
+  "anyOf": [
+    { "required": ["created_at"] },
+    { "required": ["generated_at"] }
+  ]
 }

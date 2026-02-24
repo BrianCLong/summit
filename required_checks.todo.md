@@ -24,3 +24,10 @@ Until discovered, we use temporary verifier names:
 Once real check names are known:
 1. Update CI config to emit the official check names.
 2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
+
+## MGI Gates (Temporary)
+- `ci:mgi:default-off` (Default OFF gate)
+- `ci:mgi:caps` (Cap gate)
+- `ci:mgi:fallback` (Fallback gate)
+- `ci:mgi:privacy` (Privacy gate)
+- `ci:mgi:provenance` (Provenance gate)

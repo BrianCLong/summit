@@ -9,6 +9,8 @@ import future.keywords
 
 import future.keywords
 
+import future.keywords
+
 default allow = false
 
 # Rule to check if tenant is isolated
