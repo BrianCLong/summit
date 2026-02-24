@@ -189,3 +189,18 @@ groups:
           summary: 'Summit API High Memory Usage'
           description: 'Memory usage is {{ $value }}MB, exceeding 1.5GB.'
           runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'
+
+  # Frontend Performance
+  - name: summit.frontend
+    rules:
+      - alert: PoorFrontendLCP
+        expr: histogram_quantile(0.75, sum(rate(web_vital_duration_seconds_bucket{metric="LCP"}[5m])) by (le)) > 2.5
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-web
+          component: frontend
+        annotations:
+          summary: 'Poor Frontend LCP Performance'
+          description: '75th percentile of Largest Contentful Paint (LCP) is {{ $value }}s, exceeding 2.5s.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/frontend-performance'
