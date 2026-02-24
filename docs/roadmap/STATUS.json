@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T12:30:00Z",
-  "revision_note": "Published governed agent integration reference architecture and recorded it in the roadmap.",
+  "last_updated": "2026-02-14T00:00:00Z",
+  "revision_note": "Added OpenClaw competitive one-page positioning sheet for governed differentiation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -268,10 +268,10 @@
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     },
     {
-      "id": "governed-agent-integration-reference",
+      "id": "competitive-openclaw-onepager",
       "status": "completed",
       "owner": "codex",
-      "notes": "Published governed agent integration reference architecture with endpoints, events, policy hooks, and audit receipts."
+      "notes": "Published Summit vs OpenClaw one-page advantage sheet for governed differentiation."
     }
   ],
   "summary": {
