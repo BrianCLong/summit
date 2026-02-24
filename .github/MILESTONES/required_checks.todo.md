@@ -1,20 +1,25 @@
 # Required Checks Discovery (Temporary)
 
-**Status:** Deferred pending GitHub UI confirmation.
+Status: Intentionally constrained pending repository-required-checks inspection.
 
 ## Goal
-Capture the exact required status check names enforced by branch protection rules and map them to CI workflows.
+Map temporary gate names to the repository's required checks and update workflow/job names
+accordingly.
 
-## Discovery Steps
-1. Open the repository settings → **Branches**.
-2. Locate the branch protection rule for `main`.
-3. Copy the exact required status check names shown.
-4. Record the names below, including any workflow/job prefixes.
+## Steps
+1. GitHub UI
+   - Navigate to Settings → Branches → Branch protection rules.
+   - Record the exact names of required status checks for the default branch.
+2. GitHub API (optional, scripted)
+   - Use `gh api repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`.
+   - Capture the `contexts` list for required check names.
+3. Compare required checks against temporary gates:
+   - gate/evidence-schema
+   - gate/agent-policy
+   - gate/concierge-safety
+4. Rename workflow jobs (or add aliases) so required check names match.
+5. Update this file with the final mapping and delete the temporary gate list.
 
-## Temporary Placeholder Names (to be replaced)
-- ci-agentic-hive / policy
-- ci-agentic-hive / evidence
-- ci-agentic-hive / e2e-scenarios
-
-## Rename Plan
-Once the exact names are confirmed, update this file and align any workflow/job names to the required checks list.
+## Output
+- Evidence of required check names (screenshot or API payload).
+- Updated workflow/job names if mismatched.

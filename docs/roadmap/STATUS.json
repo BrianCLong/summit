@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Validated repo assumptions for CogWar MWS alignment; recorded evidence and CI workflow verification.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Scaffolded concierge evidence schemas, validation script, and required checks discovery artifact.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -50,6 +50,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Predictive orchestration selector, hybrid context manager, and agentic RAG scaffolding with tests and integration guidance."
+    },
+    {
+      "id": "decagon-concierge-evidence-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence schemas, deterministic bundle writer, and schema validation gate scaffolding for concierge agents."
     },
     {
       "id": "B",

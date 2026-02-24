@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "evidence.stamp.schema.json",
+  "title": "EvidenceStamp",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidenceId", "runId", "createdAtIso"],
+  "properties": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVD-[A-Z0-9-]+$"
+    },
+    "runId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAtIso": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
