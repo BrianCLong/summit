@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added DeR2 sandbox benchmark initiative for regime-based evaluation.",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added inference bundle MWS scaffolding for deterministic artifact packaging.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -249,10 +249,10 @@
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     },
     {
-      "id": "der2-sandbox-benchmark",
+      "id": "inference-bundle-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "DeR2-style sandbox benchmark with regime compilation, deterministic artifacts, and security guardrails."
+      "notes": "Deterministic inference bundle CLI, fixtures, and manifest schema for MWS."
     }
   ],
   "summary": {

@@ -1,0 +1,5 @@
+{
+  "name": "tiny-fixture",
+  "description": "Synthetic bundle fixture for deterministic inference packaging.",
+  "version": "1.0.0"
+}
