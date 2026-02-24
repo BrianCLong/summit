@@ -1,31 +1,27 @@
-# Repo Assumptions - UniReason 1.0 Integration
+# repo_assumptions.md
 
-## Verified (from repo map)
-*   **Language/Tooling:** TypeScript, Node 18+, pnpm.
-*   **CI:** GitHub Actions.
-*   **Key Paths:**
-    *   `src/api/graphql`
-    *   `src/api/rest`
-    *   `src/agents`
-    *   `src/connectors`
-    *   `src/graphrag`
-    *   `tests/`
-    *   `docs/{architecture,api,security}`
-    *   `.github/workflows/*`
+## Verified
+- Language/runtime: Python (`summit/`) and Node.js (`server/`)
+- Agent runtime location: `summit/agents/`
+- Policy engine location: `summit/policy/` (specifically `engine.py`)
+- CI: GitHub Actions in `.github/workflows/` (e.g., `summit-ci.yml`, `pr-gates.yml`)
+- Evidence artifacts: `evidence/` directory with `metrics.json`, `report.json` conventions.
+- Existing MCP root: `mcp/` exists (contains `allowlist.yaml`, `README.md`) but is outside `summit/` package.
+- Package structure: `summit/` is the root package.
 
-## Assumed (to be validated)
-*   **Pipeline Runner:** Existence of a central pipeline runner or agent orchestrator under `src/agents/*`.
-*   **Evidence Schema:** Existing "evidence" artifact schema and CI enforcement steps.
-*   **Logging:** Preferred logging framework and redaction utilities.
+## Assumptions to validate
+- `summit/mcp/` does not exist; we will create it to house the new MCP integration code.
+- `summit/security/` exists; we will add strict policy enforcement logic there or extend `summit/policy/`.
 
-## Must-Not-Touch
-*   `.github/workflows/ci-*.yml` (critical for governance)
-*   `.github/policies/*`
-*   `.github/MILESTONES/*`
-*   Production docker-compose files (`docker-compose.yml`, `docker-compose.prod.yml`)
+## Must-not-touch
+- Existing `summit/policy/engine.py` (unless extending via subclass/wrapper to avoid refactor).
+- Existing `mcp/` root directory (preserve as legacy/reference).
+- CI workflow required checks (unless adding new ones).
 
-## Validation Checklist
-1.  [ ] Confirm `pnpm` scripts: `pnpm test`, `pnpm test:e2e`, `pnpm test:coverage`.
-2.  [ ] Locate agent orchestration entrypoints under `src/agents/`.
-3.  [ ] Confirm preferred logger + redaction utilities.
-4.  [ ] Identify CI check names that gate merges.
+## Plan Alignment
+- PR1: Create `summit/mcp/transport/` (HTTP/SSE, gRPC stubs).
+- PR2: Create `summit/mcp/catalog/` (Tool sync).
+- PR3: Create `summit/security/policy/` or extend `summit/policy/` for deny-by-default.
+- PR4: Add to `summit/context/` (Packer).
+- PR5: Add to `summit/models/` (Adapters).
+- PR6: Add to `scripts/monitoring/` (Drift detection).
