@@ -1,0 +1,95 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-02-05",
+  "policies": [
+    {
+      "id": "GA-GATE",
+      "title": "GA Release Readiness Gate",
+      "control_map": ["SOC2:CC2.3", "ISO27001:A.12.6.1"],
+      "workflows": [
+        {
+          "path": ".github/workflows/release-readiness.yml",
+          "job": "release-readiness",
+          "check_name": "release-readiness:gate",
+          "evidence_id": "evidence.ga.release_readiness.v1",
+          "artifact": "artifacts/governance/ga_release_readiness.json"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "CI-CORE",
+      "title": "CI Core (build, lint, unit tests)",
+      "control_map": ["SSDF:PS.3.2", "SOC2:CC7.2"],
+      "workflows": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "job": "unit-tests",
+          "check_name": "ci:test",
+          "evidence_id": "evidence.ci.tests.v1",
+          "artifact": "artifacts/ci/test_report.json"
+        },
+        {
+          "path": ".github/workflows/ci.yml",
+          "job": "lint",
+          "check_name": "ci:lint",
+          "evidence_id": "evidence.ci.lint.v1",
+          "artifact": "artifacts/ci/lint_report.json"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "SEC-SCA",
+      "title": "Software Composition Analysis",
+      "control_map": ["SSDF:PW.8.2", "SOC2:CC7.1"],
+      "workflows": [
+        {
+          "path": ".github/workflows/ci-security.yml",
+          "job": "dependency-scan",
+          "check_name": "security:sca",
+          "evidence_id": "evidence.security.sca.v1",
+          "artifact": "artifacts/security/sca_findings.json"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "SBOM-PROV",
+      "title": "SBOM & Build Provenance",
+      "control_map": ["SLSA:Provenance", "SSDF:PW.4.2"],
+      "workflows": [
+        {
+          "path": ".github/workflows/supply-chain-attest.yml",
+          "job": "attest",
+          "check_name": "supplychain:provenance",
+          "evidence_id": "evidence.supplychain.provenance.v1",
+          "artifact": "artifacts/provenance/attestation.json"
+        },
+        {
+          "path": ".github/workflows/supply-chain-attest.yml",
+          "job": "attest",
+          "check_name": "supplychain:sbom",
+          "evidence_id": "evidence.supplychain.sbom.v1",
+          "artifact": "artifacts/provenance/sbom.spdx.json"
+        }
+      ],
+      "required": true
+    },
+    {
+      "id": "BRANCH-PROTECT",
+      "title": "Branch Protection Drift",
+      "control_map": ["SSDF:RV.1.3", "SOC2:CC6.1"],
+      "workflows": [
+        {
+          "path": ".github/workflows/branch-protection-drift.yml",
+          "job": "check-drift",
+          "check_name": "governance:branch-protection",
+          "evidence_id": "evidence.governance.branch_protection.v1",
+          "artifact": "artifacts/governance/branch_protection.json"
+        }
+      ],
+      "required": true
+    }
+  ]
+}
