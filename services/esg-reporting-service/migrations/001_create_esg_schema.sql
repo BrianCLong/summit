@@ -273,47 +273,47 @@ CREATE TABLE IF NOT EXISTS esg.audit_trail (
 -- ============================================================================
 
 -- Reports indexes
-CREATE INDEX idx_esg_reports_tenant_id ON esg.reports(tenant_id);
-CREATE INDEX idx_esg_reports_status ON esg.reports(status);
-CREATE INDEX idx_esg_reports_type ON esg.reports(report_type);
-CREATE INDEX idx_esg_reports_period ON esg.reports(period_start, period_end);
-CREATE INDEX idx_esg_reports_created_at ON esg.reports(created_at DESC);
-CREATE INDEX idx_esg_reports_tenant_status ON esg.reports(tenant_id, status);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_reports_tenant_id ON esg.reports(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_reports_status ON esg.reports(status);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_reports_type ON esg.reports(report_type);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_reports_period ON esg.reports(period_start, period_end);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_reports_created_at ON esg.reports(created_at DESC);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_reports_tenant_status ON esg.reports(tenant_id, status);
 
 -- Metrics indexes
-CREATE INDEX idx_esg_metrics_tenant_id ON esg.metrics(tenant_id);
-CREATE INDEX idx_esg_metrics_report_id ON esg.metrics(report_id);
-CREATE INDEX idx_esg_metrics_category ON esg.metrics(category);
-CREATE INDEX idx_esg_metrics_name ON esg.metrics(metric_name);
-CREATE INDEX idx_esg_metrics_period ON esg.metrics(period_start, period_end);
-CREATE INDEX idx_esg_metrics_tenant_category ON esg.metrics(tenant_id, category);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_metrics_tenant_id ON esg.metrics(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_metrics_report_id ON esg.metrics(report_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_metrics_category ON esg.metrics(category);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_metrics_name ON esg.metrics(metric_name);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_metrics_period ON esg.metrics(period_start, period_end);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_metrics_tenant_category ON esg.metrics(tenant_id, category);
 
 -- Compliance mappings indexes
-CREATE INDEX idx_esg_compliance_tenant_id ON esg.compliance_mappings(tenant_id);
-CREATE INDEX idx_esg_compliance_report_id ON esg.compliance_mappings(report_id);
-CREATE INDEX idx_esg_compliance_framework ON esg.compliance_mappings(framework_id);
-CREATE INDEX idx_esg_compliance_status ON esg.compliance_mappings(status);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_compliance_tenant_id ON esg.compliance_mappings(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_compliance_report_id ON esg.compliance_mappings(report_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_compliance_framework ON esg.compliance_mappings(framework_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_compliance_status ON esg.compliance_mappings(status);
 
 -- Schedules indexes
-CREATE INDEX idx_esg_schedules_tenant_id ON esg.report_schedules(tenant_id);
-CREATE INDEX idx_esg_schedules_next_run ON esg.report_schedules(next_run_at) WHERE enabled = true;
-CREATE INDEX idx_esg_schedules_enabled ON esg.report_schedules(enabled);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_schedules_tenant_id ON esg.report_schedules(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_schedules_next_run ON esg.report_schedules(next_run_at) WHERE enabled = true;
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_schedules_enabled ON esg.report_schedules(enabled);
 
 -- Templates indexes
-CREATE INDEX idx_esg_templates_tenant_id ON esg.report_templates(tenant_id);
-CREATE INDEX idx_esg_templates_active ON esg.report_templates(is_active);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_templates_tenant_id ON esg.report_templates(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_templates_active ON esg.report_templates(is_active);
 
 -- External ratings indexes
-CREATE INDEX idx_esg_ratings_tenant_id ON esg.external_ratings(tenant_id);
-CREATE INDEX idx_esg_ratings_report_id ON esg.external_ratings(report_id);
-CREATE INDEX idx_esg_ratings_provider ON esg.external_ratings(provider);
-CREATE INDEX idx_esg_ratings_date ON esg.external_ratings(rating_date DESC);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_ratings_tenant_id ON esg.external_ratings(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_ratings_report_id ON esg.external_ratings(report_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_ratings_provider ON esg.external_ratings(provider);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_ratings_date ON esg.external_ratings(rating_date DESC);
 
 -- Audit trail indexes
-CREATE INDEX idx_esg_audit_tenant_id ON esg.audit_trail(tenant_id);
-CREATE INDEX idx_esg_audit_entity ON esg.audit_trail(entity_type, entity_id);
-CREATE INDEX idx_esg_audit_created_at ON esg.audit_trail(created_at DESC);
-CREATE INDEX idx_esg_audit_actor ON esg.audit_trail(actor);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_audit_tenant_id ON esg.audit_trail(tenant_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_audit_entity ON esg.audit_trail(entity_type, entity_id);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_audit_created_at ON esg.audit_trail(created_at DESC);
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_esg_audit_actor ON esg.audit_trail(actor);
 
 -- ============================================================================
 -- Triggers for Updated Timestamps

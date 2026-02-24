@@ -31,7 +31,9 @@ rules:
 
   - id: dangerous-sql-execution-js
     patterns:
-      - pattern: $DB.query("..." + $USER_INPUT)
+      - pattern-either:
+          - pattern: $DB.execute("..." + $USER_INPUT)
+          - pattern: $DB.query(`...${$USER_INPUT}...`)
     message: >-
       Potential SQL injection detected via string concatenation. Use parameterized queries instead.
     languages: [javascript, typescript]

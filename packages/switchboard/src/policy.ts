@@ -1,33 +1,15 @@
-import { Request } from './types.js';
-
-export interface PolicyDecision {
-  allowed: boolean;
-  decisionId: string;
-  reasons: string[];
-  obligations: string[];
-}
+import { ToolCallRequest, PolicyDecision } from './types.js';
 
 export interface PolicyClient {
-  check(request: Request): Promise<PolicyDecision>;
+  evaluate(request: ToolCallRequest): Promise<PolicyDecision>;
 }
 
 export class DenyAllPolicyClient implements PolicyClient {
-  async check(request: Request): Promise<PolicyDecision> {
+  async evaluate(request: ToolCallRequest): Promise<PolicyDecision> {
     return {
       allowed: false,
-      decisionId: 'deny-all-default',
-      reasons: ['Deny by default policy active'],
-      obligations: []
-    };
-  }
-}
-
-export class AllowAllPolicyClient implements PolicyClient {
-  async check(request: Request): Promise<PolicyDecision> {
-    return {
-      allowed: true,
-      decisionId: 'allow-all-debug',
-      reasons: ['Debug allow all'],
+      decisionId: 'deny-all',
+      reasons: ['Deny by default policy in effect'],
       obligations: []
     };
   }

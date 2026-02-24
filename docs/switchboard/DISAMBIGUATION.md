@@ -1,19 +1,29 @@
-# Summit Switchboard Disambiguation
+# Switchboard Disambiguation
 
-As the Summit ecosystem grows, several components share similar names. This document clarifies the terminology.
+This document clarifies the naming and scope of various "Switchboard" components within the Summit ecosystem.
 
-| Term | Scope | Responsibility | Key Characteristics |
-|------|-------|----------------|---------------------|
-| **Summit Switchboard** | **Control Plane** | Discovery, Capability Selection, Policy Enforcement, Credential Brokering, Health, Lifecycle, Receipts. | **Deny-by-default**, Replayable Receipts, Deterministic Trace IDs. The "Brain" of routing. |
-| **Agent Switchboard** | **Data Plane** | Message Transport, Durable Agent Comms, Redis Streams Bus. | High-throughput, low-latency message passing. The "Nervous System". |
-| **Summit MCP Server** | **Orchestration/Proxy** | Exposes Summit capabilities to MCP clients (Claude, IDEs). | Acts as a gateway/proxy. Often confusingly called "Switchboard" in early docs. |
+## Summit Switchboard (Control Plane)
 
-### Ecosystem Name Collisions
+The **Summit Switchboard** is the centralized control plane responsible for:
+- **Capability Registry**: Managing the catalog of available tools and services.
+- **Policy Enforcement**: Deny-by-default preflight checks for all tool calls.
+- **Credential Brokerage**: Just-in-time binding of credentials to authorized requests.
+- **Action Receipts**: Emitting immutable, deterministic receipts for audit and traceability.
+- **Routing**: Determining the optimal provider for a requested capability.
 
-*   **Switchboard (Solana/Oracle)**: Unrelated blockchain oracle network.
-*   **Switchboard (Google)**: Internal tool, unrelated.
-*   **Switchboard (Microsoft)**: Various internal projects, unrelated.
+The public-facing name for this system is always **"Summit Switchboard"**.
 
-**Canonical Usage:**
-Always use **"Summit Switchboard"** for the control plane.
-Always use **"Agent Switchboard"** for the data plane (Redis/Streams).
+## Agent Switchboard (Data Plane)
+
+The **Agent Switchboard** (sometimes referred to as the "data plane") handles the execution of tool calls and the transport of data between agents and providers. It operates under the direction of the Summit Switchboard.
+
+## Other Name Collisions
+
+In the event of name collisions with legacy modules or third-party tools, the Summit Switchboard takes precedence as the primary orchestrator for capability-based routing.
+
+## Summary
+
+| Name | Role | Scope |
+|------|------|-------|
+| **Summit Switchboard** | Control Plane | Governance, Policy, Routing, Receipts |
+| **Agent Switchboard** | Data Plane | Execution, Transport, Connectivity |

@@ -1,18 +1,19 @@
-export interface Request {
+export interface Capability {
+  id: string;
+  name: string;
+  version: string;
+  description?: string;
+}
+
+export interface ToolCallRequest {
+  traceId?: string;
   tenantId: string;
   actorId: string;
-  capability: string;
-  tool: string;
-  params: Record<string, any>;
+  capabilityId: string;
+  inputs: Record<string, any>;
 }
 
-export interface CapabilityModel {
-  capability: string;
-  version: string;
-  serverId: string;
-}
-
-export interface ControlPlaneReceipt {
+export interface ActionReceipt {
   receipt_id: string;
   trace_id: string;
   tenant_id: string;
@@ -25,9 +26,31 @@ export interface ControlPlaneReceipt {
   credential_grant_id: string | null;
   inputs_hash: string;
   outputs_hash: string | null;
-  timestamp: string;
+  timestamps: {
+    created_at: string;
+    [key: string]: string;
+  };
 }
 
-export type RoutingResult =
-  | { success: true; receipt: ControlPlaneReceipt; result: any }
-  | { success: false; receipt: ControlPlaneReceipt; error: string };
+export interface PolicyDecision {
+  allowed: boolean;
+  decisionId: string;
+  reasons: string[];
+  obligations: string[];
+}
+
+export interface CredentialGrant {
+  grantId: string;
+}
+
+export enum RoutingOutcome {
+  SUCCESS = 'SUCCESS',
+  DENY = 'DENY',
+  ERROR = 'ERROR'
+}
+
+export interface RoutingResponse {
+  outcome: RoutingOutcome;
+  receipt: ActionReceipt;
+  error?: string;
+}

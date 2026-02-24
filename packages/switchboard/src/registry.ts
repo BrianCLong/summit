@@ -1,20 +1,23 @@
-import { CapabilityModel } from './types.js';
+import { Capability } from './types.js';
 
 export interface Registry {
-  findCapability(capability: string): Promise<CapabilityModel | null>;
+  getCapability(id: string): Capability | undefined;
+  listCapabilities(): Capability[];
+  registerCapability(capability: Capability): void;
 }
 
 export class InMemoryRegistry implements Registry {
-  private capabilities: Map<string, CapabilityModel> = new Map();
+  private capabilities = new Map<string, Capability>();
 
-  constructor() {}
-
-  async findCapability(capability: string): Promise<CapabilityModel | null> {
-    return this.capabilities.get(capability) || null;
+  getCapability(id: string): Capability | undefined {
+    return this.capabilities.get(id);
   }
 
-  // Helper for tests/stubs
-  register(capability: string, version: string, serverId: string) {
-    this.capabilities.set(capability, { capability, version, serverId });
+  listCapabilities(): Capability[] {
+    return Array.from(this.capabilities.values());
+  }
+
+  registerCapability(capability: Capability): void {
+    this.capabilities.set(capability.id, capability);
   }
 }
