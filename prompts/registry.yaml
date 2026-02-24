@@ -1059,30 +1059,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: sigstore-rekor-cose-cosign-bundle-2026-02-07
+  - id: osint-guardrails-pr1
     version: v1
-    path: prompts/security/sigstore-rekor-cose-cosign-bundle-2026-02-07@v1.md
-    sha256: abbb99f48a902da8d7772403d940bed914b3b383bbe378000610633293323169
-    description: Implement deterministic Sigstore fail-closed smoke harness + docs for Cosign/Rekor advisories.
+    path: prompts/governance/osint-guardrails-pr1@v1.md
+    sha256: c49c6265b215927aa7a3b78e1471e62638e62fcfbf9037d19aa25a5b74c01c74
+    description: Scaffold OSINT guardrails configs, schemas, policies, fixtures, evidence, and CI verification.
     scope:
       paths:
-        - src/agents/supplychain/sigstore_smoke/
-        - tests/sigstore/
-        - artifacts/sigstore/
-        - docs/standards/sigstore-rekor-cose-cosign-bundle-2026-02-07.md
-        - docs/security/data-handling/sigstore-rekor-cose-cosign-bundle-2026-02-07.md
-        - docs/ops/runbooks/sigstore-rekor-cose-cosign-bundle-2026-02-07.md
+        - config/osint/
+        - schemas/osint/
+        - .github/policies/osint/
+        - .github/workflows/osint-governance-verify.yml
+        - evidence/index.json
+        - evidence/EVD-OSINT-LIMITS-ENVELOPE-*/
         - docs/roadmap/STATUS.json
-        - repo_assumptions.md
-        - prompts/security/sigstore-rekor-cose-cosign-bundle-2026-02-07@v1.md
+        - agents/examples/OSINT_LIMITS_ENVELOPE_PR1.json
+        - prompts/governance/osint-guardrails-pr1@v1.md
         - prompts/registry.yaml
-        - agents/examples/SIGSTORE_SMOKE_TASK_20260207.json
       domains:
-        - security
-        - supply-chain
-        - testing
-        - documentation
         - governance
+        - policy
+        - evidence
+        - ci
     verification:
       tiers_required:
         - C

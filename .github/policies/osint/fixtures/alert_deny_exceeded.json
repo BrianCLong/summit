@@ -1,0 +1,6 @@
+{
+  "risk_envelope": "conservative",
+  "collection": {
+    "alert_count": 30
+  }
+}

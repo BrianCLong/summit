@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/osint/collection_event.schema.json",
+  "title": "OSINT Collection Event",
+  "type": "object",
+  "required": [
+    "event_id",
+    "source_id",
+    "method",
+    "risk_envelope",
+    "collected_at",
+    "retention_ttl_days",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "event_id": { "type": "string" },
+    "source_id": { "type": "string" },
+    "method": { "type": "string" },
+    "risk_envelope": { "type": "string" },
+    "collected_at": { "type": "string", "format": "date-time" },
+    "pii_fields": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "redactions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "retention_ttl_days": { "type": "integer", "minimum": 1 },
+    "provenance": {
+      "type": "object",
+      "required": ["artifact_ids", "corroboration_count", "single_source", "escalation"],
+      "additionalProperties": false,
+      "properties": {
+        "artifact_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "corroboration_count": { "type": "integer", "minimum": 0 },
+        "single_source": { "type": "boolean" },
+        "escalation": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "risk_envelope": "balanced",
+  "collection": {
+    "alert_count": 50
+  }
+}

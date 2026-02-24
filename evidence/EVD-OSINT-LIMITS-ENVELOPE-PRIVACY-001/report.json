@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-OSINT-LIMITS-ENVELOPE-PRIVACY-001",
+  "title": "OSINT privacy and retention scaffolding",
+  "summary": "Retention defaults, never-log fields, and redaction policies defined with schema scaffolding.",
+  "status": "scaffolded",
+  "artifacts": [
+    "config/osint/retention.yml",
+    "schemas/osint/redaction_report.schema.json"
+  ],
+  "generated_by": "osint-governance-verify"
+}
