@@ -1,40 +1,46 @@
 # Repo Assumptions & Validation
 
-## Verified vs Assumed Directory List
+## Scope
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+This document converts memory-layer planning assumptions into verified repository facts for deterministic implementation planning.
 
-## CI Check Names (Exact)
+## Verified Runtime Entry Points
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+- `packages/agent-runtime/src/index.ts` exists and is a concrete agent runtime package entrypoint.
+- `services/agent-runtime/src/index.ts` exists for a runtime service wrapper.
+- `runtime/` exists but currently contains schemas/reports rather than executable runtime code.
 
-## Evidence Schema Conventions (Exact)
+## Verified CI Workflow Names (Memory-Relevant)
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+The following workflows are present under `.github/workflows/` and can host memory gates:
 
-## Must-Not-Touch List (Guardrails)
+- `pr-quality-gate.yml`
+- `agent-guardrails.yml`
+- `api-determinism-check.yml`
+- `ai-governance.yml`
 
-Deferred pending validation. Baseline expectations:
+## Verified Artifact Naming Conventions
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+- `evidence.json` is already used widely by scripts under `scripts/evidence/*` and `scripts/release/*`.
+- `artifacts/` exists at repo root and is suitable for deterministic output files.
 
-## Validation Checklist
+## Validation Checklist (Now Resolved)
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+Verified:
+- [x] agent runtime path
+- [x] CI workflow names
+- [x] artifact naming conventions
+
+Assumed (intentionally constrained pending implementation PR):
+- [ ] final memory gate workflow name (`memory_regression_check` proposed)
+- [ ] final evidence schema extension for memory artifacts
+
+## Must-Not-Touch Files for MWS
+
+- Existing policy engine core under `packages/agent-runtime/src/policy/`
+- Security gate evaluators under `.github/workflows/*security*` and `scripts/evidence/*`
+- Deterministic hashing helpers outside `runtime/memory/*`
+
+## Immediate Next Step
+
+Proceed with MWS memory module under `runtime/memory/` as default-OFF and artifact-emitting, then wire opt-in injection in a follow-up PR to `packages/agent-runtime`.
