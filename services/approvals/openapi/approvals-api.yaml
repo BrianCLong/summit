@@ -28,6 +28,10 @@ tags:
     description: Approval request management
   - name: Decisions
     description: Approval decision operations
+  - name: Simulation
+    description: Policy simulation and replay operations
+  - name: Receipts
+    description: Provenance receipt retrieval and selective disclosure
   - name: Health
     description: Service health endpoints
 
@@ -354,6 +358,93 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /api/v1/requests/{requestId}/simulate:
+    post:
+      summary: Re-run policy simulation for an existing request
+      description: |
+        Re-evaluates policy decisions using the current request state and latest
+        policy bundle. Returns a simulation hash for optimistic concurrency checks.
+      operationId: simulateApprovalRequest
+      tags: [Simulation]
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/TenantId'
+      responses:
+        '200':
+          description: Simulation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationSnapshot'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/requests/{requestId}/receipts:
+    get:
+      summary: List receipts for an approval request
+      description: |
+        Returns all receipts generated during request lifecycle. Use `fields` to
+        return only selected top-level fields for selective disclosure.
+      operationId: listApprovalReceipts
+      tags: [Receipts]
+      parameters:
+        - $ref: '#/components/parameters/RequestId'
+        - $ref: '#/components/parameters/TenantId'
+        - name: fields
+          in: query
+          required: false
+          description: Comma-separated top-level fields for selective disclosure
+          schema:
+            type: string
+            example: id,tenant_id,timestamp,policy_version,risk_tier
+      responses:
+        '200':
+          description: List of receipts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/receipts/{receiptId}:
+    get:
+      summary: Get a single receipt
+      description: |
+        Fetches a single receipt by ID within tenant scope. Supports selective
+        disclosure through the `fields` query parameter.
+      operationId: getApprovalReceipt
+      tags: [Receipts]
+      parameters:
+        - name: receiptId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/TenantId'
+        - name: fields
+          in: query
+          required: false
+          description: Comma-separated top-level fields for selective disclosure
+          schema:
+            type: string
+            example: id,timestamp,policy_version,input_hash,signature,key_id
+      responses:
+        '200':
+          description: Receipt found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptV1'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -407,6 +498,11 @@ components:
         - approve
         - reject
       description: Type of approval decision
+
+    RiskTier:
+      type: string
+      enum: [low, medium, high, critical]
+      description: Risk classification for privileged flow enforcement
 
     # Actor (requestor or approver)
     Actor:
@@ -712,6 +808,111 @@ components:
               description: Cursor for next page
             has_more:
               type: boolean
+
+    PolicySimulationSnapshot:
+      type: object
+      required:
+        - request_id
+        - tenant_id
+        - simulated_at
+        - simulation_hash
+        - policy
+        - risk_tier
+        - privileged
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        simulated_at:
+          type: string
+          format: date-time
+        simulation_hash:
+          type: string
+          description: Hash of simulation inputs + policy output
+        policy:
+          $ref: '#/components/schemas/PolicyEvaluation'
+        risk_tier:
+          $ref: '#/components/schemas/RiskTier'
+        privileged:
+          type: boolean
+
+    CostEstimateSnapshot:
+      type: object
+      properties:
+        currency:
+          type: string
+          default: USD
+        amount:
+          type: number
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    ReceiptV1:
+      type: object
+      required:
+        - schema_version
+        - id
+        - approval_id
+        - tenant_id
+        - actor
+        - decision
+        - timestamp
+        - policy_version
+        - input_hash
+        - signature
+        - key_id
+      properties:
+        schema_version:
+          type: string
+          example: switchboard.receipt.v1
+        id:
+          type: string
+        approval_id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+        actor:
+          $ref: '#/components/schemas/Actor'
+        decision:
+          type: string
+          enum: [created, approve, reject, cancelled]
+        timestamp:
+          type: string
+          format: date-time
+        policy_version:
+          type: string
+        policy_decision_hash:
+          type: string
+        pre_state_hash:
+          type: string
+        post_state_hash:
+          type: string
+        risk_tier:
+          $ref: '#/components/schemas/RiskTier'
+        cost_estimate:
+          $ref: '#/components/schemas/CostEstimateSnapshot'
+        input_hash:
+          type: string
+        signature:
+          type: string
+        key_id:
+          type: string
+
+    ReceiptListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReceiptV1'
+        total:
+          type: integer
 
     # Health responses
     HealthResponse:

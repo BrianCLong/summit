@@ -1,0 +1,387 @@
+openapi: 3.0.3
+info:
+  title: Switchboard Approvals and Provenance API
+  version: 1.0.0
+  description: >
+    Internal Edition GA contract for privileged action simulation, approval,
+    execution receipts, selective disclosure, and evidence export.
+servers:
+  - url: https://switchboard.internal.example.com
+security:
+  - bearerAuth: []
+paths:
+  /v1/switchboard/actions/preflight:
+    post:
+      summary: Simulate policy decision for a privileged action
+      operationId: preflightPrivilegedAction
+      tags: [Approvals]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreflightRequest'
+      responses:
+        '200':
+          description: Simulation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreflightResponse'
+        '403':
+          description: Policy denied
+        '502':
+          description: Policy engine unavailable
+
+  /v1/switchboard/actions/{action_id}/approvals:
+    post:
+      summary: Submit a human approval decision with rationale
+      operationId: approvePrivilegedAction
+      tags: [Approvals]
+      parameters:
+        - in: path
+          name: action_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApprovalDecisionRequest'
+      responses:
+        '200':
+          description: Decision recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalDecisionResponse'
+        '409':
+          description: Stale simulation hash or duplicate approver
+
+  /v1/switchboard/actions/{action_id}/execute:
+    post:
+      summary: Execute approved action and emit signed receipt
+      operationId: executePrivilegedAction
+      tags: [Approvals, Receipts]
+      parameters:
+        - in: path
+          name: action_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteActionRequest'
+      responses:
+        '202':
+          description: Accepted, receipt emitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecuteActionResponse'
+        '400':
+          description: Missing rationale or hash mismatch
+        '403':
+          description: Dual-control requirement not satisfied
+        '412':
+          description: Policy re-simulation no longer allows action
+
+  /v1/switchboard/receipts/{receipt_id}:
+    get:
+      summary: Get a signed receipt
+      operationId: getReceipt
+      tags: [Receipts]
+      parameters:
+        - in: path
+          name: receipt_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Receipt loaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReceiptEnvelope'
+        '404':
+          description: Receipt not found
+
+  /v1/switchboard/receipts/{receipt_id}/disclosure:
+    post:
+      summary: Return selective disclosure view of a receipt
+      operationId: getSelectiveDisclosure
+      tags: [Receipts]
+      parameters:
+        - in: path
+          name: receipt_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisclosureRequest'
+      responses:
+        '200':
+          description: Redacted receipt bundle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisclosureResponse'
+        '403':
+          description: Disclosure request denied
+
+  /v1/switchboard/evidence-bundles/export:
+    post:
+      summary: Export sprint evidence bundle as tar.gz
+      operationId: exportEvidenceBundle
+      tags: [Evidence]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceExportRequest'
+      responses:
+        '200':
+          description: Evidence bundle created
+          content:
+            application/gzip:
+              schema:
+                type: string
+                format: binary
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RiskTier:
+      type: string
+      enum: [low, medium, high, critical]
+
+    RationaleInput:
+      type: object
+      required: [summary, justification_code, impact_assessment, risk_acknowledged]
+      properties:
+        summary:
+          type: string
+          minLength: 20
+        justification_code:
+          type: string
+          enum:
+            - incident-response
+            - security-remediation
+            - legal-hold
+            - production-maintenance
+            - customer-obligation
+            - other
+        impact_assessment:
+          type: string
+          minLength: 10
+        risk_acknowledged:
+          type: boolean
+        ticket_ref:
+          type: string
+
+    PreflightRequest:
+      type: object
+      required: [subject, action]
+      properties:
+        subject:
+          type: object
+          required: [id, roles, tenant_id]
+          properties:
+            id:
+              type: string
+            roles:
+              type: array
+              items:
+                type: string
+            tenant_id:
+              type: string
+            attributes:
+              type: object
+              additionalProperties: true
+        action:
+          type: object
+          required: [name]
+          properties:
+            name:
+              type: string
+            attributes:
+              type: object
+              additionalProperties: true
+        resource:
+          type: object
+          additionalProperties: true
+        context:
+          type: object
+          additionalProperties: true
+
+    PreflightResponse:
+      type: object
+      required:
+        - preflight_id
+        - decision
+        - risk_tier
+        - decision_hash
+        - requires_dual_control
+        - policy_bundle_version
+      properties:
+        preflight_id:
+          type: string
+        decision:
+          type: string
+          enum: [allow, deny, hold]
+        reason:
+          type: string
+        risk_tier:
+          $ref: '#/components/schemas/RiskTier'
+        decision_hash:
+          type: string
+          pattern: '^[a-f0-9]{64}$'
+        requires_dual_control:
+          type: boolean
+        policy_bundle_version:
+          type: string
+        obligations:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        redactions:
+          type: array
+          items:
+            type: string
+
+    ApprovalDecisionRequest:
+      type: object
+      required: [preflight_id, decision_hash, rationale, decision]
+      properties:
+        preflight_id:
+          type: string
+        decision_hash:
+          type: string
+        decision:
+          type: string
+          enum: [approve, reject, override]
+        rationale:
+          $ref: '#/components/schemas/RationaleInput'
+
+    ApprovalDecisionResponse:
+      type: object
+      required: [action_id, approval_id, status, required_approvals, current_approvals]
+      properties:
+        action_id:
+          type: string
+        approval_id:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        required_approvals:
+          type: integer
+        current_approvals:
+          type: integer
+        risk_tier:
+          $ref: '#/components/schemas/RiskTier'
+
+    ExecuteActionRequest:
+      type: object
+      required: [preflight_id, decision_hash, rationale]
+      properties:
+        preflight_id:
+          type: string
+        decision_hash:
+          type: string
+        rationale:
+          $ref: '#/components/schemas/RationaleInput'
+        approval_ids:
+          type: array
+          items:
+            type: string
+        input:
+          type: object
+          additionalProperties: true
+
+    ExecuteActionResponse:
+      type: object
+      required: [status, execution_id, receipt_id]
+      properties:
+        status:
+          type: string
+          enum: [accepted]
+        execution_id:
+          type: string
+        receipt_id:
+          type: string
+        timeline_event_id:
+          type: string
+
+    ReceiptEnvelope:
+      type: object
+      required: [receipt, verified]
+      properties:
+        receipt:
+          $ref: 'receipt-schema-v1.json'
+        verified:
+          type: boolean
+
+    DisclosureRequest:
+      type: object
+      required: [fields, reason]
+      properties:
+        fields:
+          type: array
+          minItems: 1
+          items:
+            type: string
+        reason:
+          type: string
+          minLength: 8
+
+    DisclosureResponse:
+      type: object
+      required: [receipt_id, receipt, redactions]
+      properties:
+        receipt_id:
+          type: string
+        receipt:
+          $ref: 'receipt-schema-v1.json'
+        redactions:
+          type: array
+          items:
+            type: string
+
+    EvidenceExportRequest:
+      type: object
+      required: [start_time, end_time, tenant_id]
+      properties:
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        tenant_id:
+          type: string
+        include_dashboards:
+          type: boolean
+          default: true
+        include_sbom:
+          type: boolean
+          default: true
+        include_slsa:
+          type: boolean
+          default: true

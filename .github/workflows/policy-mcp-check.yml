@@ -1,0 +1,21 @@
+name: policy_mcp_check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  policy-mcp-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install test dependency
+        run: pip install pytest
+      - name: Run MCP policy tests
+        run: |
+          python3 -m pytest tests/policy/test_gcp_managed_mcp.py -k "policy or deny"

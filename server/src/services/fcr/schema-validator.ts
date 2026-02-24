@@ -1,14 +1,14 @@
-import AjvModule from 'ajv';
+import Ajv2020Module from 'ajv/dist/2020.js';
 import addFormatsModule from 'ajv-formats';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { FcrSignal } from './types.js';
 
-const Ajv = (AjvModule as any).default || AjvModule;
+const Ajv2020 = (Ajv2020Module as any).default || Ajv2020Module;
 const addFormats = (addFormatsModule as any).default || addFormatsModule;
 
 export class FcrSchemaValidator {
-  private ajv = new Ajv({ allErrors: true, strict: true });
+  private ajv = new Ajv2020({ allErrors: true, strict: true });
 
   constructor() {
     addFormats(this.ajv);

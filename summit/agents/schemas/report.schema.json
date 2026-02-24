@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["task", "selected_tool", "tool_result", "transcript"],
+  "additionalProperties": false,
+  "properties": {
+    "task": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selected_tool": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tool_result": {
+      "type": "object"
+    },
+    "transcript": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "event_type", "payload"],
+        "additionalProperties": false,
+        "properties": {
+          "evidence_id": {
+            "type": "string",
+            "pattern": "^EVID:[a-z0-9-]+:[0-9]{4}$"
+          },
+          "event_type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "payload": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

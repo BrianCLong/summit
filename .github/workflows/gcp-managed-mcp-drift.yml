@@ -1,0 +1,23 @@
+name: gcp-managed-mcp-drift
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run dry drift check
+        run: |
+          python3 scripts/monitoring/gcp-mcp-drift.py --dry-run --output artifacts/mcp/gcp/drift_report.json
+      - name: Upload drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcp-managed-mcp-drift-report
+          path: artifacts/mcp/gcp/drift_report.json

@@ -1,0 +1,142 @@
+name: PR Routing
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Route by label
+        uses: actions/github-script@v7
+        env:
+          ROUTE_CODEX_ASSIGNEES: ""
+          ROUTE_CODEX_REVIEWERS: ""
+          ROUTE_SECURITY_ASSIGNEES: ""
+          ROUTE_SECURITY_REVIEWERS: ""
+          ROUTE_CI_ASSIGNEES: ""
+          ROUTE_CI_REVIEWERS: ""
+          ROUTE_DOCS_ASSIGNEES: ""
+          ROUTE_DOCS_REVIEWERS: ""
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = pr.number;
+            const author = (pr.user?.login || "").toLowerCase();
+            const labels = new Set((pr.labels || []).map((l) => (l.name || "").toLowerCase()));
+
+            const parseCsv = (value) =>
+              (value || "")
+                .split(",")
+                .map((s) => s.trim())
+                .filter(Boolean);
+            const withDefaultOwner = (values) => (values.length > 0 ? values : [owner]);
+
+            const rules = [
+              {
+                label: "codex",
+                assignees: withDefaultOwner(parseCsv(process.env.ROUTE_CODEX_ASSIGNEES)),
+                reviewers: withDefaultOwner(parseCsv(process.env.ROUTE_CODEX_REVIEWERS)),
+                description: "Codex agent routing",
+              },
+              {
+                label: "security",
+                assignees: withDefaultOwner(parseCsv(process.env.ROUTE_SECURITY_ASSIGNEES)),
+                reviewers: withDefaultOwner(parseCsv(process.env.ROUTE_SECURITY_REVIEWERS)),
+                description: "Security routing",
+              },
+              {
+                label: "ci",
+                assignees: withDefaultOwner(parseCsv(process.env.ROUTE_CI_ASSIGNEES)),
+                reviewers: parseCsv(process.env.ROUTE_CI_REVIEWERS),
+                description: "CI routing",
+              },
+              {
+                label: "docs",
+                assignees: parseCsv(process.env.ROUTE_DOCS_ASSIGNEES),
+                reviewers: parseCsv(process.env.ROUTE_DOCS_REVIEWERS),
+                description: "Docs/Observer routing",
+              },
+            ];
+
+            const selected = rules.filter((rule) => labels.has(rule.label));
+            if (selected.length === 0) {
+              core.info("No routing labels detected.");
+              return;
+            }
+
+            const assignees = [...new Set(selected.flatMap((rule) => rule.assignees))]
+              .filter((login) => login.toLowerCase() !== author);
+            const reviewers = [...new Set(selected.flatMap((rule) => rule.reviewers))]
+              .filter((login) => login.toLowerCase() !== author);
+
+            if (assignees.length > 0) {
+              try {
+                await github.rest.issues.addAssignees({
+                  owner,
+                  repo,
+                  issue_number,
+                  assignees,
+                });
+              } catch (error) {
+                core.warning(`Failed to assign users: ${error.message}`);
+              }
+            }
+
+            if (reviewers.length > 0) {
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner,
+                  repo,
+                  pull_number: issue_number,
+                  reviewers,
+                });
+              } catch (error) {
+                core.warning(`Failed to request reviewers: ${error.message}`);
+              }
+            }
+
+            const marker = "<!-- summit-pr-routing -->";
+            const selectedLabels = selected.map((rule) => `\`${rule.label}\``).join(", ");
+            const summary = [
+              marker,
+              "### PR Routing Summary",
+              `Matched labels: ${selectedLabels}`,
+              `Assignees applied: ${assignees.length ? assignees.map((a) => `@${a}`).join(", ") : "none"}`,
+              `Reviewers requested: ${reviewers.length ? reviewers.map((r) => `@${r}`).join(", ") : "none"}`,
+            ].join("\n");
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+            });
+            const existing = comments.find(
+              (comment) => comment.user?.type === "Bot" && (comment.body || "").includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: summary,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: summary,
+              });
+            }

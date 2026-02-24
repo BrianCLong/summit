@@ -1,0 +1,6 @@
+{
+  "deny_on_repeated_signatures": true,
+  "enforcement_default": "off",
+  "provenance_header": "AGENT-PROVENANCE:",
+  "threat_model_minimum_coverage": 0.8
+}

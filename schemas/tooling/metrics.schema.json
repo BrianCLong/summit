@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "tooling_agent_metrics",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "task",
+    "deterministic",
+    "runtime_budget_ms",
+    "memory_budget_mb",
+    "artifact_size_budget_bytes"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^TOOLING-[A-Z0-9-]+-[a-f0-9]{12}$"
+    },
+    "task": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deterministic": {
+      "type": "boolean"
+    },
+    "runtime_budget_ms": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "memory_budget_mb": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "artifact_size_budget_bytes": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "additionalProperties": false
+}

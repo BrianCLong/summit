@@ -10,7 +10,7 @@ import { RedisConnection } from '../redis.js';
 
 // Mock dependencies
 jest.mock('ioredis');
-jest.mock('../utils/logger.js', () => ({
+jest.mock('../../utils/logger.js', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),

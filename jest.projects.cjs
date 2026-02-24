@@ -5,7 +5,7 @@ const client = {
   ...base,
   roots: ['<rootDir>/client', '<rootDir>/packages'],
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
 };
 
 const server = {
@@ -13,7 +13,7 @@ const server = {
   ...base,
   roots: ['<rootDir>/server'],
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
 };
 
 const services = {
@@ -21,7 +21,7 @@ const services = {
   ...base,
   roots: ['<rootDir>/services'],
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
 };
 
 const integration = {
@@ -29,7 +29,7 @@ const integration = {
   ...base,
   roots: ['<rootDir>/tests'],
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
 };
 
 const libs = {
@@ -37,7 +37,7 @@ const libs = {
   ...base,
   roots: ['<rootDir>/libs'],
   testEnvironment: 'node',
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
 };
 
 module.exports = { projects: [client, server, services, integration, libs] };

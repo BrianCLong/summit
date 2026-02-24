@@ -3,6 +3,7 @@
     "summit-gate/data-residency",
     "summit-gate/codespaces-ownership",
     "summit-evidence/validate",
+    "summit-gate/security-debt",
     "summit-verifier/required-checks"
   ]
 }

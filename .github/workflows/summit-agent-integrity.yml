@@ -1,0 +1,71 @@
+name: summit-agent-integrity
+
+on:
+  pull_request:
+    paths:
+      - "summit/agents/**"
+      - "summit/ci/verify_agent_evidence_integrity.py"
+      - "summit/ci/replay_agent_orchestrator.py"
+      - "scripts/monitoring/summit-agent-drift.py"
+      - "tests/agents/**"
+      - ".github/workflows/summit-agent-integrity.yml"
+  push:
+    branches: [main]
+    paths:
+      - "summit/agents/**"
+      - "summit/ci/verify_agent_evidence_integrity.py"
+      - "summit/ci/replay_agent_orchestrator.py"
+      - "scripts/monitoring/summit-agent-drift.py"
+      - "tests/agents/**"
+      - ".github/workflows/summit-agent-integrity.yml"
+
+jobs:
+  verify:
+    name: summit-agent-integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Run Summit agent tests
+        run: python -m pytest tests/agents
+
+      - name: Emit deterministic artifacts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from summit.agents.orchestrator import AgentOrchestrator
+          from summit.agents.tool_registry import AgentToolRegistry
+
+          out = Path("artifacts/agent")
+          reg = AgentToolRegistry(allowlist=["deterministic_echo"])
+          reg.register_tool("deterministic_echo", lambda p: {"echo": p["task"], "status": "ok"})
+          AgentOrchestrator(reg, enabled=True).run("Investigate pipeline drift", out_dir=out)
+          PY
+
+      - name: Verify evidence integrity
+        run: python summit/ci/verify_agent_evidence_integrity.py --artifacts-dir artifacts/agent
+
+      - name: Run replay harness
+        run: python summit/ci/replay_agent_orchestrator.py --update-baseline
+
+      - name: Upload integrity artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-agent-integrity-artifacts
+          path: |
+            artifacts/agent/report.json
+            artifacts/agent/metrics.json
+            artifacts/agent/stamp.json
+            artifacts/eval/replay_diff.json
+          retention-days: 30

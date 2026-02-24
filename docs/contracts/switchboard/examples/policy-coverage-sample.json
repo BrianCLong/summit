@@ -1,0 +1,17 @@
+{
+  "bundleVersion": "switchboard-policy-bundle-2026.02.24",
+  "flows": [
+    { "id": "delete_prod_dataset", "privileged": true, "covered": true },
+    { "id": "rotate_signing_key", "privileged": true, "covered": true },
+    { "id": "grant_cross_tenant_access", "privileged": true, "covered": true },
+    { "id": "override_data_retention", "privileged": true, "covered": true },
+    { "id": "export_restricted_report", "privileged": true, "covered": true },
+    { "id": "disable_policy_bundle", "privileged": true, "covered": true },
+    { "id": "bulk_user_role_change", "privileged": true, "covered": true },
+    { "id": "start_backfill_prod", "privileged": true, "covered": true },
+    { "id": "rollback_schema_prod", "privileged": true, "covered": true },
+    { "id": "force_execute_without_approval", "privileged": true, "covered": false },
+    { "id": "open_case", "privileged": false, "covered": false },
+    { "id": "read_dashboard", "privileged": false, "covered": false }
+  ]
+}

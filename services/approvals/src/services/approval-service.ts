@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db/database.js';
 import { opaClient } from './opa-client.js';
@@ -26,9 +27,10 @@ import type {
   PaginatedResponse,
   DecisionRecord,
   PolicyEvaluation,
+  PolicySimulationSnapshot,
   Actor,
   Resource,
-  AppError,
+  RiskTier,
 } from '../types.js';
 
 const log = logger.child({ component: 'approval-service' });
@@ -114,6 +116,15 @@ export class ApprovalService {
       actor: input.requestor,
       action_type: 'created',
       policy_version: policyResult.policy_version,
+      policy_decision_hash: this.hashObject(policyResult),
+      pre_state_hash: this.hashObject({ status: 'not_created' }),
+      post_state_hash: this.hashObject({
+        status: initialStatus,
+        request_id: requestId,
+        required_approvals: policyResult.required_approvals,
+      }),
+      risk_tier: this.deriveRiskTier(policyResult, input.attributes || {}),
+      cost_estimate: this.estimateCostSnapshot(input.attributes || {}),
       input_data: {
         resource: input.resource,
         action: input.action,
@@ -394,6 +405,32 @@ export class ApprovalService {
       actor: input.actor,
       action_type: input.decision,
       policy_version: policyResult.policy_version,
+      policy_decision_hash: this.hashObject(policyResult),
+      pre_state_hash: this.hashObject({
+        request_id: request.id,
+        status: request.status,
+        decisions: request.decisions.map((d) => ({
+          actor_id: d.actor.id,
+          decision: d.decision,
+        })),
+      }),
+      post_state_hash: this.hashObject({
+        request_id: request.id,
+        status: newStatus,
+        decisions_count: request.decisions.length + 1,
+      }),
+      risk_tier: this.deriveRiskTier(
+        request.policy_evaluation || {
+          policy_version: policyResult.policy_version,
+          decision: 'require_approval',
+          required_approvals: 2,
+          allowed_approver_roles: [],
+          conditions: [],
+          violations: [],
+        },
+        request.attributes || {},
+      ),
+      cost_estimate: this.estimateCostSnapshot(request.attributes || {}),
       input_data: {
         request_id: requestId,
         decision: input.decision,
@@ -512,6 +549,21 @@ export class ApprovalService {
       actor: input.actor,
       action_type: 'cancelled',
       policy_version: 'n/a',
+      policy_decision_hash: this.hashObject({ decision: 'cancelled' }),
+      pre_state_hash: this.hashObject({ request_id: request.id, status: request.status }),
+      post_state_hash: this.hashObject({ request_id: request.id, status: 'cancelled' }),
+      risk_tier: this.deriveRiskTier(
+        request.policy_evaluation || {
+          policy_version: 'n/a',
+          decision: 'require_approval',
+          required_approvals: 2,
+          allowed_approver_roles: [],
+          conditions: [],
+          violations: [],
+        },
+        request.attributes || {},
+      ),
+      cost_estimate: this.estimateCostSnapshot(request.attributes || {}),
       input_data: {
         request_id: requestId,
         reason: input.reason,
@@ -552,6 +604,76 @@ export class ApprovalService {
     }
 
     return result.rowCount || 0;
+  }
+
+  /**
+   * Re-simulate policy for an existing request (used by "Simulate Again" UX)
+   */
+  async simulateRequest(
+    tenantId: string,
+    requestId: string,
+  ): Promise<PolicySimulationSnapshot> {
+    const request = await this.getRequest(tenantId, requestId);
+    if (!request) {
+      throw new NotFoundError('ApprovalRequest', requestId);
+    }
+
+    const decision = await opaClient.evaluateApprovalRequest({
+      tenant_id: tenantId,
+      actor: request.requestor,
+      resource: request.resource,
+      action: request.action,
+      attributes: request.attributes || {},
+      context: request.context || {},
+      existing_decisions: request.decisions,
+      request_created_at: request.created_at,
+    });
+
+    const policy: PolicyEvaluation = {
+      policy_version: decision.policy_version,
+      decision: decision.allow
+        ? 'allow'
+        : decision.require_approval
+          ? 'require_approval'
+          : 'deny',
+      required_approvals: decision.required_approvals,
+      allowed_approver_roles: decision.allowed_approver_roles,
+      conditions: decision.conditions,
+      violations: decision.violations,
+    };
+
+    return {
+      request_id: request.id,
+      tenant_id: tenantId,
+      simulated_at: new Date().toISOString(),
+      simulation_hash: this.hashObject({
+        request_id: request.id,
+        policy,
+        attributes: request.attributes || {},
+        context: request.context || {},
+      }),
+      policy,
+      risk_tier: this.deriveRiskTier(policy, request.attributes || {}),
+      privileged: policy.decision !== 'allow',
+    };
+  }
+
+  /**
+   * Get all receipts linked to an approval request
+   */
+  async listReceiptsForRequest(tenantId: string, requestId: string) {
+    const request = await this.getRequest(tenantId, requestId);
+    if (!request) {
+      throw new NotFoundError('ApprovalRequest', requestId);
+    }
+    return provenanceClient.getReceiptsForApproval(requestId, tenantId);
+  }
+
+  /**
+   * Get a specific receipt with tenant scoping
+   */
+  async getReceiptById(tenantId: string, receiptId: string) {
+    return provenanceClient.getReceipt(receiptId, tenantId);
   }
 
   // ============================================================================
@@ -697,6 +819,67 @@ export class ApprovalService {
        VALUES ($1, $2, $3, $4, $5)`,
       [tenantId, requestId, eventType, actorId, JSON.stringify(data)],
     );
+  }
+
+  private deriveRiskTier(
+    policy: Pick<PolicyEvaluation, 'decision' | 'required_approvals' | 'violations'>,
+    attributes: Record<string, unknown>,
+  ): RiskTier {
+    const explicitRisk = attributes.risk_level;
+    if (
+      explicitRisk === 'critical' ||
+      policy.required_approvals >= 3 ||
+      (policy.violations || []).length > 0
+    ) {
+      return 'critical';
+    }
+    if (explicitRisk === 'high' || policy.required_approvals >= 2) {
+      return 'high';
+    }
+    if (policy.decision === 'require_approval') {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  private estimateCostSnapshot(attributes: Record<string, unknown>) {
+    const maybeAmount =
+      Number(attributes.cost_estimate_usd) ||
+      Number(attributes.amount_usd) ||
+      Number(attributes.est_usd) ||
+      0;
+    const confidence = Math.max(
+      0,
+      Math.min(1, Number(attributes.cost_confidence) || 0.8),
+    );
+    return {
+      currency: 'USD',
+      amount: Number.isFinite(maybeAmount) ? maybeAmount : 0,
+      confidence,
+    };
+  }
+
+  private hashObject(value: unknown): string {
+    return crypto
+      .createHash('sha256')
+      .update(this.stableStringify(value))
+      .digest('hex');
+  }
+
+  private stableStringify(value: unknown): string {
+    if (Array.isArray(value)) {
+      return `[${value.map((item) => this.stableStringify(item)).join(',')}]`;
+    }
+    if (value && typeof value === 'object') {
+      const entries = Object.entries(value as Record<string, unknown>).sort(
+        ([a], [b]) => a.localeCompare(b),
+      );
+      return `{${entries
+        .map(([key, val]) => `${JSON.stringify(key)}:${this.stableStringify(val)}`)
+        .join(',')}}`;
+    }
+    const encoded = JSON.stringify(value);
+    return encoded === undefined ? 'null' : encoded;
   }
 }
 

@@ -1,0 +1,17 @@
+{
+  "file_threat_map": {
+    "scripts/monitoring/security-debt-drift.py": [
+      "THREAT-06"
+    ],
+    "summit/ci/verify_security_debt.py": [
+      "CLAIM-05",
+      "THREAT-06"
+    ],
+    "summit/security_debt/*.py": [
+      "CLAIM-02",
+      "CLAIM-03",
+      "CLAIM-05",
+      "THREAT-06"
+    ]
+  }
+}

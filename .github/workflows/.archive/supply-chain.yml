@@ -117,7 +117,7 @@ jobs:
   sbom:
     name: Attach SBOM
     needs: plan
-    uses: ./.github/workflows/reusable/sbom.yml
+    uses: ./.github/workflows/_reusable-sbom.yml
     with:
       service: supply-chain
       working-directory: security/supply-chain

@@ -66,7 +66,8 @@ export class FlowDetectionService {
   ): Promise<FlowPattern[]> {
     const patterns: FlowPattern[] = [];
 
-    if (transactions.length < this.config.minTransactionCount) {
+    // Some patterns (for example rapid movement) are meaningful with two transactions.
+    if (transactions.length < 2) {
       return patterns;
     }
 

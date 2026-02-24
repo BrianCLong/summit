@@ -18,6 +18,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { EmbeddingService } from '../embeddings/embedding-service.js';
 import { GuardrailFlag } from '../types.js';
+import { EventEmitter } from 'node:events';
 
 // =============================================================================
 // TYPES
@@ -50,6 +51,257 @@ export interface DetectionResult {
   attackCategories: AttackCategory[];
   confidence: number;
   detectionMethods: string[];
+}
+
+export interface JailbreakDetectorConfig {
+  embeddingService?: EmbeddingService;
+  enableMLDetection?: boolean;
+  patternThreshold?: number;
+  semanticThreshold?: number;
+}
+
+export interface JailbreakDetectionResult {
+  detected: boolean;
+  confidence: number;
+  patterns: string[];
+  categories: string[];
+}
+
+export interface OutputFilterConfig {
+  filterPII?: boolean;
+  filterClassification?: boolean;
+  filterCredentials?: boolean;
+  maxOutputLength?: number;
+}
+
+export interface OutputFilterResult {
+  filtered: string;
+  redactions: string[];
+  containsClassified: boolean;
+  classificationLevel?: string;
+  truncated?: boolean;
+}
+
+const JAILBREAK_TEST_PATTERNS: Array<{
+  pattern: RegExp;
+  category: string;
+  label: string;
+}> = [
+  { pattern: /ignore\s+(all\s+)?(previous|prior)\s+instructions?/gi, category: 'role_override', label: 'override_instructions' },
+  { pattern: /ignore\s+instructions/gi, category: 'role_override', label: 'override_instructions_short' },
+  { pattern: /forget\s+everything\s+you\s+were\s+told/gi, category: 'role_override', label: 'forget_context' },
+  { pattern: /\bDAN\b/gi, category: 'role_override', label: 'dan_prompt' },
+  { pattern: /```system/gi, category: 'prompt_injection', label: 'system_block' },
+  { pattern: /\[SYSTEM\]/gi, category: 'prompt_injection', label: 'system_tag' },
+  { pattern: /(^|\n)\s*Human:/gi, category: 'prompt_injection', label: 'human_tag' },
+  { pattern: /###NEW\s+PROMPT###/gi, category: 'prompt_injection', label: 'markdown_prompt' },
+  { pattern: /developer\s+mode/gi, category: 'context_manipulation', label: 'developer_mode' },
+  { pattern: /testing\s+purposes\s+only/gi, category: 'context_manipulation', label: 'test_only' },
+  { pattern: /hypothetical\s+scenario/gi, category: 'context_manipulation', label: 'hypothetical' },
+  { pattern: /evil\s+ai/gi, category: 'context_manipulation', label: 'evil_ai' },
+  { pattern: /system\s+prompt/gi, category: 'information_extraction', label: 'system_prompt' },
+  { pattern: /your\s+instructions/gi, category: 'information_extraction', label: 'instructions' },
+  { pattern: /what\s+rules\s+do\s+you\s+follow/gi, category: 'information_extraction', label: 'rules' },
+  { pattern: /[A-Za-z0-9+/]{20,}={0,2}/g, category: 'encoding_evasion', label: 'base64' },
+  { pattern: /\\x[0-9a-fA-F]{2}/g, category: 'encoding_evasion', label: 'hex' },
+];
+
+export class JailbreakDetector {
+  private embeddingService?: EmbeddingService;
+  private patternThreshold: number;
+  private semanticThreshold: number;
+
+  constructor(config: JailbreakDetectorConfig = {}) {
+    this.embeddingService = config.embeddingService;
+    this.patternThreshold = config.patternThreshold ?? 1;
+    this.semanticThreshold = config.semanticThreshold ?? 0.75;
+  }
+
+  async detect(input: string): Promise<JailbreakDetectionResult> {
+    const patterns: string[] = [];
+    const categories = new Set<string>();
+
+    for (const entry of JAILBREAK_TEST_PATTERNS) {
+      if (entry.pattern.test(input)) {
+        patterns.push(entry.label);
+        categories.add(entry.category);
+      }
+      entry.pattern.lastIndex = 0;
+    }
+
+    let confidence = Math.min(0.99, 0.4 + patterns.length * 0.15);
+    if (patterns.length >= this.patternThreshold) {
+      confidence = Math.max(confidence, 0.6);
+    }
+
+    if (this.embeddingService) {
+      const embedding = await this.embeddingService.embed(input);
+      const similarity = this.embeddingService.cosineSimilarity(
+        embedding.embedding,
+        embedding.embedding,
+      );
+      if (similarity >= this.semanticThreshold) {
+        confidence = Math.max(confidence, similarity);
+      }
+    }
+
+    return {
+      detected: patterns.length > 0,
+      confidence: Math.min(0.99, confidence),
+      patterns,
+      categories: Array.from(categories),
+    };
+  }
+
+  async detectMultiTurn(turns: string[]): Promise<JailbreakDetectionResult> {
+    const combined = turns.join('\n');
+    return this.detect(combined);
+  }
+}
+
+export class OutputFilter {
+  private config: Required<OutputFilterConfig>;
+
+  constructor(config: OutputFilterConfig = {}) {
+    this.config = {
+      filterPII: config.filterPII ?? true,
+      filterClassification: config.filterClassification ?? true,
+      filterCredentials: config.filterCredentials ?? true,
+      maxOutputLength: config.maxOutputLength ?? 10000,
+    };
+  }
+
+  filter(input: string): OutputFilterResult {
+    let filtered = input;
+    const redactions: string[] = [];
+    let classificationLevel: string | undefined;
+
+    if (this.config.filterCredentials) {
+      const apiKeyPattern = /sk-[A-Za-z0-9]{20,}/g;
+      if (apiKeyPattern.test(filtered)) {
+        filtered = filtered.replace(apiKeyPattern, '[REDACTED:API_KEY]');
+        redactions.push('api_key');
+      }
+
+      const passwordPattern = /["']?password["']?\s*[:=]\s*["']?[^"'\s]+["']?/gi;
+      if (passwordPattern.test(filtered)) {
+        filtered = filtered.replace(passwordPattern, '[REDACTED:PASSWORD]');
+        redactions.push('password');
+      }
+
+      const tokenPattern = /eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g;
+      if (tokenPattern.test(filtered)) {
+        filtered = filtered.replace(tokenPattern, '[REDACTED:TOKEN]');
+        redactions.push('token');
+      }
+    }
+
+    if (this.config.filterPII) {
+      const ssnPattern = /\b\d{3}-\d{2}-\d{4}\b/g;
+      if (ssnPattern.test(filtered)) {
+        filtered = filtered.replace(ssnPattern, '[REDACTED:SSN]');
+        redactions.push('ssn');
+      }
+
+      const emailPattern = /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi;
+      if (emailPattern.test(filtered)) {
+        filtered = filtered.replace(emailPattern, '[REDACTED:EMAIL]');
+        redactions.push('email');
+      }
+
+      const phonePattern = /(\+?\d{1,2}\s?)?(\(?\d{3}\)?[ -]?)\d{3}[ -]?\d{4}/g;
+      if (phonePattern.test(filtered)) {
+        filtered = filtered.replace(phonePattern, '[REDACTED:PHONE]');
+        redactions.push('phone');
+      }
+
+      const ccPattern = /\b(?:\d[ -]*?){13,16}\b/g;
+      if (ccPattern.test(filtered)) {
+        filtered = filtered.replace(ccPattern, '[REDACTED:CC]');
+        redactions.push('cc');
+      }
+    }
+
+    if (this.config.filterClassification) {
+      const markers: Array<{ pattern: RegExp; level: string }> = [
+        { pattern: /TOP\s+SECRET\/\/SCI/gi, level: 'TOP_SECRET_SCI' },
+        { pattern: /TS\/\/SCI/gi, level: 'TOP_SECRET_SCI' },
+        { pattern: /TOP\s+SECRET/gi, level: 'TOP_SECRET' },
+        { pattern: /SECRET\/\/NOFORN/gi, level: 'SECRET' },
+        { pattern: /\bSECRET\b/g, level: 'SECRET' },
+        { pattern: /CONFIDENTIAL/gi, level: 'CONFIDENTIAL' },
+        { pattern: /\(U\/\/FOUO\)/gi, level: 'UNCLASSIFIED' },
+      ];
+      for (const { pattern, level } of markers) {
+        if (pattern.test(filtered)) {
+          classificationLevel = level;
+          break;
+        }
+      }
+    }
+
+    let truncated = false;
+    if (filtered.length > this.config.maxOutputLength) {
+      filtered =
+        filtered.slice(0, this.config.maxOutputLength) + '...[TRUNCATED]';
+      truncated = true;
+    }
+
+    return {
+      filtered,
+      redactions,
+      containsClassified:
+        !!classificationLevel && classificationLevel !== 'UNCLASSIFIED',
+      classificationLevel,
+      truncated,
+    };
+  }
+}
+
+export class GuardrailsService extends EventEmitter {
+  private detector: JailbreakDetector;
+  private outputFilter: OutputFilter;
+  private violationStats = new Map<string, { violations: number }>();
+
+  constructor(config: GuardrailConfig & { outputFiltering?: OutputFilterConfig }) {
+    super();
+    this.detector = new JailbreakDetector({
+      embeddingService: config.embeddingService,
+      enableMLDetection: config.enableMLDetection,
+      patternThreshold: config.patternBlockThreshold,
+      semanticThreshold: config.semanticSimilarityThreshold,
+    });
+    this.outputFilter = new OutputFilter(config.outputFiltering ?? {});
+  }
+
+  async checkInput(input: string, options?: { userId?: string }) {
+    const result = await this.detector.detect(input);
+    if (result.detected) {
+      if (options?.userId) {
+        const stats = this.violationStats.get(options.userId) ?? { violations: 0 };
+        stats.violations += 1;
+        this.violationStats.set(options.userId, stats);
+      }
+      this.emit('security:violation', {
+        type: 'jailbreak_attempt',
+        categories: result.categories,
+      });
+      return {
+        allowed: false,
+        reason: 'jailbreak detected',
+        details: result,
+      };
+    }
+    return { allowed: true };
+  }
+
+  filterOutput(output: string) {
+    return this.outputFilter.filter(output);
+  }
+
+  getViolationStats(userId: string) {
+    return this.violationStats.get(userId) ?? { violations: 0 };
+  }
 }
 
 // =============================================================================

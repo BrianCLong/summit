@@ -239,7 +239,9 @@ export class VersionRegistry {
     }
 
     const sunsetDate = versionInfo.sunsetDate
-      ? DateTime.fromJSDate(versionInfo.sunsetDate).toFormat('yyyy-MM-dd')
+      ? DateTime.fromJSDate(versionInfo.sunsetDate, { zone: 'utc' }).toFormat(
+          'yyyy-MM-dd',
+        )
       : 'a future date';
 
     return `API version ${version} is deprecated and will be sunset on ${sunsetDate}. Please migrate to ${this.getLatestVersion()}.`;

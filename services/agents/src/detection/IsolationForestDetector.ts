@@ -261,6 +261,7 @@ export class IsolationForestDetector {
     const results: AnomalyScore[] = [];
 
     const avgPathLen = averagePathLength(this.config.subsampleSize);
+    const rawScores: number[] = [];
 
     for (const vector of data) {
       const normalized = this.normalizeFeatures(vector.features);
@@ -275,6 +276,7 @@ export class IsolationForestDetector {
       // Anomaly score: 2^(-avgPath / c(n))
       // Higher score = more anomalous
       const rawScore = Math.pow(2, -avgPath / avgPathLen);
+      rawScores.push(rawScore);
 
       // Compute feature contributions
       const contributions = this.computeFeatureContributions(
@@ -283,17 +285,32 @@ export class IsolationForestDetector {
       );
 
       // Determine if anomaly based on contamination threshold
-      const isAnomaly = rawScore > 1 - this.config.contamination;
-
       results.push({
         featureId: vector.id,
         score: rawScore,
-        isAnomaly,
+        isAnomaly: false,
         detectorType: 'isolation_forest',
         confidence: this.computeConfidence(rawScore),
         contributingFeatures: contributions,
         timestamp: new Date(),
       });
+    }
+
+    const shouldUsePercentile = data.length >= 10 && this.config.contamination > 0;
+    const threshold = shouldUsePercentile
+      ? [...rawScores].sort((a, b) => a - b)[
+          Math.min(
+            rawScores.length - 1,
+            Math.max(
+              0,
+              Math.floor((1 - this.config.contamination) * rawScores.length),
+            ),
+          )
+        ]
+      : 1 - this.config.contamination;
+
+    for (const result of results) {
+      result.isAnomaly = result.score >= threshold;
     }
 
     const latencyMs = Date.now() - startTime;

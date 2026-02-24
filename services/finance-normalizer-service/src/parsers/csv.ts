@@ -366,12 +366,13 @@ export class CSVParser implements Parser {
 
         // Add counterparty if found
         if (counterpartyName) {
+          const canonicalCounterparty = counterpartyName.toUpperCase();
           const partyId = uuidv4();
           parsedRecord.parties = [{
             id: partyId,
-            canonicalName: counterpartyName,
+            canonicalName: canonicalCounterparty,
             originalName: row[columnMap.counterparty],
-            type: inferPartyType(counterpartyName),
+            type: inferPartyType(canonicalCounterparty),
             provenance: {
               sourceSystem: 'csv-import',
               importedAt: new Date().toISOString(),

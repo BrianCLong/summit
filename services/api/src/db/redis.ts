@@ -13,76 +13,71 @@ class RedisConnection {
   private subscriber: Redis | null = null;
   private publisher: Redis | null = null;
   private isConnected = false;
-    private connectionPromise: Promise<void> | null = null;
+  private connectionPromise: Promise<void> | null = null;
 
   async connect(): Promise<void> {
-    // If already connected, return immediately
-        if (this.isConnected && this.client) {
-                return;return;
+    if (this.isConnected && this.client) {
+      return;
     }
 
-        // If connection is already in progress, return the existing promise
-        if (this.connectionPromise) {
-                return this.connectionPromise;
-              }
-
-        // Create and store the connection promise
-        this.connectionPromise = (async () => {
-
-    const config = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
-      retryDelayOnFailover: 100,
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      keepAlive: 30000,
-      connectionName: 'intelgraph-api',
-      keyPrefix: process.env.REDIS_KEY_PREFIX || 'intelgraph:',
-    };
-
-    try {
-      // Main Redis client for caching and general operations
-      this.client = new Redis(config);
-
-      // Separate clients for pub/sub to avoid blocking
-      this.subscriber = new Redis({
-        ...config,
-        connectionName: 'intelgraph-subscriber',
-      });
-
-      this.publisher = new Redis({
-        ...config,
-        connectionName: 'intelgraph-publisher',
-      });
-
-      // Connect all clients
-      await Promise.all([
-        this.client.connect(),
-        this.subscriber.connect(),
-        this.publisher.connect(),
-      ]);
-
-      // Set up error handlers
-      this.setupErrorHandlers();
-
-      this.isConnected = true;
-      logger.info({
-        message: 'Redis connection established',
-        host: config.host,
-        port: config.port,
-        db: config.db,
-      });
-    } catch (error) {
-      logger.error({
-        message: 'Failed to connect to Redis',
-        error: error instanceof Error ? error.message : String(error),
-        host: config.host,
-        port: config.port,
-      });
-      throw error;
+    if (this.connectionPromise) {
+      return this.connectionPromise;
     }
+
+    this.connectionPromise = (async () => {
+      const config = {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        db: parseInt(process.env.REDIS_DB || '0'),
+        retryDelayOnFailover: 100,
+        maxRetriesPerRequest: 3,
+        lazyConnect: true,
+        keepAlive: 30000,
+        connectionName: 'intelgraph-api',
+        keyPrefix: process.env.REDIS_KEY_PREFIX || 'intelgraph:',
+      };
+
+      try {
+        this.client = new Redis(config);
+        this.subscriber = new Redis({
+          ...config,
+          connectionName: 'intelgraph-subscriber',
+        });
+        this.publisher = new Redis({
+          ...config,
+          connectionName: 'intelgraph-publisher',
+        });
+
+        await Promise.all([
+          this.client.connect(),
+          this.subscriber.connect(),
+          this.publisher.connect(),
+        ]);
+
+        this.setupErrorHandlers();
+
+        this.isConnected = true;
+        logger.info({
+          message: 'Redis connection established',
+          host: config.host,
+          port: config.port,
+          db: config.db,
+        });
+      } catch (error) {
+        logger.error({
+          message: 'Failed to connect to Redis',
+          error: error instanceof Error ? error.message : String(error),
+          host: config.host,
+          port: config.port,
+        });
+        throw error;
+      } finally {
+        this.connectionPromise = null;
+      }
+    })();
+
+    return this.connectionPromise;
   }
 
   private setupErrorHandlers(): void {

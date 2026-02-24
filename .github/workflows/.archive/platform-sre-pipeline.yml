@@ -192,7 +192,7 @@ jobs:
   sbom:
     name: Attach SBOM
     needs: security_scans
-    uses: ./.github/workflows/reusable/sbom.yml
+    uses: ./.github/workflows/_reusable-sbom.yml
     with:
       service: platform-sre
     secrets: inherit

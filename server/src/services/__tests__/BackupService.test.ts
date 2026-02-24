@@ -78,11 +78,11 @@ jest.unstable_mockModule('child_process', () => ({
   spawn: mockSpawn
 }));
 
-jest.unstable_mockModule('../db/neo4j.js', () => ({
+jest.unstable_mockModule('../../db/neo4j.js', () => ({
   getNeo4jDriver: jest.fn(() => mockNeo4jDriver),
 }));
 
-jest.unstable_mockModule('../db/redis.js', () => ({
+jest.unstable_mockModule('../../db/redis.js', () => ({
   getRedisClient: jest.fn(() => mockRedisClient),
 }));
 

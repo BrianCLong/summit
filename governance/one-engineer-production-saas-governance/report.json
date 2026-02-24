@@ -1,0 +1,82 @@
+{
+  "abuse_case_fixtures": [
+    "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/data_exfiltration.json",
+    "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/prompt_injection.json"
+  ],
+  "claim_registry": [
+    {
+      "claim_source": "ITEM:CLAIM-02",
+      "planned_element": "governance-pack generator"
+    },
+    {
+      "claim_source": "ITEM:CLAIM-05",
+      "planned_element": "threat modeling and abuse fixtures"
+    }
+  ],
+  "controls": [
+    "deny-by-default policy gate",
+    "deterministic evidence triad",
+    "nightly drift detector"
+  ],
+  "data_classification": {
+    "never_log": [
+      "access_tokens",
+      "full payment card numbers",
+      "raw auth headers"
+    ],
+    "pii_categories": [
+      "billing metadata",
+      "email",
+      "name"
+    ],
+    "redaction_rules": [
+      "mask email local-part",
+      "truncate token payload to first 6 characters"
+    ],
+    "retention_policy": "90 days for raw telemetry, 365 days for redacted evidence.",
+    "storage_classification": "CONFIDENTIAL"
+  },
+  "determinism": {
+    "stable_key_order": true,
+    "timestamps_in_metrics": false,
+    "timestamps_in_report": false
+  },
+  "evidence_ids": [
+    "SUMMIT-GOV-one-engineer-production-saas-governance-001",
+    "SUMMIT-GOV-one-engineer-production-saas-governance-002",
+    "SUMMIT-GOV-one-engineer-production-saas-governance-003"
+  ],
+  "item_slug": "one-engineer-production-saas-governance",
+  "maestro_layers": [
+    "Agents",
+    "Data",
+    "Observability",
+    "Security",
+    "Tools"
+  ],
+  "service_description": "Governance accelerator for rapidly assembled AI-orchestrated SaaS products.",
+  "threat_model": [
+    {
+      "ci_gate": "classification-check",
+      "id": "TH-002",
+      "mitigation": "Mandatory data classification enforcement before output",
+      "test_fixture": "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/data_exfiltration.json",
+      "threat": "Data exfiltration from over-broad retrieval"
+    },
+    {
+      "ci_gate": "injection-check",
+      "id": "TH-001",
+      "mitigation": "Policy aware input sanitization with allowlist parser",
+      "test_fixture": "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/prompt_injection.json",
+      "threat": "Prompt injection to bypass policy checks"
+    },
+    {
+      "ci_gate": "least-priv-check",
+      "id": "TH-003",
+      "mitigation": "Least privilege schema validation and deny-by-default fallback",
+      "test_fixture": "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/data_exfiltration.json",
+      "threat": "Over-privileged API actions"
+    }
+  ],
+  "title": "One engineer built a production SaaS in an hour - governance accelerator"
+}

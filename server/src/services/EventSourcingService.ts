@@ -216,7 +216,19 @@ export class EventSourcingService {
         await managedClient!.query('COMMIT');
       }
 
-      const storedEvent = this.mapEventRow(rows[0]);
+      let insertedRow = rows[0];
+      if (!insertedRow) {
+        const fallback = await (managedClient || this.pg).query(
+          `SELECT * FROM ${this.primaryEventTable} WHERE event_id = $1`,
+          [eventId],
+        );
+        insertedRow = fallback.rows[0];
+      }
+      if (!insertedRow) {
+        throw new Error(`Failed to persist event ${eventId}`);
+      }
+
+      const storedEvent = this.mapEventRow(insertedRow);
 
       serviceLogger.info(
         {

@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "tooling_agent_stamp",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "task",
+    "schema_version",
+    "evidence_hash",
+    "git_sha"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^TOOLING-[A-Z0-9-]+-[a-f0-9]{12}$"
+    },
+    "task": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "evidence_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^(local|[a-f0-9]{7,40})$"
+    }
+  },
+  "additionalProperties": false
+}

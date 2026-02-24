@@ -6,7 +6,6 @@ import {
   CancelRequestSchema,
   ListRequestsQuerySchema,
   AppError,
-  ValidationError,
 } from '../types.js';
 import { logger } from '../utils/logger.js';
 import { ZodError } from 'zod';
@@ -59,6 +58,32 @@ function handleError(err: unknown, req: Request, res: Response, next: NextFuncti
     code: 'INTERNAL_ERROR',
     message: 'An unexpected error occurred',
   });
+}
+
+function parseFieldsQuery(fieldsParam: unknown): string[] | undefined {
+  if (!fieldsParam || typeof fieldsParam !== 'string') {
+    return undefined;
+  }
+  return fieldsParam
+    .split(',')
+    .map((field) => field.trim())
+    .filter(Boolean);
+}
+
+function discloseReceiptFields<T extends Record<string, unknown>>(
+  receipt: T,
+  fields?: string[],
+): Partial<T> {
+  if (!fields || fields.length === 0) {
+    return receipt;
+  }
+  const output: Partial<T> = {};
+  for (const field of fields) {
+    if (field in receipt) {
+      output[field as keyof T] = receipt[field as keyof T];
+    }
+  }
+  return output;
 }
 
 // Apply tenant extraction to all routes
@@ -158,6 +183,57 @@ router.post('/requests/:requestId/cancel', async (req: Request, res: Response, n
     );
 
     res.json(request);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/v1/requests/:requestId/simulate - re-run policy simulation
+ */
+router.post('/requests/:requestId/simulate', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { requestId } = req.params;
+    const simulation = await approvalService.simulateRequest(req.tenantId!, requestId);
+    res.json(simulation);
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/v1/requests/:requestId/receipts - list receipts for a request
+ */
+router.get('/requests/:requestId/receipts', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { requestId } = req.params;
+    const fields = parseFieldsQuery(req.query.fields);
+    const receipts = await approvalService.listReceiptsForRequest(req.tenantId!, requestId);
+    const disclosed = receipts.map((receipt) =>
+      discloseReceiptFields(receipt as unknown as Record<string, unknown>, fields),
+    );
+    res.json({ items: disclosed, total: disclosed.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * GET /api/v1/receipts/:receiptId - get a specific receipt
+ */
+router.get('/receipts/:receiptId', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { receiptId } = req.params;
+    const fields = parseFieldsQuery(req.query.fields);
+    const receipt = await approvalService.getReceiptById(req.tenantId!, receiptId);
+    if (!receipt) {
+      res.status(404).json({
+        code: 'NOT_FOUND',
+        message: `Receipt '${receiptId}' not found`,
+      });
+      return;
+    }
+    res.json(discloseReceiptFields(receipt as unknown as Record<string, unknown>, fields));
   } catch (err) {
     next(err);
   }

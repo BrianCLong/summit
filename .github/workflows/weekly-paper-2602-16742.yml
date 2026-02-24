@@ -1,0 +1,61 @@
+name: weekly-paper-2602-16742
+
+on:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drift-monitor:
+    name: Weekly Drift Monitor (2602.16742)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build baseline and current metrics
+        env:
+          PYTHONPATH: .
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/2602.16742
+
+          cat > artifacts/2602.16742/baseline.json <<'JSON'
+          {"qwen3_vl_8b_deepvision_wemath_pass_at_1": 85.11}
+          JSON
+
+          cat > artifacts/2602.16742/current_input.json <<'JSON'
+          {"qwen3_vl_8b_deepvision_wemath_pass_at_1": 85.11}
+          JSON
+
+          python3 -m summit.evals.paper_2602_16742 \
+            --metrics-file artifacts/2602.16742/current_input.json \
+            --out-dir artifacts/2602.16742/current \
+            --evidence-id EVD-2602-16742-EVAL-WEEKLY-001 \
+            --target-value 85.11 \
+            --tolerance 0.5 \
+            --fail-on-miss
+
+      - name: Run drift detector
+        run: |
+          set -euo pipefail
+          python3 scripts/monitoring/paper_2602_16742_drift.py \
+            --baseline artifacts/2602.16742/baseline.json \
+            --current artifacts/2602.16742/current/metrics.json \
+            --out-dir artifacts/2602.16742/weekly \
+            --metric-key qwen3_vl_8b_deepvision_wemath_pass_at_1 \
+            --threshold 0.5
+
+      - name: Upload weekly artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-paper-2602-16742-artifacts
+          path: artifacts/2602.16742/

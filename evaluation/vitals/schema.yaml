@@ -1,0 +1,32 @@
+{
+  "accuracy": {
+    "weight": 0.30,
+    "direction": "higher_is_better",
+    "min": 0.0,
+    "max": 1.0
+  },
+  "latency_ms": {
+    "weight": 0.20,
+    "direction": "lower_is_better",
+    "min": 0.0,
+    "max": 5000.0
+  },
+  "cost_per_1k_tokens": {
+    "weight": 0.20,
+    "direction": "lower_is_better",
+    "min": 0.0,
+    "max": 10.0
+  },
+  "safety_score": {
+    "weight": 0.15,
+    "direction": "higher_is_better",
+    "min": 0.0,
+    "max": 1.0
+  },
+  "robustness": {
+    "weight": 0.15,
+    "direction": "higher_is_better",
+    "min": 0.0,
+    "max": 1.0
+  }
+}

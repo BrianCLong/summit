@@ -1,0 +1,127 @@
+{
+  "scenarios": [
+    {
+      "id": "prod-dataset-delete",
+      "privilegedFlow": true,
+      "input": {
+        "tenant_id": "tenant-acme",
+        "actor": { "id": "ops-1", "roles": ["operator"] },
+        "resource": { "type": "dataset", "id": "ds-01", "environment": "production" },
+        "action": "delete",
+        "attributes": {
+          "risk_level": "critical",
+          "risk_tag": "destructive",
+          "affects_multiple_tenants": false,
+          "amount_usd": 0
+        },
+        "context": { "environment": "production" }
+      },
+      "expect": {
+        "require_approval": true,
+        "min_required_approvals": 2
+      }
+    },
+    {
+      "id": "prod-deploy-change",
+      "privilegedFlow": true,
+      "input": {
+        "tenant_id": "tenant-acme",
+        "actor": { "id": "eng-1", "roles": ["developer"] },
+        "resource": { "type": "deployment", "id": "deploy-103", "environment": "production" },
+        "action": "deploy",
+        "attributes": {
+          "risk_level": "high",
+          "risk_tag": "prod_deploy",
+          "rollback_plan": true
+        },
+        "context": { "environment": "production" }
+      },
+      "expect": {
+        "require_approval": true,
+        "min_required_approvals": 2,
+        "allowed_approver_roles_contains": ["team-lead"]
+      }
+    },
+    {
+      "id": "high-value-payout",
+      "privilegedFlow": true,
+      "input": {
+        "tenant_id": "tenant-acme",
+        "actor": { "id": "fin-1", "roles": ["finance-analyst"] },
+        "resource": { "type": "payout", "id": "po-9001" },
+        "action": "release",
+        "attributes": {
+          "amount_usd": 75000,
+          "risk_level": "high",
+          "recipient_verified": true
+        },
+        "context": { "environment": "production" }
+      },
+      "expect": {
+        "require_approval": true,
+        "min_required_approvals": 2,
+        "allowed_approver_roles_contains": ["finance-admin"]
+      }
+    },
+    {
+      "id": "permission-grant",
+      "privilegedFlow": true,
+      "input": {
+        "tenant_id": "tenant-acme",
+        "actor": { "id": "sec-1", "roles": ["security"] },
+        "resource": { "type": "permission", "id": "perm-1" },
+        "action": "grant_permission",
+        "attributes": {
+          "risk_tag": "permission_grant",
+          "risk_level": "high"
+        },
+        "context": { "environment": "production" }
+      },
+      "expect": {
+        "require_approval": true,
+        "min_required_approvals": 2,
+        "allowed_approver_roles_contains": ["security-admin"]
+      }
+    },
+    {
+      "id": "bulk-update-entities",
+      "privilegedFlow": true,
+      "input": {
+        "tenant_id": "tenant-acme",
+        "actor": { "id": "ops-2", "roles": ["operator"] },
+        "resource": { "type": "entity", "id": "bulk-44" },
+        "action": "update",
+        "attributes": {
+          "risk_tag": "bulk_update",
+          "risk_level": "high",
+          "affects_multiple_tenants": false
+        },
+        "context": { "environment": "production" }
+      },
+      "expect": {
+        "require_approval": true,
+        "min_required_approvals": 2
+      }
+    },
+    {
+      "id": "cross-tenant-move",
+      "privilegedFlow": true,
+      "input": {
+        "tenant_id": "tenant-acme",
+        "actor": { "id": "admin-1", "roles": ["admin"] },
+        "resource": { "type": "data", "id": "tenant-pack-1" },
+        "action": "move",
+        "attributes": {
+          "affects_multiple_tenants": true,
+          "cross_tenant_approved": true,
+          "risk_level": "high"
+        },
+        "context": { "environment": "production" }
+      },
+      "expect": {
+        "require_approval": true,
+        "min_required_approvals": 2
+      }
+    }
+  ]
+}

@@ -1,12 +1,14 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[cm]?[tj]sx?$': [
+    '^.+\\.[cm]?tsx?$': [
       'ts-jest',
       {
-        useESM: false,
+        useESM: true,
         tsconfig: 'tsconfig.jest.json',
+        isolatedModules: true,
+        diagnostics: false,
       },
     ],
   },
@@ -71,11 +73,11 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
-    '^pg$': '<rootDir>/__mocks__/pg.js',
-    '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
-    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
-    '^gpt-tokenizer$': '<rootDir>/__mocks__/gpt-tokenizer.js',
+    '^node-fetch$': '<rootDir>/__mocks__/node-fetch.cjs',
+    '^pg$': '<rootDir>/__mocks__/pg.cjs',
+    '^ioredis$': '<rootDir>/__mocks__/ioredis.cjs',
+    '^puppeteer$': '<rootDir>/__mocks__/puppeteer.cjs',
+    '^gpt-tokenizer$': '<rootDir>/__mocks__/gpt-tokenizer.cjs',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
     '^vitest$': '<rootDir>/tests/utils/vitest-jest-bridge.cjs',
@@ -90,10 +92,10 @@ module.exports = {
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',
   ],
-  testTimeout: 30000,
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
   setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.cjs'],
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

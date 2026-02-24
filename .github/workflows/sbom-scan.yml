@@ -12,23 +12,10 @@ name: SBOM & Vulnerability Scanning
 on:
   push:
     branches: [main]
-    paths:
-      - "Dockerfile*"
-      - "docker-compose*"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "server/package.json"
-      - ".github/workflows/sbom-scan.yml"
-      - "security/grype-allowlist.yaml"
 
   pull_request:
     branches: [main]
-    paths:
-      - "Dockerfile*"
-      - "docker-compose*"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "server/package.json"
+  merge_group:
 
   workflow_dispatch:
 
@@ -59,14 +46,99 @@ jobs:
           format: cyclonedx-json
           output-file: sbom.json
 
-      - name: Scan with Grype
-        uses: anchore/scan-action@7037fa011853d5a11690026fb85feee79f4c946c # v7
+      - name: Install Grype
+        uses: anchore/scan-action/download-grype@3343887d815d7b07465f6fdcd395bd66508d486a # v3
+
+      - name: Scan SBOM with Grype (JSON report)
+        run: |
+          set -euo pipefail
+          grype sbom:sbom.json -o json > vuln_report.raw.json
+
+      - name: Enforce license and CVE policy gate
+        run: |
+          set -euo pipefail
+          python3 scripts/supply_chain/gate.py \
+            --sbom sbom.json \
+            --grype vuln_report.raw.json \
+            --license-allowlist security/supply-chain/license-allowlist.txt \
+            --license-overrides security/supply-chain/license-overrides.txt \
+            --cve-allowlist security/supply-chain/cve-allowlist.txt \
+            --severity-threshold HIGH
+
+      - name: Enforce CVE budget gate (max_high=0)
+        run: |
+          set -euo pipefail
+          node scripts/ci/enforce-cve-budget.mjs \
+            --grype-json vuln_report.raw.json \
+            --waivers-file .github/security-waivers.yml \
+            --max-high 0 \
+            --max-critical 0 \
+            --out vuln_report.json
+
+      - name: Install OPA
+        run: |
+          set -euo pipefail
+          curl -sSfL -o opa https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static
+          chmod +x opa
+          sudo mv opa /usr/local/bin/opa
+
+      - name: OPA metadata gate (license + residency + PII annotations)
+        run: |
+          set -euo pipefail
+          opa eval --format=json \
+            --data policy/opa/supply_chain_metadata.rego \
+            --input security/supply-chain/metadata.json \
+            'data.policy.supply_chain_metadata.allow' | tee opa_supply_chain_eval.json
+          jq -e '.result[0].expressions[0].value == true' opa_supply_chain_eval.json >/dev/null
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
-          sbom: sbom.json
-          fail-build: true
-          severity-cutoff: high
-          only-fixed: false
-          grype-config: security/grype-allowlist.yaml
+          cosign-release: "v3.0.5"
+
+      - name: Sign and verify SBOM
+        run: |
+          set -euo pipefail
+          COSIGN_PASSWORD="" cosign generate-key-pair
+          COSIGN_PASSWORD="" cosign sign-blob --key cosign.key --output-signature sbom.json.sig sbom.json
+          COSIGN_PASSWORD="" cosign verify-blob --key cosign.pub --signature sbom.json.sig sbom.json
+
+      - name: Generate provenance attestation stub
+        run: |
+          set -euo pipefail
+          SBOM_SHA=$(sha256sum sbom.json | awk '{print $1}')
+          cat > attestation.json <<EOF
+          {
+            "_type": "https://in-toto.io/Statement/v1",
+            "predicateType": "https://slsa.dev/provenance/v1",
+            "subject": [
+              {
+                "name": "sbom.json",
+                "digest": {
+                  "sha256": "${SBOM_SHA}"
+                }
+              }
+            ],
+            "predicate": {
+              "builder": {
+                "id": "https://github.com/${{ github.repository }}/.github/workflows/sbom-scan.yml@${{ github.ref }}"
+              },
+              "buildType": "https://github.com/Attestations/GitHubActionsWorkflow@v1",
+              "invocation": {
+                "configSource": {
+                  "uri": "git+https://github.com/${{ github.repository }}",
+                  "digest": {
+                    "sha1": "${{ github.sha }}"
+                  }
+                }
+              },
+              "metadata": {
+                "buildInvocationId": "${{ github.run_id }}"
+              }
+            }
+          }
+          EOF
+
       - name: Attest SBOM
         uses: actions/attest-sbom@v3
         with:
@@ -80,6 +152,11 @@ jobs:
           name: sbom-scan-results
           path: |
             sbom.json
-            results.sarif
+            sbom.json.sig
+            cosign.pub
+            attestation.json
+            vuln_report.raw.json
+            vuln_report.json
+            opa_supply_chain_eval.json
           retention-days: 90
 # Linked: https://linear.app/summi7/issue/SUM-10197

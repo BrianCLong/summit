@@ -11,18 +11,10 @@ name: OPA Policy Tests
 on:
   pull_request:
     branches: [main]
-    paths:
-      - "policy/**/*.rego"
-      - "policy/**/*.json"
-      - "policy/**/*.yaml"
-      - ".github/workflows/opa-policy-test.yml"
 
   push:
     branches: [main]
-    paths:
-      - "policy/**/*.rego"
-      - "policy/**/*.json"
-      - "policy/**/*.yaml"
+  merge_group:
 
   workflow_dispatch:
 

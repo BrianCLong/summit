@@ -21,5 +21,9 @@ export function auditLog(req: Request, action: string, details?: any) {
 }
 
 export function getAuditEvents(limit = 200) {
+  if (limit <= 0) {
+    events.length = 0;
+    return [];
+  }
   return events.slice(-limit).reverse();
 }

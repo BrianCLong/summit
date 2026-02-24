@@ -1,0 +1,14 @@
+{
+  "item_slug": "one-engineer-production-saas-governance",
+  "iterations": 3,
+  "memory_mb": {
+    "max": 0.148,
+    "median": 0.147,
+    "min": 0.147
+  },
+  "runtime_ms": {
+    "max": 198.842,
+    "median": 19.541,
+    "min": 5.481
+  }
+}

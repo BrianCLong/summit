@@ -1,11 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Canonical policy for release gate requirements",
-  "last_updated": "2026-02-01",
+  "last_updated": "2026-02-24",
   "owner": "Platform Engineering",
 
   "always_required": [
+    {
+      "name": "governance / governance-pack-check",
+      "workflow": "governance.yml",
+      "rationale": "Deterministic governance-pack enforcement: schema validity, artifact reproducibility, and threat/perf minimums."
+    },
     {
       "name": "Release Readiness Gate",
       "workflow": "release-readiness.yml",
@@ -65,6 +70,19 @@
       "workflow": "docker-build-scan.yml",
       "rationale": "Docker image build and security validation",
       "required_when_paths_match": ["^Dockerfile", "^docker-compose", "^\\.dockerignore$"]
+    },
+    {
+      "name": "Security Debt Gate",
+      "workflow": "security-debt-gate.yml",
+      "rationale": "Deterministic security debt accounting and AI-assisted risk governance checks.",
+      "required_when_paths_match": [
+        "^summit/security_debt/",
+        "^summit/ci/verify_security_debt\\.py$",
+        "^summit/ci/gates/security_debt\\.yml$",
+        "^scripts/monitoring/security-debt-drift\\.py$",
+        "^docs/security/security-debt/",
+        "^\\.github/workflows/security-debt-gate\\.yml$"
+      ]
     }
   ],
 

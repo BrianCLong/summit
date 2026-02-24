@@ -1,0 +1,61 @@
+name: Governance Pack Drift
+
+on:
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  drift-check:
+    name: governance-pack-drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compute governance drift hashes
+        run: |
+          PREVIOUS_HASH=$(python3 - <<'PY'
+          import hashlib
+          import subprocess
+
+          files = [
+              "governance/one-engineer-production-saas-governance/report.json",
+              "governance/one-engineer-production-saas-governance/metrics.json",
+              "governance/one-engineer-production-saas-governance/stamp.json",
+          ]
+          hashes = []
+          for path in files:
+              result = subprocess.run(
+                  ["git", "show", f"HEAD~1:{path}"],
+                  capture_output=True,
+                  text=True,
+                  check=False,
+              )
+              if result.returncode != 0:
+                  print("")
+                  raise SystemExit(0)
+              hashes.append(hashlib.sha256(result.stdout.encode("utf-8")).hexdigest())
+          print(hashlib.sha256("".join(hashes).encode("utf-8")).hexdigest())
+          PY
+          )
+
+          python3 scripts/monitoring/one-engineer-production-saas-governance-drift.py \
+            --previous-hash "${PREVIOUS_HASH}" \
+            --fail-on-drift \
+            --out governance-pack-drift.json
+          cat governance-pack-drift.json
+
+      - name: Upload drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-pack-drift
+          path: governance-pack-drift.json
+          retention-days: 14

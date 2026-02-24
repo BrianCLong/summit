@@ -6,7 +6,7 @@ export function slowQueryLogger(
   next: NextFunction,
 ) {
   const threshold = Number(process.env.SLOW_QUERY_MS || '0');
-  if (!threshold) {
+  if (!Number.isFinite(threshold) || threshold <= 0) {
     return next();
   }
   const start = Date.now();

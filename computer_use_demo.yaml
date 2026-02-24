@@ -1,0 +1,23 @@
+{
+  "name": "computer_use_demo",
+  "policy": {
+    "name": "computer_use_deny_by_default"
+  },
+  "steps": [
+    {
+      "id": "open_workspace",
+      "action": "open_page",
+      "target": "workspace:inbox"
+    },
+    {
+      "id": "extract_context",
+      "action": "extract_text",
+      "input": "summarize pending workflows"
+    },
+    {
+      "id": "click_review",
+      "action": "click",
+      "target": "review_button"
+    }
+  ]
+}

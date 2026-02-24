@@ -1,0 +1,206 @@
+name: PR Labeler and Router
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  label-and-route:
+    name: Label and Route PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Apply file-pattern labels
+        uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: true
+
+      - name: Apply semver and route labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issue_number = context.issue.number;
+            const pr = context.payload.pull_request;
+            const title = (pr.title || "").toLowerCase();
+            const body = (pr.body || "").toLowerCase();
+
+            const existingLabels = new Set((pr.labels || []).map((label) => label.name));
+            const requiredLabels = {
+              "patch": { color: "0e8a16", description: "Patch-level change classification" },
+              "minor": { color: "1d76db", description: "Minor-level change classification" },
+              "major": { color: "b60205", description: "Major-level change classification" },
+              "route:jules": { color: "8c564b", description: "Route for architecture/policy review" },
+              "route:observer": { color: "0052cc", description: "Route for verification/evidence review" },
+              "agent-task": { color: "5319e7", description: "Structured agent-task issue or PR context" },
+              "jules": { color: "c5def5", description: "Jules ownership or review context" },
+              "observer": { color: "bfdadc", description: "Observer ownership or review context" }
+            };
+
+            async function ensureLabel(name, spec) {
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name });
+              } catch (error) {
+                if (error.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner,
+                    repo,
+                    name,
+                    color: spec.color,
+                    description: spec.description
+                  });
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+            for (const [name, spec] of Object.entries(requiredLabels)) {
+              await ensureLabel(name, spec);
+            }
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              { owner, repo, pull_number: pr.number, per_page: 100 }
+            );
+            const paths = files.map((file) => file.filename);
+
+            const hasPath = (regex) => paths.some((path) => regex.test(path));
+
+            const docOnly = paths.length > 0 && paths.every((path) => (
+              path.startsWith("docs/") ||
+              path.startsWith(".github/ISSUE_TEMPLATE/") ||
+              path.startsWith(".github/PULL_REQUEST_TEMPLATE/") ||
+              path.endsWith(".md") ||
+              path === "LICENSE" ||
+              path.startsWith("README")
+            ));
+
+            const governanceTouched = hasPath(/^docs\/governance\//) ||
+              hasPath(/^policy\//) ||
+              hasPath(/^policies\//) ||
+              hasPath(/^governance\//) ||
+              hasPath(/^agent-contract\.json$/) ||
+              hasPath(/^governance\/tool_registry\.yaml$/) ||
+              hasPath(/^prompts\/registry\.yaml$/);
+
+            const ciTouched = hasPath(/^\.github\/(workflows|actions)\//) ||
+              hasPath(/^scripts\/ci\//) ||
+              hasPath(/^Makefile$/);
+
+            const securityTouched = hasPath(/^SECURITY\//) ||
+              hasPath(/^security\//) ||
+              hasPath(/^runtime_security\//) ||
+              hasPath(/^\.github\/workflows\/(security|codeql|supplychain).*\.ya?ml$/) ||
+              hasPath(/(^|\/)(auth|rbac|secrets)\//);
+
+            const testTouched = hasPath(/^tests?\//) ||
+              hasPath(/(^|\/)__tests__\//) ||
+              hasPath(/\.test\.[a-z0-9]+$/) ||
+              hasPath(/\.spec\.[a-z0-9]+$/);
+
+            const codeTouched = hasPath(/^server\//) ||
+              hasPath(/^services\//) ||
+              hasPath(/^apps\//) ||
+              hasPath(/^packages\//) ||
+              hasPath(/^src\//) ||
+              hasPath(/\.(ts|tsx|js|jsx|py|go|rs|java|kt|sql)$/);
+
+            const breakingHint = title.includes("breaking") || body.includes("breaking change");
+            const featureHint = title.startsWith("feat") || existingLabels.has("type:feature") || existingLabels.has("feature");
+            const migrationTouched = hasPath(/(^|\/)(migrations?|schema\.prisma|schema\.sql)$/);
+
+            let semverLabel = "patch";
+            if (breakingHint) {
+              semverLabel = "major";
+            } else if (!docOnly && (featureHint || codeTouched || migrationTouched)) {
+              semverLabel = "minor";
+            }
+
+            const semverCandidates = [
+              "major",
+              "minor",
+              "patch",
+              "semver:major",
+              "semver:minor",
+              "semver:patch"
+            ];
+
+            const labelsToAdd = new Set([semverLabel]);
+            const labelsToRemove = new Set();
+
+            if (hasPath(/^server\//) || hasPath(/^services\//) || hasPath(/^apps\/api\//)) {
+              labelsToAdd.add("area:server");
+            }
+            if (hasPath(/^apps\/web\//) || hasPath(/^web\//)) {
+              labelsToAdd.add("area:web");
+            }
+            if (hasPath(/^client\//)) {
+              labelsToAdd.add("area:client");
+            }
+            if (hasPath(/^packages\//)) {
+              labelsToAdd.add("area:packages");
+            }
+            if (docOnly || hasPath(/^docs\//)) {
+              labelsToAdd.add("area:docs");
+            }
+            if (ciTouched) {
+              labelsToAdd.add("area:ci");
+            }
+            if (governanceTouched) {
+              labelsToAdd.add("area:governance");
+              labelsToAdd.add("route:jules");
+            }
+            if (securityTouched) {
+              labelsToAdd.add("area:security");
+            }
+            if (ciTouched || testTouched || hasPath(/^evidence\//) || hasPath(/^artifacts\//)) {
+              labelsToAdd.add("route:observer");
+            }
+            if (codeTouched) {
+              labelsToAdd.add("codex");
+            }
+
+            for (const label of semverCandidates) {
+              if (existingLabels.has(label) && label !== semverLabel) {
+                labelsToRemove.add(label);
+              }
+            }
+
+            for (const label of labelsToRemove) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name: label });
+              } catch (error) {
+                if (error.status !== 404) {
+                  throw error;
+                }
+              }
+            }
+
+            const finalToAdd = [...labelsToAdd].filter((label) => !existingLabels.has(label));
+            if (finalToAdd.length > 0) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: finalToAdd
+              });
+            }
+
+            core.summary
+              .addHeading("PR Label Routing Summary")
+              .addRaw(`SemVer: ${semverLabel}\n`)
+              .addRaw(`Added labels: ${finalToAdd.length ? finalToAdd.join(", ") : "(none)"}\n`)
+              .addRaw(`Removed labels: ${labelsToRemove.size ? [...labelsToRemove].join(", ") : "(none)"}\n`)
+              .addRaw(`Files analyzed: ${paths.length}\n`)
+              .write();

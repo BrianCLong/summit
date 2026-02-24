@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["budget", "usage", "tool_calls"],
+  "additionalProperties": false,
+  "properties": {
+    "budget": {
+      "type": "object",
+      "required": ["max_tokens", "max_cost_usd"],
+      "additionalProperties": false,
+      "properties": {
+        "max_tokens": {
+          "type": "integer"
+        },
+        "max_cost_usd": {
+          "type": "number"
+        }
+      }
+    },
+    "usage": {
+      "type": "object",
+      "required": ["tokens", "cost_usd"],
+      "additionalProperties": false,
+      "properties": {
+        "tokens": {
+          "type": "integer"
+        },
+        "cost_usd": {
+          "type": "number"
+        }
+      }
+    },
+    "tool_calls": {
+      "type": "integer"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+version: 1
+owner: codex
+threat_model:
+  - id: TH-001
+    threat: prompt-injection
+    mitigation: sanitize-and-allowlist-inputs
+    ci_gate: injection-check
+    test_fixture: tests/fixtures/abuse_cases/<item-slug>/prompt_injection.json
+  - id: TH-002
+    threat: data-exfiltration
+    mitigation: classification-required-for-output-paths
+    ci_gate: classification-check
+    test_fixture: tests/fixtures/abuse_cases/<item-slug>/data_exfiltration.json

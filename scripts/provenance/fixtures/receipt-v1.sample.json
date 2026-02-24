@@ -1,0 +1,29 @@
+{
+  "schema_version": "switchboard.receipt.v1",
+  "id": "receipt-sample-001",
+  "approval_id": "a7f95f57-5c9b-4c59-a902-17ee6c5ea9aa",
+  "tenant_id": "tenant-acme",
+  "actor": {
+    "id": "admin-42",
+    "email": "admin@example.com",
+    "roles": ["admin", "security-admin"],
+    "attributes": {
+      "department": "security"
+    }
+  },
+  "decision": "approve",
+  "timestamp": "2026-02-24T10:00:00Z",
+  "policy_version": "1.0.0",
+  "policy_decision_hash": "9fb1ee9ca6348f2788e17130052ea67f88cbaf74f959a18d8013949552f005cc",
+  "pre_state_hash": "17ad90a49495f57ce076493d0f80fc40dfbacf3708a5134577d23f1152f53f2a",
+  "post_state_hash": "ed95dbf6ede7f80be2922c69fdb260dbfc1c70836474e9e9ca9dc4a67de3f85d",
+  "risk_tier": "critical",
+  "cost_estimate": {
+    "currency": "USD",
+    "amount": 242.75,
+    "confidence": 0.91
+  },
+  "input_hash": "d9e3926f8f8f8536fbe8f9f8d43e0872b99090f0eb6f7ad4ec0e3ad4304a1dea",
+  "signature": "CGsi718fmOSBQkpHunYgOBGLROzkiOwswdthZXPNDyc",
+  "key_id": "approvals-svc-key-1"
+}

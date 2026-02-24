@@ -16,9 +16,9 @@
 # IMPORTANT: Do not add new always_required checks without
 # verifying they run on EVERY commit to main.
 
-version: "2.1.0"
+version: "2.1.1"
 description: "Canonical policy for release gate requirements"
-last_updated: "2026-02-01"
+last_updated: "2026-02-24"
 owner: "Platform Engineering"
 
 # Branch Protection Policy
@@ -33,7 +33,10 @@ branch_protection:
       - "CI Core Gate ✅"
       - "Unit Tests"
       - "gate"
+      - "governance / governance-pack-check"
       - "Release Readiness Gate"
+      - "SBOM & Vulnerability Gate"
+      - "OPA Policy Tests"
       - "SOC Controls"
       - "test (20.x)"
       - "Workflow Validity Check"
@@ -60,9 +63,21 @@ always_required:
     workflow: "ga-gate.yml"
     rationale: "Official GA gate job required by branch protection"
 
+  - name: "governance / governance-pack-check"
+    workflow: "governance.yml"
+    rationale: "Deterministic governance-pack enforcement: schema validity, artifact reproducibility, threat model + abuse fixture presence, and performance budget."
+
   - name: "Release Readiness Gate"
     workflow: "release-readiness.yml"
     rationale: "Comprehensive release readiness verification - runs on every change"
+
+  - name: "SBOM & Vulnerability Gate"
+    workflow: "sbom-scan.yml"
+    rationale: "Deterministic supply-chain gate: SBOM, vulnerability budget, signatures, provenance, and metadata policy."
+
+  - name: "OPA Policy Tests"
+    workflow: "opa-policy-test.yml"
+    rationale: "Policy-as-code validation including release metadata governance rules."
 
   - name: "test (20.x)"
     workflow: "unit-test-coverage.yml"
@@ -105,18 +120,6 @@ conditional_required:
       - "^packages/"
       - "^cli/"
 
-  - name: "SBOM & Vulnerability Scanning"
-    workflow: "sbom-scan.yml"
-    rationale: "Supply chain security for Docker and dependencies"
-    when_paths_match:
-      - "^Dockerfile"
-      - "^docker-compose"
-      - '^package\.json$'
-      - '^pnpm-lock\.yaml$'
-      - '^server/package\.json$'
-      - '^\.github/workflows/supply-chain'
-      - "^scripts/security/"
-
   - name: "Docker Build & Security Scan"
     workflow: "docker-build.yml"
     rationale: "Docker image build and security validation"
@@ -142,18 +145,23 @@ conditional_required:
       - "^k6/"
       - "^ops/docker-compose"
 
-  - name: "OPA Policy Tests"
-    workflow: "opa-policy-test.yml"
-    rationale: "Validates OPA/Rego policies with 90% coverage requirement"
-    when_paths_match:
-      - "^policy/"
-
   - name: "Extortion Pressure Gates"
     workflow: "extortion-gates.yml"
     rationale: "Ensures extortion artifacts are deterministic and follow never-log policy"
     when_paths_match:
       - "^packages/extortion/"
       - "^scripts/ci/.*extortion"
+
+  - name: "Security Debt Gate"
+    workflow: "security-debt-gate.yml"
+    rationale: "Enforces deterministic security debt accounting, provenance headers, dependency risk classification, and threat-model coverage for AI-assisted changes."
+    when_paths_match:
+      - "^summit/security_debt/"
+      - "^summit/ci/verify_security_debt\\.py$"
+      - "^summit/ci/gates/security_debt\\.yml$"
+      - "^scripts/monitoring/security-debt-drift\\.py$"
+      - "^docs/security/security-debt/"
+      - "^\\.github/workflows/security-debt-gate\\.yml$"
 
 # Informational Checks
 # --------------------

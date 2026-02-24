@@ -1,0 +1,40 @@
+{
+  "pack_version": "v12",
+  "status": "draft",
+  "release_window": {
+    "start_date": "2026-02-23",
+    "end_date": "2026-03-06"
+  },
+  "supply_chain": {
+    "sbom": {
+      "path": "SBOM.json",
+      "format": "CycloneDX",
+      "required": true
+    },
+    "signature_verification": {
+      "method": "sigstore-cosign-keyless",
+      "result": "pending_release_cut",
+      "required": true
+    },
+    "provenance": {
+      "path": "attestation.json",
+      "slsa_target": "L3",
+      "required": true
+    },
+    "vulnerability_budget": {
+      "path": "vuln_report.json",
+      "max_high": 0,
+      "waiver": "timeboxed-approved-only"
+    }
+  },
+  "compliance": {
+    "data_residency_assertion": "required",
+    "pii_classification_summary": "required",
+    "audit_event_snapshot": "required"
+  },
+  "export_formats": [
+    "json",
+    "pdf"
+  ],
+  "retention_days_min": 30
+}

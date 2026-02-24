@@ -14,6 +14,7 @@ This index is the authoritative navigation layer for governance artifacts.
 - [Summit Readiness Assertion](../SUMMIT_READINESS_ASSERTION.md)
 - [Governance Ownership](OWNERSHIP.md)
 - [Policies & Authority](POLICIES.md)
+- [Agent Workflow Model](SUMMIT_AGENT_WORKFLOW_MODEL.md)
 
 ## Runtime Governance
 

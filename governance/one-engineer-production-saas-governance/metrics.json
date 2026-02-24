@@ -1,0 +1,18 @@
+{
+  "counts": {
+    "abuse_case_fixtures": 2,
+    "controls": 3,
+    "threat_model_entries": 3
+  },
+  "evidence_id": "SUMMIT-GOV-one-engineer-production-saas-governance-002",
+  "gates": [
+    "classification-check",
+    "injection-check",
+    "least-priv-check"
+  ],
+  "item_slug": "one-engineer-production-saas-governance",
+  "performance_budget": {
+    "max_memory_mb": 50,
+    "max_runtime_ms": 200
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["agent_version", "evidence_ids", "deterministic_hash"],
+  "additionalProperties": false,
+  "properties": {
+    "agent_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^EVID:[a-z0-9-]+:[0-9]{4}$"
+      }
+    },
+    "deterministic_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

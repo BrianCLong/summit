@@ -18,7 +18,7 @@ import {
 // Mock dependencies
 jest.mock('ioredis');
 jest.mock('@intelgraph/rate-limiter');
-jest.mock('../utils/logger.js', () => ({
+jest.mock('../../utils/logger.js', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),

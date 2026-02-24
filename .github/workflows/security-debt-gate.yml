@@ -1,0 +1,42 @@
+name: Security Debt Gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  security-debt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Analyze Security Debt
+        run: |
+          python -m summit analyze --security-debt \
+            --output-dir artifacts/security-debt \
+            --gate-config summit/ci/gates/security_debt.yml
+
+      - name: Verify Security Debt Gate
+        env:
+          SECURITY_DEBT_ENFORCEMENT: ${{ vars.SECURITY_DEBT_ENFORCEMENT }}
+        run: |
+          python summit/ci/verify_security_debt.py \
+            --artifacts-dir artifacts/security-debt \
+            --gate-config summit/ci/gates/security_debt.yml
+
+      - name: Upload Security Debt Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-debt-artifacts
+          path: artifacts/security-debt
+          retention-days: 30

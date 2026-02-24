@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "tooling_agent_report",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "task",
+    "status",
+    "title",
+    "summary",
+    "maestro_layers",
+    "threats_considered",
+    "mitigations",
+    "decisions",
+    "injection_detected",
+    "artifacts"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^TOOLING-[A-Z0-9-]+-[a-f0-9]{12}$"
+    },
+    "task": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready", "disabled", "blocked"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "maestro_layers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Foundation",
+          "Data",
+          "Agents",
+          "Tools",
+          "Infra",
+          "Observability",
+          "Security"
+        ]
+      },
+      "minItems": 1
+    },
+    "threats_considered": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "mitigations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "injection_detected": {
+      "type": "boolean"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["report.json", "metrics.json", "stamp.json"]
+      },
+      "minItems": 3,
+      "maxItems": 3
+    }
+  },
+  "additionalProperties": false
+}

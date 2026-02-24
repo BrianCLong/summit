@@ -139,6 +139,10 @@ export class DataCloneService {
         error: errorMessage,
       });
 
+      if (error && typeof error === 'object' && 'code' in error) {
+        throw error;
+      }
+
       return {
         id: uuidv4(),
         requestId,

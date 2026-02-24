@@ -1,13 +1,13 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { FlowDetectionService } from '../../services/FlowDetectionService.js';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { FlowDetectionService } from '../../services/FlowDetectionService';
 import type { Transaction, MonetaryAmount } from '@intelgraph/finance-normalizer-types';
 import { createMonetaryAmount } from '@intelgraph/finance-normalizer-types';
 
 // Mock database
-vi.mock('../../utils/db.js', () => ({
+jest.mock('../../utils/db', () => ({
   db: {
-    query: vi.fn().mockResolvedValue({ rows: [] }),
-    transaction: vi.fn((fn) => fn({ query: vi.fn() })),
+    query: jest.fn().mockResolvedValue({ rows: [] }),
+    transaction: jest.fn((fn) => fn({ query: jest.fn() })),
   },
 }));
 

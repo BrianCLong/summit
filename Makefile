@@ -10,6 +10,7 @@ include Makefile.merge-train
 .PHONY: bootstrap
 .PHONY: dev-prereqs dev-up dev-down dev-smoke
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
+.PHONY: security-debt security-debt-drift
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
@@ -101,6 +102,13 @@ release: ## Build Python wheel and Docker image tagged with project version
 	docker tag $(IMAGE) $(IMAGE_NAME):latest
 
 ci: lint test validate-ops
+
+security-debt: ## Run deterministic security debt analyzer + verifier
+	@python3 -m summit analyze --security-debt --output-dir artifacts/security-debt --gate-config summit/ci/gates/security_debt.yml
+	@python3 summit/ci/verify_security_debt.py --artifacts-dir artifacts/security-debt --gate-config summit/ci/gates/security_debt.yml
+
+security-debt-drift: ## Run security debt drift check (non-blocking unless fail-on-alert is passed)
+	@python3 scripts/monitoring/security-debt-drift.py --repo-root . --output-dir artifacts/security-debt --baseline monitoring/security_debt_baseline/security_debt_ledger.json --trend monitoring/security_debt_trends.json --gate-config summit/ci/gates/security_debt.yml
 
 k6:     ## Perf smoke (TARGET=http://host:port make k6)
 	./ops/k6/smoke.sh

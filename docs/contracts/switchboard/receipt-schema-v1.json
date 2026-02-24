@@ -1,0 +1,288 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.intelgraph.dev/contracts/switchboard/receipt-schema-v1.json",
+  "title": "Switchboard Privileged Action Receipt v1",
+  "description": "Signed receipt emitted for every privileged Switchboard action.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "action_id",
+    "action_name",
+    "timestamp",
+    "risk_tier",
+    "actor",
+    "policy_decision",
+    "hashes",
+    "rationale",
+    "approvals",
+    "cost_estimate",
+    "signer",
+    "ledger"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{8,128}$"
+    },
+    "action_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._:-]{6,128}$"
+    },
+    "action_name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "risk_tier": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["user_id", "tenant_id", "roles", "attributes"],
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "minLength": 3
+        },
+        "tenant_id": {
+          "type": "string",
+          "minLength": 2
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 2
+          }
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "number", "boolean", "null"]
+          }
+        }
+      }
+    },
+    "policy_decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision",
+        "policy_bundle_version",
+        "policy_hash",
+        "simulation_id",
+        "simulation_hash"
+      ],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "deny", "hold"]
+        },
+        "policy_bundle_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "policy_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "simulation_id": {
+          "type": "string",
+          "minLength": 6
+        },
+        "simulation_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "obligations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "hashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["input_sha256", "pre_state_sha256", "post_state_sha256"],
+      "properties": {
+        "input_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "pre_state_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "post_state_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "rationale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary",
+        "justification_code",
+        "impact_assessment",
+        "risk_acknowledged"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 20,
+          "maxLength": 2048
+        },
+        "justification_code": {
+          "type": "string",
+          "enum": [
+            "incident-response",
+            "security-remediation",
+            "legal-hold",
+            "production-maintenance",
+            "customer-obligation",
+            "other"
+          ]
+        },
+        "impact_assessment": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 1024
+        },
+        "risk_acknowledged": {
+          "type": "boolean"
+        },
+        "ticket_ref": {
+          "type": "string",
+          "maxLength": 128
+        }
+      }
+    },
+    "approvals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required_count", "approver_count", "approvers"],
+      "properties": {
+        "required_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "approver_count": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "approvers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["user_id", "approved_at", "approval_id"],
+            "properties": {
+              "user_id": {
+                "type": "string",
+                "minLength": 3
+              },
+              "approved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "approval_id": {
+                "type": "string",
+                "minLength": 6
+              }
+            }
+          }
+        }
+      }
+    },
+    "cost_estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "estimated_amount",
+        "attribution_window",
+        "confidence"
+      ],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "enum": ["USD"]
+        },
+        "estimated_amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "attribution_window": {
+          "type": "string",
+          "minLength": 3
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "signer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kid", "algorithm", "signature", "signed_at"],
+      "properties": {
+        "kid": {
+          "type": "string",
+          "minLength": 3
+        },
+        "algorithm": {
+          "type": "string",
+          "enum": ["cosign", "kms-rsassa-pss-sha256", "ed25519"]
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 12
+        },
+        "signed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entry_id", "write_latency_ms", "reference_uri"],
+      "properties": {
+        "entry_id": {
+          "type": "string",
+          "minLength": 6
+        },
+        "write_latency_ms": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reference_uri": {
+          "type": "string",
+          "minLength": 3
+        }
+      }
+    }
+  }
+}

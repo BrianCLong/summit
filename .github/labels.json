@@ -232,5 +232,125 @@
     "name": "migration-gate",
     "color": "e11d48",
     "description": "Schema-impacting change that must pass migration gate review"
+  },
+  {
+    "name": "codex",
+    "color": "0e8a16",
+    "description": "Codex-owned implementation work"
+  },
+  {
+    "name": "ci",
+    "color": "5319e7",
+    "description": "Continuous integration workflow changes"
+  },
+  {
+    "name": "docs",
+    "color": "0075ca",
+    "description": "Documentation-focused changes"
+  },
+  {
+    "name": "ga-blocker",
+    "color": "000000",
+    "description": "GA ship blocker"
+  },
+  {
+    "name": "determinism",
+    "color": "0052cc",
+    "description": "Deterministic execution and reproducibility"
+  },
+  {
+    "name": "infra",
+    "color": "1f77b4",
+    "description": "Infrastructure and runtime foundations"
+  },
+  {
+    "name": "compliance",
+    "color": "8b5cf6",
+    "description": "Compliance and control evidence"
+  },
+  {
+    "name": "security",
+    "color": "6610f2",
+    "description": "Security-related tasks"
+  },
+  {
+    "name": "cost-control",
+    "color": "f59e0b",
+    "description": "Cost telemetry and budget enforcement"
+  },
+  {
+    "name": "observability",
+    "color": "0ea5e9",
+    "description": "Metrics, traces, and operational visibility"
+  },
+  {
+    "name": "ga",
+    "color": "4c1d95",
+    "description": "General availability readiness work"
+  },
+  {
+    "name": "ux",
+    "color": "ec4899",
+    "description": "User experience and usability"
+  },
+  {
+    "name": "explainability",
+    "color": "14b8a6",
+    "description": "Decision transparency and explainability"
+  },
+  {
+    "name": "tech-debt",
+    "color": "6b7280",
+    "description": "Technical debt reduction"
+  },
+  {
+    "name": "refactor",
+    "color": "a3e635",
+    "description": "Refactoring with no intended behavior change"
+  },
+  {
+    "name": "maintenance",
+    "color": "94a3b8",
+    "description": "Maintenance and upkeep"
+  },
+  {
+    "name": "patch",
+    "color": "0e8a16",
+    "description": "Patch-level change classification"
+  },
+  {
+    "name": "minor",
+    "color": "1d76db",
+    "description": "Minor-level change classification"
+  },
+  {
+    "name": "major",
+    "color": "b60205",
+    "description": "Major-level change classification"
+  },
+  {
+    "name": "agent-task",
+    "color": "5319e7",
+    "description": "Structured agent execution task"
+  },
+  {
+    "name": "jules",
+    "color": "c5def5",
+    "description": "Jules-owned architecture and planning context"
+  },
+  {
+    "name": "observer",
+    "color": "bfdadc",
+    "description": "Observer-owned verification context"
+  },
+  {
+    "name": "route:jules",
+    "color": "8c564b",
+    "description": "Route for architecture and policy review"
+  },
+  {
+    "name": "route:observer",
+    "color": "0052cc",
+    "description": "Route for verification and evidence review"
   }
 ]

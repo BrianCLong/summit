@@ -363,6 +363,7 @@ bin/
 release-assets/
 evidence-staging/
 *.txt
+!security/supply-chain/*.txt
 tmp-test/
 \n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
 .pnpm-store/

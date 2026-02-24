@@ -1,0 +1,29 @@
+name: agent-drift
+
+on:
+  schedule:
+    - cron: "0 14 * * 1"
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run drift detector
+        run: python scripts/monitoring/summit-agent-drift.py --update-baseline
+
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-drift-report
+          path: artifacts/monitoring/agent_trend.json
+          retention-days: 30

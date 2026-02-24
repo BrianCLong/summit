@@ -10,7 +10,7 @@ import { PostgreSQLConnection } from '../postgres.js';
 
 // Mock dependencies
 jest.mock('pg');
-jest.mock('../utils/logger.js', () => ({
+jest.mock('../../utils/logger.js', () => ({
   logger: {
     info: jest.fn(),
     error: jest.fn(),
@@ -159,7 +159,7 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should log slow queries', async () => {
-      const { logger } = require('../utils/logger.js');
+      const { logger } = require('../../utils/logger.js');
       const mockResult = { rows: [], rowCount: 0 };
 
       mockPool.query.mockImplementation(

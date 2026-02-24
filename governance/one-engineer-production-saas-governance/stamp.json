@@ -1,0 +1,8 @@
+{
+  "evidence_id": "SUMMIT-GOV-one-engineer-production-saas-governance-003",
+  "generator": "scripts/governance/generate_pack.py",
+  "item_slug": "one-engineer-production-saas-governance",
+  "schema_path": "governance/schema/governance.schema.json",
+  "schema_version": "1.0.0",
+  "source_spec_sha256": "e2b10d171d3e5258edfe39feee0a5f1bcb3338d7046c0c8f19b1308d28241e85"
+}

@@ -117,31 +117,49 @@ export function parseDate(
     if (dateFormat === 'DD/MM/YYYY' || dateFormat === 'DD.MM.YYYY') {
       const match = original.match(/^(\d{2})[\/.](\d{2})[\/.](\d{4})$/);
       if (match) {
-        parsed = new Date(
-          parseInt(match[3], 10),
-          parseInt(match[2], 10) - 1,
-          parseInt(match[1], 10)
-        );
+        const year = parseInt(match[3], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[1], 10);
+        const candidate = new Date(year, month, day);
+        if (
+          candidate.getFullYear() === year &&
+          candidate.getMonth() === month &&
+          candidate.getDate() === day
+        ) {
+          parsed = candidate;
+        }
         timeInferred = true;
       }
     } else if (dateFormat === 'MM/DD/YYYY') {
       const match = original.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
       if (match) {
-        parsed = new Date(
-          parseInt(match[3], 10),
-          parseInt(match[1], 10) - 1,
-          parseInt(match[2], 10)
-        );
+        const year = parseInt(match[3], 10);
+        const month = parseInt(match[1], 10) - 1;
+        const day = parseInt(match[2], 10);
+        const candidate = new Date(year, month, day);
+        if (
+          candidate.getFullYear() === year &&
+          candidate.getMonth() === month &&
+          candidate.getDate() === day
+        ) {
+          parsed = candidate;
+        }
         timeInferred = true;
       }
     } else if (dateFormat === 'YYYY-MM-DD') {
       const match = original.match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (match) {
-        parsed = new Date(
-          parseInt(match[1], 10),
-          parseInt(match[2], 10) - 1,
-          parseInt(match[3], 10)
-        );
+        const year = parseInt(match[1], 10);
+        const month = parseInt(match[2], 10) - 1;
+        const day = parseInt(match[3], 10);
+        const candidate = new Date(year, month, day);
+        if (
+          candidate.getFullYear() === year &&
+          candidate.getMonth() === month &&
+          candidate.getDate() === day
+        ) {
+          parsed = candidate;
+        }
         timeInferred = true;
       }
     }
@@ -193,7 +211,7 @@ export function normalizePartyName(name: string): string {
   return name
     .trim()
     .replace(/\s+/g, ' ')
-    .replace(/\b(LTD|LLC|INC|CORP|CO|PLC|SA|AG|GMBH|NV|BV)\b\.?/gi, (m) => m.toUpperCase().replace('.', ''))
+    .replace(/\b(LTD|LLC|INC|CO|PLC|SA|AG|GMBH|NV|BV)\b\.?/gi, (m) => m.toUpperCase().replace('.', ''))
     .trim();
 }
 

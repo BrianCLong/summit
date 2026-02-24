@@ -1,7 +1,37 @@
 {
   "last_updated": "2026-02-24T00:00:00Z",
-  "revision_note": "Added data-collection resilience governance pack (policy rules, runbook, deterministic KPI SQL, ADR, and tradeoff record).",
+  "revision_note": "Delivered Summit agent workflow extension pack, including live GitHub issues #18644-#18649 and automated PR label/routing workflows. Added agent trust-boundary evaluation harness with deterministic triad artifacts, schema-gated CI verification, and drift monitoring.",
   "initiatives": [
+    {
+      "id": "notion-computer-use-governance-lane",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented `summit agent run` for computer-use simulation plans with mandatory policy declaration, deny-by-default network controls, deterministic report/metrics/stamp outputs, default-off feature flag, CI policy tests, and operational docs + drift detection script."
+    },
+    {
+      "id": "jules-codex-handoff-contracts",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented executable agent-task issue contract and PR labeler routing with semver auto-labeling (patch/minor/major) plus Jules/Observer route tags and canonical area labels."
+    },
+    {
+      "id": "agent-eval-trust-boundary",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic AI coding-agent trust boundary with provenance schema, CI gate, perf/determinism tests, and weekly drift detection."
+    },
+    {
+      "id": "switchboard-sprint-07-approvals-provenance-ga-internal",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Sprint 07 delivery artifacts: approvals/provenance GA sprint plan, Jira import backlog, receipt schema v1, OAS endpoints, evidence bundle checklist, and runbook procedures for stuck approvals, signing failures, policy regressions, and dual-control override audits."
+    },
+    {
+      "id": "claude-code-tooling-agent-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic internal tooling agent scaffold with structured prompt, report/metrics/stamp schemas, CI determinism+schema gate, and default-off feature flag behavior."
+    },
     {
       "id": "bgp-routing-resilience-hardening",
       "status": "in_progress",
@@ -13,6 +43,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+    },
+    {
+      "id": "one-engineer-production-saas-governance-accelerator",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic governance-pack generator, governance schema, threat-model template, abuse-case fixtures, governance-pack CI enforcement, and item-scoped docs plus drift monitor."
+    },
+    {
+      "id": "security-debt-ledger-agent-evidence-pipeline",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic security debt artifacts (report/metrics/stamp/security_debt_ledger), dependency classification checks, agent provenance enforcement, CI verifier workflow, and drift detector scaffold with default-off enforcement."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -37,6 +79,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Added governed controls for API deprecation denial, crawl legal gating, evidence minimum fields, provider concentration alerts, response runbook, and deterministic resilience KPIs."
+    },
+    {
+      "id": "agentic-engineering-patterns-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PR1 scaffold for a deterministic, feature-flagged Summit agent orchestrator with tool allowlist registry, transcript evidence IDs, and smoke-tested report/metrics/stamp artifacts."
     },
     {
       "id": "B",
@@ -247,6 +295,36 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Implemented Graph Sync Gate A/B/C/D evidence model, parity/recon runner, CDC provenance scaffold, Cypher templates, and PG checksum/slot setup assets."
+    },
+    {
+      "id": "switchboard-approvals-provenance-ga-sprint-07",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published Sprint 07 execution plan and Jira import backlog for Approvals and Rationale Center, OPA/ABAC coverage push, signed receipt and ledger path, observability SLO pack, FinOps attribution, and Helm/Terraform packaging."
+    },
+    {
+      "id": "summit-agent-workflow-extension-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added agent-task issue template, PR labeler and PR routing workflows, governance workflow model (Jules->Codex->Observer), six issue-ready execution briefs, and published GitHub issues #18644-#18649."
+    },
+    {
+      "id": "secure-railhead-sprint-12",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Drafted ADR-042 deterministic supply chain gate, ADR-043 customer trust artifacts, Sprint 12 execution plan, risk dashboard baseline, and /releases/v12 evidence pack seed."
+    },
+    {
+      "id": "llm-vitals-evaluation-harness",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic LLM Vitals harness with schema, baseline regression gate, CI workflow, drift detector, and evidence artifacts (report.json/metrics.json/stamp.json)."
+    },
+    {
+      "id": "gcp-managed-mcp-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added clean-room GCP managed MCP adapter, deny-by-default policy gate, deterministic report/metrics/stamp evidence emitter, probe script, drift detector, docs, tests, and CI workflows."
     }
   ],
   "summary": {

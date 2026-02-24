@@ -1,10 +1,146 @@
 import { QueueManager } from '../core/QueueManager';
 import { JobPriority } from '../types';
 
+const mockQueues: Record<string, any[]> = {};
+const mockProcessors: Record<string, ((job: any) => Promise<any>) | undefined> = {};
+
+jest.mock('ioredis', () => {
+  class FakeRedis {
+    async quit() {}
+  }
+
+  return {
+    __esModule: true,
+    default: jest.fn(() => new FakeRedis()),
+  };
+});
+
+jest.mock('bullmq', () => {
+  class MockQueue {
+    name: string;
+    constructor(name: string) {
+      this.name = name;
+      mockQueues[this.name] = mockQueues[this.name] || [];
+    }
+
+    async add(name: string, data: any, opts: any = {}) {
+      const queue = (mockQueues[this.name] = mockQueues[this.name] || []);
+      let resolveDone: (value: any) => void = () => {};
+      let rejectDone: (reason?: unknown) => void = () => {};
+      const done = new Promise((resolve, reject) => {
+        resolveDone = resolve;
+        rejectDone = reject;
+      });
+      // Prevent unhandled rejection noise in tests that don't await completion.
+      done.catch(() => {});
+
+      const job = {
+        id: opts.jobId || `${this.name}:${queue.length + 1}`,
+        name,
+        data,
+        opts: { attempts: opts.attempts ?? 3, ...opts },
+        attemptsMade: 0,
+        queueName: this.name,
+        retry: async () => {},
+        waitUntilFinished: async () => done,
+        remove: async () => {
+          mockQueues[this.name] = (mockQueues[this.name] || []).filter((j) => j.id !== job.id);
+        },
+      };
+      queue.push(job);
+
+      const processor = mockProcessors[this.name];
+      if (processor) {
+        setTimeout(() => {
+          void (async () => {
+            const maxAttempts = Math.max(1, Number(job.opts.attempts ?? 1));
+            let lastError: unknown;
+            while (job.attemptsMade < maxAttempts) {
+              try {
+                const result = await processor(job);
+                resolveDone(result);
+                return;
+              } catch (error) {
+                job.attemptsMade += 1;
+                lastError = error;
+              }
+            }
+            rejectDone(lastError);
+          })();
+        }, 0);
+      } else {
+        resolveDone(job);
+      }
+
+      return job;
+    }
+
+    async addBulk(jobs: any[]) {
+      return Promise.all(jobs.map((job) => this.add(job.name, job.data, job.opts || {})));
+    }
+
+    async getJob(id: string) {
+      return (mockQueues[this.name] || []).find((job) => job.id === id);
+    }
+
+    async getJobs(_status: string[], start: number, end: number) {
+      return (mockQueues[this.name] || []).slice(start, end);
+    }
+
+    async getJobCounts() {
+      return {
+        waiting: (mockQueues[this.name] || []).length,
+        active: 0,
+        completed: 0,
+        failed: 0,
+        delayed: 0,
+        paused: 0,
+      };
+    }
+
+    async pause() {}
+    async resume() {}
+    async close() {}
+    async obliterate() {}
+    async clean() {}
+  }
+
+  class MockWorker {
+    on = jest.fn();
+    constructor(
+      public name: string,
+      public processor: (job: any) => Promise<any>,
+      public _opts: any,
+    ) {
+      mockProcessors[this.name] = processor;
+    }
+    async close() {
+      delete mockProcessors[this.name];
+    }
+  }
+
+  class MockQueueEvents {
+    on = jest.fn();
+    async close() {}
+  }
+
+  return {
+    Queue: MockQueue,
+    Worker: MockWorker,
+    QueueEvents: MockQueueEvents,
+  };
+});
+
 describe('QueueManager', () => {
   let queueManager: QueueManager;
 
   beforeEach(() => {
+    for (const key of Object.keys(mockQueues)) {
+      mockQueues[key] = [];
+    }
+    for (const key of Object.keys(mockProcessors)) {
+      delete mockProcessors[key];
+    }
     queueManager = new QueueManager();
   });
 

@@ -1,0 +1,110 @@
+{
+  "budgets": {
+    "cost_budget_usd": 5.0,
+    "estimated_cost_usd": 0.2531,
+    "estimated_runtime_sec": 13.47,
+    "memory_budget_mb": 2048,
+    "runtime_budget_sec": 600.0,
+    "violations": []
+  },
+  "inputs": {
+    "corpus_file": "evaluation/vitals/benchmark_corpus.jsonl",
+    "corpus_sha256": "0a34d049c415df481568250354fc4b5a99d9e686d973768507fb13b524291e7c",
+    "fixtures_file": "evaluation/vitals/provider_fixtures.json",
+    "fixtures_sha256": "33c51a803d47d5deef4a1df3b92178d47c46a1f0d48773ff8a43df9327a818e2",
+    "schema_file": "evaluation/vitals/schema.yaml",
+    "schema_sha256": "a50fe462b13a7cc29719f5f2a4a3697500bb1de3fad7ef965828e21f9e74617b"
+  },
+  "providers": [
+    {
+      "estimated": {
+        "cost_usd": 0.08385,
+        "runtime_sec": 5.955
+      },
+      "evidence_ids": {
+        "accuracy": "EVIDENCE-LLM-VITALS-gpt-4o-mini-accuracy-faf8ebfb10c6",
+        "cost_per_1k_tokens": "EVIDENCE-LLM-VITALS-gpt-4o-mini-cost-per-1k-tokens-06c945691c14",
+        "latency_ms": "EVIDENCE-LLM-VITALS-gpt-4o-mini-latency-ms-d9424f740bd7",
+        "robustness": "EVIDENCE-LLM-VITALS-gpt-4o-mini-robustness-199431527771",
+        "safety_score": "EVIDENCE-LLM-VITALS-gpt-4o-mini-safety-score-9ab09180d89b",
+        "total_score": "EVIDENCE-LLM-VITALS-gpt-4o-mini-total-score-441fe188e4a0"
+      },
+      "model": "gpt-4o-mini",
+      "model_key": "openai:gpt-4o-mini",
+      "provider": "openai",
+      "rank": 1,
+      "reliability": 1.0,
+      "score": 0.958915,
+      "seed": 101,
+      "vitals": {
+        "accuracy": 1.0,
+        "cost_per_1k_tokens": 0.270484,
+        "latency_ms": 845.0,
+        "robustness": 1.0,
+        "safety_score": 0.9875
+      }
+    },
+    {
+      "estimated": {
+        "cost_usd": 0.16925,
+        "runtime_sec": 7.515
+      },
+      "evidence_ids": {
+        "accuracy": "EVIDENCE-LLM-VITALS-claude-3-5-haiku-accuracy-836e01eac62e",
+        "cost_per_1k_tokens": "EVIDENCE-LLM-VITALS-claude-3-5-haiku-cost-per-1k-tokens-fcabd65be6f5",
+        "latency_ms": "EVIDENCE-LLM-VITALS-claude-3-5-haiku-latency-ms-98847e67f023",
+        "robustness": "EVIDENCE-LLM-VITALS-claude-3-5-haiku-robustness-80d3e63f279b",
+        "safety_score": "EVIDENCE-LLM-VITALS-claude-3-5-haiku-safety-score-7c8a02800ef4",
+        "total_score": "EVIDENCE-LLM-VITALS-claude-3-5-haiku-total-score-a1c39f667e15"
+      },
+      "model": "claude-3-5-haiku",
+      "model_key": "anthropic:claude-3-5-haiku",
+      "provider": "anthropic",
+      "rank": 2,
+      "reliability": 1.0,
+      "score": 0.781122,
+      "seed": 202,
+      "vitals": {
+        "accuracy": 0.75,
+        "cost_per_1k_tokens": 0.533912,
+        "latency_ms": 1080.0,
+        "robustness": 0.5,
+        "safety_score": 0.9
+      }
+    }
+  ],
+  "regressions": [],
+  "schema": {
+    "accuracy": {
+      "direction": "higher_is_better",
+      "max": 1.0,
+      "min": 0.0,
+      "weight": 0.3
+    },
+    "cost_per_1k_tokens": {
+      "direction": "lower_is_better",
+      "max": 10.0,
+      "min": 0.0,
+      "weight": 0.2
+    },
+    "latency_ms": {
+      "direction": "lower_is_better",
+      "max": 5000.0,
+      "min": 0.0,
+      "weight": 0.2
+    },
+    "robustness": {
+      "direction": "higher_is_better",
+      "max": 1.0,
+      "min": 0.0,
+      "weight": 0.15
+    },
+    "safety_score": {
+      "direction": "higher_is_better",
+      "max": 1.0,
+      "min": 0.0,
+      "weight": 0.15
+    }
+  },
+  "schema_version": "v1"
+}

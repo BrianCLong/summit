@@ -16,6 +16,9 @@ export type ApprovalStatus = z.infer<typeof ApprovalStatus>;
 export const DecisionType = z.enum(['approve', 'reject']);
 export type DecisionType = z.infer<typeof DecisionType>;
 
+export const RiskTier = z.enum(['low', 'medium', 'high', 'critical']);
+export type RiskTier = z.infer<typeof RiskTier>;
+
 // ============================================================================
 // Actor Schema (requestor or approver)
 // ============================================================================
@@ -222,6 +225,7 @@ export interface OPADecisionResult {
 // ============================================================================
 
 export interface ProvenanceReceipt {
+  schema_version?: 'switchboard.receipt.v1';
   id: string;
   approval_id: string;
   tenant_id: string;
@@ -229,9 +233,28 @@ export interface ProvenanceReceipt {
   decision: DecisionType | 'created' | 'cancelled';
   timestamp: string;
   policy_version: string;
+  policy_decision_hash?: string;
+  pre_state_hash?: string;
+  post_state_hash?: string;
+  risk_tier?: RiskTier;
+  cost_estimate?: {
+    currency: string;
+    amount: number;
+    confidence: number;
+  };
   input_hash: string;
   signature: string;
   key_id: string;
+}
+
+export interface PolicySimulationSnapshot {
+  request_id: string;
+  tenant_id: string;
+  simulated_at: string;
+  simulation_hash: string;
+  policy: PolicyEvaluation;
+  risk_tier: RiskTier;
+  privileged: boolean;
 }
 
 // ============================================================================

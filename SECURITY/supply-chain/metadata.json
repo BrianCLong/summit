@@ -1,0 +1,16 @@
+{
+  "services": [
+    {
+      "name": "server",
+      "license_policy": "allowlist-v1",
+      "residency_tag": "global-us",
+      "pii_annotation": "contains_pii:possible"
+    },
+    {
+      "name": "client",
+      "license_policy": "allowlist-v1",
+      "residency_tag": "global-us",
+      "pii_annotation": "contains_pii:none"
+    }
+  ]
+}

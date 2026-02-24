@@ -1,0 +1,94 @@
+name: paper-2602-16742-reproduction-gate
+
+on:
+  pull_request:
+    paths:
+      - "summit/evals/paper_2602_16742.py"
+      - "summit/tests/test_paper_2602_16742.py"
+      - ".github/workflows/paper_2602_16742.yml"
+      - "docs/standards/2602.16742.md"
+      - "docs/security/data-handling/2602.16742.md"
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reproduction-gate:
+    name: 2602.16742 Reproduction Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: python3 -m pip install --upgrade pip pytest
+
+      - name: Run evaluator unit tests
+        env:
+          PYTHONPATH: .
+        run: pytest -q --noconftest summit/tests/test_paper_2602_16742.py
+
+      - name: Reproduce claim and emit artifacts
+        env:
+          PYTHONPATH: .
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/2602.16742
+          cat > artifacts/2602.16742/observed_metrics.json <<'JSON'
+          {"qwen3_vl_8b_deepvision_wemath_pass_at_1": 85.11}
+          JSON
+
+          python3 -m summit.evals.paper_2602_16742 \
+            --metrics-file artifacts/2602.16742/observed_metrics.json \
+            --out-dir artifacts/2602.16742/run_a \
+            --evidence-id EVD-2602-16742-EVAL-001 \
+            --target-value 85.11 \
+            --tolerance 0.5 \
+            --fail-on-miss
+
+          python3 -m summit.evals.paper_2602_16742 \
+            --metrics-file artifacts/2602.16742/observed_metrics.json \
+            --out-dir artifacts/2602.16742/run_b \
+            --evidence-id EVD-2602-16742-EVAL-001 \
+            --target-value 85.11 \
+            --tolerance 0.5 \
+            --fail-on-miss
+
+      - name: Verify deterministic output stability
+        run: |
+          set -euo pipefail
+          diff -u artifacts/2602.16742/run_a/report.json artifacts/2602.16742/run_b/report.json
+          diff -u artifacts/2602.16742/run_a/metrics.json artifacts/2602.16742/run_b/metrics.json
+
+      - name: Verify fail-on-miss behavior
+        env:
+          PYTHONPATH: .
+        run: |
+          set -euo pipefail
+          cat > artifacts/2602.16742/bad_metrics.json <<'JSON'
+          {"qwen3_vl_8b_deepvision_wemath_pass_at_1": 70.0}
+          JSON
+
+          set +e
+          python3 -m summit.evals.paper_2602_16742 \
+            --metrics-file artifacts/2602.16742/bad_metrics.json \
+            --out-dir artifacts/2602.16742/run_fail \
+            --evidence-id EVD-2602-16742-EVAL-002 \
+            --target-value 85.11 \
+            --tolerance 0.5 \
+            --fail-on-miss
+          status=$?
+          set -e
+          test "${status}" -eq 1
+
+      - name: Upload 2602.16742 artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: paper-2602-16742-artifacts
+          path: artifacts/2602.16742/

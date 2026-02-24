@@ -1,0 +1,76 @@
+name: tooling-agent
+
+on:
+  pull_request:
+    paths:
+      - 'agents/tooling_agent.py'
+      - 'agents/prompts/base_prompt.md'
+      - 'agents/prompts/tooling_task_template.md'
+      - 'agents/task_graph.py'
+      - 'lib/artifact_writer.py'
+      - 'schemas/tooling/**'
+      - 'scripts/tooling/run_agent.py'
+      - 'scripts/tooling/profile_agent.py'
+      - 'scripts/monitoring/tooling-agent-drift.py'
+      - 'scripts/ci/tooling_agent_check.mjs'
+      - 'scripts/ci/tooling_prompt_lint.py'
+      - '.github/workflows/tooling-agent.yml'
+      - 'tests/tooling/**'
+      - 'tests/security/test_prompt_injection.py'
+      - 'tests/policy/test_artifact_integrity.py'
+  push:
+    branches: [main]
+    paths:
+      - 'agents/tooling_agent.py'
+      - 'agents/prompts/base_prompt.md'
+      - 'agents/prompts/tooling_task_template.md'
+      - 'agents/task_graph.py'
+      - 'lib/artifact_writer.py'
+      - 'schemas/tooling/**'
+      - 'scripts/tooling/run_agent.py'
+      - 'scripts/tooling/profile_agent.py'
+      - 'scripts/monitoring/tooling-agent-drift.py'
+      - 'scripts/ci/tooling_agent_check.mjs'
+      - 'scripts/ci/tooling_prompt_lint.py'
+      - '.github/workflows/tooling-agent.yml'
+      - 'tests/tooling/**'
+      - 'tests/security/test_prompt_injection.py'
+      - 'tests/policy/test_artifact_integrity.py'
+  schedule:
+    - cron: '0 8 * * 1'
+
+jobs:
+  tooling-agent-check:
+    name: tooling-agent-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint tooling prompts
+        run: python3 scripts/ci/tooling_prompt_lint.py
+      - name: Verify tooling agent artifacts and determinism
+        run: node scripts/ci/tooling_agent_check.mjs
+      - name: Enforce runtime and memory budgets
+        run: python3 scripts/tooling/profile_agent.py --task example --enforce
+      - name: Upload tooling-agent profile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tooling-agent-profile
+          path: artifacts/tooling-agent/profile.json
+
+  tooling-agent-drift:
+    name: tooling-agent-drift
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run weekly tooling-agent drift detector
+        run: python3 scripts/monitoring/tooling-agent-drift.py --task example --out artifacts/drift_report.json
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tooling-agent-drift
+          path: artifacts/drift_report.json

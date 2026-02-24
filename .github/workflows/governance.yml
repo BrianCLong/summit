@@ -18,3 +18,42 @@ jobs:
       - run: node scripts/ci/verify_required_checks.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  governance-pack-check:
+    name: governance / governance-pack-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install jsonschema pytest
+
+      - name: Require governance changes in pull requests
+        if: github.event_name == 'pull_request'
+        run: |
+          CHANGED=$(git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}")
+          echo "${CHANGED}"
+          if ! echo "${CHANGED}" | grep -q '^governance/'; then
+            echo "::error::governance-pack-check requires at least one change under governance/."
+            exit 1
+          fi
+
+      - name: Validate governance specs
+        run: python3 scripts/governance/generate_pack.py --validate-repo
+
+      - name: Verify deterministic governance artifacts
+        run: python3 scripts/governance/generate_pack.py --verify-repo
+
+      - name: Run governance pack tests
+        run: python3 -m pytest -q tests/test_governance_pack.py
+
+      - name: Enforce governance performance budgets
+        run: python3 scripts/perf/profile_governance.py --iterations 3

@@ -1,0 +1,61 @@
+name: vitals-eval
+
+on:
+  pull_request:
+    paths:
+      - 'evaluation/vitals/**'
+      - 'scripts/vitals_eval.py'
+      - 'scripts/monitoring/llm-vitals-drift.py'
+      - 'summit/vitals/**'
+      - 'tests/test_vitals_*.py'
+      - '.github/workflows/vitals-eval.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 12 * * 1'
+
+jobs:
+  vitals-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Vitals Evaluation Gate
+        env:
+          VITALS_EVAL_ENABLED: 'true'
+        run: |
+          python -m summit vitals eval \
+            --force \
+            --out-dir artifacts/llm-vitals \
+            --baseline evaluation/vitals/baseline_metrics.json \
+            --expected-corpus-sha 0a34d049c415df481568250354fc4b5a99d9e686d973768507fb13b524291e7c \
+            --max-regression 0.05
+
+      - name: Run Drift Detector
+        run: |
+          python scripts/monitoring/llm-vitals-drift.py \
+            --baseline evaluation/vitals/baseline_metrics.json \
+            --current artifacts/llm-vitals/metrics.json \
+            --out artifacts/llm-vitals/drift_report.json
+
+      - name: Emit Profile Artifact
+        run: |
+          python scripts/vitals_profile.py \
+            --metrics artifacts/llm-vitals/metrics.json \
+            --out artifacts/llm-vitals/profile.json
+
+      - name: Upload Vitals Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: llm-vitals-artifacts
+          path: |
+            artifacts/llm-vitals/report.json
+            artifacts/llm-vitals/metrics.json
+            artifacts/llm-vitals/stamp.json
+            artifacts/llm-vitals/drift_report.json
+            artifacts/llm-vitals/profile.json

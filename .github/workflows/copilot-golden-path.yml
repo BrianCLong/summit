@@ -31,6 +31,6 @@ jobs:
   # canary-rollback:
   #   needs: pipeline
   #   if: github.event_name == 'push'
-  #   uses: ./.github/workflows/reusable/canary-rollback.yml
+  #   uses: ./.github/workflows/_reusable-canary-rollback.yml
   #   with:
   #     service-name: copilot

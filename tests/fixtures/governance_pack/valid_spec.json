@@ -1,0 +1,72 @@
+{
+  "item_slug": "one-engineer-production-saas-governance",
+  "title": "One engineer built a production SaaS in an hour - governance accelerator",
+  "service_description": "Governance accelerator for rapidly assembled AI-orchestrated SaaS products.",
+  "claim_registry": [
+    {
+      "planned_element": "governance-pack generator",
+      "claim_source": "ITEM:CLAIM-02"
+    },
+    {
+      "planned_element": "threat modeling and abuse fixtures",
+      "claim_source": "ITEM:CLAIM-05"
+    }
+  ],
+  "data_classification": {
+    "pii_categories": [
+      "name",
+      "email",
+      "billing metadata"
+    ],
+    "retention_policy": "90 days for raw telemetry, 365 days for redacted evidence.",
+    "never_log": [
+      "access_tokens",
+      "full payment card numbers",
+      "raw auth headers"
+    ],
+    "redaction_rules": [
+      "mask email local-part",
+      "truncate token payload to first 6 characters"
+    ],
+    "storage_classification": "CONFIDENTIAL"
+  },
+  "threat_model": [
+    {
+      "id": "TH-001",
+      "threat": "Prompt injection to bypass policy checks",
+      "mitigation": "Policy aware input sanitization with allowlist parser",
+      "ci_gate": "injection-check",
+      "test_fixture": "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/prompt_injection.json"
+    },
+    {
+      "id": "TH-002",
+      "threat": "Data exfiltration from over-broad retrieval",
+      "mitigation": "Mandatory data classification enforcement before output",
+      "ci_gate": "classification-check",
+      "test_fixture": "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/data_exfiltration.json"
+    },
+    {
+      "id": "TH-003",
+      "threat": "Over-privileged API actions",
+      "mitigation": "Least privilege schema validation and deny-by-default fallback",
+      "ci_gate": "least-priv-check",
+      "test_fixture": "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/data_exfiltration.json"
+    }
+  ],
+  "abuse_case_fixtures": [
+    "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/prompt_injection.json",
+    "tests/fixtures/abuse_cases/one-engineer-production-saas-governance/data_exfiltration.json"
+  ],
+  "controls": [
+    "deny-by-default policy gate",
+    "deterministic evidence triad",
+    "nightly drift detector"
+  ],
+  "maestro_layers": [
+    "Data",
+    "Agents",
+    "Tools",
+    "Observability",
+    "Security"
+  ]
+}

@@ -34,6 +34,9 @@ vi.mock('../services/approval-service.js', () => ({
     listRequests: vi.fn(),
     submitDecision: vi.fn(),
     cancelRequest: vi.fn(),
+    simulateRequest: vi.fn(),
+    listReceiptsForRequest: vi.fn(),
+    getReceiptById: vi.fn(),
   },
 }));
 
@@ -249,6 +252,122 @@ describe('Approvals API Routes', () => {
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe('cancelled');
+    });
+  });
+
+  describe('POST /api/v1/requests/:requestId/simulate', () => {
+    it('should return simulation snapshot', async () => {
+      vi.mocked(approvalService.simulateRequest).mockResolvedValue({
+        request_id: 'req-123',
+        tenant_id: 'tenant-1',
+        simulated_at: new Date().toISOString(),
+        simulation_hash: 'abc123',
+        policy: {
+          policy_version: '1.0.0',
+          decision: 'require_approval',
+          required_approvals: 2,
+          allowed_approver_roles: ['admin'],
+          conditions: [],
+          violations: [],
+        },
+        risk_tier: 'high',
+        privileged: true,
+      } as any);
+
+      const response = await request(app)
+        .post('/api/v1/requests/req-123/simulate')
+        .set('X-Tenant-ID', 'tenant-1')
+        .send({});
+
+      expect(response.status).toBe(200);
+      expect(response.body.request_id).toBe('req-123');
+      expect(approvalService.simulateRequest).toHaveBeenCalledWith(
+        'tenant-1',
+        'req-123',
+      );
+    });
+  });
+
+  describe('GET /api/v1/requests/:requestId/receipts', () => {
+    it('should return receipts for a request', async () => {
+      vi.mocked(approvalService.listReceiptsForRequest).mockResolvedValue([
+        {
+          id: 'receipt-1',
+          approval_id: 'req-123',
+          tenant_id: 'tenant-1',
+          actor: { id: 'approver-1', roles: ['admin'] },
+          decision: 'approve',
+          timestamp: new Date().toISOString(),
+          policy_version: '1.0.0',
+          input_hash: 'abc',
+          signature: 'sig',
+          key_id: 'kid',
+        },
+      ] as any);
+
+      const response = await request(app)
+        .get('/api/v1/requests/req-123/receipts')
+        .set('X-Tenant-ID', 'tenant-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.total).toBe(1);
+      expect(approvalService.listReceiptsForRequest).toHaveBeenCalledWith(
+        'tenant-1',
+        'req-123',
+      );
+    });
+
+    it('should apply selective disclosure fields', async () => {
+      vi.mocked(approvalService.listReceiptsForRequest).mockResolvedValue([
+        {
+          id: 'receipt-1',
+          tenant_id: 'tenant-1',
+          signature: 'sig',
+          key_id: 'kid',
+        },
+      ] as any);
+
+      const response = await request(app)
+        .get('/api/v1/requests/req-123/receipts?fields=id,tenant_id')
+        .set('X-Tenant-ID', 'tenant-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.items[0]).toEqual({
+        id: 'receipt-1',
+        tenant_id: 'tenant-1',
+      });
+    });
+  });
+
+  describe('GET /api/v1/receipts/:receiptId', () => {
+    it('should return a receipt by ID', async () => {
+      vi.mocked(approvalService.getReceiptById).mockResolvedValue({
+        id: 'receipt-1',
+        tenant_id: 'tenant-1',
+        signature: 'sig',
+      } as any);
+
+      const response = await request(app)
+        .get('/api/v1/receipts/receipt-1')
+        .set('X-Tenant-ID', 'tenant-1');
+
+      expect(response.status).toBe(200);
+      expect(response.body.id).toBe('receipt-1');
+      expect(approvalService.getReceiptById).toHaveBeenCalledWith(
+        'tenant-1',
+        'receipt-1',
+      );
+    });
+
+    it('should return 404 for missing receipt', async () => {
+      vi.mocked(approvalService.getReceiptById).mockResolvedValue(null);
+
+      const response = await request(app)
+        .get('/api/v1/receipts/missing')
+        .set('X-Tenant-ID', 'tenant-1');
+
+      expect(response.status).toBe(404);
+      expect(response.body.code).toBe('NOT_FOUND');
     });
   });
 });

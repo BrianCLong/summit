@@ -61,7 +61,7 @@ const MT103_PATTERNS = {
   field59: /^:59:(?:\/([^\n]+)\n)?(.+?)(?=\n:|$)/ms,
   field59A: /^:59A:(?:\/([^\n]+)\n)?([A-Z]{4}[A-Z0-9]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?)$/m,
   // Remittance Information
-  field70: /^:70:(.+?)(?=\n:|$)/ms,
+  field70: /(?:^|\n):70:([\s\S]*?)(?=\n:[0-9A-Z]{2,4}:|$)/,
   // Details of Charges
   field71A: /^:71A:(.+)$/m,
   // Sender's Charges

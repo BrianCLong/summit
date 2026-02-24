@@ -1,15 +1,25 @@
-type,title
-Epic,GA Release 1.0.0
-Epic,SOC2 Type I
-Epic,Migrations & Installers
-Epic,Supportability
-Story,release-ga workflow
-Story,SBOM+provenance
-Story,pre-flight validator
-Story,migration scripts
-Story,helm GA
-Story,support runbooks
-Story,demo sanitization
-Bug,block unsigned patch
-Bug,fix residency misconfig in values-ga
-Bug,CVE threshold failures
+type,id,title,priority,owner,slo_metric,baseline,target,evidence
+Epic,SRH-EPIC-A,Deterministic Supply Chain Gate,P0,Platform TL,signed_artifact_coverage,0,100,"ADR-042; CI gate evidence"
+Story,SRH-A1,CycloneDX SBOM generation and attach,P0,Platform,sbom_coverage_percent,0,100,"SBOM.json per service"
+Story,SRH-A2,Cosign keyless sign and deploy verify,P0,Security,image_signature_verification_percent,0,100,"cosign verify logs"
+Story,SRH-A3,Provenance attestation with builder digest pin,P0,Platform,provenance_attestation_percent,0,100,"attestation.json per build"
+Story,SRH-A4,CVE budget gate max_high=0 with waiver TTL,P0,Security,high_cve_budget_breaches,deferred_pending_baseline_capture,0,"vuln_report.json; waiver ledger"
+Story,SRH-A5,OPA policy gate for license residency and PII tags,P0,Security,policy_gate_pass_rate,deferred_pending_baseline_capture,100,"OPA evaluation output"
+Epic,SRH-EPIC-B,Canary Manager v1 with auto-rollback,P0,SRE Lead,change_fail_rate_percent,deferred_pending_baseline_capture,30_percent_reduction,"canary runbook and release logs"
+Story,SRH-B1,Red black deploy toggle in Helm flow,P0,Platform,canary_rollout_success_rate,deferred_pending_baseline_capture,99,"helm release evidence"
+Story,SRH-B2,Synthetic probes for HTTP and auth flow,P0,SRE,probe_coverage_services,0,100,"probe configs and results"
+Story,SRH-B3,Auto rollback on error rate SLO breach,P0,SRE,rollback_trigger_latency_minutes,deferred_pending_baseline_capture,5,"staging chaos evidence"
+Story,SRH-B4,Auto rollback on p95 latency 2x baseline for 10m,P0,SRE,rollback_trigger_accuracy,deferred_pending_baseline_capture,95,"staging chaos evidence"
+Story,SRH-B5,Slack Pager alerts with trace IDs,P1,SRE,alert_payload_trace_coverage,0,100,"alert payload samples"
+Epic,SRH-EPIC-C,Customer Release Evidence Pack,P1,Product Ops,evidence_pack_delivery,0,1_signed_pack,"ADR-043; /releases/v12"
+Story,SRH-C1,Admin UI Download Evidence Pack action,P1,Frontend,evidence_pack_download_success_rate,deferred_pending_baseline_capture,99,"UI test + release screenshot"
+Story,SRH-C2,Generate JSON and PDF pack outputs,P1,Platform,evidence_pack_format_parity,0,100,"json/pdf checksum manifest"
+Story,SRH-C3,Sign and timestamp evidence pack,P1,Security,evidence_pack_signature_verification,0,100,"cosign verification output"
+Story,SRH-C4,Include residency PII and audit snapshot sections,P1,Product Ops,evidence_pack_completeness,0,100,"pack schema validation"
+Epic,SRH-EPIC-D,Observability First Kit baseline,P1,Platform,error_budget_visibility_services,deferred_pending_baseline_capture,2_pilot_services,"dashboard and alert evidence"
+Story,SRH-D1,Emit request_count error_rate p95_latency metrics,P1,Platform,metric_contract_compliance,0,100,"sdk integration tests"
+Story,SRH-D2,Trace ID propagation across services,P1,Platform,trace_id_propagation_rate,deferred_pending_baseline_capture,99,"trace sampling report"
+Story,SRH-D3,Lint rule blocks deploy without metrics endpoint,P1,Platform,noncompliant_deploy_attempts_blocked,0,100,"lint gate logs"
+Chore,SRH-TD1,Remove 3 unpinned GitHub Actions refs,P2,Platform,unpinned_actions_refs,643,640,"workflow diff + scan"
+Chore,SRH-TD2,Reduce CI runtime by 15 percent via sharding,P2,Platform,ci_runtime_minutes_p95,deferred_pending_baseline_capture,15_percent_reduction,"CI trend panel"
+Chore,SRH-TD3,Archive 2 unused feature flags with cleanup PRs,P2,Product Ops,unused_flags_count,deferred_pending_baseline_capture,minus_2,"cleanup PR links"

@@ -39,17 +39,19 @@ export class BitemporalService {
     tenantId: string;
     kind: string;
     props: Record<string, any>;
-    validFrom: Date;
-    validTo?: Date;
-    transactionFrom?: Date; // Added for testing/drills
+    validFrom: Date | string;
+    validTo?: Date | string;
+    transactionFrom?: Date | string; // Added for testing/drills
     createdBy?: string;
   }): Promise<void> {
     const pool = getPostgresPool();
     const client = await pool.connect();
 
-    const validFromStr = params.validFrom.toISOString();
-    const validToStr = params.validTo ? params.validTo.toISOString() : this.FAR_FUTURE;
-    const transactionFromStr = params.transactionFrom ? params.transactionFrom.toISOString() : new Date().toISOString();
+    const toIso = (value: Date | string): string =>
+      (value instanceof Date ? value : new Date(value)).toISOString();
+    const validFromStr = toIso(params.validFrom);
+    const validToStr = params.validTo ? toIso(params.validTo) : this.FAR_FUTURE;
+    const transactionFromStr = params.transactionFrom ? toIso(params.transactionFrom) : new Date().toISOString();
     const user = params.createdBy || 'system';
 
     try {
@@ -108,15 +110,17 @@ export class BitemporalService {
     if (result.rows.length === 0) return null;
 
     const row = result.rows[0];
+    const asIso = (value: Date | string): string =>
+      (value instanceof Date ? value : new Date(value)).toISOString();
     return {
       id: row.id,
       tenantId: row.tenant_id,
       kind: row.kind,
       props: row.props,
-      validFrom: row.valid_from.toISOString(),
-      validTo: row.valid_to.toISOString(),
-      transactionFrom: row.transaction_from.toISOString(),
-      transactionTo: row.transaction_to.toISOString()
+      validFrom: asIso(row.valid_from),
+      validTo: asIso(row.valid_to),
+      transactionFrom: asIso(row.transaction_from),
+      transactionTo: asIso(row.transaction_to)
     };
   }
 }
