@@ -132,3 +132,19 @@ Governed Exception: Issue scan deferred pending GitHub API connectivity.
 - Completed: High-signal blocker isolation + escalation with links.
 - In progress: Remediation implementation for issue #18631 (workflow patch path).
 - Blocked: GA merge readiness until CI Core/gov gates are patched and rerun green.
+
+## Continuation Run (2026-02-24T04:07:37Z UTC)
+
+### Remediation Delivery
+- Opened CI remediation PR for blocker issue #18631:
+  - PR: https://github.com/BrianCLong/summit/pull/18632
+  - Branch: `fix/ci-core-pnpm-setup-18631`
+  - Scope: `.github/workflows/ci-core.yml`, `.github/workflows/ci-pr.yml`
+- Posted PR validation/update comments:
+  - https://github.com/BrianCLong/summit/pull/18632#issuecomment-3948850089
+  - https://github.com/BrianCLong/summit/pull/18632#issuecomment-3948850408
+
+### Status
+- Completed: blocker isolation + issue creation + remediation PR opened.
+- In progress: CI rerun/verification on PR #18632 and downstream impact on PR #18621.
+- Blocked: final merge readiness pending green required checks.
