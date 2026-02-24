@@ -19,11 +19,7 @@ We are using these names in our CI pipeline definitions, but they might be repor
 - `gate/evidence` (PR2)
 - `gate/supplychain` (PR4)
 - `gate/fimi` (PR7)
-- `SummitGate/evidence`
-- `SummitGate/policy`
-- `SummitGate/determinism`
-- `SummitGate/dependency-delta`
-- `sigstore-verify` (PR4)
+- `summit-osint-verify`
 - `lint`
 - `typecheck`
 - `build`

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:12:37Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-07T01:00:00Z",
+  "revision_note": "Added OSINT evidence gate, schemas, and governance docs (PR1 lane).",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -9,10 +9,10 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-      "id": "agent-data-access-policy-pr1",
+      "id": "osint-evidence-pr1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Policy registries, schemas, evaluator, and evidence-first tests for deny-by-default tool access."
+      "notes": "OSINT evidence schemas, governance docs, and summit-osint-verify CI gate (lane 1, PR1)."
     },
     {
       "id": "B",
@@ -247,12 +247,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "nonpublic-data-access",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Published non-public data access standards, data handling guidance, and runbook with policy-gated, HITL, and secure collection patterns."
     }
   ],
   "summary": {
