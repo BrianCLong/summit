@@ -199,3 +199,13 @@ check your internet connection or https://githubstatus.com
 - PRs touched: None (evidence-only run).
 - Commands run: `gh pr list`, `gh pr view`, `gh pr checks` (success), `gh issue list` (failed).
 - Finality: Sprint log published; blockers logged with governed exception for follow-up.
+
+## Continuation Run 1
+- Added prompt registration for daily sprint orchestrator (`prompts/automation/daily-sprint@v1.md`, `prompts/registry.yaml`).
+- Attempted PR creation for `chore/daily-sprint-2026-02-24-1`; deferred pending GitHub API connectivity.
+
+### Continuation Evidence: PR Creation Failure (Governed Exception)
+```
+error connecting to api.github.com
+check your internet connection or https://githubstatus.com
+```
