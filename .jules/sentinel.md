@@ -75,3 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2025-03-24 - [HIGH] Vulnerable Input Sanitization Middleware
+**Vulnerability:** The `sanitize` function in `server/src/middleware/sanitization.ts` was vulnerable to Prototype Pollution, property injection via inheritance, and lacked XSS protection (HTML escaping). It also corrupted special object types like `Date`, `RegExp`, and `Buffer`.
+**Learning:** Security middleware must be robust against prototype manipulation and should use `hasOwnProperty` when iterating over untrusted objects. It should also be type-aware to avoid corrupting legitimate complex objects.
+**Prevention:** Use a hardened sanitization pattern that explicitly blocks dangerous keys (`__proto__`, `constructor`, `prototype`), uses `Object.prototype.hasOwnProperty.call()`, and preserves known safe object types while HTML-escaping strings by default.
