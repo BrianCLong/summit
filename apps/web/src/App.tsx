@@ -72,6 +72,7 @@ import { ResilienceProvider } from '@/contexts/ResilienceContext'
 import { ErrorBoundary, NotFound, DataFetchErrorBoundary, MutationErrorBoundary } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
+import { SnapshotProvider } from '@/features/snapshots'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
@@ -101,9 +102,10 @@ function App() {
           <AuthProvider>
             <FeatureFlagProvider>
               <SearchProvider>
-                <CommandStatusProvider>
-                  <ResilienceProvider>
-                    <Router>
+                <SnapshotProvider>
+                  <CommandStatusProvider>
+                    <ResilienceProvider>
+                      <Router>
                       <ErrorBoundary
                         enableRetry={true}
                         maxRetries={3}
@@ -324,9 +326,10 @@ function App() {
                     </Routes>
                     </React.Suspense>
                     </ErrorBoundary>
-                  </Router>
-                  </ResilienceProvider>
-                </CommandStatusProvider>
+                      </Router>
+                    </ResilienceProvider>
+                  </CommandStatusProvider>
+                </SnapshotProvider>
               </SearchProvider>
             </FeatureFlagProvider>
           </AuthProvider>
