@@ -1,10 +1,12 @@
+import rego.v1
+
 # Truth Defense Policy
 # Enforces adversarial-resistant decision-making rules
 
 package summit.truth_defense
+
 import future.keywords.if
 import future.keywords.in
-
 
 # Configuration
 default integrity_threshold_high := 0.70
@@ -315,15 +317,10 @@ truth_defense_posture := score if {
     low_integrity_total := count([c | some c in input.claims; c.integrity_score < integrity_threshold_low])
 
     integrity_score := high_integrity_claims / total_claims
-    containment_score := compute_containment_score(quarantined_low_integrity, low_integrity_total)
+    containment_score := quarantined_low_integrity / low_integrity_total { low_integrity_total > 0 } else := 1.0
 
     score := (integrity_score + containment_score) / 2
 }
-
-compute_containment_score(q, t) := score if {
-    t > 0
-    score := q / t
-} else := 1.0
 
 # Identify high-risk decisions requiring immediate attention
 high_risk_decisions[decision] if {

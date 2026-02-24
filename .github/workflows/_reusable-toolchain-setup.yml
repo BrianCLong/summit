@@ -14,7 +14,7 @@ on:
         description: "PNPM version (optional, defaults to repo pin)"
         required: false
         type: string
-        default: "9.12.0"
+
       install-deps:
         description: "Whether to install dependencies (defaults to true)"
         required: false

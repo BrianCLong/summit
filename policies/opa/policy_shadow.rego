@@ -2,6 +2,8 @@ package composer.policy_shadow
 import future.keywords.if
 import future.keywords.in
 
+import rego.v1
+
 # Combine sub-decisions and emit a consolidated verdict
 
 verdict := {

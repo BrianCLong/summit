@@ -1,3 +1,5 @@
+import rego.v1
+
 # ============================================================================
 # IntelGraph ABAC Authorization Policy
 # Main allow policy that orchestrates all authorization checks
