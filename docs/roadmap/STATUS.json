@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added agentic orchestration, hybrid context management, and agentic RAG integration scaffolding.",
+  "last_updated": "2026-02-08T06:35:52Z",
+  "revision_note": "Added GA feature gaization skill entry for prompt-driven GA uplift workflows.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -278,6 +278,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "summit-architecture-brief",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "summit-ga-feature-gaization-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added GA feature discovery \u2192 GA readiness prompt builder skill for governed uplift workflows."
     }
   ],
   "summary": {
@@ -285,7 +297,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 23,
     "ga_blockers": []
   }
 }
