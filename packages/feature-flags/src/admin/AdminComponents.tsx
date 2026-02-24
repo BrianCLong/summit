@@ -45,7 +45,7 @@ export const FlagList: React.FC<FlagListProps> = ({
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Filter flags
-  const filteredFlags = flags.filter((flag) => {
+  const filteredFlags = flags.filter((flag: any) => {
     // Search filter
     if (searchTerm && !flag.key.toLowerCase().includes(searchTerm.toLowerCase()) &&
         !flag.name?.toLowerCase().includes(searchTerm.toLowerCase())) {
@@ -54,7 +54,7 @@ export const FlagList: React.FC<FlagListProps> = ({
 
     // Tag filter
     if (selectedTags.length > 0 &&
-        !selectedTags.some((tag) => flag.tags?.includes(tag))) {
+        !selectedTags.some((tag: any) => flag.tags?.includes(tag))) {
       return false;
     }
 
@@ -68,7 +68,7 @@ export const FlagList: React.FC<FlagListProps> = ({
 
   // Get all unique tags
   const allTags = Array.from(
-    new Set(flags.flatMap((flag) => flag.tags || [])),
+    new Set(flags.flatMap((flag: any) => flag.tags || [])),
   ).sort();
 
   if (isLoading) {
@@ -82,20 +82,20 @@ export const FlagList: React.FC<FlagListProps> = ({
           type="text"
           placeholder="Search flags..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e: any) => setSearchTerm(e.target.value)}
           className="flag-search"
         />
 
         {allTags.length > 0 && (
           <div className="flag-tags-filter">
-            {allTags.map((tag) => (
+            {allTags.map((tag: any) => (
               <button
                 key={tag}
                 className={`tag-filter ${selectedTags.includes(tag) ? 'active' : ''}`}
                 onClick={() => {
                   setSelectedTags((prev) =>
                     prev.includes(tag)
-                      ? prev.filter((t) => t !== tag)
+                      ? prev.filter((t: any) => t !== tag)
                       : [...prev, tag],
                   );
                 }}
@@ -111,7 +111,7 @@ export const FlagList: React.FC<FlagListProps> = ({
         {filteredFlags.length === 0 ? (
           <div className="flag-list-empty">No flags found</div>
         ) : (
-          filteredFlags.map((flag) => (
+          filteredFlags.map((flag: any) => (
             <div
               key={flag.key}
               className={`flag-list-item ${!flag.enabled ? 'disabled' : ''}`}
@@ -127,7 +127,7 @@ export const FlagList: React.FC<FlagListProps> = ({
                   {onToggle && (
                     <button
                       className="flag-toggle"
-                      onClick={(e) => {
+                      onClick={(e: any) => {
                         e.stopPropagation();
                         onToggle(flag.key, !flag.enabled);
                       }}
@@ -139,7 +139,7 @@ export const FlagList: React.FC<FlagListProps> = ({
                   {onDelete && (
                     <button
                       className="flag-delete"
-                      onClick={(e) => {
+                      onClick={(e: any) => {
                         e.stopPropagation();
                         if (confirm(`Delete flag "${flag.key}"?`)) {
                           onDelete(flag.key);
@@ -158,7 +158,7 @@ export const FlagList: React.FC<FlagListProps> = ({
 
               {flag.tags && flag.tags.length > 0 && (
                 <div className="flag-tags">
-                  {flag.tags.map((tag) => (
+                  {flag.tags.map((tag: any) => (
                     <span key={tag} className="flag-tag">
                       {tag}
                     </span>
@@ -231,7 +231,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
         <input
           type="text"
           value={formData.key}
-          onChange={(e) => setFormData({ ...formData, key: e.target.value })}
+          onChange={(e: any) => setFormData({ ...formData, key: e.target.value })}
           required
           disabled={Boolean(flag)}
         />
@@ -242,7 +242,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
         <input
           type="text"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e: any) => setFormData({ ...formData, name: e.target.value })}
           required
         />
       </div>
@@ -251,7 +251,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
         <label>Description</label>
         <textarea
           value={formData.description}
-          onChange={(e) =>
+          onChange={(e: any) =>
             setFormData({ ...formData, description: e.target.value })
           }
         />
@@ -261,7 +261,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
         <label>Type *</label>
         <select
           value={formData.type}
-          onChange={(e) =>
+          onChange={(e: any) =>
             setFormData({
               ...formData,
               type: e.target.value as FlagDefinition['type'],
@@ -280,7 +280,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
           <input
             type="checkbox"
             checked={formData.enabled}
-            onChange={(e) =>
+            onChange={(e: any) =>
               setFormData({ ...formData, enabled: e.target.checked })
             }
           />
@@ -344,7 +344,7 @@ export const FlagAnalytics: React.FC<FlagAnalyticsProps> = ({
       {Object.keys(data.variations).length > 0 && (
         <div className="variations-breakdown">
           <h3>Variations</h3>
-          {Object.entries(data.variations).map(([variation, count]) => {
+          {Object.entries(data.variations).map(([variation, count]: [string, any]) => {
             const percentage = (count / data.evaluations) * 100;
             return (
               <div key={variation} className="variation-stat">
@@ -369,7 +369,7 @@ export const FlagAnalytics: React.FC<FlagAnalyticsProps> = ({
           <h3>Evaluation Timeline</h3>
           {/* Simple timeline visualization */}
           <div className="timeline">
-            {data.timeline.map((point, index) => (
+            {data.timeline.map((point: any, index: number) => (
               <div key={index} className="timeline-point">
                 <div
                   className="timeline-bar"
@@ -433,7 +433,7 @@ export const FlagDashboard: React.FC<{
 
       // Update local state
       setFlags((prev) =>
-        prev.map((flag) =>
+        prev.map((flag: any) =>
           flag.key === flagKey ? { ...flag, enabled } : flag,
         ),
       );

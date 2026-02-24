@@ -149,7 +149,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
 
         // Update context from server if provided
         if (data.context) {
-          setContext((prev) => ({ ...prev, ...data.context }));
+          setContext((prev: any) => ({ ...prev, ...data.context }));
         }
       }
     } catch (err) {
@@ -176,7 +176,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
   // Subscribe to client changes if provided
   useEffect(() => {
     if (client) {
-      const unsubscribe = client.subscribe((updatedFlags) => {
+      const unsubscribe = client.subscribe((updatedFlags: any) => {
         setFlags(updatedFlags);
       });
       return unsubscribe;
@@ -186,7 +186,7 @@ export const FeatureFlagProvider: React.FC<FeatureFlagProviderProps> = ({
   // Update context
   const updateContext = useCallback(
     (newContext: Partial<FlagContext>) => {
-      setContext((prev) => ({ ...prev, ...newContext }));
+      setContext((prev: any) => ({ ...prev, ...newContext }));
 
       if (client) {
         client.updateContext(newContext);
