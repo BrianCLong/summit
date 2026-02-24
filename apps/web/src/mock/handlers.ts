@@ -47,7 +47,7 @@ const conductorMetrics = {
 
 export const handlers = [
   // GraphQL endpoint
-  http.post('*/graphql', async ({ request }) => {
+  http.post(/\/graphql/, async ({ request }) => {
     const { query, variables } = await request.json() as { query: string; variables?: Record<string, unknown> }
     const queryString = query.trim()
 
@@ -196,7 +196,7 @@ export const handlers = [
   }),
 
   // REST endpoints
-  http.get('*/health', () => {
+  http.get(/\/health/, () => {
     return HttpResponse.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
@@ -210,12 +210,12 @@ export const handlers = [
   }),
 
   // Conductor Metrics (Matches useConductorMetrics hook)
-  http.get('*/metrics', () => {
+  http.get(/\/metrics/, () => {
     return HttpResponse.json(conductorMetrics)
   }),
 
   // Legacy Metrics (if called)
-  http.get('*/api/metrics', () => {
+  http.get(/\/api\/metrics/, () => {
     return HttpResponse.json({
       timestamp: new Date().toISOString(),
       performance: {
@@ -233,7 +233,7 @@ export const handlers = [
   }),
 
   // Auth endpoints
-  http.post('*/auth/login', async ({ request }) => {
+  http.post(/\/auth\/login/, async ({ request }) => {
     const { email, password } = await request.json() as { email: string; password: string }
 
     // Simple mock auth
@@ -248,17 +248,17 @@ export const handlers = [
     return HttpResponse.json({ error: 'Invalid credentials' }, { status: 401 })
   }),
 
-  http.post('*/auth/logout', () => {
+  http.post(/\/auth\/logout/, () => {
     return HttpResponse.json({ success: true })
   }),
 
   // User management
-  http.get('*/users/me', () => {
+  http.get(/\/users\/me/, () => {
     return HttpResponse.json(mockData.users[0])
   }),
 
   // Maestro Runs
-  http.post('*/api/maestro/runs', () => {
+  http.post(/\/api\/maestro\/runs/, () => {
     return HttpResponse.json({
       run: {
         id: 'run-mock-123',
@@ -279,7 +279,7 @@ export const handlers = [
   }),
 
   // File upload mock
-  http.post('*/upload', () => {
+  http.post(/\/upload/, () => {
     return HttpResponse.json({
       id: `file-${Date.now()}`,
       filename: 'uploaded-file.csv',

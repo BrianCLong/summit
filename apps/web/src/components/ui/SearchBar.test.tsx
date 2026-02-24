@@ -108,4 +108,19 @@ describe('SearchBar', () => {
     expect(handleChange).toHaveBeenCalledWith('ab');
     expect(handleChange).toHaveBeenCalledTimes(1);
   });
+
+  it('focuses input when clear button is clicked', () => {
+    const handleChange = vi.fn();
+    render(<SearchBar onChange={handleChange} value="initial" />);
+
+    const input = screen.getByRole('searchbox');
+    const clearButton = screen.getByRole('button', { name: /clear search/i });
+
+    // Verify input is not focused initially
+    expect(document.activeElement).not.toBe(input);
+
+    fireEvent.click(clearButton);
+
+    expect(input).toHaveFocus();
+  });
 });

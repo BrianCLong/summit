@@ -23,6 +23,7 @@ export function SearchBar({
 }: SearchBarProps) {
   const [internalValue, setInternalValue] = React.useState(value)
   const onChangeRef = React.useRef(onChange)
+  const inputRef = React.useRef<HTMLInputElement>(null)
 
   // Keep the latest onChange reference
   React.useEffect(() => {
@@ -53,6 +54,7 @@ export function SearchBar({
     setInternalValue('')
     onChangeRef.current?.('')
     onClear?.()
+    inputRef.current?.focus()
   }
 
   return (
@@ -65,6 +67,7 @@ export function SearchBar({
           aria-hidden="true"
         />
         <input
+          ref={inputRef}
           type="search"
           aria-label={placeholder || 'Search'}
           value={internalValue}
