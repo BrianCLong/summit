@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.dlp
 import future.keywords
 default allow := true

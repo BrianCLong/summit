@@ -1,0 +1,57 @@
+name: CogWar Adaptive Influence Systems CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packages/cogwar/**'
+      - 'fixtures/cogwar/**'
+      - '.github/workflows/cogwar-ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'packages/cogwar/**'
+      - 'fixtures/cogwar/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Unit Tests
+        run: npx vitest run packages/cogwar
+
+      - name: Run Drift Monitor (Integration Test)
+        run: npx tsx scripts/monitoring/cogwar-adaptive-influence-systems-2026-drift.ts
+
+      - name: Verify Artifacts
+        run: |
+          if [ ! -f "drift_check_out/report.json" ]; then
+            echo "Error: Report artifact missing"
+            false
+          fi
+          if [ ! -f "drift_check_out/evidence.json" ]; then
+            echo "Error: Evidence artifact missing"
+            false
+          fi
+
+      - name: Upload Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cogwar-evidence
+          path: drift_check_out/
+          retention-days: 5

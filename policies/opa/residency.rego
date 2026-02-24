@@ -1,3 +1,4 @@
+import future.keywords
 package composer.residency
 import future.keywords
 

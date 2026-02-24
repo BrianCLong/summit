@@ -1,3 +1,4 @@
+import future.keywords
 package policies.allowedregistries
 import future.keywords
 

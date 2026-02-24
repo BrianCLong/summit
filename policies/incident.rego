@@ -1,3 +1,4 @@
+import future.keywords
 package companyos.incident
 import future.keywords
 

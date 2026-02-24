@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.local/schemas/cogwar-evidence.schema.json",
+  "title": "Cognitive Warfare Evidence Bundle",
+  "description": "Immutable pointers + derived features with stable Evidence IDs.",
+  "type": "object",
+  "required": [
+    "evidence_id",
+    "timestamp",
+    "artifacts",
+    "features"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EVD:CW26:[a-z0-9-]+:[a-zA-Z0-9-]+:[a-zA-Z0-9]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "hash", "uri"],
+        "properties": {
+          "type": { "type": "string", "enum": ["post", "image", "video", "log", "incident"] },
+          "hash": { "type": "string" },
+          "uri": { "type": "string" }
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "description": "Extracted features supporting the detection",
+      "additionalProperties": true
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "detector_version": { "type": "string" },
+        "commit_sha": { "type": "string" }
+      }
+    }
+  }
+}

@@ -21,9 +21,7 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    # Support both "items" (legacy) and "evidence" (new schema) keys
     items = idx.get("evidence", idx.get("items", {}))
-
     if not isinstance(items, dict) or not items:
         fail("evidence/index.json must contain non-empty 'evidence' or 'items' map")
 
