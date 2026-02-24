@@ -1,6 +1,4 @@
-import { factGovSchema } from './schema.factgov.js';
-
-const mainSchema = `
+export const typeDefs = `
   scalar JSON
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
@@ -550,5 +548,3 @@ const mainSchema = `
     playbookActionCompleted(playbookId: ID!): JSON!
   }
 `;
-
-export const typeDefs = [mainSchema, factGovSchema];

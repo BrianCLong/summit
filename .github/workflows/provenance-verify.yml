@@ -15,6 +15,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - uses: pnpm/action-setup@v4
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

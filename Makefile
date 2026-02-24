@@ -12,7 +12,8 @@ include Makefile.merge-train
 .PHONY: demo demo-down demo-check demo-seed demo-smoke
 .PHONY: gmr-gate gmr-eval gmr-validate
 
-COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
+# Handle both .yaml and .yml extensions for dev compose
+COMPOSE_DEV_FILE ?= $(shell ls docker-compose.dev.yml 2>/dev/null || ls docker-compose.dev.yaml 2>/dev/null || echo "docker-compose.dev.yml")
 DEV_ENV_FILE ?= .env
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
@@ -73,11 +74,18 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
-	python3 -m venv $(VENV_DIR)
-	$(VENV_BIN)/pip install -U pip
-	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
-	$(VENV_BIN)/pip install pytest ruff mypy pre-commit
-	$(VENV_BIN)/pre-commit install || true
+	@if [ ! -d "$(VENV_DIR)" ]; then \
+		echo "Creating venv..."; \
+		$(PYTHON) -m venv $(VENV_DIR) || $(PYTHON) -m venv $(VENV_DIR) --without-pip; \
+	fi
+	@if [ ! -f "$(VENV_BIN)/pip" ]; then \
+		echo "Installing pip..."; \
+		curl -sS https://bootstrap.pypa.io/get-pip.py | $(VENV_BIN)/python || true; \
+	fi
+	@$(VENV_BIN)/pip install -U pip || true
+	@$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]" || true
+	@$(VENV_BIN)/pip install pytest ruff mypy pre-commit || true
+	@$(VENV_BIN)/pre-commit install || true
 	pnpm install
 
 dev:

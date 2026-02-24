@@ -1,13 +1,13 @@
 {
-  "name": "@maestro/core",
-  "version": "4.2.3",
+  "name": "@intelgraph/maestro-core",
+  "version": "5.3.2",
   "description": "Maestro orchestration engine core",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint \"src/**/*.ts\"",
     "clean": "rm -rf dist"

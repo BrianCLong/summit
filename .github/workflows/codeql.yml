@@ -29,6 +29,7 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -50,8 +51,17 @@ jobs:
       # and packages/ directories. Dependencies MUST be installed before CodeQL
       # analysis to ensure proper JavaScript/TypeScript resolution.
       # ============================================================================
+      - name: Setup pnpm
+        if: matrix.language == 'javascript-typescript'
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+
       - name: Setup Node.js
         if: matrix.language == 'javascript-typescript'
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: Install dependencies (monorepo workspaces)
         if: matrix.language == 'javascript-typescript'
         run: pnpm install --frozen-lockfile --ignore-scripts

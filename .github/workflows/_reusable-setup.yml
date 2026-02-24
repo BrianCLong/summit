@@ -95,7 +95,19 @@ jobs:
           echo "node=${{ inputs.node-version }}" >> "$GITHUB_OUTPUT"
           echo "pnpm=${{ inputs.pnpm-version }}" >> "$GITHUB_OUTPUT"
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: false
+
       - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: "pnpm"
+          cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
       - name: Get pnpm store path
         id: pnpm-store
         shell: bash
