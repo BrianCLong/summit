@@ -1,35 +1,32 @@
 # Repo Assumptions Ledger
 
-This ledger separates verified facts from intentionally constrained assumptions. Any assumption
-must be resolved before feature flags or CI gates become enforced.
-
-## Verified
+## Verified (Current State)
 
 | Item | Evidence |
 | --- | --- |
-| Node.js/TypeScript monorepo using pnpm workspaces | `package.json` declares `type: module`, `pnpm@10.0.0`, and `workspaces`. |
-| Primary CLI entrypoints live under `src/cli/` | `src/cli/*` contains CLI command modules. |
-| CI configuration is rooted in `.github/` workflows | `.github/workflows` and CI policy files are present. |
-| Documentation lives under `docs/` with architecture subfolder | `docs/architecture/` exists and is populated. |
+| Monorepo structure with `services/` and `src/` | Root directory layout |
+| `src/` contains core logic and libraries | Root directory layout |
+| `services/evals` exists with `runner.ts` | Root directory layout |
+| `src/cli` exists | Root directory layout |
+| `docs/standards/`, `docs/security/data-handling/`, and `docs/ops/runbooks/` exist | Directory layout |
+| pnpm workspace is in use | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` |
 
-## Assumed (intentionally constrained)
+## Deferred Pending Validation
 
-| Item | Assumption State |
-| --- | --- |
-| Evidence artifact retention rules for architecture flows | Deferred pending review of evidence governance docs. |
-| Required status checks for new CI gates | Deferred pending inspection of `required-checks.yml` and branch protections. |
-| Must-not-touch files beyond lockfiles and release automation | Deferred pending compliance review and CODEOWNERS constraints. |
+| Item | Reason | Validation Plan |
+| --- | --- | --- |
+| UI is Next.js or compatible | Deferred pending repo scan | Inspect `apps/` or `client/` package.json |
+| Testing stack includes Playwright/Vitest | Deferred pending repo scan | Search for Playwright/Vitest configs |
+| Policy-as-code enforcement exists | Deferred pending evidence | Locate enforcement scripts and gates |
+| Feature flag mechanism exists | Deferred pending evidence | Confirm `feature-flags`/`flags` usage |
 
-## Validation checklist
+## Validation Checklist
 
-1. Confirm CLI entrypoint wiring for new commands in the primary CLI tool.
-2. Locate evidence bundle conventions and storage location expectations.
-3. Confirm CI check naming and required status checks.
-4. Identify governance files that must align with new evidence IDs.
-5. Confirm any generated artifact locations that are excluded from formatting or linting.
+- [ ] Confirm UI framework (Next.js or other) in `apps/` or `client/`.
+- [ ] Confirm test stack (`playwright`, `vitest`, `jest`) in root configs.
+- [ ] Locate policy enforcement gate scripts.
+- [ ] Locate feature flag wiring and default-off behavior.
 
-## Must-not-touch list (current)
+## Plan Deviation (Current)
 
-- Lockfiles (`pnpm-lock.yaml`, `Cargo.lock`) and release automation outputs.
-- Generated artifacts under `dist/`.
-- Existing CI workflows unrelated to the flows capability.
+- Documentation-only changes scoped to standards, security data handling, and ops runbooks.
