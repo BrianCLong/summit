@@ -1,30 +1,35 @@
-# Repository Assumptions (Software Factory Subsumption)
+# Repo Assumptions — ai-platform-daily-2026-02-07
 
-Status: Intentionally constrained pending verification.
+**Status:** Intentionally constrained pending in-repo validation.
+**Item Slug:** ai-platform-daily-2026-02-07
 
-## Verify (grounded checks)
+## Verified (from provided path map)
 
-- Language mix (Python/Go/TypeScript) and primary runtime targets.
-- Current agent runner entrypoints and where they live (CLI, service, or scripts).
-- Existing test harness style (unit/integration/e2e) and naming conventions.
-- CI system and job names (GitHub Actions or equivalent workflows).
-- Evidence folder conventions and artifact retention patterns.
-- Logging and telemetry approach (structured logs, metrics, traces).
+- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
+- Canonical paths:
+  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
+  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
+  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
+  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
+- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
 
-## Must-not-touch (until verified)
+## Assumed (must validate in repo)
 
-- Release workflow files.
-- Security policy files.
-- Anything under `infra/` or production deployment manifests.
+- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
+- Existing policy engine format under `.github/policies/` (OPA vs custom).
+- Evidence schema conventions (filenames, JSON structure).
+- Current CI job names inside the workflows (exact `name:` fields).
 
-## Checklist (to run before implementation)
+## Must-not-touch list (until validated)
 
-- `rg -n "evidence|eval|scenario|harness|agent"` to map existing primitives.
-- List CI jobs and required checks for baseline policy gates.
-- Confirm license and contribution rules.
+- `.github/workflows/codeql.yml`
+- Any production deployment workflows (if present)
+- DB migration directories (if present)
+- Secrets / encrypted configs
 
-## Default constraints (if verification is blocked)
+## Validation checklist (before PRs merge)
 
-- Feature flags default OFF for any new pipeline.
-- Deny-by-default for external network calls in tests.
-- Only additive modules and minimal wiring changes.
+- Confirm `.github/workflows/*` filenames + required checks in branch protection.
+- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
+- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
+- Confirm test runner + assertion libs (`pnpm test:*`).

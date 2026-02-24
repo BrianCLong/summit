@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-08T00:39:27Z",
-  "revision_note": "Added Sigstore bundle-first evidence scaffolding and supply-chain policy guardrails.",
+  "last_updated": "2026-02-07T12:00:00Z",
+  "revision_note": "Added ai-platform-daily-2026-02-07 repo assumptions artifact.",
   "initiatives": [
     {
-      "id": "sigstore-bundlefirst-foundation",
+      "id": "ai-platform-daily-2026-02-07",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Bundle-first Sigstore verification scaffolding, evidence schemas alignment, and supply-chain policy fixtures."
+      "notes": "Captured repo assumptions artifact for ai-platform-daily-2026-02-07 intake and validation checklist."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
