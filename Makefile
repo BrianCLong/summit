@@ -409,3 +409,11 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+eval-skills-changed: ## Run skill evals for changed files
+	@echo "Running skill evals for changed files..."
+	@node scripts/eval-skills.js --mode changed
+
+eval-skills-all: ## Run full skill eval suite
+	@echo "Running full skill eval suite..."
+	@node scripts/eval-skills.js --mode all

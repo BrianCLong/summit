@@ -119,6 +119,8 @@ export {
   narrativeSimulationDurationSeconds
 };
 
+export default metrics;
+
 export const metrics = {
   jobsProcessed,
   outboxSyncLatency,
