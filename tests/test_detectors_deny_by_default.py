@@ -1,9 +1,3 @@
-import pytest
-try:
-    import torch
-except ImportError:
-    pytest.skip("torch not installed", allow_module_level=True)
-
 from summit.precision.detectors import MismatchReport, compute_mismatch_metrics
 
 

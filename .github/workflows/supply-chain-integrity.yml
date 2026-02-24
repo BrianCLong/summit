@@ -54,8 +54,7 @@ jobs:
         uses: actions/setup-node@65d868f8d4d85d7d4abb7de0875cde3fcc8798f5 # v4.0.3
         with:
           node-version: "20"
-          cache: "pnpm"
-
+          cache: false
       - name: Set up Python
         uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
         with:
@@ -64,6 +63,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v5.0.1
         with:
+          cache: false
           go-version: "1.21"
 
       # Install supply chain tools with strict pinning

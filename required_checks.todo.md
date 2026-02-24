@@ -1,26 +1,23 @@
-# Required checks discovery (TODO)
+# Required Checks Discovery
 
-## Goal
-List the repository's *required* CI checks for the default branch, then map them to verifier names
-in `ci/verifiers/`.
+## Process to Identify Required Checks
 
-## GitHub UI steps
-1. Repo → Settings → Branches → Branch protection rules.
-2. Open the rule for the default branch.
-3. Under “Require status checks to pass”, copy the exact check names.
+1. Go to repository Settings in GitHub.
+2. Navigate to **Branches** -> **Branch protection rules**.
+3. Edit the rule for `main` (or default branch).
+4. Look for "Require status checks to pass before merging".
+5. Copy the exact names of the required checks listed there.
 
-## GitHub API steps (alternative)
-Use the Branch Protection API to fetch required status checks for the branch:
-`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
+## Temporary Gate Names (Implemented in Plan)
 
-## Temporary convention
-Until discovered, we use temporary verifier names:
-- `ci:unit`
-- `ci:schema`
-- `ci:lint`
-- `ci:deps-delta`
+We are using these names in our CI pipelines until the official required check names are confirmed and mapped.
 
-## Rename plan
-Once real check names are known:
-1. Update CI config to emit the official check names.
-2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.
+- `ci:unit` - Runs unit tests for new packages.
+- `ci:lint` - Runs linting.
+- `ci:evidence` - Validates evidence artifacts (schemas, determinism).
+- `ci:security-gates` - Runs deny-by-default and redaction tests.
+- `verify:dependency-delta` - Ensures dependency changes are documented.
+
+## Rename Plan
+
+Once official names are known, we will alias these jobs or rename them in the workflow files to match the branch protection rules.

@@ -7,11 +7,11 @@
  */
 
 import { EventEmitter } from 'events';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
-import { tracer, Span } from '../utils/tracing';
-import { DatabaseService } from './DatabaseService';
-import { TenantCostService } from './TenantCostService';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
+import { tracer, Span } from '../utils/tracing.js';
+import { DatabaseService } from './DatabaseService.js';
+import { TenantCostService } from './TenantCostService.js';
 
 // Partitioning configuration
 interface PartitioningConfig {

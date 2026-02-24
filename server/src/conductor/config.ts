@@ -1,10 +1,10 @@
 // Conductor Configuration and Initialization
 // Sets up MCP servers, registers them, and initializes the conductor system
 
-import { initializeConductor, ConductorConfig } from './index';
-import { mcpRegistry } from './mcp/client';
-import GraphOpsServer, { GraphOpsConfig } from './mcp/servers/graphops-server';
-import FilesServer, { FilesServerConfig } from './mcp/servers/files-server';
+import { initializeConductor, ConductorConfig } from './index.js';
+import { mcpRegistry } from './mcp/client.js';
+import GraphOpsServer, { GraphOpsConfig } from './mcp/servers/graphops-server.js';
+import FilesServer, { FilesServerConfig } from './mcp/servers/files-server.js';
 
 const u1 = process.env.NEO4J_USER;
 const u2 = process.env.NEO4J_USERNAME;
@@ -310,7 +310,7 @@ export async function shutdownConductorSystem(servers: {
     }
 
     // Shutdown main conductor
-    const { conductor } = await import('./index');
+    const { conductor } = await import('./index.js');
     if (conductor) {
       await conductor.shutdown();
     }

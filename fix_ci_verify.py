@@ -1,128 +1,31 @@
+import re
 
-import os
-
-filepath = ".github/workflows/ci-verify.yml"
-
-with open(filepath, "r") as f:
+with open('.github/workflows/ci-verify.yml', 'r') as f:
     content = f.read()
 
-# Helper to inject pnpm setup before setup-node
-# and setup-python before pnpm install
-# and update OPA version
+# 1. Add pnpm/action-setup to ga-evidence-completeness
+# Find the job start
+job_pattern = r'(ga-evidence-completeness:[\s\S]*?steps:\n\s+- uses: actions/checkout@v4\n)'
+# Insert pnpm setup after checkout
+pnpm_step = '      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4\n'
 
-lines = content.splitlines()
-new_lines = []
-in_job = None
-job_indent = ""
+if 'uses: pnpm/action-setup' not in content.split('ga-evidence-completeness:')[1].split('setup-node')[0]:
+    content = re.sub(job_pattern, pnpm_step, content, count=1)
 
-# Common snippets
-pnpm_setup = [
-    "      - uses: pnpm/action-setup@v4",
-    "        with:",
-    "          version: 9.12.0"
-]
+# 2. Update setup-opa version
+# We want to replace 'uses: open-policy-agent/setup-opa@...' with itself plus 'with: version: v0.68.0'
+# BUT checking if 'with' already exists is hard with regex.
+# Let's verify if we can just replace the line with a block.
 
-python_setup = [
-    "      - uses: actions/setup-python@v5",
-    "        with:",
-    "          python-version: '3.11'",
-    "          cache: 'pip'"
-]
+opa_pattern = r'(uses: open-policy-agent/setup-opa@[^\n]+)(\n\s+with:\n\s+version: [^\n]+)?'
+opa_replacement = r'\1\n        with:\n          version: v0.68.0'
 
-# Track if we've inserted pnpm setup in the current job
-pnpm_inserted = False
+# Use a function to avoid double 'with' if it exists (though regex optional group handles simple case)
+def replace_opa(match):
+    base = match.group(1)
+    return f"{base}\n        with:\n          version: v0.68.0"
 
-for i, line in enumerate(lines):
-    stripped = line.strip()
-    indent = line[:len(line) - len(stripped)]
+content = re.sub(opa_pattern, replace_opa, content)
 
-    # Detect job start (simplified)
-    if line.startswith("  ") and not line.startswith("    ") and ":" in line:
-        in_job = line.strip().split(":")[0]
-        pnpm_inserted = False
-
-    # Update OPA version
-    if "open-policy-agent/setup-opa" in line:
-        new_lines.append(line)
-        continue
-    if stripped.startswith("version: v0.45.0") and "Setup OPA" in lines[i-2]: # context check roughly
-        new_lines.append(indent + "version: v0.61.0 # Updated for modern Rego syntax")
-        continue
-
-    # Insert pnpm setup before setup-node
-    if "uses: actions/setup-node" in stripped:
-        # Check if pnpm setup was just before this (legacy/existing)
-        # The existing file uses pnpm/action-setup@c5ba... which is a commit hash.
-        # We want to standardize.
-
-        # If the previous line was pnpm/action-setup, we might have already processed it or want to replace it.
-        # Let's look backward.
-        prev_line = lines[i-1].strip()
-        if "pnpm/action-setup" in prev_line:
-            # We will handle/replace that line when we iterate to it?
-            # No, we are at setup-node now.
-            pass
-        else:
-            # If we haven't seen pnpm setup in this job block yet, insert it
-            if not pnpm_inserted:
-                # Use the same indentation
-                for p_line in pnpm_setup:
-                    new_lines.append(indent + p_line.lstrip())
-                pnpm_inserted = True
-
-    # Replace existing pnpm/action-setup with our standard block if encountered
-    if "uses: pnpm/action-setup" in stripped:
-        if pnpm_inserted:
-            # Already inserted our version, skip this one
-            continue
-        else:
-            # Replace with our version
-            for p_line in pnpm_setup:
-                new_lines.append(indent + p_line.lstrip())
-            pnpm_inserted = True
-            continue
-
-    # Insert setup-python before pnpm install
-    if stripped == "run: pnpm install --frozen-lockfile":
-        # Check if python setup is before
-        # We'll just insert it. Idempotency is hard without parsing, but unlikely to have it twice unless we added it.
-        # But we know we haven't added it yet.
-        for py_line in python_setup:
-            new_lines.append(indent + py_line.lstrip())
-
-    new_lines.append(line)
-
-# Post-processing: specific fix for mcp-ux-lint which didn't have pnpm setup
-# The loop above adds it before setup-node, so it should be covered.
-
-# Post-processing: specific fix for ga-evidence-completeness which didn't have pnpm install
-# We need to find that job and add pnpm install.
-final_lines = []
-in_ga_job = False
-for line in new_lines:
-    if "ga-evidence-completeness:" in line:
-        in_ga_job = True
-    elif line.startswith("  ") and not line.startswith("    ") and ":" in line:
-        in_ga_job = False
-
-    final_lines.append(line)
-
-    if in_ga_job and "node-version: \"20\"" in line:
-        # After setup-node, add pnpm install
-        # We need indentation
-        indent = line[:len(line) - len(line.lstrip())]
-        # This indent is likely inside `with:`. We need steps indent.
-        steps_indent = "      "
-        final_lines.append(steps_indent + "- name: Install dependencies")
-        final_lines.append(steps_indent + "  run: pnpm install --frozen-lockfile")
-
-# One logic error in the loop: if I replace pnpm setup, I skip the line "uses: ...".
-# But if it had "with: version: ...", I need to skip that too.
-# Simplified approach: The existing file has `uses: pnpm/action-setup...` as a one-liner usually in this file?
-# Let's check the content read.
-# The content shows: `uses: pnpm/action-setup@c5ba... # v4` (one liner).
-# So skipping just that line is fine.
-
-# Write back
-with open(filepath, "w") as f:
-    f.write("\n".join(final_lines))
+with open('.github/workflows/ci-verify.yml', 'w') as f:
+    f.write(content)

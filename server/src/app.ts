@@ -11,136 +11,136 @@ import hpp from 'hpp';
 import pino from 'pino';
 import pinoHttpModule from 'pino-http';
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
-import { logger as appLogger } from './config/logger.ts';
-import { telemetry } from './lib/telemetry/comprehensive-telemetry.ts';
-import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.ts';
-import { anomalyDetector } from './lib/telemetry/anomaly-detector.ts';
-import { auditLogger } from './middleware/audit-logger.ts';
-import { auditFirstMiddleware } from './middleware/audit-first.ts';
-import { correlationIdMiddleware } from './middleware/correlation-id.ts';
-import { featureFlagContextMiddleware } from './middleware/feature-flag-context.ts';
-import { sanitizeInput } from './middleware/sanitization.ts';
-import { piiGuardMiddleware } from './middleware/pii-guard.ts';
-import { errorHandler } from './middleware/errorHandler.ts';
-import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimiter.ts';
-import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.ts';
-import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.ts';
-import { overloadProtection } from './middleware/overloadProtection.ts';
-import { admissionControl } from './runtime/backpressure/AdmissionControl.ts';
-import { httpCacheMiddleware } from './middleware/httpCache.ts';
-import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.ts';
-import { residencyEnforcement } from './middleware/residency.ts';
-import { requestProfilingMiddleware } from './middleware/request-profiling.ts';
-import { securityHeaders } from './middleware/securityHeaders.ts';
-import exceptionRouter from './data-residency/exceptions/routes.ts';
-import monitoringRouter from './routes/monitoring.ts';
-import billingRouter from './routes/billing.ts';
-import entityResolutionRouter from './routes/entity-resolution.ts';
-import workspaceRouter from './routes/workspaces.ts';
-import gaCoreMetricsRouter from './routes/ga-core-metrics.ts';
-import nlGraphQueryRouter from './routes/nl-graph-query.ts';
-import disclosuresRouter from './routes/disclosures.ts';
-import narrativeSimulationRouter from './routes/narrative-sim.ts';
-import receiptsRouter from './routes/receipts.ts';
-import predictiveRouter from './routes/predictive.ts';
-import { policyRouter } from './routes/policy.ts';
-import policyManagementRouter from './routes/policies/policy-management.ts';
-import { metricsRoute } from './http/metricsRoute.ts';
-import monitoringBackpressureRouter from './routes/monitoring-backpressure.ts';
-import rbacRouter from './routes/rbacRoutes.ts';
-// import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.ts';
-import { getContext } from './lib/auth.ts';
-import { getNeo4jDriver } from './db/neo4j.ts';
-import { initializeTracing, getTracer } from './observability/tracer.ts';
+import { logger as appLogger } from './config/logger.js';
+import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
+import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
+import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
+import { auditLogger } from './middleware/audit-logger.js';
+import { auditFirstMiddleware } from './middleware/audit-first.js';
+import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
+import { sanitizeInput } from './middleware/sanitization.js';
+import { piiGuardMiddleware } from './middleware/pii-guard.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimiter.js';
+import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
+import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
+import { overloadProtection } from './middleware/overloadProtection.js';
+import { admissionControl } from './runtime/backpressure/AdmissionControl.js';
+import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
+import { residencyEnforcement } from './middleware/residency.js';
+import { requestProfilingMiddleware } from './middleware/request-profiling.js';
+import { securityHeaders } from './middleware/securityHeaders.js';
+import exceptionRouter from './data-residency/exceptions/routes.js';
+import monitoringRouter from './routes/monitoring.js';
+import billingRouter from './routes/billing.js';
+import entityResolutionRouter from './routes/entity-resolution.js';
+import workspaceRouter from './routes/workspaces.js';
+import gaCoreMetricsRouter from './routes/ga-core-metrics.js';
+import nlGraphQueryRouter from './routes/nl-graph-query.js';
+import disclosuresRouter from './routes/disclosures.js';
+import narrativeSimulationRouter from './routes/narrative-sim.js';
+import receiptsRouter from './routes/receipts.js';
+import predictiveRouter from './routes/predictive.js';
+import { policyRouter } from './routes/policy.js';
+import policyManagementRouter from './routes/policies/policy-management.js';
+import { metricsRoute } from './http/metricsRoute.js';
+import monitoringBackpressureRouter from './routes/monitoring-backpressure.js';
+import rbacRouter from './routes/rbacRoutes.js';
+// import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
+import { getContext } from './lib/auth.js';
+import { getNeo4jDriver } from './db/neo4j.js';
+import { initializeTracing, getTracer } from './observability/tracer.js';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
-import { startTrustWorker } from './workers/trustScoreWorker.ts';
-import { startRetentionWorker } from './workers/retentionWorker.ts';
-import { cfg } from './config.ts';
-import supportTicketsRouter from './routes/support-tickets.ts';
-import ticketLinksRouter from './routes/ticket-links.ts';
-import tenantContextMiddleware from './middleware/tenantContext.ts';
-import sharingRouter from './routes/sharing.ts';
-import { auroraRouter } from './routes/aurora.ts';
-import { oracleRouter } from './routes/oracle.ts';
-import { phantomLimbRouter } from './routes/phantom_limb.ts';
-import { actionsRouter } from './routes/actions.ts';
-import { echelon2Router } from './routes/echelon2.ts';
-import { mnemosyneRouter } from './routes/mnemosyne.ts';
-import { necromancerRouter } from './routes/necromancer.ts';
-import { zeroDayRouter } from './routes/zero_day.ts';
-import { abyssRouter } from './routes/abyss.ts';
-import authRouter from './routes/authRoutes.ts';
-import ssoRouter from './routes/sso.ts';
-import qafRouter from './routes/qaf.ts';
-import siemPlatformRouter from './routes/siem-platform.ts';
-import maestroRouter from './routes/maestro.ts';
-import mcpAppsRouter from './routes/mcp-apps.ts';
-import caseRouter from './routes/cases.ts';
-import entityCommentsRouter from './routes/entity-comments.ts';
-import tenantsRouter from './routes/tenants.ts';
-import { SummitInvestigate } from './services/SummitInvestigate.ts';
-import { streamIngest } from './ingest/stream.ts';
-import osintRouter from './routes/osint.ts';
-import palettesRouter from './routes/palettes.ts';
+import { startTrustWorker } from './workers/trustScoreWorker.js';
+import { startRetentionWorker } from './workers/retentionWorker.js';
+import { cfg } from './config.js';
+import supportTicketsRouter from './routes/support-tickets.js';
+import ticketLinksRouter from './routes/ticket-links.js';
+import tenantContextMiddleware from './middleware/tenantContext.js';
+import sharingRouter from './routes/sharing.js';
+import { auroraRouter } from './routes/aurora.js';
+import { oracleRouter } from './routes/oracle.js';
+import { phantomLimbRouter } from './routes/phantom_limb.js';
+import { actionsRouter } from './routes/actions.js';
+import { echelon2Router } from './routes/echelon2.js';
+import { mnemosyneRouter } from './routes/mnemosyne.js';
+import { necromancerRouter } from './routes/necromancer.js';
+import { zeroDayRouter } from './routes/zero_day.js';
+import { abyssRouter } from './routes/abyss.js';
+import authRouter from './routes/authRoutes.js';
+import ssoRouter from './routes/sso.js';
+import qafRouter from './routes/qaf.js';
+import siemPlatformRouter from './routes/siem-platform.js';
+import maestroRouter from './routes/maestro.js';
+import mcpAppsRouter from './routes/mcp-apps.js';
+import caseRouter from './routes/cases.js';
+import entityCommentsRouter from './routes/entity-comments.js';
+import tenantsRouter from './routes/tenants.js';
+import { SummitInvestigate } from './services/SummitInvestigate.js';
+import { streamIngest } from './ingest/stream.js';
+import osintRouter from './routes/osint.js';
+import palettesRouter from './routes/palettes.js';
 
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './config/swagger.ts';
-import metaOrchestratorRouter from './routes/meta-orchestrator.ts';
-import adminSmokeRouter from './routes/admin-smoke.ts';
-import lineageRouter from './routes/lineage.ts';
-import scenarioRouter from './routes/scenarios.ts';
-import resourceCostsRouter from './routes/resource-costs.ts';
+import { swaggerSpec } from './config/swagger.js';
+import metaOrchestratorRouter from './routes/meta-orchestrator.js';
+import adminSmokeRouter from './routes/admin-smoke.js';
+import lineageRouter from './routes/lineage.js';
+import scenarioRouter from './routes/scenarios.js';
+import resourceCostsRouter from './routes/resource-costs.js';
 
-import streamRouter from './routes/stream.ts'; // Added import
-import queryPreviewStreamRouter from './routes/query-preview-stream.ts';
-import correctnessProgramRouter from './routes/correctness-program.ts';
-import commandConsoleRouter from './routes/internal/command-console.ts';
-import searchV1Router from './routes/search-v1.ts';
-import ontologyRouter from './routes/ontology.ts';
-import searchIndexRouter from './routes/search-index.ts'; // New search-index route
-import dataGovernanceRouter from './routes/data-governance-routes.ts';
-import tenantBillingRouter from './routes/tenants/billing.ts';
-import tenantUsageRouter from './routes/tenants/usage.ts';
-import { gtmRouter } from './routes/gtm-messaging.ts';
-import { airgapRouter } from './routes/airgap.ts';
-import analyticsRouter from './routes/analytics.ts';
-import experimentRouter from './routes/experiments.ts';
-import cohortRouter from './routes/cohorts.ts';
-import funnelRouter from './routes/funnels.ts';
-import anomaliesRouter from './routes/anomalies.ts';
-import exportsRouter from './routes/exports.ts';
-import retentionRouter from './routes/retention.ts';
-import drRouter from './routes/dr.ts';
-import reportingRouter from './routes/reporting.ts';
-import policyProfilesRouter from './routes/policy-profiles.ts';
-import policyProposalsRouter from './routes/policy-proposals.ts';
-import evidenceRouter from './routes/evidence.ts';
-import masteryRouter from './routes/mastery.ts';
-import cryptoIntelligenceRouter from './routes/crypto-intelligence.ts';
-import demoRouter from './routes/demo.ts';
-import claimsRouter from './routes/claims.ts';
-import opsRouter from './routes/ops.ts';
-import featureFlagsRouter from './routes/feature-flags.ts';
-import mlReviewRouter from './routes/ml_review.ts';
-import adminFlagsRouter from './routes/admin-flags.ts';
-import auditEventsRouter from './routes/audit-events.ts';
-import brandPackRouter from './services/brand-packs/brand-pack.routes.ts';
-import { centralizedErrorHandler } from './middleware/error-handling-middleware.ts';
-import pluginAdminRouter from './routes/plugins/plugin-admin.ts';
-import integrationAdminRouter from './routes/integrations/integration-admin.ts';
-import securityAdminRouter from './routes/security/security-admin.ts';
-import complianceAdminRouter from './routes/compliance/compliance-admin.ts';
-import sandboxAdminRouter from './routes/sandbox/sandbox-admin.ts';
-import adminTenantsRouter from './routes/admin/tenants.ts';
-import onboardingRouter from './routes/onboarding.ts';
-import supportCenterRouter from './routes/support-center.ts';
-import i18nRouter from './routes/i18n.ts';
-import experimentationRouter from './routes/experimentation.ts';
-import { v4Router } from './routes/v4/index.ts';
-import vectorStoreRouter from './routes/vector-store.ts';
-import intelGraphRouter from './routes/intel-graph.ts';
-import graphragRouter from './routes/graphrag.ts';
-import intentRouter from './routes/intent.ts';
+import streamRouter from './routes/stream.js'; // Added import
+import queryPreviewStreamRouter from './routes/query-preview-stream.js';
+import correctnessProgramRouter from './routes/correctness-program.js';
+import commandConsoleRouter from './routes/internal/command-console.js';
+import searchV1Router from './routes/search-v1.js';
+import ontologyRouter from './routes/ontology.js';
+import searchIndexRouter from './routes/search-index.js'; // New search-index route
+import dataGovernanceRouter from './routes/data-governance-routes.js';
+import tenantBillingRouter from './routes/tenants/billing.js';
+import tenantUsageRouter from './routes/tenants/usage.js';
+import { gtmRouter } from './routes/gtm-messaging.js';
+import { airgapRouter } from './routes/airgap.js';
+import analyticsRouter from './routes/analytics.js';
+import experimentRouter from './routes/experiments.js';
+import cohortRouter from './routes/cohorts.js';
+import funnelRouter from './routes/funnels.js';
+import anomaliesRouter from './routes/anomalies.js';
+import exportsRouter from './routes/exports.js';
+import retentionRouter from './routes/retention.js';
+import drRouter from './routes/dr.js';
+import reportingRouter from './routes/reporting.js';
+import policyProfilesRouter from './routes/policy-profiles.js';
+import policyProposalsRouter from './routes/policy-proposals.js';
+import evidenceRouter from './routes/evidence.js';
+import masteryRouter from './routes/mastery.js';
+import cryptoIntelligenceRouter from './routes/crypto-intelligence.js';
+import demoRouter from './routes/demo.js';
+import claimsRouter from './routes/claims.js';
+import opsRouter from './routes/ops.js';
+import featureFlagsRouter from './routes/feature-flags.js';
+import mlReviewRouter from './routes/ml_review.js';
+import adminFlagsRouter from './routes/admin-flags.js';
+import auditEventsRouter from './routes/audit-events.js';
+import brandPackRouter from './services/brand-packs/brand-pack.routes.js';
+import { centralizedErrorHandler } from './middleware/error-handling-middleware.js';
+import pluginAdminRouter from './routes/plugins/plugin-admin.js';
+import integrationAdminRouter from './routes/integrations/integration-admin.js';
+import securityAdminRouter from './routes/security/security-admin.js';
+import complianceAdminRouter from './routes/compliance/compliance-admin.js';
+import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
+import adminTenantsRouter from './routes/admin/tenants.js';
+import onboardingRouter from './routes/onboarding.js';
+import supportCenterRouter from './routes/support-center.js';
+import i18nRouter from './routes/i18n.js';
+import experimentationRouter from './routes/experimentation.js';
+import { v4Router } from './routes/v4/index.js';
+import vectorStoreRouter from './routes/vector-store.js';
+import intelGraphRouter from './routes/intel-graph.js';
+import graphragRouter from './routes/graphrag.js';
+import intentRouter from './routes/intent.js';
 
 export const createApp = async () => {
   // Initialize OpenTelemetry tracing
@@ -273,7 +273,7 @@ export const createApp = async () => {
   const {
     productionAuthMiddleware,
     applyProductionSecurity,
-  } = await import('./config/production-security.ts');
+  } = await import('./config/production-security.js');
 
   // Apply security middleware based on environment
   if (cfg.NODE_ENV === 'production') {
@@ -369,7 +369,7 @@ export const createApp = async () => {
   });
 
   // Health endpoints (exempt from rate limiting)
-  const healthRouter = (await import('./routes/health.ts')).default;
+  const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
 
   // Swagger UI
@@ -416,7 +416,7 @@ export const createApp = async () => {
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   if (process.env.SKIP_AI_ROUTES !== 'true') {
-    const { default: aiRouter } = await import('./routes/ai.ts');
+    const { default: aiRouter } = await import('./routes/ai.js');
     app.use('/api/ai', aiRouter);
   }
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
@@ -429,7 +429,7 @@ export const createApp = async () => {
   app.use('/api/er', entityResolutionRouter);
   app.use('/api/workspaces', workspaceRouter);
   if (process.env.SKIP_WEBHOOKS !== 'true') {
-    const { default: webhookRouter } = await import('./routes/webhooks.ts');
+    const { default: webhookRouter } = await import('./routes/webhooks.js');
     app.use('/api/webhooks', webhookRouter);
   }
   app.use('/api/support', supportTicketsRouter);
@@ -518,11 +518,11 @@ export const createApp = async () => {
   SummitInvestigate.initialize(app);
   process.stdout.write('[DEBUG] SummitInvestigate initialized\n');
   // Maestro
-  const { buildMaestroRouter } = await import('./routes/maestro_routes.ts');
-  const { Maestro } = await import('./maestro/core.ts');
-  const { MaestroQueries } = await import('./maestro/queries.ts');
-  const { IntelGraphClientImpl } = await import('./intelgraph/client-impl.ts');
-  const { CostMeter } = await import('./maestro/cost_meter.ts');
+  const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
+  const { Maestro } = await import('./maestro/core.js');
+  const { MaestroQueries } = await import('./maestro/queries.js');
+  const { IntelGraphClientImpl } = await import('./intelgraph/client-impl.js');
+  const { CostMeter } = await import('./maestro/cost_meter.js');
 
   const igClient = new IntelGraphClientImpl();
   const costMeter = new CostMeter(igClient, {
@@ -547,12 +547,12 @@ export const createApp = async () => {
 
   // Initialize Maestro V2 Engine & Handlers (Stable-DiffCoder Integration)
   try {
-    const { MaestroEngine } = await import('./maestro/engine.ts');
-    const { MaestroHandlers } = await import('./maestro/handlers.ts');
-    const { MaestroAgentService } = await import('./maestro/agent_service.ts');
-    const { DiffusionCoderAdapter } = await import('./maestro/adapters/diffusion_coder.ts');
-    const { getPostgresPool } = await import('./db/postgres.ts');
-    const { getRedisClient } = await import('./db/redis.ts');
+    const { MaestroEngine } = await import('./maestro/engine.js');
+    const { MaestroHandlers } = await import('./maestro/handlers.js');
+    const { MaestroAgentService } = await import('./maestro/agent_service.js');
+    const { DiffusionCoderAdapter } = await import('./maestro/adapters/diffusion_coder.js');
+    const { getPostgresPool } = await import('./db/postgres.js');
+    const { getRedisClient } = await import('./db/redis.js');
 
     const pool = getPostgresPool();
     const redis = getRedisClient();
@@ -651,8 +651,8 @@ export const createApp = async () => {
   });
 
   if (process.env.SKIP_GRAPHQL !== 'true') {
-    const { typeDefs } = await import('./graphql/schema.ts');
-    const { default: resolvers } = await import('./graphql/resolvers/index.ts');
+    const { typeDefs } = await import('./graphql/schema.js');
+    const { default: resolvers } = await import('./graphql/resolvers/index.js');
     process.stdout.write('[DEBUG] GraphQL resolvers imported\n');
 
     const executableSchema = makeExecutableSchema({
@@ -664,18 +664,18 @@ export const createApp = async () => {
 
     // GraphQL over HTTP
     const { persistedQueriesPlugin } = await import(
-      './graphql/plugins/persistedQueries.ts'
+      './graphql/plugins/persistedQueries.js'
     );
-    const { default: pbacPlugin } = await import('./graphql/plugins/pbac.ts');
+    const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
     const { default: resolverMetricsPlugin } = await import(
-      './graphql/plugins/resolverMetrics.ts'
+      './graphql/plugins/resolverMetrics.js'
     );
     const { default: auditLoggerPlugin } = await import(
-      './graphql/plugins/auditLogger.ts'
+      './graphql/plugins/auditLogger.js'
     );
-    const { depthLimit } = await import('./graphql/validation/depthLimit.ts');
-    const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.ts');
-    const { httpStatusCodePlugin } = await import('./graphql/plugins/httpStatusCodePlugin.ts');
+    const { depthLimit } = await import('./graphql/validation/depthLimit.js');
+    const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
+    const { httpStatusCodePlugin } = await import('./graphql/plugins/httpStatusCodePlugin.js');
 
     const apollo = new ApolloServer({
       schema,
@@ -763,7 +763,7 @@ export const createApp = async () => {
     // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
     // In a real production setup, this might be in a separate process/container.
     // For MVP/Monolith, we keep it here.
-    const { webhookWorker } = await import('./webhooks/webhook.worker.ts');
+    const { webhookWorker } = await import('./webhooks/webhook.worker.js');
     if (webhookWorker) {
       // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
       // though import side-effects usually suffice.

@@ -1,0 +1,141 @@
+---
+# Standard timeout policy for web traffic
+# Replaces: nginx.ingress.kubernetes.io/proxy-*-timeout annotations
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: standard-timeout
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: timeout-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: standard
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+  timeout:
+    tcp:
+      connectTimeout: 10s
+    http:
+      requestTimeout: 60s
+      idleTimeout: 3600s
+      maxConnectionDuration: 0s  # No limit
+  retry:
+    numRetries: 2
+    retryOn:
+      - connect-failure
+      - refused-stream
+      - unavailable
+      - retriable-status-codes
+    retriableStatusCodes:
+      - 502
+      - 503
+      - 504
+    perRetry:
+      timeout: 10s
+      backOff:
+        baseInterval: 100ms
+        maxInterval: 1s
+---
+# Long-running request timeout (for uploads, exports, etc.)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: long-timeout
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: timeout-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: long-running
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: upload-routes
+  timeout:
+    tcp:
+      connectTimeout: 30s
+    http:
+      requestTimeout: 300s  # 5 minutes for uploads
+      idleTimeout: 600s
+  retry:
+    numRetries: 1  # Limited retries for large uploads
+    retryOn:
+      - connect-failure
+    perRetry:
+      timeout: 30s
+---
+# GraphQL endpoint timeout (may have variable response times)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: graphql-timeout
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: timeout-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: graphql
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: graphql-routes
+  timeout:
+    tcp:
+      connectTimeout: 10s
+    http:
+      requestTimeout: 120s  # 2 minutes for complex queries
+      idleTimeout: 300s
+  retry:
+    numRetries: 1
+    retryOn:
+      - connect-failure
+      - refused-stream
+    perRetry:
+      timeout: 30s
+---
+# Health check routes (fast timeout, no retries)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: health-check-timeout
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: timeout-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: health
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: health-routes
+  timeout:
+    tcp:
+      connectTimeout: 2s
+    http:
+      requestTimeout: 5s
+      idleTimeout: 10s
+  retry:
+    numRetries: 0  # No retries for health checks
+---
+# Circuit breaker for backend protection
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: circuit-breaker
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: circuit-breaker-policy
+    app.kubernetes.io/part-of: summit-platform
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+  circuitBreaker:
+    maxConnections: 1024
+    maxPendingRequests: 128
+    maxRequests: 1024
+    maxRetries: 3

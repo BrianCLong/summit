@@ -1,0 +1,16 @@
+{
+  "claims": [
+    {
+      "backing": "ITEM:CLAIM-01",
+      "claim_id": "ITEM:CLAIM-01"
+    }
+  ],
+  "decisions": [
+    "Deny ingress-nginx references in tracked YAML manifests.",
+    "Override requires SUMMIT_ALLOW_INGRESS_NGINX=1."
+  ],
+  "evidence_id": "EVD-INGNGX-SEC-001",
+  "generated_by": "scripts/ci/deny_ingress_nginx.mjs",
+  "item_slug": "ingress-nginx-retirement",
+  "notes": ["deny_gate_ok"]
+}

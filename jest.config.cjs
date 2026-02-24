@@ -1,15 +1,17 @@
 module.exports = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
       {
+        useESM: true,
         tsconfig: 'tsconfig.test.json',
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'pp_alerts'],
+  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'pp_alerts', 'summit'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
@@ -63,6 +65,7 @@ module.exports = {
       statements: 85,
     },
   },
+  coverageReporters: ['json-summary', 'text', 'lcov'],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
@@ -91,6 +94,6 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
-  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.cjs'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

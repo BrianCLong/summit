@@ -21,5 +21,6 @@
       ],
       "mitigations": ["Allowlist validation", "Restricted PII transform enforcement"]
     }
-  ]
+  ],
+  "summary": "Legacy report summary"
 }

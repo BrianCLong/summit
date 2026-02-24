@@ -10,7 +10,7 @@ const entryPoints = await glob('src/**/*.ts', {
 await esbuild.build({
   entryPoints,
   outdir: 'dist',
-  bundle: false,
+  bundle: true,
   platform: 'node',
   format: 'esm',
   target: 'node18',

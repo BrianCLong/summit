@@ -1,0 +1,132 @@
+---
+# Standard rate limiting policy for web traffic
+# Replaces: nginx.ingress.kubernetes.io/limit-rps annotations
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: standard-rate-limit
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: rate-limit-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: standard
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        # 10 requests per second per client IP (matches nginx limit-rps: 10)
+        - limit:
+            requests: 10
+            unit: Second
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+---
+# High-traffic rate limiting for API endpoints
+# Replaces: nginx.ingress.kubernetes.io/limit-rpm: 100
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: api-rate-limit
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: rate-limit-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: api
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: summit-gateway
+    sectionName: api-https
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        # 100 requests per minute per client IP
+        - limit:
+            requests: 100
+            unit: Minute
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+        # Additional rule: 1000 requests per minute per authenticated user
+        - limit:
+            requests: 1000
+            unit: Minute
+          clientSelectors:
+            - headers:
+                - name: X-User-ID
+                  type: Distinct
+---
+# Strict rate limiting for sensitive endpoints (auth, admin)
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: strict-rate-limit
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: rate-limit-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: strict
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: auth-routes
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        # 5 requests per second for auth endpoints
+        - limit:
+            requests: 5
+            unit: Second
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+        # Burst protection: 20 per minute max
+        - limit:
+            requests: 20
+            unit: Minute
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct
+---
+# High-capacity rate limiting for Maestro/Conductor orchestrator
+# Replaces: maestro-ingress.yaml limit-rpm: 1000
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: maestro-rate-limit
+  namespace: envoy-gateway-system
+  labels:
+    app.kubernetes.io/name: rate-limit-policy
+    app.kubernetes.io/part-of: summit-platform
+    policy.summit.io/tier: orchestrator
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: maestro-routes
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        # 1000 requests per minute for orchestrator
+        - limit:
+            requests: 1000
+            unit: Minute
+          clientSelectors:
+            - sourceCIDR:
+                value: "0.0.0.0/0"
+                type: Distinct

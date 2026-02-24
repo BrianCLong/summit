@@ -1,7 +1,7 @@
-import entityResolvers from './entity';
-import relationshipResolvers from './relationship';
-import userResolvers from './user';
-import investigationResolvers from './investigation';
+import entityResolvers from './entity.js';
+import relationshipResolvers from './relationship.js';
+import userResolvers from './user.js';
+import investigationResolvers from './investigation.js';
 import authResolvers from './auth.js';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import evidenceResolvers from './evidence.js';
@@ -12,7 +12,7 @@ import provenanceResolvers from './provenance.js';
 import supportTicketResolvers from './supportTicket.js';
 import sprint28Resolvers from './sprint28.js';
 import ewResolvers from './electronic-warfare.js';
-import { collaborationResolvers } from './collaboration';
+import { collaborationResolvers } from './collaboration.js';
 import { cognitiveSecurityResolvers } from './cognitive-security.js';
 import { deduplicationResolvers } from './deduplication.js';
 import ticketLinksResolvers from './ticket-links.js';

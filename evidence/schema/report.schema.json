@@ -1,12 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["evidence_id", "item", "config", "summary"],
+  "additionalProperties": false,
   "properties": {
     "evidence_id": { "type": "string" },
-    "item": { "type": "object" },
-    "config": { "type": "object" },
-    "summary": { "type": "string" }
+    "summary": { "type": "string" },
+    "status": { "type": "string" },
+    "artifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
   },
-  "additionalProperties": true
+  "required": ["evidence_id", "summary"]
 }
