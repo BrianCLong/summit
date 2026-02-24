@@ -1,0 +1,9 @@
+{
+  "artifact": "skill-bundle",
+  "payload": {
+    "name": "example-skill",
+    "version": "1.0.0"
+  },
+  "algorithm": "ed25519",
+  "signature": "demo-signature-value"
+}
