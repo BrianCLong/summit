@@ -1,9 +1,17 @@
 // packages/agent-runtime/src/index.ts
 
+export interface AgentLogger {
+  info(message: string, meta?: any): void;
+  warn(message: string, meta?: any): void;
+  error(message: string, meta?: any): void;
+}
+
 export interface AgentConfig {
   agentId: string;
   capabilities: string[];
   mcpServers?: string[];
+  correlationId?: string;
+  logger?: AgentLogger;
 }
 
 export interface CopilotAgent {
@@ -11,11 +19,30 @@ export interface CopilotAgent {
   execute(step: string): Promise<any>;
 }
 
+export interface HealthStatus {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  details?: any;
+}
+
+class ConsoleLogger implements AgentLogger {
+  info(message: string, meta?: any): void {
+    console.log(JSON.stringify({ level: 'info', message, ...meta }));
+  }
+  warn(message: string, meta?: any): void {
+    console.warn(JSON.stringify({ level: 'warn', message, ...meta }));
+  }
+  error(message: string, meta?: any): void {
+    console.error(JSON.stringify({ level: 'error', message, ...meta }));
+  }
+}
+
 export class AgentRuntime {
   private config: AgentConfig;
+  private logger: AgentLogger;
 
   constructor(config: AgentConfig) {
     this.config = config;
+    this.logger = config.logger || new ConsoleLogger();
   }
 
   /**
@@ -23,7 +50,10 @@ export class AgentRuntime {
    * In a real implementation, this would connect to the Copilot SDK.
    */
   async initialize(): Promise<void> {
-    console.log(`[AgentRuntime] Initializing agent: ${this.config.agentId}`);
+    this.logger.info('Initializing agent', {
+      agentId: this.config.agentId,
+      correlationId: this.config.correlationId
+    });
     // Connect to Copilot SDK
   }
 
@@ -31,26 +61,53 @@ export class AgentRuntime {
    * Executes a goal using the agentic loop.
    */
   async runGoal(goal: string): Promise<any> {
-    console.log(`[AgentRuntime] Received goal: ${goal}`);
+    const meta = {
+      agentId: this.config.agentId,
+      correlationId: this.config.correlationId,
+      goal
+    };
 
-    // Simulate planning
-    const steps = await this.plan(goal);
+    this.logger.info('Received goal', meta);
 
-    // Simulate execution
-    for (const step of steps) {
-      await this.executeStep(step);
+    try {
+      // Simulate planning
+      const steps = await this.plan(goal);
+
+      // Simulate execution
+      for (const step of steps) {
+        await this.executeStep(step);
+      }
+
+      this.logger.info('Goal completed', meta);
+      return { status: 'completed', goal };
+    } catch (error) {
+      this.logger.error('Goal execution failed', { ...meta, error });
+      throw error;
     }
+  }
 
-    return { status: 'completed', goal };
+  /**
+   * Returns the health status of the runtime.
+   * Designed for liveness/readiness probes.
+   */
+  health(): HealthStatus {
+    // In a real scenario, check connections to MCP servers, memory usage, etc.
+    return { status: 'healthy', details: { agentId: this.config.agentId } };
   }
 
   private async plan(goal: string): Promise<string[]> {
-    console.log(`[AgentRuntime] Planning for goal: ${goal}`);
+    this.logger.info('Planning for goal', {
+      goal,
+      correlationId: this.config.correlationId
+    });
     return ['step1', 'step2'];
   }
 
   private async executeStep(step: string): Promise<void> {
-    console.log(`[AgentRuntime] Executing step: ${step}`);
+    this.logger.info('Executing step', {
+      step,
+      correlationId: this.config.correlationId
+    });
     // Check MCP permissions here via Gateway
   }
 }
