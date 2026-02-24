@@ -74,7 +74,7 @@ const verifyJiraSecret = (req: any, res: any, next: any) => {
   }
 
   // Check for secret in header or query param (common Jira patterns)
-  const incomingSecret = req.headers['x-webhook-secret'] || ((req.query.secret as string) as string);
+  const incomingSecret = req.headers['x-webhook-secret'] || (((req.query.secret as string) as string) as string);
 
   if (!incomingSecret || incomingSecret !== secret) {
     logger.warn('Jira webhook rejected: Invalid secret');
@@ -347,8 +347,8 @@ router.delete('/:id', async (req, res) => {
 router.get('/:id/deliveries', async (req, res) => {
   try {
     const tenantId = getTenantId(req);
-    const limit = parseInt(((req.query.limit as string) as string) as string) || 20;
-    const offset = parseInt(((req.query.offset as string) as string) as string) || 0;
+    const limit = parseInt((((req.query.limit as string) as string) as string) as string) || 20;
+    const offset = parseInt((((req.query.offset as string) as string) as string) as string) || 0;
     const deliveries = await webhookService.getDeliveries(tenantId, req.params.id, limit, offset);
     res.json(deliveries);
   } catch (error: any) {

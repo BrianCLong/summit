@@ -187,9 +187,9 @@ router.get(
   requireFeatureFlag('i18n.enabled'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const key = ((req.query.key as string) as string) as string;
-      const locale = (((req.query.locale as string) as string) as string) || 'en-US';
-      const namespace = (((req.query.namespace as string) as string) as string) || 'common';
+      const key = (((req.query.key as string) as string) as string) as string;
+      const locale = ((((req.query.locale as string) as string) as string) as string) || 'en-US';
+      const namespace = ((((req.query.namespace as string) as string) as string) as string) || 'common';
 
       if (!key) {
         res.status(400).json({ error: 'Translation key is required' });

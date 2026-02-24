@@ -66,20 +66,20 @@ exportRouter.use(tenantHeader());
 
 exportRouter.get('/provenance', async (req, res) => {
   try {
-    const scope = String(((req.query.scope as string) as string) || '');
-    const id = String(((req.query.id as string) as string) || '');
-    const format = String(((req.query.format as string) as string) || 'json').toLowerCase();
-    const ts = Number(((req.query.ts as string) as string) || 0);
-    const sig = String(((req.query.sig as string) as string) || '');
-    const reasonCodeIn = String(((req.query.reasonCodeIn as string) as string) || '');
+    const scope = String((((req.query.scope as string) as string) as string) || '');
+    const id = String((((req.query.id as string) as string) as string) || '');
+    const format = String((((req.query.format as string) as string) as string) || 'json').toLowerCase();
+    const ts = Number((((req.query.ts as string) as string) as string) || 0);
+    const sig = String((((req.query.sig as string) as string) as string) || '');
+    const reasonCodeIn = String((((req.query.reasonCodeIn as string) as string) as string) || '');
     const kindIn = String((req.query as any).kindIn || '');
     const sourceIn = String((req.query as any).sourceIn || '');
     const tenant = String((req.query as any).tenant || '');
     const headerTenant = String((req as any).tenantId || '');
-    const from = ((req.query.from as string) as string) ? String(((req.query.from as string) as string)) : undefined;
-    const to = ((req.query.to as string) as string) ? String(((req.query.to as string) as string)) : undefined;
-    const contains = ((req.query.contains as string) as string)
-      ? String(((req.query.contains as string) as string))
+    const from = (((req.query.from as string) as string) as string) ? String((((req.query.from as string) as string) as string)) : undefined;
+    const to = (((req.query.to as string) as string) as string) ? String((((req.query.to as string) as string) as string)) : undefined;
+    const contains = (((req.query.contains as string) as string) as string)
+      ? String((((req.query.contains as string) as string) as string))
       : undefined;
 
     if (!['incident', 'investigation'].includes(scope) || !id) {
@@ -131,8 +131,8 @@ exportRouter.get('/provenance', async (req, res) => {
     if (from) filter.from = from;
     if (to) filter.to = to;
     if (contains) filter.contains = contains;
-    const first = Math.min(Number(((req.query.first as string) as string) || 1000), 5000);
-    const offset = Math.max(Number(((req.query.offset as string) as string) || 0), 0);
+    const first = Math.min(Number((((req.query.first as string) as string) as string) || 1000), 5000);
+    const offset = Math.max(Number((((req.query.offset as string) as string) as string) || 0), 0);
 
     // Cache JSON responses 60s
     const cacheKey = `exp:${crypto

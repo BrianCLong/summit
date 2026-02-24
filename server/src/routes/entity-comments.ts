@@ -169,11 +169,11 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = ((req.query.limit as string) as string)
-      ? parseInt(((req.query.limit as string) as string) as string, 10)
+    const limit = (((req.query.limit as string) as string) as string)
+      ? parseInt((((req.query.limit as string) as string) as string) as string, 10)
       : undefined;
-    const offset = ((req.query.offset as string) as string)
-      ? parseInt(((req.query.offset as string) as string) as string, 10)
+    const offset = (((req.query.offset as string) as string) as string)
+      ? parseInt((((req.query.offset as string) as string) as string) as string, 10)
       : undefined;
 
     await authorizer({
@@ -192,7 +192,7 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
       limit,
       offset,
       {
-        includeDeleted: String(((req.query.includeDeleted as string) as string) || '') === 'true',
+        includeDeleted: String((((req.query.includeDeleted as string) as string) as string) || '') === 'true',
       },
     );
 

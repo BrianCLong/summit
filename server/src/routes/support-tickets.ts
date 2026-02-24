@@ -49,13 +49,13 @@ router.post('/tickets', express.json(), async (req, res) => {
 router.get('/tickets', async (req, res) => {
   try {
     const options: ListTicketsOptions = {
-      status: ((req.query.status as string) as string) as any,
-      priority: ((req.query.priority as string) as string) as any,
-      category: ((req.query.category as string) as string) as any,
-      reporter_id: ((req.query.reporter_id as string) as string) as string,
-      assignee_id: ((req.query.assignee_id as string) as string) as string,
-      limit: ((req.query.limit as string) as string) ? parseInt(((req.query.limit as string) as string) as string, 10) : 50,
-      offset: ((req.query.offset as string) as string) ? parseInt(((req.query.offset as string) as string) as string, 10) : 0,
+      status: (((req.query.status as string) as string) as string) as any,
+      priority: (((req.query.priority as string) as string) as string) as any,
+      category: (((req.query.category as string) as string) as string) as any,
+      reporter_id: (((req.query.reporter_id as string) as string) as string) as string,
+      assignee_id: (((req.query.assignee_id as string) as string) as string) as string,
+      limit: (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string, 10) : 50,
+      offset: (((req.query.offset as string) as string) as string) ? parseInt((((req.query.offset as string) as string) as string) as string, 10) : 0,
     };
 
     const [tickets, count] = await Promise.all([
@@ -154,7 +154,7 @@ router.post('/tickets/:id/comments', express.json(), async (req, res) => {
 /** GET /api/support/tickets/:id/comments - Get comments for a ticket */
 router.get('/tickets/:id/comments', async (req, res) => {
   try {
-    const includeDeleted = ((req.query.includeDeleted as string) as string) === 'true';
+    const includeDeleted = (((req.query.includeDeleted as string) as string) as string) === 'true';
     const comments = await getComments(req.params.id, { includeDeleted });
     res.json(comments);
   } catch (error: any) {

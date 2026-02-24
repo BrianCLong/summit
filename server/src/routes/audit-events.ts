@@ -31,20 +31,20 @@ router.get('/audit-events', async (req, res) => {
     }
 
     const query = {
-      startTime: ((req.query.startTime as string) as string)
-        ? new Date(((req.query.startTime as string) as string) as string)
+      startTime: (((req.query.startTime as string) as string) as string)
+        ? new Date((((req.query.startTime as string) as string) as string) as string)
         : undefined,
-      endTime: ((req.query.endTime as string) as string)
-        ? new Date(((req.query.endTime as string) as string) as string)
+      endTime: (((req.query.endTime as string) as string) as string)
+        ? new Date((((req.query.endTime as string) as string) as string) as string)
         : undefined,
-      eventTypes: parseList(((req.query.eventTypes as string) as string) as string | undefined),
-      levels: parseList(((req.query.levels as string) as string) as string | undefined),
-      userIds: parseList(((req.query.userIds as string) as string) as string | undefined),
-      resourceTypes: parseList(((req.query.resourceTypes as string) as string) as string | undefined),
-      correlationIds: parseList(((req.query.correlationIds as string) as string) as string | undefined),
+      eventTypes: parseList((((req.query.eventTypes as string) as string) as string) as string | undefined),
+      levels: parseList((((req.query.levels as string) as string) as string) as string | undefined),
+      userIds: parseList((((req.query.userIds as string) as string) as string) as string | undefined),
+      resourceTypes: parseList((((req.query.resourceTypes as string) as string) as string) as string | undefined),
+      correlationIds: parseList((((req.query.correlationIds as string) as string) as string) as string | undefined),
       tenantIds: [tenantId],
-      limit: ((req.query.limit as string) as string) ? Number(((req.query.limit as string) as string)) : 100,
-      offset: ((req.query.offset as string) as string) ? Number(((req.query.offset as string) as string)) : 0,
+      limit: (((req.query.limit as string) as string) as string) ? Number((((req.query.limit as string) as string) as string)) : 100,
+      offset: (((req.query.offset as string) as string) as string) ? Number((((req.query.offset as string) as string) as string)) : 0,
     };
 
     const events = await advancedAuditSystem.queryEvents(query);
