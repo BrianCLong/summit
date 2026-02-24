@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Added evening standup note for BrianCLong/summit on 2026-02-07.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added agentic orchestration, hybrid context management, and agentic RAG integration scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -44,6 +44,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Switchboard consumer-to-enterprise wedge: positioning, policy modes, receipts/replay, skill trust ladder, white-label admin, and threat model docs."
+    },
+    {
+      "id": "agentic-orchestration-context-rag",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Predictive orchestration selector, hybrid context manager, and agentic RAG scaffolding with tests and integration guidance."
     },
     {
       "id": "B",
