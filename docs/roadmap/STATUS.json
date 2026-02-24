@@ -1,14 +1,7 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added serious client tone prompt pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Added evening standup note for BrianCLong/summit on 2026-02-07.",
   "initiatives": [
-    {
-      "id": "sprint-plus1-incident-hub-runbook-tenant-console",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Sprint +1 delivery plan for Incident Hub v1, Runbook Center v1, Tenant Console v1, and metering v0 (governed extension).",
-      "evidence": "sprint/sprint-plus1-incident-hub-runbook-tenant-console.md"
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -286,7 +279,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 16,
     "ga_blockers": []
   }
 }
