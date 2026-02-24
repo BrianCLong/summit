@@ -1,5 +1,5 @@
 package switchboard
-import future.keywords
+import future.keywords.in
 
 default allow = false
 

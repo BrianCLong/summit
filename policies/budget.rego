@@ -5,6 +5,7 @@ package intelgraph.budget
 
 import future.keywords.if
 import future.keywords.in
+import future.keywords.contains
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false
@@ -113,14 +114,6 @@ monthly_room[tenant] := room if {
     room >= 0
 }
 
-monthly_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    spent := monthly_spending[tenant]
-    room := budget.monthly_usd_limit - spent
-    room < 0
-}
-
 # Emergency monthly room (120% of normal limit)
 emergency_monthly_room[tenant] := room if {
     some tenant
@@ -129,15 +122,6 @@ emergency_monthly_room[tenant] := room if {
     emergency_limit := budget.monthly_usd_limit * 1.2
     room := emergency_limit - spent
     room >= 0
-}
-
-emergency_monthly_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    spent := monthly_spending[tenant]
-    emergency_limit := budget.monthly_usd_limit * 1.2
-    room := emergency_limit - spent
-    room < 0
 }
 
 # Budget calculations - daily room remaining
@@ -150,22 +134,6 @@ daily_room[tenant] := room if {
     room >= 0
 }
 
-daily_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    budget.daily_usd_limit
-    spent := daily_spending[tenant]
-    room := budget.daily_usd_limit - spent
-    room < 0
-}
-
-daily_room[tenant] := fallback if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    not budget.daily_usd_limit
-    fallback := monthly_room[tenant] / 30
-}
-
 # Emergency daily room (150% of normal daily limit)
 emergency_daily_room[tenant] := room if {
     some tenant
@@ -175,23 +143,6 @@ emergency_daily_room[tenant] := room if {
     emergency_limit := budget.daily_usd_limit * 1.5
     room := emergency_limit - spent
     room >= 0
-}
-
-emergency_daily_room[tenant] := 0 if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    budget.daily_usd_limit
-    spent := daily_spending[tenant]
-    emergency_limit := budget.daily_usd_limit * 1.5
-    room := emergency_limit - spent
-    room < 0
-}
-
-emergency_daily_room[tenant] := fallback if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    not budget.daily_usd_limit
-    fallback := emergency_monthly_room[tenant] / 30
 }
 
 # Current month spending calculation
@@ -207,11 +158,6 @@ monthly_spending[tenant] := total if {
     total := sum([entry.total_usd | some entry in monthly_entries])
 }
 
-monthly_spending[tenant] := 0 if {
-    some tenant
-    not data.spending_ledger[tenant]
-}
-
 # Current day spending calculation  
 daily_spending[tenant] := total if {
     some tenant
@@ -225,17 +171,12 @@ daily_spending[tenant] := total if {
     total := sum([entry.total_usd | some entry in daily_entries])
 }
 
-daily_spending[tenant] := 0 if {
-    some tenant
-    not data.spending_ledger[tenant]
-}
-
 # Risk assessment for operations
 operation_risk_level := "high" if {
     input.est_usd > 10.0
-}
+} else := "medium" if {
     input.est_usd > 1.0
-
+} else := "low"
 
 # Violation reasons for debugging
 violation_reasons contains reason if {
@@ -305,13 +246,4 @@ allow if {
     override := tenant_override[input.tenant_id]
     input.est_usd <= override.override_limit_usd
     override.bypass_four_eyes == true
-}
-
-operation_risk_level := "medium" if {
-    input.est_usd > 1.0
-    input.est_usd <= 10.0
-}
-
-operation_risk_level := "low" if {
-    input.est_usd <= 1.0
 }

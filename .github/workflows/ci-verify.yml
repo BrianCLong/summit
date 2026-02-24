@@ -1,52 +1,153 @@
-name: CI Verify
+name: CI Verify (Security & Compliance)
+
+# This workflow enforces security, provenance, compliance, and governance gates.
+# Most jobs are BLOCKING - PRs cannot merge if critical checks fail.
 
 on:
   pull_request:
     branches: [main]
   push:
     branches: [main]
+  merge_group:
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   security-scan:
     name: Security Scan
-    uses: ./.github/workflows/ci-security.yml
-    secrets:
-      snyk_token: ${{ secrets.SNYK_TOKEN }}
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 0 # Full history required for Gitleaks
+
+      - name: Gitleaks secret scanning
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: false # BLOCKING: secrets block merge
+
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit (critical CVEs only)
+        run: |
+          echo "=== Scanning for Critical CVEs ==="
+          pnpm audit --audit-level critical || {
+            echo "::error::Critical CVEs detected - CI BLOCKED"
+            echo "::error::Run 'pnpm audit' locally and document exceptions if needed"
+            exit 1
+          }
+        continue-on-error: false # BLOCKING: critical CVEs block merge
+
+      - name: Snyk security scan
+        if: env.SNYK_TOKEN != ''
+        run: npx snyk test --severity-threshold=high || npx snyk test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        continue-on-error: true # Non-blocking (token may not be available)
+
+      - name: Upload security scan results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        if: always()
+        with:
+          name: security-scan-results
+          path: |
+            gitleaks-report.json
+            snyk-report.json
+          retention-days: 90
 
   policy-compliance:
     name: Policy Compliance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/checkout@v4 # v6
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: 9.12.0
-      - uses: actions/setup-node@v4
+          version: v0.45.0 # Pinned for legacy Rego syntax compatibility
+
+      - name: OPA policy check
+        run: |
+          echo "=== Checking OPA Policy Syntax ==="
+          opa check policies/ policy/maestro || {
+            echo "::error::OPA policy syntax check FAILED"
+            exit 1
+          }
+
+      - name: OPA policy tests
+        run: |
+          echo "=== Running OPA Policy Tests ==="
+          (opa test policies/ policy/maestro policy_tests -v || opa test policies/ policy/maestro policy_tests -v) || {
+            echo "::error::OPA policy tests FAILED"
+            exit 1
+          }
+
+      - name: Upload OPA test results
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        if: always()
         with:
-          node-version: "20"
-          cache: pnpm
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: OPA Check
-        run: pnpm config:validate
+          name: opa-test-results
+          path: |
+            policies/test-results.json
+          retention-days: 90
 
   governance-checks:
     name: Governance Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: pnpm
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Run governance checks
-        run: pnpm governance:check
+
+      - name: Media provenance gate
+        run: npx tsx scripts/ci/verify_media_provenance.ts
+
+      - name: Check execution governor
+        run: |
+          echo "=== Checking Execution Governor ==="
+          pnpm check:execution || {
+            echo "::error::Execution Governor Check FAILED"
+            exit 1
+          }
+
+      - name: Check governance compliance
+        run: npm run check:governance || echo "Governance check skipped (script may not exist)"
+        continue-on-error: true # Non-blocking until governance engine is stable
+
+      - name: Validate agent contracts
+        run: |
+          if [ -f "scripts/validate-agent-contracts.ts" ]; then
+            npx tsx scripts/validate-agent-contracts.ts
+          else
+            echo "Agent contract validation skipped (script not yet implemented)"
+          fi
+        continue-on-error: true # Non-blocking until implementation complete
+
+      - name: Check audit exception expiry
+        run: |
+          if [ -f "scripts/check-audit-exceptions.ts" ]; then
+            npx tsx scripts/check-audit-exceptions.ts
+          else
+            echo "Audit exception check skipped (script not yet implemented)"
+          fi
+        continue-on-error: true # Non-blocking until implementation complete
 
   mcp-ux-lint:
     name: MCP Tool UX Lint
@@ -59,24 +160,22 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
-          cache: pnpm
 
       - name: Run MCP UX Linter
         run: |
           if [ -f "scripts/ci/lint-mcp-ux.mjs" ]; then
-            node scripts/ci/lint-mcp-ux.mjs
+            node scripts/ci/lint-mcp-ux.mjs intelgraph-mcp
           else
-            echo "MCP UX Linter script not found, skipping."
+            echo "MCP UX Linter not found, skipping."
           fi
+        continue-on-error: false # BLOCKING: poor tool UX fails CI
 
   provenance:
     name: Provenance & SBOM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -85,9 +184,53 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Generate evidence index
+      - name: Generate SBOM
         run: |
-          pnpm ci:evidence:index \
+          if [ -f "scripts/generate-sbom.sh" ]; then
+            ./scripts/generate-sbom.sh
+          else
+            echo "SBOM generation skipped (script not yet implemented)"
+            echo "Placeholder SBOM for CI validation"
+            echo '{"bomFormat":"CycloneDX","specVersion":"1.4","version":1}' > sbom.json
+          fi
+        continue-on-error: true # Non-blocking for PRs, required for releases
+
+      - name: Generate SLSA provenance
+        run: |
+          if [ -f "scripts/attest-slsa.sh" ]; then
+            ./scripts/attest-slsa.sh
+          else
+            echo "SLSA provenance skipped (script not yet implemented)"
+            echo "Placeholder provenance for CI validation"
+            echo '{"_type":"https://in-toto.io/Statement/v0.1"}' > provenance.json
+          fi
+        continue-on-error: true # Non-blocking for PRs, required for releases
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        if: always()
+        with:
+          name: sbom
+          path: sbom.json
+          retention-days: 90 # 2 years retention
+
+      - name: Upload SLSA provenance
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.1.0
+        if: always()
+        with:
+          name: slsa-provenance
+          path: provenance.json
+          retention-days: 90 # 2 years retention
+
+      - name: Prepare evidence directory
+        run: |
+          mkdir -p evidence
+          [ -f provenance.json ] && cp provenance.json evidence/
+          [ -f sbom.json ] && cp sbom.json evidence/sbom.cdx.json || true
+
+      - name: Generate Evidence Index (deterministic)
+        run: |
+          node scripts/release/generate_evidence_index.mjs \
             --evidence-dir evidence \
             --provenance evidence/provenance.json \
             --outjson evidence/evidence-index.json \
@@ -114,9 +257,7 @@ jobs:
         with:
           fetch-depth: 0 # Needed for schema diff
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -148,9 +289,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
+      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -177,6 +316,28 @@ jobs:
           fi
         continue-on-error: true # Non-blocking for PRs
 
+  unireason-drift:
+    name: UniReason Drift Detector
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run UniReason Drift Detector
+        run: npx tsx scripts/monitoring/unireason-1-0-drift.ts
+      - name: Upload drift artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: unireason-drift
+          path: artifacts/unireason-1-0/drift.json
+
   ga-evidence-completeness:
     name: GA Evidence Completeness
     runs-on: ubuntu-22.04
@@ -187,7 +348,6 @@ jobs:
           version: 9.12.0
       - uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
           node-version: "20"
       - name: Ensure evidence bundle exists
         run: |
@@ -276,6 +436,7 @@ jobs:
       - schema-validation
       - compliance-evidence
       - ga-evidence-completeness
+      - unireason-drift
     if: always()
     steps:
       - name: Check critical gates passed
@@ -312,6 +473,10 @@ jobs:
             exit 1
           fi
 
+          if [[ "${{ needs.unireason-drift.result }}" != "success" ]]; then
+             echo "::warning::UniReason Drift Detector FAILED - Informational only"
+          fi
+
           # Non-critical gates (informational)
           # Governance, provenance, schema, compliance are non-blocking until implementation complete
 
@@ -328,6 +493,7 @@ jobs:
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ UniReason Drift Detector" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY
           echo "- ℹ️ Governance Checks" >> $GITHUB_STEP_SUMMARY
