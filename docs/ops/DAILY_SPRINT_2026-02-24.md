@@ -236,3 +236,24 @@ check your internet connection or https://githubstatus.com
 ### Continuation Evidence: PR Check Snapshot
 - `gh pr checks 18624 -R BrianCLong/summit`
   - Result: broad pending/queued matrix across policy, lint/test, governance, and supply-chain jobs; no hard fail signal at snapshot time.
+
+## Continuation Run 4
+- Re-polled PR #18624 checks and observed transition from queued-only state to deterministic failures in infra/security lanes.
+
+### Continuation Evidence: Deterministic Failures Snapshot
+- `gh pr checks 18624 -R BrianCLong/summit`
+  - `Compliance & Security` fail: https://github.com/BrianCLong/summit/actions/runs/22333182072/job/64619875527
+  - `Parity (aws)` fail: https://github.com/BrianCLong/summit/actions/runs/22333182065/job/64619875351
+  - `Parity (azure)` fail: https://github.com/BrianCLong/summit/actions/runs/22333182065/job/64619875366
+  - `Verify Release Integrity` fail: https://github.com/BrianCLong/summit/actions/runs/22333182005/job/64619875343
+  - `gate/supplychain_verify` fail: https://github.com/BrianCLong/summit/actions/runs/22333182079/job/64619875592
+
+### Continuation Evidence: Workflow/Job State Detail
+- `gh run view 22333182065 --json jobs` shows:
+  - `Parity (aws)` failed at step `Configure AWS Credentials`.
+  - `Parity (azure)` failed at step `Setup Azure CLI`.
+- `gh run view 22333181885 --json ...` shows `Auto Enqueue Merge Queue` run concluded `cancelled` (not hard failure); prior `enqueue fail` line in `gh pr checks` was stale relative to latest run state.
+
+### Assessment
+- Inference: failure pattern is consistent with shared runner/credential/environment gates rather than docs-only diff behavior, because early cloud credential/bootstrap steps failed before project-specific validation execution.
+- Action: hold branch steady, keep evidence updated, and avoid additional pushes that would retrigger full matrix while infra lanes are unresolved.
