@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["source", "target", "label"],
+  "properties": {
+    "source": { "type": "string" },
+    "target": { "type": "string" },
+    "label": { "type": "string" },
+    "weight": { "type": "number" },
+    "provenance_receipt_id": { "type": "string" }
+  }
+}

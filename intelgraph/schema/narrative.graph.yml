@@ -1,0 +1,75 @@
+nodes:
+  Narrative:
+    properties:
+      narrative_id: string
+      summary: string
+      state: string
+      score: float
+  Frame:
+    properties:
+      frame_id: string
+      description: string
+      sentiment: string
+  Claim:
+    properties:
+      claim_id: string
+      text: string
+      confidence: float
+      status: string
+  Assumption:
+    properties:
+      assumption_id: string
+      text: string
+      stability_score: float
+  Artifact:
+    properties:
+      artifact_id: string
+      content_sha256: string
+      uri: string
+      source: string
+      outlet_tier: string
+      published_at: datetime
+  Actor:
+    properties:
+      actor_id: string
+      name: string
+      role: string
+  Community:
+    properties:
+      community_id: string
+      name: string
+      size: integer
+  Event:
+    properties:
+      event_id: string
+      type: string
+      timestamp: datetime
+  Handoff:
+    properties:
+      handoff_id: string
+      from_tier: string
+      to_tier: string
+      score: float
+
+edges:
+  SUPPORTED_BY:
+    source: Claim
+    target: Artifact
+  FRAMED_AS:
+    source: Artifact
+    target: Frame
+  IMPLIES:
+    source: Claim
+    target: Assumption
+  ATTRIBUTED_TO:
+    source: Claim
+    target: Actor
+  CIRCULATED_IN:
+    source: Artifact
+    target: Community
+  TRIGGERED:
+    source: Artifact
+    target: Event
+  TRANSITIONED_VIA:
+    source: Narrative
+    target: Handoff

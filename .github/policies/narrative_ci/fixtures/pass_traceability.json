@@ -1,0 +1,16 @@
+{
+  "new_claims": [
+    {
+      "node_id": "CLAIM-001",
+      "kind": "Claim",
+      "text": "Lt. Gen. Alekseyev regained consciousness",
+      "provenance_receipt_ids": ["RCPT-001"]
+    },
+    {
+      "node_id": "CLAIM-002",
+      "kind": "Claim",
+      "text": "Unit 42 reports 37 countries compromised",
+      "provenance_receipt_ids": ["RCPT-002"]
+    }
+  ]
+}

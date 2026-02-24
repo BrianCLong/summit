@@ -41,7 +41,7 @@ jobs:
 
       - name: Setup AWS CLI
         if: matrix.cloud == 'aws'
-        uses: aws-actions/setup-cli@v2
+        uses: unfor19/install-aws-cli-action@v1@v2
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v2
