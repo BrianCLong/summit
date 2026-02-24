@@ -615,27 +615,22 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: spreadsheetbench-verified-docs
+  - id: narrative-dominance-operationalization
     version: v1
-    path: prompts/docs/spreadsheetbench-verified-docs@v1.md
-    sha256: a9600cb8fd1b0a7c0c0201a87e2e2bedc864e75569125b3f71eaec6482cbd1bf
-    description: Document SpreadsheetBench Verified standards, data handling, and runbook updates with governance alignment.
+    path: prompts/docs/narrative-dominance-operationalization@v1.md
+    sha256: 208130d1771ddeba7470e364b0ac00adb93e6096731339981975c56830873a13
+    description: Expand narrative dominance standards with operational high-signal extensions for determinism and longitudinal analysis.
     scope:
       paths:
-        - repo_assumptions.md
-        - docs/standards/spreadsheetbench-verified.md
-        - docs/security/data-handling/spreadsheetbench-verified.md
-        - docs/ops/runbooks/spreadsheetbench-verified.md
+        - docs/standards/narrative-dominance-tech.md
         - docs/roadmap/STATUS.json
-        - agents/examples/SPREADSHEETBENCH_VERIFIED_DOCS_TASK.json
-        - prompts/docs/spreadsheetbench-verified-docs@v1.md
+        - agents/examples/NARRATIVE_DOMINANCE_OPERATIONALIZATION_TASK.json
+        - prompts/docs/narrative-dominance-operationalization@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
         - governance
-        - security
-        - operations
-        - evaluation
+        - narrative-intel
     verification:
       tiers_required:
         - C

@@ -24,6 +24,57 @@ Given a stream of public posts/articles, Summit clusters narrative candidates, d
 - Deterministic artifacts: `report.json`, `metrics.json`, `stamp.json` contain no timestamps.
 - Logs may include timestamps; artifacts must not.
 
+## Operationalization Extensions (High-Signal)
+These extensions harden operational narrative intelligence while preserving determinism and provenance. Governance posture follows the Summit Readiness Assertion and enforcement gates in `docs/SUMMIT_READINESS_ASSERTION.md`.
+
+### Narrative Debt (Detection + Accounting)
+- **Definition:** Early framing shortcuts (vagueness, hedging, implied causality) create “narrative debt” that constrains later clarification.
+- **Detection signal:** Iterations that cannot specify claims without breaking prior coherence.
+- **Operationalization:** Track a `debt_index` per narrative cluster derived from (a) hedging density, (b) later-iteration contradiction cost, and (c) assumption divergence drift. Preserve historical debt snapshots in evidence bundles.
+
+### Audience Partitioning Inside a Single Narrative
+- **Definition:** Single narrative embeds polysemous phrases to allow divergent audience interpretations.
+- **Detection signal:** Identical fragments map to divergent downstream discourse clusters.
+- **Operationalization:** Maintain `fragment→audience_cluster` bipartite edges with divergence scores; flag fragments whose entropy exceeds policy thresholds.
+
+### Narrative Exhaustion Attacks
+- **Definition:** Operations that fatigue audiences into disengagement by normalizing ambiguity and procedural delay.
+- **Detection signal:** Sustained emphasis on complexity, uncertainty, and endless process without directional claims.
+- **Operationalization:** Track `exhaustion_ratio = (ambiguity_tokens + delay_tokens) / directional_claim_tokens` with a minimum window length; emit evidence when the ratio breaches baseline bands.
+
+### Assumption Modeling (Beyond Topic/Frame)
+- **Definition:** Extract implicit assumptions that must hold for the narrative to make sense.
+- **Detection signal:** Stable assumptions persisting across paraphrase/translation.
+- **Operationalization:** Promote assumptions to first-class nodes (`assumption_id`, `lineage`, `confidence`, `supporting_evidence`), link to claims and artifacts, and track mutation deltas across time slices.
+
+### Narrative Compression Metrics
+- **Definition:** Measure how much context is needed to activate a narrative.
+- **Detection signal:** Rapid drop in tokens required to evoke full narrative meaning inside a community.
+- **Operationalization:** Track `activation_tokens_p50` and `activation_tokens_p90` per narrative cluster; alert on steep negative slopes beyond threshold.
+
+### Counter-Narrative Absorption
+- **Definition:** Counter-claims are echoed verbatim but reframed as supporting context.
+- **Detection signal:** Counter-claims embedded as “exceptions that prove the rule.”
+- **Operationalization:** Detect verbatim echoes, then measure reframe polarity shift; emit `absorption_events` with evidence references.
+
+### Convergence With Funnel Analytics
+- **Definition:** Narrative onboarding follows conversion paths akin to marketing funnels.
+- **Detection signal:** Progressive disclosure of claims and trust transfer via peer-like intermediaries.
+- **Operationalization:** Model `narrative_funnel_stage` per user path and compute conversion/attrition rates; store path hashes for deterministic replay.
+
+### Narrative Governance as a Strategic Vector
+- **Definition:** Governance artifacts used as rhetorical signals more than operational controls.
+- **Detection signal:** Governance documents referenced far more than executed.
+- **Operationalization:** Compare `governance_reference_rate` vs `governance_execution_rate` using audit logs; flag significant deltas as governance-signaling risk.
+
+### Narrative State Tracking
+- **State model:** `seeded → contested → normalized → exhausted`.
+- **Operationalization:** Enforce state transitions through evidence-backed thresholds (volume, diversity, assumption stability). Store transitions as immutable events for provenance.
+
+### Narrative Half-Life Metrics
+- **Definition:** Measure decay, not just growth.
+- **Operationalization:** Compute `half_life_days` for engagement and for assumption stability. Long half-life with low engagement is a coordination signal, not a growth signal.
+
 ## Import/Export Matrix (v0)
 | Surface | Import | Export | Non-goals |
 |---|---|---|---|
