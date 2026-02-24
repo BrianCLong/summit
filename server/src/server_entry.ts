@@ -10,10 +10,10 @@ import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { otelService } from './lib/observability/otel.js';
+import { initializeTracing } from './observability/tracer.js';
 
 // Initialize OpenTelemetry as early as possible
-otelService.initialize();
+const tracer = initializeTracing();
 
 import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -142,7 +142,7 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
-    await otelService.shutdown();
+    await tracer.shutdown();
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();

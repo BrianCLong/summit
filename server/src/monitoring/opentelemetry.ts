@@ -1,23 +1,10 @@
 /**
- * OpenTelemetry Instrumentation
+ * OpenTelemetry Instrumentation Helper
  *
- * Replaces custom tracing with industry-standard OpenTelemetry
- * for Apollo GraphQL, Neo4j, and BullMQ operations.
+ * Provides helper methods for tracing, using the globally initialized OpenTelemetry SDK.
+ * Note: SDK initialization is handled in `server_entry.ts` via `observability/tracer.ts`.
  */
 
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { NodeSDK } from '@opentelemetry/sdk-node';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import * as resources from '@opentelemetry/resources';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
 
@@ -27,111 +14,34 @@ interface TracingConfig {
   serviceName: string;
   serviceVersion: string;
   environment: string;
-  jaegerEndpoint?: string;
-  enableConsoleExporter: boolean;
-  sampleRate: number;
 }
 
 class OpenTelemetryService {
-  private sdk: NodeSDK | null = null;
-  private tracer: any = null;
   private config: TracingConfig;
 
-  constructor(config: Partial<TracingConfig> = {}) {
+  constructor() {
     this.config = {
-      serviceName:
-        config.serviceName || process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
-      serviceVersion:
-        config.serviceVersion || process.env.OTEL_SERVICE_VERSION || '1.0.0',
-      environment: config.environment || process.env.NODE_ENV || 'development',
-      jaegerEndpoint: config.jaegerEndpoint || process.env.JAEGER_ENDPOINT,
-      enableConsoleExporter:
-        config.enableConsoleExporter ?? process.env.NODE_ENV === 'development',
-      sampleRate:
-        config.sampleRate ?? parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
+      serviceName: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
+      serviceVersion: process.env.OTEL_SERVICE_VERSION || '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
     };
   }
 
-  /**
-   * Initialize OpenTelemetry SDK
-   */
+  // No-op initialize as SDK is initialized globally
   initialize(): void {
-    try {
-      // Configure resource
-      const resource = resources.Resource.default().merge(
-        new resources.Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-          [SemanticResourceAttributes.SERVICE_VERSION]:
-            this.config.serviceVersion,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
-            this.config.environment,
-        }),
-      );
-
-      // Configure exporters
-      const traceExporters: any[] = [];
-
-      if (this.config.jaegerEndpoint) {
-        traceExporters.push(
-          new JaegerExporter({
-            endpoint: this.config.jaegerEndpoint,
-          }),
-        );
-      }
-
-      // Configure metrics
-      const metricReaders: any[] = [];
-
-      // Prometheus metrics
-      metricReaders.push(
-        new PrometheusExporter({
-          port: parseInt(process.env.PROMETHEUS_PORT || '9464'),
-        }),
-      );
-
-      // Initialize SDK
-      this.sdk = new NodeSDK({
-        resource,
-        traceExporter:
-          traceExporters.length > 0 ? traceExporters[0] : undefined,
-        metricReader: metricReaders.length > 0 ? metricReaders[0] : undefined,
-        instrumentations: [
-          getNodeAutoInstrumentations({
-            // Disable instrumentation for certain modules if needed
-            '@opentelemetry/instrumentation-fs': {
-              enabled: false,
-            },
-          }),
-        ],
-      });
-
-      // Start the SDK
-      this.sdk.start();
-
-      // Get tracer
-      this.tracer = trace.getTracer(
-        this.config.serviceName,
-        this.config.serviceVersion,
-      );
-
-      logger.info(
-        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${!!this.config.jaegerEndpoint}`,
-      );
-    } catch (error: any) {
-      logger.error(
-        `Failed to initialize OpenTelemetry. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
+    logger.info('OpenTelemetryService wrapper initialized (relying on global SDK)');
   }
 
-  /**
-   * Shutdown OpenTelemetry SDK
-   */
+  // No-op shutdown as SDK is managed globally
   async shutdown(): Promise<void> {
-    if (this.sdk) {
-      await this.sdk.shutdown();
-      logger.info('OpenTelemetry SDK shutdown');
-    }
+    // No-op
+  }
+
+  private getTracer() {
+    return trace.getTracer(
+      this.config.serviceName,
+      this.config.serviceVersion
+    );
   }
 
   /**
@@ -142,11 +52,8 @@ class OpenTelemetryService {
     attributes: Record<string, any> = {},
     kind: typeof SpanKind.INTERNAL = SpanKind.INTERNAL,
   ) {
-    if (!this.tracer) {
-      return this.createNoOpSpan();
-    }
-
-    return this.tracer.startSpan(name, {
+    const tracer = this.getTracer();
+    return tracer.startSpan(name, {
       kind,
       attributes: {
         'service.name': this.config.serviceName,
@@ -335,29 +242,15 @@ class OpenTelemetryService {
     tracerActive: boolean;
   } {
     return {
-      enabled: !!this.sdk,
+      enabled: true,
       serviceName: this.config.serviceName,
       environment: this.config.environment,
-      tracerActive: !!this.tracer,
+      tracerActive: true,
     };
   }
 }
 
 // Global instance
 export const otelService = new OpenTelemetryService();
-
-// Initialize if not in test environment
-if (process.env.NODE_ENV !== 'test') {
-  otelService.initialize();
-}
-
-// Graceful shutdown
-process.on('SIGTERM', async () => {
-  await otelService.shutdown();
-});
-
-process.on('SIGINT', async () => {
-  await otelService.shutdown();
-});
 
 export default otelService;
