@@ -6,12 +6,16 @@
     "version": {
       "type": ["string", "integer"]
     },
-    "items": {
-      "type": ["object", "array"],
+    "mappings": {
+      "type": "object",
       "additionalProperties": {
         "type": "object",
-        "required": ["files"],
+        "required": ["report", "metrics", "stamp"],
         "properties": {
+          "report": { "type": "string" },
+          "metrics": { "type": "string" },
+          "stamp": { "type": "string" },
+          "evidence_id": { "type": "string" },
           "files": {
             "type": "object",
             "required": ["report", "metrics", "stamp"],
@@ -24,23 +28,9 @@
           "title": { "type": "string" },
           "category": { "type": "string" }
         },
+        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }, { "required": ["report", "metrics", "stamp"] }],
         "additionalProperties": true
       }
-    },
-    "map": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["report", "metrics", "stamp"],
-        "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" }
-        }
-      }
-    },
-    "evidence": {
-      "type": "object"
     }
   },
   "definitions": {
