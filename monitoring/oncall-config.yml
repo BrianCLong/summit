@@ -29,6 +29,12 @@ pagerduty:
       escalation_policy: platform-team-escalation
       urgency: high
 
+    - name: IntelGraph Routing
+      service_id: ${PAGERDUTY_SERVICE_ID_ROUTING}
+      escalation_policy: platform-team-escalation
+      urgency: high
+      auto_resolve_timeout: 14400
+
   # Escalation Policies
   escalation_policies:
     - name: platform-team-escalation

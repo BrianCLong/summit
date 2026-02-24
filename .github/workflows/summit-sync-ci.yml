@@ -23,7 +23,8 @@ jobs:
 
       - name: Acceptance checks
         run: |
-          grep -q "Mismatch rate" acceptance/validation_criteria.md
+          grep -q "MISMATCH_RATE" acceptance/validation_criteria.md
+          grep -q "Gate A (Parity)" acceptance/validation_criteria.md
           test -s schema/summit_mapping.yml
 
       - name: Harness

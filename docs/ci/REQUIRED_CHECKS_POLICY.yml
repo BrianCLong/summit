@@ -37,6 +37,7 @@ branch_protection:
       - "SOC Controls"
       - "test (20.x)"
       - "Workflow Validity Check"
+      - "Routing Resilience Validation"
 
 # Always Required Checks
 # ----------------------
@@ -74,6 +75,10 @@ always_required:
   - name: "Workflow Validity Check"
     workflow: "workflow-validity.yml"
     rationale: "Workflow syntax validity is required by protected-branch checks"
+
+  - name: "Routing Resilience Validation"
+    workflow: "routing-resilience-check.yml"
+    rationale: "Validates BGP/BYOIP routing resilience guardrails, probe matrix, and monitoring configuration."
 
 # Conditional Required Checks
 # ---------------------------

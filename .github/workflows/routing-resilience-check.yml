@@ -2,15 +2,9 @@ name: Routing Resilience Checks
 
 on:
   pull_request:
-    paths:
-      - 'monitoring/**'
-      - '.github/workflows/routing-resilience-check.yml'
   push:
     branches:
       - main
-    paths:
-      - 'monitoring/**'
-      - '.github/workflows/routing-resilience-check.yml'
 
 jobs:
   routing-resilience-checks:

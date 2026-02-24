@@ -10,9 +10,10 @@ export NEO4J_PASS="${NEO4J_PASS:-summit}"
 export PG_REPL_SLOT="${PG_REPL_SLOT:-summit_slot}"
 export PG_OUTPUT_PLUGIN="${PG_OUTPUT_PLUGIN:-test_decoding}"
 export OPENLINEAGE_AUDIT_FILE="${OPENLINEAGE_AUDIT_FILE:-$ROOT/artifacts/lineage/openlineage.jsonl}"
-PYTHON_BIN="${PYTHON_BIN:-python3}"
+export SUMMIT_SYNC_VENV="${SUMMIT_SYNC_VENV:-$ROOT/.venv-summit-sync}"
 
 INGEST_PID=""
+PYTHON_BIN="python3"
 
 cleanup() {
   if [[ -n "$INGEST_PID" ]]; then
@@ -22,28 +23,41 @@ cleanup() {
 }
 trap cleanup EXIT
 
+require_cmd() {
+  local cmd="$1"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "ERROR: required command '$cmd' not found" >&2
+    exit 1
+  fi
+}
+
+prepare_python() {
+  if python3 -c "import neo4j, psycopg" >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+    return
+  fi
+  if [[ ! -x "$SUMMIT_SYNC_VENV/bin/python" ]]; then
+    python3 -m venv "$SUMMIT_SYNC_VENV"
+  fi
+  "$SUMMIT_SYNC_VENV/bin/python" -m pip install --quiet neo4j psycopg[binary]
+  PYTHON_BIN="$SUMMIT_SYNC_VENV/bin/python"
+}
+
 wait_for_pg() {
   local attempts=30
-  local delay=1
   local i
   for ((i=1; i<=attempts; i++)); do
-    if command -v psql >/dev/null 2>&1; then
-      if psql "$PG_DSN" -v ON_ERROR_STOP=1 -c "select 1" >/dev/null 2>&1; then
-        return
-      fi
-    elif python3 -c "import psycopg" >/dev/null 2>&1; then
-      if python3 - "$PG_DSN" <<'PY' >/dev/null 2>&1
+    if "$PYTHON_BIN" - "$PG_DSN" <<'PY' >/dev/null 2>&1
 import sys
 import psycopg
 with psycopg.connect(sys.argv[1]) as conn:
     with conn.cursor() as cur:
         cur.execute("select 1")
 PY
-      then
-        return
-      fi
+    then
+      return
     fi
-    sleep "$delay"
+    sleep 1
   done
   echo "ERROR: Postgres not reachable after ${attempts}s: $PG_DSN" >&2
   exit 1
@@ -55,13 +69,26 @@ run_sql_file() {
     psql "$PG_DSN" -v ON_ERROR_STOP=1 -f "$file"
     return
   fi
-  docker compose -f "$ROOT/docker-compose.summit-sync.yml" exec -T postgres \
-    psql -U summit -d summit -v ON_ERROR_STOP=1 < "$file"
+  "$PYTHON_BIN" - "$PG_DSN" "$file" <<'PY'
+import pathlib
+import sys
+import psycopg
+
+dsn = sys.argv[1]
+sql_file = pathlib.Path(sys.argv[2])
+sql = sql_file.read_text(encoding="utf-8")
+with psycopg.connect(dsn, autocommit=True) as conn:
+    with conn.cursor() as cur:
+        cur.execute(sql)
+PY
 }
 
+require_cmd docker
+prepare_python
 rm -f "$OPENLINEAGE_AUDIT_FILE"
 
 # 1) Boot infra.
+docker compose -f "$ROOT/docker-compose.summit-sync.yml" down -v --remove-orphans >/dev/null 2>&1 || true
 docker compose -f "$ROOT/docker-compose.summit-sync.yml" up -d --wait
 wait_for_pg
 

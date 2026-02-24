@@ -192,6 +192,7 @@ Edit `alertmanager.yml` to configure:
 - Blackbox exporter module config: `monitoring/blackbox.yml`
 - Active routing scrape jobs: `monitoring/prometheus.yml`, `monitoring/prometheus/prometheus.yml`
 - CI validation workflow: `.github/workflows/routing-resilience-check.yml`
+- Routing ownership and escalation mapping: `docs/ops/ROUTING_ALERT_ESCALATION.md`
 
 ## Grafana Dashboards
 
