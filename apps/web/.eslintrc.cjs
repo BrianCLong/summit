@@ -6,6 +6,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
     'plugin:storybook/recommended',
+    'plugin:jsx-a11y/strict',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs', 'public/js/**/*', 'vite.config.js'],
   parser: '@typescript-eslint/parser',
@@ -22,13 +23,5 @@ module.exports = {
     'prefer-const': 'error',
     'no-var': 'error',
   },
-  overrides: [
-    {
-      files: ['src/components/Layout.tsx', 'src/pages/SignInPage.tsx'],
-      extends: ['plugin:jsx-a11y/recommended'],
-      rules: {
-        'jsx-a11y/no-autofocus': 'off',
-      },
-    },
-  ],
+
 }

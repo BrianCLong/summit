@@ -71,19 +71,19 @@ jobs:
           mkdir -p test-results
 
           # Run tests with JUnit output for ABAC
-          opa test policy/abac policy/tests/abac_test.rego \
+          opa test policy/abac policy/tests/baseline_test.rego \
             --format junit \
             --coverage \
             > test-results/abac-junit.xml 2>&1 || true
 
           # Run tests again for readable output and coverage JSON
-          opa test policy/abac policy/tests/abac_test.rego \
+          opa test policy/abac policy/tests/baseline_test.rego \
             --verbose \
             --coverage \
             > test-results/abac-coverage.json 2>&1
 
           # Check if tests passed
-          if ! opa test policy/abac policy/tests/abac_test.rego; then
+          if ! opa test policy/abac policy/tests/baseline_test.rego; then
             echo "ABAC tests failed"
             exit 1
           fi
@@ -117,7 +117,7 @@ jobs:
       - name: Check Coverage Threshold
         run: |
           echo "Checking coverage threshold (90% required)..."
-          COVERAGE=$(opa test policy/abac policy/tests/abac_test.rego --coverage 2>/dev/null | jq -r '.coverage // 0')
+          COVERAGE=$(opa test policy/abac policy/tests/baseline_test.rego --coverage 2>/dev/null | jq -r '.coverage // 0')
           echo "Coverage: $COVERAGE%"
 
           if (( $(echo "$COVERAGE < 90" | bc -l) )); then
@@ -134,7 +134,7 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
 
           # Get coverage
-          COVERAGE=$(opa test policy/abac policy/tests/abac_test.rego --coverage 2>/dev/null | jq -r '.coverage // "N/A"')
+          COVERAGE=$(opa test policy/abac policy/tests/baseline_test.rego --coverage 2>/dev/null | jq -r '.coverage // "N/A"')
 
           echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
           echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"

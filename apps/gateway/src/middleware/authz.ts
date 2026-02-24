@@ -9,6 +9,7 @@ interface AuthzInput {
     tenant?: string;
     clearance: string;
     mfa?: string;
+    purpose?: string[];
   };
   resource: {
     type: string;
@@ -36,13 +37,14 @@ interface Decision {
 
 const DEFAULT_DECISION_URL =
   process.env.OPA_DECISION_URL ||
-  "http://localhost:8181/v1/data/policy/authz/abac/decision";
+  "http://localhost:8181/v1/data/abac/authz/decision";
 
 const redacted = (value?: string) =>
   value ? createHash("sha256").update(value).digest("hex").slice(0, 8) : undefined;
 
 function buildInput(req: Request): AuthzInput {
   const roles = (req.headers["x-roles"] as string | undefined)?.split(",") || [];
+  const purpose = (req.headers["x-purpose"] as string | undefined)?.split(",") || [];
   const tenantHeader = (req.headers["x-tenant"] as string | undefined) ||
     (req.headers["x-tenant-id"] as string | undefined) ||
     "unknown";
@@ -57,6 +59,7 @@ function buildInput(req: Request): AuthzInput {
     subject: {
       id: (req.headers["x-subject-id"] as string | undefined) || "anonymous",
       roles,
+      purpose,
       tenant: tenantHeader,
       clearance: (req.headers["x-clearance"] as string | undefined) || "internal",
       mfa: (req.headers["x-mfa"] as string | undefined) || "unknown",

@@ -160,6 +160,16 @@ async function startGatewayService() {
   // Protected API routes
   app.use('/api/*', authMiddleware.authenticate());
 
+  // PR 8: RBAC verification for investigation export
+  app.use('/api/v1/investigations/export', (req: any, res: any, next: any) => {
+    const userRoles = req.user?.roles || [];
+    if (userRoles.includes('admin') || userRoles.includes('investigator')) {
+      return next();
+    }
+    logger.warn('Access denied to export investigation', { user: req.user?.id, roles: userRoles });
+    return res.status(403).json({ error: 'Forbidden: Insufficient permissions for export' });
+  });
+
   // Error handling
   app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
     logger.error('Request error', {
