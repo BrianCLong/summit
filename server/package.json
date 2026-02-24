@@ -163,7 +163,9 @@
     "validator": "^13.11.0",
     "winston": "3.19.0",
     "ws": "8.18.3",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "@intelgraph/osint-collector": "workspace:*",
+    "@intelgraph/policy-audit": "workspace:*"
   },
   "devDependencies": {
     "@aws-sdk/client-glue": "^3.958.0",

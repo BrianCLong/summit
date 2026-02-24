@@ -8,7 +8,6 @@ import {
 import { useKeyboardShortcuts, Shortcut } from '@/contexts/KeyboardShortcutsContext'
 import { Badge } from '@/components/ui/Badge'
 import { Command } from 'lucide-react'
-import { isMac } from '@/lib/utils'
 
 export function KeyboardShortcutsHelp(): React.ReactElement {
   const { isHelpOpen, closeHelp, shortcuts } = useKeyboardShortcuts()
@@ -57,7 +56,7 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
                               variant="secondary"
                               className="font-mono text-xs px-1.5 min-w-[20px] justify-center capitalize"
                             >
-                              {key === 'mod' ? (isMac ? '⌘' : 'Ctrl') : key === 'shift' ? (isMac ? '⇧' : 'Shift') : key}
+                              {key === 'mod' ? '⌘' : key === 'shift' ? '⇧' : key}
                             </Badge>
                           ))}
                         </div>
@@ -84,7 +83,7 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
                 <span className="text-sm">Command Palette</span>
                 <div className="flex gap-1">
                   <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
-                    {isMac ? '⌘' : 'Ctrl'}
+                    ⌘
                   </Badge>
                   <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
                     K
