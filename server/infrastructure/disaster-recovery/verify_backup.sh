@@ -54,4 +54,39 @@ fi
 #     echo "✅ redis.rdb found."
 # fi
 
+# 4. Run Restore Test (Optional)
+# Check for --restore flag or environment variable
+RUN_RESTORE_TEST=false
+if [ "$VERIFY_RESTORE" = "true" ]; then
+    RUN_RESTORE_TEST=true
+fi
+for arg in "$@"; do
+    if [ "$arg" == "--restore" ]; then
+        RUN_RESTORE_TEST=true
+    fi
+done
+
+if [ "$RUN_RESTORE_TEST" = "true" ]; then
+    echo "Running restore test..."
+
+    # Locate restore_test.sh
+    RESTORE_TEST_SCRIPT="/scripts/restore_test.sh"
+    if [ ! -f "$RESTORE_TEST_SCRIPT" ]; then
+        RESTORE_TEST_SCRIPT="$(dirname "$0")/restore_test.sh"
+    fi
+
+    if [ -f "$RESTORE_TEST_SCRIPT" ]; then
+        if bash "$RESTORE_TEST_SCRIPT" "$LATEST_BACKUP"; then
+            echo "✅ Restore verification passed."
+        else
+            echo "❌ Restore verification FAILED."
+            exit 1
+        fi
+    else
+        echo "⚠️ restore_test.sh not found. Skipping restore test."
+    fi
+else
+    echo "Skipping restore test (use --restore to enable)."
+fi
+
 echo "Backup verification completed successfully."

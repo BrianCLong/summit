@@ -128,6 +128,73 @@ export class PartitionManager {
     // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
   }
 
+  /**
+   * Creates a hash partition for a table.
+   * Useful for load balancing large tables without a natural range key.
+   */
+  async createHashPartition(
+    tableName: string,
+    modulus: number,
+    remainder: number,
+  ): Promise<void> {
+    const partitionName = `${tableName}_mod${modulus}_rem${remainder}`;
+
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if partition exists
+      const checkRes = await client.query(`SELECT to_regclass($1::text)`, [
+        partitionName,
+      ]);
+
+      if (checkRes.rows[0].to_regclass) {
+        logger.info(`Partition ${partitionName} already exists.`);
+        await client.query('COMMIT');
+        return;
+      }
+
+      const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES WITH (MODULUS ${modulus}, REMAINDER ${remainder})
+      `;
+
+      await client.query(query);
+      logger.info(
+        `Created hash partition ${partitionName} (modulus ${modulus}, remainder ${remainder})`,
+      );
+
+      await client.query('COMMIT');
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error(`Failed to create hash partition ${partitionName}`, error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Checks if partitions for a table exist and are accessible.
+   */
+  async checkPartitionHealth(tableName: string): Promise<boolean> {
+    const client = await this.pool.connect();
+    try {
+      const res = await client.query(
+        `SELECT count(*) as count FROM pg_inherits WHERE inhparent = $1::regclass`,
+        [tableName],
+      );
+      const count = parseInt(res.rows[0].count, 10);
+      return count > 0;
+    } catch (error) {
+      logger.error(`Failed to check partition health for ${tableName}`, error);
+      return false;
+    } finally {
+      client.release();
+    }
+  }
+
   async detachOldPartitions(
     tables: string[],
     retentionMonths: number,

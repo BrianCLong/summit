@@ -137,4 +137,75 @@ describe('PartitionManager', () => {
       );
     });
   });
+
+  describe('createHashPartition', () => {
+    it('should create a hash partition', async () => {
+      mockQuery.mockImplementation((query: any) => {
+        if (typeof query === 'string' && query.includes('SELECT to_regclass')) {
+          return Promise.resolve({ rows: [{ to_regclass: null }] });
+        }
+        return Promise.resolve({ rows: [] });
+      });
+
+      await partitionManager.createHashPartition('users', 4, 0);
+
+      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('CREATE TABLE users_mod4_rem0'),
+      );
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('FOR VALUES WITH (MODULUS 4, REMAINDER 0)'),
+      );
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    });
+
+    it('should skip if hash partition exists', async () => {
+      mockQuery.mockImplementation((query: any) => {
+        if (typeof query === 'string' && query.includes('SELECT to_regclass')) {
+          return Promise.resolve({ rows: [{ to_regclass: 'exists' }] });
+        }
+        return Promise.resolve({ rows: [] });
+      });
+
+      await partitionManager.createHashPartition('users', 4, 0);
+
+      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+      expect(mockClient.query).not.toHaveBeenCalledWith(
+        expect.stringContaining('CREATE TABLE'),
+      );
+      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    });
+  });
+
+  describe('checkPartitionHealth', () => {
+    it('should return true if partitions exist', async () => {
+      mockQuery.mockImplementation((query: any) => {
+        if (typeof query === 'string' && query.includes('SELECT count(*)')) {
+          return Promise.resolve({ rows: [{ count: 1 }] });
+        }
+        return Promise.resolve({ rows: [] });
+      });
+
+      const result = await partitionManager.checkPartitionHealth('users');
+      expect(result).toBe(true);
+    });
+
+    it('should return false if no partitions exist', async () => {
+      mockQuery.mockImplementation((query: any) => {
+        if (typeof query === 'string' && query.includes('SELECT count(*)')) {
+          return Promise.resolve({ rows: [{ count: 0 }] });
+        }
+        return Promise.resolve({ rows: [] });
+      });
+
+      const result = await partitionManager.checkPartitionHealth('users');
+      expect(result).toBe(false);
+    });
+
+    it('should return false on error', async () => {
+      mockQuery.mockRejectedValue(new Error('DB Error'));
+      const result = await partitionManager.checkPartitionHealth('users');
+      expect(result).toBe(false);
+    });
+  });
 });

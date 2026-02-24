@@ -7,6 +7,7 @@ BACKUP_ROOT="/backups"
 BACKUP_DIR="$BACKUP_ROOT/$TIMESTAMP"
 LOG_FILE="$BACKUP_ROOT/backup.log"
 RETENTION_DAYS=${RETENTION_DAYS:-7}
+VERSION="1.0.0"
 
 # Ensure backup root exists
 mkdir -p "$BACKUP_ROOT"
@@ -16,8 +17,20 @@ log() {
     echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
 }
 
+notify() {
+    local status="$1"
+    local message="$2"
+    if [ ! -z "$WEBHOOK_URL" ]; then
+        log "Sending notification..."
+        curl -s -X POST -H "Content-Type: application/json" \
+            -d "{\"status\": \"$status\", \"message\": \"$message\", \"timestamp\": \"$TIMESTAMP\"}" \
+            "$WEBHOOK_URL" || log "Warning: Failed to send notification"
+    fi
+}
+
 error_handler() {
     log "ERROR: Backup failed at line $1"
+    notify "error" "Backup failed at line $1"
     exit 1
 }
 trap 'error_handler ${LINENO}' ERR
@@ -26,8 +39,10 @@ log "Starting backup process: $TIMESTAMP"
 
 mkdir -p "$BACKUP_DIR"
 
-# Metadata
-echo "{\"timestamp\": \"$TIMESTAMP\", \"started_at\": \"$(date -u -Iseconds)\"}" > "$BACKUP_DIR/metadata.json"
+# Initialize hashes
+PG_HASH=""
+REDIS_HASH=""
+NEO4J_HASH=""
 
 # Postgres Backup
 log "Backing up PostgreSQL..."
@@ -62,14 +77,14 @@ if [ ! -z "$REDIS_PASSWORD" ] && [ "$REDIS_PASSWORD" != "devpassword" ]; then
     REDIS_CLI_CMD="$REDIS_CLI_CMD -a $REDIS_PASSWORD --no-auth-warning"
 fi
 
+# Use --rdb to save to specific file. Note: This requires redis-cli to support --rdb (Redis 3+)
 if $REDIS_CLI_CMD --rdb "$BACKUP_DIR/redis.rdb"; then
     log "Redis RDB backup successful."
     REDIS_HASH=$(sha256sum "$BACKUP_DIR/redis.rdb" | cut -d ' ' -f 1)
     log "Redis RDB SHA256: $REDIS_HASH"
 else
     log "Warning: Redis backup failed or not available. Continuing..."
-    # Don't fail the whole backup for Redis if it's optional, but here we assume it's critical if we want "comprehensive"
-    # But often Redis is just cache. I'll warn but not exit, unless strictly required.
+    REDIS_HASH="FAILED"
 fi
 
 # Neo4j Backup
@@ -87,7 +102,23 @@ if [ -d "/neo4j_data" ]; then
     fi
 else
     log "Warning: /neo4j_data not found. Skipping Neo4j backup."
+    NEO4J_HASH="SKIPPED"
 fi
+
+# Create Metadata JSON
+cat <<EOF > "$BACKUP_DIR/metadata.json"
+{
+  "version": "$VERSION",
+  "timestamp": "$TIMESTAMP",
+  "created_at": "$(date -u -Iseconds)",
+  "hashes": {
+    "postgres": "$PG_HASH",
+    "redis": "$REDIS_HASH",
+    "neo4j": "$NEO4J_HASH"
+  }
+}
+EOF
+log "Metadata file created."
 
 # Archive
 log "Archiving backup..."
@@ -97,9 +128,6 @@ tar -czf "$BACKUP_ROOT/$ARCHIVE_NAME" -C "$BACKUP_ROOT" "$TIMESTAMP"
 # Calculate Archive Hash
 ARCHIVE_HASH=$(sha256sum "$BACKUP_ROOT/$ARCHIVE_NAME" | cut -d ' ' -f 1)
 log "Archive SHA256: $ARCHIVE_HASH"
-
-# Update Metadata
-# We can't easily update the json inside the tar, but we can log it.
 
 # Clean up temp dir
 rm -rf "$BACKUP_DIR"
@@ -133,11 +161,24 @@ find "$BACKUP_ROOT" -name "backup-*.sha256" -mtime +$RETENTION_DAYS -delete
 
 # Verify Backup
 log "Running backup verification..."
-if /scripts/verify_backup.sh; then
-    log "Backup verification passed."
+# Assuming scripts are in /scripts inside the container
+VERIFY_SCRIPT="/scripts/verify_backup.sh"
+if [ ! -f "$VERIFY_SCRIPT" ]; then
+    # Fallback if running outside container or different path
+    VERIFY_SCRIPT="$(dirname "$0")/verify_backup.sh"
+fi
+
+if [ -f "$VERIFY_SCRIPT" ]; then
+    if $VERIFY_SCRIPT; then
+        log "Backup verification passed."
+        notify "success" "Backup $ARCHIVE_NAME completed successfully."
+    else
+        log "ERROR: Backup verification FAILED."
+        notify "failure" "Backup $ARCHIVE_NAME verification failed."
+        exit 1
+    fi
 else
-    log "ERROR: Backup verification FAILED."
-    exit 1
+    log "Warning: verify_backup.sh not found. Skipping verification."
 fi
 
 log "Backup completed successfully."
