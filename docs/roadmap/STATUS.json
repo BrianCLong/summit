@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-11T00:00:00Z",
-  "revision_note": "Corrected roadmap summary total after logging the Kore.ai execpolicy amendment requirement.",
+  "last_updated": "2026-02-08T03:30:10Z",
+  "revision_note": "Aligned Summit v4.1.15 architecture reference with readiness-language constraints.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -242,7 +242,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 16,
     "ga_blockers": []
   }
 }
