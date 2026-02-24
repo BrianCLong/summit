@@ -8,7 +8,7 @@ export NEO4J_URI="${NEO4J_URI:-bolt://localhost:7687}"
 export NEO4J_USER="${NEO4J_USER:-neo4j}"
 export NEO4J_PASS="${NEO4J_PASS:-summit}"
 export PG_REPL_SLOT="${PG_REPL_SLOT:-summit_slot}"
-export PG_OUTPUT_PLUGIN="${PG_OUTPUT_PLUGIN:-wal2json}"
+export PG_OUTPUT_PLUGIN="${PG_OUTPUT_PLUGIN:-test_decoding}"
 
 INGEST_PID=""
 

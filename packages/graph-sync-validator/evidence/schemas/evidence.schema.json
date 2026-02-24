@@ -5,10 +5,12 @@
     "acceptance": {
       "type": "object",
       "properties": {
-        "idParity": { "type": "string" },
-        "refInt": { "type": "string" },
-        "maxLag": { "type": "string" }
-      }
+        "gateA": { "type": "string" },
+        "gateB": { "type": "string" },
+        "gateC": { "type": "string" },
+        "gateD": { "type": "string" }
+      },
+      "required": ["gateA", "gateB", "gateC", "gateD"]
     },
     "result": { "$ref": "metrics.schema.json" }
   },
