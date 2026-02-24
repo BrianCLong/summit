@@ -13,6 +13,7 @@ include Makefile.merge-train
 
 COMPOSE_DEV_FILE ?= docker-compose.dev.yaml
 DEV_ENV_FILE ?= .env
+DEV_SERVICES ?= postgres redis neo4j elasticsearch api web
 SHELL_SERVICE ?= gateway
 VENV_DIR ?= .venv
 VENV_BIN = $(VENV_DIR)/bin
@@ -25,7 +26,7 @@ IMAGE ?= $(IMAGE_NAME):$(IMAGE_TAG)
 # --- Docker Compose Controls ---
 
 up:     ## Run dev stack
-	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+	docker compose -f $(COMPOSE_DEV_FILE) up --build -d $(DEV_SERVICES)
 
 down:   ## Stop dev stack
 	docker compose -f $(COMPOSE_DEV_FILE) down -v
@@ -40,7 +41,7 @@ dev-prereqs:
 
 dev-up: dev-prereqs ## Validate prereqs then start dev stack
 	@echo "Starting dev stack with $(COMPOSE_DEV_FILE)..."
-	docker compose -f $(COMPOSE_DEV_FILE) up --build -d
+	docker compose -f $(COMPOSE_DEV_FILE) up --build -d $(DEV_SERVICES)
 
 dev-down: dev-prereqs ## Stop dev stack and remove volumes
 	@echo "Stopping dev stack defined in $(COMPOSE_DEV_FILE)..."
@@ -70,6 +71,7 @@ clean:
 # --- Development Workflow ---
 
 bootstrap: ## Install dev dependencies
+	@[ -f "$(DEV_ENV_FILE)" ] || cp .env.example "$(DEV_ENV_FILE)"
 	python3 -m venv $(VENV_DIR)
 	$(VENV_BIN)/pip install -U pip
 	$(VENV_BIN)/pip install -e ".[otel,policy,sbom,perf]"
