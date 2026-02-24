@@ -66,12 +66,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Learning:** Inline routes in main application files are easily overlooked during security audits. Additionally, inconsistent casing in role names (e.g., 'admin' vs 'ADMIN') can lead to manual check bypasses or availability issues.
 **Prevention:** Enforce a "deny-by-default" posture by applying `authenticateToken` and `ensureRole(['ADMIN', 'admin'])` middleware to all administrative and sensitive data endpoints. Always use standardized middleware rather than manual property checks for role validation.
 
-## 2026-02-19 - [CRITICAL] Tenant Scoping Bypass via SQL Comments
-**Vulnerability:** The `validateAndScopeQuery` function in `server/src/db/query-scope.ts` naively appended `WHERE tenant_id = ...` to the end of SQL queries. This allowed attackers to use SQL comments (`--`) to neutralize the tenant scoping clause, effectively bypassing tenant isolation.
-**Learning:** Naive string concatenation for security controls is fragile. Security logic must be robust against input variations (like comments) or structural manipulation.
-**Prevention:** When auto-injecting security clauses into SQL, validate that the query structure is safe (e.g., no comments) and sanitize inputs (e.g., strip trailing semicolons). Use parser-based modification or strict validation instead of simple concatenation where possible.
-
-## 2026-03-01 - [HIGH] Hardening Evidence Search and RBAC
-**Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
-**Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
-**Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+## 2026-02-18 - [CRITICAL] Insecure Webhook Signature Verification
+**Vulnerability:** The `InboundAlertService` in `server/src/integrations/inbound/service.ts` verified webhook signatures by directly comparing the signature with the secret (`signature !== config.secret`). This requires the sender to transmit the secret in plaintext, effectively exposing it.
+**Learning:** Placeholder code ("In production, we'd use HMAC") often persists into production if not flagged. Authentication mechanisms that rely on "shared secrets" must never require the transmission of the secret itself.
+**Prevention:** Implement standard HMAC-SHA256 signature verification. Compare signatures using `crypto.timingSafeEqual` to prevent timing attacks. Ensure the service expects a computed signature (HMAC) rather than the secret itself.

@@ -46,7 +46,6 @@ describe('InboundAlertService', () => {
         });
 
         await expect(service.processAlert('tenant-1', 'config-1', {}, 'wrong')).rejects.toThrow('Invalid signature');
-        // SEC: Plaintext secret should also fail (this was the vulnerability)
         await expect(service.processAlert('tenant-1', 'config-1', {}, 'secret')).rejects.toThrow('Invalid signature');
     });
 });

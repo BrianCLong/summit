@@ -21,7 +21,8 @@ export class InboundAlertService {
         throw new Error('Invalid or disabled alert configuration');
     }
 
-    // 2. Verify Signature using HMAC-SHA256 with timing-safe comparison
+    // 2. Verify Signature
+    // Use HMAC with config.secret
     if (config.secret) {
         const hmac = createHmac('sha256', config.secret);
         hmac.update(JSON.stringify(payload));
