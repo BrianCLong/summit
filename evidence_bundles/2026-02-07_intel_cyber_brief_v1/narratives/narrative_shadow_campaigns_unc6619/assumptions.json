@@ -1,0 +1,25 @@
+{
+  "assumptions": [
+    {
+      "assumption_id": "s_objective_policy_intel_theft",
+      "assumption_normal_form": "The primary objective is policy and security data theft rather than disruption or signaling.",
+      "scope": "narrative",
+      "confidence": 0.72,
+      "supported_by_claim_ids": [
+        "c_disclosure_unit42_triggers_reviews",
+        "c_kernel_rootkit_shadowguard"
+      ],
+      "provenance_id": "p_shadow_0001"
+    },
+    {
+      "assumption_id": "s_long_term_access_priority",
+      "assumption_normal_form": "The operator prioritizes long-term stealth access and survivability over rapid monetization or immediate impact.",
+      "scope": "narrative",
+      "confidence": 0.76,
+      "supported_by_claim_ids": [
+        "c_kernel_rootkit_shadowguard"
+      ],
+      "provenance_id": "p_shadow_0001"
+    }
+  ]
+}

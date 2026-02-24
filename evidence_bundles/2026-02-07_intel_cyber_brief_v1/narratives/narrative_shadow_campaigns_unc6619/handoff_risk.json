@@ -1,0 +1,55 @@
+{
+  "handoff_model": {
+    "model_id": "handoff_risk_v1",
+    "features": [
+      "vendor_disclosure_present",
+      "multi-country_victim_scope",
+      "critical_infrastructure_relevance",
+      "stealth_persistence_indicator",
+      "attribution_specificity",
+      "evidence_completeness_penalty"
+    ],
+    "scoring": "0..100 weighted sum with penalties"
+  },
+  "handoff_assessment": {
+    "narrative_id": "n_shadow_campaigns_unc6619",
+    "risk_score": 71,
+    "risk_band": "high",
+    "feature_contributions": [
+      {
+        "feature": "vendor_disclosure_present",
+        "weight": 14,
+        "value": 1
+      },
+      {
+        "feature": "multi-country_victim_scope",
+        "weight": 18,
+        "value": 1
+      },
+      {
+        "feature": "critical_infrastructure_relevance",
+        "weight": 16,
+        "value": 1
+      },
+      {
+        "feature": "stealth_persistence_indicator",
+        "weight": 14,
+        "value": 1
+      },
+      {
+        "feature": "attribution_specificity",
+        "weight": 6,
+        "value": 1
+      },
+      {
+        "feature": "evidence_completeness_penalty",
+        "weight": -9,
+        "value": 1
+      }
+    ],
+    "alerts": [
+      "High likelihood of policy handoff (ministerial briefings, alliance coordination) due to cross-border scope and CI targeting."
+    ],
+    "provenance_id": "p_shadow_0001"
+  }
+}

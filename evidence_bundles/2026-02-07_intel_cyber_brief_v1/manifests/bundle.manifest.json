@@ -1,0 +1,35 @@
+{
+  "bundle_version": "1",
+  "bundle_id": "b_2026-02-07_intel_cyber_brief_v1",
+  "generator": {
+    "pipeline": "summit-evidence-bundler",
+    "pipeline_version": "0.1.0",
+    "policy_hash": "policy_hash_placeholder"
+  },
+  "contents": [
+    "narratives/narrative_gru_assassination_attempt/narrative.json",
+    "narratives/narrative_gru_assassination_attempt/artifacts.json",
+    "narratives/narrative_gru_assassination_attempt/claims.json",
+    "narratives/narrative_gru_assassination_attempt/assumptions.json",
+    "narratives/narrative_gru_assassination_attempt/frames.json",
+    "narratives/narrative_gru_assassination_attempt/handoff_risk.json",
+    "narratives/narrative_gru_assassination_attempt/evidence_map.json",
+    "narratives/narrative_shadow_campaigns_unc6619/narrative.json",
+    "narratives/narrative_shadow_campaigns_unc6619/artifacts.json",
+    "narratives/narrative_shadow_campaigns_unc6619/claims.json",
+    "narratives/narrative_shadow_campaigns_unc6619/assumptions.json",
+    "narratives/narrative_shadow_campaigns_unc6619/frames.json",
+    "narratives/narrative_shadow_campaigns_unc6619/handoff_risk.json",
+    "narratives/narrative_shadow_campaigns_unc6619/evidence_map.json",
+    "narratives/narrative_signal_phishing_germany/narrative.json",
+    "narratives/narrative_signal_phishing_germany/artifacts.json",
+    "narratives/narrative_signal_phishing_germany/claims.json",
+    "narratives/narrative_signal_phishing_germany/assumptions.json",
+    "narratives/narrative_signal_phishing_germany/frames.json",
+    "narratives/narrative_signal_phishing_germany/handoff_risk.json",
+    "narratives/narrative_signal_phishing_germany/evidence_map.json",
+    "provenance/receipts/prov_gru_0001.json",
+    "provenance/receipts/prov_shadow_0001.json",
+    "provenance/receipts/prov_signal_0001.json"
+  ]
+}

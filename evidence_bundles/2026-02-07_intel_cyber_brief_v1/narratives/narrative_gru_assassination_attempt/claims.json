@@ -1,0 +1,62 @@
+{
+  "claims": [
+    {
+      "claim_id": "c_alekseyev_shot_on_feb6",
+      "claim_normal_form": "Lt. Gen. Vladimir Alekseyev was shot in Moscow on February 6 and underwent surgery.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.72,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_gru_0001",
+      "notes": "Operational event claim; confidence bounded by summary-only sourcing."
+    },
+    {
+      "claim_id": "c_alekseyev_regained_consciousness",
+      "claim_normal_form": "Alekseyev regained consciousness after surgery.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.68,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_gru_0001"
+    },
+    {
+      "claim_id": "c_two_suspects_detained",
+      "claim_normal_form": "Russian authorities detained a suspect and an accomplice related to the shooting.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.7,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_gru_0001"
+    },
+    {
+      "claim_id": "c_russia_accuses_ukraine",
+      "claim_normal_form": "Russia accused Ukraine of orchestrating the attack to sabotage peace talks.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.74,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_gru_0001",
+      "notes": "Verifiable as a statement/accusation; not verification of responsibility."
+    },
+    {
+      "claim_id": "c_alekseyev_sanctioned_for_cyber",
+      "claim_normal_form": "Alekseyev has Western sanctions associated with cyberespionage and election interference allegations.",
+      "verifiability": "verifiable",
+      "stance": "assert",
+      "confidence": 0.55,
+      "source_artifact_ids": [
+        "a_user_brief_2026_02_07"
+      ],
+      "provenance_id": "p_gru_0001",
+      "notes": "Lower confidence due to summary-only support and specificity."
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "narrative_id": "n_shadow_campaigns_unc6619",
+  "artifact_to_claims": {
+    "a_user_brief_2026_02_07": [
+      "c_70_networks_37_countries",
+      "c_kernel_rootkit_shadowguard",
+      "c_recon_155_countries",
+      "c_disclosure_unit42_triggers_reviews"
+    ]
+  },
+  "claim_to_assumptions": {
+    "c_disclosure_unit42_triggers_reviews": [
+      "s_objective_policy_intel_theft"
+    ],
+    "c_kernel_rootkit_shadowguard": [
+      "s_objective_policy_intel_theft",
+      "s_long_term_access_priority"
+    ]
+  },
+  "assumption_to_frames": {
+    "s_objective_policy_intel_theft": [
+      "f_global_persistent_espionage"
+    ],
+    "s_long_term_access_priority": [
+      "f_global_persistent_espionage"
+    ]
+  }
+}

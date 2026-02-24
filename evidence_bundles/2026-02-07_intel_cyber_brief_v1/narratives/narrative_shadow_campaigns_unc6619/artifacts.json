@@ -1,0 +1,16 @@
+{
+  "artifacts": [
+    {
+      "artifact_id": "a_user_brief_2026_02_07",
+      "artifact_type": "user_provided_summary",
+      "uri_refs": [],
+      "anchors": [
+        "anchor:Global Cyber Espionage Campaign block"
+      ],
+      "integrity": {
+        "hash_algo": "sha256",
+        "hash": "hash_placeholder_user_text"
+      }
+    }
+  ]
+}

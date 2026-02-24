@@ -1,0 +1,17 @@
+{
+  "narrative_id": "n_shadow_campaigns_unc6619",
+  "label": "State-sponsored cyber-espionage: long-term government network access via kernel-level rootkit",
+  "state": "normalized",
+  "topic_tags": [
+    "cyberespionage",
+    "rootkit",
+    "government_networks",
+    "unit42",
+    "persistence"
+  ],
+  "scope": "cyber_intelligence",
+  "source_artifact_ids": [
+    "a_user_brief_2026_02_07"
+  ],
+  "notes": "Narrative is primarily analytic/technical; attribution and scale claims remain sensitive to source completeness."
+}

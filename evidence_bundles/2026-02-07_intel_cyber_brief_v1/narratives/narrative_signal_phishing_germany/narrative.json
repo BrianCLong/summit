@@ -1,0 +1,17 @@
+{
+  "narrative_id": "n_germany_signal_phishing",
+  "label": "State-linked Signal phishing targets officials and journalists via fake support chats",
+  "state": "seeded",
+  "topic_tags": [
+    "phishing",
+    "signal",
+    "social_engineering",
+    "europe",
+    "politicians",
+    "journalists"
+  ],
+  "scope": "counterintelligence_cyber",
+  "source_artifact_ids": [
+    "a_user_brief_2026_02_07"
+  ]
+}
