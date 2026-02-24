@@ -1,24 +1,12 @@
 {
-  "last_updated": "2026-02-07T02:40:00Z",
-  "revision_note": "Reinforced open-graph lineage docs baseline with governed-exception and MAESTRO alignment.",
+  "last_updated": "2026-02-08T03:20:48Z",
+  "revision_note": "Recorded inline comment intake deferral for repo assumptions baseline.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Refined evidence determinism guardrails and expanded timestamp denial coverage for hive subsumption lane-1 posture."
-    },
-    {
-      "id": "evidence-trail-peek",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Read-only evidence trail peek overlay, API endpoints, telemetry, and runbook documentation."
-    },
-    {
-      "id": "open-graph-lineage-agentic-twins-pr1",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Docs baseline for open-graph lineage + agentic twins standard, architecture, and repo assumptions."
+      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, evidence-first lane-1 posture, repo assumptions baseline refresh, and inline comment intake deferral."
     },
     {
       "id": "B",
