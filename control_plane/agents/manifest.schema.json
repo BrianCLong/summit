@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://summit.example.com/schemas/control-plane/agent-manifest.json",
+  "title": "Summit Agent Control Plane Manifest",
+  "description": "Canonical definition of a Governed AI Agent in the vendor-agnostic Summit Control Plane.",
+  "type": "object",
+  "required": [
+    "agent_id",
+    "version",
+    "identity",
+    "governance",
+    "runtime",
+    "evidence"
+  ],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique, immutable identifier for the agent."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the agent configuration."
+    },
+    "identity": {
+      "type": "object",
+      "required": ["name", "owner_id", "organization_id"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "owner_id": { "type": "string" },
+        "organization_id": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "required": ["classification", "policy_set"],
+      "properties": {
+        "classification": {
+          "type": "string",
+          "enum": ["public", "internal", "confidential", "restricted", "secret"],
+          "description": "Data sensitivity level the agent is authorized to handle."
+        },
+        "policy_set": {
+          "type": "string",
+          "description": "Reference to the OPA policy bundle governing this agent."
+        },
+        "risk_level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"],
+          "default": "medium"
+        },
+        "compliance_tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "required": ["model", "instructions", "capabilities"],
+      "properties": {
+        "model": {
+          "type": "object",
+          "required": ["provider", "name"],
+          "properties": {
+            "provider": { "type": "string", "enum": ["openai", "anthropic", "google", "meta", "fallback"] },
+            "name": { "type": "string" },
+            "parameters": {
+              "type": "object",
+              "properties": {
+                "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+                "top_p": { "type": "number" },
+                "max_tokens": { "type": "integer" },
+                "effort": {
+                  "type": "string",
+                  "enum": ["low", "medium", "high"],
+                  "description": "Reasoning effort knob (e.g., for GPT-5.3-Codex)."
+                },
+                "budget": {
+                  "type": "object",
+                  "properties": {
+                    "max_cost_usd": { "type": "number" },
+                    "max_steps": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "instructions": {
+          "type": "object",
+          "required": ["source", "sha256"],
+          "properties": {
+            "source": { "type": "string", "description": "Path to the primary system prompt file." },
+            "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Cryptographic hash of the instruction file content." }
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "permission"],
+            "properties": {
+              "name": { "type": "string", "description": "Name of the capability or tool." },
+              "permission": { "type": "string", "enum": ["read-only", "read-write", "admin", "sandbox-only"] },
+              "sandbox_profile": { "type": "string", "description": "Reference to a sandbox profile in control_plane/capabilities/." },
+              "timeout_ms": { "type": "integer", "default": 30000 }
+            }
+          }
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["log_level", "required_artifacts"],
+      "properties": {
+        "log_level": {
+          "type": "string",
+          "enum": ["info", "debug", "audit", "trace"],
+          "default": "audit"
+        },
+        "required_artifacts": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["trace", "decision_log", "tool_output", "policy_eval", "compaction_summary"] },
+          "description": "List of evidence types that must be persisted for every run."
+        },
+        "replay_mode": {
+          "type": "string",
+          "enum": ["deterministic", "best-effort", "none"],
+          "default": "deterministic"
+        }
+      }
+    }
+  }
+}

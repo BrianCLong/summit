@@ -1,0 +1,24 @@
+agents:
+  - agent_id: "regression-test-agent"
+    version: "1.0.0"
+    identity:
+      name: "Regression Test Agent"
+      owner_id: "qa-team"
+      organization_id: "summit-internal"
+    governance:
+      classification: "internal"
+      policy_set: "policies/test"
+    runtime:
+      model:
+        provider: "fallback"
+        name: "mock-model"
+      instructions:
+        source: "prompts/qa/regression-test-agent@v1.md"
+        sha256: "3aae3e9bf2e31b296683154b40176365a287a3466511ec7536a5565d7a41ba47"
+      capabilities:
+        - name: "test:ping"
+          permission: "read-only"
+    evidence:
+      log_level: "debug"
+      required_artifacts: ["trace"]
+      replay_mode: "none"
