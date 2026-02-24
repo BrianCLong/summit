@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added software-factory StrongDM subsumption plan scaffolding (standards, runbook, data handling, monitoring).",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added Neo4j Cypher plan cache governance guidance for LLM-generated queries.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -260,7 +260,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 16,
     "ga_blockers": []
   }
 }
