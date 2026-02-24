@@ -1,3 +1,4 @@
+import future.keywords
 package release_gates
 import future.keywords.if
 

@@ -21,6 +21,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Set up Node.js for evidence bundle generation
         uses: actions/setup-node@v4
         with:

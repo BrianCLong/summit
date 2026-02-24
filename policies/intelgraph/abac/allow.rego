@@ -1,18 +1,12 @@
-import future.keywords
-
 # ============================================================================
 # IntelGraph ABAC Authorization Policy
 # Main allow policy that orchestrates all authorization checks
 # ============================================================================
 
 package intelgraph.abac
-import future.keywords.contains
-
-import rego.v1
-
 import future.keywords.if
 import future.keywords.in
-import future.keywords.contains
+
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION

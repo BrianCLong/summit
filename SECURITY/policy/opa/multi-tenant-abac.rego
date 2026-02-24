@@ -1,3 +1,4 @@
+import future.keywords
 # Multi-Tenant ABAC (Attribute-Based Access Control) Policy
 # Implements IC-grade multi-tenancy with comprehensive access controls
 #

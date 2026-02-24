@@ -1,3 +1,4 @@
+import future.keywords
 package summit.release
 import future.keywords.if
 

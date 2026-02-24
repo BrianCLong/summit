@@ -1,13 +1,9 @@
 # IntelGraph GA-Core Authority Binding Policy
-import future.keywords.in
 # Addresses Foster & Starkey dissent requirements
 
 package intelgraph.authority
-import future.keywords.contains
 import future.keywords.if
 import future.keywords.in
-
-import future.keywords
 
 import rego.v1
 

@@ -1,3 +1,4 @@
+import future.keywords
 package images
 import future.keywords.if
 allow if {

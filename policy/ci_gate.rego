@@ -1,3 +1,4 @@
+import future.keywords
 package ci_gate
 import future.keywords.if
 import future.keywords.contains

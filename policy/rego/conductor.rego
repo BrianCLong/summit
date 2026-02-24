@@ -1,3 +1,4 @@
+import future.keywords
 package rego.conductor.authz
 import future.keywords.if
 

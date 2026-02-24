@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.rest
 import future.keywords.if
 

@@ -1,3 +1,4 @@
+import future.keywords
 # Tenant bundle simulation fixture
 # Validates cross-tenant denial and overlay override behavior.
 

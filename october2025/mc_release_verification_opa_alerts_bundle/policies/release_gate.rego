@@ -1,3 +1,4 @@
+import future.keywords
 package policy.release
 
 # Input shape example:

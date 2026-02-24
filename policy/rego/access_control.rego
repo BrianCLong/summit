@@ -1,3 +1,4 @@
+import future.keywords
 package rego.intelgraph.authz
 import future.keywords.if
 

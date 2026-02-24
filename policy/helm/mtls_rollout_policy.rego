@@ -1,3 +1,4 @@
+import future.keywords
 package helmchecks
 import future.keywords.if
 import future.keywords.contains

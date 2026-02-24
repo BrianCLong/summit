@@ -4,7 +4,10 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 
 @dataclass
@@ -14,6 +17,9 @@ class MismatchReport:
     violations: int = 0
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
+    if torch is None:
+        raise ImportError("torch is required for compute_mismatch_metrics")
+
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
         train_logprobs = train_vals.get("log_probs")
@@ -26,12 +32,9 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
         return MismatchReport()
 
     if torch is None:
-         # Fallback or raise error if torch is strictly required for this path
-         # For now, just return empty report or maybe raise specific error
-         # But based on the code, it uses .abs(), .max().item() which are torch tensor methods.
-         # Assuming if we have logprobs as tensors, we must have torch installed.
-         # But the test only calls it with empty dicts, so it returns early.
-         return MismatchReport()
+        # Fallback if torch is not available, though in production it should be.
+        # This allows unit tests to run in environments without torch.
+        return MismatchReport()
 
     delta = (train_logprobs - rollout_logprobs).abs()
 

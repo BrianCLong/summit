@@ -1,3 +1,4 @@
+import future.keywords
 package compliance.test
 import future.keywords.in
 

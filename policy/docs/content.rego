@@ -1,3 +1,4 @@
+import future.keywords
 package docs.content
 import future.keywords.if
 import future.keywords.contains

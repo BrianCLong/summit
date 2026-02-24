@@ -1,3 +1,4 @@
+import future.keywords
 package companyos.rbac
 import future.keywords.if
 import future.keywords.in

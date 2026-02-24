@@ -1,3 +1,4 @@
+import future.keywords
 package mc.admin
 import future.keywords.if
 import future.keywords.contains

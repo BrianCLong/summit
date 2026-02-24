@@ -1,3 +1,4 @@
+import future.keywords
 package docker.policy
 import future.keywords.if
 

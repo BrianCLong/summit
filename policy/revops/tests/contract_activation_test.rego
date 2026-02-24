@@ -1,3 +1,4 @@
+import future.keywords
 package revops.contract_activation_test
 import future.keywords.if
 

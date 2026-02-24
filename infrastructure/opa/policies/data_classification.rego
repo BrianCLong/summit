@@ -1,3 +1,4 @@
+import future.keywords
 package intelgraph.data_classification
 import future.keywords.if
 import future.keywords.in

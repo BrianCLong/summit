@@ -1,3 +1,4 @@
+import future.keywords
 package fixes.compartmentation
 import future.keywords.if
 

@@ -1,3 +1,4 @@
+import future.keywords
 package secrets
 import future.keywords.if
 import future.keywords.in

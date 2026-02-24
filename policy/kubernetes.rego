@@ -1,3 +1,4 @@
+import future.keywords
 package kubernetes
 import future.keywords.if
 import future.keywords.in

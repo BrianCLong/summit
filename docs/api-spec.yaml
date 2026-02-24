@@ -1,87 +1,92 @@
 openapi: 3.0.0
 info:
-  title: Summit API
-  version: 1.0.0
-  description: API for Summit, the IntelGraph agent platform.
+  title: IntelGraph Summit API
+  version: 1.1.0
+  description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
   contact:
-    name: IntelGraph Support
-    email: support@intelgraph.com
+    name: Platform Engineering
+    email: platform-eng@intelgraph.com
+
 servers:
-  - url: http://localhost:3000
-    description: Local development server
+  - url: /api
+    description: Base API path for most endpoints
+  - url: /
+    description: Root path for monitoring and health
+
 tags:
-  - name: Monitoring
+  - name: Observability
     description: System health and metrics
-  - name: Tenants
+  - name: Tenancy
     description: Tenant management
-  - name: Policy
-    description: Policy simulation and enforcement
-  - name: Export
-    description: Data export and compliance
+  - name: Governance
+    description: Policy and compliance
+  - name: Disclosure
+    description: Data export and transparency
+  - name: Provenance
+    description: Traceability and signatures
   - name: Maestro
-    description: Orchestration and workflow management
+    description: Agent orchestration
 
 paths:
   /monitoring/metrics:
     get:
-      operationId: getMetrics
-      summary: Get system metrics
-      description: Retrieve current system metrics including CPU, memory, and request counts.
-      tags: [Monitoring]
+      operationId: getMonitoringMetrics
+      summary: Prometheus metrics
+      description: Returns system metrics in Prometheus format.
+      tags: [Observability]
       responses:
         '200':
-          description: Metrics object
+          description: Prometheus metrics text
           content:
-            application/json:
+            text/plain:
               schema:
-                type: object
-                additionalProperties:
-                  type: number
+                type: string
 
   /health:
     get:
       operationId: getHealth
-      summary: Health check
-      description: Check the health status of the API and its dependencies.
-      tags: [Monitoring]
+      summary: System health check
+      description: Returns the current health status of the system and its dependencies.
+      tags: [Observability]
       responses:
         '200':
-          description: System is healthy
+          description: Healthy
           content:
             application/json:
               schema:
-                : '#/components/schemas/HealthStatus'
+                $ref: '#/components/schemas/HealthStatus'
         '503':
-          description: System is unhealthy
+          description: Unhealthy
           content:
             application/json:
               schema:
-                : '#/components/schemas/HealthStatus'
+                $ref: '#/components/schemas/HealthStatus'
 
   /api/tenants:
     post:
       operationId: createTenant
       summary: Create a new tenant
-      description: Provision a new tenant with the specified configuration.
-      tags: [Tenants]
+      description: Provisions a new tenant with the specified profile and tier.
+      tags: [Tenancy]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              : '#/components/schemas/CreateTenantRequest'
+              $ref: '#/components/schemas/CreateTenantRequest'
       responses:
         '201':
           description: Tenant created
           content:
             application/json:
               schema:
-                : '#/components/schemas/Tenant'
+                $ref: '#/components/schemas/Tenant'
+
     get:
       operationId: listTenants
-      summary: List all tenants
-      description: Retrieve a list of all registered tenants.
-      tags: [Tenants]
+      summary: List tenants (Admin only)
+      description: Returns a list of all tenants in the system.
+      tags: [Tenancy]
       responses:
         '200':
           description: List of tenants
@@ -90,54 +95,54 @@ paths:
               schema:
                 type: array
                 items:
-                  : '#/components/schemas/Tenant'
+                  $ref: '#/components/schemas/Tenant'
 
   /api/policy/simulate:
     post:
       operationId: simulatePolicy
-      summary: Simulate policy enforcement
-      description: Simulate a policy decision for a given subject, resource, and action.
-      tags: [Policy]
+      summary: Simulate a policy decision (Preflight)
+      description: Evaluates an action against policies without executing it.
+      tags: [Governance]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              : '#/components/schemas/PolicySimulationInput'
+              $ref: '#/components/schemas/PolicySimulationInput'
       responses:
         '200':
           description: Simulation result
           content:
             application/json:
               schema:
-                : '#/components/schemas/PolicySimulationResult'
+                $ref: '#/components/schemas/PolicySimulationResult'
 
   /api/export/bundles:
     post:
       operationId: createExportBundle
-      summary: Create an export bundle
-      description: Initiate a job to create an export bundle for a specific run.
-      tags: [Export]
+      summary: Create an Intel Bundle export
+      description: Initiates the generation of an Intel Bundle for a specific run.
+      tags: [Disclosure]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              : '#/components/schemas/CreateBundleRequest'
+              $ref: '#/components/schemas/CreateBundleRequest'
       responses:
         '202':
-          description: Export job started
+          description: Bundle generation started
           content:
             application/json:
               schema:
-                : '#/components/schemas/JobStatus'
+                $ref: '#/components/schemas/JobStatus'
 
   /api/receipts/{id}:
     get:
       operationId: getReceipt
-      summary: Get a receipt by ID
-      description: Retrieve a specific receipt by its unique identifier.
-      tags: [Export]
+      summary: Get a signed receipt by ID
+      description: Retrieves a specific signed provenance receipt.
+      tags: [Provenance]
       parameters:
         - name: id
           in: path
@@ -146,83 +151,20 @@ paths:
             type: string
       responses:
         '200':
-          description: Receipt details
+          description: Signed receipt
           content:
             application/json:
               schema:
-                : '#/components/schemas/Receipt'
-        '404':
-          description: Receipt not found
+                $ref: '#/components/schemas/Receipt'
 
   /api/maestro/route/preview:
     post:
       operationId: previewRoute
-      summary: Preview routing decision
-      description: Preview the candidates and estimated costs for a routing request.
+      summary: Preview routing candidates for a task
+      description: Lists potential agent/tool candidates for a given task.
       tags: [Maestro]
       requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                prompt:
-                  type: string
-      responses:
-        '200':
-          description: Routing candidates
-          content:
-            application/json:
-              schema:
-                : '#/components/schemas/RoutePreviewResponse'
-
-  /api/maestro/route/execute:
-    post:
-      operationId: executeRoute
-      summary: Execute routed request
-      description: Execute a request using the Maestro routing logic.
-      tags: [Maestro]
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                prompt:
-                  type: string
-                models:
-                  type: array
-                  items:
-                    type: string
-      responses:
-        '200':
-          description: Execution result
-          content:
-            application/json:
-              schema:
-                : '#/components/schemas/RouteExecuteResponse'
-
-  /api/maestro/web/interfaces:
-    get:
-      operationId: listWebInterfaces
-      summary: List available web interfaces
-      description: Retrieve a list of available web interfaces for orchestration.
-      tags: [Maestro]
-      responses:
-        '200':
-          description: List of interfaces
-          content:
-            application/json:
-              schema:
-                : '#/components/schemas/WebInterfacesResponse'
-
-  /api/maestro/web/run:
-    post:
-      operationId: runWebOrchestration
-      summary: Run web orchestration
-      description: Orchestrate a task across multiple web interfaces.
-      tags: [Maestro]
-      requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -230,35 +172,106 @@ paths:
               properties:
                 task:
                   type: string
+                context:
+                  type: object
       responses:
         '200':
-          description: Orchestration result
+          description: List of candidates
           content:
             application/json:
               schema:
-                : '#/components/schemas/OrchestrateWebResponse'
+                $ref: '#/components/schemas/RoutePreviewResponse'
+
+  /api/maestro/route/execute:
+    post:
+      operationId: executeRoute
+      summary: Execute a task with selected candidates
+      description: Executes a task using a specific selection of agent/tool candidates.
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task:
+                  type: string
+                selection:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Execution results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteExecuteResponse'
+
+  /api/maestro/web/interfaces:
+    get:
+      operationId: getWebInterfaces
+      summary: Get available web interfaces
+      description: Returns a list of available web search and content retrieval interfaces.
+      tags: [Maestro]
+      responses:
+        '200':
+          description: List of web interfaces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebInterfacesResponse'
+
+  /api/maestro/web/run:
+    post:
+      operationId: runWebOrchestration
+      summary: Orchestrate web search/content tasks
+      description: Performs complex web orchestration across multiple interfaces.
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task:
+                  type: string
+                interfaces:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Orchestration results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestrateWebResponse'
 
   /api/maestro/budgets:
     get:
       operationId: getBudgets
-      summary: Get budget status
-      description: Retrieve the current budget status and usage for the tenant.
+      summary: Get budget and usage information
+      description: Returns current resource consumption and remaining budgets.
       tags: [Maestro]
       responses:
         '200':
-          description: Budget details
+          description: Budget info
           content:
             application/json:
               schema:
-                : '#/components/schemas/BudgetsResponse'
+                $ref: '#/components/schemas/BudgetsResponse'
 
   /api/maestro/policy/check:
     post:
       operationId: checkPolicy
-      summary: Check policy compliance
-      description: Check if a proposed action complies with the configured policies.
+      summary: Check policy for an action
+      description: Validates if a specific action is permitted under current policies.
       tags: [Maestro]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -266,44 +279,46 @@ paths:
               properties:
                 action:
                   type: string
+                payload:
+                  type: object
       responses:
         '200':
           description: Policy check result
           content:
             application/json:
               schema:
-                : '#/components/schemas/PolicyCheckResponse'
+                $ref: '#/components/schemas/PolicyCheckResponse'
 
   /api/maestro/runs:
     post:
       operationId: createRun
-      summary: Start a new run
-      description: Initiate a new workflow run.
+      summary: Create and run a new pipeline
+      description: Starts a new Maestro orchestration run.
       tags: [Maestro]
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
-                workflowId:
+                userId:
+                  type: string
+                requestText:
                   type: string
       responses:
-        '201':
+        '200':
           description: Run created
           content:
             application/json:
               schema:
                 type: object
-                properties:
-                  runId:
-                    type: string
 
   /api/tenants/{tenantId}/workflows:
     post:
-      operationId: createWorkflow
-      summary: Create a workflow definition
-      description: Define a new workflow for a specific tenant.
+      operationId: createWorkflowDefinition
+      summary: Create or update a workflow definition
+      description: Defines a new reusable workflow for a tenant.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -316,20 +331,20 @@ paths:
         content:
           application/json:
             schema:
-              : '#/components/schemas/WorkflowDefinitionInput'
+              $ref: '#/components/schemas/WorkflowDefinitionInput'
       responses:
         '201':
-          description: Workflow created
+          description: Workflow definition created
           content:
             application/json:
               schema:
-                : '#/components/schemas/WorkflowDefinition'
+                $ref: '#/components/schemas/WorkflowDefinition'
 
   /api/tenants/{tenantId}/runs:
     post:
-      operationId: startTenantRun
-      summary: Start a run for a tenant
-      description: Start a workflow run within a specific tenant context.
+      operationId: startRun
+      summary: Start a new run from a workflow definition
+      description: Initiates a run of a previously defined workflow.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -342,20 +357,20 @@ paths:
         content:
           application/json:
             schema:
-              : '#/components/schemas/StartRunInput'
+              $ref: '#/components/schemas/StartRunInput'
       responses:
         '201':
           description: Run started
           content:
             application/json:
               schema:
-                : '#/components/schemas/Run'
+                $ref: '#/components/schemas/Run'
 
   /api/tenants/{tenantId}/runs/{runId}:
     get:
-      operationId: getRunDetails
-      summary: Get run details
-      description: Retrieve the details and status of a specific run.
+      operationId: getRun
+      summary: Get run details including receipts
+      description: Returns full status and data for a specific run.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -374,13 +389,13 @@ paths:
           content:
             application/json:
               schema:
-                : '#/components/schemas/Run'
+                $ref: '#/components/schemas/Run'
 
   /api/tenants/{tenantId}/runs/{runId}/approve:
     post:
       operationId: approveRun
       summary: Approve or reject a run/step
-      description: Submit an approval decision for a specific step in a run.
+      description: Submits a human-in-the-loop decision for a pending run step.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -398,20 +413,20 @@ paths:
         content:
           application/json:
             schema:
-              : '#/components/schemas/ApprovalInput'
+              $ref: '#/components/schemas/ApprovalInput'
       responses:
         '200':
           description: Approval processed
           content:
             application/json:
               schema:
-                : '#/components/schemas/ApprovalResult'
+                $ref: '#/components/schemas/ApprovalResult'
 
   /api/tenants/{tenantId}/runs/{runId}/events:
     get:
       operationId: getRunEvents
       summary: Get timeline events for a run
-      description: Retrieve the event timeline for a specific run.
+      description: Returns a stream of events representing the run's progress.
       tags: [Maestro]
       parameters:
         - name: tenantId
@@ -432,7 +447,7 @@ paths:
               schema:
                 type: array
                 items:
-                  : '#/components/schemas/RunEvent'
+                  $ref: '#/components/schemas/RunEvent'
 
 components:
   schemas:
@@ -583,7 +598,7 @@ components:
         candidates:
           type: array
           items:
-            : '#/components/schemas/Candidate'
+            $ref: '#/components/schemas/Candidate'
 
     RouteExecuteStep:
       type: object
@@ -619,7 +634,7 @@ components:
         steps:
           type: array
           items:
-            : '#/components/schemas/RouteExecuteStep'
+            $ref: '#/components/schemas/RouteExecuteStep'
 
     WebInterface:
       type: object
@@ -641,7 +656,7 @@ components:
         items:
           type: array
           items:
-            : '#/components/schemas/WebInterface'
+            $ref: '#/components/schemas/WebInterface'
 
     OrchestrateWebResponse:
       type: object
@@ -742,7 +757,7 @@ components:
 
     WorkflowDefinition:
       allOf:
-        - : '#/components/schemas/WorkflowDefinitionInput'
+        - $ref: '#/components/schemas/WorkflowDefinitionInput'
         - type: object
           properties:
             id:
@@ -788,7 +803,7 @@ components:
         receipts:
           type: array
           items:
-            : '#/components/schemas/Receipt'
+            $ref: '#/components/schemas/Receipt'
 
     ApprovalInput:
       type: object

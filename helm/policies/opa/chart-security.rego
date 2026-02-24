@@ -1,3 +1,4 @@
+import future.keywords
 package chart.security
 
 default allow = true

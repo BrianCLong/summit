@@ -1,3 +1,4 @@
+import future.keywords
 package summit.gates.migration
 import future.keywords.if
 import future.keywords.contains

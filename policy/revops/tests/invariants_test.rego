@@ -1,3 +1,4 @@
+import future.keywords
 package revops.invariants_test
 import future.keywords.if
 

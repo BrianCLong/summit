@@ -1,3 +1,4 @@
+import future.keywords
 package policy.tests.authz
 import future.keywords.if
 

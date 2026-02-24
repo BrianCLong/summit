@@ -1,3 +1,4 @@
+import future.keywords
 package graphql.authz
 import future.keywords.if
 

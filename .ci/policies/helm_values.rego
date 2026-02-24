@@ -1,3 +1,4 @@
+import future.keywords
 package helm.values
 
 deny[msg] {

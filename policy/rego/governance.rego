@@ -1,3 +1,4 @@
+import future.keywords
 package rego.governance
 import future.keywords.if
 import future.keywords.contains

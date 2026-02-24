@@ -1,3 +1,4 @@
+import future.keywords
 # Service Authorization Policy Tests
 # Unit tests for zero-trust service-to-service authorization
 

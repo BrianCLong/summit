@@ -14,14 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup- name: Setup pnpm
-        uses: actions/setup  uses: pnpm/action-setup@v4
-        uses: actions/setup  with:
-        uses: actions/setup    version: 10
         uses: actions/setup-node@v4
         with:
           node-version: 20

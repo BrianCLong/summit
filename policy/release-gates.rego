@@ -1,3 +1,4 @@
+import future.keywords
 package release
 import future.keywords.if
 

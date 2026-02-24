@@ -1,3 +1,4 @@
+import future.keywords
 package migrations
 import future.keywords.in
 import future.keywords.contains

@@ -1,3 +1,4 @@
+import future.keywords
 package dockerfile
 import future.keywords.if
 import future.keywords.in
