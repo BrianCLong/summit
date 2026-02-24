@@ -19,6 +19,8 @@ export interface SimpleFeedConfig extends CollectorConfig {
  * - HTTPS requests retain hostname-based TLS validation (SNI/certificate checks).
  */
 export class SimpleFeedCollector extends CollectorBase {
+  private static readonly MAX_REDIRECTS = 3;
+
   /**
    * Creates a collector instance with the web-scraping collection type.
    *
@@ -51,6 +53,7 @@ export class SimpleFeedCollector extends CollectorBase {
    * Security invariants:
    * - URL safety validation is mandatory before issuing fetch.
    * - HTTP transport always targets validated resolved IP with Host header preserved.
+   * - Redirect destinations are explicitly re-validated before any follow-up request.
    *
    * Failure modes:
    * - Throws if URL is missing, invalid, unsafe, or fetch response is non-2xx.
@@ -69,32 +72,63 @@ export class SimpleFeedCollector extends CollectorBase {
     console.log(`[SimpleFeedCollector] Fetching feed from ${url}`);
 
     try {
-      const resolvedIp = await validateSafeUrl(url);
-      const { fetchUrl, headers } = this.buildFetchTarget(url, resolvedIp);
+      let currentUrl = url;
+      let currentResolvedIp = await validateSafeUrl(currentUrl);
 
-      const response = await fetch(fetchUrl, { headers });
-      if (!response.ok) {
-        throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`);
+      for (let redirectCount = 0; redirectCount <= SimpleFeedCollector.MAX_REDIRECTS; redirectCount += 1) {
+        const { fetchUrl, headers } = this.buildFetchTarget(currentUrl, currentResolvedIp);
+        const response = await fetch(fetchUrl, { headers, redirect: 'manual' });
+
+        if (this.isRedirectStatus(response.status)) {
+          if (redirectCount === SimpleFeedCollector.MAX_REDIRECTS) {
+            throw new Error(`Redirect limit exceeded (${SimpleFeedCollector.MAX_REDIRECTS}) for feed URL`);
+          }
+
+          const location = response.headers.get('location');
+          if (!location) {
+            throw new Error('Redirect response missing Location header');
+          }
+
+          currentUrl = new URL(location, currentUrl).toString();
+          currentResolvedIp = await validateSafeUrl(currentUrl);
+          continue;
+        }
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch feed: ${response.status} ${response.statusText}`);
+        }
+
+        const text = await response.text();
+
+        // Process the data
+        const lines = text.split('\n');
+        const iocs = lines
+          .map(line => line.trim())
+          .filter(line => line && !line.startsWith('#'));
+
+        return iocs.map(ioc => ({
+          type: 'ip', // Simplified assumption for MVP
+          value: ioc,
+          source: currentUrl,
+          timestamp: new Date().toISOString()
+        }));
       }
 
-      const text = await response.text();
-
-      // Process the data
-      const lines = text.split('\n');
-      const iocs = lines
-        .map(line => line.trim())
-        .filter(line => line && !line.startsWith('#'));
-
-      return iocs.map(ioc => ({
-        type: 'ip', // Simplified assumption for MVP
-        value: ioc,
-        source: url,
-        timestamp: new Date().toISOString()
-      }));
+      throw new Error(`Redirect limit exceeded (${SimpleFeedCollector.MAX_REDIRECTS}) for feed URL`);
     } catch (error) {
       console.error(`[SimpleFeedCollector] Error fetching feed:`, error);
       throw error;
     }
+  }
+
+  /**
+   * Determines whether a response status code is an HTTP redirect.
+   *
+   * @param status HTTP response status code
+   * @returns `true` for 3xx redirect statuses, else `false`
+   */
+  private isRedirectStatus(status: number): boolean {
+    return status >= 300 && status < 400;
   }
 
   /**
@@ -107,6 +141,7 @@ export class SimpleFeedCollector extends CollectorBase {
    * Security invariants:
    * - For HTTP, network connection is pinned to `resolvedIp` while preserving Host.
    * - For HTTPS, hostname is preserved to keep TLS certificate validation intact.
+   * - Original port and IPv6 bracket notation are preserved in the Host header.
    *
    * Failure modes:
    * - Throws if URL parsing fails (invalid URL string).
@@ -123,8 +158,12 @@ export class SimpleFeedCollector extends CollectorBase {
     const headers: Record<string, string> = {};
 
     if (parsed.protocol === 'http:') {
-      const originalHost = parsed.hostname;
-      parsed.hostname = resolvedIp;
+      const originalHost = parsed.host;
+      const hostPortSuffix = parsed.port ? `:${parsed.port}` : '';
+      const networkHost = resolvedIp.includes(':')
+        ? `[${resolvedIp}]${hostPortSuffix}`
+        : `${resolvedIp}${hostPortSuffix}`;
+      parsed.host = networkHost;
       headers.Host = originalHost;
       return { fetchUrl: parsed.toString(), headers };
     }

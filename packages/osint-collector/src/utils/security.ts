@@ -167,6 +167,11 @@ function checkIp(ip: string): void {
       const cParts = canonical.split(':');
       const firstHex = parseInt(cParts[0], 16);
 
+      // Site-local (deprecated but non-routable): fec0::/10
+      if ((firstHex & 0xffc0) === 0xfec0) {
+        throw new Error(`Unsafe IP address blocked: ${ip}`);
+      }
+
       // Unique Local: fc00::/7 => fcxx or fdxx
       if ((firstHex & 0xfe00) === 0xfc00) {
         throw new Error(`Unsafe IP address blocked: ${ip}`);
