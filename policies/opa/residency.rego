@@ -26,6 +26,7 @@ allow {
 
 # Top-level decision with shadow support
 package composer.decision
+import rego.v1
 
 import data.composer.residency as r
 

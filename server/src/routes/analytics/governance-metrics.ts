@@ -81,9 +81,9 @@ const parseTimeRange = (req: Request): TimeRange => {
   const now = new Date();
   const defaultStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000); // 7 days ago
 
-  const start = req.query.start ? new Date(req.query.start as string) : defaultStart;
-  const end = req.query.end ? new Date(req.query.end as string) : now;
-  const granularity = (req.query.granularity as TimeRange['granularity']) || 'day';
+  const start = ((req.query.start as string) as string) ? new Date(((req.query.start as string) as string) as string) : defaultStart;
+  const end = ((req.query.end as string) as string) ? new Date(((req.query.end as string) as string) as string) : now;
+  const granularity = (((req.query.granularity as string) as string) as TimeRange['granularity']) || 'day';
 
   return { start, end, granularity };
 };
@@ -189,7 +189,7 @@ router.get(
     try {
       const principal = (req as any).principal;
       const timeRange = parseTimeRange(req);
-      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+      const limit = ((req.query.limit as string) as string) ? parseInt(((req.query.limit as string) as string) as string, 10) : 10;
 
       const envelope = await metricsService.getPolicyEffectiveness(
         principal.tenantId,

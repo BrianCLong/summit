@@ -20,6 +20,8 @@ allow {
 }
 
 # Wrapper decision
+package composer.decision_cmk
+import rego.v1
 
 decision := {
   "policy": "cmk",

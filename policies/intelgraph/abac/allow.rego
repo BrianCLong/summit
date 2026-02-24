@@ -4,6 +4,7 @@
 # ============================================================================
 
 package intelgraph.abac
+import rego.v1
 
 import future.keywords.contains
 

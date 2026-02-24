@@ -74,7 +74,7 @@ router.post(
       return res.status(403).json({ error: 'POLICY_HOT_RELOAD is disabled' });
     }
 
-    const toVersion = (req.query.toVersion as string) || req.body?.toVersion;
+    const toVersion = (((req.query.toVersion as string) as string) as string) || req.body?.toVersion;
     if (!toVersion) {
       return res.status(400).json({ error: 'toVersion is required' });
     }

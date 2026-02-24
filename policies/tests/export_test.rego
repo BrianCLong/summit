@@ -1,8 +1,5 @@
 package intelgraph.export
-import future.keywords.if
-import future.keywords.in
-
-import future.keywords.in
+import rego.v1
 
 import future.keywords.every
 

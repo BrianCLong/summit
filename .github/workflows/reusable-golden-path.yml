@@ -123,8 +123,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x ./opa
+          curl -L -o opa_bin_bin_bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x ./opa_bin_bin_bin
 
       - name: Pull image and get config for policy check
         run: |
@@ -133,7 +133,7 @@ jobs:
 
       - name: Evaluate OPA policy
         run: |
-          ./opa eval --fail \
+          ./opa_bin_bin_bin eval --fail \
             --data zero-trust/policies/opa/deployment.rego \
             --input image-config.json \
             'data.docker.policy.deny'

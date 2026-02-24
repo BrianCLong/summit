@@ -2,10 +2,11 @@
 # Enforces legal authority requirements for sensitive actions
 
 package intelgraph.warrant
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
 import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 # =============================================================================
 # Main Decision Rules

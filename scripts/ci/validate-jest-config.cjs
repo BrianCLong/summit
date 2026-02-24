@@ -34,8 +34,6 @@ function checkTsConfig(filePath) {
 
   try {
     const content = fs.readFileSync(filePath, 'utf8');
-    // Simple JSON parse. If comments exist, this will fail.
-    // Assuming standard JSON for now to avoid regex complexity.
     const config = JSON.parse(content);
 
     const compilerOptions = config.compilerOptions || {};
@@ -87,30 +85,14 @@ function checkJestConfig(filePath) {
     return;
   }
 
-  try {
-    let config;
-    try {
-      config = require(path.resolve(filePath));
-    } catch (e) {
-      // Fallback if require fails (e.g. imports not available)
-      const content = fs.readFileSync(filePath, 'utf8');
-      // Naive check: looks for 'ts-jest' inside a globals block
-      // This regex matches "globals: { ... 'ts-jest'" roughly
-      if (/globals:\s*\{[\s\S]*?['"]ts-jest['"]/.test(content)) {
-         error(`${filePath}: Using deprecated ts-jest globals syntax. Use transform options instead.`);
-      }
-      log(`Validated (static): ${filePath}`);
-      return;
-    }
+  const content = fs.readFileSync(filePath, 'utf8');
 
-    if (config.globals && config.globals['ts-jest']) {
-      error(`${filePath}: Using deprecated ts-jest globals syntax. Use transform options instead.`);
-    }
-
-    log(`Validated: ${filePath}`);
-  } catch (e) {
-    warn(`${filePath}: Could not validate completely: ${e.message}`);
+  // Check for deprecated globals syntax
+  if (content.includes("globals:") && content.includes("'ts-jest'")) {
+    error(`${filePath}: Using deprecated ts-jest globals syntax. Use transform options instead.`);
   }
+
+  log(`Validated: ${filePath}`);
 }
 
 // Check pnpm-workspace.yaml for duplicates

@@ -1,8 +1,5 @@
 package summit.provenance.gate
-import future.keywords.if
-import future.keywords.in
-
-import future.keywords.if
+import rego.v1
 
 # Default deny
 default allow = false
