@@ -9,9 +9,6 @@ def fail(msg: str) -> None:
     print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
     raise SystemExit(1)
 
-def warn(msg: str) -> None:
-    print(f"[verify_evidence] WARN: {msg}", file=sys.stderr)
-
 def load(p: Path):
     try:
         return json.loads(p.read_text(encoding="utf-8"))
@@ -24,80 +21,71 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items", [])
+    items = idx.get("items", {})
 
-    normalized_items = []
+    # Normalize items to a dict: {evd_id: files_list}
+    normalized_items = {}
 
-    if isinstance(items, dict):
-        for k, v in items.items():
-            if isinstance(v, dict):
-                # Ensure evidence_id is set
-                if "evidence_id" not in v:
-                    v["evidence_id"] = k
-                normalized_items.append(v)
-            elif isinstance(v, list):
-                normalized_items.append({"evidence_id": k, "files": v})
-    elif isinstance(items, list):
-        normalized_items = items
+    if isinstance(items, list):
+        for item in items:
+            if "evidence_id" not in item:
+                continue
+            evd_id = item["evidence_id"]
+            # Convert files dict/list to list of paths
+            files_entry = item.get("files", {})
+            file_list = []
+            if isinstance(files_entry, dict):
+                file_list = list(files_entry.values())
+            elif isinstance(files_entry, list):
+                file_list = files_entry
+            normalized_items[evd_id] = file_list
+    elif isinstance(items, dict):
+        for evd_id, meta in items.items():
+            if isinstance(meta, list):
+                normalized_items[evd_id] = meta
+            elif isinstance(meta, dict):
+                # Handle nested structure if any, or skip if legacy mismatch
+                if "files" in meta:
+                    normalized_items[evd_id] = meta["files"]
+                else:
+                    continue
     else:
-        fail("evidence/index.json 'items' must be a list or dict")
+        fail("evidence/index.json items must be a list or dict")
 
     if not normalized_items:
-        fail("evidence/index.json must contain non-empty items")
+        fail("evidence/index.json contains no valid items")
 
-    # Filter out items that look like dummy test items if needed, or just validate what's there
+    for evd_id, files in normalized_items.items():
+        base = ROOT # Assume relative to root by default for now
 
-    for item in normalized_items:
-        evd_id = item.get("evidence_id")
-        if not evd_id:
-            continue
-
-        files_val = item.get("files")
-        file_paths = []
-        base = ROOT
-
-        if isinstance(files_val, dict):
-            file_paths = list(files_val.values())
-        elif isinstance(files_val, list):
-            file_paths = files_val
-        else:
-            continue
-
-        # Optional: check if legacy path style
-        if "path" in item and not file_paths:
-             # This handles the case in the OLD verify_evidence.py logic
-             # meta = dict with "path"
-             base = ROOT / item["path"]
-             file_paths = item.get("files", [])
-
-        for fn in file_paths:
+        for fn in files:
             fp = base / fn
-            # Ignore template files or examples which might not exist in verification context
-            if "templates" in str(fn):
-                continue
-
             if not fp.exists():
-                # Check for ignore directories logic from memory/previous context
-                # "The scripts/verify_evidence.py script requires IGNORE_DIRS..."
-                # But this is tools/ci/verify_evidence.py.
-                # Use warning to be safe against existing repo rot
-                warn(f"{evd_id} missing file: {fp}")
-                continue
+                fail(f"{evd_id} missing file: {fp}")
 
-            if fn.endswith("report.json"):
-                report = load(fp)
-                if report.get("evidence_id") != evd_id:
-                    warn(f"{evd_id} report.json evidence_id mismatch: {report.get('evidence_id')} != {evd_id}")
+        if any(name.endswith("report.json") for name in files):
+            report_path = base / next(name for name in files if name.endswith("report.json"))
+            report = load(report_path)
+            # Only enforce ID match if report actually has an ID
+            # Also skip if the file is in a 'templates' directory
+            if "templates" not in str(report_path) and report.get("evidence_id") and report.get("evidence_id") != evd_id:
+                fail(f"{evd_id} report.json evidence_id mismatch")
 
-            if fn.endswith("metrics.json"):
-                metrics = load(fp)
-                if metrics.get("evidence_id") != evd_id:
-                     warn(f"{evd_id} metrics.json evidence_id mismatch")
+        if any(name.endswith("metrics.json") for name in files):
+            metrics_path = base / next(name for name in files if name.endswith("metrics.json"))
+            metrics = load(metrics_path)
+            # Only enforce ID match if metrics actually has an ID
+            if "templates" not in str(metrics_path) and metrics.get("evidence_id") and metrics.get("evidence_id") != evd_id:
+                fail(f"{evd_id} metrics.json evidence_id mismatch")
 
-            if fn.endswith("stamp.json"):
-                stamp = load(fp)
-                if stamp.get("evidence_id") != evd_id:
-                     warn(f"{evd_id} stamp.json evidence_id mismatch")
+        if any(name.endswith("stamp.json") for name in files):
+            stamp_path = base / next(name for name in files if name.endswith("stamp.json"))
+            stamp = load(stamp_path)
+            # Only enforce ID match if stamp actually has an ID
+            if "templates" not in str(stamp_path) and stamp.get("evidence_id") and stamp.get("evidence_id") != evd_id:
+                fail(f"{evd_id} stamp.json evidence_id mismatch")
+            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at", "timestamp", "retrieved_at")):
+                fail(f"{evd_id} stamp.json missing generated time field")
 
     print("[verify_evidence] OK")
 

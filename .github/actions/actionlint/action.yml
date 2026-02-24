@@ -1,0 +1,13 @@
+name: 'Actionlint'
+description: 'Lint GitHub Actions workflows with actionlint'
+inputs:
+  version:
+    description: 'Version of actionlint to use'
+    default: '1.6.26'
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) ${{ inputs.version }}
+        ./actionlint -color
+      shell: bash

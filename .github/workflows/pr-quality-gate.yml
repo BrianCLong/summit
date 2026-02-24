@@ -16,15 +16,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -38,15 +37,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -60,9 +58,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
@@ -74,6 +69,9 @@ jobs:
 
       - name: Validate LongRunJob Specs (dry-run)
         run: node scripts/ci/validate-longrun-job.mjs
+
+    # NOTE: ga-risk-gate job removed - referenced workflow file does not exist
+    # TODO: Re-enable when ga-risk-gate.yml is created
 
   security-scan:
     name: Vulnerability and Security Scan
@@ -93,30 +91,18 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        # Correct args: NAME VERSION OUTPUT_DIR
-        run: bash scripts/generate-sbom.sh summit-platform "${{ github.sha }}" artifacts/sbom
+        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
         env:
-          # The script generates multiple files. We pick the main one if we know it or check dir.
-          # Policy check likely expects a specific file.
-          # Based on script: ${ARTIFACT_NAME}-main-${VERSION}.cdx.json
-          SBOM_FILE: artifacts/sbom/summit-platform-main-${{ github.sha }}.cdx.json
-        run: |
-          # Ensure the expected file exists or find one
-          if [ ! -f "$SBOM_FILE" ]; then
-             SBOM_FILE=$(ls artifacts/sbom/*.cdx.json | head -n 1 || echo "")
-          fi
-          if [ -n "$SBOM_FILE" ]; then
-             node scripts/sbom-policy-check.mjs
-          else
-             echo "No SBOM file found to check"
-          fi
+          SBOM_FILE: artifacts/sbom/sbom.json
+        run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
-          path: artifacts/sbom/
+          path: artifacts/sbom/sbom.json
           retention-days: 14
+

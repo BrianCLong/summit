@@ -1,7 +1,7 @@
 package composer.decision_cmk
-
 import future.keywords
 
+# Wrapper decision
 decision := {
   "policy": "cmk",
   "mode": input.mode,

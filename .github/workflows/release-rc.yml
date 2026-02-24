@@ -103,7 +103,8 @@ jobs:
           node-version: "20"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4      - name: Install dependencies
+        uses: pnpm/action-setup@v4 # v4
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run release:ready
@@ -305,7 +306,7 @@ jobs:
             --arg verify_result "${{ needs.verify.result }}" \
             --arg guard_result "${{ needs.promotion-guard.result }}" \
             '{
-              version: $version,
+
               pipeline: $pipeline,
               generated_at: $generated_at,
               rc_tag: $rc_tag,

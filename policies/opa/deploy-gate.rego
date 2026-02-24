@@ -1,7 +1,5 @@
 package maestro.deploy
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
+import future.keywords
 
 # Allow dev deploys only from maintainers and CI bots
 allow {

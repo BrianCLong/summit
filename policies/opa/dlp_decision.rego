@@ -1,7 +1,7 @@
 package composer.decision_dlp
-
 import future.keywords
 
+# Shadow-able wrapper decision
 decision := {
   "policy": "dlp",
   "mode": input.mode,
