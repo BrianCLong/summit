@@ -1,105 +1,99 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 
-// Determinism gate: evidence artifacts must be stable and timestamp-free outside stamp.json.
-
-const indexPath = path.resolve('evidence/index.json');
-
-const timestampKeys = new Set([
+const forbiddenTimestampKeys = [
   'timestamp',
-  'timestamps',
-  'generated_at',
-  'created_at',
-  'updated_at',
+  'createdAt',
+  'updatedAt',
   'time',
-  'date'
-]);
-
-function fail(message) {
-  console.error(message);
-  process.exit(1);
-}
+];
 
 function readJson(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(raw);
+  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
 
-function findTimestampKey(value, currentPath = []) {
-  if (Array.isArray(value)) {
-    for (let i = 0; i < value.length; i += 1) {
-      const found = findTimestampKey(value[i], currentPath.concat(String(i)));
-      if (found) {
-        return found;
+function loadSchema(ajv, schemaPath) {
+  const schema = readJson(schemaPath);
+  return ajv.compile(schema);
+}
+
+export function verifyEvidence({ rootDir = process.cwd() } = {}) {
+  const evidenceDir = path.join(rootDir, 'artifacts', 'evidence');
+  const schemaDir = path.join(evidenceDir, 'schemas');
+  const ajv = new Ajv({ allErrors: true, strict: true });
+  addFormats(ajv);
+
+  const indexPath = path.join(evidenceDir, 'index.json');
+  const indexSchemaPath = path.join(schemaDir, 'index.schema.json');
+  const index = readJson(indexPath);
+  const validateIndex = loadSchema(ajv, indexSchemaPath);
+
+  if (!validateIndex(index)) {
+    const error = new Error('EVIDENCE_INDEX_INVALID');
+    error.details = validateIndex.errors;
+    throw error;
+  }
+
+  const schemaMap = new Map([
+    ['report.json', 'report.schema.json'],
+    ['metrics.json', 'metrics.schema.json'],
+    ['stamp.json', 'stamp.schema.json'],
+  ]);
+
+  for (const entry of index.evidence) {
+    for (const rel of entry.files) {
+      const fullPath = path.join(rootDir, rel);
+      if (!fs.existsSync(fullPath)) {
+        const error = new Error('EVIDENCE_FILE_MISSING');
+        error.details = { id: entry.id, file: rel };
+        throw error;
+      }
+
+      if (!rel.endsWith('stamp.json')) {
+        const raw = fs.readFileSync(fullPath, 'utf8');
+        for (const key of forbiddenTimestampKeys) {
+          if (raw.includes(`"${key}"`)) {
+            const error = new Error('NONDETERMINISTIC_FIELD_OUTSIDE_STAMP');
+            error.details = { id: entry.id, file: rel, key };
+            throw error;
+          }
+        }
+      }
+
+      const basename = path.basename(rel);
+      const schemaName = schemaMap.get(basename);
+      if (schemaName) {
+        const validateFile = loadSchema(
+          ajv,
+          path.join(schemaDir, schemaName),
+        );
+        const payload = readJson(fullPath);
+        if (!validateFile(payload)) {
+          const error = new Error('EVIDENCE_FILE_INVALID');
+          error.details = { id: entry.id, file: rel, errors: validateFile.errors };
+          throw error;
+        }
       }
     }
-    return null;
   }
 
-  if (value && typeof value === 'object') {
-    for (const [key, child] of Object.entries(value)) {
-      if (timestampKeys.has(key)) {
-        return currentPath.concat(key).join('.');
-      }
-      const found = findTimestampKey(child, currentPath.concat(key));
-      if (found) {
-        return found;
-      }
-    }
-  }
-
-  return null;
+  return { ok: true };
 }
 
-if (!fs.existsSync(indexPath)) {
-  fail('missing evidence/index.json');
-}
-
-const index = readJson(indexPath);
-
-if (!index || typeof index !== 'object' || !index.evidence) {
-  fail('evidence/index.json missing evidence map');
-}
-
-const entries = Object.values(index.evidence);
-
-for (const entry of entries) {
-  if (!entry || typeof entry !== 'object' || !entry.files) {
-    fail('evidence/index.json has invalid entry');
-  }
-
-  const { report, metrics, stamp } = entry.files;
-
-  if (!report || !metrics || !stamp) {
-    fail(`evidence entry missing report/metrics/stamp: ${entry.evidence_id ?? 'unknown'}`);
-  }
-
-  const reportPath = path.resolve(report);
-  const metricsPath = path.resolve(metrics);
-  const stampPath = path.resolve(stamp);
-
-  if (!fs.existsSync(reportPath)) {
-    fail(`missing report artifact: ${report}`);
-  }
-  if (!fs.existsSync(metricsPath)) {
-    fail(`missing metrics artifact: ${metrics}`);
-  }
-  if (!fs.existsSync(stampPath)) {
-    fail(`missing stamp artifact: ${stamp}`);
-  }
-
-  const reportJson = readJson(reportPath);
-  const metricsJson = readJson(metricsPath);
-
-  const reportTimestamp = findTimestampKey(reportJson);
-  if (reportTimestamp) {
-    fail(`timestamp field found in report.json: ${report} (${reportTimestamp})`);
-  }
-
-  const metricsTimestamp = findTimestampKey(metricsJson);
-  if (metricsTimestamp) {
-    fail(`timestamp field found in metrics.json: ${metrics} (${metricsTimestamp})`);
+function main() {
+  try {
+    verifyEvidence();
+    console.log('EVIDENCE_OK');
+  } catch (error) {
+    console.error(error.message, error.details ?? null);
+    process.exit(1);
   }
 }
 
-console.log('evidence verifier: OK');
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main();
+}
