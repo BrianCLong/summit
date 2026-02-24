@@ -1,29 +1,20 @@
 version: 1
 prompts:
-  - id: implement-ui-fuzz-probe
+  - id: imputed-intent-23rd-order
     version: v1
-    path: prompts/implement/ui-fuzz-probe@v1.md
-    sha256: 92cb1f09e3a18b9e2c454afa484fa837cdd33f75b1945d8cf5edcedb53ef01c6
-    description: Implement Bombadil-inspired deterministic UI fuzz probe, CI smoke, and drift monitoring.
+    path: prompts/analysis/imputed-intent-23rd-order@v1.md
+    sha256: 387dfbe283069b40de2d241e82f92a048267b8fec6c9834ff4d3df8176c70008
+    description: Deliver a governance-first 23rd-order imputed intention artifact and roadmap tracking update.
     scope:
       paths:
-        - tools/ui_fuzz/
-        - scripts/monitoring/bombadil-ui-fuzz-drift.ts
-        - docs/standards/bombadil-ui-fuzz.md
-        - docs/security/data-handling/bombadil-ui-fuzz.md
-        - docs/ops/runbooks/bombadil-ui-fuzz.md
+        - docs/analysis/imputed-intent-23rd-order.md
         - docs/roadmap/STATUS.json
-        - .github/workflows/ui-fuzz.yml
-        - .github/workflows/ui-fuzz-drift.yml
-        - package.json
-        - prompts/implement/ui-fuzz-probe@v1.md
+        - prompts/analysis/imputed-intent-23rd-order@v1.md
         - prompts/registry.yaml
       domains:
         - documentation
-        - tooling
-        - ci
-        - security
         - governance
+        - analysis
     verification:
       tiers_required:
         - C
