@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T03:20:49Z",
-  "revision_note": "Added verifier unit tests and fixtures for lane-1 evidence schema enforcement.",
+  "last_updated": "2026-02-07T02:40:00Z",
+  "revision_note": "Reinforced open-graph lineage docs baseline with governed-exception and MAESTRO alignment.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -13,6 +13,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Read-only evidence trail peek overlay, API endpoints, telemetry, and runbook documentation."
+    },
+    {
+      "id": "open-graph-lineage-agentic-twins-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Docs baseline for open-graph lineage + agentic twins standard, architecture, and repo assumptions."
     },
     {
       "id": "B",
@@ -57,7 +63,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Evidence schema contracts + verifier scaffolding added for lane-1 agentic lineage gates. Evidence schema guidance now references Summit Readiness Assertion. Verifier unit tests + fixtures added for evidence schema enforcement."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
       "id": "promptspec-foundation-lane1",

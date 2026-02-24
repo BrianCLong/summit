@@ -1,35 +1,40 @@
-# Repo Assumptions — ai-platform-daily-2026-02-07
+# Repo Assumptions and Verification Ledger
 
-**Status:** Intentionally constrained pending in-repo validation.
-**Item Slug:** ai-platform-daily-2026-02-07
+This ledger records verified repository facts and declared assumptions. Any item marked
+"Deferred pending verification" is not treated as authoritative until inspected.
 
-## Verified (from provided path map)
+## Verified
 
-- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
-- Canonical paths:
-  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
-  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
-  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
-  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
-- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
+| Area | Evidence | Notes |
+| --- | --- | --- |
+| Package manager | `package.json` specifies `pnpm@10.0.0` | pnpm is authoritative for installs. |
+| Core scripts | `package.json` includes `test`, `test:e2e`, `lint`, `typecheck` | Standard commands exist for CI and local validation. |
+| Compose files | Multiple `docker-compose*.yml` files exist in repo root | Compose is available for dev and infra stacks. |
+| Primary zones | `client/`, `server/`, `packages/`, `apps/` directories exist | Monorepo structure is present. |
+| Readiness authority | `docs/SUMMIT_READINESS_ASSERTION.md` exists | Governs readiness baseline and exceptions. |
 
-## Assumed (must validate in repo)
+## Assumed (Deferred pending verification)
 
-- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
-- Existing policy engine format under `.github/policies/` (OPA vs custom).
-- Evidence schema conventions (filenames, JSON structure).
-- Current CI job names inside the workflows (exact `name:` fields).
+| Area | Assumption | Source |
+| --- | --- | --- |
+| API paths | `src/api/{graphql,rest}` exists | Provided path map. |
+| Agent runtime | `src/agents` exists with agent execution surfaces | Provided path map. |
+| Connectors | `src/connectors` exists with ingestion stubs | Provided path map. |
+| GraphRAG | `src/graphrag` exists with graph abstractions | Provided path map. |
+| Tests | `tests/` contains unit test suites | Provided path map. |
+| Docs | `docs/{architecture,api,security}` contain primary docs | Provided path map. |
+| CI workflows | `.github/workflows/*` contains PR/CI workflows | Provided path map. |
 
-## Must-not-touch list (until validated)
+## Must-Not-Touch (Deferred pending verification)
 
-- `.github/workflows/codeql.yml`
-- Any production deployment workflows (if present)
-- DB migration directories (if present)
-- Secrets / encrypted configs
+- Auth, prod deploy, and secrets surfaces are treated as protected until governance review is
+  completed and explicitly recorded.
+- Any exception is recorded as a governed exception with rollback guidance.
 
-## Validation checklist (before PRs merge)
+## Validation Checklist
 
-- Confirm `.github/workflows/*` filenames + required checks in branch protection.
-- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
-- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
-- Confirm test runner + assertion libs (`pnpm test:*`).
+- Confirm `pnpm` scripts and test commands remain accurate.
+- Confirm Neo4j wiring and existing GraphRAG abstractions.
+- Confirm agent run logging and events to avoid duplication.
+- Confirm CI workflow names and required checks.
+- Identify protected files and annotate the must-not-touch list.
