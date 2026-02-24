@@ -27,3 +27,17 @@ export type EvidenceStamp = {
   version: string;
   date?: string; // ISO timestamp allowed in stamp
 };
+
+export enum EvidenceArtifact {
+  REPORT = 'report',
+  METRICS = 'metrics',
+  STAMP = 'stamp',
+}
+
+export type ScopedEvidence = {
+  domain: string;
+  scopeId: string;
+  version: string;
+  report: Record<string, any>;
+  metrics: Record<string, any>;
+};
