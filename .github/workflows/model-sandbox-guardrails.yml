@@ -1,0 +1,32 @@
+name: Model Sandbox Guardrails
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/policies/model-sandbox/**'
+      - '.github/scripts/model-sandbox/**'
+      - 'tools/model-sandbox/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '.github/policies/model-sandbox/**'
+      - '.github/scripts/model-sandbox/**'
+      - 'tools/model-sandbox/**'
+
+jobs:
+  policy-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Run Fixture Tests
+        run: node .github/scripts/model-sandbox/fixtures_test.mjs

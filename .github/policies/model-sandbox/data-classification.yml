@@ -1,0 +1,12 @@
+version: 1
+classifications:
+  public:
+    description: "Freely available data."
+    sandbox_requirements: "Standard"
+  internal:
+    description: "Data for company use only."
+    sandbox_requirements: "Hardened"
+  restricted:
+    description: "Highly sensitive data."
+    sandbox_requirements: "Ultra-Hardened"
+default_classification: restricted

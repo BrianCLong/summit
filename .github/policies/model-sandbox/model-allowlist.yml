@@ -1,0 +1,15 @@
+version: 1
+models:
+  - name: example-model
+    source: "local://weights/example-model.bin"
+    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855" # Empty file SHA256 for example
+    provenance:
+      url: "https://huggingface.co/example/model"
+      commit: "main"
+      checksum_file: "checksums.txt"
+  - name: dummy-model
+    source: "tools/model-sandbox/fixtures/dummy-weights.bin"
+    sha256: "b58219b4b6a89631f7734fcb0b8bef1f8f78ee6f7c186d4866b6b055c7be944f"
+    provenance:
+      url: "local"
+      commit: "none"
