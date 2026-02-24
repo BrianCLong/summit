@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T04:58:21Z",
-  "revision_note": "Added Sprint +1 governed delivery plan for Incident Hub, Runbook Center, Tenant Console, and metering.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added GDELT GKG 23rd-order delivery plan entry and refreshed repo validation checklist.",
   "initiatives": [
     {
       "id": "sprint-plus1-incident-hub-runbook-tenant-console",
@@ -101,7 +101,25 @@
       "id": "switchboard-openclaw-wedge-strategy",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published governed consumer wedge and white-label strategy for Switchboard with receipts-first and verified skills posture."
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+    },
+    {
+      "id": "summit-ga-preflight-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
+    },
+    {
+      "id": "summit-pr-stack-sequencer-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "gdelt-gkg-23rd-order-delivery",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published 23rd-order governed delivery plan for GDELT GKG integration with evidence-first posture and MAESTRO alignment."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -227,12 +245,6 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
-      "id": "io-front-run-defensive-rails",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Defensive front-run IO scope, dual-use prohibitions, and segment governance policy gates."
-    },
-    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -279,12 +291,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "summit-architecture-brief",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, acceptance criteria, and the governed personal-agent integration reference architecture."
     }
   ],
   "summary": {
@@ -292,7 +298,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 18,
     "ga_blockers": []
   }
 }
