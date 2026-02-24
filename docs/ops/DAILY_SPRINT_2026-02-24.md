@@ -104,3 +104,36 @@ enqueue fail https://github.com/BrianCLong/summit/actions/runs/22333120731/job/6
 **Completed:** Issue scan completed with current open issue set (#18597, #193).
 **In Progress:** PR #18623 checks are running; fail-state evidence captured.
 **Blocked:** Required checks currently failing (`Parity`, `check`, `enqueue`); merge readiness pending CI recovery.
+
+## Continuation Run 4 (2026-02-24T03:42:46Z)
+
+### Source: gh pr checks 18623 (latest snapshot)
+```text
+High-signal failures on latest commit include:
+- check (Repo Hygiene): https://github.com/BrianCLong/summit/actions/runs/22333185996/job/64619886325
+- Parity (aws): https://github.com/BrianCLong/summit/actions/runs/22333186148/job/64619887673
+- Parity (azure): https://github.com/BrianCLong/summit/actions/runs/22333186148/job/64619887649
+- Parity (gcp): https://github.com/BrianCLong/summit/actions/runs/22333186148/job/64619887660
+```
+
+### Root-Cause Evidence
+```text
+Repo Hygiene check failure:
+- CASE COLLISION DETECTED:
+  ['DEPENDENCY_DELTA.md', 'dependency_delta.md']
+  ['deps/DEPENDENCY_DELTA.md', 'deps/dependency_delta.md']
+
+Parity failures:
+- AWS: Credentials could not be loaded from any providers.
+- Azure: azure/login missing SERVICE_PRINCIPAL client-id and tenant-id.
+```
+
+### Continuation Actions
+- Verified collision files are present in repository root and `deps/` paths.
+- Verified no existing open issue matched the case-collision/parity-credential blockers.
+- Posted blocker summary on PR #18623 with run/job links.
+
+### Continuation Status
+**Completed:** Current CI fail-state triaged and documented with concrete root causes.
+**In Progress:** PR #18623 awaits upstream CI/repo hygiene remediation.
+**Blocked:** Merge readiness blocked by repo-level case-collision and parity credential failures.
