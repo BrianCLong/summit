@@ -6,7 +6,7 @@
       "id": "bgp-routing-resilience-hardening",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "BGP route-withdrawal runbook, BYOIP failover policy, multi-region/multi-ASN probe matrix, and prefix-automation guardrails with rollback gates."
+      "notes": "BGP route-withdrawal runbook, BYOIP failover policy, multi-region/multi-ASN probe matrix, prefix-automation guardrails with rollback gates, merge-blocking routing resilience CI checks, and routing-specific PagerDuty/Slack escalation wiring."
     },
     {
       "id": "saas-crash-2026-positioning-pack",

@@ -13,5 +13,9 @@ This policy is enforced automatically via CI.
 - scripts/ci/verify_required_checks.mjs
 - scripts/ci/governance-meta-gate.mjs
 
+## Required Context Additions
+- Routing resilience is now merge-blocking via required context `Routing Resilience Validation`
+  sourced from `.github/workflows/routing-resilience-check.yml`.
+
 ## Evidence
 - docs/ga/evidence/ci-governance/
