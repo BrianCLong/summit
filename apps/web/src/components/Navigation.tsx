@@ -13,6 +13,7 @@ import {
   History,
   LogOut,
   Command,
+  Activity,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -110,6 +111,14 @@ const navItems: NavItem[] = [
     href: '/reports',
     icon: FileBarChart as React.ComponentType<{ className?: string }>,
     resource: 'reports',
+    action: 'read',
+  },
+
+  {
+    name: 'RAG Health',
+    href: '/admin/rag-health',
+    icon: Activity as React.ComponentType<{ className?: string }>,
+    resource: 'admin',
     action: 'read',
   },
   {
