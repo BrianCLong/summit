@@ -1,0 +1,41 @@
+{
+  "skill": "summit-ga-preflight-hard-gate-auditor",
+  "inputs": {
+    "skill": "summit-ga-preflight-hard-gate-auditor",
+    "findings": [],
+    "requested": {
+      "network": false,
+      "shell": false,
+      "fs_write": false,
+      "credentials": false
+    }
+  },
+  "tool_calls": [],
+  "outputs": {
+    "findings": []
+  },
+  "diffs": {
+    "files": [
+      "deploy/compose/docker-compose.dev.yml",
+      "docs/roadmap/STATUS.json",
+      "skills/index.json",
+      "skills/registry/skills.lock.json",
+      "skills/registry/skills.manifest.json"
+    ],
+    "summary": "deploy/compose/docker-compose.dev.yml | 167 +++++++++++++++++++++++++---------\n docs/roadmap/STATUS.json              |  20 +++-\n skills/index.json                     |  10 ++\n skills/registry/skills.lock.json      |  58 ++++++++----\n skills/registry/skills.manifest.json  | 122 +++++++++++++++++++------\n 5 files changed, 282 insertions(+), 95 deletions(-)"
+  },
+  "checksums": {
+    "deploy/compose/docker-compose.dev.yml": "165b24f8a6f621a00676e2abcb2de105e82277a2e682c3ba24b9219fd20bd481",
+    "docs/roadmap/STATUS.json": "6a69bcb27a6810d9f626886369e43fe2b47fbe42eeeb0aa4128f3f6cc97216a3",
+    "skills/index.json": "93fe65a0b882ca39db9a0701071d581940012a8b10eb0c9e54ee0cca17432f66",
+    "skills/registry/skills.lock.json": "c84bdca4cce59e69a8c89083248b1c6e7f83b0d54f8324a59a74923d00e57f04",
+    "skills/registry/skills.manifest.json": "55defc21d1261974f90ddcc9573ad4a6f241412c477991f2175b03abc19d0f60"
+  },
+  "policy": {
+    "allow": false,
+    "denies": [
+      "OPA evaluation failed"
+    ]
+  },
+  "timestamp": "2026-02-07T22:59:59.113Z"
+}
