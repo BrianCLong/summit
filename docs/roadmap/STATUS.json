@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Added PR provenance + SBOM visibility workflow and policy-controller starter pack.",
+  "last_updated": "2026-02-08T00:39:27Z",
+  "revision_note": "Added Sigstore bundle-first evidence scaffolding and supply-chain policy guardrails.",
   "initiatives": [
+    {
+      "id": "sigstore-bundlefirst-foundation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Bundle-first Sigstore verification scaffolding, evidence schemas alignment, and supply-chain policy fixtures."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -241,12 +247,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "pr-provenance-sbom-visibility",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Keyless Sigstore signing + SPDX SBOM workflow with PR badge evidence and policy-controller starter pack."
     }
   ],
   "summary": {

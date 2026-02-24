@@ -1,0 +1,5 @@
+{
+  "evidence": {"result": "fail"},
+  "cosign": {"version": "3.0.4"},
+  "trust": {"pinned": true}
+}
