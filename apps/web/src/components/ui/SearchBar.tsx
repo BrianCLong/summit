@@ -1,6 +1,12 @@
 import * as React from 'react'
-import { Search, X, Command } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Search, X } from 'lucide-react'
+import { cn, isMac } from '@/lib/utils'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui'
 
 interface SearchBarProps {
   placeholder?: string
@@ -74,20 +80,26 @@ export function SearchBar({
         />
         <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
           {internalValue && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Clear search</span>
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Clear search</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           {showShortcut && !internalValue && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Command className="h-3 w-3" />
-              <span>K</span>
-            </div>
+            <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
+            </kbd>
           )}
         </div>
       </div>
