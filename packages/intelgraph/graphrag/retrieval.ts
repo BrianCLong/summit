@@ -1,5 +1,8 @@
 import { Driver, Session } from 'neo4j-driver';
 import { PathAssembler, GraphContext } from './path_assembler';
+import { TemporalGraphRAG } from './temporal/tg_rag';
+import { RelationIndex } from './temporal/relation_index';
+import { ChunkIndex } from './temporal/chunk_index';
 
 // Mock embedding function type
 type Embedder = (text: string) => Promise<number[]>;
@@ -61,5 +64,25 @@ export class GraphFirstRetrieval {
     // In production, this would embed 'text' and dot-product with queryVec.
     // Returning a mock score based on length for demonstration.
     return 0.5 + (Math.random() * 0.5);
+  }
+}
+
+/**
+ * Implements the "Temporal GraphRAG" retrieval strategy.
+ */
+export class TemporalGraphRAGRetrieval {
+  private tgrag: TemporalGraphRAG;
+
+  constructor(
+    private driver: Driver,
+    private embedder: Embedder,
+    relationIndex: RelationIndex,
+    chunkIndex: ChunkIndex
+  ) {
+    this.tgrag = new TemporalGraphRAG(relationIndex, chunkIndex, embedder);
+  }
+
+  async retrieve(query: string): Promise<{ context: string; evidenceId: string }> {
+    return this.tgrag.retrieveLocal(query);
   }
 }
