@@ -1,5 +1,30 @@
 version: 1
 prompts:
+  - id: daily-sprint-automation
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: ea9a057d5c44a8b3849b03aee67a805562aeaff76aabfad5adf169f683573388
+    description: Governed daily sprint loop for evidence-first ops logging and roadmap refresh.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_<YYYY-MM-DD>.md
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+        - agents/examples/DAILY_SPRINT_<YYYYMMDD>_RUN1.json
+      domains:
+        - operations
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: saas-crash-2026-positioning-pack
     version: v1
     path: prompts/positioning/saas-crash-2026@v1.md

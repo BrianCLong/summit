@@ -1,0 +1,48 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-automation",
+    "version": "v1",
+    "sha256": "ea9a057d5c44a8b3849b03aee67a805562aeaff76aabfad5adf169f683573388",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260224_RUN1.json"
+    ],
+    "domains": [
+      "operations",
+      "governance",
+      "documentation"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log created with evidence bundle and execution log.",
+    "Roadmap status updated with current timestamp and revision note.",
+    "Prompt registry entry recorded for daily sprint automation."
+  ],
+  "stop_conditions": [
+    "GitHub API connectivity blocks issue scan; record Governed Exception.",
+    "Repository write access unavailable."
+  ]
+}
