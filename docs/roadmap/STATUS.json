@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T03:30:10Z",
-  "revision_note": "Aligned Summit v4.1.15 architecture reference with readiness-language constraints.",
+  "last_updated": "2026-02-08T03:30:08Z",
+  "revision_note": "Expanded GA Control Room checklist with project definition, thread templates, and incident mode metadata guidance.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -235,6 +235,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "ga-control-room-codex",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Defined Summit GA Control Room project config, threads, and GA checklist/incident mode drafts in docs/ops."
     }
   ],
   "summary": {
