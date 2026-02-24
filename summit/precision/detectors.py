@@ -17,9 +17,8 @@ class MismatchReport:
     violations: int = 0
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
-    # If torch is unavailable, return empty report to prevent crashes
     if torch is None:
-        return MismatchReport()
+        raise ImportError("torch is required for compute_mismatch_metrics")
 
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
@@ -33,8 +32,15 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
         return MismatchReport()
 
     if torch is None:
-        # Fallback if torch is not available, though in production it should be.
-        # This allows unit tests to run in environments without torch.
+        # Fallback for environments without torch
+        import math
+        if isinstance(train_logprobs, (int, float)) and isinstance(rollout_logprobs, (int, float)):
+            delta = abs(train_logprobs - rollout_logprobs)
+            return MismatchReport(
+                max_abs_logprob_delta=float(delta),
+                mean_abs_logprob_delta=float(delta),
+                violations=0,
+            )
         return MismatchReport()
 
     delta = (train_logprobs - rollout_logprobs).abs()

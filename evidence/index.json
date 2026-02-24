@@ -10,6 +10,22 @@
       }
     },
     {
+      "evidence_id": "EVD-ATG-TECF-001",
+      "files": {
+        "report": "evidence/EVD-ATG-TECF-001/report.json",
+        "metrics": "evidence/EVD-ATG-TECF-001/metrics.json",
+        "stamp": "evidence/EVD-ATG-TECF-001/stamp.json"
+      }
+    },
+    {
+      "evidence_id": "EVD-ATG-GRAPH-001",
+      "files": {
+        "report": "evidence/EVD-ATG-GRAPH-001/report.json",
+        "metrics": "evidence/EVD-ATG-GRAPH-001/metrics.json",
+        "stamp": "evidence/EVD-ATG-GRAPH-001/stamp.json"
+      }
+    },
+    {
       "evidence_id": "EVD-002",
       "files": {
         "report": "evidence/report.json",

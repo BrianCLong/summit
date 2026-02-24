@@ -21,45 +21,26 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("items")
-    # Supports dictionary (legacy/strict) and list (array)
-    if isinstance(items, dict):
-        if not items:
-            fail("evidence/index.json must contain non-empty 'items' map")
-        iterator = items.items()
-    elif isinstance(items, list):
-        if not items:
-            fail("evidence/index.json must contain non-empty 'items' list")
-        iterator = ((i.get("evidence_id"), i) for i in items)
+    items_data = idx.get("items", {})
+    if isinstance(items_data, list):
+        items = {item["evidence_id"]: item for item in items_data if "evidence_id" in item}
+    elif isinstance(items_data, dict):
+        items = items_data
     else:
-        fail("evidence/index.json 'items' must be a list or map")
+        fail("evidence/index.json 'items' must be a map or a list")
 
-    for evd_id, meta in iterator:
-        if not evd_id:
-            continue
+    if not items:
+        fail("evidence/index.json must contain non-empty 'items'")
 
+    for evd_id, meta in items.items():
         if isinstance(meta, list):
-            # Legacy: value is list of files
             files = meta
             base = ROOT
-        elif isinstance(meta, dict):
-            # Object: can specify path, files, artifacts
-            if "path" in meta:
-                base = ROOT / meta["path"]
-            else:
-                base = ROOT
-
-            # Support both 'files' (dict or list) and 'artifacts' (list)
-            files_meta = meta.get("files", [])
-            if isinstance(files_meta, dict):
-                files = list(files_meta.values())
-            else:
-                files = files_meta
-
-            # Add artifacts if present
-            artifacts = meta.get("artifacts", [])
-            files.extend(artifacts)
+        elif isinstance(meta, dict) and "path" in meta:
+            base = ROOT / meta["path"]
+            files = meta.get("files", [])
         else:
+            # Skip legacy items or items not following the new schema
             continue
 
         for fn in files:
@@ -70,27 +51,21 @@ def main() -> None:
         if any(name.endswith("report.json") for name in files):
             report_path = base / next(name for name in files if name.endswith("report.json"))
             report = load(report_path)
-            # Only check if evidence_id is present in the file
-            eid = report.get("evidence_id")
-            if eid and eid != evd_id:
-                fail(f"{evd_id} report.json evidence_id mismatch (found {eid})")
+            if report.get("evidence_id") != evd_id:
+                fail(f"{evd_id} report.json evidence_id mismatch")
 
         if any(name.endswith("metrics.json") for name in files):
             metrics_path = base / next(name for name in files if name.endswith("metrics.json"))
             metrics = load(metrics_path)
-            eid = metrics.get("evidence_id")
-            if eid and eid != evd_id:
-                fail(f"{evd_id} metrics.json evidence_id mismatch (found {eid})")
+            if metrics.get("evidence_id") != evd_id:
+                fail(f"{evd_id} metrics.json evidence_id mismatch")
 
         if any(name.endswith("stamp.json") for name in files):
             stamp_path = base / next(name for name in files if name.endswith("stamp.json"))
             stamp = load(stamp_path)
-            eid = stamp.get("evidence_id")
-            if eid and eid != evd_id:
-                fail(f"{evd_id} stamp.json evidence_id mismatch (found {eid})")
-
-            # Check for timestamp
-            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at", "timestamp", "retrieved_at")):
+            if stamp.get("evidence_id") != evd_id:
+                fail(f"{evd_id} stamp.json evidence_id mismatch")
+            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
                 fail(f"{evd_id} stamp.json missing generated time field")
 
     print("[verify_evidence] OK")

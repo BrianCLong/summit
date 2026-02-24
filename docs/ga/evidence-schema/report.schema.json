@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Report Schema",
+  "type": "object",
+  "required": ["evidence_id", "area", "summary", "details"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "area": { "type": "string" },
+    "summary": { "type": "string" },
+    "details": { "type": "object" },
+    "status": { "type": "string", "enum": ["success", "failure", "partial"] }
+  }
+}
