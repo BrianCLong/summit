@@ -24,6 +24,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -45,6 +46,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -63,6 +65,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

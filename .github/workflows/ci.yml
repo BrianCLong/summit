@@ -41,6 +41,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version-file: .nvmrc
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -59,6 +60,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
@@ -80,6 +82,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
@@ -113,6 +116,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -164,6 +168,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests

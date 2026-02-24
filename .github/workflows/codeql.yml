@@ -61,6 +61,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies (monorepo workspaces)
         if: matrix.language == 'javascript-typescript'

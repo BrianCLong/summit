@@ -165,6 +165,53 @@ router.get('/simulations', (_req, res) => {
   res.json(narrativeSimulationManager.list());
 });
 
+import { neo } from '../db/neo4j.js';
+import { Neo4jNarrativeLoader } from '../narrative/adapters/neo4j-loader.js';
+
+router.get('/search-nodes', async (req, res) => {
+  try {
+    const q = req.query.q as string;
+    if (!q) {
+      res.json([]);
+      return;
+    }
+
+    const query = `
+      MATCH (n)
+      WHERE n:Actor OR n:Group OR n:Topic
+      AND toLower(n.name) CONTAINS toLower($q)
+      RETURN n.id AS id, n.name AS name, labels(n) AS labels
+      LIMIT 10
+    `;
+    const result = await neo.run(query, { q });
+    const nodes = result.records.map((record) => ({
+      id: record.get('id'),
+      name: record.get('name'),
+      labels: record.get('labels'),
+    }));
+    res.json(nodes);
+  } catch (error: any) {
+    res.status(500).json({ error: 'failed-to-search', details: error.message });
+  }
+});
+
+router.get('/load-graph', async (req, res) => {
+  try {
+    const rootId = req.query.rootId as string;
+    const depth = parseInt(req.query.depth as string || '2', 10);
+
+    if (!rootId) {
+      res.status(400).json({ error: 'rootId is required' });
+      return;
+    }
+
+    const entities = await Neo4jNarrativeLoader.loadFromGraph(rootId, depth);
+    res.json(entities);
+  } catch (error: any) {
+    res.status(500).json({ error: 'failed-to-load-graph', details: error.message });
+  }
+});
+
 router.post('/simulations', (req, res) => {
   try {
     const payload = createSimulationSchema.parse(req.body ?? {});

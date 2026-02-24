@@ -345,7 +345,6 @@ describe('IngestService', () => {
             },
           ],
         })
-        .mockResolvedValueOnce({ rows: [] })
         .mockResolvedValueOnce({
           rows: [
             {
@@ -361,8 +360,7 @@ describe('IngestService', () => {
               last_seen: new Date('2026-01-01T00:00:00.000Z'),
             },
           ],
-        })
-        .mockResolvedValueOnce({ rows: [] });
+        });
 
       await (ingestService as any).syncToNeo4j('test-tenant', 'prov-1');
 

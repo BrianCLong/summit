@@ -262,7 +262,7 @@ export function registerApi(app: FastifyInstance) {
       'mcp.session.id': session.id,
     });
     void recordEvent(session.recordingId, 'in', 'jsonrpc', {
-      method: rpc.method,
+      method,
       args,
     });
 

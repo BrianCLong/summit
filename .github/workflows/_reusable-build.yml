@@ -75,6 +75,7 @@ jobs:
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Get pnpm store path
         id: pnpm-store
