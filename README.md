@@ -145,6 +145,15 @@ See: [Agent Development](docs/agents/README.md)
 
 ## 🧪 Testing
 
+### Golden Path (Required for PRs)
+
+Run the full verification suite (Lint + Test + E2E):
+
+```bash
+make golden-path
+```
+
+
 ```bash
 # Run all tests
 pnpm test

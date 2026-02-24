@@ -81,12 +81,10 @@ dev:
 	pnpm run dev
 
 test:   ## Run unit tests (node+python)
-	pnpm -w run test:unit || true && $(VENV_BIN)/pytest || true
+	pnpm -w run test:unit && $(VENV_BIN)/pytest
 
 lint:   ## Lint js/ts + python
-	pnpm -w exec eslint . || true
-	$(VENV_BIN)/ruff check .
-	$(VENV_BIN)/mypy src
+	pnpm run lint
 
 format: ## Format code
 	pnpm -w exec prettier -w . || true
@@ -136,15 +134,14 @@ supplychain.attest.local: ## Build image and export attestations locally (no pus
 	@echo "Verifying attestations..."
 	@find out/image -name "*.json" -exec python3 hack/supplychain/verify_attestation_shape.py {} \;
 
-smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
-	@echo "Waiting for services to start..."
-	@sleep 45
-	@echo "Checking UI health..."
-	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
-	@echo "Checking Gateway health..."
-	@curl -s -f http://localhost:8080/healthz > /dev/null && echo "✅ Gateway is up" || (curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1))
-	@echo "Smoke test complete."
+golden-path: ## Run the full golden path verification (CI standard)
+	@./scripts/golden-path.sh
 
+golden-path-quick: ## Run fast golden path checks (lint + unit tests)
+	@make lint
+	@make test
+
+smoke: golden-path ## Alias for golden-path (legacy compat)
 rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)
 	@if [ -z "$(v)" ]; then echo "Error: Version v is required (e.g., v=v3.0.0)"; exit 1; fi
 	@if [ -z "$(env)" ]; then echo "Error: Environment env is required (e.g., env=prod)"; exit 1; fi
