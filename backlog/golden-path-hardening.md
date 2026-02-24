@@ -22,19 +22,24 @@ Derived from Bug Bash 20250922 and Golden Path verification.
 
 ## Medium Priority (Reliability)
 
-### [BB-004] Smoke Test Timeout Configuration
+### [BB-004] Smoke Test Timeout Configuration ✅ RESOLVED
 **Severity**: Minor
 **Area**: Testing
+**Status**: ✅ **RESOLVED (2026-02-06)**
 **Description**: `scripts/smoke-test.js` has a hardcoded 30s timeout. On slower machines (or cold CI starts), this causes false negatives.
-**Proposed Fix**:
-- Make timeout configurable via `SMOKE_TIMEOUT` env var.
-- Increase default to 60s.
+**Resolution**:
+- Made timeout configurable via `SMOKE_TIMEOUT` env var
+- Increased default to 60s (from 30s)
+- Added to `scripts/smoke-test.js`
 
 ## Low Priority (Papercuts)
 
-### [BB-005] Empty Health Check Results
+### [BB-005] Empty Health Check Results ✅ RESOLVED
 **Severity**: Minor
 **Area**: Testing
+**Status**: ✅ **RESOLVED (2026-02-06)**
 **Description**: `health-check-results.json` is generated but empty.
-**Proposed Fix**:
-- Ensure the smoke test script writes actual health payload to this file on failure.
+**Resolution**:
+- Smoke test now writes comprehensive health check results to `health-check-results.json`
+- Includes: timestamp, environment, config, summary (total/passed/failed), and per-test details
+- Results written on both success and failure for debugging

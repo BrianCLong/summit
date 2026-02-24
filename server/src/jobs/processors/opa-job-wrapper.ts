@@ -23,7 +23,7 @@ const OPA_ENABLED = process.env.OPA_JOBS_ENABLED !== 'false';
 const OPA_TIMEOUT_MS = parseInt(process.env.OPA_JOB_TIMEOUT_MS ?? '5000', 10);
 const FAIL_CLOSED = process.env.NODE_ENV === 'production';
 
-interface JobPolicyContext {
+export interface JobPolicyContext {
   allow: boolean;
   reason?: string;
   obligations?: string[];
@@ -163,11 +163,11 @@ function logPolicyDecision(
  * @param processor - The original job processor function
  * @returns A wrapped processor that checks policy before execution
  */
-export function withOpaPolicy<T = unknown>(
+export function withOpaPolicy<T = unknown, R = unknown>(
   queueName: string,
-  processor: (job: Job<T>, policyContext: JobPolicyContext) => Promise<void>,
-): (job: Job<T>) => Promise<void> {
-  return async (job: Job<T>): Promise<void> => {
+  processor: (job: Job<T>, policyContext: JobPolicyContext) => Promise<R>,
+): (job: Job<T>) => Promise<R> {
+  return async (job: Job<T>): Promise<R> => {
     const policyContext = await evaluateJobPolicy(queueName, job as Job);
 
     if (!policyContext.allow) {
@@ -181,8 +181,8 @@ export function withOpaPolicy<T = unknown>(
       throw new Error(`JOB_POLICY_DENIED: ${policyContext.reason ?? 'Access denied by policy'}`);
     }
 
-    // Execute the original processor
-    await processor(job, policyContext);
+    // Execute the original processor and return its result
+    return processor(job, policyContext);
   };
 }
 

@@ -20,7 +20,7 @@
   "dependencies": {
     "@intelgraph/sandbox-tenant-profile": "workspace:*",
     "@intelgraph/datalab-service": "workspace:*",
-    "@apollo/server": "^4.10.0",
+    "@apollo/server": "^4.13.0",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
     "express": "^4.18.2",

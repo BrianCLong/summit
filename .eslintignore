@@ -1,5 +1,7 @@
 _worktrees/**
 node_modules/**
+node_modules_*/**
+.pnpm-store/**
 dist/**
 build/**
 coverage/**

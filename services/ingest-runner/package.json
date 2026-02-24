@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@intelgraph/ingest-connector-sdk": "workspace:*",
+    "@intelgraph/connector-sdk": "workspace:*",
+    "@intelgraph/connectors": "workspace:*",
     "bullmq": "^5.0.0",
     "ioredis": "^5.0.0",
     "nats": "^2.19.0",

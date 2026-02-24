@@ -71,7 +71,7 @@ export class IntentCompiler {
     const { target_entities, constraints, evidence_budget, ordering } = spec;
 
     // 1. Where Clause (Entity Binding)
-    const entityIds = target_entities.map(e => e.id);
+    const entityIds = target_entities.map((e: { id: string }) => e.id);
     const params: Record<string, any> = {
       startIds: entityIds
     };
@@ -79,7 +79,7 @@ export class IntentCompiler {
     // 2. Traversal
     const hops = constraints?.max_hops || 1;
     const relTypes = constraints?.relationship_types
-      ? `:${constraints.relationship_types.map(t => `\`${t}\``).join('|')}`
+      ? `:${constraints.relationship_types.map((t: string) => `\`${t}\``).join('|')}`
       : '';
 
     // 3. Construct Query

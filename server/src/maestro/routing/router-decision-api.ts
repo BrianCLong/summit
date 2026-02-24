@@ -81,10 +81,10 @@ router.post(
   policyActionGate({
     action: 'override',
     resource: 'maestro_run',
-    resolveResourceId: (req) => req.params.runId,
+    resolveResourceId: (req) => req.params.runId as string,
     buildResourceAttributes: (req) => ({
-      runId: req.params.runId,
-      nodeId: req.params.nodeId,
+      runId: req.params.runId as string,
+      nodeId: req.params.nodeId as string,
     }),
   }),
   requirePermission('routing:override'),
