@@ -127,6 +127,7 @@ Governed Exception: Issue scan deferred pending GitHub API connectivity.
 - Evidence capture attempted for PR list and PR details; deferred pending GitHub API connectivity.
 - Issue scan deferred pending GitHub API connectivity (Governed Exception).
 - Roadmap status update applied (see docs/roadmap/STATUS.json).
+- Registered daily sprint prompt in prompts/automation/daily-sprint@v1.md and prompts/registry.yaml.
 
 ### Validation Log
 
