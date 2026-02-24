@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-WIDESEEK-d72f20eb-535f-4232-b98a-d1414d416ff8",
+  "metrics": {
+    "duration_seconds": 0.00012063980102539062,
+    "subagents": 3,
+    "tool_calls": 0
+  }
+}

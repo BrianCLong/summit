@@ -1,0 +1,53 @@
+name: Enforce PR Classification
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, labeled, unlabeled]
+
+jobs:
+  enforce-classification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for classification label or conventional commit title
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            const title = pr.title;
+            const classificationLabels = ['patch', 'minor', 'major'];
+
+            // Check if any classification label is present
+            let hasClassification = labels.some(l => classificationLabels.includes(l));
+
+            // Auto-infer from title if no classification label is present
+            if (!hasClassification) {
+              const inferredLabels = [];
+              if (title.startsWith('feat:')) inferredLabels.push('minor');
+              else if (title.startsWith('fix:')) inferredLabels.push('patch');
+              else if (title.startsWith('docs:')) inferredLabels.push('patch');
+              else if (title.startsWith('style:')) inferredLabels.push('patch');
+              else if (title.startsWith('refactor:')) inferredLabels.push('patch');
+              else if (title.startsWith('perf:')) inferredLabels.push('patch');
+              else if (title.startsWith('test:')) inferredLabels.push('patch');
+              else if (title.startsWith('build:')) inferredLabels.push('patch');
+              else if (title.startsWith('ci:')) inferredLabels.push('patch');
+              else if (title.startsWith('chore:')) inferredLabels.push('patch');
+              else if (title.startsWith('revert:')) inferredLabels.push('patch');
+              else if (title.startsWith('ops:')) inferredLabels.push('patch');
+              else if (title.startsWith('hotfix:')) inferredLabels.push('patch');
+
+              if (title.includes('BREAKING CHANGE') || title.includes('!')) inferredLabels.push('major');
+
+              // If we inferred something, we consider it valid (in a real scenario we might auto-label, here we just pass)
+              if (inferredLabels.length > 0) {
+                 hasClassification = true;
+                 console.log("Inferred classification: " + inferredLabels.join(', '));
+              }
+            }
+
+            if (!hasClassification) {
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:, chore:, etc.).");
+            }

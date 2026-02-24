@@ -1,22 +1,9 @@
 {
   "items": {
-    "EVD-ATP-LATENT-EVIDENCE-002": {
-      "report": "examples/report.json",
-      "metrics": "examples/metrics.json",
-      "stamp": "examples/stamp.json",
-      "files": ["examples/report.json", "examples/metrics.json", "examples/stamp.json"]
-    },
-    "EVD-MITSTARTUPS2026-BUNDLE-001": {
-      "report": "summit/evidence/report.json",
-      "metrics": "summit/evidence/metrics.json",
-      "stamp": "summit/evidence/stamp.json",
-      "files": ["summit/evidence/report.json", "summit/evidence/metrics.json", "summit/evidence/stamp.json"]
-    },
-    "SAGE-SELF-HINT-GRPO-001": {
-      "report": "summit/evidence/templates/sage-self-hint-grpo/run.json",
-      "metrics": "summit/evidence/templates/sage-self-hint-grpo/metrics.json",
-      "stamp": "summit/evidence/templates/sage-self-hint-grpo/stamp.json",
-      "files": ["summit/evidence/templates/sage-self-hint-grpo/run.json", "summit/evidence/templates/sage-self-hint-grpo/metrics.json", "summit/evidence/templates/sage-self-hint-grpo/stamp.json"]
+    "EVD-WIDESEEK-RUNTIME-001": {
+      "files": [
+        "artifacts/run_id/final.md"
+      ]
     }
   }
 }

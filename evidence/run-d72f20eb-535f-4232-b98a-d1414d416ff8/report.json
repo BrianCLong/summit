@@ -1,0 +1,12 @@
+{
+  "evidence_id": "EVD-WIDESEEK-d72f20eb-535f-4232-b98a-d1414d416ff8",
+  "summary": "WideSeek R1 Run",
+  "environment": "offline-fixtures",
+  "backend": "mock-llm",
+  "artifacts": [
+    "final.md",
+    "metrics.json",
+    "stamp.json"
+  ],
+  "query": "Test Query"
+}

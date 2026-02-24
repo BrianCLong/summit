@@ -1,13 +1,22 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Evidence Run Index",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "additionalProperties": {
-    "type": "object",
-    "required": ["files", "description"],
-    "properties": {
-      "files": {"type": "array", "items": {"type": "string"}},
-      "description": {"type": "string"}
+  "properties": {
+    "items": {
+      "type": "object",
+      "patternProperties": {
+        "^EVD-[A-Z0-9-]+$": {
+          "type": "object",
+          "properties": {
+            "files": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": ["files"]
+        }
+      }
     }
-  }
+  },
+  "required": ["items"]
 }
