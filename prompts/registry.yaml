@@ -1059,22 +1059,30 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: naio-narrative-signals-plan
+  - id: sigstore-rekor-cose-cosign-bundle-2026-02-07
     version: v1
-    path: prompts/narrative/naio-integration-plan@v1.md
-    sha256: cfea269e026fb2fd6fbaacb3b0519c339a1eeb2333396326e51d177a0f884a52
-    description: Draft NAIO narrative signals integration plan and update roadmap status.
+    path: prompts/security/sigstore-rekor-cose-cosign-bundle-2026-02-07@v1.md
+    sha256: abbb99f48a902da8d7772403d940bed914b3b383bbe378000610633293323169
+    description: Implement deterministic Sigstore fail-closed smoke harness + docs for Cosign/Rekor advisories.
     scope:
       paths:
-        - docs/narrative-signals/naio-integration-plan.md
+        - src/agents/supplychain/sigstore_smoke/
+        - tests/sigstore/
+        - artifacts/sigstore/
+        - docs/standards/sigstore-rekor-cose-cosign-bundle-2026-02-07.md
+        - docs/security/data-handling/sigstore-rekor-cose-cosign-bundle-2026-02-07.md
+        - docs/ops/runbooks/sigstore-rekor-cose-cosign-bundle-2026-02-07.md
         - docs/roadmap/STATUS.json
-        - prompts/narrative/naio-integration-plan@v1.md
+        - repo_assumptions.md
+        - prompts/security/sigstore-rekor-cose-cosign-bundle-2026-02-07@v1.md
         - prompts/registry.yaml
-        - agents/examples/NAIO_NARRATIVE_SIGNALS_PLAN_20260207.json
+        - agents/examples/SIGSTORE_SMOKE_TASK_20260207.json
       domains:
+        - security
+        - supply-chain
+        - testing
         - documentation
         - governance
-        - narrative-signals
     verification:
       tiers_required:
         - C

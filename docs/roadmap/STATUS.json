@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:55:32Z",
-  "revision_note": "Added sigstore bundle verification action, policy gate, and evidence schema update.",
+  "last_updated": "2026-02-07T01:00:00Z",
+  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -9,10 +9,10 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-      "id": "graphrag-scope-firewall-ga-spec",
+      "id": "sigstore-rekor-cose-cosign-bundle-2026-02-07",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published GA spec for GraphRAG scope isolation, inference firewalls, claim lifetimes, evidence bundles, and PR acceptance criteria in docs/standards."
+      "notes": "Fail-closed Sigstore negative-case smoke harness + evidence schema + data handling/runbook docs."
     },
     {
       "id": "B",
@@ -248,7 +248,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 21,
     "ga_blockers": []
   }
 }

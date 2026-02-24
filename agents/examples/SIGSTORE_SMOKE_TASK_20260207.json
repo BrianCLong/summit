@@ -1,0 +1,49 @@
+{
+  "task_id": "SIGSTORE_SMOKE_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sigstore-rekor-cose-cosign-bundle-2026-02-07",
+    "version": "v1",
+    "sha256": "abbb99f48a902da8d7772403d940bed914b3b383bbe378000610633293323169",
+    "path": "prompts/security/sigstore-rekor-cose-cosign-bundle-2026-02-07@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/agents/supplychain/sigstore_smoke/",
+      "tests/sigstore/",
+      "artifacts/sigstore/",
+      "docs/standards/sigstore-rekor-cose-cosign-bundle-2026-02-07.md",
+      "docs/security/data-handling/sigstore-rekor-cose-cosign-bundle-2026-02-07.md",
+      "docs/ops/runbooks/sigstore-rekor-cose-cosign-bundle-2026-02-07.md",
+      "docs/roadmap/STATUS.json",
+      "repo_assumptions.md",
+      "prompts/security/sigstore-rekor-cose-cosign-bundle-2026-02-07@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/SIGSTORE_SMOKE_TASK_20260207.json"
+    ],
+    "domains": ["security", "supply-chain", "testing", "documentation", "governance"],
+    "exclusions": [".github/workflows", "secrets", "release"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "artifacts/sigstore/smoke.report.json",
+      "docs/standards/sigstore-rekor-cose-cosign-bundle-2026-02-07.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Sigstore smoke harness emits deterministic summit.sigstore.smoke.v1 evidence.",
+    "Negative-case smoke tests fail closed on mismatch acceptance and Rekor 500 scenarios.",
+    "Roadmap status updated with the item slug."
+  ],
+  "stop_conditions": [
+    "Required evidence artifacts cannot be generated.",
+    "Scope requires modifying protected workflows or secrets."
+  ],
+  "dependencies": ["docs/SUMMIT_READINESS_ASSERTION.md"]
+}

@@ -1,40 +1,45 @@
 # Repo Reality Check — GitHub Files Changed Governance (2026-02-05)
 
-## Evidence Bundle (UEF)
-- CODEOWNERS files are present at `/CODEOWNERS` and `/.github/CODEOWNERS`.
-- Branch protection and required-check policy references exist in `/.github/branch-protection-rules.md`, `/.github/required-checks.yml`, and `docs/ci/REQUIRED_CHECKS_POLICY.yml`.
-- Branch protection reconciliation workflow exists at `/.github/workflows/branch-protection-reconcile.yml`.
-- Workflows live under `/.github/workflows/` with guidance in `/.github/workflows/README.md`.
-- Governance documentation and CI standards live in `docs/ci/` and `docs/governance/`.
-- Evidence and artifact stores are present at `/artifacts`, `/evidence`, and `/release-artifacts`.
-- Core top-level directories include `/docs`, `/scripts`, `/tests`, and `/test`.
+## Structure Validation
 
-## Verified Repo Conventions (Present State)
-- **CODEOWNERS locations:** `/CODEOWNERS` and `/.github/CODEOWNERS` are authoritative inputs for ownership review rules.
-- **Required checks policy:** `docs/ci/REQUIRED_CHECKS_POLICY.yml` and `docs/ci/REQUIRED_CHECKS_POLICY.json` define policy expectations; `/.github/required-checks.yml` and `/.github/branch-protection-rules.md` record operational settings.
-- **Branch protection drift controls:** `/.github/workflows/branch-protection-reconcile.yml` is the existing reconciliation entrypoint.
-- **Workflow governance:** `/.github/workflows/README.md` documents required checks and modification cautions.
-- **Evidence storage:** `/artifacts`, `/evidence`, and `/release-artifacts` are established evidence stores.
+| Plan Path | Actual Path | Status | Notes |
+|Str|Str|Str|Str|
+| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
+| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
+| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
+| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
+| `docs/` | `docs/` | ✅ Exists | Root directory. |
+| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
+| `tests/` | `tests/` | ✅ Exists | Root directory. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
 
-## Assumptions (Deferred Pending Validation)
-- **Check name alignment:** exact check names in GitHub branch protection settings should be confirmed against `/.github/required-checks.yml` and `docs/ci/REQUIRED_CHECKS_POLICY.yml` before enforcement changes.
-- **Protected path policy source-of-truth:** a dedicated policy file for protected paths is not yet observed and should be established if enforcement is required.
+## Component Mapping
 
-## Must-Not-Touch List (Governed Default for This Work)
-- `/artifacts/**`
-- `/evidence/**`
-- `/release-artifacts/**`
-- `/docs/generated/**`
+| Planned Component | Proposed Location | Actual Location / Action |
+|Str|Str|Str|
+| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
+| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
+| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
+| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
 
-## Recommended Next Checks (Deterministic)
-1. Confirm CODEOWNERS coverage scopes against `/CODEOWNERS` and `/.github/CODEOWNERS`.
-2. Compare required checks in GitHub settings vs `docs/ci/REQUIRED_CHECKS_POLICY.yml` and `/.github/required-checks.yml`.
-3. Validate evidence artifact schemas and naming conventions in `/artifacts` and `/evidence` before adding new reports.
+## Constraints & Checks
 
-## Check Name Candidates (Present State)
-- `policy/branch-protection-reconcile` (from `/.github/workflows/branch-protection-reconcile.yml`)
-- `release/rc` (from `/.github/workflows/release-rc.yml`)
-- `release/ga` (from `/.github/workflows/release-ga-pipeline.yml`)
+* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
+* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
+* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
+* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
 
-## Decision
-Summit will treat CODEOWNERS + branch protection parity as enforceable only after the check name alignment step is complete.
+## Sigstore Smoke Harness Assumptions (2026-02-07)
+
+* **Assumed**: Node/TypeScript monorepo with `pnpm`, CI workflows in `.github/workflows/`, tests under `tests/`.
+* **Assumed must-not-touch**: release/deploy workflows, CodeQL workflow, secret handling.
+* **Validate before merge**:
+  1. Identify the workflow and script entrypoint for Summit’s supply-chain verification gate.
+  2. Confirm whether Cosign/Rekor are vendored binaries or container-based tools.
+  3. Verify artifact upload conventions and evidence schema expectations.
+
+## Next Steps
+
+1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
+2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+3. Implement **Sigstore negative-case smoke harness** under `src/agents/supplychain/sigstore_smoke/`.
