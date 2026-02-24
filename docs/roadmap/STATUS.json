@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
+  "last_updated": "2026-02-24T17:19:56Z",
   "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
   "initiatives": [
     {
@@ -217,14 +217,20 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "route-opt-deterministic-roam",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic tool-driven route optimization module with schema validation, reproducibility hashes, and CI drift monitoring."
     }
   ],
   "summary": {
-    "rc_ready": 8,
-    "partial": 2,
-    "incomplete": 0,
-    "not_started": 5,
-    "total": 17,
+    "rc_ready": 4,
+    "partial": 0,
+    "incomplete": 20,
+    "not_started": 1,
+    "total": 25,
     "ga_blockers": []
   }
 }

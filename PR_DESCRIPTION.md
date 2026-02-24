@@ -1,64 +1,87 @@
-# PR: Consolidate Prompt Metadata and Add Jest Network Teardown Shim
+# PR: feat(route-opt): add deterministic ROAM module with CI reproducibility gates
 
-Consolidate prompt metadata so ONE prompt hash accurately represents the full, combined scope of the current PR, including Jest network teardown shim addition, governed test updates, and LFS exception updates.
+## Summary
 
-## Changes
+This PR introduces the Route Optimization Agent Module (ROAM), a deterministic planner for optimizing routes. It includes:
+- Core planner logic with stable hashing for inputs and outputs.
+- Schema validation for route plans.
+- CI scripts for schema compliance and drift monitoring.
+- Integration with the `agents` and `scripts` directories.
 
-### 1. Jest Network Teardown Shim
+## Risk & Surface (Required)
 
-- Added opt-in Jest setup shim to `server/tests/setup/jest.setup.cjs`.
-- Tracks and closes network servers and timers when `NO_NETWORK_LISTEN=true`.
-- Reduces open handle hangs in CI.
+<!-- Select the appropriate risk level and surface area. -->
 
-### 2. LFS Exceptions
+**Risk Level** (Select one):
 
-- Updated `.gitattributes` to include exception for `verification/*.png` to prevent LFS smudge failures in certain environments.
+- [ ] `risk:low` (Docs, comments, safe refactors)
+- [x] `risk:medium` (Feature flags, backward-compatible changes)
+- [ ] `risk:high` (Database migrations, auth changes, critical path)
+- [ ] `risk:release-blocking` (Critical fixes only)
 
-### 3. Prompt Registry Consolidation
+**Surface Area** (Select all that apply):
 
-- Identified `jest-network-teardown-shim` as the prompt of record.
-- Updated prompt scope to explicitly enumerate all files touched by this PR.
-- Registered new prompt hash in `prompts/registry.yaml`.
-- Included earlier prompt file edits (`gitattributes-lfs-exception@v1.md`, `nl-graph-query-test-tson-fix@v1.md`) in the consolidated scope.
+- [ ] `area:client`
+- [x] `area:server`
+- [ ] `area:docs`
+- [ ] `area:infra`
+- [x] `area:ci`
+- [ ] `area:policy`
+
+## Assumption Ledger
+
+<!-- State your assumptions, ambiguities, tradeoffs, and stop conditions. -->
+
+- **Assumptions**: Input data follows the `route_plan.schema.json`. Determinism relies on `json.dumps(sort_keys=True)`.
+- **Ambiguities**: None.
+- **Tradeoffs**: Determinism requires strict sorting of inputs, potentially impacting performance for very large datasets (accepted trade-off).
+- **Stop Condition**: If drift is detected in CI, the build fails.
+
+## Execution Governor & Customer Impact
+
+- [x] **Single Product Mode**: Respects active product (FactFlow) or includes `.exec-override`.
+- [x] **Frozen Code**: Does not touch frozen products without override.
+- **Customer Impact**: Improved route optimization reliability and auditability.
+- **Rollback Plan**: Revert this PR; no database migrations involved.
+
+## Evidence Bundle
+
+<!-- Attach evidence that your change works and is safe. See docs/evidence-bundle-spec.md -->
+
+- [x] **Tests**: New or updated tests passing? (See `agents/route_opt/tests/`)
+- [ ] **Screenshots**: Attached for UI changes? (N/A)
+- [x] **Evidence Generated**: Bundle attached or linked? (Drift check logs)
+- [x] **Prompt Hash**: `prompts/registry.yaml` updated (if prompts changed)? (N/A)
+
+## Security Impact
+
+- [ ] **Security Impact**: Does this change touch auth, PII, or crypto?
+  - If YES, link to [Security Triage/Backlog](docs/SECURITY_PHASE1_STARTER_PACK_BACKLOG.md).
+  - No auth or PII involved.
+
+## Green CI Contract Checklist
+
+<!-- Must be checked before merge. See docs/governance/GREEN_CI_CONTRACT.md -->
+
+- [x] **Lint**: Ran `pnpm lint` locally.
+- [x] **Tests**: Ran `pnpm test:unit` locally.
+- [x] **Determinism**: No leaked singletons or open handles.
+- [x] **Evidence**: Added at least one test case or verification step.
+
+## CI & Merge Train Rules
+
+<!-- See docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md and docs/release/DAILY_DASHBOARD.md -->
+
+**If CI is Blocked:**
+
+- [ ] Docs/Metadata PRs may proceed.
+- [ ] Behavior changes must wait for green CI.
+- [x] Do not bypass gates without written approval from Release Captain.
 
 ## Verification
 
-- Computed SHA-256 hash for consolidated prompt: `72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b`.
-- Verified hash consistency in `prompts/registry.yaml`.
-- Confirmed `server/tests/setup/jest.setup.cjs` parses correctly.
+<!-- How did you verify this change? -->
 
-### Hash Computation
-
-To compute the prompt hash, run:
-
-```bash
-sha256sum prompts/governance/jest-network-teardown-shim@v1.md
-```
-
-<!-- AGENT-METADATA:START -->
-
-```json
-{
-  "agent_id": "jules",
-  "task_id": "consolidate-prompt-metadata",
-  "prompt_hash": "72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b",
-  "domains": ["governance", "testing"],
-  "verification_tiers": ["C"],
-  "debt_delta": 0,
-  "declared_scope": {
-    "paths": [
-      ".gitattributes",
-      "PR_DESCRIPTION.md",
-      "server/tests/setup/jest.setup.cjs",
-      "docs/roadmap/STATUS.json",
-      "prompts/registry.yaml",
-      "prompts/governance/gitattributes-lfs-exception@v1.md",
-      "prompts/governance/nl-graph-query-test-tson-fix@v1.md",
-      "prompts/governance/jest-network-teardown-shim@v1.md"
-    ]
-  },
-  "allowed_operations": ["create", "edit"]
-}
-```
-
-<!-- AGENT-METADATA:END -->
+- [x] Automated Test (`pytest agents/route_opt/tests/`)
+- [x] Manual Verification (Ran `scripts/monitoring/route-opt-drift.py`)
+- [ ] Snapshot / Screenshot
