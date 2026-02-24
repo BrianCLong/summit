@@ -1,0 +1,49 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN13",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-orchestrator",
+    "version": "v1",
+    "sha256": "afd3efc60b2a146710fcd8e883eca670a64b5292e5df831632db4fc562d97bd9",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260224_RUN13.json"
+    ],
+    "domains": [
+      "operations",
+      "governance",
+      "documentation"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log updated with evidence bundle, plan, and execution report.",
+    "Roadmap status metadata refreshed for this run.",
+    "Prompt registry updated to include daily sprint prompt reference."
+  ],
+  "stop_conditions": [
+    "GitHub API connectivity outage blocks issue or PR access.",
+    "Required credentials or secrets are unavailable.",
+    "Validation commands fail after two localized remediation attempts."
+  ]
+}
