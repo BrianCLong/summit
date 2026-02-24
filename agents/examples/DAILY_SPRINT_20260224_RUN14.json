@@ -1,0 +1,41 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN14",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint",
+    "version": "v1",
+    "sha256": "bf15e07c58218a00f2c1ddedee59937d5ab861abec52bfd4e5272d81698478c1",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260224_RUN14.json"
+    ],
+    "domains": ["operations", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint evidence and plan recorded for 2026-02-24.",
+    "Roadmap status updated with timestamp and revision note.",
+    "Prompt and task spec registered with immutable hash."
+  ],
+  "stop_conditions": [
+    "Governance authority files conflict with task requirements.",
+    "Changes exceed declared scope."
+  ]
+}

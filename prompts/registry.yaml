@@ -922,3 +922,28 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: bf15e07c58218a00f2c1ddedee59937d5ab861abec52bfd4e5272d81698478c1
+    description: Daily sprint orchestration for Summit repo evidence, planning, execution, and reporting.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_2026-02-24.md
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+        - agents/examples/DAILY_SPRINT_20260224_RUN14.json
+      domains:
+        - operations
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
