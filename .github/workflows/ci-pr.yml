@@ -194,6 +194,9 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
 
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
       - name: Bootstrap and smoke test
         run: |
           echo "=== Bootstrap ==="
@@ -203,7 +206,7 @@ jobs:
           make up || echo "Service startup skipped (Docker may not be available)"
 
           echo "=== Smoke Test ==="
-          make smoke || echo "Smoke test skipped (services may not be running)"
+          make smoke
 
           echo "=== Cleanup ==="
           make down || true
