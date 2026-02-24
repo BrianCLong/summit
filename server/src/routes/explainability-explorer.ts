@@ -17,23 +17,20 @@ import { ListRunsFilter } from '../explainability/types.js';
 const router = Router();
 const service = ExplainabilityExplorerService.getInstance();
 
+const ensureString = (param: any): string | undefined => {
+  if (Array.isArray(param)) {
+    return param[0] as string;
+  }
+  return param as string | undefined;
+};
+
 /**
  * GET /api/explainability/runs
  *
  * List runs with filtering and pagination.
- * Query params:
- *   - run_type: filter by type
- *   - actor_id: filter by actor
- *   - started_after: ISO 8601 timestamp
- *   - started_before: ISO 8601 timestamp
- *   - capability: filter by capability used
- *   - min_confidence: minimum confidence threshold
- *   - limit: pagination limit (default 50)
- *   - offset: pagination offset (default 0)
  */
 router.get('/runs', async (req: Request, res: Response) => {
   try {
-    // Extract tenant from request (assumes middleware sets req.tenant)
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
     const requesterId = (req as any).user?.id || 'anonymous';
 
@@ -51,14 +48,14 @@ router.get('/runs', async (req: Request, res: Response) => {
     }
 
     const filter: ListRunsFilter = {
-      run_type: req.query.run_type as any,
-      actor_id: req.query.actor_id as string,
-      started_after: req.query.started_after as string,
-      started_before: req.query.started_before as string,
-      capability: req.query.capability as string,
-      min_confidence: req.query.min_confidence ? parseFloat(req.query.min_confidence as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+      run_type: ensureString(req.query.run_type) as any,
+      actor_id: ensureString(req.query.actor_id),
+      started_after: ensureString(req.query.started_after),
+      started_before: ensureString(req.query.started_before),
+      capability: ensureString(req.query.capability),
+      min_confidence: req.query.min_confidence ? parseFloat(ensureString(req.query.min_confidence)!) : undefined,
+      limit: req.query.limit ? parseInt(ensureString(req.query.limit)!, 10) : 50,
+      offset: req.query.offset ? parseInt(ensureString(req.query.offset)!, 10) : 0,
     };
 
     const result = await service.listRuns(tenantId, filter, requesterId);
@@ -80,9 +77,6 @@ router.get('/runs', async (req: Request, res: Response) => {
 
 /**
  * GET /api/explainability/runs/:runId
- *
- * Fetch a single run by ID.
- * Returns full explanation with links to artifacts, SBOM, and provenance.
  */
 router.get('/runs/:runId', async (req: Request, res: Response) => {
   try {
@@ -122,16 +116,12 @@ router.get('/runs/:runId', async (req: Request, res: Response) => {
 
 /**
  * GET /api/explainability/runs/:runId/lineage
- *
- * Traverse lineage: run → artifacts → SBOM → provenance.
- * Query params:
- *   - depth: how many levels to traverse (default 3)
  */
 router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
   try {
     const { runId } = req.params;
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
-    const depth = req.query.depth ? parseInt(req.query.depth as string, 10) : 3;
+    const depth = req.query.depth ? parseInt(ensureString(req.query.depth)!, 10) : 3;
 
     if (!tenantId) {
       return res.status(403).json({
@@ -165,16 +155,11 @@ router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
 
 /**
  * GET /api/explainability/compare
- *
- * Compare two runs: inputs/outputs/confidence deltas.
- * Query params:
- *   - run_a: first run ID
- *   - run_b: second run ID
  */
 router.get('/compare', async (req: Request, res: Response) => {
   try {
-    const runA = req.query.run_a as string;
-    const runB = req.query.run_b as string;
+    const runA = ensureString(req.query.run_a);
+    const runB = ensureString(req.query.run_b);
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
 
     if (!runA || !runB) {
@@ -222,9 +207,6 @@ router.get('/compare', async (req: Request, res: Response) => {
 
 /**
  * GET /api/explainability/runs/:runId/verify
- *
- * Verify linkage: run → provenance → SBOM hashes.
- * Returns verification report.
  */
 router.get('/runs/:runId/verify', async (req: Request, res: Response) => {
   try {
