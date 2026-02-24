@@ -28,13 +28,12 @@ jobs:
         uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
         continue-on-error: false # BLOCKING: secrets block merge
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
           cache: pnpm
 
       - name: Install dependencies
@@ -76,7 +75,7 @@ jobs:
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
-          version: v0.68.0 # Upgraded for rego.v1 support
+          version: v0.45.0 # Updated to support modern Rego syntax (e.g. 'in')
 
       - name: OPA policy check
         run: |
@@ -111,7 +110,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
           cache: pnpm
 
       - name: Install dependencies
@@ -151,7 +150,7 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Run MCP UX Linter
         run: |
@@ -170,7 +169,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
           cache: pnpm
 
       - name: Install dependencies
@@ -252,7 +251,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
           cache: pnpm
 
       - name: Install dependencies
@@ -284,7 +283,7 @@ jobs:
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
           cache: pnpm
 
       - name: Install dependencies
@@ -317,7 +316,7 @@ jobs:
       - uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
       - name: Ensure evidence bundle exists
         run: |
           EVIDENCE_DIR="dist/evidence/${GITHUB_SHA}"

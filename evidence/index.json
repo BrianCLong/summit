@@ -1,10 +1,197 @@
 {
-  "version": 1.0,
+  "version": "1.0",
   "items": [
-    { "id": "EVD-kgrag-dual-INGEST-001", "path": "evidence/kgrag-dual/INGEST-001" },
-    { "id": "EVD-kgrag-dual-INGEST-002", "path": "evidence/kgrag-dual/INGEST-002" },
-    { "id": "EVD-kgrag-dual-RETR-001", "path": "evidence/kgrag-dual/RETR-001" },
-    { "id": "EVD-kgrag-dual-RETR-002", "path": "evidence/kgrag-dual/RETR-002" },
-    { "id": "EVD-kgrag-dual-SYNC-001", "path": "evidence/kgrag-dual/SYNC-001" }
+    {
+      "evidence_id": "EVD-PIPELINE-RESILIENCE-001",
+      "title": "Pipeline Scaffolding Check",
+      "category": "pipeline",
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001",
+      "title": "SketchDynamics End-to-End Run",
+      "category": "dynamic-intent",
+      "artifacts": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001",
+      "title": "SketchDynamics Clarification Trigger",
+      "category": "dynamic-intent",
+      "artifacts": [
+        "fixtures/ambiguities/critical.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-vfgnn-ATT-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-vfgnn-NEG-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ATLAS-SCHEMA-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ATLAS-PLNR-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ATLAS-XFER-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ATLAS-ATLS-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ATLAS-ATLS-002",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ATLAS-GOV-001",
+      "files": [
+        "evidence/report.json",
+        "evidence/metrics.json",
+        "evidence/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-ARCH-001",
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-STAB-002",
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-DSCL-003",
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-260119895-keel-BENCH-004",
+      "files": [
+        "summit/evidence/templates/report.json",
+        "summit/evidence/templates/metrics.json",
+        "summit/evidence/templates/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-SSDF12-BNDL-001",
+      "files": [
+        "evidence/ssdf-v1-2/pr-01/report.json",
+        "evidence/ssdf-v1-2/pr-01/metrics.json",
+        "evidence/ssdf-v1-2/pr-01/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-EXPB-CORE-001",
+      "files": [
+        "evidence/runs/expectation-baselines/report.json",
+        "evidence/runs/expectation-baselines/metrics.json",
+        "evidence/runs/expectation-baselines/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
+      "files": [
+        "evidence/privtel/report.json",
+        "evidence/privtel/metrics.json",
+        "evidence/privtel/stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-graph-merge-KNN-001",
+      "path": "evidence/graph-merge/KNN-001",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-graph-merge-KNN-002",
+      "path": "evidence/graph-merge/KNN-002",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-graph-merge-DIST-001",
+      "path": "evidence/graph-merge/DIST-001",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-graph-merge-POLICY-001",
+      "path": "evidence/graph-merge/POLICY-001",
+      "files": [
+        "report.json",
+        "metrics.json",
+        "stamp.json"
+      ]
+    }
   ]
 }

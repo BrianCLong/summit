@@ -20,9 +20,6 @@ Until discovered, we use temporary verifier names:
 - `ci:lint`
 - `ci:deps-delta`
 
-## Mapped Verifiers
-- `ci/evidence-verify` -> `scripts/ci_verify_evidence.py`
-
 ## Rename plan
 Once real check names are known:
 1. Update CI config to emit the official check names.
