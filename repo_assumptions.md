@@ -1,41 +1,38 @@
-# Repo Assumptions & Validation (Model Sandbox)
+# Repo Assumptions & Reality Check
 
-## Verified vs Assumed
+## 1. Paths & Structure
 
 | Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Canonical entry workflows root. |
-| `.github/actions/` | ✅ Verified | Composite actions root. |
-| `.github/scripts/` | ✅ Verified | CI helper scripts root. |
-| `.github/policies/` | ✅ Verified | Policy definitions (Rego/JS). |
-| `docs/architecture/` | ✅ Verified | Canonical doc root. |
-| `docs/security/` | ✅ Verified | Canonical doc root. |
-| `docs/standards/` | ✅ Verified | Canonical doc root. |
-| `docs/ops/runbooks/` | ✅ Verified | Canonical doc root. |
-| `scripts/` | ✅ Verified | Root scripts directory exists. |
-| `tools/` | ✅ Verified | Root tools directory exists. |
-| `docker-compose.yml` | ✅ Verified | Root anchor exists. |
-| `package.json` | ✅ Verified | Root anchor exists. |
+| :--- | :--- | :--- |
+| `summit/` | ✅ Verified | Root Python package. |
+| `summit/tests/` | ✅ Verified | Test root. |
+| `summit/evidence/schemas/` | ✅ Verified | Existing schema location. |
+| `summit/narrative/` | ⚠️ Assumed | New package to be created. |
+| `scripts/` | ✅ Verified | Location for Python scripts/tools. |
+| `artifacts/` | ⚠️ Assumed | Output directory (repo has `release-artifacts/` and `evidence/`). Will use `artifacts/` for local/CI outputs. |
+| `tools/summitctl` | ✅ Verified | TypeScript CLI. Will use Python script for this task to align with MWS. |
 
-## Component Mapping
+## 2. CI & Gates
 
-| Planned Component | Proposed Location |
-| --- | --- |
-| Model Sandbox Policies | `.github/policies/model-sandbox/` |
-| Policy Scripts | `.github/scripts/model-sandbox/` |
-| Sandbox Runner | `tools/model-sandbox/` |
-| Drift Detector | `.github/scripts/monitoring/` |
-| CI Workflows | `.github/workflows/` |
+| Check Name | Status | Notes |
+| :--- | :--- | :--- |
+| `summit-ci.yml` | ✅ Verified | Likely the main CI loop. |
+| `ci-evidence-verify.yml` | ✅ Verified | Likely validates evidence artifacts. |
+| `lint` | ⚠️ Assumed | Standard python linting (ruff/flake8) expected. |
+| `test` | ⚠️ Assumed | Pytest expected. |
 
-## Validation Checklist
+## 3. Evidence Conventions
 
-- [x] Confirm presence of `scripts/` at repo root.
-- [x] Confirm existing CI gates (e.g., `agent-guardrails.yml`).
-- [x] Confirm Rego preference in `.github/policies/` (Rego is used, but we'll add YAML for sandbox config as it's data-heavy).
-- [x] Confirm Docker as preferred container runtime.
+| Convention | Status | Notes |
+| :--- | :--- | :--- |
+| `*.report.schema.json` | ✅ Verified | Standard schema naming. |
+| `*.metrics.schema.json` | ✅ Verified | Standard schema naming. |
+| `*.stamp.schema.json` | ✅ Verified | Standard schema naming. |
+| Deterministic Outputs | ✅ Verified | `tools/determinism_smoke.py` exists. |
 
-## Must-not-touch list
+## 4. Must-Not-Touch
 
-- Existing workflows under `.github/workflows/` unless explicitly adding/wiring.
-- Existing policy engine logic in `.github/policies/*.rego`.
-- Root `package.json` dependencies (unless adding scripts).
+* `summit/evidence/schemas/index.schema.json` (Core schema, unless necessary)
+* `tools/summitctl/` (Avoid TS changes unless needed for integration)
+* `summit/main.py` (Avoid modifying core app routing for this isolated pipeline)
+
