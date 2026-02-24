@@ -25,8 +25,14 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
+          version: 10
+      - uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -54,8 +60,10 @@ jobs:
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -82,8 +90,10 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -121,8 +131,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -153,8 +165,10 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -182,8 +196,10 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+      - uses: actions/setup-node@v4 # v6
         with:
+          node-version: "20"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/orchestrator-store",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "PostgreSQL-backed orchestrator store for IntelGraph Summit platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,17 +28,15 @@
     "crypto-js": "^4.2.0"
   },
   "devDependencies": {
-    "@types/hapi__catbox": "^10.2.4",
-    "@types/hapi__shot": "^4.1.2",
     "@types/pg": "^8.10.9",
     "@types/crypto-js": "^4.1.3",
     "@types/uuid": "^9.0.8",
     "typescript": "^5.3.0",
     "vitest": "^1.0.0",
     "@types/node": "^20.11.0",
-    "ts-node": "^10.9.2",
-    "@types/hapi__catbox": "^12.1.0",
-    "@types/hapi__shot": "^6.0.0"
+    "@types/hapi__catbox": "^12.0.6",
+    "@types/hapi__shot": "^6.0.4",
+    "ts-node": "^10.9.2"
   },
   "repository": {
     "type": "git",

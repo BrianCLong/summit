@@ -97,16 +97,6 @@ jobs:
           echo "Resolved commit: ${COMMIT}"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
-          cache: 'pnpm'
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Run release:ready
         run: |
           TAG="${{ steps.params.outputs.tag }}"

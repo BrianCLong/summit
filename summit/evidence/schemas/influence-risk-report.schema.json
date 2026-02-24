@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Influence Risk Report",
+  "description": "Schema for influence operation risk assessments with causal envelope support.",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string", "enum": ["1.0.0"] },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "analysis_id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "methodology": { "type": "string" }
+      },
+      "required": ["analysis_id", "timestamp"]
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entity_id": { "type": "string" },
+          "risk_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "classification": { "type": "string" },
+          "causal_envelope": {
+            "type": "object",
+            "properties": {
+              "nodes": { "type": "array", "items": { "type": "string" } },
+              "edges": { "type": "array", "items": { "type": "string" } },
+              "evidence_bundles": { "type": "array", "items": { "type": "string" } }
+            },
+            "required": ["nodes", "evidence_bundles"]
+          }
+        },
+        "required": ["entity_id", "risk_score", "causal_envelope"]
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "ledger_id": { "type": "string" },
+        "run_id": { "type": "string" }
+      },
+      "required": ["ledger_id"]
+    }
+  },
+  "required": ["version", "metadata", "results", "provenance"]
+}

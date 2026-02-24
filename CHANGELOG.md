@@ -15,13 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Long-Horizon Agency evaluation track based on daVinci-Agency (arXiv:2602.02619).
-- PR-chain schema and validation logic in `src/agents/longhorizon/schema/`.
-- Staged task builder for multi-PR decomposition in `src/agents/longhorizon/builder/`.
-- Deterministic evaluation metrics (decomposition, consistency, refinement) in `src/agents/longhorizon/evaluator/`.
-- Deny-by-default tool policy and artifact redaction in `src/agents/longhorizon/policies/`.
-- Drift detector for long-horizon track in `scripts/monitoring/`.
-- Evaluation execution harness in `scripts/agents/longhorizon/run-fixture.ts`.
+- Influence Operations Defense Suite with PFIDG, CoC-EW, CwC, IPNF, and IRCES modules.
+- New graph node types: `narrative_frame`, `process_frame`.
+- Evidence schema for Influence Risk Reports with causal envelope support.
+- Technical disclosures and claim sets for influence defense inventions.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

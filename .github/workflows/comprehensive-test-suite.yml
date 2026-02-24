@@ -20,19 +20,15 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y             build-essential             libcairo2-dev             libpango1.0-dev             libjpeg-dev             libgif-dev             librsvg2-dev
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
+          sudo apt-get install -y \
+            build-essential \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libjpeg-dev \
+            libgif-dev \
+            librsvg2-dev
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -64,12 +60,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          run_install: false
-
-      - name: Setup Node.js
+          version: 10
         uses: actions/setup-node@v4
         with:
           node-version: 22

@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, Literal, Optional
 
 Platform = Literal["x", "facebook", "telegram", "other"]
-NodeType = Literal["actor", "content", "url", "media", "topic"]
+NodeType = Literal["actor", "content", "url", "media", "topic", "narrative_frame", "process_frame"]
 EdgeType = Literal["engages", "mentions", "amplifies", "co_shares", "crossposts"]
 
 
@@ -14,6 +14,7 @@ class Node:
     type: NodeType
     platform: Optional[Platform]
     attrs: dict[str, Any]
+    provenance_id: Optional[str] = None  # EVD- or PROV- reference
 
 
 @dataclass(frozen=True)
