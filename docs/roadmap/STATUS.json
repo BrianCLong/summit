@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:43:05Z",
-  "revision_note": "Aligned OSINT source inventory with GDELT GKG access notes.",
+  "last_updated": "2026-02-07T00:30:00Z",
+  "revision_note": "Added GraphRAG scope isolation GA spec in docs/standards.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -9,10 +9,10 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-      "id": "gdelt-gkg-connector-skeleton",
+      "id": "graphrag-scope-firewall-ga-spec",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added GDELT GKG connector skeleton with sample TSV parsing, registry entry, and draft docs for external narrative ingestion."
+      "notes": "Published GA spec for GraphRAG scope isolation, inference firewalls, claim lifetimes, evidence bundles, and PR acceptance criteria in docs/standards."
     },
     {
       "id": "B",
@@ -248,7 +248,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 18,
     "ga_blockers": []
   }
 }
