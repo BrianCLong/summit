@@ -1,0 +1,3 @@
+{"id":"task-001","question":"What law describes how signal strength decays with distance?","expected_answer":"inverse square law","related_doc_ids":["doc-001"],"novelty_required":true}
+{"id":"task-002","question":"What type of noise adds variance to measurements?","expected_answer":"gaussian noise","related_doc_ids":["doc-002"],"novelty_required":true}
+{"id":"task-003","question":"Why combine independent signals?","expected_answer":"to improve reliability","related_doc_ids":["doc-003"],"novelty_required":true}

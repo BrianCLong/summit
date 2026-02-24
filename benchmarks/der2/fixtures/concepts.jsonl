@@ -1,0 +1,3 @@
+{"task_id":"task-001","concepts":["signal decay","inverse square"],"rationale":"Key law describing decay."}
+{"task_id":"task-002","concepts":["measurement noise","gaussian"],"rationale":"Noise distribution affecting variance."}
+{"task_id":"task-003","concepts":["evidence fusion","independent signals"],"rationale":"Combining signals for reliability."}

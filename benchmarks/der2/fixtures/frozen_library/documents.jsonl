@@ -1,0 +1,4 @@
+{"id":"doc-001","title":"Signal Basics","text":"Signal strength follows the inverse square law. Stronger signals decay with distance."}
+{"id":"doc-002","title":"Noise Models","text":"Gaussian noise adds variance to a measurement. Higher variance reduces confidence."}
+{"id":"doc-003","title":"Fusion Notes","text":"Evidence fusion combines independent signals to improve reliability."}
+{"id":"doc-004","title":"Distractor","text":"This document contains unrelated operational policy notes."}
