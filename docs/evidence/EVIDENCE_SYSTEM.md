@@ -22,6 +22,15 @@ Schemas are located in `evidence/schemas/`.
 *   `metrics.schema.json`
 *   `stamp.schema.json`
 
+## Minimal Example Bundle
+
+A validated, deterministic example lives in:
+
+*   `docs/evidence/examples/minimal-bundle/`
+
+The bundle includes `index.json`, `report.json`, `metrics.json`, and `stamp.json`. Only
+`stamp.json` contains timestamps; all other artifacts are deterministic.
+
 ## Evidence IDs
 
 Evidence IDs must follow the format: `EVD-<ITEMSLUG>-<AREA>-<NNN>`

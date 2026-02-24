@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Captured GitHub Files Changed governance reality check and repo assumptions baseline.",
+  "last_updated": "2026-02-08T04:30:00Z",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register. Normalized reusable workflow path checks in validate-workflows.sh and pruned .archive.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -76,12 +76,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
-    },
-    {
-      "id": "structured-rag-db-not-docs",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Structured retrieval PR1-PR6: SQL-first planner/policy/executor, evidence writer, tests, and runbooks."
     },
     {
       "id": "E",

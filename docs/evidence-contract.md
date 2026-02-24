@@ -15,4 +15,7 @@ Each evidence bundle must contain:
 - `metrics.json` (optional): Quantitative metrics.
 
 ## Schema Validation
-All evidence artifacts are validated against JSON schemas in `evidence/schema/`.
+All evidence artifacts are validated against JSON schemas in `evidence/schemas/`.
+
+## Minimal Example
+See `docs/evidence/examples/minimal-bundle/` for a deterministic, schema-valid bundle.
