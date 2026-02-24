@@ -1,27 +1,22 @@
-# Repo Assumptions & Validation (Moltbook AI-Theater Pack)
+# Repo Assumptions & Validation — CADDS Intake
 
-## Verified
+Reference: [Summit Readiness Assertion](docs/SUMMIT_READINESS_ASSERTION.md).
 
-_(empty)_
+## Verified (inspected in repo)
 
-## Assumed
+- `docs/` exists and is the primary documentation root.
+- `docs/standards/` exists for standards/interop documentation.
+- `docs/security/` exists for security and data-handling guidance.
+- `docs/ops/runbooks/` exists for operational runbooks.
+- `.github/pull_request_template.md` exists and includes the AGENT-METADATA block template.
+- `docs/roadmap/STATUS.json` exists and is the execution assignment ledger.
 
-- Language: Python
-- CLI entrypoint: `summit`
-- Test runner: pytest
-- Lint: ruff
-- CI: GitHub Actions
+## Assumed (deferred pending validation)
+
+- `docs/ci/REQUIRED_CHECKS_POLICY.yml` defines authoritative branch protection check names.
+- The repo’s primary test runner is `pnpm`-based with supplemental `make` targets.
+- Outbound HTTP is disallowed in CI by default; fixture-driven ingestion is required.
 
 ## Must-Not-Touch Files
 
-- Lockfiles
-- Release workflows
-- Security policy
-- Any `infra/` deployment configs (until verified)
-
-## Validation Checklist (Before PR1 Merge)
-
-- Confirm actual CLI framework and where commands live.
-- Confirm existing evidence schema (or create one without breaking changes).
-- Confirm CI check names and required status checks.
-- Confirm existing logging redaction/security documentation conventions.
+- None declared (list intentionally constrained; expand only with explicit governance direction).
