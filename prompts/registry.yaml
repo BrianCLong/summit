@@ -1,21 +1,21 @@
 version: 1
 prompts:
-  - id: governed-agent-integration-reference
+  - id: govos-1-governed-multi-agent-os
     version: v1
-    path: prompts/architecture/governed-agent-integration-reference@v1.md
-    sha256: b3cc1444eeaf4755f9a7912fb42feeb6f1726cf1212cf50d06b1f0ea49e2bd53
-    description: Publish governed agent integration reference architecture and update roadmap status.
+    path: prompts/epics/govos-1-governed-multi-agent-os@v1.md
+    sha256: eb01ec40753e208354ad52e26d9000528dae5ee92b7f44782eea6513c200b873
+    description: Create GOVOS-1 governed multi-agent OS epic doc and register roadmap status.
     scope:
       paths:
-        - docs/architecture/governed-agent-integration-reference.md
+        - docs/epics/govos-1-governed-multi-agent-os.md
         - docs/roadmap/STATUS.json
-        - prompts/architecture/governed-agent-integration-reference@v1.md
+        - prompts/epics/govos-1-governed-multi-agent-os@v1.md
         - prompts/registry.yaml
-        - agents/examples/PARTNER_ENABLEMENT_KIT_V1.json
+        - agents/examples/GOVOS_1_EPIC_DOC_20260208.json
       domains:
         - documentation
         - governance
-        - architecture
+        - epics
     verification:
       tiers_required:
         - C
