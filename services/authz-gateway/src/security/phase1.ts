@@ -201,7 +201,8 @@ export function digestForPath(targetPath: string): string {
 
 export function cosignSignArtifact(artifactPath: string, identity?: string): string {
   const signaturePath = `${artifactPath}.sig`;
-  execFileSync('cosign', ['sign-blob', '--yes', '--output-signature', signaturePath, artifactPath], {
+  const bundlePath = `${artifactPath}.bundle.json`;
+  execFileSync('cosign', ['sign-blob', '--yes', '--output-signature', signaturePath, '--bundle', bundlePath, artifactPath], {
     env: {
       ...process.env,
       COSIGN_EXPERIMENTAL: 'true',
@@ -212,9 +213,20 @@ export function cosignSignArtifact(artifactPath: string, identity?: string): str
   return signaturePath;
 }
 
-export function cosignVerifyArtifact(artifactPath: string, signaturePath: string): void {
+export function cosignVerifyArtifact(artifactPath: string, signaturePath: string, bundlePath?: string): void {
   try {
-    execFileSync('cosign', ['verify-blob', '--signature', signaturePath, artifactPath], {
+    const args = ['verify-blob', '--signature', signaturePath, artifactPath];
+    const effectiveBundle = bundlePath || (fs.existsSync(`${artifactPath}.bundle.json`) ? `${artifactPath}.bundle.json` : undefined);
+
+    if (effectiveBundle) {
+      args.push('--bundle', effectiveBundle);
+      if (process.env.CERTIFICATE_IDENTITY && process.env.CERTIFICATE_OIDC_ISSUER) {
+        args.push('--certificate-identity', process.env.CERTIFICATE_IDENTITY);
+        args.push('--certificate-oidc-issuer', process.env.CERTIFICATE_OIDC_ISSUER);
+      }
+    }
+
+    execFileSync('cosign', args, {
       env: { ...process.env, COSIGN_EXPERIMENTAL: 'true' },
       stdio: 'inherit',
     });
