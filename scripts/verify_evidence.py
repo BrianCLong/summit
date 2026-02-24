@@ -134,15 +134,15 @@ def main() -> int:
         "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules",
         "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps",
         "runs", "runtime", "subsumption", "out", "cognitive", "model_ti",
+        # New additions from CI failure
         "DISINFO-NEWS-ECOSYSTEM-2026", "EVID-NARINT-SMOKE", "fixtures", "eval-repro",
-        "EVD-IOB20260202-AIAGENT-001", "EVD-IOB20260202-SUPPLYCHAIN-001",
-        "moltbook-relay-surface-001", "EVD-IOB20260202-FIMI-001", "forbes-2026-trends",
-        "osintplatint_20260201_transform_search_ea8aba4", "EVD-IOB20260202-WIRELESS-001",
-        "EVD-IOB20260202-ALLYRISK-001", "EVD-IOB20260202-HUMINT-001",
+        "EVD-IOB20260202-AIAGENT-001", "EVD-IOB20260202-SUPPLYCHAIN-001", "moltbook-relay-surface-001",
+        "EVD-IOB20260202-FIMI-001", "forbes-2026-trends", "osintplatint_20260201_transform_search_ea8aba4",
+        "EVD-IOB20260202-WIRELESS-001", "EVD-IOB20260202-ALLYRISK-001", "EVD-IOB20260202-HUMINT-001",
         "EVD-IOB20260202-ECONESP-001", "EVD-COGWAR-2026-EVENT-002", "pppt-501608",
-        "FORBES-AGENTIC-AI-2026", "EVID-20260131-ufar-0001", "audit",
-        "EVD-COGWAR-2026-EVENT-003", "portal-kombat-venezuela", "EVD-IOB20260202-CAPACITY-001",
-        "policy", "skills", "EVD-COGWAR-2026-EVENT-001"
+        "FORBES-AGENTIC-AI-2026", "EVID-20260131-ufar-0001", "audit", "EVD-COGWAR-2026-EVENT-003",
+        "portal-kombat-venezuela", "EVD-IOB20260202-CAPACITY-001", "policy", "skills",
+        "EVD-COGWAR-2026-EVENT-001"
     }
 
     for p in EVID.rglob("*"):
