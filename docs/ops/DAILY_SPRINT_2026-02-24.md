@@ -73,6 +73,7 @@ check your internet connection or https://githubstatus.com
 - Attempted issue scan; GitHub API unreachable (recorded as Governed Exception).
 - Prepared daily sprint prompt registration and task spec for this run.
 - Validated STATUS.json format with `python3 -m json.tool docs/roadmap/STATUS.json`.
+- Attempted PR creation for branch `chore/daily-sprint-2026-02-24-12`; blocked by `api.github.com` outage.
 
 ## Governed Exceptions
 
@@ -83,6 +84,7 @@ check your internet connection or https://githubstatus.com
 ## Blockers
 
 - `api.github.com` connectivity outage blocks issue scan and live PR evidence refresh.
+- `api.github.com` outage blocks PR creation for daily sprint branch.
 
 ## End-of-Day Report
 
