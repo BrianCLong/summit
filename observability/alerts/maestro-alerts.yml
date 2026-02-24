@@ -1,0 +1,42 @@
+groups:
+  - name: maestro-alerts
+    rules:
+      - alert: MaestroHighOrchestrationErrorRate
+        expr: sum(rate(maestro_orchestration_errors_total[5m])) by (endpoint) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: maestro
+        annotations:
+          summary: "High Maestro Orchestration Error Rate"
+          description: "Orchestration endpoint {{ $labels.endpoint }} has an error rate > 0.1/s."
+
+      - alert: MaestroJobFailureRateHigh
+        expr: sum(rate(maestro_job_execution_duration_seconds_count{status="failed"}[5m])) by (job_type) > 0
+        for: 5m
+        labels:
+          severity: warning
+          service: maestro
+        annotations:
+          summary: "Maestro Job Failures Detected"
+          description: "Maestro job type {{ $labels.job_type }} is failing."
+
+      - alert: MaestroAIModelHighErrorRate
+        expr: sum(rate(maestro_ai_model_errors_total[5m])) by (model) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: maestro
+        annotations:
+          summary: "High AI Model Error Rate"
+          description: "AI Model {{ $labels.model }} error rate is > 0.05/s."
+
+      - alert: MaestroHighChangeFailureRate
+        expr: maestro_change_failure_rate > 10
+        for: 15m
+        labels:
+          severity: critical
+          service: maestro
+        annotations:
+          summary: "High Change Failure Rate"
+          description: "Change failure rate is {{ $value }}%."

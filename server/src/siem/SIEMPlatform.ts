@@ -122,7 +122,7 @@ export class SIEMPlatform {
 
   private matchesConditions(event: SIEMEvent, conditions: RuleCondition[]): boolean {
     return conditions.every(condition => {
-      const eventRecord = event as Record<string, unknown>;
+      const eventRecord = event as unknown as Record<string, unknown>;
       const val = eventRecord[condition.field]; // Simple field access
       if (val === undefined) return false;
 

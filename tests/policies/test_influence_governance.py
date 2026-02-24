@@ -22,7 +22,9 @@ def test_policy_load():
 def test_prohibited_intents():
     prohibited = load_list("prohibited_intents.txt")
     policy = load_policy()
-    assert sorted(prohibited) == sorted(policy["prohibited_intents"])
+        # Normalization: Replace spaces with underscores in loaded list to match policy format
+        normalized_prohibited = [p.replace(" ", "_") for p in prohibited]
+        assert sorted(normalized_prohibited) == sorted(policy["prohibited_intents"])
 
     # Negative test
     for intent in prohibited:
@@ -50,10 +52,8 @@ def test_violation_logic():
     assert validate("analysis_only", {"region": "US", "volume": 100}) is True
 
     # Negative case: prohibited intent
-    # Note: 'microtargeting' was removed from policy.yaml but is hardcoded here.
-    # We should use an intent that IS in the policy, like 'automate amplification'.
-    with pytest.raises(ValueError, match="Prohibited intent: automate amplification"):
-        validate("automate amplification", {"region": "US"})
+    with pytest.raises(ValueError, match="Prohibited intent: microtargeting"):
+        validate("microtargeting", {"region": "US"})
 
     # Negative case: prohibited fields
     with pytest.raises(ValueError, match=r"Prohibited fields present: \['psychographic_segment'\]"):

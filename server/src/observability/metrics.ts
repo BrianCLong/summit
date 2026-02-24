@@ -60,7 +60,10 @@ import {
   narrativeSimulationActiveSimulations,
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds
+  narrativeSimulationDurationSeconds,
+  agentExecutionsTotal,
+  agentExecutionDuration,
+  policyDecisionsTotal
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -116,7 +119,10 @@ export {
   narrativeSimulationActiveSimulations,
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds
+  narrativeSimulationDurationSeconds,
+  agentExecutionsTotal,
+  agentExecutionDuration,
+  policyDecisionsTotal
 };
 
 export const metrics = {
@@ -170,5 +176,8 @@ export const metrics = {
   narrativeSimulationActiveSimulations,
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds
+  narrativeSimulationDurationSeconds,
+  agentExecutionsTotal,
+  agentExecutionDuration,
+  policyDecisionsTotal
 };
