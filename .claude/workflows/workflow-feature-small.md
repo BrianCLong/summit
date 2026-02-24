@@ -1,156 +1,82 @@
 # Workflow: Small Feature
 
-Use this workflow when adding a small, well-defined feature.
+## When to use
 
----
+- Adding a small, well-defined feature (<500 LOC net change).
 
-## Scope Guardrails
+## Inputs required from user
 
-- **One feature per PR** - Single logical addition
-- **< 500 lines changed** - If larger, split into multiple PRs
-- **Self-contained** - Feature works end-to-end in this PR
-- **Tested** - Unit tests for new functionality
-- **No refactoring** - Don't improve unrelated code
+- Feature request or acceptance criteria.
+- In-scope / out-of-scope list.
+- Target area (see `.claude/areas.md`).
+- UX or API expectations (when applicable).
 
----
-
-## Steps
-
-### 1. Understand Requirements
-
-```
-Clarify the feature scope:
-- What is the user-facing behavior?
-- What are the acceptance criteria?
-- What's explicitly OUT of scope?
-```
-
-### 2. Research Existing Patterns
-
-```
-Find similar features in the codebase:
-- How are similar things implemented?
-- What patterns should be followed?
-- What utilities/helpers exist?
-```
-
-### 3. Plan the Implementation
-
-```
-Identify files to modify:
-- List all files that need changes
-- Estimate the diff size
-- If > 500 lines, consider splitting
-```
-
-### 4. Implement the Feature
-
-```
-Code the feature:
-- Follow existing patterns
-- Use TypeScript types
-- Handle errors gracefully
-- Add inline comments for complex logic
-```
-
-### 5. Add Tests
-
-```
-Write tests for the feature:
-- Unit tests for new functions
-- Integration tests if crossing boundaries
-- Edge cases and error scenarios
-```
-
-### 6. Verify the Implementation
+## Discover (read-only)
 
 ```bash
-# Run new tests
+# Confirm patterns and ownership
+cat .claude/README.md
+cat .claude/areas.md
+
+# Find similar features
+rg -n "<feature keyword>" <area-path>
+rg -n "use[A-Z][a-zA-Z]+" <area-path>
+
+# Review related tests
+rg -n "<feature keyword>" <area-path>/__tests__ <area-path>/tests
+```
+
+## Plan (checklist)
+
+- [ ] **File list (explicit):**
+  - `<path/to/file>`
+  - `<path/to/test>`
+- [ ] **Risk level:** Low | Medium | High (justify in PR body).
+- [ ] **Behavior changes:** bullets of user-visible changes.
+- [ ] **Test plan:** unit/integration targets.
+
+## Apply (rules)
+
+- One feature per PR; no unrelated refactors.
+- Follow existing patterns and types.
+- Small, reviewable diffs; atomic commits.
+- Add/adjust tests for new behavior.
+
+## Verify
+
+```bash
+# Run targeted tests
 pnpm test -- --testPathPattern="<test-file>"
 
-# Run full test suite
-pnpm test
-
-# Check types
-pnpm typecheck
-```
-
----
-
-## Local Commands
-
-```bash
-# During development
-pnpm lint:fix
-pnpm typecheck
-
-# Before committing
-pnpm test
-
-# Before PR
+# If verification scope is intentionally constrained, use repo golden path in `.claude/README.md`
 make claude-preflight
-make ga
 ```
 
----
+## Evidence bundle
 
-## PR Body Template
+- Use the PR evidence template: `.prbodies/claude-evidence.md`.
+- Capture:
+  - Files changed + why
+  - Test commands + outputs
+  - Risk + rollback
+  - Screenshots if UI
+
+## PR checklist
+
+- [ ] Feature meets acceptance criteria.
+- [ ] Tests added/updated.
+- [ ] No unrelated changes.
+- [ ] Evidence template completed.
+
+## PR body snippet (paste)
 
 ```markdown
 ## Summary
-
-Adds <feature name>: <brief description>
-
-## Changes
-
-- <file1>: <what changed>
-- <file2>: <what changed>
-- ...
-
-## How It Works
-
-<Brief explanation of the implementation>
+Adds <feature>: <one-line description>.
 
 ## Verification
+- Commands run: `pnpm test -- --testPathPattern="<test-file>"`, `make claude-preflight`
 
-- [ ] Unit tests added: `<test-file-path>`
-- [ ] All tests pass
-- [ ] `make ga` passes
-
-### Commands Run
+## Evidence
+See `.prbodies/claude-evidence.md`.
 ```
-
-pnpm test -- --testPathPattern="<test-file>"
-pnpm typecheck
-make ga
-
-```
-
-### Screenshots/Output
-
-<If UI change, add screenshots. If API, add example request/response>
-
-## Risk
-
-Low | Medium | High
-
-<Justify risk level>
-
-## Rollback
-
-Revert this commit: `git revert <sha>`
-
-## Follow-ups
-
-- [ ] <any follow-up tasks, or "None">
-```
-
----
-
-## Checklist Before PR
-
-- [ ] Feature is complete and works end-to-end
-- [ ] < 500 lines changed
-- [ ] Tests added for new functionality
-- [ ] No unrelated changes
-- [ ] `make ga` passes

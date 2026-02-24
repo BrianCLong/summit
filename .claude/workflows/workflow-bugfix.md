@@ -1,140 +1,81 @@
 # Workflow: Bug Fix
 
-Use this workflow when fixing a reported bug or regression.
+## When to use
 
----
+- Fixing a reported bug or regression.
 
-## Scope Guardrails
+## Inputs required from user
 
-- **One bug per PR** - Don't bundle multiple fixes
-- **No refactoring** - Fix the bug, don't improve surrounding code
-- **Minimal diff** - Smallest change that fixes the issue
-- **Add regression test** - Prevent the bug from returning
+- Issue/incident link.
+- Repro steps (expected vs actual).
+- Affected area (see `.claude/areas.md`).
+- Severity and target release.
 
----
-
-## Steps
-
-### 1. Understand the Bug
-
-```
-Read the bug report/issue. Identify:
-- Expected behavior
-- Actual behavior
-- Steps to reproduce
-- Affected files/components
-```
-
-### 2. Locate the Bug
-
-```
-Search for the relevant code:
-- Use grep/glob to find affected files
-- Read the code to understand the flow
-- Identify root cause vs. symptoms
-```
-
-### 3. Write a Failing Test
-
-```
-Before fixing, write a test that reproduces the bug:
-- Test should FAIL before the fix
-- Test should PASS after the fix
-- This becomes your regression test
-```
-
-### 4. Implement the Fix
-
-```
-Apply the minimal fix:
-- Change only what's necessary
-- Don't refactor unrelated code
-- Preserve existing behavior for other cases
-```
-
-### 5. Verify the Fix
+## Discover (read-only)
 
 ```bash
-# Run the specific test
+# Locate likely ownership and patterns
+cat .claude/README.md
+cat .claude/areas.md
+
+# Find relevant code and tests
+rg -n "<keyword|error|component>" <area-path>
+rg -n "<bug keyword>" <area-path>/__tests__ <area-path>/tests
+
+# Inspect files
+sed -n '1,200p' <path/to/file>
+```
+
+## Plan (checklist)
+
+- [ ] **File list (explicit):**
+  - `<path/to/file>`
+  - `<path/to/test>`
+- [ ] **Risk level:** Low | Medium | High (justify in PR body).
+- [ ] **Regression coverage:** add/extend test for the failure.
+- [ ] **Edge cases:** list inputs that previously failed.
+
+## Apply (rules)
+
+- Smallest diff that fixes root cause.
+- One bug per PR; no refactors.
+- Add regression test before/with fix.
+- Atomic commit(s) only.
+
+## Verify
+
+```bash
+# Run the narrowest failing test first
 pnpm test -- --testPathPattern="<test-file>"
 
-# Run related test suite
-pnpm test -- --testPathPattern="<directory>"
-
-# Run full test suite
-pnpm test
-```
-
----
-
-## Local Commands
-
-```bash
-# Before committing
-pnpm lint:fix
-pnpm test
-
-# Before PR
+# If verification scope is intentionally constrained, use repo golden path in `.claude/README.md`
 make claude-preflight
-make ga
 ```
 
----
+## Evidence bundle
 
-## PR Body Template
+- Use the PR evidence template: `.prbodies/claude-evidence.md`.
+- Capture:
+  - Files changed + why
+  - Test commands + outputs
+  - Risk + rollback
+
+## PR checklist
+
+- [ ] Bug is reproducible and fixed.
+- [ ] Regression test added.
+- [ ] No unrelated changes.
+- [ ] Evidence template completed.
+
+## PR body snippet (paste)
 
 ```markdown
 ## Summary
-
-Fixes #<issue-number>: <brief description of the bug>
-
-## Root Cause
-
-<Explain what was causing the bug>
-
-## Fix
-
-<Explain the fix and why it works>
+Fixes <issue>: <one-line bug description>.
 
 ## Verification
+- Commands run: `pnpm test -- --testPathPattern="<test-file>"`, `make claude-preflight`
 
-- [ ] Added regression test: `<test-file-path>`
-- [ ] Existing tests pass
-- [ ] `make ga` passes
-
-### Commands Run
+## Evidence
+See `.prbodies/claude-evidence.md`.
 ```
-
-pnpm test -- --testPathPattern="<test-file>"
-make ga
-
-```
-
-### Test Output
-
-<paste relevant test output>
-
-## Risk
-
-Low | Medium | High
-
-<Justify risk level>
-
-## Rollback
-
-Revert this commit: `git revert <sha>`
-
-## Follow-ups
-
-- [ ] <any follow-up tasks, or "None">
-```
-
----
-
-## Checklist Before PR
-
-- [ ] Bug is reproducible with a test
-- [ ] Fix is minimal and focused
-- [ ] No unrelated changes
-- [ ] Regression test added
-- [ ] `make ga` passes
