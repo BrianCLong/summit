@@ -1,0 +1,28 @@
+name: Self-Evolving Agents Drift Detection
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Drift Benchmark
+        run: |
+          # Simulate running benchmarks and generating current_metrics.json
+          echo '{"success_rate": 0.88, "cost": 10.2}' > current_metrics.json
+          # In a real scenario, we would pull the baseline from a stored artifact or database
+          echo '{"success_rate": 0.90, "cost": 10.0}' > baseline_metrics.json
+
+      - name: Run Drift Detector Script
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          python3 scripts/monitoring/self-evolving-agents-drift.py current_metrics.json baseline_metrics.json

@@ -4,7 +4,10 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-import torch
+try:
+    import torch
+except ImportError:
+    torch = None
 
 
 @dataclass
@@ -14,6 +17,9 @@ class MismatchReport:
     violations: int = 0
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
+    if torch is None:
+        raise ImportError("torch is required for compute_mismatch_metrics")
+
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
         train_logprobs = train_vals.get("log_probs")
@@ -22,16 +28,13 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
     if rollout_logprobs is None:
         rollout_logprobs = rollout_vals.get("log_probs")
 
-    if train_logprobs is None or rollout_logprobs is None:
+    if train_logprobs is None or rollout_logprobs is None or torch is None:
         return MismatchReport()
 
-    if torch is None:
-        # Fallback if torch is not available, though this path implies
-        # train_logprobs were somehow passed as tensors or duck-typed objects.
-        # If they are None, we already returned. If they are not None but torch is missing,
-        # we might crash if they are actual torch tensors.
-        # Assuming if torch is missing, these are likely not tensors or we should return empty.
-        return MismatchReport()
+    if isinstance(train_logprobs, list):
+        train_logprobs = torch.tensor(train_logprobs)
+    if isinstance(rollout_logprobs, list):
+        rollout_logprobs = torch.tensor(rollout_logprobs)
 
     delta = (train_logprobs - rollout_logprobs).abs()
 
