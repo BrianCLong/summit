@@ -1,14 +1,53 @@
 import logger from '../config/logger.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
+import { RedisService } from '../cache/redis.js';
 import fs from 'fs';
+import fsp from 'fs/promises';
 import readline from 'readline';
 import { promisify } from 'util';
-import { exec } from 'child_process';
+import { exec, execFile } from 'child_process';
 import zlib from 'zlib';
+import path from 'path';
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export class RestoreService {
+  private redis?: RedisService;
+
+  constructor(redis?: RedisService) {
+      this.redis = redis;
+  }
+
+  async downloadFromS3(s3Key: string, localPath: string): Promise<void> {
+    const bucket = process.env.S3_BACKUP_BUCKET;
+    const region = process.env.S3_REGION || 'us-east-1';
+
+    if (!bucket) {
+        throw new Error('S3_BACKUP_BUCKET is not configured');
+    }
+
+    logger.info(`Downloading ${s3Key} from S3 bucket ${bucket} to ${localPath}...`);
+
+    try {
+        if (process.env.USE_AWS_CLI === 'true') {
+            await execFileAsync('aws', ['s3', 'cp', `s3://${bucket}/${s3Key}`, localPath, '--region', region]);
+        } else {
+            // Placeholder for SDK implementation if needed, or error.
+            // For now, consistent with BackupService simulation/CLI dependency.
+            if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
+                 logger.warn('Simulating S3 download (USE_AWS_CLI!=true). Expecting file to exist or created manually.');
+            } else {
+                 throw new Error('AWS CLI required for S3 download (USE_AWS_CLI=true) in this environment configuration.');
+            }
+        }
+        logger.info('S3 download completed.');
+    } catch (error: any) {
+        logger.error('Failed to download from S3', error);
+        throw error;
+    }
+  }
+
   async restorePostgres(filepath: string): Promise<void> {
     logger.info(`Starting PostgreSQL restore from ${filepath}...`);
     try {
@@ -105,6 +144,51 @@ export class RestoreService {
     } finally {
         await session.close();
     }
+  }
+
+  async restoreRedis(filepath: string): Promise<void> {
+      logger.info(`Starting Redis restore from ${filepath}...`);
+      try {
+          const redis = this.redis || RedisService.getInstance();
+          const client = redis.getClient();
+          if (!client) throw new Error('Redis client not available to determine data directory');
+
+          // 1. Get Redis Directory
+          // @ts-ignore
+          const configDirArray = await client.config('GET', 'dir');
+           // @ts-ignore
+          const configDbFilenameArray = await client.config('GET', 'dbfilename');
+
+          const redisDir = configDirArray[1];
+          const dbFilename = configDbFilenameArray[1];
+          const targetPath = path.join(redisDir, dbFilename);
+
+          logger.info({ targetPath }, 'Identified Redis RDB target path');
+
+          // 2. Check if file exists
+          if (!fs.existsSync(filepath)) {
+              throw new Error(`Backup file not found: ${filepath}`);
+          }
+
+          // 3. Copy file
+          logger.warn('Overwriting Redis RDB file. Redis must be restarted to load this data.');
+
+          // Verify we can write to the target directory
+          try {
+            await fsp.access(path.dirname(targetPath), fs.constants.W_OK);
+          } catch (e) {
+             throw new Error(`Cannot write to Redis directory: ${path.dirname(targetPath)}`);
+          }
+
+          await fsp.copyFile(filepath, targetPath);
+
+          logger.info('Redis RDB file restored successfully.');
+          logger.warn('IMPORTANT: Please restart the Redis service to load the restored data.');
+
+      } catch (error: any) {
+          logger.error('Redis restore failed', error);
+          throw error;
+      }
   }
 
   private async processNodeBatch(session: any, batch: any[]) {

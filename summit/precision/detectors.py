@@ -32,15 +32,11 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
         return MismatchReport()
 
     if torch is None:
-        # Fallback for environments without torch
-        import math
-        if isinstance(train_logprobs, (int, float)) and isinstance(rollout_logprobs, (int, float)):
-            delta = abs(train_logprobs - rollout_logprobs)
-            return MismatchReport(
-                max_abs_logprob_delta=float(delta),
-                mean_abs_logprob_delta=float(delta),
-                violations=0,
-            )
+        # Fallback if torch is not available, though this path implies
+        # train_logprobs were somehow passed as tensors or duck-typed objects.
+        # If they are None, we already returned. If they are not None but torch is missing,
+        # we might crash if they are actual torch tensors.
+        # Assuming if torch is missing, these are likely not tensors or we should return empty.
         return MismatchReport()
 
     delta = (train_logprobs - rollout_logprobs).abs()
