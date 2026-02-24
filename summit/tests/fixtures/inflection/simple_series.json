@@ -1,0 +1,7 @@
+[
+  { "timestamp": "2024-01-01T00:00:00Z", "value": 10 },
+  { "timestamp": "2024-01-02T00:00:00Z", "value": 12 },
+  { "timestamp": "2024-01-03T00:00:00Z", "value": 15 },
+  { "timestamp": "2024-01-04T00:00:00Z", "value": 19 },
+  { "timestamp": "2024-01-05T00:00:00Z", "value": 24 }
+]

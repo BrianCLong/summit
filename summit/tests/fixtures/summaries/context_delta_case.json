@@ -1,0 +1,4 @@
+{
+  "items": ["Item A", "Item B", "Item C", "Item D", "Item E"],
+  "max_items": 3
+}

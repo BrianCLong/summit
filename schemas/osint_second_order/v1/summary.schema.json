@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Summary with Context Deltas",
+  "type": "object",
+  "properties": {
+    "summary_text": { "type": "string" },
+    "context_deltas": {
+      "type": "object",
+      "properties": {
+        "omitted_count": { "type": "integer" },
+        "reordered_count": { "type": "integer" },
+        "details": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["omitted_count"]
+    }
+  },
+  "required": ["summary_text", "context_deltas"]
+}

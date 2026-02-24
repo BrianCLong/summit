@@ -1,44 +1,21 @@
-# Repo Assumptions & Validation - FS-Researcher Subsumption
+# Repo Assumptions
 
-## Structure Validation
+| Item | Status | Verified Path/Value | Notes |
+| :--- | :--- | :--- | :--- |
+| Language | Verified | Python 3.12 | `summit-ci.yml`, `requirements.in` |
+| Test Framework | Verified | `pytest` | `summit-ci.yml` |
+| CI Workflow | Verified | `.github/workflows/summit-ci.yml` | Job: `test-python` |
+| Evidence Root | Verified | `evidence/` | Also `summit_evidence/` exists |
+| Artifacts Root | Assumed | `artifacts/` | Will create if missing |
+| Schema Root | Verified | `schemas/` | |
+| Main Package | Verified | `summit/` | |
+| New Module | Assumed | `summit/osint/` | To be created |
 
-| Plan Path | Actual Path | Status | Notes |
-|---|---|---|---|
-| `summit/` | `summit/` | ✅ Exists | Core Python package. |
-| `pyproject.toml` | `pyproject.toml` | ✅ Exists | Defines dependencies (OTEL, Structlog, FastAPI). |
-| `summit/observability.py` | `summit/observability.py` | ✅ Exists | Existing OTEL/Prometheus setup. |
-| `summit/agents/` | `summit/agents/` | ✅ Exists | Contains `ShadowAgent` (in `finance/`). |
+## Must-not-touch List
+* `summit/ingest/` (unless integrating)
+* `intelgraph/`
+* `client/`
 
-## Component Mapping
-
-| Planned Component | Proposed Location | Actual Location / Action |
-|---|---|---|
-| Observability Schema | `summit/observability/schema.py` | Create new. |
-| Evidence ID Logic | `summit/observability/evidence.py` | Create new. |
-| Decision Provenance | `summit/observability/provenance.py` | Create new. |
-| State Snapshot | `summit/observability/state.py` | Create new. |
-| Lineage Graph | `summit/observability/lineage.py` | Create new. |
-| Conflict Log | `summit/observability/conflicts.py` | Create new. |
-| Wrapper | `summit/observability/wrapper.py` | Create new. |
-| Existing Obs Setup | `summit/observability.py` | Will integrate with or move to `summit/observability/__init__.py`. |
-
-## Agent Interface Findings
-
-* **Assumption**: `agent.decide(request) -> decision dict`.
-* **Reality**:
-    * `summit.policy.permission_broker.PermissionBroker` has `decide(request)`.
-    * `summit.agents.finance.shadow_agent.ShadowAgent` has `process(inputs)`.
-    * No unified `Agent` base class found in `summit/agent` or `summit/agents`.
-* **Action**: The wrapper will primarily target the `decide` pattern but should be flexible (e.g., support `process` or custom method names via config).
-
-## Observability Stack
-
-* **Existing**: `opentelemetry`, `structlog`, `prometheus-fastapi-instrumentator`.
-* **Plan**: Leverage existing OTEL stack. The new `ObservableAgent` should emit OTEL spans and structured logs compatible with the existing setup.
-
-## Must-Not-Touch
-
-* `summit/acp/` (Agent Control Plane internals).
-* `summit/agents/cli.py` (CLI entry point).
-* `summit/observability.py` (Existing setup - I should probably *import* from it or refactor it carefully, but for now I will treat it as "legacy" to integrate with, ensuring I don't break existing apps using it).
-
+## CI Check Name Discovery
+* [x] `test-python` (pytest)
+* [x] `test-e2e` (playwright)

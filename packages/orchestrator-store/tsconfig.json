@@ -16,9 +16,8 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedIndexedAccess": true,
-    "types": [],
-    "typeRoots": []
+    "types": ["node", "pg", "uuid", "crypto-js"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "src/__tests__", "src/tests", "coverage"]
+  "exclude": ["node_modules", "dist", "__tests__", "tests", "coverage"]
 }
