@@ -1,0 +1,48 @@
+{
+  "task_id": "SANDBOXED_RUNTIME_EDGE_ROUTER_DOCS_20260207",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "sandboxed-runtime-edge-router-docs",
+    "version": "v1",
+    "sha256": "1729438234199739c33ee5a331d3e48df0900ddeb98ad39bcb4958387a2ef391",
+    "path": "prompts/docs/sandboxed-runtime-edge-router@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/standards/cloudflare-moltworker.md",
+      "docs/ops/runbooks/cloudflare-moltworker.md",
+      "docs/security/data-handling/cloudflare-moltworker.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/SANDBOXED_RUNTIME_EDGE_ROUTER_DOCS_TASK.json",
+      "prompts/docs/sandboxed-runtime-edge-router@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": [
+      "documentation",
+      "governance",
+      "security",
+      "operations"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/standards/cloudflare-moltworker.md",
+      "docs/ops/runbooks/cloudflare-moltworker.md",
+      "docs/security/data-handling/cloudflare-moltworker.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Sandboxed runtime standards, runbook, and data-handling docs are published",
+    "Roadmap status updated to reflect the new documentation initiative"
+  ],
+  "stop_conditions": [
+    "Authority files required by governance are missing",
+    "Policy-as-code requirements cannot be satisfied"
+  ]
+}
