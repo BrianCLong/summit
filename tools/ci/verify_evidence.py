@@ -21,21 +21,9 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    exceptions_path = ROOT / "evidence" / "governed_exceptions.json"
-    exceptions = load(exceptions_path) if exceptions_path.exists() else {}
-    schema_exceptions = exceptions.get("schema", [])
-
-    items = idx.get("items", [])
-    if not isinstance(items, (dict, list)) or not items:
-        fail("evidence/index.json must contain non-empty 'items'")
-
-    if isinstance(items, list):
-        # Convert list to dict for easier processing
-        items_dict = {}
-        for item in items:
-            if isinstance(item, dict) and "evidence_id" in item:
-                items_dict[item["evidence_id"]] = item
-        items = items_dict
+    items = idx.get("evidence", {}) or idx.get("items", {})
+    if not isinstance(items, dict) or not items:
+        fail('evidence/index.json must contain non-empty "evidence" or "items" map')
 
     for evd_id, meta in items.items():
         files = []

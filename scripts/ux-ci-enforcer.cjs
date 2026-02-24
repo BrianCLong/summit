@@ -41,6 +41,12 @@ class UXCIEnforcer {
     this.validateInformationHierarchy();
     this.validateTrustBoundaries();
 
+    const report = {
+      timestamp: new Date().toISOString(),
+      violations: this.violations,
+      filesChecked: this.changes.length
+    };
+
     // Report results
     if (this.violations.length > 0) {
       console.log('\n❌ UX CI Enforcer found violations:');
@@ -51,9 +57,12 @@ class UXCIEnforcer {
       });
       
       console.log('⚠️  UX Violations detected! PR/Commit blocked.');
+      fs.writeFileSync('ux-governance-report.json', JSON.stringify(report, null, 2));
       process.exit(1);
     } else {
       console.log('✅ All UX checks passed! No violations detected.');
+      // Optionally write success report too
+      fs.writeFileSync('ux-governance-report.json', JSON.stringify(report, null, 2));
       process.exit(0);
     }
   }

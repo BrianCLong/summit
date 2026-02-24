@@ -1,0 +1,6 @@
+name: Agentic Research Architecture Gate
+steps:
+  - name: Run Tests
+    command: npx jest __tests__/agentic-research/maestro-architecture.test.ts
+  - name: Generate Evidence
+    command: npx tsx agentic-research/maestro-architecture/src/evidenceRun.ts

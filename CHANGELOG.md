@@ -14,9 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Security
-- Hardened multi-tenant isolation in OSINT evidence search.
-- Standardized `ensureRole` middleware for case-insensitive role matching.
+### Added
+- Added agentic research modules: Hybrid Context Management, Architecture Selector, Temporal RAG, SLM Routing.
+- Added deterministic evidence artifacts for new agentic modules.
+
+### Added
+- Added `@summit/trends` package for business trend instrumentation.
+- Added evidence system for Forbes 2026 trends analysis.
 
 ### Added
 - **Strategic Update**: Positioned Summit as the "governed control plane" for agent sprawl (vs. OpenAI Frontier).
