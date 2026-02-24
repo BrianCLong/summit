@@ -1,18 +1,12 @@
 {
-  "last_updated": "2026-02-11T18:10:00Z",
-  "revision_note": "Resolved roadmap conflict state and added IO PR2 normalization hardening: canonical EVID:: IDs, deterministic schema eval outputs, and CLI io command wiring.",
+  "last_updated": "2026-02-08T00:15:00Z",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register; Normalized evidence/index.json to match evidence schema; Added UI Fuzz Probe scaffolding; Added Maestro Long-Run Job Engine governance scaffolding and CI gates; Expanded RepoFlow subsumption implementation scope and evidence gates.",
   "initiatives": [
     {
-      "id": "influence-ops-pr2-normalization-hardening-2026-02-11",
+      "id": "vercel-v0-90-problem-repoflow",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Standardized IO evidence IDs to EVID::<tenant>::<domain>::<artifact>::<date>::<gitsha7>::<runid8>, wired CLI io command registration, and hardened schema roundtrip eval outputs for deterministic report/metrics/stamp generation."
-    },
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+      "notes": "Repo-connected agent change flow: sandboxed execution, deterministic evidence, and policy-gated PR simulation."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -200,12 +194,6 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -235,7 +223,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 16,
     "ga_blockers": []
   }
 }
