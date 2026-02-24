@@ -1,4 +1,3 @@
-
 # Institutional Alignment & Governance
 
 > **Status:** DRAFT
@@ -15,11 +14,13 @@ To position Summit as **the trusted reference system** by aligning with external
 ## 2. External Governance Model
 
 
+
 ### 2.1. Advisory Councils
 We will establish advisory councils to provide oversight and guidance, separating technical execution from governance.
 * **Protocol Standards Council:** Oversees the evolution of the public protocols (PMP, PDI, AES). Includes external experts from academia and industry.
 * **Ethics & Safety Board:** Reviews simulation scenarios and AI safety guardrails.
 * **Sovereign User Group:** A closed forum for government and defense customers to discuss sensitive requirements.
+
 
 
 ### 2.2. Oversight Frameworks
@@ -44,6 +45,7 @@ We will establish advisory councils to provide oversight and guidance, separatin
 To maintain trust while protecting IP, we rigorously classify artifacts:
 
 
+
 ### Public (The "Commons")
 * Protocol Specifications (PMP, PDI, AES).
 * Client SDKs and API definitions.
@@ -52,11 +54,13 @@ To maintain trust while protecting IP, we rigorously classify artifacts:
 * Audit Summaries.
 
 
+
 ### Controlled Access (Partners/Customers)
 * Detailed Architecture Documentation.
 * Reference Implementation Source Code (under license).
 * Full Audit Reports.
 * Advanced Configuration Guides.
+
 
 
 ### Private (The "Core")
@@ -68,9 +72,9 @@ To maintain trust while protecting IP, we rigorously classify artifacts:
 
 ## 5. Controlled Publication
 Whitepapers and technical reports are strategic assets. They must be:
-1. **Peer-Reviewed:** Internally and by select external advisors.
-2. **Sanitized:** Checked for sensitive IP or dual-use risks.
-3. **Timed:** Released to coincide with strategic initiatives or protocol updates.
+1.  **Peer-Reviewed:** Internally and by select external advisors.
+2.  **Sanitized:** Checked for sensitive IP or dual-use risks.
+3.  **Timed:** Released to coincide with strategic initiatives or protocol updates.
 
 
 ## 6. Success Indicators

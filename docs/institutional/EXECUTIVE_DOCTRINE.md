@@ -44,6 +44,7 @@ We operate on two strict cycles. "Sprints" do not exist.
     * Outcome: Capabilities not re-certified are removed.
 
 
+
 ## 4. Failure & Risk
 * **Drift is Failure:** Silent deviation is treated as a critical defect.
 * **Contraction on Risk:** When uncertainty rises, the system automatically constricts autonomy and freezes changes.

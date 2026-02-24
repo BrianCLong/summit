@@ -1,21 +1,16 @@
-# Repo Reality Check (OMB M-26-05)
+# Repo Reality Check
 
-## Verified Structure
-- ✅ `docs/security/`: Exists
-- ✅ `docs/ci/REQUIRED_CHECKS_POLICY.yml`: Exists
-- ✅ `.github/workflows/`: Exists
-- ✅ `package.json` / `pnpm-lock.yaml`: Node.js environment verified.
-- ✅ Existing scanners: Trivy, Gitleaks, Semgrep, CodeQL found in `ci-security.yml`.
+## Verified
+* `summit` is the root python package.
+* `summit/post_training/recipes/typhoon_s/opd_trainer.py` exists and uses PyTorch.
+* `summit/post_training/recipes/typhoon_s/ink_grpo.py` exists but is only a config dataclass.
+* `tools/summit-fara` contains an agent loop with placeholder GRPO comments.
 
-## Assumptions
-- ⚠️ CI environment has access to OIDC for provenance (assumed for GitHub Actions).
-- ⚠️ Release process uses `dist/` as the primary artifact staging area.
+## Assumed (and will be created)
+* `summit/rl` will be the new home for the RL pipeline to support SAGE.
+* `summit/rl/trainers/grpo.py` will be created (or mocked) as the target for SAGE integration.
+* Evidence artifacts will be stored in `reports/sage-self-hint-grpo/` following the pattern seen in `summit/evidence/templates`.
 
 ## Must-not-touch
-- Production infrastructure files (Terraform, K8s manifests) unless explicitly required.
-- Core required checks in `docs/ci/REQUIRED_CHECKS_POLICY.yml` (only add new ones via established process).
-
-## Performance Budgets (Enforced)
-- SBOM generation: p95 ≤ 2 min
-- Evidence verification: ≤ 30 sec
-- Drift job: ≤ 5 min
+* `summit/post_training/recipes/typhoon_s/*` (unless strictly necessary, will leave as is).
+* `packages/*` (TypeScript/Node.js code).

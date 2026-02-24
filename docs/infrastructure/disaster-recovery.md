@@ -40,7 +40,7 @@ In the event of data loss:
 
    # Run restore
    ./restore.sh <TIMESTAMP>
-   ```
+   ```bash
 3. **Verify**: Run application health checks.
 
 

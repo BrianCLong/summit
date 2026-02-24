@@ -5,6 +5,18 @@
       "report": "examples/report.json",
       "metrics": "examples/metrics.json",
       "stamp": "examples/stamp.json"
+    },
+    {
+      "evidence_id": "EVD-MITSTARTUPS2026-BUNDLE-001",
+      "report": "summit/evidence/report.json",
+      "metrics": "summit/evidence/metrics.json",
+      "stamp": "summit/evidence/stamp.json"
+    },
+    {
+      "evidence_id": "SAGE-SELF-HINT-GRPO-001",
+      "report": "reports/sage-self-hint-grpo/run.json",
+      "metrics": "reports/sage-self-hint-grpo/metrics.json",
+      "stamp": "reports/sage-self-hint-grpo/stamp.json"
     }
   ]
 }
