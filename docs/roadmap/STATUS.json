@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T03:30:08Z",
-  "revision_note": "Expanded GA Control Room checklist with project definition, thread templates, and incident mode metadata guidance.",
+  "last_updated": "2026-02-08T03:32:03Z",
+  "revision_note": "Refined Codex Desktop GA Control Room + Architecture Lab artifacts with UEF outputs and MAESTRO alignment.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -237,10 +237,16 @@
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
     {
-      "id": "ga-control-room-codex",
+      "id": "codex-desktop-ga-control-room",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Defined Summit GA Control Room project config, threads, and GA checklist/incident mode drafts in docs/ops."
+      "notes": "Codex Desktop GA Control Room project definition, thread checklists, and initial run outputs."
+    },
+    {
+      "id": "codex-desktop-architecture-lab",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Codex Desktop Architecture Lab project definition and non-GA blocking operating rules."
     }
   ],
   "summary": {
@@ -248,7 +254,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 18,
     "ga_blockers": []
   }
 }
