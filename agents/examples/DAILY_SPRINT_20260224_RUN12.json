@@ -1,0 +1,38 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN12",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint",
+    "version": "v1",
+    "sha256": "c21be8753188043ff210a02d5ba1ff4713aa3545b61a46d419ffd87ececd8347",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260224_RUN12.json"
+    ],
+    "domains": ["operations", "documentation", "governance"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["local-checks/status-json-validate"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log updated with evidence-first bundle and execution status.",
+    "Prompt registry updated to include daily sprint prompt.",
+    "Roadmap status refreshed for this sprint run."
+  ],
+  "stop_conditions": [
+    "Scope breach outside declared paths.",
+    "Evidence capture blocked by persistent GitHub API outage without logging governed exception."
+  ]
+}
