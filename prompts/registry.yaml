@@ -1,31 +1,30 @@
 version: 1
 prompts:
-  - id: osint-evidence-pr1
+  - id: osint-hallucination-mitigation
     version: v1
-    path: prompts/osint/osint-evidence-pr1@v1.md
-    sha256: 96a6be40a6e97e565caa1420d51e47dc5a1e0090f29be7e4e5032311c3beec4d
-    description: Add OSINT evidence schemas, governance docs, and the summit-osint-verify CI gate.
+    path: prompts/osint/osint-hallucination-mitigation@v1.md
+    sha256: 9d6a71f809270db4fc2c78ef7741f3517a60cac3e92488d811a3e6b0cac9a49b
+    description: Establish provenance-required OSINT facts, deterministic evidence IDs, verifier gates, and supporting docs.
     scope:
       paths:
-        - .github/scripts/osint_verify.mjs
-        - .github/workflows/ci-osint-verify.yml
-        - docs/architecture/osint-pipeline.md
-        - docs/security/osint-governance.md
+        - packages/osint/src/hallucination/
+        - tests/test_provenance_required.py
+        - tests/test_unknown_degradation.py
+        - tests/test_verifier_flags_unsupported.py
+        - tests/test_two_source_promotion.py
+        - tests/test_deterministic_evidence_ids.py
+        - docs/standards/osint-hallucination-mitigation.md
+        - docs/security/data-handling/osint-hallucination-mitigation.md
+        - docs/ops/runbooks/osint-hallucination-mitigation.md
         - docs/roadmap/STATUS.json
-        - schemas/osint/report.schema.json
-        - schemas/osint/metrics.schema.json
-        - schemas/osint/stamp.schema.json
-        - schemas/osint/evidence-index.schema.json
-        - required_checks.todo.md
-        - prompts/osint/osint-evidence-pr1@v1.md
+        - prompts/osint/osint-hallucination-mitigation@v1.md
         - prompts/registry.yaml
         - agents/examples/OSINT_EVIDENCE_PR1.json
       domains:
         - osint
         - governance
-        - ci
         - documentation
-        - schemas
+        - testing
     verification:
       tiers_required:
         - C
