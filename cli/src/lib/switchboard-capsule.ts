@@ -26,9 +26,19 @@ const WaiverSchema = z.object({
   expires_at: z.string().optional(),
 });
 
+const GuardrailConfigSchema = z.object({
+  maxConcurrent: z.number().optional(),
+  timeoutMs: z.number().optional(),
+  rateLimit: z.object({
+    tokensPerSecond: z.number(),
+    burst: z.number(),
+  }).optional(),
+});
+
 const StepSchema = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
+  guardrails: GuardrailConfigSchema.optional(),
   command: z.string(),
   args: z.array(z.string()).default([]),
   reads: z.array(z.string()).default([]),
@@ -47,6 +57,7 @@ export const CapsuleManifestSchema = z.object({
   env_allowlist: z.array(z.string()).default([]),
   time: TimePinSchema.default({}),
   secret_handles: z.array(z.string()).default([]),
+  guardrails: GuardrailConfigSchema.optional(),
   waivers: z.array(WaiverSchema).default([]),
   steps: z.array(StepSchema).default([]),
 }).strict();
