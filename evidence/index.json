@@ -1,42 +1,10 @@
 {
-  "version": "1.0",
-  "evidence": {
-    "EVD-neo4j-vector-opt-RETR-001": {
-      "path": "evidence/neo4j-vector-opt/RETR-001"
-    },
-    "EVD-neo4j-vector-opt-RETR-002": {
-      "path": "evidence/neo4j-vector-opt/RETR-002"
-    },
-    "EVD-neo4j-vector-opt-GRAPHRAG-001": {
-      "path": "evidence/neo4j-vector-opt/GRAPHRAG-001"
-    },
-    "EVD-neo4j-vector-opt-CI-001": {
-      "path": "evidence/neo4j-vector-opt/CI-001"
-    },
-    "EVD-SSDF12-BNDL-001": {
-      "path": "evidence/ssdf-v1-2/pr-01"
-    },
-    "EVD-PRIVTEL-SCHEMA-001": {
-      "path": "evidence/privtel"
-    }
-  },
-  "legacy_items": [
-    "EVD-PIPELINE-RESILIENCE-001",
-    "EVD-SKETCHDYNAMICS-PIPELINE-001",
-    "EVD-SKETCHDYNAMICS-CLARIFY-001",
-    "EVD-vfgnn-ATT-001",
-    "EVD-vfgnn-NEG-001",
-    "EVD-INHOUSE-DATA-AGENT-ARCH-001",
-    "EVD-ATLAS-SCHEMA-001",
-    "EVD-ATLAS-PLNR-001",
-    "EVD-ATLAS-XFER-001",
-    "EVD-ATLAS-ATLS-001",
-    "EVD-ATLAS-ATLS-002",
-    "EVD-ATLAS-GOV-001",
-    "EVD-260119895-keel-ARCH-001",
-    "EVD-260119895-keel-STAB-002",
-    "EVD-260119895-keel-DSCL-003",
-    "EVD-260119895-keel-BENCH-004",
-    "EVD-EXPB-CORE-001"
+  "version": 1.0,
+  "items": [
+    { "id": "EVD-kgrag-dual-INGEST-001", "path": "evidence/kgrag-dual/INGEST-001" },
+    { "id": "EVD-kgrag-dual-INGEST-002", "path": "evidence/kgrag-dual/INGEST-002" },
+    { "id": "EVD-kgrag-dual-RETR-001", "path": "evidence/kgrag-dual/RETR-001" },
+    { "id": "EVD-kgrag-dual-RETR-002", "path": "evidence/kgrag-dual/RETR-002" },
+    { "id": "EVD-kgrag-dual-SYNC-001", "path": "evidence/kgrag-dual/SYNC-001" }
   ]
 }

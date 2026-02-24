@@ -67,7 +67,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-report-node-${{ matrix.node-version }}
           path: /tmp/test-report.md
@@ -113,7 +113,7 @@ jobs:
           labels: triage, automated, weekly-report
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: weekly-triage-${{ github.run_number }}
           path: |

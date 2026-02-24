@@ -6,6 +6,8 @@ import rego.v1
 import future.keywords
 
 
+import future.keywords
+
 default allow = false
 
 allow if {

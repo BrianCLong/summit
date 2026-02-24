@@ -470,7 +470,7 @@ jobs:
 
       - name: Upload verification artifacts
         if: steps.detect-changes.outputs.verification_needed == 'true'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pq-dual-signature-verification-${{ github.sha }}-${{ matrix.signature_type }}
           path: |

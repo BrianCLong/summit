@@ -50,6 +50,9 @@ jobs:
           fetch-depth: 0 # Full history for accurate diffs
 
       - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"

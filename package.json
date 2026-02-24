@@ -369,14 +369,30 @@
       "apollo-server-express": ">=3.13.0",
       "redis": ">=5.9.0",
       "@types/express": "4.17.21",
-      "@types/express-serve-static-core": "4.19.6",
-      "@isaacs/brace-expansion": "^5.0.1"
+      "@types/express-serve-static-core": "4.19.6"
     },
     "peerDependencyRules": {
       "allowedVersions": {
         "react": "*",
         "react-dom": "*"
       }
-    }
+    },
+    "neverBuiltDependencies": [
+      "bcrypt",
+      "canvas",
+      "classic-level",
+      "cpu-features",
+      "cypress",
+      "dtrace-provider",
+      "isolated-vm",
+      "lzo",
+      "node-gyp",
+      "node-pre-gyp",
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp",
+      "spellchecker",
+      "xxhash"
+    ]
   }
 }

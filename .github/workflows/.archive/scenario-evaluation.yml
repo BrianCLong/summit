@@ -162,7 +162,7 @@ jobs:
           "
 
       - name: Upload scenario reports
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: scenario-evaluation-reports
@@ -170,7 +170,7 @@ jobs:
           retention-days: 30
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: coverage

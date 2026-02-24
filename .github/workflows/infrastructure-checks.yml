@@ -1,0 +1,40 @@
+name: Infrastructure Checks
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  infra-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Dockerfile
+        run: |
+          if [ -f "Dockerfile" ]; then
+            echo "Dockerfile exists."
+          fi
+
+      - name: Check Helm Chart
+        run: |
+          if [ -d "helm" ]; then
+             if [ -f "helm/Chart.yaml" ]; then
+               helm lint helm/
+             else
+               echo "helm directory exists but Chart.yaml not found. Skipping lint."
+             fi
+          else
+            echo "helm directory not found."
+          fi
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Check Terraform
+        run: |
+          if [ -d "terraform" ]; then
+            terraform fmt -check -recursive terraform/
+          fi

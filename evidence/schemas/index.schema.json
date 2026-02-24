@@ -1,26 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["version"],
+  "required": ["version", "items"],
   "properties": {
-    "version": { "type": ["number", "string"] },
-    "evidence": {
-      "type": "object",
-      "patternProperties": {
-        "^EVD-[a-zA-Z0-9-]+$": {
-          "type": "object",
-          "required": ["path"],
-          "properties": {
-            "path": { "type": "string" }
-          },
-          "additionalProperties": false
-        }
-      }
-    },
-    "legacy_items": {
-      "type": "array",
-      "items": { "type": "string" }
-    },
+    "version": { "type": "number" },
     "items": {
       "type": "array",
       "items": {
@@ -34,5 +17,6 @@
       }
     }
   },
+  "required": ["items"],
   "additionalProperties": false
 }

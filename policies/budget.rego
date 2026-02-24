@@ -5,7 +5,6 @@ package intelgraph.budget
 
 import future.keywords
 
-
 # Default deny - all budget requests must be explicitly allowed
 default allow := false
 

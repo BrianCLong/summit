@@ -4,6 +4,8 @@ import future.keywords.in
 import future.keywords
 
 
+import future.keywords
+
 # Combine sub-decisions and emit a consolidated verdict
 
 verdict := {

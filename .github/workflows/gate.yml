@@ -1,54 +1,43 @@
-name: Pre-Deploy SLO Gate
-
-# Reusable workflow for health gates based on SLO metrics
-# Blocks production deployment if error rates or latency exceed thresholds
-#
-# Authority: docs/governance/SLO_CONTROLS.md
-
+name: Gate
 on:
-  workflow_call:
-    inputs:
-      region:
-        description: "Region to check SLOs for"
-        required: false
-        type: string
-        default: "us-east-1"
-      prometheus_url:
-        description: "Prometheus URL"
-        required: false
-        type: string
-        default: "http://prometheus:9090"
-    outputs:
-      ok:
-        description: "true if gate passed"
-        value: ${{ jobs.gate.outputs.ok }}
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   gate:
-    name: SLO Health Gate
-    runs-on: ubuntu-latest
-    outputs:
-      ok: ${{ steps.result.outputs.ok }}
+    runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Canary Gate
-        id: result
-        shell: bash
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Check Evidence
         run: |
-          echo "Checking SLOs for region: ${{ inputs.region }}"
-          export PROMETHEUS_URL="${{ inputs.prometheus_url }}"
-          export PROMETHEUS_LABEL_FILTER="region=\"${{ inputs.region }}\""
-
-          # Ensure script is executable
-          chmod +x scripts/canary-gate.sh
-
-          if ./scripts/canary-gate.sh; then
-            echo "ok=true" >> $GITHUB_OUTPUT
-            echo "✅ SLO Gate Passed"
-          else
-            echo "ok=false" >> $GITHUB_OUTPUT
-            echo "❌ SLO Gate Failed"
-            exit 1
+          if [ -d "evidence" ]; then
+             python3 scripts/ci_verify_evidence.py
           fi

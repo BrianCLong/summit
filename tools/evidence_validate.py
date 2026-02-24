@@ -72,12 +72,7 @@ def main():
     success = True
 
     # Validate Items
-    items = index_data.get("items", [])
-    if "evidence" in index_data:
-        for evd_id, meta in index_data["evidence"].items():
-            items.append({"id": evd_id, "path": meta["path"]})
-
-    for item in items:
+    for item in index_data.get("items", []):
         evidence_id = item.get("id")
         path = item.get("path")
 

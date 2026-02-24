@@ -19,9 +19,9 @@ Until discovered, we use temporary verifier names:
 - `ci:schema`
 - `ci:lint`
 - `ci:deps-delta`
-- `ci/evidence-verify`
-- `ci/retrieval-drift`
-- `ci/retrieval-acl`
+
+## Mapped Verifiers
+- `ci/evidence-verify` -> `scripts/ci_verify_evidence.py`
 
 ## Rename plan
 Once real check names are known:

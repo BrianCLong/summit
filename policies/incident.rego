@@ -7,6 +7,8 @@ import rego.v1
 import future.keywords
 
 
+import future.keywords
+
 # Default to deny all actions unless explicitly allowed.
 default allow = false
 
