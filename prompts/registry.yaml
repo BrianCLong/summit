@@ -922,3 +922,29 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: c3d8a8c9c3a54c0525dd7eb4b53d730de4b25f1e42f910929317f43a68bf6ed0
+    description: Daily sprint automation prompt for evidence-first planning, execution, and reporting.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+        - agents/examples/DAILY_SPRINT_20260224_RUN2.json
+      domains:
+        - automation
+        - governance
+        - operations
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
