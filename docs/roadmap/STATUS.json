@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-09T00:00:00Z",
-  "revision_note": "Added Summit Switchboard (MCP) standards, data handling, runbook, and repo assumptions.",
+  "last_updated": "2026-02-08T01:10:00Z",
+  "revision_note": "Added workflow-graph evidence lane-1 tracking entry.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -103,7 +103,13 @@
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Added Switchboard MCP control-plane evidence contract and determinism scaffolding."
     },
     {
-      "id": "gdelt-gkg-23rd-order-delivery",
+      "id": "workflow-graphs-evidence-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Workflow graph evidence scaffolding with deterministic verifier and index registration."
+    },
+    {
+      "id": "summit-skill-router-ga-orchestrator",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Published 23rd-order governed delivery plan for GDELT GKG integration with evidence-first posture and MAESTRO alignment."
