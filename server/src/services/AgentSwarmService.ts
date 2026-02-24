@@ -62,9 +62,9 @@ export class AgentSwarmService {
     }
 
     const missionId = randomUUID();
-    
+
     // Task #122: Human-in-the-loop guardrail for critical missions
-    const humanApprovalRequired = agentCount > 50; 
+    const humanApprovalRequired = agentCount > 50;
 
     // Task #122: Provenance Handoff
     const provenanceHash = quantumIdentityManager.issueIdentity(`missionId=${missionId};agents=${availableAgents.map(a => a.id).join(',')}`).signature;
@@ -79,7 +79,7 @@ export class AgentSwarmService {
     };
 
     availableAgents.forEach(a => a.status = 'busy');
-    
+
     logger.info({ missionId, humanApprovalRequired }, 'AgentSwarm: Mission initialized');
     return mission;
   }

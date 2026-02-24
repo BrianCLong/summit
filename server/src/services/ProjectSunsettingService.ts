@@ -35,10 +35,10 @@ export class ProjectSunsettingService {
     try {
       // 1. Mark as STALLED (30 days inactivity)
       const stalledResult = await pool.query(`
-        UPDATE tenants 
+        UPDATE tenants
         SET config = config || '{"lifecycle_status": "STALLED"}'::jsonb,
             updated_at = NOW()
-        WHERE is_active = true 
+        WHERE is_active = true
         AND updated_at < NOW() - INTERVAL '30 days'
         AND (config->>'lifecycle_status' IS NULL OR config->>'lifecycle_status' != 'STALLED')
         RETURNING id
@@ -50,7 +50,7 @@ export class ProjectSunsettingService {
 
       // 2. Mark as ARCHIVED (60 days inactivity)
       const archivedResult = await pool.query(`
-        UPDATE tenants 
+        UPDATE tenants
         SET config = config || '{"lifecycle_status": "ARCHIVED"}'::jsonb,
             is_active = false,
             updated_at = NOW()

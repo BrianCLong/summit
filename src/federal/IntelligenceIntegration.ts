@@ -317,9 +317,9 @@ export class FederalIntelligenceIntegration extends EventEmitter {
             eventType: 'task_fail',
             level: 'error',
             message: `Failed to sync from ${dataSource.name}`,
-            details: { 
-              dataSourceId: dataSource.id, 
-              error: error instanceof Error ? error.message : String(error) 
+            details: {
+              dataSourceId: dataSource.id,
+              error: error instanceof Error ? error.message : String(error)
             }
           });
           dataSource.status = 'ERROR';
@@ -355,7 +355,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     // Check for explicit override in environment
     const envKey = `FEDERAL_CONN_TEST_${dataSource.agency}_${dataSource.classification}`;
     const envOverride = process.env[envKey];
-    
+
     if (envOverride === 'fail') return false;
     if (envOverride === 'pass') return true;
 
@@ -370,7 +370,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     // Check for explicit override in environment
     const envKey = `FEDERAL_AUTH_${dataSource.agency}_${dataSource.classification}`;
     const envOverride = process.env[envKey];
-    
+
     if (envOverride === 'fail') throw new Error(`Authentication failed for ${dataSource.name} (env override)`);
 
     // Default to deterministic behavior
@@ -387,14 +387,14 @@ export class FederalIntelligenceIntegration extends EventEmitter {
   ): Promise<any[]> {
     const seed = `${dataSource.id}-${dataSource.agency}`;
     const rand = (s: string) => this.deterministicRandom(s);
-    
+
     const recordCount = Math.floor(rand(seed + '-count') * 20) + 5;
     const records = [];
 
     for (let i = 0; i < recordCount; i++) {
       const itemSeed = `${seed}-item-${i}`;
       const typeIdx = Math.floor(rand(itemSeed + '-type') * dataSource.dataTypes.length);
-      
+
       records.push({
         id: `record-${dataSource.agency}-${i}`,
         type: dataSource.dataTypes[typeIdx],
@@ -542,7 +542,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     const results = [];
     const seed = `query-${query}-${dataSources.join(',')}`;
     const rand = (s: string) => this.deterministicRandom(s);
-    
+
     const resultCount = Math.floor(rand(seed + '-count') * 20) + 5;
 
     for (let i = 0; i < resultCount; i++) {
@@ -607,7 +607,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
     // Deterministic compliance assessment
     const seed = `assess-${requirement.id}`;
     const rand = (s: string) => this.deterministicRandom(s);
-    
+
     const statusRand = rand(seed + '-status');
     const status =
       statusRand > 0.3

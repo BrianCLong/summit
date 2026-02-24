@@ -27,7 +27,7 @@ export class DeepAuditArchiveService {
   public async runDeepArchive(): Promise<void> {
     logger.info('DeepAuditArchive: Starting deep archive job');
     const pool = getPostgresPool();
-    
+
     const cutoff = new Date();
     cutoff.setMonth(cutoff.getMonth() - this.DEEP_ARCHIVE_RETENTION_MONTHS);
 
@@ -49,10 +49,10 @@ export class DeepAuditArchiveService {
 
         if (partitionDate <= cutoff) {
           logger.info({ partitionName }, 'DeepAuditArchive: Archiving partition to DEEP_ARCHIVE');
-          
+
           // 1. Detach partition
           await pool.query(`ALTER TABLE ${this.AUDIT_TABLE} DETACH PARTITION ${partitionName}`);
-          
+
           // 2. Archive to S3 Glacier Deep Archive
           await coldStorageService.archivePartition(
             this.AUDIT_TABLE,
@@ -63,7 +63,7 @@ export class DeepAuditArchiveService {
 
           // 3. Drop partition
           await pool.query(`DROP TABLE IF EXISTS ${partitionName}`);
-          
+
           logger.info({ partitionName }, 'DeepAuditArchive: Successfully moved to cold storage and dropped from DB');
         }
       }

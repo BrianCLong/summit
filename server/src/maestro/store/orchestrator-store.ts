@@ -1,7 +1,7 @@
 import { Pool, QueryResult } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
 import { logger } from '../../config/logger.js';
-import { 
+import {
   MaestroLoop,
   MaestroAgent,
   MaestroExperiment,
@@ -149,7 +149,7 @@ export class OrchestratorPostgresStore {
     const result = await this.pool.query(
       'SELECT id, name, type, status, last_decision, last_run, config FROM maestro_loops ORDER BY created_at DESC'
     );
-    
+
     return result.rows.map(row => ({
       id: row.id,
       name: row.name,
@@ -231,26 +231,26 @@ export class OrchestratorPostgresStore {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
-      
+
       // Update agent
       const updateResult = await client.query(
-        `UPDATE maestro_agents SET 
-          name = COALESCE($1, name), 
-          role = COALESCE($2, role), 
-          model = COALESCE($3, model), 
-          status = COALESCE($4, status), 
-          routing_weight = COALESCE($5, routing_weight), 
-          metrics = COALESCE($6, metrics), 
-          updated_at = CURRENT_TIMESTAMP 
-         WHERE id = $7 
+        `UPDATE maestro_agents SET
+          name = COALESCE($1, name),
+          role = COALESCE($2, role),
+          model = COALESCE($3, model),
+          status = COALESCE($4, status),
+          routing_weight = COALESCE($5, routing_weight),
+          metrics = COALESCE($6, metrics),
+          updated_at = CURRENT_TIMESTAMP
+         WHERE id = $7
          RETURNING *`,
         [
-          updates.name, 
-          updates.role, 
-          updates.model, 
-          updates.status, 
-          updates.routingWeight, 
-          updates.metrics, 
+          updates.name,
+          updates.role,
+          updates.model,
+          updates.status,
+          updates.routingWeight,
+          updates.metrics,
           id
         ]
       );
@@ -266,7 +266,7 @@ export class OrchestratorPostgresStore {
       );
 
       await client.query('COMMIT');
-      
+
       const row = updateResult.rows[0];
       return {
         id: row.id,
@@ -305,17 +305,17 @@ export class OrchestratorPostgresStore {
 
   async createExperiment(experiment: MaestroExperiment, actor: string): Promise<MaestroExperiment> {
     const result = await this.pool.query(
-      `INSERT INTO maestro_experiments 
-       (id, name, hypothesis, status, variants, metrics, start_date) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) 
+      `INSERT INTO maestro_experiments
+       (id, name, hypothesis, status, variants, metrics, start_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, name, hypothesis, status, variants, metrics, start_date, created_at`,
       [
         experiment.id || uuidv4(),
-        experiment.name, 
-        experiment.hypothesis, 
-        experiment.status, 
-        experiment.variants, 
-        experiment.metrics, 
+        experiment.name,
+        experiment.hypothesis,
+        experiment.status,
+        experiment.variants,
+        experiment.metrics,
         experiment.startDate ? new Date(experiment.startDate) : null
       ]
     );
@@ -361,11 +361,11 @@ export class OrchestratorPostgresStore {
     actor: string
   ): Promise<CoordinationTask> {
     const id = `task_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    
+
     const result = await this.pool.query(
-      `INSERT INTO maestro_coordination_tasks 
-       (id, title, description, owner_id, participants, priority) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO maestro_coordination_tasks
+       (id, title, description, owner_id, participants, priority)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, title, description, status, owner_id, participants, priority, created_at`,
       [id, task.title, task.description, task.ownerId, task.participants, task.priority]
     );
@@ -427,11 +427,11 @@ export class OrchestratorPostgresStore {
     actor: string
   ): Promise<CoordinationChannel> {
     const id = `channel_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-    
+
     const result = await this.pool.query(
-      `INSERT INTO maestro_coordination_channels 
-       (id, topic, participants) 
-       VALUES ($1, $2, $3) 
+      `INSERT INTO maestro_coordination_channels
+       (id, topic, participants)
+       VALUES ($1, $2, $3)
        RETURNING id, topic, participants, status, created_at`,
       [id, topic, participantAgentIds]
     );
@@ -482,11 +482,11 @@ export class OrchestratorPostgresStore {
   ): Promise<ConsensusProposal<T>> {
     const id = `consensus_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const deadline = new Date(Date.now() + deadlineHours * 60 * 60 * 1000);
-    
+
     const result = await this.pool.query(
-      `INSERT INTO maestro_consensus_proposals 
-       (id, topic, proposal_data, coordinator_id, voters, deadline) 
-       VALUES ($1, $2, $3, $4, $5, $6) 
+      `INSERT INTO maestro_consensus_proposals
+       (id, topic, proposal_data, coordinator_id, voters, deadline)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, topic, proposal_data, coordinator_id, voters, status, deadline, created_at`,
       [id, topic, JSON.stringify(proposal), coordinatorId, voterAgentIds, deadline]
     );
@@ -578,9 +578,9 @@ export class OrchestratorPostgresStore {
   // Audit log methods
   async getAuditLog(limit: number = 100): Promise<AuditEvent[]> {
     const result = await this.pool.query(
-      `SELECT id, actor, action, resource, details, status, created_at 
-       FROM maestro_audit_log 
-       ORDER BY created_at DESC 
+      `SELECT id, actor, action, resource, details, status, created_at
+       FROM maestro_audit_log
+       ORDER BY created_at DESC
        LIMIT $1`,
       [limit]
     );

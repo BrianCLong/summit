@@ -25,10 +25,10 @@ export class ModelMonitorService {
   public async checkDrift(modelId: string, currentMetrics: { accuracy: number; biasScore: number }): Promise<void> {
     // 1. Fetch model metadata
     // For demo, we simulate fetching from DB. In reality, use modelLifecycleService.
-    const baselineAccuracy = 0.95; 
-    
+    const baselineAccuracy = 0.95;
+
     const accuracyDrop = baselineAccuracy - currentMetrics.accuracy;
-    
+
     if (accuracyDrop > this.DRIFT_THRESHOLD) {
       const reason = `Drift detected: Accuracy dropped by ${(accuracyDrop * 100).toFixed(2)}% (Threshold: ${this.DRIFT_THRESHOLD * 100}%)`;
       await modelLifecycleService.triggerRetraining(modelId, reason);

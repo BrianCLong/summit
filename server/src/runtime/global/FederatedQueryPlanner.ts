@@ -39,7 +39,7 @@ export class FederatedQueryPlanner {
 
     const decision = await globalTrafficSteering.resolveRegion(tenantId);
     const targetRegions = [decision.targetRegion];
-    
+
     if (params.globalSearch === true) {
         targetRegions.push('eu-central-1', 'ap-southeast-1');
     }
@@ -48,7 +48,7 @@ export class FederatedQueryPlanner {
 
     for (const region of targetRegions) {
       const pushedDownFilters: string[] = [];
-      
+
       if (query.includes('WHERE')) {
           pushedDownFilters.push('temporal_filter');
           pushedDownFilters.push('tenant_isolation');
@@ -84,13 +84,13 @@ export class FederatedQueryPlanner {
     // If cross-region aggregation, apply Differential Privacy
     if (plan.mergeStrategy === 'AGGREGATE' && plan.subQueries.length > 1) {
       const total = rawResults.reduce((acc: number, curr: any) => acc + curr.value, 0);
-      
+
       // Apply DP to the aggregate
       const guarded = differentialPrivacyService.guardResult(
-        { value: total }, 
+        { value: total },
         'AGGREGATE'
       );
-      
+
       logger.info({ original: total, guarded: guarded.value }, 'FederatedQueryPlanner: Applied DP to sovereign aggregate');
       return guarded;
     }

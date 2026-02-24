@@ -21,7 +21,7 @@ class AdversarialTestAgent extends BaseAgentArchetype {
   async recommend() { return []; }
   async act() { throw new Error('Not implemented'); }
   async shutdown(): Promise<void> {}
-  
+
   public async testValidateInput(input: string, context: AgentContext): Promise<boolean> {
     return await (this as any).validateInput(input, context);
   }
@@ -29,7 +29,7 @@ class AdversarialTestAgent extends BaseAgentArchetype {
 
 export async function runAdversarialSuite() {
   console.log('🛡️  Starting Post-Hardening Adversarial Verification Suite...');
-  
+
   // Mock auditSink to avoid DB dependency in red-team pass
   const originalRecordEvent = auditSink.recordEvent;
   const originalSecurityAlert = auditSink.securityAlert;
@@ -151,7 +151,7 @@ export async function runAdversarialSuite() {
   console.log(`Config Validation: ${summary.configValidation}/2`);
   console.log(`Audit Integrity:   ${summary.auditIntegrity}/1`);
   console.log(`Provenance Gate:   ${summary.provenanceGate}/1`);
-  
+
   if (summary.failures.length > 0) {
     console.error('\n❌ FAILURES DETECTED:');
     summary.failures.forEach(f => console.error(`  - ${f}`));

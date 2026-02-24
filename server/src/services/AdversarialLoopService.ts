@@ -34,7 +34,7 @@ export class AdversarialLoopService {
       try {
         const targetId = `auto-target-${Math.floor(Math.random() * 1000)}`;
         logger.info({ loopId, type, targetId }, 'AdversarialLoop: Triggering scheduled campaign');
-        
+
         await this.simulator.runCampaign(type, targetId, {
           name: `AutoLoop: ${type}`,
           severity: 'high'

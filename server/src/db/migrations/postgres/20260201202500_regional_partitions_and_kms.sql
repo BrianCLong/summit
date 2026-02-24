@@ -14,9 +14,9 @@ DO $$
 BEGIN
     -- Drop the old unique constraint on tenant_id only
     IF EXISTS (
-        SELECT 1 
-        FROM information_schema.table_constraints 
-        WHERE constraint_name = 'kms_configs_tenant_id_key' 
+        SELECT 1
+        FROM information_schema.table_constraints
+        WHERE constraint_name = 'kms_configs_tenant_id_key'
         AND table_name = 'kms_configs'
     ) THEN
         ALTER TABLE kms_configs DROP CONSTRAINT kms_configs_tenant_id_key;

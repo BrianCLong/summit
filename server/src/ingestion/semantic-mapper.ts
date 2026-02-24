@@ -139,7 +139,7 @@ export class SemanticMapperService {
     for (const sourceKey of keys) {
       const lowerKey = sourceKey.toLowerCase();
       const match = targetFields.find(t => lowerKey.includes(t.toLowerCase()) || t.toLowerCase().includes(lowerKey));
-      
+
       mappings.push({
         sourceField: sourceKey,
         targetField: match || `custom_${sourceKey}`,

@@ -58,7 +58,7 @@ export class DeepfakeDetectionService {
             2. Lighting and shadow anomalies.
             3. Blurred or overly smooth textures in complex areas.
             4. Inconsistent backgrounds or geometric distortions.
-            
+
             Return a JSON object:
             {
                 "isDeepfake": boolean,

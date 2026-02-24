@@ -309,9 +309,9 @@ router.post('/shadow/configs', express.json(), async (req, res) => {
     await pool.query(
       `INSERT INTO shadow_traffic_configs (tenant_id, target_url, sampling_rate, compare_responses)
        VALUES ($1, $2, $3, $4)
-       ON CONFLICT (tenant_id) DO UPDATE 
-       SET target_url = EXCLUDED.target_url, 
-           sampling_rate = EXCLUDED.sampling_rate, 
+       ON CONFLICT (tenant_id) DO UPDATE
+       SET target_url = EXCLUDED.target_url,
+           sampling_rate = EXCLUDED.sampling_rate,
            compare_responses = EXCLUDED.compare_responses,
            updated_at = CURRENT_TIMESTAMP`,
       [tenantId, targetUrl, samplingRate ?? 0, compareResponses ?? false]

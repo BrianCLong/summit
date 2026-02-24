@@ -8,7 +8,7 @@ describe('Bitemporal Service (Task #109)', () => {
 
   it('should record a fact and allow point-in-time retrieval', async () => {
     const validFrom = new Date('2026-01-01T00:00:00Z');
-    
+
     await bitemporalService.recordFact({
       id: entityId,
       tenantId,
@@ -51,9 +51,9 @@ describe('Bitemporal Service (Task #109)', () => {
 
     // 2. View as of what we knew BEFORE correction (John)
     const whatWeKnewThen = await bitemporalService.queryAsOf(
-        entityId, 
-        tenantId, 
-        new Date(), 
+        entityId,
+        tenantId,
+        new Date(),
         transactionBeforeCorrection
     );
     expect(whatWeKnewThen?.props.name).toBe('John Doe');

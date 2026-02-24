@@ -138,7 +138,7 @@ export class HighRiskOperationService {
         }
 
         if (request.status !== HighRiskOpStatus.APPROVED && request.status !== HighRiskOpStatus.REQUESTED) {
-            // Note: REQUESTED might be okay if policy allows single-actor for some things, 
+            // Note: REQUESTED might be okay if policy allows single-actor for some things,
             // but here we expect APPROVED via dual-control.
             if (request.status !== HighRiskOpStatus.APPROVED) {
                 throw new Error(`Execution denied: current status is ${request.status}`);

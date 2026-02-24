@@ -10,7 +10,7 @@ function lintWorkflow(filePath) {
   const errors = [];
 
   try {
-    yaml.load(content, { 
+    yaml.load(content, {
       filename: filePath,
       onWarning: (warning) => {
         errors.push(`Warning: ${warning.message}`);

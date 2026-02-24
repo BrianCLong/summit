@@ -61,7 +61,7 @@ permissions:
 jobs:
   audit:
     name: Security Audit
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     outputs:
       critical: ${{ steps.audit.outputs.critical }}

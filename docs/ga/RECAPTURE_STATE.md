@@ -1,7 +1,7 @@
 # GA Recapture State (Phase 0–1)
 
-**Mode:** Sensing (evidence-first).  
-**Authority Anchors:** Constitution + Meta-Governance + Agent Mandates + Summit Readiness Assertion.  
+**Mode:** Sensing (evidence-first).
+**Authority Anchors:** Constitution + Meta-Governance + Agent Mandates + Summit Readiness Assertion.
 **Summit Readiness Assertion:** `docs/SUMMIT_READINESS_ASSERTION.md` (reference enforced).
 
 ## Evidence Index (Raw)

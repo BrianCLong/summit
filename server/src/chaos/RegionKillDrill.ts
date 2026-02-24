@@ -35,7 +35,7 @@ export class RegionKillDrill {
   public async executeDrill(region: string, tenantId: string): Promise<DrillResult> {
     const availability = RegionalAvailabilityService.getInstance();
     const drPair = regionalFailoverService.getDRPair(region);
-    
+
     if (!drPair) {
       throw new Error(`Region ${region} has no defined DR pair`);
     }
