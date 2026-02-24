@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
+- Daily sprint automation now records 2026-02-24 evidence snapshots, PR triage status, and governed exceptions in `docs/ops/DAILY_SPRINT_2026-02-24.md`.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
