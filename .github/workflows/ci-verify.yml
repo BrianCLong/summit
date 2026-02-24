@@ -402,39 +402,16 @@ jobs:
             echo "Artifacts: ga-evidence-index-${GITHUB_SHA}" >> $GITHUB_STEP_SUMMARY
           fi
 
-  evidence-schema-validate:
-    name: evidence-schema-validate
+  evidence-determinism:
+    name: Evidence Determinism
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate evidence report/metrics/stamp schemas
-        run: pnpm exec tsx .github/scripts/verify-evidence.ts --evidence-dir evidence --check schemas
-
-  evidence-index-validate:
-    name: evidence-index-validate
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
-      - uses: actions/setup-node@v4 # v6
-        with:
-          node-version: "20"
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate evidence index schema
-        run: pnpm exec tsx .github/scripts/verify-evidence.ts --evidence-dir evidence --check index
+      - name: Verify evidence determinism
+        run: node .github/scripts/verify-evidence.mjs
 
   ci-verify-gate:
     name: CI Verify Gate ✅
@@ -448,8 +425,7 @@ jobs:
       - schema-validation
       - compliance-evidence
       - ga-evidence-completeness
-      - evidence-schema-validate
-      - evidence-index-validate
+      - evidence-determinism
     if: always()
     steps:
       - name: Check critical gates passed
@@ -463,8 +439,7 @@ jobs:
           echo "Schema Validation: ${{ needs.schema-validation.result }}"
           echo "Compliance Evidence: ${{ needs.compliance-evidence.result }}"
           echo "GA Evidence Completeness: ${{ needs.ga-evidence-completeness.result }}"
-          echo "Evidence Schema Validation: ${{ needs.evidence-schema-validate.result }}"
-          echo "Evidence Index Validation: ${{ needs.evidence-index-validate.result }}"
+          echo "Evidence Determinism: ${{ needs.evidence-determinism.result }}"
           echo ""
 
           # Critical gates (BLOCKING)
@@ -483,13 +458,8 @@ jobs:
             exit 1
           fi
 
-          if [[ "${{ needs.evidence-schema-validate.result }}" != "success" ]]; then
-            echo "::error::Evidence Schema Validation FAILED - CI BLOCKED"
-            exit 1
-          fi
-
-          if [[ "${{ needs.evidence-index-validate.result }}" != "success" ]]; then
-            echo "::error::Evidence Index Validation FAILED - CI BLOCKED"
+          if [[ "${{ needs.evidence-determinism.result }}" != "success" ]]; then
+            echo "::error::Evidence Determinism FAILED - CI BLOCKED"
             exit 1
           fi
 
@@ -513,8 +483,7 @@ jobs:
           echo "- ✅ Security Scan (Gitleaks, pnpm audit)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Policy Compliance (OPA check + test)" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ GA Evidence Completeness" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Evidence Schema Validation" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Evidence Index Validation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Evidence Determinism" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ MCP Tool UX Lint" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Informational Gates (Non-blocking)" >> $GITHUB_STEP_SUMMARY

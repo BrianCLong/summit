@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "koreai-agentic-run-001",
+  "evidence": {
+    "EVD-koreai-agentic-EVIDENCE-001": {
+      "report": "report.json",
+      "metrics": "metrics.json",
+      "stamp": "stamp.json"
+    }
+  },
+  "notes": "Determinism enforced; timestamps restricted to stamp.json."
+}

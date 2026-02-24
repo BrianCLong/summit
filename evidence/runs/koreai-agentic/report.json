@@ -1,0 +1,9 @@
+{
+  "summary": "Kore.ai agentic subsumption evidence scaffolding created.",
+  "status": "PASS",
+  "evidence_id": "EVD-koreai-agentic-EVIDENCE-001",
+  "notes": [
+    "Deterministic evidence bundle structure established.",
+    "Timestamps confined to stamp.json per determinism gate."
+  ]
+}

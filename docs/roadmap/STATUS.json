@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-14T00:15:00Z",
-  "revision_note": "Refined AgentApp repo recon anchors with readiness assertion and governed exceptions.",
+  "last_updated": "2026-02-08T02:09:28Z",
+  "revision_note": "Added deterministic evidence bundle gate for koreai-agentic scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -51,7 +51,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added koreai-agentic evidence bundle + CI verify gate."
     },
     {
       "id": "promptspec-foundation-lane1",
