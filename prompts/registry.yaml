@@ -1,20 +1,20 @@
 version: 1
 prompts:
-  - id: codex-desktop-ga-control-room
-    version: v2
-    path: prompts/docs/codex-desktop-ga-control-room@v2.md
-    sha256: 96f766c47da605b19b239f709a4332c4ab2fb7816ea2f70171f66e08c439e8c1
-    description: Stand up Codex Desktop GA Control Room and Architecture Lab artifacts with UEF outputs and MAESTRO alignment.
+  - id: partner-enablement-kit-v1
+    version: v1
+    path: prompts/partners/partner-enablement-kit-v1.md
+    sha256: 1557c823b4eecb0fb603d2697205ac153f070fee8c3867e37363ed32031310f8
+    description: Draft the Sprint N+7 partner enablement kit v1 documentation and update roadmap status.
     scope:
       paths:
-        - docs/codex-desktop/
+        - docs/partners/partner-enablement-kit-v1.md
         - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/docs/codex-desktop-ga-control-room@v2.md
+        - prompts/partners/partner-enablement-kit-v1.md
         - prompts/registry.yaml
-        - agents/examples/CODEX_DESKTOP_GA_CONTROL_ROOM_20260208.json
+        - agents/examples/PARTNER_ENABLEMENT_KIT_V1.json
       domains:
         - documentation
+        - partners
         - governance
         - ops
     verification:

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T03:21:23Z",
-  "revision_note": "Expanded Sprint +6 pilot execution plan with evidence, MAESTRO alignment, and implementation matrix.",
+  "last_updated": "2026-02-08T03:17:33Z",
+  "revision_note": "Added Sprint N+7 partner enablement kit v1 documentation milestone.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -26,6 +26,12 @@
       "owner": "codex",
       "notes": "Sprint +6 plan covering pilot execution, activation funnel, feedback capture, migration tools, and v1.1 roadmap lock.",
       "artifact": "sprint/sprint-06-pilot-execution-feedback-migration-tools-roadmap.md"
+    },
+    {
+      "id": "sprint-n-plus-7-partner-enablement-kit-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published partner enablement kit v1 guidance covering onboarding, IdP setup, policy profiles, evidence packs, billing basics, and troubleshooting links."
     },
     {
       "id": "B",
