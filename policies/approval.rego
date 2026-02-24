@@ -4,6 +4,7 @@ import future.keywords
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.approval"
 
 package intelgraph.approval
+import future.keywords.contains
 
 import rego.v1
 

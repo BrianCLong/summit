@@ -1,10 +1,8 @@
-import future.keywords
-
 
 package conductor
-import future.keywords
-
-import future.keywords
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 test_allow_known_good {
     allow with input as {

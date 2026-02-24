@@ -1,0 +1,35 @@
+name: Assurance Evidence Generation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-assurance-pack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build Evidence Pack
+        run: ./scripts/assurance/build_evidence_pack.sh
+
+      - name: Verify Evidence Pack
+        run: ./scripts/assurance/verify_evidence_pack.sh
+
+      - name: Upload Evidence Pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-evidence-pack
+          path: dist/assurance/evidence-pack.tgz
+          retention-days: 90

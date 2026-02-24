@@ -1,9 +1,7 @@
 package composer.policy_shadow
-import future.keywords
-
-import rego.v1
-
-import future.keywords
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
 
 # Combine sub-decisions and emit a consolidated verdict
 
@@ -29,3 +27,4 @@ all(arr, fn) = ok {
   some i
   ok = ok & fn(arr[i])
 }
+

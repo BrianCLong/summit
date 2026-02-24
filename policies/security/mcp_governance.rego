@@ -1,6 +1,7 @@
 import future.keywords
 
 package security.mcp
+import future.keywords.contains
 
 import rego.v1
 

@@ -6,6 +6,7 @@ import future.keywords
 # ============================================================================
 
 package intelgraph.abac
+import future.keywords.contains
 
 import rego.v1
 

@@ -1,0 +1,14 @@
+{
+  "name": "@summit/flows-summit-platform",
+  "version": "4.2.3",
+  "private": true,
+  "files": [
+    "manifest.json"
+  ],
+  "dependencies": {
+    "@summit/flows-ig": "workspace:*",
+    "@summit/flows-mc": "workspace:*",
+    "@summit/flows-sb": "workspace:*",
+    "@summit/flows-co": "workspace:*"
+  }
+}
