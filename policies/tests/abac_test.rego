@@ -4,6 +4,8 @@ import future.keywords
 package policies
 import future.keywords
 
+import future.keywords
+
 # Test tenant isolation: user from tenant A cannot access tenant B data
 test_deny_cross_tenant_access {
     deny with input as {

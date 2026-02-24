@@ -4,6 +4,8 @@ import future.keywords
 
 import rego.v1
 
+import future.keywords
+
 default allow = false
 
 # Rule to check if tenant is isolated

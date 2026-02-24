@@ -3,6 +3,8 @@ import future.keywords
 package policies.allowedregistries
 import future.keywords
 
+import future.keywords
+
 default allow = false
 
 allow {

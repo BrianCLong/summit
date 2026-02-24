@@ -4,6 +4,8 @@ import future.keywords
 package conductor
 import future.keywords
 
+import future.keywords
+
 test_allow_known_good {
     allow with input as {
         "verb": "get",

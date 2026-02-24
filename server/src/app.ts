@@ -23,6 +23,7 @@ import { sanitizeInput } from './middleware/sanitization.js';
 import { piiGuardMiddleware } from './middleware/pii-guard.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { publicRateLimit, authenticatedRateLimit } from './middleware/rateLimiter.js';
+import { ensureRole } from './middleware/auth.js';
 import { advancedRateLimiter } from './middleware/TieredRateLimitMiddleware.js';
 import { circuitBreakerMiddleware } from './middleware/circuitBreakerMiddleware.js';
 import { overloadProtection } from './middleware/overloadProtection.js';
@@ -396,13 +397,8 @@ export const createApp = async () => {
   });
 
   // Admin Rate Limit Dashboard Endpoint
-  // Requires authentication and admin role (simplified check for now)
-  app.get('/api/admin/rate-limits/:userId', authenticateToken, async (req, res) => {
-    const user = (req as any).user;
-    if (!user || user.role !== 'admin') {
-      res.status(403).json({ error: 'Forbidden' });
-      return;
-    }
+  // Requires authentication and admin role
+  app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
       const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
@@ -423,7 +419,7 @@ export const createApp = async () => {
   app.use('/policies', policyManagementRouter);
   app.use('/api/receipts', receiptsRouter);
   app.use('/api/brand-packs', brandPackRouter);
-  app.use(['/monitoring', '/api/monitoring'], monitoringRouter);
+  app.use(['/monitoring', '/api/monitoring'], authenticateToken, monitoringRouter);
   app.use('/api', monitoringBackpressureRouter);
   app.use('/api/ga-core-metrics', gaCoreMetricsRouter);
   if (process.env.SKIP_AI_ROUTES !== 'true') {
@@ -504,12 +500,12 @@ export const createApp = async () => {
   app.use('/api/admin/flags', adminFlagsRouter);
   app.use('/api', auditEventsRouter);
   app.use('/api', federatedCampaignRadarRouter);
-  app.use('/api/admin', adminGateway);
-  app.use('/api/plugins', pluginAdminRouter);
-  app.use('/api/integrations', integrationAdminRouter);
-  app.use('/api/security', securityAdminRouter);
-  app.use('/api/compliance', complianceAdminRouter);
-  app.use('/api/sandbox', sandboxAdminRouter);
+  app.use('/api/admin', authenticateToken, ensureRole(['ADMIN', 'admin']), adminGateway);
+  app.use('/api/plugins', authenticateToken, ensureRole(['ADMIN', 'admin']), pluginAdminRouter);
+  app.use('/api/integrations', authenticateToken, ensureRole(['ADMIN', 'admin']), integrationAdminRouter);
+  app.use('/api/security', authenticateToken, ensureRole(['ADMIN', 'admin']), securityAdminRouter);
+  app.use('/api/compliance', authenticateToken, ensureRole(['ADMIN', 'admin']), complianceAdminRouter);
+  app.use('/api/sandbox', authenticateToken, ensureRole(['ADMIN', 'admin']), sandboxAdminRouter);
   app.use('/api/v1/onboarding', onboardingRouter);
   app.use('/api/v1/support', supportCenterRouter);
   app.use('/api/v1/i18n', i18nRouter);
@@ -610,7 +606,7 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', async (req, res) => {
+  app.get('/search/evidence', authenticateToken, async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
     if (!q) {

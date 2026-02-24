@@ -5,6 +5,8 @@ import future.keywords
 
 import future.keywords
 
+import future.keywords
+
 # Allow dev deploys only from maintainers and CI bots
 allow if {
   input.env == "dev"

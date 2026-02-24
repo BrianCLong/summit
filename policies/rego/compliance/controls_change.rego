@@ -5,6 +5,8 @@ import future.keywords
 
 import future.keywords
 
+import future.keywords
+
 pass["chg-DEPLOY-001"]["Prod deploy has CI run, commit, artifact digest"] {
   input.evidence.spec == "summit.evidence.deployment.v1"
   input.evidence.deployment.env == "prod"

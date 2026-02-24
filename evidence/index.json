@@ -392,6 +392,14 @@
         "metrics": "evidence/EVD-shared-memory-orch-001/metrics.json",
         "stamp": "evidence/EVD-shared-memory-orch-001/stamp.json"
       }
+    },
+    {
+      "evidence_id": "EVD-INTSUM-2026-THREAT-HORIZON-001",
+      "files": {
+        "report": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/report.json",
+        "metrics": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/metrics.json",
+        "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
+      }
     }
   ]
 }

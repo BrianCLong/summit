@@ -3,6 +3,8 @@ import future.keywords
 package summit.authz_test
 import future.keywords
 
+import future.keywords
+
 import data.summit.authz
 
 base_subject := {

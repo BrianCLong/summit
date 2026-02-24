@@ -364,4 +364,4 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
-summit/telemetry/*.json
+\n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**

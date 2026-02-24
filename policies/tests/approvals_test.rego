@@ -3,6 +3,8 @@ import future.keywords
 package companyos.provenance
 import future.keywords
 
+import future.keywords
+
 test_approval_required {
     input := {
         "action": "delete",

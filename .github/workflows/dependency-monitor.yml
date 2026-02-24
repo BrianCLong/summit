@@ -95,8 +95,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7
-        with:
-          fetch-depth: 0
       # Note: pnpm version is read from package.json "packageManager" field
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
