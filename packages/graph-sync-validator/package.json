@@ -4,8 +4,8 @@
   "description": "Graph↔PG sync validator",
   "main": "src/compare/compare.mjs",
   "bin": {
-    "graph-sync-validate": "bin/graph-sync-validate.mjs",
-    "graph-sync-recon": "bin/parity-recon.mjs"
+    "graph-sync-validate": "scripts/graph-sync-validate.mjs",
+    "graph-sync-recon": "scripts/parity-recon.mjs"
   },
   "type": "module",
   "scripts": {

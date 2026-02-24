@@ -6,13 +6,13 @@ function runNode(args) {
   return result.status ?? 1;
 }
 
-const validateStatus = runNode(['packages/graph-sync-validator/bin/graph-sync-validate.mjs']);
+const validateStatus = runNode(['packages/graph-sync-validator/scripts/graph-sync-validate.mjs']);
 if (validateStatus !== 0) {
   process.exit(validateStatus);
 }
 
 const reconStatus = runNode([
-  'packages/graph-sync-validator/bin/parity-recon.mjs',
+  'packages/graph-sync-validator/scripts/parity-recon.mjs',
   '--metrics',
   'artifacts/graph-sync/metrics.json',
   '--output',
