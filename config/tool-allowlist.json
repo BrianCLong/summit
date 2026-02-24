@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "environments": {
+    "dev": {
+      "allowedTools": [
+        "graph-query",
+        "entity-search",
+        "copilot-ask",
+        "narrative-gen",
+        "export-csv",
+        "osint-lookup",
+        "debug-inspect",
+        "sandbox-exec"
+      ],
+      "denyByDefault": true,
+      "requireRationale": false
+    },
+    "staging": {
+      "allowedTools": [
+        "graph-query",
+        "entity-search",
+        "copilot-ask",
+        "narrative-gen",
+        "export-csv",
+        "osint-lookup"
+      ],
+      "denyByDefault": true,
+      "requireRationale": true
+    },
+    "prod": {
+      "allowedTools": [
+        "graph-query",
+        "entity-search",
+        "copilot-ask",
+        "export-csv"
+      ],
+      "denyByDefault": true,
+      "requireRationale": true
+    }
+  }
+}

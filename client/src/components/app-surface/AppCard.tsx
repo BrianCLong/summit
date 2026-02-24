@@ -1,152 +1,210 @@
 /**
- * AppCard - Generic embedded tool UI card for chat surfaces.
+ * AppCard - Generic embedded tool UI for chat messages.
  *
  * Renders a card with:
- * - Title, summary, status pill
- * - Expandable details panel (progressive disclosure)
- * - Optional children for form/results content
- * - Downloadable JSON evidence link
- *
- * Mobile-friendly, MUI-based, no secret leakage.
+ *  - Title, summary, status pill
+ *  - An optional form with validated inputs
+ *  - A results panel with downloadable JSON evidence
+ *  - Progressive disclosure: policy decision first, details expandable
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Card,
   CardContent,
+  CardActions,
   Typography,
   Chip,
+  Box,
   Collapse,
   IconButton,
-  Box,
   Button,
-  Stack,
+  Tooltip,
+  Alert,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   Download as DownloadIcon,
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+  HourglassEmpty as PendingIcon,
+  Error as ErrorIcon,
+  PlayArrow as RunningIcon,
 } from '@mui/icons-material';
 
-export type AppCardStatus = 'idle' | 'pending' | 'success' | 'denied' | 'error';
+export type AppCardStatus = 'pending' | 'running' | 'success' | 'denied' | 'error';
 
-const STATUS_COLORS: Record<AppCardStatus, 'default' | 'warning' | 'success' | 'error' | 'info'> = {
-  idle: 'default',
-  pending: 'info',
-  success: 'success',
-  denied: 'error',
-  error: 'warning',
-};
-
-const STATUS_LABELS: Record<AppCardStatus, string> = {
-  idle: 'Ready',
-  pending: 'Running...',
-  success: 'Allowed',
-  denied: 'Denied',
-  error: 'Error',
-};
+export interface AppCardResult {
+  verdict?: 'ALLOW' | 'DENY';
+  details?: Record<string, unknown>;
+  evidenceId?: string;
+  evidenceJson?: string;
+}
 
 export interface AppCardProps {
+  id: string;
+  surface: string;
   title: string;
   summary: string;
   status: AppCardStatus;
+  timestamp: string;
+  result?: AppCardResult;
   children?: React.ReactNode;
-  detailsContent?: React.ReactNode;
-  evidenceJson?: object | null;
-  evidenceId?: string;
+  onDownloadEvidence?: () => void;
 }
 
-const AppCard: React.FC<AppCardProps> = ({
+const STATUS_CONFIG: Record<
+  AppCardStatus,
+  { color: 'default' | 'primary' | 'success' | 'error' | 'warning'; icon: React.ReactElement; label: string }
+> = {
+  pending: { color: 'default', icon: <PendingIcon fontSize="small" />, label: 'Pending' },
+  running: { color: 'primary', icon: <RunningIcon fontSize="small" />, label: 'Running' },
+  success: { color: 'success', icon: <CheckCircleIcon fontSize="small" />, label: 'Allowed' },
+  denied: { color: 'error', icon: <CancelIcon fontSize="small" />, label: 'Denied' },
+  error: { color: 'warning', icon: <ErrorIcon fontSize="small" />, label: 'Error' },
+};
+
+function downloadJson(data: string, filename: string) {
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export default function AppCard({
+  id,
+  surface,
   title,
   summary,
   status,
+  timestamp,
+  result,
   children,
-  detailsContent,
-  evidenceJson,
-  evidenceId,
-}) => {
+  onDownloadEvidence,
+}: AppCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const statusCfg = STATUS_CONFIG[status];
 
-  const handleDownloadEvidence = () => {
-    if (!evidenceJson) return;
-    const blob = new Blob([JSON.stringify(evidenceJson, null, 2)], {
-      type: 'application/json',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `evidence-${evidenceId ?? 'bundle'}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const handleDownload = useCallback(() => {
+    if (onDownloadEvidence) {
+      onDownloadEvidence();
+      return;
+    }
+    if (result?.evidenceJson) {
+      downloadJson(result.evidenceJson, `evidence-${result.evidenceId || id}.json`);
+    }
+  }, [onDownloadEvidence, result, id]);
 
   return (
     <Card
-      variant="outlined"
+      data-testid={`app-card-${id}`}
       sx={{
-        maxWidth: 480,
+        maxWidth: 600,
         width: '100%',
-        mx: 'auto',
-        my: 1,
+        border: '1px solid',
+        borderColor:
+          status === 'denied' ? 'error.main' :
+          status === 'success' ? 'success.main' :
+          'divider',
         borderRadius: 2,
       }}
     >
       <CardContent sx={{ pb: 1 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
-          <Typography variant="subtitle1" fontWeight={600} noWrap>
-            {title}
-          </Typography>
+        {/* Header: title + status pill */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {surface} &middot; {new Date(timestamp).toLocaleString()}
+            </Typography>
+          </Box>
           <Chip
-            label={STATUS_LABELS[status]}
-            color={STATUS_COLORS[status]}
+            icon={statusCfg.icon}
+            label={statusCfg.label}
+            color={statusCfg.color}
             size="small"
-            data-testid="app-card-status"
+            sx={{ ml: 1, flexShrink: 0 }}
           />
-        </Stack>
+        </Box>
 
-        <Typography variant="body2" color="text.secondary" mb={1}>
+        {/* Summary */}
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
           {summary}
         </Typography>
 
+        {/* Verdict banner (progressive disclosure — shown first) */}
+        {result?.verdict && (
+          <Alert
+            severity={result.verdict === 'ALLOW' ? 'success' : 'error'}
+            sx={{ mb: 1 }}
+            data-testid="verdict-banner"
+          >
+            Policy decision: <strong>{result.verdict}</strong>
+            {result.evidenceId && (
+              <Typography variant="caption" component="span" sx={{ ml: 1 }}>
+                (Evidence: {result.evidenceId})
+              </Typography>
+            )}
+          </Alert>
+        )}
+
+        {/* Form area — rendered via children */}
         {children}
 
-        {detailsContent && (
+        {/* Expandable details */}
+        {result?.details && (
           <>
-            <Box display="flex" alignItems="center" mt={1}>
-              <Typography variant="caption" color="text.secondary">
+            <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', mt: 1 }} onClick={() => setExpanded(!expanded)}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
                 Details
               </Typography>
-              <IconButton
-                size="small"
-                onClick={() => setExpanded(!expanded)}
-                aria-label={expanded ? 'collapse details' : 'expand details'}
-                data-testid="app-card-toggle"
-              >
-                {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              <IconButton size="small" aria-label={expanded ? 'Collapse details' : 'Expand details'}>
+                {expanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
               </IconButton>
             </Box>
             <Collapse in={expanded}>
-              <Box mt={1}>{detailsContent}</Box>
+              <Box
+                component="pre"
+                sx={{
+                  bgcolor: 'grey.50',
+                  p: 1.5,
+                  borderRadius: 1,
+                  fontSize: '0.75rem',
+                  overflow: 'auto',
+                  maxHeight: 300,
+                  mt: 0.5,
+                }}
+              >
+                {JSON.stringify(result.details, null, 2)}
+              </Box>
             </Collapse>
           </>
         )}
+      </CardContent>
 
-        {evidenceJson && (
-          <Box mt={1}>
+      {/* Actions */}
+      {(result?.evidenceJson || onDownloadEvidence) && (
+        <CardActions sx={{ px: 2, py: 1 }}>
+          <Tooltip title="Download evidence bundle as JSON">
             <Button
-              variant="text"
               size="small"
               startIcon={<DownloadIcon />}
-              onClick={handleDownloadEvidence}
-              data-testid="app-card-download"
+              onClick={handleDownload}
+              data-testid="download-evidence"
             >
               Download Evidence
             </Button>
-          </Box>
-        )}
-      </CardContent>
+          </Tooltip>
+        </CardActions>
+      )}
     </Card>
   );
-};
-
-export default AppCard;
+}

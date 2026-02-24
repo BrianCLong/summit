@@ -1,0 +1,19 @@
+{
+  "id": "ev-550e8400-e29b-41d4-a716-446655440000",
+  "version": "1.0",
+  "timestamp": "2025-01-15T10:30:00.000Z",
+  "actor": "analyst@intelgraph.local",
+  "action": "policy_preflight",
+  "inputsHash": "a3f2b1c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2",
+  "outputsHash": "b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3",
+  "policyDecision": "ALLOW",
+  "environment": "dev",
+  "details": {
+    "dryRun": false,
+    "requestedToolCount": 2,
+    "allowedToolCount": 2,
+    "deniedToolCount": 0
+  },
+  "integrityHash": "c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4",
+  "_description": "Example evidence bundle produced by the App Surface Policy Preflight Runner. Each tool invocation generates a bundle like this, persisted to audit/app-surface/. The integrityHash covers all other fields to detect tampering. inputsHash and outputsHash use SHA-256 over canonical (sorted-key) JSON."
+}

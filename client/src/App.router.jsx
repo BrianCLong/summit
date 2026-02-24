@@ -113,6 +113,9 @@ const ComplianceCenter = React.lazy(() =>
 const SandboxDashboard = React.lazy(() =>
   import('./pages/Sandbox/SandboxDashboard')
 );
+const PolicyPreflightRunner = React.lazy(() =>
+  import('./components/app-surface/PolicyPreflightRunner')
+);
 const ReleaseReadinessRoute = React.lazy(() =>
   import('./routes/ReleaseReadinessRoute')
 );
@@ -125,7 +128,7 @@ const SearchResultDetail = React.lazy(() =>
   import('./pages/Search/SearchResultDetail')
 );
 
-import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import { MilitaryTech, Notifications, Extension, Cable, Key, VerifiedUser, Science, Policy } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 import { Assignment as AssignmentIcon } from '@mui/icons-material';
 
@@ -178,6 +181,7 @@ const navigationItems = [
   { path: '/security', label: 'Security', icon: <Key />, roles: [ADMIN] },
   { path: '/compliance', label: 'Compliance', icon: <VerifiedUser />, roles: [ADMIN] },
   { path: '/sandbox', label: 'Sandbox', icon: <Science />, roles: [ADMIN] },
+  { path: '/app-surface', label: 'App Surface', icon: <Policy />, roles: [ADMIN, 'OPERATOR'] },
   {
     path: '/ops/release-readiness',
     label: 'Release Readiness',
@@ -831,6 +835,7 @@ function MainLayout() {
                 <Route path="/security" element={<SecurityDashboard />} />
                 <Route path="/compliance" element={<ComplianceCenter />} />
                 <Route path="/sandbox" element={<SandboxDashboard />} />
+                <Route path="/app-surface" element={<PolicyPreflightRunner />} />
                 <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
