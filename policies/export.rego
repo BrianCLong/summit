@@ -1,5 +1,7 @@
 package intelgraph.export
 
+import rego.v1
+
 # Export policy for IntelGraph GA Core — simulate/enforce, DLP redactions, WebAuthn step-up.
 # Decision object intentionally explicit for audit & UX payloads.
 
@@ -17,15 +19,16 @@ default allow := false
 
 # --- Helpers -----------------------------------------------------------------
 
-is_simulate := input.mode == "simulate"
-is_enforce  := input.mode == "enforce"
+is_simulate if input.mode == "simulate"
+is_enforce  if input.mode == "enforce"
 
 sens := lower(input.resource.sensitivity)
-needs_step_up := sens == "sensitive" or sens == "restricted"
-has_step_up := input.auth.webauthn_verified == true
+needs_step_up if sens == "sensitive"
+needs_step_up if sens == "restricted"
+has_step_up if input.auth.webauthn_verified == true
 
 # Collect DLP redactions from pii:* tags on fields
-redactions_from_tags[entry] {
+redactions_from_tags contains entry if {
   f := input.resource.fields[_]
   some t
   t := f.tags[_]
@@ -34,15 +37,16 @@ redactions_from_tags[entry] {
 }
 
 # Merge explicit masks
-redactions_from_explicit[entry] {
+redactions_from_explicit contains entry if {
   p := input.resource.explicit_dlp_mask_paths[_]
   entry := {"path": p, "reason": "explicit"}
 }
 
-redactions := r {
-  r := redactions_from_tags
-  r2 := redactions_from_explicit
-  r := r | r2
+redactions contains r if {
+  some r in redactions_from_tags
+}
+redactions contains r if {
+  some r in redactions_from_explicit
 }
 
 # Reasons (human-readable)
@@ -61,20 +65,18 @@ decision := {
   "reasons": reasons
 }
 
-reasons := r {
+reasons := rs if {
   base := []
-  rs := base
-  rs := cond_append(rs, needs_step_up, reason_step_up)
-  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
-  r := rs
+  rs1 := cond_append(base, needs_step_up, reason_step_up)
+  rs2 := cond_append(rs1, needs_step_up and not has_step_up and is_enforce, reason_no_step)
+  rs := rs2
 }
 
 # allow rules
-allow { is_simulate }
-allow { is_enforce; not needs_step_up }
-allow { is_enforce; needs_step_up; has_step_up }
+allow if { is_simulate }
+allow if { is_enforce; not needs_step_up }
+allow if { is_enforce; needs_step_up; has_step_up }
 
 # Utility: append iff condition true
-cond_append(arr, cond, v) = out { cond; out := array.concat(arr, [v]) }
-cond_append(arr, cond, _) = arr { not cond }
-
+cond_append(arr, cond, v) := out if { cond; out := array.concat(arr, [v]) }
+cond_append(arr, cond, _) := arr if { not cond }

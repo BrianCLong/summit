@@ -1,9 +1,11 @@
 package switchboard
 import future.keywords.in
 
+import rego.v1
+
 default allow = false
 
-allow {
+allow if {
   input.subject.authenticated
   input.subject.webauthn_verified
   input.action == "render_widget"
@@ -11,7 +13,7 @@ allow {
   input.context.classification <= data.labels.allow_max
 }
 
-deny[msg] {
+deny contains msg if {
   not allow
   msg := sprintf("blocked: %v on %v", [input.action, input.resource])
 }

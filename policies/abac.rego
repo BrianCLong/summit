@@ -1,7 +1,8 @@
-# (same as in sprint doc)
 package abac.authz
 import future.keywords.if
 import future.keywords.in
+
+import rego.v1
 
 default allow = false
 
@@ -69,13 +70,13 @@ sensitive_read_basic_ok if {
 
 sensitive_read_privileged_ok if {
   input.action == "read"
-  ("pii" in input.resource.labels)
+  "pii" in input.resource.labels
   input.jwt.roles[_] == "admin"
 }
 
 sensitive_read_officer_ok if {
   input.action == "read"
-  ("pii" in input.resource.labels)
+  "pii" in input.resource.labels
   input.jwt.roles[_] == "privacy-officer"
 }
 
@@ -95,8 +96,4 @@ allow if {
   tenant_isolated
   purpose_allowed
   role_can_write
-}
-
-labels_contains_pii if {
-  input.resource.labels[_] == "pii"
 }
