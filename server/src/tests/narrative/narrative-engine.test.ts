@@ -1,11 +1,11 @@
-import { NarrativeSimulationEngine } from '../../narrative/engine.js';
+import { NarrativeSimulationEngine } from '../../narrative/engine';
 import { describe, it, expect } from '@jest/globals';
 import type {
   SimulationConfig,
   NarrativeEvent,
   LLMClient,
   LLMNarrativeRequest,
-} from '../../narrative/types.js';
+} from '../../narrative/types';
 
 class TestLLMClient implements LLMClient {
   constructor(private readonly shouldFail = false) {}
