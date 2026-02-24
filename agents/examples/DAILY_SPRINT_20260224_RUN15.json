@@ -1,0 +1,38 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN15",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-orchestrator",
+    "version": "v1",
+    "sha256": "f658b6e9fc282d724a3996cc0be2bb3a54875eebcfd7ef6ed4d9bc39da6cd011",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260224_RUN15.json"
+    ],
+    "domains": ["operations", "governance", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["git-status", "diff-review"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log captures evidence-first PR/issue scan and sprint plan.",
+    "Roadmap status timestamp updated for the run.",
+    "Prompt registry entry present for the daily sprint orchestrator."
+  ],
+  "stop_conditions": [
+    "Any change outside declared scope.",
+    "Need to modify production workflows or security policies."
+  ]
+}
