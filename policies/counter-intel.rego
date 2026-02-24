@@ -3,7 +3,7 @@
 # the automated aspects of the counter-intelligence framework.
 
 package counter_intelligence
-import rego.v1
+import future.keywords
 
 default allow = false
 

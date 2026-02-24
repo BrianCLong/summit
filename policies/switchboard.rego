@@ -1,7 +1,5 @@
 package switchboard
-import rego.v1
-
-import future.keywords.in
+import future.keywords
 
 default allow = false
 

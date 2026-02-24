@@ -1,5 +1,5 @@
 package maestro.deploy
-import rego.v1
+import future.keywords
 
 # Allow dev deploys only from maintainers and CI bots
 allow {

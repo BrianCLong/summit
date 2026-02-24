@@ -1,5 +1,5 @@
 package compliance
-import rego.v1
+import future.keywords
 
 import data.compliance.lib_time as t
 

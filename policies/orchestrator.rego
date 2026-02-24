@@ -1,5 +1,5 @@
 package orchestrator
-import rego.v1
+import future.keywords
 
 default allow = false
 

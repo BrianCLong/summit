@@ -1,6 +1,6 @@
 
 package conductor
-import rego.v1
+import future.keywords
 
 test_allow_known_good {
     allow with input as {

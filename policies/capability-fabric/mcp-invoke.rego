@@ -1,5 +1,5 @@
 package summit.capability.mcp_invoke
-import rego.v1
+import future.keywords
 
 default allow = false
 

@@ -1,5 +1,5 @@
 package summit.capability.maestro_runs_read
-import rego.v1
+import future.keywords
 
 default allow = false
 

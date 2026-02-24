@@ -114,7 +114,6 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           node-version: ${{ inputs.node-version }}
-          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

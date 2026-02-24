@@ -1,5 +1,5 @@
 package companyos.provenance
-import rego.v1
+import future.keywords
 
 test_approval_required {
     input := {

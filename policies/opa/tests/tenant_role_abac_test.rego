@@ -1,5 +1,5 @@
 package summit.authz_test
-import rego.v1
+import future.keywords
 
 import data.summit.authz
 

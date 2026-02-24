@@ -1,5 +1,5 @@
 package export.v2
-import rego.v1
+import future.keywords
 
 default allow := false
 

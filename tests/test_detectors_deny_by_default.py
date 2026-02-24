@@ -1,8 +1,5 @@
-import sys
-from unittest.mock import MagicMock
-
-# Mock torch before importing the module under test
-sys.modules["torch"] = MagicMock()
+import pytest
+pytest.importorskip("torch")
 
 from summit.precision.detectors import MismatchReport, compute_mismatch_metrics
 

@@ -1,5 +1,5 @@
 package maestro.deploy
-import rego.v1
+import future.keywords
 
 import data.maestro.deploy.allow
 import data.maestro.deploy.deny
