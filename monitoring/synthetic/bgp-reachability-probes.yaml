@@ -1,0 +1,78 @@
+version: 1
+name: bgp-reachability-probes
+description: Multi-region, multi-ASN routing probes for BYOIP reachability validation.
+
+probe_job: blackbox-routing
+success_metric: probe_success
+latency_metric: probe_duration_seconds
+
+requirements:
+  min_regions: 3
+  min_unique_asns: 6
+  min_providers: 2
+
+probe_targets:
+  - id: us-east-comcast
+    target: https://edge.intelgraph.ai/health
+    region: us-east
+    asn: AS7922
+    provider: isp
+
+  - id: us-west-att
+    target: https://edge.intelgraph.ai/health
+    region: us-west
+    asn: AS7018
+    provider: isp
+
+  - id: eu-central-vodafone
+    target: https://edge.intelgraph.ai/health
+    region: eu-central
+    asn: AS3209
+    provider: isp
+
+  - id: ap-southeast-ntt
+    target: https://edge.intelgraph.ai/health
+    region: ap-southeast
+    asn: AS2914
+    provider: isp
+
+  - id: us-east-aws
+    target: https://edge.intelgraph.ai/health
+    region: us-east
+    asn: AS16509
+    provider: cloud
+
+  - id: us-central-gcp
+    target: https://edge.intelgraph.ai/health
+    region: us-central
+    asn: AS15169
+    provider: cloud
+
+  - id: eu-west-azure
+    target: https://edge.intelgraph.ai/health
+    region: eu-west
+    asn: AS8075
+    provider: cloud
+
+byoip_prefix_inventory:
+  - prefix: 203.0.113.0/24
+    prefix_class: byoip
+    primary_origin_asn: AS64512
+    failover_origin_asn: AS64513
+
+  - prefix: 198.51.100.0/24
+    prefix_class: byoip
+    primary_origin_asn: AS64512
+    failover_origin_asn: AS64513
+
+slos:
+  global_reachability: 0.99
+  region_asn_reachability: 0.95
+  coverage_warning_threshold: 0.98
+  coverage_critical_threshold: 0.95
+
+labels_required:
+  - region
+  - asn
+  - provider
+  - target

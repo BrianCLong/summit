@@ -317,4 +317,71 @@ describe('IngestService', () => {
       expect(id).toContain('person');
     });
   });
+
+  describe('syncToNeo4j', () => {
+    it('writes batched UNWIND queries with relationship idempotency sentinel', async () => {
+      const runMock = jest.fn().mockResolvedValue({ records: [] });
+      const executeWriteMock = jest.fn().mockImplementation(async (work) =>
+        work({ run: runMock }),
+      );
+      const closeMock = jest.fn().mockResolvedValue(undefined);
+
+      mockNeo4j.session.mockReturnValue({
+        executeWrite: executeWriteMock,
+        close: closeMock,
+      } as any);
+
+      mockClient.query
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'entity-1',
+              tenant_id: 'test-tenant',
+              kind: 'person',
+              labels: ['Person'],
+              props: JSON.stringify({ name: 'Alice' }),
+              created_at: new Date('2026-01-01T00:00:00.000Z'),
+              updated_at: new Date('2026-01-01T00:00:00.000Z'),
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({
+          rows: [
+            {
+              id: 'rel-1',
+              from_entity_id: 'entity-1',
+              to_entity_id: 'entity-2',
+              tenant_id: 'test-tenant',
+              relationship_type: 'RELATED_TO',
+              props: JSON.stringify({ weight: 0.9 }),
+              confidence: 0.95,
+              source: 'unit-test',
+              first_seen: new Date('2026-01-01T00:00:00.000Z'),
+              last_seen: new Date('2026-01-01T00:00:00.000Z'),
+            },
+          ],
+        })
+        .mockResolvedValueOnce({ rows: [] });
+
+      await (ingestService as any).syncToNeo4j('test-tenant', 'prov-1');
+
+      const cyphers = runMock.mock.calls.map((call) => call[0] as string);
+      expect(
+        cyphers.some((cypher) =>
+          cypher.includes('MERGE (n:Entity {id: row.id, tenantId: row.tenantId})'),
+        ),
+      ).toBe(true);
+      expect(
+        cyphers.some((cypher) => cypher.includes('MERGE (s:IngestRelationshipIdempotency')),
+      ).toBe(true);
+
+      expect(
+        runMock.mock.calls.some((call) =>
+          JSON.stringify(call[1]).includes('"idempotencyToken":"test-tenant:relationship:rel-1"'),
+        ),
+      ).toBe(true);
+      expect(closeMock).toHaveBeenCalled();
+    });
+  });
 });

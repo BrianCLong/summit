@@ -1,0 +1,92 @@
+groups:
+  - name: network.routing.resilience
+    interval: 30s
+    rules:
+      - alert: ByoipPrefixCoverageDropWarning
+        expr: |
+          (
+            sum(bgp_prefix_announced_total{prefix_class="byoip"})
+            /
+            clamp_min(sum(bgp_prefix_expected_total{prefix_class="byoip"}), 1)
+          ) < 0.98
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          component: routing
+        annotations:
+          summary: 'BYOIP prefix coverage dropped below 98%'
+          description: 'Announced BYOIP coverage is {{ $value | humanizePercentage }}. Investigate control-plane route withdrawals.'
+          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/bgp-route-withdrawal.md'
+
+      - alert: ByoipPrefixCoverageDropCritical
+        expr: |
+          (
+            sum(bgp_prefix_announced_total{prefix_class="byoip"})
+            /
+            clamp_min(sum(bgp_prefix_expected_total{prefix_class="byoip"}), 1)
+          ) < 0.95
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          component: routing
+        annotations:
+          summary: 'BYOIP prefix coverage dropped below 95%'
+          description: 'Critical BYOIP withdrawal detected. Begin failover policy and freeze prefix automation.'
+          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/bgp-route-withdrawal.md'
+
+      - alert: RoutingProbeGlobalReachabilityDrop
+        expr: |
+          (
+            sum(avg_over_time(probe_success{job="blackbox-routing"}[5m]))
+            /
+            clamp_min(count(avg_over_time(probe_success{job="blackbox-routing"}[5m])), 1)
+          ) < 0.90
+        for: 3m
+        labels:
+          severity: critical
+          team: platform
+          component: routing
+        annotations:
+          summary: 'Global routing reachability dropped below 90%'
+          description: 'Cross-region synthetic routing probes indicate Internet reachability loss while infrastructure may still be healthy.'
+          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/bgp-route-withdrawal.md'
+
+      - alert: RoutingProbeAsnRegionFailure
+        expr: |
+          avg by (region, asn) (
+            avg_over_time(probe_success{job="blackbox-routing"}[5m])
+          ) < 0.50
+        for: 3m
+        labels:
+          severity: warning
+          team: platform
+          component: routing
+        annotations:
+          summary: 'Routing reachability failed in region/ASN slice'
+          description: 'Region {{ $labels.region }} and ASN {{ $labels.asn }} have severe probe failures. Validate selective route propagation.'
+          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/bgp-route-withdrawal.md'
+
+      - alert: ServiceHealthyButRoutingBroken
+        expr: |
+          (
+            sum(rate(http_requests_total{job="summit-api",status=~"2..|3.."}[5m]))
+            /
+            clamp_min(sum(rate(http_requests_total{job="summit-api"}[5m])), 1)
+          ) > 0.98
+          and
+          (
+            sum(avg_over_time(probe_success{job="blackbox-routing"}[5m]))
+            /
+            clamp_min(count(avg_over_time(probe_success{job="blackbox-routing"}[5m])), 1)
+          ) < 0.85
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          component: routing
+        annotations:
+          summary: 'Service health appears normal but routing is degraded'
+          description: 'Internal success rates are healthy while external routing probes are failing. Treat as route-withdrawal incident.'
+          runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/bgp-route-withdrawal.md'
