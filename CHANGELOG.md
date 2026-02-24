@@ -14,15 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Multi-Granular Indexing (MGI)**: Foundation for KET-RAG (KDD '25) implementation, including configuration (`MGIConfig`), schemas (`mgi_index`, `mgi_run`), and deterministic keyword bipartite graph builder.
-- **CI**: Installed `jsonschema` dependency for evidence validation.
-- **Evidence**: Added new evidence IDs for MGI cost and quality metrics.
-
-### Fixed
-- **CI**: Resolved `pnpm` version conflict (v10 vs v9) in GitHub Actions workflows.
-- **CI**: Fixed `Docs Lint` job by removing unnecessary `pnpm install` step.
-- **Evidence**: Repaired syntax errors in `evidence/index.json` to allow new entries.
+- Added distributed GraphRAG skeleton with multi-region support (`graphrag/topology`, `graphrag/store`, `graphrag/edge`, `graphrag/federation`).
+- Added deterministic replication log and reconciliation scaffolding.
+- Added edge caching and filter enforcement contracts.
+- Added federated extractor update signing verification stub.
+- Added benchmark harness for plateau detection.
+- Fixed CI workflows to resolve pnpm and Python version conflicts (pinned Python 3.11, corrected action ordering).
+- Resolved native module build failures in CI (xxhash, spellchecker) and updated OPA version to v0.68.0.
+- Resolved critical CVE in `@orval/core` by updating override to `^7.21.0`.
 
 ## [5.0.0-ga] - 2026-01-23
 

@@ -490,7 +490,6 @@ jobs:
           pattern: security-reports-*
           path: aggregated-security
           merge-multiple: true
-          if-no-artifact-found: warn
       - name: Generate coverage metrics
         id: metrics
         env:

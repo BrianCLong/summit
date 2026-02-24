@@ -1,0 +1,92 @@
+[
+  {
+    "mode": "single_region",
+    "tokens_total": 1000,
+    "chunks_total": 10,
+    "nodes_total": 2,
+    "edges_total": 4,
+    "index_s": 0.0011069774627685547,
+    "retrieve_p50_ms": 4.455327987670898,
+    "retrieve_p95_ms": 4.992008209228516
+  },
+  {
+    "mode": "single_region",
+    "tokens_total": 10000,
+    "chunks_total": 100,
+    "nodes_total": 20,
+    "edges_total": 40,
+    "index_s": 0.010126352310180664,
+    "retrieve_p50_ms": 3.415822982788086,
+    "retrieve_p95_ms": 4.948854446411133
+  },
+  {
+    "mode": "single_region",
+    "tokens_total": 100000,
+    "chunks_total": 1000,
+    "nodes_total": 200,
+    "edges_total": 400,
+    "index_s": 0.10014462471008301,
+    "retrieve_p50_ms": 2.8755664825439453,
+    "retrieve_p95_ms": 4.886865615844727
+  },
+  {
+    "mode": "multi_region",
+    "tokens_total": 1000,
+    "chunks_total": 10,
+    "nodes_total": 2,
+    "edges_total": 4,
+    "index_s": 0.0011086463928222656,
+    "retrieve_p50_ms": 4.179239273071289,
+    "retrieve_p95_ms": 5.993127822875977
+  },
+  {
+    "mode": "multi_region",
+    "tokens_total": 10000,
+    "chunks_total": 100,
+    "nodes_total": 20,
+    "edges_total": 40,
+    "index_s": 0.010114431381225586,
+    "retrieve_p50_ms": 3.6203861236572266,
+    "retrieve_p95_ms": 6.064653396606445
+  },
+  {
+    "mode": "multi_region",
+    "tokens_total": 100000,
+    "chunks_total": 1000,
+    "nodes_total": 200,
+    "edges_total": 400,
+    "index_s": 0.1002054214477539,
+    "retrieve_p50_ms": 4.7054290771484375,
+    "retrieve_p95_ms": 5.726099014282227
+  },
+  {
+    "mode": "edge_cache",
+    "tokens_total": 1000,
+    "chunks_total": 10,
+    "nodes_total": 2,
+    "edges_total": 4,
+    "index_s": 0.0011584758758544922,
+    "retrieve_p50_ms": 0.4489421844482422,
+    "retrieve_p95_ms": 0.6031990051269531
+  },
+  {
+    "mode": "edge_cache",
+    "tokens_total": 10000,
+    "chunks_total": 100,
+    "nodes_total": 20,
+    "edges_total": 40,
+    "index_s": 0.010120391845703125,
+    "retrieve_p50_ms": 0.3657341003417969,
+    "retrieve_p95_ms": 0.49805641174316406
+  },
+  {
+    "mode": "edge_cache",
+    "tokens_total": 100000,
+    "chunks_total": 1000,
+    "nodes_total": 200,
+    "edges_total": 400,
+    "index_s": 0.10016870498657227,
+    "retrieve_p50_ms": 0.5145072937011719,
+    "retrieve_p95_ms": 0.5660057067871094
+  }
+]

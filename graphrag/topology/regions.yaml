@@ -1,0 +1,13 @@
+version: 1
+default_region: us-central
+regions:
+  - name: us-central
+    role: primary
+    allow_classes: ["public","restricted"]
+  - name: eu-west
+    role: replica
+    allow_classes: ["public"]
+edge:
+  enabled: false
+federation:
+  enabled: false
