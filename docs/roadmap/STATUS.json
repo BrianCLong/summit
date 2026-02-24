@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-24T03:56:43Z",
-  "revision_note": "Daily sprint continuation: PR #18628 check-failure snapshot recorded.",
+  "last_updated": "2026-02-24T04:06:51Z",
+  "revision_note": "CI stabilization: aligned S-AOS headers, docs-only changelog exemption, required-check polling hardening.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
