@@ -270,7 +270,7 @@ changes may not be included if they are not expected to break existing code.
 
 ## 0.12.0 (2018-02-08)
 
-* Extendscript target script in NPM package 
+* Extendscript target script in NPM package
 
 ## 0.11.19 (2018-02-03)
 
@@ -358,4 +358,3 @@ $ sed -i .ext [...] # bsd
 
 * Removed ods.js source.  The xlsx.js source absorbed the ODS logic and exposes
   the ODS variable, so projects should remove references to ods.js
-

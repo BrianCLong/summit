@@ -231,9 +231,9 @@ jobs:
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
-        run: docker build -t security-suite/server ./server
+        run: docker build -t security-suite/server -f server/Dockerfile .
       - name: Build client image for scanning
-        run: docker build -t security-suite/client ./client
+        run: docker build -t security-suite/client -f client/Dockerfile .
       - name: Scan server image
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.1
         with:

@@ -1,0 +1,77 @@
+name: Graph Validator
+
+on:
+  push:
+    paths:
+      - 'tools/graph-validator/**'
+  pull_request:
+    paths:
+      - 'tools/graph-validator/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/tools/graph-validator
+          # Generate fixtures just in case
+          python3 -c '
+          import json, random, os
+          random.seed(42)
+          def generate(fp, n, shape):
+              with open(fp, "w") as f:
+                  for _ in range(n):
+                      f.write(json.dumps({"degree": int(random.paretovariate(shape))}) + "\n")
+          os.makedirs("tools/graph-validator/fixtures/data", exist_ok=True)
+          generate("tools/graph-validator/fixtures/data/baseline.jsonl", 1000, 2.0)
+          generate("tools/graph-validator/fixtures/data/window_drift.jsonl", 1000, 1.2)
+          generate("tools/graph-validator/fixtures/data/window_ok.jsonl", 1000, 2.0)
+          '
+          python3 tools/graph-validator/tests/test_drift.py
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Build Baseline
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/tools/graph-validator
+          # Generate fixtures
+          python3 -c '
+          import json, random, os
+          random.seed(42)
+          def generate(fp, n, shape):
+              with open(fp, "w") as f:
+                  for _ in range(n):
+                      f.write(json.dumps({"degree": int(random.paretovariate(shape))}) + "\n")
+          os.makedirs("tools/graph-validator/fixtures/data", exist_ok=True)
+          generate("tools/graph-validator/fixtures/data/baseline.jsonl", 1000, 2.0)
+          generate("tools/graph-validator/fixtures/data/window.jsonl", 1000, 2.0)
+          '
+
+          python3 -m graph_validator.cli baseline build             --input tools/graph-validator/fixtures/data/baseline.jsonl             --output tools/graph-validator/fixtures/data/baseline.json
+
+      - name: Run Validator (No Drift)
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)/tools/graph-validator
+          python3 -m graph_validator.cli window run             --input tools/graph-validator/fixtures/data/window.jsonl             --baseline tools/graph-validator/fixtures/data/baseline.json             --out-dir out             --threshold-d 0.15
+
+      - name: Archive Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-report
+          path: out/
