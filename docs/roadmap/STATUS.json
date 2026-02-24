@@ -1,7 +1,19 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-24T03:52:00Z",
+  "revision_note": "Added data-collection resilience governance pack. Fixed reusable SLSA workflow startup/SBOM path and hardened workflow-validity gate.",
   "initiatives": [
+    {
+      "id": "bgp-routing-resilience-hardening",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "BGP route-withdrawal runbook, BYOIP failover policy, multi-region/multi-ASN probe matrix, prefix-automation guardrails with rollback gates, merge-blocking routing resilience CI checks, and routing-specific PagerDuty/Slack escalation wiring."
+    },
+    {
+      "id": "ci-golden-path-supplychain-startup-fix",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Removed reusable workflow concurrency collision, split SBOM generation per-format, and enforced full workflow actionlint coverage."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -13,6 +25,24 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "lineage-stack-lockstep-gate",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added CI preflight for OpenLineage/OpenMetadata lockstep checks and pinned OpenLineage Python dependencies."
+    },
+    {
+      "id": "summit-sync-logical-decoding-mvp",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Logical decoding to Neo4j upsert path with provenance events, reconciliation repair loop, and harness-backed CI smoke. Added canonical Neo4j ingest write routing for Entity/Indicator/Source nodes and MENTIONS/DERIVES_FROM edges with idempotency-token sentinel gating."
+    },
+    {
+      "id": "data-collection-resilience-hardening",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added governed controls for API deprecation denial, crawl legal gating, evidence minimum fields, provider concentration alerts, response runbook, and deterministic resilience KPIs."
     },
     {
       "id": "B",
@@ -217,6 +247,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "cdc-graph-sync-audit-gates",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented Graph Sync Gate A/B/C/D evidence model, parity/recon runner, CDC provenance scaffold, Cypher templates, and PG checksum/slot setup assets."
     }
   ],
   "summary": {
@@ -224,7 +260,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }
