@@ -149,5 +149,5 @@ GA Milestone Impact: ✅ UNBLOCKED
 
 ---
 
-_IntelGraph Summit Development Team_  
+_IntelGraph Summit Development Team_
 _Automated Triage Resolution System_

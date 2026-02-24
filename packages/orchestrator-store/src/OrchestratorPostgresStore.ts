@@ -1,8 +1,8 @@
 import { Pool } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
-import { 
+import {
   MaestroLoop,
-  MaestroAgent, 
+  MaestroAgent,
   MaestroExperiment,
   MaestroPlaybook,
   CoordinationTask,

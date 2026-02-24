@@ -29,7 +29,7 @@ data:
                 "format": "json"
               },
               {
-                "type": "social", 
+                "type": "social",
                 "platform": "twitter",
                 "query": "sample intelligence"
               },
@@ -47,14 +47,14 @@ data:
         },
         {
           "name": "entity_resolution_task",
-          "taskReferenceName": "entity_resolution", 
+          "taskReferenceName": "entity_resolution",
           "type": "SIMPLE",
           "description": "Extract and resolve entities from ingested data",
           "inputParameters": {
             "data": "${data_ingest.output.processed_data}",
             "entity_types": [
               "person",
-              "organization", 
+              "organization",
               "location",
               "event",
               "artifact"
@@ -68,7 +68,7 @@ data:
         {
           "name": "graph_analysis_task",
           "taskReferenceName": "graph_analysis",
-          "type": "SIMPLE", 
+          "type": "SIMPLE",
           "description": "Perform graph analysis on resolved entities",
           "inputParameters": {
             "entities": "${entity_resolution.output.entities}",
@@ -89,7 +89,7 @@ data:
           "name": "intelligence_brief_task",
           "taskReferenceName": "intelligence_brief",
           "type": "SIMPLE",
-          "description": "Generate intelligence brief from analysis results", 
+          "description": "Generate intelligence brief from analysis results",
           "inputParameters": {
             "analysis_results": "${graph_analysis.output}",
             "template": "standard_brief",
@@ -138,7 +138,7 @@ data:
       "restartable": true,
       "workflowStatusListenerEnabled": true,
       "ownerEmail": "intelligence@intelgraph.io",
-      "timeoutPolicy": "TIME_OUT_WF", 
+      "timeoutPolicy": "TIME_OUT_WF",
       "timeoutSeconds": 600,
       "variables": {
         "demo_mode": true,
@@ -185,7 +185,7 @@ spec:
                 http://maestro-conductor:8080/api/metadata/workflow \
                 -H "Content-Type: application/json" \
                 -d @/workflow/hello-case.json
-                
+
               echo "Hello-Case workflow registered successfully!"
 
           volumeMounts:
@@ -247,7 +247,7 @@ spec:
                         \"batch_size\": 50
                       }
                     }"
-                    
+
                   echo "Hello-Case workflow triggered with ID: ${WORKFLOW_ID}"
               resources:
                 requests:

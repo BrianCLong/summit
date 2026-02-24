@@ -46,7 +46,7 @@ export class QuantumIdentityManager {
 
     // Simulate Kyber Key Generation
     const publicKey = `pqc-kyber-v1:${crypto.randomBytes(32).toString('base64')}`;
-    
+
     const identity: Omit<QuantumIdentity, 'signature'> = {
       serviceId,
       publicKey,
@@ -67,7 +67,7 @@ export class QuantumIdentityManager {
   public verifyIdentity(identity: QuantumIdentity): boolean {
     // Task #114: Verify signature against serviceId directly
     const isValid = this.verify(identity.serviceId, identity.signature);
-    
+
     if (!isValid) {
       logger.warn({ serviceId: identity.serviceId }, 'QuantumIdentity: Invalid signature');
       return false;

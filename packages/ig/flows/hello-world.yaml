@@ -34,14 +34,14 @@ data:
           "responseTimeoutSeconds": 10
         },
         {
-          "name": "system_info_task", 
+          "name": "system_info_task",
           "taskReferenceName": "system_info",
           "type": "SIMPLE",
           "description": "Collect basic system information",
           "inputParameters": {
             "check_components": [
               "postgres",
-              "redis", 
+              "redis",
               "workers"
             ]
           },
@@ -100,7 +100,7 @@ spec:
                 http://maestro-conductor:8080/api/metadata/workflow \
                 -H "Content-Type: application/json" \
                 -d @/workflow/hello-world.json
-                
+
               echo "Hello-World workflow registered successfully!"
 
           volumeMounts:
@@ -159,7 +159,7 @@ spec:
                         \"environment\": \"dev\"
                       }
                     }"
-                    
+
                   echo "Hello-World workflow triggered with ID: ${WORKFLOW_ID}"
               resources:
                 requests:

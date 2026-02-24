@@ -35,8 +35,8 @@ outputs to shorten feedback loops and enforce evidence-first workflows.
 
 | Field        | Definition | Source alignment |
 | ------------ | ---------- | ---------------- |
-| `actors`     | Observed or reported actors, including state, proxies, botnets | Public reporting on cognitive warfare ecosystems | 
-| `channels`   | Media and dissemination channels (web/social/messaging) | Described propagation channels | 
+| `actors`     | Observed or reported actors, including state, proxies, botnets | Public reporting on cognitive warfare ecosystems |
+| `channels`   | Media and dissemination channels (web/social/messaging) | Described propagation channels |
 | `narratives` | Narrative themes + frames | Narrative clusters (nuclear/dirty bomb, anti-NATO) |
 | `timing`     | Event hooks (summits, aid announcements) | Temporal/event-based analysis |
 | `indicators` | Deterministic matching patterns (keywords, typosquat domains) | Tactic observations |

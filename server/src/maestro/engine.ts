@@ -101,7 +101,7 @@ export class MaestroEngine {
       [templateId, tenantId]
     );
     if (res.rows.length === 0) throw new Error(`Template not found: ${templateId}`);
-    
+
     const row = res.rows[0];
     const template: MaestroTemplate = {
       id: row.id,

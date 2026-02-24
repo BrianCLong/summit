@@ -86,7 +86,7 @@ export class FusionService {
 
         if (signalData) {
           const classification = await this.signalService.classifySignal(signalData);
-          analysisText = `RF Signal Analysis: ${classification.label} (Confidence: ${classification.confidence}). 
+          analysisText = `RF Signal Analysis: ${classification.label} (Confidence: ${classification.confidence}).
                          Tags: ${classification.tags.join(', ')}. Threat Level: ${classification.threatLevel}.
                          Frequency: ${signalData.frequency} Hz. Bandwidth: ${signalData.bandwidth} Hz.`;
         }

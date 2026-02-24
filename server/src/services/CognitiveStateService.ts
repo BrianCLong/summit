@@ -38,12 +38,12 @@ export class CognitiveStateService {
         SET r.strength = $strength,
             r.certainty = $certainty,
             r.updatedAt = datetime()
-        
+
         // Recalculate segment resilience based on belief entropy
         WITH s
         MATCH (s)-[rel:ADOPTS]->()
         WITH s, avg(rel.strength) as avgBelief, count(rel) as beliefCount
-        SET s.resilienceScore = CASE 
+        SET s.resilienceScore = CASE
             WHEN beliefCount > 5 THEN 1.0 - (avgBelief * 0.5) // Higher diverse beliefs = more resilient
             ELSE 0.5
           END

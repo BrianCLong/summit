@@ -10,7 +10,7 @@ export class VisionService {
 
     /**
      * Analyze an image and return a description of entities and relationships
-     * 
+     *
      * @param imageUri - The URI or base64 data of the image
      * @param prompt - Optional custom prompt for analysis
      */
@@ -18,9 +18,9 @@ export class VisionService {
         logger.info({ message: 'Analyzing image with vision model', imageUri });
 
         const systemPrompt = prompt || `
-      You are an expert intelligence analyst. 
-      Analyze the provided image and describe all relevant entities (People, Organizations, Locations, Equipment) 
-      and the relationships between them. 
+      You are an expert intelligence analyst.
+      Analyze the provided image and describe all relevant entities (People, Organizations, Locations, Equipment)
+      and the relationships between them.
       Provide a detailed, factual summary that can be used for entity extraction.
     `;
 

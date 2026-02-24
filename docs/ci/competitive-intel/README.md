@@ -65,4 +65,3 @@ When proposing or implementing changes, explicitly record:
 - **MAESTRO Layers**: Foundation, Data, Agents, Tools, Infra, Observability, Security.
 - **Threats Considered**: goal manipulation, prompt injection, tool abuse.
 - **Mitigations**: measurable controls reducing confidentiality/integrity/safety risk.
-

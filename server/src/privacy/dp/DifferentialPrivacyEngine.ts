@@ -42,7 +42,7 @@ export class DifferentialPrivacyEngine {
     const privatizedValue = value + noise;
 
     logger.debug({ original: value, privatized: privatizedValue, epsilon }, 'DP: Aggregate privatized');
-    
+
     // Ensure counts don't go negative
     return Math.max(0, privatizedValue);
   }

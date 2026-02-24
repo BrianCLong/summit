@@ -606,11 +606,11 @@ export class DeterministicExportService {
 
     // Task #114: Attach PQC Signature
     const serviceId = process.env.SERVICE_ID || 'summit-api-export';
-    
+
     // We sign a string containing BOTH the serviceId and the manifestHash for stability
     const signedPayload = `service=${serviceId};hash=${manifest.integrity.manifestHash}`;
     const identity = quantumIdentityManager.issueIdentity(signedPayload);
-    
+
     manifest.pqcServiceId = serviceId;
     manifest.pqcSignature = identity.signature;
 
