@@ -364,3 +364,4 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
+summit/telemetry/*.json

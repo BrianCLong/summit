@@ -16,7 +16,14 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
-      - run: pnpm install yaml --no-save
-      - run: node scripts/ci/verify_required_checks.mjs
+      - name: Install dependencies
+        run: |
+          mkdir -p .tmp_deps
+          cd .tmp_deps
+          pnpm init
+          pnpm add yaml
+      - name: Run verification
+        run: node scripts/ci/verify_required_checks.mjs
         env:
+          NODE_PATH: ./.tmp_deps/node_modules
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

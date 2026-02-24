@@ -1,0 +1,35 @@
+name: tool-telemetry-gate
+on:
+  pull_request:
+    types: [opened, synchronize]
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./summit # Assuming we are testing the summit subdirectory
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.22' }
+      - name: OPA
+        uses: open-policy-agent/setup-opa@v2
+      - name: Install deps
+        run: npm ci || pnpm i
+      - name: Build Wasm Runner
+        run: |
+          cd infra/wasm-runner
+          go build -o wasm-runner main.go
+          # Ensure binary is executable
+          chmod +x wasm-runner
+      - name: Run canary tool set
+        run: |
+          mkdir -p telemetry
+          # The script run_tool_with_policy.mjs expects to be called with arguments
+          # The prompt command: node scripts/ci/run_tool_with_policy.mjs agent=SummitAI web.search '["read","domain:gov"]' 4000 1 wasm || true
+          # I need to make sure the script path is correct relative to working-directory
+          node scripts/ci/run_tool_with_policy.mjs SummitAI web.search '["read","domain:gov"]' 4000 1 wasm || true
+      - name: Validate telemetry & policy
+        run: node scripts/ci/validate_tool_telemetry.js
