@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-23T00:00:00Z",
+  "revision_note": "Added deterministic short-term memory MWS scaffolding, evidence artifacts, and validation tests.",
   "initiatives": [
+    {
+      "id": "memory-layer-mws-short-term",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic short-term memory module under runtime/memory with default-OFF posture and machine-verifiable artifacts."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -224,7 +230,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 25,
     "ga_blockers": []
   }
 }
