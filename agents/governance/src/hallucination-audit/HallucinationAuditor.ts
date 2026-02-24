@@ -56,7 +56,7 @@ export interface DetectionResult {
   detected: boolean;
   type?: HallucinationType;
   confidence: number;
-  evidence: Partial<HallucinationEvidence>;
+  evidence?: Partial<HallucinationEvidence>;
   hallucinatedContent?: string;
 }
 
@@ -94,10 +94,10 @@ export class HallucinationAuditor {
     previousOutputs?: string[];
     sources?: string[];
   }): Promise<HallucinationDetection | null> {
-    if (!this.config.enabled) {return null;}
+    if (!this.config.enabled) { return null; }
 
     // Apply sampling
-    if (Math.random() > this.config.samplingRate) {return null;}
+    if (Math.random() > this.config.samplingRate) { return null; }
 
     const context: DetectionContext = {
       agentId: params.agentId,
@@ -112,7 +112,7 @@ export class HallucinationAuditor {
 
     for (const methodId of this.config.detectionMethods) {
       const method = this.detectionMethods.get(methodId);
-      if (!method) {continue;}
+      if (!method) { continue; }
 
       try {
         const result = await method.detect(params.input, params.output, context);
@@ -124,7 +124,7 @@ export class HallucinationAuditor {
 
     // Combine results
     const positiveDetections = results.filter((r) => r.detected);
-    if (positiveDetections.length === 0) {return null;}
+    if (positiveDetections.length === 0) { return null; }
 
     // Create detection record
     const detection = this.createDetection(params, positiveDetections);
@@ -187,7 +187,7 @@ export class HallucinationAuditor {
     this.registerMethod({
       id: 'factual_check',
       name: 'Factual Consistency Check',
-      async detect(input, output, context) {
+      async detect(input, output, context): Promise<DetectionResult> {
         // Check for common hallucination patterns
         const patterns = [
           /according to .* (19\d{2}|20[0-1]\d) study/i, // Fabricated studies
@@ -221,15 +221,15 @@ export class HallucinationAuditor {
     this.registerMethod({
       id: 'consistency_check',
       name: 'Self-Consistency Check',
-      async detect(input, output, context) {
+      async detect(input, output, context): Promise<DetectionResult> {
         if (!context.previousOutputs || context.previousOutputs.length === 0) {
           return { detected: false, confidence: 0 };
         }
 
         // Simple keyword extraction and comparison
         const extractKeyFacts = (text: string) => {
-          const numbers = text.match(/\d+(\.\d+)?/g) || [];
-          const dates = text.match(/\b\d{4}\b/g) || [];
+          const numbers: string[] = text.match(/\d+(\.\d+)?/g) || [];
+          const dates: string[] = text.match(/\b\d{4}\b/g) || [];
           return { numbers, dates };
         };
 
@@ -265,7 +265,7 @@ export class HallucinationAuditor {
     this.registerMethod({
       id: 'source_verification',
       name: 'Source Verification Check',
-      async detect(input, output, context) {
+      async detect(input, output, context): Promise<DetectionResult> {
         if (!context.sources || context.sources.length === 0) {
           return { detected: false, confidence: 0 };
         }
@@ -304,7 +304,7 @@ export class HallucinationAuditor {
     this.registerMethod({
       id: 'temporal_check',
       name: 'Temporal Confusion Check',
-      async detect(input, output, context) {
+      async detect(input, output, context): Promise<DetectionResult> {
         const currentYear = new Date().getFullYear();
 
         // Check for future dates presented as past
@@ -354,11 +354,11 @@ export class HallucinationAuditor {
       generatedOutput: params.output.substring(0, 1000),
       hallucinatedContent: primary.hallucinatedContent || '',
       evidence: results.map((r) => ({
-        type: r.evidence.type || 'factual_check',
-        method: r.evidence.method || 'unknown',
-        result: r.evidence.result || 'uncertain',
+        type: r.evidence?.type || 'factual_check',
+        method: r.evidence?.method || 'unknown',
+        result: r.evidence?.result || 'uncertain',
         confidence: r.confidence,
-        details: r.evidence.details || {},
+        details: r.evidence?.details || {},
       })) as HallucinationEvidence[],
     };
   }
@@ -445,7 +445,7 @@ export class HallucinationAuditor {
    * Redact hallucinated content from output
    */
   private redactHallucination(output: string, hallucinatedContent: string): string {
-    if (!hallucinatedContent) {return output;}
+    if (!hallucinatedContent) { return output; }
     return output.replace(hallucinatedContent, '[REDACTED - Unverified Content]');
   }
 
@@ -455,7 +455,7 @@ export class HallucinationAuditor {
   private async escalate(agentId: AgentId, detection: HallucinationDetection): Promise<void> {
     console.warn(
       `[Hallucination] Escalation threshold exceeded for agent ${agentId}. ` +
-        `Total detections: ${this.agentDetectionCounts.get(agentId)}`,
+      `Total detections: ${this.agentDetectionCounts.get(agentId)}`,
     );
     // Would integrate with IncidentResponseManager
   }

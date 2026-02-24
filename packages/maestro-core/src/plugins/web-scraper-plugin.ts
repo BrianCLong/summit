@@ -468,7 +468,7 @@ export class WebScraperPlugin implements StepPlugin {
       const elements = $(extract.selector);
 
       if (extract.multiple) {
-        return elements.toArray().map((el) => {
+        return elements.toArray().map((el: any) => {
           if (extract.attribute) {
             return $(el).attr(extract.attribute);
           }
@@ -569,18 +569,18 @@ export class WebScraperPlugin implements StepPlugin {
     const $ = cheerio.load(html);
 
     // Headers
-    $('h1').each((_, el) => {
+    $('h1').each((_: any, el: any) => {
       $(el).replaceWith(`\n# ${$(el).text()}\n`);
     });
-    $('h2').each((_, el) => {
+    $('h2').each((_: any, el: any) => {
       $(el).replaceWith(`\n## ${$(el).text()}\n`);
     });
-    $('h3').each((_, el) => {
+    $('h3').each((_: any, el: any) => {
       $(el).replaceWith(`\n### ${$(el).text()}\n`);
     });
 
     // Links
-    $('a').each((_, el) => {
+    $('a').each((_: any, el: any) => {
       const text = $(el).text();
       const href = $(el).attr('href');
       if (href) {
@@ -589,15 +589,15 @@ export class WebScraperPlugin implements StepPlugin {
     });
 
     // Bold and italic
-    $('strong, b').each((_, el) => {
+    $('strong, b').each((_: any, el: any) => {
       $(el).replaceWith(`**${$(el).text()}**`);
     });
-    $('em, i').each((_, el) => {
+    $('em, i').each((_: any, el: any) => {
       $(el).replaceWith(`*${$(el).text()}*`);
     });
 
     // Paragraphs
-    $('p').each((_, el) => {
+    $('p').each((_: any, el: any) => {
       $(el).replaceWith(`\n${$(el).text()}\n`);
     });
 
@@ -655,7 +655,7 @@ export class WebScraperPlugin implements StepPlugin {
 
     const proxy =
       this.config.proxies[
-        Math.floor(Math.random() * this.config.proxies.length)
+      Math.floor(Math.random() * this.config.proxies.length)
       ];
     const [host, port] = proxy.split(':');
 

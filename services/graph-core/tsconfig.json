@@ -12,7 +12,14 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "../../node_modules/@types",
+      "./node_modules/@types"
+    ]
   },
   "include": [
     "src/**/*.ts"

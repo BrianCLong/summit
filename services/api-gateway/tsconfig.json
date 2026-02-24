@@ -12,9 +12,15 @@
     "sourceMap": true,
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
-    "allowImportingTsExtensions": false,
-    "composite": true
-    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "../../node_modules/@types",
+      "./node_modules/@types"
+    ]
   },
   "include": [
     "src"

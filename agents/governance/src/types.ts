@@ -175,6 +175,8 @@ export interface ProvenanceAttestation {
   attestedAt: Date;
   signature: string;
   claims: Record<string, unknown>;
+  predicateType?: string;
+  predicate?: Record<string, unknown>;
 }
 
 // ============================================================================
@@ -527,6 +529,7 @@ export interface AIBuildDefinition {
     chainId?: string;
     temperature?: number;
     maxTokens?: number;
+    decisionId?: string;
   };
   internalParameters?: Record<string, unknown>;
   resolvedDependencies: AIResolvedDependency[];
