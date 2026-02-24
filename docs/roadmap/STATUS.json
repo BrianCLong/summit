@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:45:00Z",
-  "revision_note": "Added CSE graph extensions standard and schema reference for cogwar lab alignment.",
+  "last_updated": "2026-02-08T09:03:32Z",
+  "revision_note": "Added CogWar adaptive influence schema + standards baseline and repo validation updates.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -322,10 +322,10 @@
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     },
     {
-      "id": "cogwar-mws-repo-assumptions",
+      "id": "cogwar-adaptive-influence-systems-2026-schema",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Captured verified vs deferred repo layout, CI workflow presence, evidence schema locations, and must-not-touch zones for CogWar MWS."
+      "notes": "Campaign Object + Evidence Bundle schema foundation, deterministic standards, and repo validation baseline."
     }
   ],
   "summary": {
