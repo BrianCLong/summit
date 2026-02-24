@@ -11,6 +11,7 @@ import jestPlugin from 'eslint-plugin-jest';
 export default tseslint.config(
   { ignores: [
     'dist', 'build', 'coverage', 'node_modules', '*.min.js',
+    '.worktrees/**',
     '.archive/**', '_salvage_from_refs/**', 'templates/**', '.ci/**', '.disabled/**', '.github/**',
     'scripts/**', 'tools/**', 'benchmarks/**', 'examples/**', 'zero-trust/**',
     'ga-graphai/**', 'conductor-ui/**', 'e2e/**', 'mobile/**', 'activities/**',

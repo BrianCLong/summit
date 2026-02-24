@@ -33,7 +33,7 @@ export function normalizeQuery(query: string): string {
 }
 
 export function stableHash(input: unknown): string {
-  return crypto.createHash('sha1').update(stableStringify(input)).digest('hex');
+  return crypto.createHash('sha256').update(stableStringify(input)).digest('hex');
 }
 
 function stableStringify(value: unknown): string {
@@ -53,7 +53,7 @@ export function buildGraphCacheKey(ctx: GraphQueryCacheContext) {
   const paramsHash = stableHash(ctx.params || {});
 
   const composite = `${tenantId}:${caseId}:${normalizedQuery}:${paramsHash}:${permissionsHash}`;
-  const cacheKey = `graph:query:${crypto.createHash('sha1').update(composite).digest('hex')}`;
+  const cacheKey = `graph:query:${crypto.createHash('sha256').update(composite).digest('hex')}`;
 
   const tags = [
     'graph:query',

@@ -1,0 +1,10 @@
+
+> intelgraph-platform@4.1.15 security:check /Users/brianlong/Developer/summit
+> node scripts/security-check.js
+
+[security:check] starting: JavaScript dependency audit (pnpm)
+[security:check] starting: Python dependency audit (pip-audit)
+[security:check] skipped: Python dependency audit (pip-audit) (pip-audit not installed)
+[security:check] starting: Rust dependency audit (cargo-audit)
+[security:check] skipped: Rust dependency audit (cargo-audit) (cargo-audit not installed)
+ ELIFECYCLE  Command failed with exit code 1.

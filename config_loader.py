@@ -78,7 +78,7 @@ class ConfigLoader:
         # Derive OAUTH_TOKEN_URL if not explicitly provided
         if not config["OAUTH_TOKEN_URL"] and config["INTELGRAPH_API_BASE_URL"]:
             config["OAUTH_TOKEN_URL"] = f"{config['INTELGRAPH_API_BASE_URL']}/oauth/token"
-            logger.info(f"Derived OAUTH_TOKEN_URL: {config['OAUTH_TOKEN_URL']}")
+            logger.info("Derived OAUTH_TOKEN_URL from INTELGRAPH_API_BASE_URL")
 
         # Parse PostgreSQL URI if individual PG_HOST, etc. are not provided
         if config["POSTGRES_URI"] and not config["PG_HOST"]:

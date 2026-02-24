@@ -1,0 +1,67 @@
+name: Daily Sprint Loop
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "UTC date in YYYY-MM-DD format (optional)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+jobs:
+  generate:
+    name: Generate Daily Sprint Evidence
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Daily Sprint Loop
+        id: generate
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_DATE: ${{ inputs.date }}
+        run: |
+          set -euo pipefail
+          if [[ -n "${INPUT_DATE:-}" ]]; then
+            RUN_DATE="${INPUT_DATE}"
+          else
+            RUN_DATE="$(date -u +%F)"
+          fi
+          echo "run_date=${RUN_DATE}" >> "$GITHUB_OUTPUT"
+          ./scripts/ops/daily-sprint-loop.sh "${RUN_DATE}"
+
+      - name: Validate Evidence JSON
+        run: |
+          set -euo pipefail
+          RUN_DATE="${{ steps.generate.outputs.run_date }}"
+          python3 -m json.tool "docs/ops/evidence/daily-sprint-${RUN_DATE}/report.json" >/dev/null
+          python3 -m json.tool "docs/ops/evidence/daily-sprint-${RUN_DATE}/metrics.json" >/dev/null
+          python3 -m json.tool "docs/ops/evidence/daily-sprint-${RUN_DATE}/stamp.json" >/dev/null
+
+      - name: Upload Daily Sprint Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-sprint-${{ steps.generate.outputs.run_date }}
+          path: docs/ops/evidence/daily-sprint-${{ steps.generate.outputs.run_date }}/
+          retention-days: 30
+
+      - name: Job Summary
+        if: always()
+        run: |
+          set -euo pipefail
+          RUN_DATE="${{ steps.generate.outputs.run_date }}"
+          REPORT_PATH="docs/ops/evidence/daily-sprint-${RUN_DATE}/daily-sprint.md"
+          if [[ -f "${REPORT_PATH}" ]]; then
+            cat "${REPORT_PATH}" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Daily sprint markdown report not found at ${REPORT_PATH}." >> "$GITHUB_STEP_SUMMARY"
+          fi

@@ -1,0 +1,4 @@
+{"type":"registry_validated","tool_count":2,"timestamp":"2026-02-11T00:00:00.000Z"}
+{"type":"policy_denied","tool_id":"demo.echo","reason":"deny-by-default","timestamp":"2026-02-11T00:00:00.000Z"}
+{"type":"policy_allowed","tool_id":"demo.echo","server_id":"local-demo","reason":"allowlist-match","timestamp":"2026-02-11T00:00:00.000Z"}
+{"type":"tool_stubbed","tool_id":"demo.echo","output":{"payload":"demo-output","ok":true},"timestamp":"2026-02-11T00:00:00.000Z"}

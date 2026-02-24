@@ -1,7 +1,19 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register; Normalized evidence/index.json to match evidence schema; Added UI Fuzz Probe scaffolding; Added Maestro Long-Run Job Engine governance scaffolding and CI gates; Expanded RepoFlow subsumption implementation scope and evidence gates; Added narrative frame/infrastructure schema and deterministic ids for narrative intel. and evidence-first lane-1 posture; Added narrative analysis research update for 2026-02-08; Published AI platform daily summary runbook for 2026-02-04; Added graph tech signal update brief for GraphRAG governance alignment.",
+  "last_updated": "2026-02-11T18:10:00Z",
+  "revision_note": "Resolved roadmap conflict state and added IO PR2 normalization hardening: canonical EVID:: IDs, deterministic schema eval outputs, and CLI io command wiring.",
   "initiatives": [
+    {
+      "id": "influence-ops-pr2-normalization-hardening-2026-02-11",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Standardized IO evidence IDs to EVID::<tenant>::<domain>::<artifact>::<date>::<gitsha7>::<runid8>, wired CLI io command registration, and hardened schema roundtrip eval outputs for deterministic report/metrics/stamp generation."
+    },
+    {
+      "id": "saas-crash-2026-positioning-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -18,10 +30,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -30,9 +39,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -41,9 +48,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -230,7 +235,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 18,
     "ga_blockers": []
   }
 }

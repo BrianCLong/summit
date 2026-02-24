@@ -7,12 +7,12 @@ def parse_trivy(filepath):
         with open(filepath) as f:
             data = json.load(f)
 
-        count = 0
+        secret_count = 0
         if "Results" in data:
             for result in data["Results"]:
                 if "Secrets" in result:
-                    count += len(result["Secrets"])
-        return {"count": count}
+                    secret_count += len(result["Secrets"])
+        return {"count": secret_count}
     except FileNotFoundError:
         return {"count": 0}  # Assume 0 if not run or no secrets found (if file missing? risky)
     except Exception as e:
@@ -45,8 +45,8 @@ def main():
     grype_file = "grype-results.json"
     trust_policy_file = "docs/policies/trust-policy.yaml"
 
-    secrets = parse_trivy(trivy_file)
-    vulns = parse_grype(grype_file)
+    trivy_summary = parse_trivy(trivy_file)
+    vuln_summary = parse_grype(grype_file)
 
     # Simple parsing of freeze mode
     freeze_mode = "advisory"
@@ -59,12 +59,12 @@ def main():
                         val = parts[1].strip().split()[0].replace('"', "").replace("'", "")
                         if val == "blocking":
                             freeze_mode = "blocking"
-    except:
-        pass
+    except Exception as e:
+        print(f"Warning: unable to read trust policy ({e})", file=sys.stderr)
 
     output = {
-        "secrets_scan": secrets,
-        "sbom": {"vulns": vulns},
+        "trivy_scan": trivy_summary,
+        "sbom": {"vulns": vuln_summary},
         "authz_check": {"violations": 0},  # Placeholder until real AuthZ scanner integrated
         "export_check": {"violations": 0},
         "dlp_check": {"violations": 0},

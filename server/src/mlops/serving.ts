@@ -4,6 +4,51 @@ import { modelRegistry } from './registry.js';
 import { logger } from '../config/logger.js';
 import axios from 'axios';
 
+const SAFE_MODEL_SEGMENT = /^[A-Za-z0-9._-]{1,128}$/;
+
+function isBlockedHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  if (
+    host === 'localhost' ||
+    host === '0.0.0.0' ||
+    host === '127.0.0.1' ||
+    host === '::1' ||
+    host === '169.254.169.254' ||
+    host === 'metadata.google.internal'
+  ) {
+    return true;
+  }
+  return (
+    host.startsWith('10.') ||
+    host.startsWith('192.168.') ||
+    /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+  );
+}
+
+function normalizeInferenceBaseUrl(rawUrl: string): URL {
+  const parsed = new URL(rawUrl);
+  if (!['http:', 'https:'].includes(parsed.protocol)) {
+    throw new Error('ML_INFERENCE_URL must use http or https');
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error('ML_INFERENCE_URL must not include URL credentials');
+  }
+  if (
+    process.env.ALLOW_PRIVATE_ML_ENDPOINTS !== 'true' &&
+    isBlockedHost(parsed.hostname)
+  ) {
+    throw new Error('ML_INFERENCE_URL host is not allowed');
+  }
+  return parsed;
+}
+
+function toSafeModelSegment(value: string, field: string): string {
+  if (!SAFE_MODEL_SEGMENT.test(value)) {
+    throw new Error(`Invalid ${field} value`);
+  }
+  return value;
+}
+
 /**
  * Service for serving ML models.
  * Implements Adapter pattern to support:
@@ -80,9 +125,16 @@ export class ModelServingService {
 
     if (externalUrl && !process.env.USE_MOCK_ML) {
         try {
+            const safeName = toSafeModelSegment(name, 'model name');
+            const safeVersion = toSafeModelSegment(version, 'model version');
+            const base = normalizeInferenceBaseUrl(externalUrl);
+            const basePath = base.pathname === '/' ? '' : base.pathname.replace(/\/+$/, '');
+            const targetUrl =
+                `${base.origin}${basePath}/v1/models/${encodeURIComponent(safeName)}` +
+                `/versions/${encodeURIComponent(safeVersion)}:predict`;
             // Standard TensorFlow Serving REST API pattern
             const response = await axios.post(
-                `${externalUrl}/v1/models/${name}/versions/${version}:predict`,
+                targetUrl,
                 { instances: [inputs] }
             );
             return response.data;

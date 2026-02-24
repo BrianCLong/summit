@@ -29,7 +29,7 @@ export class FileConnector extends BaseConnector implements SourceConnector {
         return { records: [], nextCursor: 'DONE' };
       }
 
-      const filePath = this.config.path;
+      const filePath = this.resolveFilePath(this.config.path);
 
       try {
         const stats = await fs.stat(filePath);
@@ -75,5 +75,22 @@ export class FileConnector extends BaseConnector implements SourceConnector {
         throw err;
       }
     }, ctx);
+  }
+
+  private resolveFilePath(inputPath: string): string {
+    if (typeof inputPath !== 'string' || inputPath.trim().length === 0) {
+      throw new Error('invalid_file_path');
+    }
+    const resolvedPath = path.resolve(inputPath);
+    const allowedBase = path.resolve(
+      process.env.FILE_CONNECTOR_BASE_DIR || process.cwd(),
+    );
+    if (
+      resolvedPath !== allowedBase &&
+      !resolvedPath.startsWith(`${allowedBase}${path.sep}`)
+    ) {
+      throw new Error('file_path_outside_allowed_base');
+    }
+    return resolvedPath;
   }
 }
