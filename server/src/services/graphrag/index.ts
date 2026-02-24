@@ -10,6 +10,8 @@
 
 // Types
 export * from './types.js';
+export * from './evidence-id.js';
+export * from './narrative-operationalization.js';
 
 // Repositories
 export {

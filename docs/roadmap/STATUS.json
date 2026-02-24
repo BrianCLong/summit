@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added cyber threat intelligence brief for 2026-02-06.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Added narrative-operationalization schema + evidence ID standard entry.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -195,6 +195,12 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
+      "id": "narrative-operationalization-schema",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Schema + EvidenceID utilities + standards doc for narrative-operationalization MWS."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -234,19 +240,7 @@
       "id": "cicd-signal-deltas-2026",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets. Aligned lint strict gate to run via pnpm lint:strict with explicit max-warnings enforcement."
-    },
-    {
-      "id": "naio-narrative-signals-plan",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "cti-brief-2026-02-06",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published cyber threat intelligence summary with evidence-first structure and defender actions."
+      "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     }
   ],
   "summary": {
@@ -254,7 +248,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 18,
     "ga_blockers": []
   }
 }
