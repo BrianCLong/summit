@@ -1,23 +1,41 @@
 # Graph↔PG Sync Validator
 
-This package provides a continuous validation tool to ensure data consistency between Postgres (canonical source) and Neo4j (graph view).
+Deterministic CDC-to-graph validation with audit-grade gate outputs.
 
-## Features
-- **Deterministic Snapshots**: Uses materialized views in Postgres and ordered exports in Neo4j.
-- **Strict Comparison**: Checks ID parity, referential integrity, and content hash equality.
-- **Evidence Generation**: Produces verifiable JSON artifacts (`stamp.json`, `metrics.json`, `evidence.json`).
+## Pass/Fail Gates
+
+- `Gate A` parity: per table/label count + keyset parity within drift threshold
+- `Gate B` fidelity: every FK row maps to exactly one graph edge
+- `Gate C` tx alignment: every graph mutation carries `(lsn, txid, commit_ts)` and has OpenLineage linkage
+- `Gate D` freshness: graph lag stays within commit timestamp SLO
 
 ## Usage
-Run the validator:
+
 ```bash
-node bin/graph-sync-validate.mjs
+node packages/graph-sync-validator/bin/graph-sync-validate.mjs
+node packages/graph-sync-validator/bin/parity-recon.mjs \
+  --metrics artifacts/graph-sync/metrics.json \
+  --output artifacts/graph-sync/recon.json
 ```
 
 Environment variables:
-- `GRAPH_SYNC_OUT_DIR`: Output directory for artifacts (default: `artifacts/graph-sync`).
-- `GRAPH_SYNC_MAX_LAG`: Max allowed lag rate (default: 0.001).
-- `PG*`: Postgres connection variables (standard libpq env vars).
-- `NEO4J_*`: Neo4j connection variables (used by cypher-shell).
 
-## Schemas
-See `evidence/schemas/` for artifact schemas.
+- `GRAPH_SYNC_OUT_DIR` output directory (default `artifacts/graph-sync`)
+- `GRAPH_SYNC_MAX_LAG` Gate A drift threshold (default `0.001`)
+- `GRAPH_SYNC_FRESHNESS_SLO_SECONDS` Gate D lag SLO (default `60`)
+- `GRAPH_SYNC_LINEAGE_WINDOW_SECONDS` Gate C lineage emit delay window (default `30`)
+- `PG*` Postgres connection vars
+- `NEO4J_*` Neo4j connection vars
+
+## Artifacts
+
+- `metrics.json` full gate-by-gate metrics
+- `recon.json` actionable parity/reconciliation summary
+- `openlineage.jsonl` mutation lineage events generated from source snapshot metadata
+- `stamp.json`, `evidence.json` deterministic evidence bundle records
+
+## Scaffold Assets
+
+- `scaffold/cdc/` TypeScript CDC consumer scaffold (`pg logical events -> Neo4j apply -> OpenLineage`)
+- `cypher/` idempotent upsert/delete templates with `(txid,lsn)` replay guards
+- `sql/pg_cdc_setup.sql` logical slot + checksum view bootstrap

@@ -5,9 +5,24 @@
     "totals": {
       "type": "object",
       "properties": {
-        "pg": { "type": "object", "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } } },
-        "neo": { "type": "object", "properties": { "nodes": { "type": "integer" }, "edges": { "type": "integer" } } }
-      }
+        "pg": {
+          "type": "object",
+          "properties": {
+            "nodes": { "type": "integer" },
+            "edges": { "type": "integer" }
+          },
+          "required": ["nodes", "edges"]
+        },
+        "neo": {
+          "type": "object",
+          "properties": {
+            "nodes": { "type": "integer" },
+            "edges": { "type": "integer" }
+          },
+          "required": ["nodes", "edges"]
+        }
+      },
+      "required": ["pg", "neo"]
     },
     "lagRate": { "type": "number" },
     "violation": { "type": "boolean" },
@@ -16,7 +31,47 @@
     "orphansPG": { "type": "array" },
     "nodeDelta": { "type": "integer" },
     "edgeDelta": { "type": "integer" },
+    "gates": {
+      "type": "object",
+      "properties": {
+        "gateA": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "pass": { "type": "boolean" },
+            "maxAllowedDrift": { "type": "number" },
+            "mappings": { "type": "array" }
+          },
+          "required": ["name", "pass"]
+        },
+        "gateB": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "pass": { "type": "boolean" }
+          },
+          "required": ["name", "pass"]
+        },
+        "gateC": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "pass": { "type": "boolean" }
+          },
+          "required": ["name", "pass"]
+        },
+        "gateD": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "pass": { "type": "boolean" }
+          },
+          "required": ["name", "pass"]
+        }
+      },
+      "required": ["gateA", "gateB", "gateC", "gateD"]
+    },
     "timestamp": { "type": "string" }
   },
-  "required": ["totals", "lagRate", "violation"]
+  "required": ["totals", "lagRate", "violation", "gates", "timestamp"]
 }
