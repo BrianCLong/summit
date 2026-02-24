@@ -49,7 +49,7 @@ function sanitize(obj: any): any {
         }
 
         // Fast character checks for NoSQL injection protection and Prototype Pollution
-        if (key[0] === '$' || key[0] === '.') {
+        if (key.length > 0 && (key[0] === '$' || key[0] === '.')) {
             hasChanged = true;
             continue;
         }
@@ -90,8 +90,6 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
     if (req.query) {
         try {
             const sanitizedQuery = sanitize(req.query);
-            // In some environments (like Jest/Supertest), req.query might be read-only
-            // through a getter. We try to redefine it or safely update it.
             Object.defineProperty(req, 'query', {
                 value: sanitizedQuery,
                 writable: true,
@@ -99,8 +97,6 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
                 enumerable: true
             });
         } catch (err: any) {
-            // Fallback: if we can't redefine, we just skip it to avoid crashing
-            // but log it for visibility in tests.
             if (process.env.DEBUG_TESTS) {
                 console.warn('[Sanitization] Warning: Could not sanitize req.query:', err.message);
             }
