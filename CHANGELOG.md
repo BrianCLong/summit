@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- Hardened multi-tenant isolation in OSINT evidence search.
+- Standardized `ensureRole` middleware for case-insensitive role matching.
+
 ### Added
 - **MARS Framework Implementation**: Added Modular Agent with Reflective Search (`summit.mars`) for autonomous AI research.
   - Implemented budget-aware Monte Carlo Tree Search (MCTS) planner.
