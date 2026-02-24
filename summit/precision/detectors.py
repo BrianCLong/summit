@@ -4,10 +4,7 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-try:
-    import torch
-except ImportError:
-    torch = None
+import torch
 
 
 @dataclass
@@ -17,9 +14,6 @@ class MismatchReport:
     violations: int = 0
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
-    if torch is None:
-        return MismatchReport()
-
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
         train_logprobs = train_vals.get("log_probs")
@@ -30,19 +24,6 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
 
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
-
-    # Ensure they are torch tensors if they aren't already
-    if not isinstance(train_logprobs, torch.Tensor):
-        try:
-            train_logprobs = torch.as_tensor(train_logprobs)
-        except Exception:
-            return MismatchReport()
-
-    if not isinstance(rollout_logprobs, torch.Tensor):
-        try:
-            rollout_logprobs = torch.as_tensor(rollout_logprobs)
-        except Exception:
-            return MismatchReport()
 
     delta = (train_logprobs - rollout_logprobs).abs()
 
