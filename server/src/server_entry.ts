@@ -10,10 +10,7 @@ import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
-import { otelService } from './lib/observability/otel.js';
-
-// Initialize OpenTelemetry as early as possible
-otelService.initialize();
+import { initializeTracing } from './observability/tracer.js';
 
 import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
@@ -37,6 +34,10 @@ const logger: pino.Logger = (pino as any)();
  * @trace FEAT-BOOTSTRAP
  */
 const startServer = async () => {
+  // Initialize OpenTelemetry
+  const tracer = initializeTracing();
+  await tracer.initialize();
+
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;
@@ -142,7 +143,7 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
-    await otelService.shutdown();
+    await tracer.shutdown();
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
