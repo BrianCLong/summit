@@ -1,8 +1,0 @@
-{
-  "exposed_ports": [
-    {
-      "port": 18789,
-      "auth_enabled": false
-    }
-  ]
-}

@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-XGNN-GOV-001",
-  "fidelity": 0.9,
-  "stability": 0.95,
-  "coverage": 1.0,
-  "predicate_rates": { "cross_cluster_bridge": 0.1 }
-}

@@ -1,0 +1,192 @@
+groups:
+  - name: summit.critical.rules
+    rules:
+      - alert: HighApplicationErrorRate
+        expr: rate(application_errors_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Application Error Rate > 5% ({{ $value }})"
+
+      - alert: HighGraphQLErrorRate
+        expr: rate(graphql_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GraphQL Error Rate > 10%"
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 HTTP Response Time > 2s"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / 1024 / 1024 > 1500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memory Usage > 1.5GB"
+
+      - alert: HighEventLoopLag
+        expr: nodejs_eventloop_lag_seconds > 0.5
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Event Loop Lag > 500ms"
+
+      - alert: PostgresConnectionPoolSaturation
+        expr: db_connections_active{database="postgres"} > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Postgres Connection Pool > 80 active"
+
+      - alert: Neo4jConnectionSaturation
+        expr: db_connections_active{database="neo4j"} > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Neo4j Connection Pool > 80 active"
+
+      - alert: HighJobFailureRate
+        expr: rate(maestro_job_execution_duration_seconds_count{status="failed"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: error
+        annotations:
+          summary: "Maestro Job Failures detected"
+
+      - alert: LLMHighLatency
+        expr: histogram_quantile(0.99, sum(rate(llm_request_duration_seconds_bucket[5m])) by (le, model)) > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "LLM Latency p99 > 20s for model {{ $labels.model }}"
+
+  - name: summit.experience.rules
+    rules:
+      - alert: HighGoldenPathFailureRate
+        expr: |
+          sum(rate(golden_path_step_total{status="failure"}[5m]))
+          /
+          sum(rate(golden_path_step_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+          team: frontend
+        annotations:
+          summary: "High Golden Path Failure Rate"
+          description: "Over 10% of users are failing on critical path steps."
+
+      - alert: HighUIErrorRate
+        expr: increase(ui_error_boundary_catch_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          team: frontend
+        annotations:
+          summary: "Spike in UI Errors"
+          description: "Detected {{ $value }} UI boundary errors in the last 5 minutes."
+
+      - alert: PoorLCP
+        expr: avg(web_vital_value{metric="LCP"}) > 2500
+        for: 15m
+        labels:
+          severity: warning
+          team: frontend
+        annotations:
+          summary: "Poor Largest Contentful Paint"
+          description: "Average LCP is {{ $value }}ms, exceeding 2.5s threshold."
+
+      - alert: HighChangeFailureRate
+        expr: maestro_change_failure_rate > 0.15
+        for: 15m
+        labels:
+          severity: warning
+          team: devops
+        annotations:
+          summary: "High Change Failure Rate"
+          description: "Change failure rate is {{ $value | humanizePercentage }}."
+
+  - name: summit.system.rules
+    rules:
+      - alert: HighApiErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "High API Error Rate"
+          description: "API 5xx error rate is {{ $value | humanizePercentage }}, exceeding 5%."
+
+      - alert: HighDatabaseLatency
+        expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "High Database Latency"
+          description: "P95 Database query latency is {{ $value }}s, exceeding 2.0s."
+
+      - alert: LowCacheHitRatio
+        expr: |
+          sum(rate(cache_hits_total[5m]))
+          /
+          (sum(rate(cache_hits_total[5m])) + sum(rate(cache_misses_total[5m]))) < 0.5
+        for: 15m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Low Cache Hit Ratio"
+          description: "Cache hit ratio dropped to {{ $value | humanizePercentage }}."
+
+      - alert: HighMemoryUsageRSS
+        expr: process_memory_rss_bytes / 1024 / 1024 > 1024
+        for: 5m
+        labels:
+          severity: warning
+          team: ops
+        annotations:
+          summary: "High Memory Usage (RSS)"
+          description: "Server RSS memory usage is {{ $value }} MB, exceeding 1GB."
+
+  - name: summit.maestro.rules.v2
+    rules:
+      - alert: MaestroJobFailuresV2
+        expr: increase(maestro_job_execution_duration_seconds_count{status="failed"}[10m]) > 0
+        for: 1m
+        labels:
+          severity: warning
+          team: data-science
+        annotations:
+          summary: "Maestro Job Failures"
+          description: "Maestro jobs have failed in the last 10 minutes."
+
+      - alert: HighAiJobFailureRate
+        expr: |
+          sum(rate(ai_jobs_total{status="failed"}[10m]))
+          /
+          sum(rate(ai_jobs_total[10m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: data-science
+        annotations:
+          summary: "High AI Job Failure Rate"
+          description: "AI Job failure rate is {{ $value | humanizePercentage }}."

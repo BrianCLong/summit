@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { spawnSync } from 'child_process';
 import * as crypto from 'crypto';
+import { computeDigest } from '@summit/receipts';
 import {
   CapsuleManifest,
   CapsuleStep,
@@ -261,15 +262,35 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       fs.writeFileSync(stdoutPath, result.stdout ?? '', 'utf8');
       fs.writeFileSync(stderrPath, result.stderr ?? '', 'utf8');
 
-      ledger.append('tool_exec', {
-        step_id: stepId,
-        step_name: stepLabel,
+      // Record detailed action receipt
+      const inputDigest = computeDigest({
         command: step.command,
         args: step.args,
-        exit_code: result.status ?? 0,
-        duration_ms: durationMs,
-        stdout_path: path.relative(sessionDir, stdoutPath),
-        stderr_path: path.relative(sessionDir, stderrPath),
+        env // includes secrets if any
+      });
+
+      const outputDigest = computeDigest({
+        stdout: result.stdout,
+        stderr: result.stderr,
+        exitCode: result.status
+      });
+
+      ledger.recordAction({
+        toolId: step.command,
+        capability: 'exec',
+        inputDigest,
+        outputDigest,
+        status: result.status === 0 ? 'success' : 'failure',
+        errorCategory: result.status !== 0 ? 'exit_code_nonzero' : undefined,
+        metadata: {
+          step_id: stepId,
+          step_name: stepLabel,
+          duration_ms: durationMs,
+          command: step.command,
+          args: step.args,
+          stdout_path: path.relative(sessionDir, stdoutPath),
+          stderr_path: path.relative(sessionDir, stderrPath),
+        }
       });
 
       if (step.category === 'test') {

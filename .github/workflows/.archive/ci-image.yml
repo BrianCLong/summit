@@ -50,7 +50,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push server image
-        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true'
+        if: (((((steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true') && (steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')
         uses: docker/build-push-action@v4 # No specific SHA found
         with:
           context: ./server
@@ -59,7 +59,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Build and push client image
-        if: steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: docker/build-push-action@v4 # No specific SHA found
         with:
           context: ./client
@@ -68,7 +67,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
 
       - name: Run hadolint
-        if: steps.changes.outputs.dockerfile == 'true'
         uses: reviewdog/action-hadolint@fc7ee4a
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -76,7 +74,6 @@ jobs:
           filter_mode: added
 
       - name: Generate SBOM
-        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: anchore/sbom-action@v0 # Using v0 as specific SHA not found for v0.1.0
         with:
           image: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
@@ -84,14 +81,12 @@ jobs:
           output: server-sbom.spdx.json
 
       - name: Upload SBOM artifact
-        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: actions/upload-artifact@0b7f8f6
         with:
           name: server-sbom
           path: server-sbom.spdx.json
 
       - name: Sign images (Cosign keyless)
-        if: steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true'
         uses: sigstore/cosign-installer@v1.4.1 # No specific SHA found
       - run: |
           cosign sign ghcr.io/${{ github.repository }}-server:${{ github.sha }} --yes

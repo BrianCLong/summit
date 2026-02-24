@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy-preview:
-    if: github.event.action != 'closed'
+    if: (github.event.action != 'closed') && (github.event.action == 'closed')
     runs-on: ubuntu-latest
     environment:
       name: preview-${{ github.event.pull_request.number }}
@@ -102,7 +102,6 @@ jobs:
             });
 
   teardown-preview:
-    if: github.event.action == 'closed'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

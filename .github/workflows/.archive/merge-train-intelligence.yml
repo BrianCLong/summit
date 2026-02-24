@@ -125,7 +125,7 @@ No action needed - this is automated. Track progress in [Merge Train Status](htt
           done
 
       - name: Generate intelligence report
-        if: always()
+        if: (always()) && (always())
         run: |
           cat > intelligence_report.md << 'EOF'
           # 🧠 Merge Train Intelligence Report
@@ -158,7 +158,6 @@ No action needed - this is automated. Track progress in [Merge Train Status](htt
           cat intelligence_report.md
 
       - name: Update metrics dashboard
-        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

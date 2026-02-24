@@ -321,7 +321,7 @@ jobs:
           echo "✅ Redis verified"
 
       - name: Check data sanitization (if applicable)
-        if: ${{ steps.restore_env.outputs.restore_env == 'dev' || steps.restore_env.outputs.restore_env == 'test' }}
+        if: (((((${{ steps.restore_env.outputs.restore_env == 'dev' || steps.restore_env.outputs.restore_env == 'test' }}) && (always())) && (always())) && (always())) && (failure())) && (always())
         run: |
           echo "Checking data sanitization..."
 
@@ -354,7 +354,6 @@ jobs:
           echo "status=skipped" >> $GITHUB_OUTPUT
 
       - name: Generate restore validation report
-        if: always()
         run: |
           BACKUP_ID="${{ steps.find_backup.outputs.backup_id }}"
           RESTORE_STATUS="${{ steps.restore.outputs.status }}"
@@ -396,7 +395,6 @@ jobs:
           cat restore-validation-report.md
 
       - name: Upload validation report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: restore-validation-report
@@ -404,12 +402,10 @@ jobs:
           retention-days: 30
 
       - name: Add to job summary
-        if: always()
         run: |
           cat restore-validation-report.md >> $GITHUB_STEP_SUMMARY
 
       - name: Notify on failure
-        if: failure()
         run: |
           echo "## ❌ Backup Restore Validation FAILED" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -421,7 +417,6 @@ jobs:
     name: RTO/RPO Compliance Check
     needs: [create-backup, restore-validation]
     runs-on: ubuntu-latest
-    if: always()
 
     steps:
       - name: Check RTO compliance

@@ -37,7 +37,7 @@ jobs:
 
       - name: Capture policy status
         id: record_status
-        if: always()
+        if: ((always()) && (always())) && (steps.record_status.outputs.status == 'fail')
         run: |
           STATUS=$(node - <<'NODE'
           const fs = require('fs');
@@ -57,7 +57,6 @@ jobs:
           echo "Policy status: $STATUS"
 
       - name: Upload policy report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-policy-report
@@ -65,7 +64,6 @@ jobs:
           if-no-files-found: ignore
 
       - name: Fail workflow on policy violation
-        if: steps.record_status.outputs.status == 'fail'
         run: |
           echo "Automated test policies failed."
           exit 1

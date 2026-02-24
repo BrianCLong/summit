@@ -73,7 +73,7 @@ jobs:
       - name: Generate GitHub App token
         id: app-token
         if: github.event.inputs.mode == 'plan'
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@v2
         continue-on-error: true
         with:
           app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
