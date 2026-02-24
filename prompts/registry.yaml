@@ -1,20 +1,23 @@
 version: 1
 prompts:
-  - id: imputed-intent-23rd-order
+  - id: ai-growth-bottlenecks-2026-investorplace
     version: v1
-    path: prompts/analysis/imputed-intent-23rd-order@v1.md
-    sha256: 387dfbe283069b40de2d241e82f92a048267b8fec6c9834ff4d3df8176c70008
-    description: Deliver a governance-first 23rd-order imputed intention artifact and roadmap tracking update.
+    path: prompts/standards/ai-growth-bottlenecks-2026-investorplace@v1.md
+    sha256: c97c1ef5b75c25d96c3175f6cfe8af84c8f5abe1ac558a1d6761810cfb1e714c
+    description: Establish schema + standards baseline for AI growth bottlenecks intake.
     scope:
       paths:
-        - docs/analysis/imputed-intent-23rd-order.md
+        - schemas/bottlenecks.report.schema.json
+        - docs/standards/ai-growth-bottlenecks-2026-investorplace.md
+        - repo_assumptions.md
         - docs/roadmap/STATUS.json
-        - prompts/analysis/imputed-intent-23rd-order@v1.md
+        - prompts/standards/ai-growth-bottlenecks-2026-investorplace@v1.md
         - prompts/registry.yaml
+        - agents/examples/BOTTLENECKS_SCHEMA_PR1.json
       domains:
         - documentation
         - governance
-        - analysis
+        - standards
     verification:
       tiers_required:
         - C

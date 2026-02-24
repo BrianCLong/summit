@@ -1,18 +1,39 @@
 # Repo Assumptions & Validation (SpreadsheetBench Verified)
 
-## Verified vs Assumed
+## Structure Validation
 
-| Verified | Assumed |
-| --- | --- |
-| `docs/` exists and contains standards/security/ops subdirectories. | Current CLI includes a native `summit intel` command (added in this change set). |
-| `scripts/` exists and is a suitable location for monitoring drift scripts. | CI conventions accept a dedicated `intel-drift` workflow name. |
-| `intel/schema/` exists for JSON schemas. | The nightly drift job should fail on material deltas by default. |
-| `intel/` exists for intelligence artifacts. | `artifacts/intel/<item>` is an approved location for baseline reports. |
-| `.github/workflows/` exists for CI workflows. | `INTEL_ENABLE_INGEST` remains the default gate for ingest execution. |
-| `docs/roadmap/STATUS.json` is the execution ledger to update per change. | No additional policy exceptions are required for this pack. |
+| Plan Path | Actual Path | Status | Notes |
+| --- | --- | --- | --- |
+| `schemas/` | `schemas/` | ✅ Exists | JSON schema store; contains evidence schemas used as reference. |
+| `docs/standards/` | `docs/standards/` | ✅ Exists | Standards documentation directory. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | CI workflows live here; naming still under review. |
+| `artifacts/` | `artifacts/` | ✅ Exists | Artifact output directory used by governance tooling. |
+| `cli/` | `cli/` | ✅ Exists | CLI-related code present; entrypoint still needs validation. |
 
-## Must-Not-Touch List
+## Component Mapping (Bottlenecks MWS)
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `Cargo.lock`)
-- Release automation (`.github/workflows/*release*`, `scripts/release/*`)
-- Security policy roots (`docs/governance/*`, `docs/ga/*`, `agent-contract.json`)
+| Planned Component | Proposed Location | Actual Location / Action |
+| --- | --- | --- |
+| Bottlenecks report schema | `schemas/bottlenecks.report.schema.json` | Added under `schemas/` to align with existing schema layout. |
+| Standards doc | `docs/standards/ai-growth-bottlenecks-2026-investorplace.md` | Added under `docs/standards/`. |
+| CLI extractor | `cli/` or `src/` | **Assumed**; needs validation before implementation. |
+| Test runner | `pytest` / `pnpm` | **Assumed**; verify per `pytest.ini`, `package.json`, and CI workflow usage. |
+
+## Assumptions Pending Validation
+
+* CLI entrypoint (Python/Node) and command wiring are not yet confirmed.
+* Schema validation library (jsonschema/pydantic/zod) is not yet confirmed.
+* CI workflow names for new gates are not yet confirmed.
+* Evidence ID convention should follow `docs/governance/EVIDENCE_ID_POLICY.yml`.
+
+## Must-Not-Touch (Discovered)
+
+* Release workflows and governance enforcement configs.
+* Security policy docs in `docs/governance/` unless explicitly required.
+* Existing CI gate registries without explicit approval.
+
+## Next Validation Steps
+
+1. Locate CLI entrypoint and command registry.
+2. Identify existing schema validation utilities and artifact hashing conventions.
+3. Confirm CI workflow patterns and required gates before adding new checks.
