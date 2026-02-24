@@ -126,6 +126,13 @@ Command: gh run view 22344171367 --log-failed
 Result: error connecting to api.github.com (Deferred pending GitHub API connectivity)
 ```
 
+### Governed Exception: PR creation
+
+```text
+Command: gh pr create --title "chore(ops): daily sprint log 2026-02-24 run 11" --body-file /tmp/pr-body.txt
+Result: error connecting to api.github.com (Deferred pending GitHub API connectivity)
+```
+
 Mode: Reasoning
 
 ## MAESTRO Alignment
@@ -157,6 +164,7 @@ Mitigations: Evidence-first logging, governed exception ledger entries, prioriti
 - Deferred issue scan and failed-run log fetch pending GitHub API connectivity.
 - Authored daily sprint ledger and staged STATUS.json refresh.
 - Registered daily sprint prompt and task spec per prompt integrity requirements.
+- PR creation deferred pending GitHub API connectivity.
 
 ## Task Status
 
@@ -181,6 +189,7 @@ python3 - <<'PY'
 cat <<'EOF' >> prompts/registry.yaml
 cat <<'EOF' > agents/examples/DAILY_SPRINT_20260224_RUN11.json
 python3 -m json.tool docs/roadmap/STATUS.json
+gh pr create --title "chore(ops): daily sprint log 2026-02-24 run 11" --body-file /tmp/pr-body.txt
 ```
 
 ## End-of-Day Summary
@@ -190,5 +199,6 @@ Completed: Evidence bundle for top-20 PRs; GA PR #18663 check snapshot; sprint l
 In progress: GA PR #18663 failure triage (blocked by GitHub API connectivity for run logs).
 
 Blocked: Issue scan and PR-specific check scans for #18659 and #18656 (Deferred pending GitHub API connectivity).
+Blocked: PR creation for branch `chore/daily-sprint-2026-02-24-11` (Deferred pending GitHub API connectivity).
 
 Finality: Sprint ledger updated with governed exceptions and next-step constraints.
