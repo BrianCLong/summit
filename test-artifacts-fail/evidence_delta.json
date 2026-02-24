@@ -1,0 +1,13 @@
+[
+  {
+    "id": "1",
+    "type": "DIGEST_MISMATCH",
+    "postgresDigest": "344d98fb5bc96c1ea6b943c24cb2cceaf877d1720da1e0c62c9b1fa98959859e",
+    "neoDigest": "0da5a192fa1ae91fc4e4880c75c687c3c879805f8f6410c9e2f7b2188b4d2562"
+  },
+  {
+    "id": "2",
+    "type": "MISSING_IN_NEO4J",
+    "postgresDigest": "575b7a9280b846db429072bae01ccb12565c42ae2e046ad2655d5231f15b0a76"
+  }
+]

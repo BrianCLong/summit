@@ -1,0 +1,11 @@
+{
+  "runId": "019c2732-83aa-70ea-bb2c-31c5f86a39c4",
+  "subject": "openlineage://test-ns/runs/019c2732-83aa-70ea-bb2c-31c5f86a39c4",
+  "timestamp": "2026-02-04T05:53:26.073Z",
+  "status": "PASS",
+  "postgresCount": 2,
+  "neo4jCount": 2,
+  "postgresAggregateDigest": "528fbb3bd0f1cab09608b4d6794fc763e9363a15eaa187780590e4c670898ce4",
+  "neo4jAggregateDigest": "528fbb3bd0f1cab09608b4d6794fc763e9363a15eaa187780590e4c670898ce4",
+  "mismatches": []
+}
