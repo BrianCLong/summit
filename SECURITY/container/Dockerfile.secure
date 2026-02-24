@@ -47,7 +47,7 @@ FROM aquasec/trivy:latest AS security-scan
 COPY --from=builder /app /scan
 RUN trivy fs --exit-code 0 --no-progress --format table /scan
 
-# Runtime stage - Use distroless for minimal attack surface  
+# Runtime stage - Use distroless for minimal attack surface
 FROM gcr.io/distroless/nodejs18-debian12:nonroot AS runtime
 
 # Security labels and metadata

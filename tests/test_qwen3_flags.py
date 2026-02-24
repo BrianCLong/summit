@@ -1,4 +1,5 @@
 import pytest
+import summit.flags
 from summit.audio.tts.qwen3.adapter import Qwen3TTSAdapter, Qwen3TTSRequest
 from summit.flags import FEATURE_QWEN3_TTS
 
@@ -17,3 +18,26 @@ def test_adapter_enabled():
     res = adapter.synthesize(req)
     assert res["sample_rate"] == 0
     assert res["metrics"]["attention_backend"] == "auto"
+
+from summit.audio.asr.providers.qwen3_asr_provider import Qwen3ASRProvider
+from summit.audio.asr.types import ASRRequest
+from summit.flags import FEATURE_QWEN3_ASR
+
+def test_asr_provider_respects_flags(monkeypatch):
+    monkeypatch.setenv("SUMMIT_ASR_ENABLED", "0")
+    monkeypatch.setattr(summit.flags, "FEATURE_QWEN3_ASR", False)
+    provider = Qwen3ASRProvider()
+    req = ASRRequest(audio="clip.wav", audio_type="path")
+
+    with pytest.raises(RuntimeError, match="disabled"):
+        provider.transcribe(req)
+
+def test_asr_provider_enabled_by_feature_flag(monkeypatch):
+    monkeypatch.setenv("SUMMIT_ASR_ENABLED", "0")
+    monkeypatch.setattr(summit.flags, "FEATURE_QWEN3_ASR", True)
+    monkeypatch.setenv("RUN_ASR_INTEGRATION", "0")
+    provider = Qwen3ASRProvider()
+    req = ASRRequest(audio="clip.wav", audio_type="path")
+
+    result = provider.transcribe(req)
+    assert "[Transformers Mock]" in result.text

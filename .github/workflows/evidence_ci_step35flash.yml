@@ -12,10 +12,6 @@ on:
       - 'summit/evidence/schemas/step35flash_*.json'
       - 'summit/evidence/step35flash_index.example.json'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   validate-evidence:
     runs-on: ubuntu-latest

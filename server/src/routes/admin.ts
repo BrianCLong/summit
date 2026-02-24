@@ -257,6 +257,7 @@ router.get('/admin/tenant-defaults', (req, res) => {
 export default router;
 
 // n8n flows admin (read/write server/config/n8n-flows.json)
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
 
 router.get('/admin/n8n-flows', (_req, res) => {

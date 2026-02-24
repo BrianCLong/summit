@@ -1,5 +1,7 @@
 {
   "evidence_id": "EVD-SCOUT-CI-005",
   "summary": "Schema validation fixtures for evidence bundle.",
+  "environment": "ci",
+  "backend": "mock",
   "artifacts": ["metrics.json", "stamp.json", "evidence/index.json"]
 }

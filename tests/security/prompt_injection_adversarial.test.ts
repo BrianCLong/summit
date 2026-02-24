@@ -17,7 +17,7 @@ class AdversarialTestAgent extends BaseAgentArchetype {
   async recommend() { return []; }
   async act() { throw new Error('Not implemented'); }
   async shutdown(): Promise<void> {}
-  
+
   // Expose the protected method for testing
   public async testValidateInput(input: string, context: AgentContext): Promise<boolean> {
     return await (this as any).validateInput(input, context);

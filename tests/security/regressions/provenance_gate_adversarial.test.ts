@@ -51,10 +51,10 @@ describe('Adversarial Security: Provenance Gate (OPA)', () => {
   it('should FAIL CLOSED when policy file is missing or corrupted', () => {
     const backupPolicy = 'policy/supply_chain.rego.bak';
     const policyPath = 'policy/supply_chain.rego';
-    
+
     // Temporarily rename policy file
     fs.renameSync(policyPath, backupPolicy);
-    
+
     try {
       const validInput = path.join(tempDir, 'valid-stub.json');
       fs.writeFileSync(validInput, JSON.stringify({
@@ -85,12 +85,12 @@ describe('Adversarial Security: Provenance Gate (OPA)', () => {
       sboms_signed: true,
       provenance_signed: true,
       artifact: { sbom_spdx: true, sbom_cyclonedx: true, provenance_attestation: true },
-      slsa_provenance: { 
-        predicate: { 
-          buildType: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1", 
-          builder: { id: "https://github.com/actions/runner" }, 
-          metadata: { buildInvocationId: "run-123" } 
-        } 
+      slsa_provenance: {
+        predicate: {
+          buildType: "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+          builder: { id: "https://github.com/actions/runner" },
+          metadata: { buildInvocationId: "run-123" }
+        }
       },
       vulnerability_scan: { vulnerabilities: [] },
       transparency_log: { uuid: "trans-123" },
@@ -101,9 +101,9 @@ describe('Adversarial Security: Provenance Gate (OPA)', () => {
 
     // Attempt to skip via a hypothetical env var (many CI systems have these)
     try {
-      execSync(`SKIP_PROVENANCE=true bash ${gateScript} ${validInput}`, { 
+      execSync(`SKIP_PROVENANCE=true bash ${gateScript} ${validInput}`, {
         env: { ...process.env, SKIP_PROVENANCE: 'true' },
-        stdio: 'pipe' 
+        stdio: 'pipe'
       });
       // It should pass because the input IS valid, but we want to ensure
       // the script doesn't have a shortcut that returns 0 early.

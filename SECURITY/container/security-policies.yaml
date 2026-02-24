@@ -457,13 +457,13 @@ data:
         compliance_checks:
           enabled: true
           standards: ["CIS", "PCI-DSS", "SOX"]
-      
+
       runtime_protection:
         enabled: true
         behavioral_analysis: true
         anomaly_detection: true
         auto_response: false
-        
+
       network_security:
         tls_enforcement: true
         certificate_validation: true

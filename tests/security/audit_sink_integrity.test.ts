@@ -46,7 +46,7 @@ describe('Adversarial Security: Audit Sink Integrity', () => {
 
   it('should NOT emit audit logs via console.log (regression)', async () => {
     const consoleSpy = jest.spyOn(console, 'log');
-    
+
     await auditSink.recordEvent({
       eventType: 'user_action',
       level: 'info',
@@ -56,10 +56,10 @@ describe('Adversarial Security: Audit Sink Integrity', () => {
     });
 
     // Ensure no plain JSON objects containing audit data leaked to stdout
-    const auditLeaks = consoleSpy.mock.calls.some(call => 
+    const auditLeaks = consoleSpy.mock.calls.some(call =>
       JSON.stringify(call).includes('Pulse check')
     );
-    
+
     expect(auditLeaks).toBe(false);
   });
 });
