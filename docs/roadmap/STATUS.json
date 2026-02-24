@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-09T00:00:00Z",
-  "revision_note": "Added staging/prod digest parity workflows and deployment hardening manifests.",
+  "last_updated": "2026-02-08T00:33:31Z",
+  "revision_note": "Added governed GitHub Actions OIDC with AWS STS hardening guide in docs/security.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
