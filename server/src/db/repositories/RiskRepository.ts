@@ -33,26 +33,67 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals in batches (BOLT OPTIMIZATION)
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
-              savedScore.id,
-              sig.type,
-              sig.source,
-              sig.value,
-              sig.weight,
-              sig.contributionScore,
-              sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
-          );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < input.signals.length; i += CHUNK_SIZE) {
+          const chunk = input.signals.slice(i, i + CHUNK_SIZE);
+          try {
+            await tx.query('SAVEPOINT signal_batch');
+            const values: any[] = [];
+            const placeholders: string[] = [];
+            let paramIdx = 1;
+
+            for (const sig of chunk) {
+              const detectedAt = sig.detectedAt || new Date();
+              placeholders.push(
+                `($${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++}, $${paramIdx++})`
+              );
+              values.push(
+                savedScore.id,
+                sig.type,
+                sig.source,
+                sig.value,
+                sig.weight,
+                sig.contributionScore,
+                sig.description,
+                detectedAt
+              );
+            }
+
+            const sigRows = await tx.query(
+              `INSERT INTO risk_signals (
+                risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+              ) VALUES ${placeholders.join(', ')}
+              RETURNING *`,
+              values
+            );
+
+            await tx.query('RELEASE SAVEPOINT signal_batch');
+            savedSignals.push(...sigRows.map((row: any) => this.mapSignal(row)));
+          } catch (error) {
+            await tx.query('ROLLBACK TO SAVEPOINT signal_batch');
+            // Fallback to row-by-row if batch fails to maintain row-level reliability
+            for (const sig of chunk) {
+              const sigRows = await tx.query(
+                `INSERT INTO risk_signals (
+                  risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING *`,
+                [
+                  savedScore.id,
+                  sig.type,
+                  sig.source,
+                  sig.value,
+                  sig.weight,
+                  sig.contributionScore,
+                  sig.description,
+                  sig.detectedAt || new Date(),
+                ]
+              );
+              savedSignals.push(this.mapSignal(sigRows[0]));
+            }
+          }
         }
       }
 
