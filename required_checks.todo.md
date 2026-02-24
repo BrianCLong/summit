@@ -16,8 +16,17 @@ CI job names can align with branch protection rules.
 gh api repos/:owner/:repo/branches/main/protection --jq '.required_status_checks.contexts'
 ```
 
-## Canonical Checks
-- [ ] TODO: Add discovered check names here.
+## Temporary names (Mapping needed)
+We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
+- `gate/evidence` (PR2)
+- `gate/supplychain` (PR4)
+- `gate/fimi` (PR7)
+- `sigstore-verify` (PR4)
+- `pidm-evidence-verify` (PIDM evidence gate)
+- `lint`
+- `typecheck`
+- `build`
+- `test`
 
 ## Temporary Check Aliases (until canonical list is confirmed)
 - adoption-evidence-verify (temporary)

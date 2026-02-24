@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-08T10:06:31Z",
-  "revision_note": "Added Community Copilot Lane 1 plan entry for governed PR stack sequencing.",
+  "last_updated": "2026-02-08T02:05:00Z",
+  "revision_note": "Added PIDM lane-1 evidence foundation initiative and CI evidence verification gate.",
   "initiatives": [
     {
-      "id": "community-copilot-lane1",
+      "id": "pidm-foundation-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Community Copilot Lane 1 plan doc (PR1\u2013PR5) with evidence, policy, retrieval, connector, and API contracts."
+      "notes": "PIDM evidence index, CI verification, and architecture baseline documentation."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
