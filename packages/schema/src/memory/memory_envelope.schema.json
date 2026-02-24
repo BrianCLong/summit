@@ -1,0 +1,64 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.com/schemas/memory/memory_envelope.schema.json",
+  "title": "Memory Write Envelope",
+  "description": "Schema for memory writes ensuring coherence and provenance",
+  "type": "object",
+  "properties": {
+    "memory_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the memory entry"
+    },
+    "memory_type": {
+      "type": "string",
+      "enum": ["graph", "vector", "episodic", "file"],
+      "description": "Type of memory storage"
+    },
+    "source_agent": {
+      "type": "string",
+      "description": "Identifier of the agent that generated the memory"
+    },
+    "run_id": {
+      "type": "string",
+      "description": "Identifier of the execution run"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp"
+    },
+    "confidence_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence score of the memory (0.0 to 1.0)"
+    },
+    "provenance_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "References to source material or previous memories"
+    },
+    "compaction_group": {
+      "type": "string",
+      "description": "Group identifier for compaction/deduplication"
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "The actual content of the memory"
+    }
+  },
+  "required": [
+    "memory_id",
+    "memory_type",
+    "source_agent",
+    "run_id",
+    "timestamp",
+    "confidence_score",
+    "provenance_refs",
+    "content"
+  ]
+}
