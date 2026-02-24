@@ -34,17 +34,18 @@
 1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
 2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
 
-## Bombadil UI Fuzz Probe (planned work)
+## Structured RAG (PR1)
 ### Verified
-- **Repo already contains `repo_assumptions.md`** that must be updated for new initiatives.
-- **Root-level docs hierarchy** includes `docs/security/`, `docs/ops/`, `docs/standards/` (targets for new docs).
+- **Feature flags**: `summit/flags.py` uses env-based toggles; new `SUMMIT_STRUCTURED_RAG` added.
+- **Retrieval layout**: `summit/retrieval/` exists with `hybrid/` but no structured retrieval module yet.
 
-### Assumed (must validate before coding)
-- **UI entrypoint**: The Summit UI can be launched locally for smoke probes.
-- **Existing CI artifact upload patterns** exist to follow for `artifacts/` uploads.
-- **Browser automation**: Playwright browsers are available in CI runtime.
+### Assumed
+- **Structured retrieval entrypoint**: Future integration point to be confirmed in `summit/retrieval/` routing.
+- **Evidence artifact conventions**: Existing patterns will be aligned in later PRs once evidence modules are verified.
 
-### Must-not-touch for UI fuzz PR1 (doc-only)
-- `docs/ci/REQUIRED_CHECKS_POLICY.yml`
-- `.github/workflows/*`
-- `SECURITY/` (any file)
+## Structured RAG (Implementation)
+### Verified
+- **Structured retrieval module**: `summit/retrieval/structured/` with planner, policy, executor, pipeline, and config.
+- **Evidence writer**: `summit/evidence/structured/` with deterministic artifacts and schema.
+- **Tests**: `tests/structured_rag/` covers disambiguation, aggregation, policy guards, and evidence determinism.
+

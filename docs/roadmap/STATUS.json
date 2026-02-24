@@ -1,12 +1,30 @@
 {
   "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register; Normalized evidence/index.json to match evidence schema; Added UI Fuzz Probe scaffolding; Added Maestro Long-Run Job Engine governance scaffolding and CI gates; Expanded RepoFlow subsumption implementation scope and evidence gates.",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register; Normalized evidence/index.json to match evidence schema; Added UI Fuzz Probe scaffolding; Added Maestro Long-Run Job Engine governance scaffolding and CI gates.",
   "initiatives": [
     {
-      "id": "vercel-v0-90-problem-repoflow",
+      "id": "structured-rag-db-not-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Repo-connected agent change flow: sandboxed execution, deterministic evidence, and policy-gated PR simulation."
+      "notes": "Structured retrieval PR1-PR6: SQL-first planner/policy/executor, evidence writer, tests, and runbooks."
+    },
+    {
+      "id": "maestro-long-run-job-engine-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Maestro Long-Run Job Engine governance scaffolding and CI gates."
+    },
+    {
+      "id": "ui-fuzz-probe",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "UI Fuzz Probe scaffolding."
+    },
+    {
+      "id": "evidence-index-schema-normalization",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Normalized evidence/index.json to match evidence schema."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -90,10 +108,10 @@
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
     },
     {
-      "id": "dependabot-oidc-registry-policy-gate",
+      "id": "structured-rag-db-not-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Implemented CI policy gate to block long-lived registry secrets with deterministic artifacts."
+      "notes": "Structured retrieval PR1-PR6: SQL-first planner/policy/executor, evidence writer, tests, and runbooks."
     },
     {
       "id": "E",
