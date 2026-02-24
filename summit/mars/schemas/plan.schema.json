@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MARS Plan",
+  "type": "object",
+  "required": ["task", "total_iterations", "seed", "steps"],
+  "properties": {
+    "task": { "type": "string" },
+    "total_iterations": { "type": "integer" },
+    "seed": { "type": "integer" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "cost", "cumulative_cost"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "cost": { "type": "integer" },
+          "cumulative_cost": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
