@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Validated repo assumptions for graph-grounded agent planning; recorded evidence sources and deferred validations.",
+  "last_updated": "2026-02-08T10:06:31Z",
+  "revision_note": "Added Community Copilot Lane 1 plan entry for governed PR stack sequencing.",
   "initiatives": [
     {
-      "id": "repo-assumptions-graph-grounded-agent",
-      "status": "completed",
+      "id": "community-copilot-lane1",
+      "status": "in_progress",
       "owner": "codex",
-      "notes": "Repo assumptions validated with evidence-first inventory for graph-grounded agent lane; deferred CLI and redaction discovery."
+      "notes": "Community Copilot Lane 1 plan doc (PR1\u2013PR5) with evidence, policy, retrieval, connector, and API contracts."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
