@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T12:00:00Z",
-  "revision_note": "Added safety tool-approval gate scaffolding (sandbox runner, policy, tests).",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added Postgres CDC blueprint in docs/streaming.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
