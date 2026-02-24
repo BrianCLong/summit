@@ -3,6 +3,12 @@
   "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
   "initiatives": [
     {
+      "id": "sam-optimizer-mws-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PR1 adds summit/optim SAM wrapper and deterministic unit coverage as the minimal winning slice foundation."
+    },
+    {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
       "owner": "codex",
