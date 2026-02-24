@@ -3,6 +3,9 @@ package intelgraph.migrations
 import future.keywords.if
 import future.keywords.in
 
+import future.keywords.if
+import future.keywords.in
+
 default allow := false
 
 # Migrations can only be run by admin or cicd bot

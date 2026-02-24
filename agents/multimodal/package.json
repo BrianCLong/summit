@@ -18,9 +18,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
+    "test": "pnpm exec jest",
+    "test:watch": "pnpm exec jest --watch",
+    "test:coverage": "pnpm exec jest --coverage",
     "lint": "if [ -d src ]; then eslint src --ext .ts; else eslint . --ext .ts; fi",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"

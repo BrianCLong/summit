@@ -9,8 +9,11 @@ allow {
   input.env == "dev"
   some role
   role := input.actor.role
-  role == "maintainer" or role == "ci-bot"
+  any_allowed_role(role)
 }
+
+any_allowed_role("maintainer")
+any_allowed_role("ci-bot")
 
 deny[msg] {
   not allow

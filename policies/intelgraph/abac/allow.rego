@@ -1,14 +1,14 @@
-import rego.v1
-
 # ============================================================================
 # IntelGraph ABAC Authorization Policy
 # Main allow policy that orchestrates all authorization checks
 # ============================================================================
 
 package intelgraph.abac
+
+import future.keywords.contains
+
 import future.keywords.if
 import future.keywords.in
-
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION

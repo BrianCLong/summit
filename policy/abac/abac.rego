@@ -3,6 +3,9 @@ package summit.abac
 import future.keywords.if
 import future.keywords.contains
 
+import future.keywords.contains
+import future.keywords.if
+
 import data.abac
 
 default decision := {

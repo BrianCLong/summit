@@ -2,6 +2,8 @@ import future.keywords
 package access
 import future.keywords.if
 
+import future.keywords.if
+
 # input: { user: { id, roles, mfa_level }, action, resource: { owner, tier } }
 allow if {
   # owners can access their own resources

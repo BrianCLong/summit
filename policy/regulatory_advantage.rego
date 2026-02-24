@@ -4,6 +4,10 @@ import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
 
+import future.keywords.contains
+import future.keywords.if
+import future.keywords.in
+
 # Policy-as-code for Regulatory Advantage
 # See docs/strategy/REGULATORY_ADVANTAGE.md for full strategy.
 

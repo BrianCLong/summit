@@ -5,6 +5,8 @@ package maestro.governance
 import future.keywords.if
 import future.keywords.in
 
+import future.keywords.in
+
 # Deny public S3 buckets
 deny[msg] {
     input.asset_type == "aws_s3_bucket"

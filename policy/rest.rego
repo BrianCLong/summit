@@ -2,6 +2,8 @@ import future.keywords
 package intelgraph.rest
 import future.keywords.if
 
+import future.keywords.if
+
 default allow := false
 
 # Allow if tenant matches

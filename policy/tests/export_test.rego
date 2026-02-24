@@ -2,6 +2,8 @@ import future.keywords
 package intelgraph.policy.export
 import future.keywords.if
 
+import future.keywords.if
+
 test_deny_on_restricted_license if {
   obj := {
     "action": "export",

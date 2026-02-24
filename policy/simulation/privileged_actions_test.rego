@@ -2,6 +2,8 @@ import future.keywords
 package policy.simulation.privileged_actions
 import future.keywords.if
 
+import future.keywords.if
+
 import data.summit.abac
 import data.scenarios
 

@@ -3,6 +3,8 @@ package summit.gates.migration
 import future.keywords.if
 import future.keywords.contains
 
+import future.keywords.if
+
 default allow := false
 
 # Approve migrations only when the PR is explicitly gated and compatibility tests pass.

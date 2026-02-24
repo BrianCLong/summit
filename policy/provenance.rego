@@ -3,6 +3,9 @@ package summit.provenance
 import future.keywords.if
 import future.keywords.contains
 
+import future.keywords.contains
+import future.keywords.if
+
 default valid := false
 
 valid if {

@@ -2,6 +2,8 @@ import future.keywords
 package deploy.gates
 import future.keywords.if
 
+import future.keywords.if
+
 # Require cosign signature, SBOM, and no critical vulns
 allow if {
   input.image.signed

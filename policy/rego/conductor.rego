@@ -2,6 +2,8 @@ import future.keywords
 package rego.conductor.authz
 import future.keywords.if
 
+import future.keywords.if
+
 default allow := false
 
 # Require explicit scope for sensitive ops

@@ -3,6 +3,9 @@ package summit.regulatory
 import future.keywords.if
 import future.keywords.in
 
+import future.keywords.if
+import future.keywords.in
+
 test_deny_missing_jurisdiction if {
     test_input := {
         "kind": "DeploymentConfig",

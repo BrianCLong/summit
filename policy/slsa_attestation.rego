@@ -2,6 +2,8 @@ import future.keywords
 package summit.slsa
 import future.keywords.if
 
+import future.keywords.if
+
 default allow := false
 
 #

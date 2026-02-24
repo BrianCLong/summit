@@ -2,6 +2,8 @@ import future.keywords
 package summit.abac.test
 import future.keywords.if
 
+import future.keywords.if
+
 import data.summit.abac
 
 base_subject := {

@@ -18,7 +18,7 @@ jobs:
       - name: Install conftest
         uses: instrumenta/conftest-action@v1
         with:
-          version: v0.56.0
+          version: v0.68.0
 
       - name: Validate Dockerfiles against policy
         run: |

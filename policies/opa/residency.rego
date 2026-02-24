@@ -4,6 +4,8 @@ import future.keywords.in
 
 import rego.v1
 
+import future.keywords.in
+
 # Input contract (example):
 # input = {
 #   "mode": "enforce" | "shadow",
@@ -28,18 +30,14 @@ allow {
 }
 
 # Top-level decision with shadow support
-package composer.decision
-
-import data.composer.residency as r
-
 decision := {
   "policy": "residency",
   "mode": mode,
   "allow": allow_val,
-  "violations": r.violation,
+  "violations": violation,
 }
 {
   mode := input.mode
-  allow_val := r.allow
+  allow_val := allow
 }
 

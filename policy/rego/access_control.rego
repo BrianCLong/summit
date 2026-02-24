@@ -2,6 +2,8 @@ import future.keywords
 package rego.intelgraph.authz
 import future.keywords.if
 
+import future.keywords.if
+
 default allow := false
 
 allow if {

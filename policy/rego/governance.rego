@@ -3,6 +3,8 @@ package rego.governance
 import future.keywords.if
 import future.keywords.contains
 
+import future.keywords.if
+
 default allow := false
 default log_event := true
 

@@ -3,6 +3,8 @@ import future.keywords
 package governance_test
 import future.keywords.if
 
+import future.keywords.if
+
 import data.governance
 
 test_allow_safe if {

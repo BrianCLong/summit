@@ -2,6 +2,8 @@ import future.keywords
 package release_gates
 import future.keywords.if
 
+import future.keywords.if
+
 default allow = false
 
 # Allow release if all gates pass

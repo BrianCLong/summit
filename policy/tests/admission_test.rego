@@ -4,6 +4,9 @@ import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
 
+import future.keywords.if
+import future.keywords.in
+
 # Stub function for admission decision
 decision_for(req) := "require-human" if {
   some label in req.policyLabels

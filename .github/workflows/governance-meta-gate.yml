@@ -16,6 +16,10 @@ on:
       - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
       - "policy/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -31,9 +35,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Install Dependencies
-        run: npm install js-yaml --no-save
 
       - name: Run Governance Meta-Gate
         run: node scripts/ci/governance-meta-gate.mjs

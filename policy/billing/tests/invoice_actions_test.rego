@@ -2,6 +2,8 @@ import future.keywords
 package billing.invoice_actions_test
 import future.keywords.if
 
+import future.keywords.if
+
 import data.billing.invoice_actions
 
 invoices := [
