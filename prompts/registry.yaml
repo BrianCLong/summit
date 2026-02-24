@@ -922,3 +922,27 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: daily-sprint-orchestrator
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: 2e0a28096db3bee1397a5f8c80f7235215d427038ca13d3d9e499239bf35c4f2
+    description: Daily sprint plan and evidence-first execution log for Summit automation.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_*.md
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - ops
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
