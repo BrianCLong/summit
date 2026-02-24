@@ -1,0 +1,30 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2.3.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_CONFIG: .gitleaks.toml
+
+    - name: Generate SBOM
+      uses: anchore/sbom-action@v0.18.0
+      with:
+        path: .
+
+    - name: Scan SBOM
+      uses: anchore/scan-action@v3
+      with:
+        sbom: "sbom.spdx.json"
+        fail-build: false

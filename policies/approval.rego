@@ -3,7 +3,8 @@
 
 package intelgraph.approval
 
-import rego.v1
+import future.keywords
+
 
 # Default deny - all operations must be explicitly allowed
 default allow := false
@@ -28,7 +29,7 @@ requires_four_eyes if {
 }
 
 requires_four_eyes if {
-  # Cost threshold: any operation >.00 requires approval
+  # Cost threshold: any operation >$5.00 requires approval
   input.est_usd > 5.0
 }
 

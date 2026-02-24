@@ -2,6 +2,9 @@ package policies.abac_tenant_isolation
 
 import rego.v1
 
+import future.keywords
+
+
 default allow = false
 
 # Allow if the principal's tenant_id matches the resource's tenant_id

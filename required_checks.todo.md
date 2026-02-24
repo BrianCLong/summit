@@ -19,6 +19,9 @@ Until discovered, we use temporary verifier names:
 - `ci:schema`
 - `ci:lint`
 - `ci:deps-delta`
+- `ci/evidence-verify`
+- `ci/retrieval-drift`
+- `ci/retrieval-acl`
 
 ## Rename plan
 Once real check names are known:

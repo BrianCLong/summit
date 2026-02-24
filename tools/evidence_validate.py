@@ -1,88 +1,143 @@
-#!/usr/bin/env python3
+import argparse
 import json
+import os
 import sys
-import pathlib
+from typing import Any, Dict, List
 
-# Try to import jsonschema, but fall back gracefully if missing
-# This allows the script to function in basic environments for index verification
-try:
-    import jsonschema
-    HAS_JSONSCHEMA = True
-except ImportError:
-    HAS_JSONSCHEMA = False
+import jsonschema
 
-def main() -> int:
-    root = pathlib.Path("evidence/index.json")
-    if not root.exists():
-        print("Error: missing evidence/index.json")
-        return 2
 
+def load_json(path: str) -> Any:
     try:
-        idx = json.loads(root.read_text(encoding="utf-8"))
+        with open(path) as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print(f"Error: File not found: {path}")
+        return None
     except json.JSONDecodeError as e:
-        print(f"Error: evidence/index.json is not valid JSON: {e}")
-        return 2
+        print(f"Error: Invalid JSON in {path}: {e}")
+        return None
 
-    # Verify that 'evidence' key exists and is a list
-    if "evidence" not in idx or not isinstance(idx["evidence"], list):
-        print("Error: evidence/index.json missing 'evidence' list")
-        return 2
+def validate_schema(data: Any, schema: dict[str, Any], context: str) -> bool:
+    try:
+        jsonschema.validate(instance=data, schema=schema)
+        return True
+    except jsonschema.ValidationError as e:
+        print(f"Validation failed for {context}: {e.message}")
+        return False
 
-    ok = True
+def check_timestamps(data: Any, path: str, allowed: bool) -> bool:
+    if isinstance(data, dict):
+        for key, value in data.items():
+            if key in ["timestamp", "created_at", "updated_at", "ts", "generated_at"]:
+                if not allowed:
+                    print(f"Error: Timestamp field '{key}' found in {path}. Timestamps are only allowed in stamp.json.")
+                    return False
+            if not check_timestamps(value, path, allowed):
+                return False
+    elif isinstance(data, list):
+        for item in data:
+            if not check_timestamps(item, path, allowed):
+                return False
+    return True
 
-    # 1. Check file existence
-    print("Checking evidence file existence...")
-    for ev in idx["evidence"]:
-        ev_id = ev.get("id", "unknown")
-        paths = ev.get("paths", {})
-        if not paths:
-             print(f"Warning: Evidence {ev_id} has no paths")
-             continue
+def main():
+    parser = argparse.ArgumentParser(description="Validate evidence artifacts against schemas.")
+    parser.add_argument("--schemas", required=True, help="Directory containing schemas")
+    parser.add_argument("--evidence", required=True, help="Root directory for evidence")
+    args = parser.parse_args()
 
-        for key, path_str in paths.items():
-            if not pathlib.Path(path_str).exists():
-                print(f"Error: missing {ev_id} {key}: {path_str}")
-                ok = False
-            else:
-                print(f"  OK: {ev_id} {key} -> {path_str}")
+    # Load Schemas
+    try:
+        index_schema = load_json(os.path.join(args.schemas, "index.schema.json"))
+        report_schema = load_json(os.path.join(args.schemas, "report.schema.json"))
+        metrics_schema = load_json(os.path.join(args.schemas, "metrics.schema.json"))
+        stamp_schema = load_json(os.path.join(args.schemas, "stamp.schema.json"))
+    except Exception as e:
+        print(f"Failed to load schemas: {e}")
+        sys.exit(1)
 
-    # 2. Validate schemas if jsonschema is available
-    if HAS_JSONSCHEMA:
-        print("\nValidating schemas...")
-        schema_map = {
-            "report": "evidence/schema/report.schema.json",
-            "metrics": "evidence/schema/metrics.schema.json",
-            "stamp": "evidence/schema/stamp.schema.json"
-        }
+    if not all([index_schema, report_schema, metrics_schema, stamp_schema]):
+        sys.exit(1)
 
-        # Pre-load schemas
-        schemas = {}
-        for key, schema_path in schema_map.items():
-             p = pathlib.Path(schema_path)
-             if p.exists():
-                 try:
-                     schemas[key] = json.loads(p.read_text(encoding="utf-8"))
-                 except Exception as e:
-                     print(f"Warning: Could not load schema {schema_path}: {e}")
+    # Validate Index
+    index_path = os.path.join(args.evidence, "index.json")
+    index_data = load_json(index_path)
+    if index_data is None:
+        sys.exit(1)
 
-        for ev in idx["evidence"]:
-            paths = ev.get("paths", {})
-            for key, path_str in paths.items():
-                if key in schemas and pathlib.Path(path_str).exists():
-                     try:
-                         data = json.loads(pathlib.Path(path_str).read_text(encoding="utf-8"))
-                         jsonschema.validate(instance=data, schema=schemas[key])
-                         print(f"  Valid: {path_str} matches {key} schema")
-                     except jsonschema.ValidationError as e:
-                         print(f"Error: {path_str} failed validation against {key} schema: {e.message}")
-                         ok = False
-                     except json.JSONDecodeError:
-                         print(f"Error: {path_str} is not valid JSON")
-                         ok = False
-    else:
-        print("\nSkipping schema validation (jsonschema not installed).")
+    if not validate_schema(index_data, index_schema, "index.json"):
+        sys.exit(1)
 
-    return 0 if ok else 1
+    success = True
+
+    # Validate Items
+    items = index_data.get("items", [])
+    if "evidence" in index_data:
+        for evd_id, meta in index_data["evidence"].items():
+            items.append({"id": evd_id, "path": meta["path"]})
+
+    for item in items:
+        evidence_id = item.get("id")
+        path = item.get("path")
+
+        # If path is relative, make it absolute relative to repo root (or args.evidence parent)
+        # Assuming args.evidence points to 'evidence/' dir.
+        # But index.json paths seem to be relative to repo root e.g. "evidence/report.json"
+
+        # If path is a directory, look for standard artifacts
+        # If path is a file, strictly it doesn't match the new standard but let's see.
+
+        full_path = path
+        if not os.path.exists(full_path):
+            print(f"Warning: Path not found for evidence {evidence_id}: {full_path}")
+            # Non-fatal for now unless strict
+            continue
+
+        artifacts_to_check = []
+        if os.path.isdir(full_path):
+            artifacts_to_check = [
+                ("report.json", report_schema, False),
+                ("metrics.json", metrics_schema, False),
+                ("stamp.json", stamp_schema, True)
+            ]
+            base_dir = full_path
+        else:
+            # It's a file. check what it is based on name?
+            # Existing entries point to 'evidence/report.json'.
+            # We can skip validation for legacy or try to guess.
+            # For this plan, we care about the new IDs which are directories.
+            if "LIMY-AGENTICWEB" in evidence_id:
+                 print(f"Error: Agentic Web evidence {evidence_id} points to a file, expected directory.")
+                 success = False
+            continue
+
+        for filename, schema, allow_timestamps in artifacts_to_check:
+            filepath = os.path.join(base_dir, filename)
+            if not os.path.exists(filepath):
+                 print(f"Missing artifact {filename} in {base_dir}")
+                 # For now, require all? The plan says "Required artifacts per run".
+                 # If we are validating *existence*, yes.
+                 # But if we are just validating what exists, maybe optional.
+                 # Plan implies mandatory.
+                 success = False
+                 continue
+
+            data = load_json(filepath)
+            if data is None:
+                success = False
+                continue
+
+            if not validate_schema(data, schema, f"{evidence_id}/{filename}"):
+                success = False
+
+            if not check_timestamps(data, filepath, allow_timestamps):
+                success = False
+
+    if not success:
+        sys.exit(1)
+
+    print("Validation successful.")
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

@@ -3,6 +3,9 @@ import future.keywords.in
 
 import rego.v1
 
+import future.keywords
+
+
 # Deny overly permissive IAM roles
 deny contains msg if {
     input.asset_type == "aws_iam_role"

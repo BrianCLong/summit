@@ -95,7 +95,7 @@
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",
     "release:verify": "node scripts/release/verify-release-bundle.mjs",
-    "release:diff": "node scripts/release/diff-bundles.mjs",
+    "release:diff": "npx tsx scripts/release/diff-releases.ts",
     "precommit": "lint-staged",
     "db:prisma:diff": "prisma migrate diff --from-url $DATABASE_URL --to-schema-datamodel prisma/schema.prisma",
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
@@ -153,7 +153,6 @@
     "release:rollback": "npx tsx scripts/release/rollback-release.ts",
     "release:post-check": "npx tsx scripts/release/post-release-check.ts",
     "release:list": "npx tsx scripts/release/list-releases.ts",
-    "release:diff": "npx tsx scripts/release/diff-releases.ts",
     "release:lock": "npx tsx scripts/release/release-lock.ts",
     "release:hotfix": "npx tsx scripts/release/hotfix-release.ts",
     "release:metrics": "npx tsx scripts/release/release-metrics.ts",
@@ -371,7 +370,7 @@
       "redis": ">=5.9.0",
       "@types/express": "4.17.21",
       "@types/express-serve-static-core": "4.19.6",
-      "@isaacs/brace-expansion": ">=5.0.1"
+      "@isaacs/brace-expansion": "^5.0.1"
     },
     "peerDependencyRules": {
       "allowedVersions": {

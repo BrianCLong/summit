@@ -1,23 +1,63 @@
-# .github/workflows/_reusable-node-pnpm-setup.yml
-name: Reusable Node & Pnpm Setup
+name: Reusable Node.js & pnpm Setup
 
 on:
   workflow_call:
+    inputs:
+      node-version:
+        description: "Node.js version to use"
+        required: false
+        default: "20.x"
+        type: string
+      pnpm-version:
+        description: "pnpm version to use"
+        required: false
+        default: "9.12.0"
+        type: string
+      install-deps:
+        description: "Whether to install dependencies"
+        required: false
+        default: true
+        type: boolean
+      cache-key-prefix:
+        description: "Prefix for cache key"
+        required: false
+        default: "pnpm"
+        type: string
 
 jobs:
   setup:
+    name: Setup Node.js & pnpm
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
-          node-version: 18
+          node-version: ${{ inputs.node-version }}
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
 
-      - uses: pnpm/action-setup@v4
-        name: Install pnpm
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4 # v5
         with:
-          # If version is missing, action-setup will check package.json "packageManager"
-          # This avoids the "Multiple versions of pnpm specified" error
-          run_install: false
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-${{ inputs.cache-key-prefix }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ inputs.cache-key-prefix }}-
+
+      - name: Install dependencies
+        if: ${{ inputs.install-deps }}
+        run: pnpm install --frozen-lockfile --prefer-offline

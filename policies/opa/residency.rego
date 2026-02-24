@@ -3,6 +3,9 @@ import future.keywords.in
 
 import rego.v1
 
+import future.keywords
+
+
 # Input contract (example):
 # input = {
 #   "mode": "enforce" | "shadow",

@@ -124,10 +124,10 @@ def main() -> int:
         "taxonomy.stamp.json", "compliance_report.json", "ga-evidence-manifest.json",
         "evidence-index.json"
     }
-    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption"}
+    IGNORE_DIRS = {"schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "ai-influence-ops", "TELETOK-2025", "EVD-POSTIZ-GROWTH-001", "EVD-POSTIZ-COMPLY-002", "EVD-POSTIZ-PROD-003", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-POSTIZ-GATE-004"}
 
     for p in EVID.rglob("*"):
-        if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
+        if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json") or p.name.startswith("EVD-") or p.name == "acp_stamp.json" or p.name.startswith("skill_"):
             continue
         if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
             continue

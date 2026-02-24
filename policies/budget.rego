@@ -3,7 +3,8 @@
 
 package intelgraph.budget
 
-import rego.v1
+import future.keywords
+
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false

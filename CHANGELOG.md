@@ -14,9 +14,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-- **Foundation**: Established evidence system scaffolding, tool registry, and deny-by-default policy engine for OSINT framework.
-
 ## [5.0.0-ga] - 2026-01-23
 
 ### General Availability Release
