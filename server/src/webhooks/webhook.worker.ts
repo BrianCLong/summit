@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
-import axios from 'axios';
+import { safeClient } from '../utils/http-client.js';
 import { pg } from '../db/pg.js';
 import { webhookService } from './webhook.service.js';
 import { logger } from '../utils/logger.js';
@@ -45,7 +45,7 @@ export const webhookWorker = new Worker<WebhookJobData>(
     };
 
     try {
-      const response = await axios.post(url, payload, {
+      const response = await safeClient.post(url, payload, {
         headers: {
           'Content-Type': 'application/json',
           'X-Webhook-Signature': signature,

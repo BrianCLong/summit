@@ -86,12 +86,21 @@ Summit follows a modular microservices architecture:
 └─────────────────────────────────┘
 ```
 
+## 🧩 Core Components
+
+- **IntelGraph**: Central graph data model for entities, relationships, evidence, and provenance to enable link analysis and multi-hop queries.
+- **Maestro Conductor**: Workflow orchestration for job DAGs, retries, policy enforcement, observability, and SLO tracking, driven by IntelGraph state.
+- **CompanyOS**: Knowledge, runbooks, and business logic APIs integrated with graph data and orchestrated workflows.
+- **Switchboard**: Ingestion, normalization, deduplication, enrichment, and routing of events into the platform’s core services.
+- **Provenance Ledger**: Evidence-first audit trail for explainable outputs, lineage, and compliance-ready reporting across the platform.
+
 **Deep Dive Docs:**
 
+- [📈 Executive Briefing (2026-01-31)](docs/executive/2026-01-31-summit-platform-briefing.md)
 - [🏛 Architecture Overview](docs/architecture/README.md)
-- [🔌 Data Ingestion](docs/universal-ingestion-etl-architecture.md)
-- [🤖 Agent System](docs/agent-archetypes.md)
-- [🕸 Knowledge Graphs](docs/graph_ai_current_state.md)
+- [🔌 Data Ingestion](docs/architecture/ingestion.md)
+- [🤖 Agent System](docs/architecture/agents.md)
+- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
 - [🔒 Security](docs/security/README.md)
 
 ## 📚 Key Components
@@ -116,7 +125,7 @@ Retrieval-augmented generation with knowledge graphs:
 - Vector similarity search
 - LLM-powered synthesis
 
-See: [GraphRAG Guide](docs/graphrag-architecture.md)
+See: [GraphRAG Guide](docs/graphrag/README.md)
 
 ### Agents
 
@@ -130,9 +139,9 @@ See: [Agent Development](docs/agents/README.md)
 
 ## 📡 API Reference
 
-- [GraphQL Schema](docs/graphql/SCHEMA_GOVERNANCE.md)
-- [REST Endpoints](docs/openapi/index.html)
-- [CompanyOS SDK](docs/summit_internal_companyos.md)
+- [GraphQL Schema](docs/api/graphql.md)
+- [REST Endpoints](docs/api/rest.md)
+- [CompanyOS SDK](docs/api/companyos.md)
 
 ## 🧪 Testing
 
@@ -172,7 +181,7 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
-See: [Deployment Guide](docs/DEPLOY.md)
+See: [Deployment Guide](docs/deployment/README.md)
 
 ## 🤝 Contributing
 
@@ -180,7 +189,7 @@ We welcome contributions! Please see:
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Development Setup](docs/development/monorepo-and-pnpm.md)
+- [Development Setup](docs/development/setup.md)
 
 ## 📄 License
 
@@ -193,3 +202,4 @@ We welcome contributions! Please see:
 - **Documentation**: [Full docs](docs/)
 
 Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)
+\n\n# Verified Governance (2026-02-10)

@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   weekly-release:
-    if: github.event_name == 'schedule' && startsWith(github.event.schedule, '0 15') || github.event_name == 'workflow_dispatch'
+    if: (((github.event_name == 'schedule' && startsWith(github.event.schedule, '0 15') || github.event_name == 'workflow_dispatch') && (env.REMINDER_WEBHOOK)) && (github.event_name == 'schedule' && startsWith(github.event.schedule, '0 16 1') || github.event_name == 'workflow_dispatch')) && (env.REMINDER_WEBHOOK)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -46,7 +46,6 @@ jobs:
 
       # Optional: Slack/Webhook ping (set REMINDER_WEBHOOK in repo secrets)
       - name: Notify (optional)
-        if: env.REMINDER_WEBHOOK
         env:
           REMINDER_WEBHOOK: ${{ secrets.REMINDER_WEBHOOK }}
         run: |
@@ -54,7 +53,6 @@ jobs:
             -d "{\"text\":\"Weekly release train issue created.\"}" "$REMINDER_WEBHOOK" || true
 
   monthly-hygiene:
-    if: github.event_name == 'schedule' && startsWith(github.event.schedule, '0 16 1') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +84,6 @@ jobs:
             core.setOutput('issue', issue.html_url);
 
       - name: Notify (optional)
-        if: env.REMINDER_WEBHOOK
         env:
           REMINDER_WEBHOOK: ${{ secrets.REMINDER_WEBHOOK }}
         run: |

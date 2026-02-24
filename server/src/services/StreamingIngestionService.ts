@@ -3,6 +3,7 @@ import { Queue, Worker, type Job } from 'bullmq';
 import { OsintConnector } from '../connectors/implementations/OsintConnector.js';
 import { OsintSourceType, OsintRecord, IngestionEvent } from '../connectors/types.js';
 import { provenanceLedger } from '../provenance/ledger.js';
+import { ProvenanceMapping } from '@intelgraph/provenance';
 import { randomUUID } from 'crypto';
 import pino from 'pino';
 import { Counter, Histogram } from 'prom-client';
@@ -58,7 +59,7 @@ export class StreamingIngestionService {
     });
 
     this.worker.on('failed', (job, err) => {
-        logger.error({ jobId: job?.id, err }, 'Job failed');
+      logger.error({ jobId: job?.id, err }, 'Job failed');
     });
   }
 
@@ -118,39 +119,50 @@ export class StreamingIngestionService {
     // 4. Lineage Tracking
     const lineageId = randomUUID();
     const event: IngestionEvent = {
-        id: randomUUID(),
+      id: randomUUID(),
+      sourceId: record.id,
+      timestamp: new Date(),
+      data: enrichedRecord,
+      metadata: {
+        tenantId,
+        ingestionType: 'stream'
+      },
+      provenance: {
+        source: record.sourceType,
         sourceId: record.id,
-        timestamp: new Date(),
-        data: enrichedRecord,
-        metadata: {
-            tenantId,
-            ingestionType: 'stream'
-        },
-        provenance: {
-            source: record.sourceType,
-            sourceId: record.id,
-            ingestTimestamp: new Date(),
-            connectorType: 'osint',
-            lineageId
-        }
+        ingestTimestamp: new Date(),
+        connectorType: 'osint',
+        lineageId
+      }
     };
+
+    // Generate Sovereign OPA Input if applicable
+    const isSovereign = enrichedRecord.metadata?.isSovereign || false;
+    let sovereignSafeguards = null;
+    if (isSovereign) {
+      sovereignSafeguards = ProvenanceMapping.toSovereignInput({
+        actor: { id: 'system-ingestion', role: 'admin' },
+      } as any, enrichedRecord.metadata);
+    }
 
     // Record to Provenance Ledger
     await provenanceLedger.appendEntry({
-        tenantId,
-        actionType: 'INGEST',
-        resourceType: 'OsintRecord',
-        resourceId: record.id,
-        actorId: 'system-ingestion',
-        actorType: 'system',
-        payload: {
-            mutationType: 'CREATE',
-            diff: enrichedRecord
-        },
-        metadata: {
-            lineageId,
-            processingNode: 'ingestion-worker-1'
-        }
+      tenantId,
+      actionType: 'INGEST',
+      resourceType: 'OsintRecord',
+      resourceId: record.id,
+      actorId: 'system-ingestion',
+      actorType: 'system',
+      payload: {
+        mutationType: 'CREATE',
+        diff: enrichedRecord
+      },
+      metadata: {
+        lineageId,
+        processingNode: 'ingestion-worker-1',
+        isSovereign,
+        sovereignSafeguards // Ingested records now carry Sovereign mandates
+      }
     });
 
     // 5. Load (to DB - mocked log)

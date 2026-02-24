@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   create-demo-pr:
-    if: ${{ github.event.inputs.create_pr == 'true' }}
+    if: ((${{ github.event.inputs.create_pr == 'true' }}) && (always())) && (always())
     runs-on: ubuntu-latest
     outputs:
       pr_number: ${{ steps.create-pr.outputs.pr_number }}
@@ -376,7 +376,6 @@ jobs:
 
   demo-release-captain:
     needs: create-demo-pr
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Demo Release Captain
@@ -511,7 +510,6 @@ jobs:
 
   demo-summary:
     needs: [create-demo-pr, demo-release-captain]
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Demo Summary

@@ -10,6 +10,10 @@ on:
       - "evidence/**"
       - "backlog/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   governance-bundle:
     name: governance-bundle

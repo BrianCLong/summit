@@ -1,17 +1,27 @@
 item: shai-hulud-supply-chain
-status: deferred
+status: completed
 owner: codex
 lanes:
   foundation:
     - id: verifier
       summary: "Implement subsumption bundle verifier + fixtures"
-      status: deferred
+      status: completed
+      completed_at: "2026-02-06"
+      artifacts:
+        - tools/verify-subsumption-bundle.py
+        - test/fixtures/subsumption/
     - id: npm-lifecycle-gate
       summary: "Add deny-by-default npm lifecycle script policy gate"
-      status: deferred
+      status: completed
+      completed_at: "2026-02-06"
+      artifacts:
+        - .npmrc (ignore-scripts=true)
+        - policy/npm-lifecycle-allowlist.json
+        - scripts/ci/verify-npm-lifecycle.sh
   innovation:
     - id: asset-payload-heuristics
       summary: "Flag suspicious compressed assets in Python packages (flag off)"
       status: deferred
 notes:
-  - "Deferred pending required checks discovery and CI gate alignment."
+  - "Blocker resolved 2026-02-06: Required checks discovery completed (see ci/required_checks.todo.md)"
+  - "Ready for implementation when prioritized"

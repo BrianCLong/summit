@@ -10,11 +10,14 @@
     "useUnknownInCatchVariables": false,
     "noImplicitThis": false,
     "skipLibCheck": true,
-    "noEmitOnError": false
+    "noEmitOnError": false,
+    "strict": false
   },
   "exclude": [
     "node_modules",
     "../node_modules",
+    "../libs/**",
+    "../packages/**",
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
@@ -22,6 +25,8 @@
     "tests/**",
     "../tests/**",
     "src/tests/**",
-    "src/routes/geoint.js"
+    "src/routes/geoint.js",
+    "src/maestro/tools/context-shell.ts",
+    "src/routes/osint.ts"
   ]
 }

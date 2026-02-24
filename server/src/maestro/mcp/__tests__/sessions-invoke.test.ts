@@ -19,6 +19,10 @@ jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({
   initializeMCPClient: jest.fn(),
 }));
 
+jest.unstable_mockModule('../../../capability-fabric/policy-gate.js', () => ({
+  evaluateCapabilityPolicy: jest.fn(async () => ({ allow: true, reason: 'allow' })),
+}));
+
 const describeIf = process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;
 
 describeIf('MCP sessions + invoke', () => {
@@ -30,6 +34,7 @@ describeIf('MCP sessions + invoke', () => {
     // Create session with scope
     const create = await request(app)
       .post('/api/maestro/v1/runs/r1/mcp/sessions')
+      .set('x-actor-scopes', 'mcp:session')
       .send({ scopes: ['mcp:invoke'] })
       .expect(201);
     const token = create.body.token as string;
@@ -50,6 +55,7 @@ describeIf('MCP sessions + invoke', () => {
   it('denies invoke without scope', async () => {
     const create = await request(app)
       .post('/api/maestro/v1/runs/r1/mcp/sessions')
+      .set('x-actor-scopes', 'mcp:session')
       .send({ scopes: ['foo'] })
       .expect(201);
     const token = create.body.token as string;

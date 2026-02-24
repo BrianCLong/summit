@@ -5,6 +5,10 @@ on:
     paths:
       - 'terraform/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   DIFF_BUDGET: 20 # Maximum number of resource changes allowed without special approval
 

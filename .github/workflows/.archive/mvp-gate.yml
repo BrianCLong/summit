@@ -56,7 +56,7 @@ jobs:
 
       - name: Determine MVP tier from PR body
         id: tier
-        if: ${{ github.event_name == 'pull_request' }}
+        if: (${{ github.event_name == 'pull_request' }}) && (always())
         run: node scripts/mvp/gate.mjs tier-from-pr
 
       - name: MVP Gate (mvp-0 always enforced)
@@ -65,7 +65,6 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
 
       - name: Gate Summary
-        if: always()
         run: node scripts/mvp/gate.mjs summary
         env:
           PR_BODY: ${{ github.event.pull_request.body }}

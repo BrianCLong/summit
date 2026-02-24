@@ -226,7 +226,7 @@ jobs:
           fi
 
       - name: Generate drift report
-        if: always()
+        if: ((((((always()) && (always())) && (github.event_name == 'pull_request' && steps.drift.outputs.drift_detected == 'true')) && (steps.drift.outputs.drift_detected == 'true' && github.event_name == 'pull_request')) && (github.event.inputs.full_validation == 'true' || github.event_name == 'pull_request')) && (always())) && (always())
         run: |
           echo "📊 Generating drift report..."
 
@@ -264,7 +264,6 @@ jobs:
           cat snapshots/drift_report.md
 
       - name: Upload drift artifacts
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: schema-drift-report-${{ github.run_number }}
@@ -273,7 +272,6 @@ jobs:
           retention-days: 30
 
       - name: Comment PR with drift report
-        if: github.event_name == 'pull_request' && steps.drift.outputs.drift_detected == 'true'
         uses: actions/github-script@v7
         with:
           script: |
@@ -288,7 +286,6 @@ jobs:
             });
 
       - name: Fail if critical drift detected
-        if: steps.drift.outputs.drift_detected == 'true' && github.event_name == 'pull_request'
         run: |
           echo "❌ Schema drift detected in PR"
           echo "Please review the drift report and update expected schema if intentional"
@@ -297,7 +294,6 @@ jobs:
   performance-impact-analysis:
     name: Performance Impact Analysis
     runs-on: ubuntu-latest
-    if: github.event.inputs.full_validation == 'true' || github.event_name == 'pull_request'
 
     services:
       postgres:
@@ -355,7 +351,6 @@ jobs:
           fi
 
       - name: Generate performance report
-        if: always()
         run: |
           echo "## Migration Performance Report" > perf_report.md
           echo "" >> perf_report.md
@@ -377,7 +372,6 @@ jobs:
           cat perf_report.md
 
       - name: Upload performance report
-        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: performance-report-${{ github.run_number }}

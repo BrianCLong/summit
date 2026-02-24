@@ -217,6 +217,34 @@
           }
         ],
         "gridPos": { "h": 8, "w": 12, "x": 12, "y": 48 }
+      },
+      {
+        "id": 14,
+        "title": "Summit Python Core - Scout Activity",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "scout_runs_total",
+            "legendFormat": "Runs - {{scout_name}}"
+          },
+          {
+            "expr": "scout_errors_total",
+            "legendFormat": "Errors - {{scout_name}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 56 }
+      },
+      {
+        "id": 15,
+        "title": "Summit Python Core - Scout Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(scout_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th Percentile - {{scout_name}}"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 56 }
       }
     ],
     "time": {

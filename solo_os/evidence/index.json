@@ -15,6 +15,21 @@
       "files": [
         "solo_os/evidence/index.json"
       ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-GOV-001",
+      "files": [
+        "solo_os/governance/policy.schema.json",
+        "solo_os/governance/policy.default.json"
+      ]
+    },
+    {
+      "evidence_id": "EVD-ENTRE-502318-CTR-001",
+      "files": [
+        "solo_os/contracts/engine.schema.json",
+        "solo_os/contracts/run_request.schema.json",
+        "solo_os/contracts/run_result.schema.json"
+      ]
     }
   ]
 }

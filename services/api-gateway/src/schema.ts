@@ -114,6 +114,91 @@ export const typeDefs = gql`
     createdAt: DateTime!
   }
 
+  # Case Management Types
+  type Case {
+    id: ID!
+    tenantId: String!
+    title: String!
+    description: String
+    status: String!
+    priority: String!
+    compartment: String
+    policyLabels: [String!]
+    metadata: JSON
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    createdBy: String!
+    closedAt: DateTime
+    closedBy: String
+    slaTimers: [SLATimer!]
+    comments(limit: Int, offset: Int): [Comment!]
+  }
+
+  type Comment {
+    commentId: ID!
+    tenantId: String!
+    targetType: String!
+    targetId: String!
+    parentId: ID
+    rootId: ID
+    content: String!
+    authorId: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    mentions: [String!]
+    isEdited: Boolean!
+    isDeleted: Boolean!
+    metadata: JSON
+  }
+
+  type SLATimer {
+    slaId: ID!
+    caseId: ID!
+    tenantId: String!
+    type: String!
+    name: String!
+    startTime: DateTime!
+    deadline: DateTime!
+    completedAt: DateTime
+    status: String!
+    targetDurationSeconds: Int!
+    metadata: JSON
+  }
+
+  input CaseInput {
+    title: String!
+    description: String
+    status: String
+    priority: String
+    compartment: String
+    policyLabels: [String!]
+    metadata: JSON
+    reason: String
+    legalBasis: String
+  }
+
+  input CaseUpdateInput {
+    id: ID!
+    title: String
+    description: String
+    status: String
+    priority: String
+    compartment: String
+    policyLabels: [String!]
+    metadata: JSON
+    reason: String
+    legalBasis: String
+  }
+
+  input CommentInput {
+    targetType: String!
+    targetId: String!
+    parentId: ID
+    content: String!
+    mentions: [String!]
+    metadata: JSON
+  }
+
   # Query Root
   type Query {
     # Graph Queries
@@ -142,6 +227,11 @@ export const typeDefs = gql`
     # Prediction Queries
     forecast(id: ID!): Forecast
 
+    # Case Management Queries
+    case(id: ID!, reason: String!, legalBasis: String!): Case
+    cases(status: String, compartment: String, limit: Int, offset: Int): [Case!]
+    comments(targetType: String!, targetId: String!, limit: Int, offset: Int): [Comment!]
+
     # Health Check
     health: Health!
   }
@@ -157,6 +247,14 @@ export const typeDefs = gql`
 
     # Prediction Mutations
     createForecast(input: CreateForecastInput!): Forecast!
+
+    # Case Management Mutations
+    createCase(input: CaseInput!): Case!
+    updateCase(input: CaseUpdateInput!): Case!
+    archiveCase(id: ID!, reason: String!, legalBasis: String!): Case!
+    addComment(input: CommentInput!): Comment!
+    updateComment(id: ID!, content: String!): Comment!
+    deleteComment(id: ID!): Boolean!
 
     # System Mutations
     ping(input: PingInput!): PingResponse!

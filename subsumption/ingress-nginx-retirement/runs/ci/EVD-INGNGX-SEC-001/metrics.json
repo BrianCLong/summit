@@ -2,7 +2,7 @@
   "evidence_id": "EVD-INGNGX-SEC-001",
   "item_slug": "ingress-nginx-retirement",
   "metrics": {
-    "files_scanned": 2846,
+    "files_scanned": 2911,
     "hit_count": 0
   }
 }

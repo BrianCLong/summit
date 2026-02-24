@@ -1,6 +1,6 @@
 global:
   resolve_timeout: 5m
-  slack_api_url: '${SLACK_WEBHOOK_URL:-}' # Set via env var
+  slack_api_url: 'http://localhost/dummy'
 
 # Root route
 route:
@@ -75,8 +75,7 @@ receivers:
           {{ end }}
           {{ end }}
         send_resolved: true
-      - api_url: '${PAGERDUTY_URL:-}'
-        routing_key: '${PAGERDUTY_KEY:-}'
+      - api_url: 'http://localhost/dummy'
         send_resolved: true
 
   - name: 'warning'

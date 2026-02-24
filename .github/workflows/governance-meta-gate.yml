@@ -3,22 +3,13 @@ name: Governance Meta Gate
 on:
   pull_request:
     branches: [main, develop]
-    paths:
-      - ".github/workflows/**"
-      - "scripts/ci/**"
-      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
-      - "policy/**"
   push:
     branches: [main]
-    paths:
-      - ".github/workflows/**"
-      - "scripts/ci/**"
-      - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
-      - "policy/**"
+  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -35,12 +26,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Run Governance Meta-Gate
         run: node scripts/ci/governance-meta-gate.mjs

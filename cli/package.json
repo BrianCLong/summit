@@ -9,7 +9,6 @@
     "intelgraph": "./dist/cli.js",
     "ig": "./dist/cli.js",
     "summit": "./dist/summit.js",
-    "switchboard": "./dist/cli.js",
     "igraph-run": "./dist/bin/run.js"
   },
   "scripts": {
@@ -32,11 +31,10 @@
   },
   "dependencies": {
     "@intelgraph/adapter-sdk": "workspace:*",
-    "@summit/receipts": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "conf": "^13.0.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "^17.2.3",
     "ink": "^5.0.1",
     "ink-spinner": "^5.0.0",
     "ink-table": "^3.1.0",
@@ -55,9 +53,10 @@
     "@types/node": "^22.9.0",
     "@types/pg": "^8.16.0",
     "@types/react": "^18.3.12",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.14.0",
     "@typescript-eslint/parser": "^8.14.0",
-    "eslint": "^9.14.0",
+    "eslint": "^9.39.2",
     "jest": "^29.7.0",
     "pkg": "^5.8.1",
     "rimraf": "^6.0.1",

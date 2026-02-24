@@ -82,7 +82,7 @@ jobs:
 
       - name: Resolve Project ID
         id: project
-        if: ${{ inputs.add_to_project != 'false' }}
+        if: (${{ inputs.add_to_project != 'false' }}) && (always())
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.PROJECT_TOKEN || github.token }}
@@ -158,7 +158,6 @@ jobs:
           node scripts/oct25_bulk_issue_import.cjs
 
       - name: Summary
-        if: always()
         shell: bash
         run: |
           set -euo pipefail

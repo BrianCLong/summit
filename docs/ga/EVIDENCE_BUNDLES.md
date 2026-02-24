@@ -1,86 +1,50 @@
 # Evidence Bundle Standard
 
 ## Overview
+An Evidence Bundle is a deterministic, git-derived artifact that provides proof of change, risk assessment, and verification for a Pull Request or Release. It ensures that every change to the Summit platform is auditable and transparent.
 
-Summit uses deterministic **Evidence Bundles** to ensure that every PR and release is auditable, verifiable, and carries its own provenance. This standard defines the required format for these bundles.
+## Bundle Structure
+A standard evidence bundle is a directory containing the following files:
 
-## Canonical Specification
-
-An Evidence Bundle is a directory containing a set of deterministic artifacts that capture the state of a change.
-
-### Required Artifacts
-
-1.  **manifest.json**: A machine-readable summary of the bundle.
-2.  **diff.patch**: A standard git diff of the changes against a base ref.
-3.  **diffstat.txt**: A summary of changes (files changed, insertions, deletions).
-4.  **tree.txt**: A list of file paths included in the change.
-
-### Naming Conventions
-
-- **Directory Name**: `evidence-bundle-<sha>-<timestamp>`
-- **Storage**: Evidence bundles should be generated locally and their summary pasted into the PR description. For releases, the bundle is archived as a build artifact.
+| File | Description |
+| --- | --- |
+| `manifest.json` | The core metadata of the bundle in JSON format. |
+| `diff.patch` | The full `git diff` against the chosen base reference. |
+| `diffstat.txt` | The summary of changes (`git diff --stat`). |
+| `tree.txt` | A deterministic list of all files in the repository at the time of generation. |
 
 ## Manifest Schema
+The `manifest.json` file must contain the following fields:
 
-The `manifest.json` must contain the following fields:
-
-| Field           | Type     | Description                                                 |
-| :-------------- | :------- | :---------------------------------------------------------- |
-| `timestamp`     | `string` | ISO8601 timestamp of generation.                            |
-| `commit_sha`    | `string` | The git SHA (HEAD) of the working tree.                     |
-| `base_ref`      | `string` | The base reference or merge base used for the diff.         |
-| `changed_files` | `array`  | Alphabetically sorted list of changed files.                |
-| `diffstat`      | `object` | Summary counts: `insertions`, `deletions`, `files_changed`. |
-| `prompt_hashes` | `array`  | List of referenced prompt hashes (optional).                |
-| `risk_level`    | `string` | Manual field: `low`, `medium`, `high`, or `unknown`.        |
-| `checks_run`    | `array`  | List of manual or automated checks performed.               |
-
-## PR Integration
-
-When opening a PR, run the generator and paste the contents of `manifest.json` into the provided section in the PR template.
-
-### Examples
-
-#### Docs-only PR
-
-```json
-{
-  "timestamp": "2026-01-30T10:00:00Z",
-  "commit_sha": "a1b2c3d4...",
-  "base_ref": "origin/main",
-  "changed_files": ["docs/ga/EVIDENCE_BUNDLES.md"],
-  "diffstat": { "files_changed": 1, "insertions": 50, "deletions": 0 },
-  "prompt_hashes": [],
-  "risk_level": "low",
-  "checks_run": ["markdown-lint"]
-}
-```
-
-#### Behavior PR
-
-```json
-{
-  "timestamp": "2026-01-30T10:00:00Z",
-  "commit_sha": "e5f6g7h8...",
-  "base_ref": "origin/main",
-  "changed_files": ["src/logic.py", "tests/test_logic.py"],
-  "diffstat": { "files_changed": 2, "insertions": 100, "deletions": 10 },
-  "prompt_hashes": ["sha256:abc..."],
-  "risk_level": "medium",
-  "checks_run": ["pytest", "lint", "typecheck"]
-}
-```
+- `timestamp`: (ISO8601 string) The UTC time when the bundle was generated. Optional in deterministic modes.
+- `commit_sha`: (string) The full 40-character SHA-1 hash of the current HEAD.
+- `base_ref`: (string) The base reference (e.g., `origin/main`) or merge-base used for comparison.
+- `changed_files`: (array of strings) A sorted list of file paths modified in this change.
+- `diffstat_summary`: (string) A one-line summary of insertions and deletions.
+- `prompt_hashes`: (array of strings) SHA-256 hashes of any AI prompts used during development (from `prompts/registry.yaml`).
+- `risk_level`: (string) Manual assessment of risk: `low`, `medium`, `high`, or `unknown`.
+- `checks_run`: (array of strings) A list of manual or automated checks performed (e.g., `make test`, `pnpm lint`).
 
 ## Usage
-
-### Local Generation
-
+### Generation
+Use the standard generator script:
 ```bash
-python3 scripts/maintainers/gen-evidence-bundle.py --out my-bundle --base origin/main
+python3 scripts/maintainers/gen-evidence-bundle.py --base origin/main --risk low
+```
+Or via Makefile:
+```bash
+make evidence-bundle RISK=low
 ```
 
-### Makefile
+### Attachment to PR
+When opening a PR, copy the contents of `manifest.json` into the PR description within an `AGENT-METADATA` block if applicable, or as a "Evidence Summary" section.
 
-```bash
-make evidence-bundle
-```
+### Minimal vs Full Bundles
+- **Docs-only PRs**: Can omit `checks_run` or mark as `N/A`.
+- **Behavior/Logic PRs**: Must include `checks_run` and an accurate `risk_level`.
+
+## Storage
+Bundles are typically stored in the `evidence/bundles/` directory, named by the short SHA of the commit they represent (e.g., `evidence/bundles/a1b2c3d/`).
+
+---
+*Standard v1.0.0 — Jan 30, 2026*

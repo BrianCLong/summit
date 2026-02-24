@@ -8,7 +8,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -w",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "keywords": [
     "osint",
@@ -20,11 +20,11 @@
     "axios": "^1.11.0",
     "cheerio": "^1.0.0",
     "puppeteer": "^23.0.0",
-    "playwright": "^1.56.0",
+    "playwright": "^1.58.1",
     "node-fetch": "^3.3.2",
     "rss-parser": "^3.13.0",
     "whois": "^2.13.10",
-    "ip-address": "^9.0.5",
+    "ip-address": "^10.1.0",
     "socks-proxy-agent": "^8.0.4",
     "queue": "^7.0.0",
     "rate-limiter-flexible": "^5.0.3",

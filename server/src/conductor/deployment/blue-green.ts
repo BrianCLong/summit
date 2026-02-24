@@ -7,6 +7,7 @@ import { spawn } from 'child_process';
 import Redis from 'ioredis';
 import { prometheusConductorMetrics } from '../observability/prometheus.js';
 import { multiRegionFailoverManager } from '../failover/multi-region.js';
+import { automatedCanaryService } from './AutomatedCanaryService.js';
 
 export interface DeploymentConfig {
   strategy: 'blue-green' | 'canary' | 'rolling';
@@ -661,22 +662,27 @@ export class BlueGreenDeploymentEngine extends EventEmitter {
   private async monitorCanaryMetrics(
     execution: DeploymentExecution,
   ): Promise<void> {
-    const { rollbackThreshold } = execution.config;
     const monitoringDuration = 300000; // 5 minutes
     const startTime = Date.now();
 
     while (Date.now() - startTime < monitoringDuration) {
-      const metrics = await this.collectHealthMetrics();
-      execution.healthMetrics = metrics;
+      const canaryMetrics = await this.collectHealthMetrics();
+      const productionMetrics = await this.collectHealthMetrics(); // Simulated production metrics
+      execution.healthMetrics = canaryMetrics;
 
-      // Check rollback conditions
-      if (
-        metrics.errorRate > rollbackThreshold.errorRate ||
-        metrics.latencyP95 > rollbackThreshold.latencyP95
-      ) {
-        throw new Error(
-          `Rollback threshold exceeded: Error Rate ${metrics.errorRate}%, P95 ${metrics.latencyP95}ms`,
-        );
+      // v2: ML-driven Automated Canary Analysis (ACA)
+      const acaResult = await automatedCanaryService.analyze(canaryMetrics, productionMetrics);
+      
+      this.addLog(execution.phases.find(p => p.name === 'canary_traffic_management')!, 
+        `ACA Result: Score=${acaResult.score}, Decision=${acaResult.decision}, Reason=${acaResult.reason}`);
+
+      if (acaResult.decision === 'ROLLBACK') {
+        throw new Error(`Automated Canary Analysis triggered ROLLBACK: ${acaResult.reason}`);
+      }
+
+      if (acaResult.decision === 'PROMOTE') {
+        this.addLog(execution.phases.find(p => p.name === 'canary_traffic_management')!, 'ACA recommended early promotion');
+        return; // Exit monitoring early to proceed with promotion
       }
 
       await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds

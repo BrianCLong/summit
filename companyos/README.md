@@ -1,6 +1,27 @@
-# CompanyOS
+# CompanyOS: The Intelligence Layer SDK
 
-This directory contains the operational blueprint, agent definitions, and governance artifacts for the CompanyOS.
+**CompanyOS** is the sovereign intelligence layer for the modern enterprise. Unlike closed platforms that require you to replace your operating system, CompanyOS embeds agentic reasoning, knowledge graph intelligence, and governance directly into your existing stack.
+
+## 🧠 Embed Intelligence, Don't Replace It
+
+CompanyOS provides the SDKs and patterns to build:
+*   **Agentic Workflows**: Autonomous agents that reason, plan, and execute.
+*   **Knowledge Graphs**: GraphRAG-powered insights using Neo4j and GQL.
+*   **Sovereign Governance**: Policy-as-code enforcement with full auditability.
+
+## 📦 SDK Entrypoints
+
+The **CompanyOS SDK** is composed of modular packages designed for specific intelligence capabilities:
+
+### 1. @intelgraph/sdk (Core Client)
+The foundational client for interacting with the Summit Intelligence Graph.
+*   **Use for**: Querying the Knowledge Graph, ingesting data, and managing entities.
+*   **Location**: `packages/sdk`
+
+### 2. @intelgraph/maestro-sdk (Agent Orchestration)
+The engine for defining and running multi-agent workflows.
+*   **Use for**: Defining agent roles, creating task graphs, and orchestrating complex multi-hop reasoning.
+*   **Location**: `packages/maestro-sdk`
 
 ## Structure
 

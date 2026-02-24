@@ -1,3 +1,4 @@
+version: 1
 item:
   slug: shai-hulud-supply-chain
   title: "Supply-chain attacks: Shai-Hulud (npm) + PyPI spellchecker RAT"

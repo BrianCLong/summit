@@ -1,6 +1,7 @@
 {
   "evidence_id": "EVD-SCHEMARETR-ABLAT-001",
   "item_slug": "schema-retrieval-ablation",
+  "summary": "Schema retrieval ablation evidence slot is reserved for evaluation runs.",
   "claims": ["Schema retrieval ablation evidence slot is reserved for evaluation runs."],
   "decisions": [],
   "findings": []

@@ -1,3 +1,4 @@
+version: 1
 item:
   slug: graph-hybrid
   title: "Graph+Vector Hybrid Retrieval + Sharding + GQL Signals"
