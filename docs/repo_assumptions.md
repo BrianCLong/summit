@@ -1,32 +1,30 @@
-# Repo Assumptions Ledger
+# Repository Assumptions (Software Factory Subsumption)
 
-## Verified (Current State)
+Status: Intentionally constrained pending verification.
 
-| Item | Evidence |
-| --- | --- |
-| Monorepo structure with `services/` and `src/` | Root directory layout |
-| `src/` contains core logic and libraries | Root directory layout |
-| `services/evals` exists with `runner.ts` | Root directory layout |
-| `src/cli` exists | Root directory layout |
-| `docs/standards/`, `docs/security/data-handling/`, and `docs/ops/runbooks/` exist | Directory layout |
-| pnpm workspace is in use | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` |
+## Verify (grounded checks)
 
-## Deferred Pending Validation
+- Language mix (Python/Go/TypeScript) and primary runtime targets.
+- Current agent runner entrypoints and where they live (CLI, service, or scripts).
+- Existing test harness style (unit/integration/e2e) and naming conventions.
+- CI system and job names (GitHub Actions or equivalent workflows).
+- Evidence folder conventions and artifact retention patterns.
+- Logging and telemetry approach (structured logs, metrics, traces).
 
-| Item | Reason | Validation Plan |
-| --- | --- | --- |
-| UI is Next.js or compatible | Deferred pending repo scan | Inspect `apps/` or `client/` package.json |
-| Testing stack includes Playwright/Vitest | Deferred pending repo scan | Search for Playwright/Vitest configs |
-| Policy-as-code enforcement exists | Deferred pending evidence | Locate enforcement scripts and gates |
-| Feature flag mechanism exists | Deferred pending evidence | Confirm `feature-flags`/`flags` usage |
+## Must-not-touch (until verified)
 
-## Validation Checklist
+- Release workflow files.
+- Security policy files.
+- Anything under `infra/` or production deployment manifests.
 
-- [ ] Confirm UI framework (Next.js or other) in `apps/` or `client/`.
-- [ ] Confirm test stack (`playwright`, `vitest`, `jest`) in root configs.
-- [ ] Locate policy enforcement gate scripts.
-- [ ] Locate feature flag wiring and default-off behavior.
+## Checklist (to run before implementation)
 
-## Plan Deviation (Current)
+- `rg -n "evidence|eval|scenario|harness|agent"` to map existing primitives.
+- List CI jobs and required checks for baseline policy gates.
+- Confirm license and contribution rules.
 
-- Documentation-only changes scoped to standards, security data handling, and ops runbooks.
+## Default constraints (if verification is blocked)
+
+- Feature flags default OFF for any new pipeline.
+- Deny-by-default for external network calls in tests.
+- Only additive modules and minimal wiring changes.

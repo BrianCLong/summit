@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added sandboxed runtime edge router standards, runbook, and data-handling references.",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added software-factory StrongDM subsumption plan scaffolding (standards, runbook, data handling, monitoring).",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -249,10 +249,10 @@
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     },
     {
-      "id": "sandboxed-runtime-edge-router-standards",
+      "id": "software-factory-strongdm-2026",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published experimental standards, runbook, and data-handling guidance for sandboxed agent runtime edge routing."
+      "notes": "Subsumption scaffolding for StrongDM software factory patterns: standards, runbook, data handling, drift monitoring, and repo assumptions."
     }
   ],
   "summary": {
