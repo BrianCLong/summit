@@ -1,0 +1,29 @@
+version: 1
+default:
+  require_approval: true
+  allowed_when_unapproved: []
+
+tools:
+  file.delete:
+    description: Delete a file from disk
+    require_approval: true
+    allowed_when_unapproved: []
+  file.write:
+    description: Write a file to disk
+    require_approval: true
+    allowed_when_unapproved:
+      - "**/*.tmp"
+      - "**/scratch/**"
+  net.http_post:
+    description: Outbound POST to network
+    require_approval: true
+    allowed_when_unapproved: []
+  net.http_get:
+    description: Outbound GET (read-only)
+    require_approval: true
+    allowed_when_unapproved:
+      - "https://example.com/health"
+  process.exec:
+    description: Spawn a subprocess
+    require_approval: true
+    allowed_when_unapproved: []

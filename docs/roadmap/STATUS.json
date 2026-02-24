@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:30:00Z",
-  "revision_note": "Added GraphRAG scope isolation GA spec in docs/standards.",
+  "last_updated": "2026-02-07T12:00:00Z",
+  "revision_note": "Added safety tool-approval gate scaffolding (sandbox runner, policy, tests).",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
