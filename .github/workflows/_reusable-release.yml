@@ -118,7 +118,7 @@ jobs:
             release-bundle/compliance-bundle-v${{ inputs.version }}.tgz \
             -C release-bundle/compliance .
       - name: Upload release artifact
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           retention-days: 14
           name: release-bundle

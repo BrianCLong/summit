@@ -281,9 +281,6 @@ pr-dashboard.html
 pr-backlog-stats.json
 tests/e2e/auth-state.json
 artifacts/
-!artifacts/
-!artifacts/evidence/
-!artifacts/evidence/**
 /dist
 .env
 sbom.json
@@ -297,9 +294,6 @@ tmp-audit/
 
 # Test reports
 reports/
-!reports/
-!reports/a11y-keyboard/
-!reports/a11y-keyboard/README.md
 bug-bash-results/
 *-report.json
 lint_output.txt
@@ -370,3 +364,4 @@ evidence-staging/
 !services/er-service/requirements.txt
 tmp-test/
 _worktrees/
+solo_os/evidence/runs/

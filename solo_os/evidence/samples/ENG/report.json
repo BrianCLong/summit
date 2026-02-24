@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-ENTRE-502318-ENG-001",
+  "summary": "Signal engine dry-run successful",
+  "environment": {"engine": "signal_engine"},
+  "backend": "solo_os",
+  "artifacts": ["report.json", "metrics.json", "stamp.json"]
+}

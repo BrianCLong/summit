@@ -2,19 +2,15 @@ name: GraphCI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'ci/graphci/**'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'ci/graphci/**'
   schedule:
     - cron: '0 0 * * *' # Daily at midnight
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   test:

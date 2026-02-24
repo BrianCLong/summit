@@ -1,5 +1,6 @@
 ---
 # Standard rate limiting policy for web traffic
+# Replaces: nginx.ingress.kubernetes.io/limit-rps annotations
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:
@@ -28,6 +29,7 @@ spec:
                 type: Distinct
 ---
 # High-traffic rate limiting for API endpoints
+# Replaces: nginx.ingress.kubernetes.io/limit-rpm: 100
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:
@@ -101,6 +103,7 @@ spec:
                 type: Distinct
 ---
 # High-capacity rate limiting for Maestro/Conductor orchestrator
+# Replaces: maestro-ingress.yaml limit-rpm: 1000
 apiVersion: gateway.envoyproxy.io/v1alpha1
 kind: BackendTrafficPolicy
 metadata:

@@ -1,14 +1,8 @@
 name: Infra Parity
 on:
   pull_request:
-    branches: [ main ]
-    paths: [ "infra/**", ".github/workflows/infra-parity.yml" ]
-  merge_group:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
-  cancel-in-progress: true
-
+    branches: [main]
+    paths: ["infra/**", ".github/workflows/infra-parity.yml"]
 jobs:
   parity:
     runs-on: ubuntu-latest
@@ -18,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
-        with: { terraform_version: 1.8.5 }
+        with: {terraform_version: 1.8.5}
       - name: Parity ≥95%
         run: |
           chmod +x infra/scripts/validate_parity.sh

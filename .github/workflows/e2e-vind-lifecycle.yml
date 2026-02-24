@@ -2,21 +2,16 @@ name: E2E Vind Lifecycle Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   lifecycle-test:
     name: pause->resume
-    if: false && (vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1')
     runs-on: ubuntu-latest
-
+    if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1'
 
     steps:
       - name: Checkout code

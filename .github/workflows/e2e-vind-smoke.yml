@@ -2,21 +2,16 @@ name: E2E Vind Smoke Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   smoke-test:
     name: create->kubectl->delete
-    if: false && (vars.SUMMIT_VIND_CI == '1')
     runs-on: ubuntu-latest
-
+    if: vars.SUMMIT_VIND_CI == '1'
 
     steps:
       - name: Checkout code

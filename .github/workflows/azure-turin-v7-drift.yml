@@ -14,5 +14,5 @@ jobs:
           version: 9.12.0
 
       - uses: actions/setup-node@v4
-        with: { node-version: '20' }
+        with: {node-version: '20'}
       - run: node scripts/monitoring/azure-turin-v7-drift.mjs

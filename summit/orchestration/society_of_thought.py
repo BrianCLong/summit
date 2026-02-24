@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
-from summit.governance.guards import AgentGuard
 from summit.orchestration.policy.trace_redaction import TraceRedactor
 
 
@@ -45,17 +44,13 @@ class SocietyOfThoughtEngine:
   NOTE: This intentionally does NOT expose chain-of-thought; it produces
   structured 'debate notes' suitable for audit, per policy.
   """
-  def __init__(self, llm_client, policy=None, redactor=None, *, enabled: bool = False, guard: Optional[AgentGuard] = None):
+  def __init__(self, llm_client, policy=None, redactor=None, *, enabled: bool = False):
     self.llm = llm_client
     self.policy = policy
     self.redactor = redactor or TraceRedactor()
     self.enabled = enabled
-    self.guard = guard or AgentGuard()
 
-  async def run(self, user_input: str, context: Optional[dict[str, Any]] = None, agent_id: Optional[str] = None) -> dict[str, Any]:
-    if agent_id:
-        self.guard.check_allowed(agent_id, context or {})
-
+  async def run(self, user_input: str, context: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     if not self.enabled:
       # Assume llm_client has a 'complete' method as per the plan
       return {"mode": "baseline", "output": await self.llm.complete(user_input, context=context)}

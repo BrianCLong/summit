@@ -13,9 +13,6 @@
     "lint": "eslint src --ext .ts,.tsx",
     "typecheck": "tsc --noEmit"
   },
-  "bin": {
-    "orchestrator-replay": "dist/cli/replay.js"
-  },
   "dependencies": {
     "@open-policy-agent/opa-wasm": "^1.10.0",
     "eventemitter3": "^5.0.1",

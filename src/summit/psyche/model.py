@@ -12,7 +12,7 @@ class PsychographicSignal:
     policy: dict[str, Any]
     pii_status: bool = False # Confirmed scrubbed
 
-    def validate(self) -> None:
+    def validate(self):
         if self.subject_scope == "person":
              raise ValueError("Person scope is not allowed in PsychographicSignal")
         # Further validation logic if needed

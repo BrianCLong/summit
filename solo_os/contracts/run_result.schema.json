@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Solo OS Run Result",
+  "type": "object",
+  "properties": {
+    "ok": { "type": "boolean" },
+    "evidence_path": { "type": "string" },
+    "summary": { "type": "object" }
+  },
+  "required": ["ok", "evidence_path", "summary"],
+  "additionalProperties": false
+}

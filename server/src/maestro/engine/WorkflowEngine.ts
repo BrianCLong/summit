@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto';
 import { metrics } from '../../observability/metrics.js';
 import logger from '../../utils/logger.js';
-import { ContextShellTool } from '../tools/context-shell.js';
 
 export interface WorkflowDefinition {
   id: string;
@@ -59,9 +58,6 @@ export class WorkflowEngine {
   constructor() {
     this.registry = new ToolRegistry();
     this.registry.register('utils.echo', new EchoTool());
-    this.registry.register('ctx.bash', new ContextShellTool('bash'));
-    this.registry.register('ctx.readFile', new ContextShellTool('readFile'));
-    this.registry.register('ctx.writeFile', new ContextShellTool('writeFile'));
   }
 
   async execute(

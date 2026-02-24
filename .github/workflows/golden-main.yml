@@ -1,6 +1,6 @@
 name: golden-main
 on:
-  schedule: [{ cron: "*/30 * * * *" }]
+  schedule: [cron: "*/30 * * * *"]
   workflow_dispatch:
 
 env:
@@ -14,7 +14,7 @@ jobs:
       checks: read
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 50 }
+        with: {fetch-depth: 50}
       - name: Get last 3 main SHAs
         run: |
           git fetch origin main --deepen=50
