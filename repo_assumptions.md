@@ -1,21 +1,38 @@
 # repo_assumptions.md
 
-## Verified
-- Repo: BrianCLong/summit exists and is MIT licensed. (source: GitHub UI)
-- README references "Switchboard" as ingestion/normalization routing component (not MCP).
+## Structure Validation
 
-## Assumed (Deferred pending validation)
-- Runtime: Node.js 18+, TypeScript, pnpm.
-- Source layout: src/api/graphql, src/api/rest, src/agents, src/connectors, src/graphrag.
-- CI workflows under .github/workflows/*.yml and scripts under .github/scripts/.
+| Plan Path | Actual Path | Status | Notes |
+|Str|Str|Str|Str|
+| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
+| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
+| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
+| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
+| `docs/` | `docs/` | ✅ Exists | Root directory. |
+| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
+| `tests/` | `tests/` | ✅ Exists | Root directory. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
+| `artifacts/` | `artifacts/` | ✅ Exists | Evidence and performance artifacts directory. |
 
-## Must-not-touch (until explicit ticket)
-- Existing ingestion Switchboard implementation (naming collision)
-- Production deployment manifests
-- Provenance Ledger core schema (extend via additive fields only)
+## Component Mapping
 
-## Validation checklist (before merging PR2)
-- Confirm actual src/ layout and test runner.
-- Find existing "switchboard" directory (if any) and avoid name collision by using
-  switchboard_mcp/.
-- Confirm CI workflow names to hook new checks without breaking required gates.
+| Planned Component | Proposed Location | Actual Location / Action |
+|Str|Str|Str|
+| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
+| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
+| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
+| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
+
+## Constraints & Checks
+
+* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
+* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
+* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
+* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
+* **Perf Evidence**: `artifacts/` exists and is the default location for deterministic perf evidence bundles.
+
+## Next Steps
+
+1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
+2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
+3. Implement **PR-1: Pydantic v2 performance standards** in `docs/standards/pydantic-perf-v2.md`.

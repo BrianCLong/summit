@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T12:30:00Z",
-  "revision_note": "Added GA evidence system contract, schemas, and CI verifier skeleton for deterministic evidence artifacts.",
+  "last_updated": "2026-02-10T14:05:00Z",
+  "revision_note": "Added Pydantic v2 validation performance standards initiative and evidence-first documentation alignment.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -106,7 +106,31 @@
       "id": "summit-skill-router-ga-orchestrator",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published 23rd-order governed delivery plan for GDELT GKG integration with evidence-first posture and MAESTRO alignment."
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+    },
+    {
+      "id": "summit-ops-incident-console",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
+    },
+    {
+      "id": "summit-ga-preflight-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
+    },
+    {
+      "id": "pydantic-perf-v2-standards",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Documented Pydantic v2 validation performance standards with evidence artifacts, budgets, and MAESTRO-aligned guidance."
+    },
+    {
+      "id": "summit-pr-stack-sequencer-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
