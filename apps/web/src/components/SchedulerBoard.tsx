@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react'
-import $ from 'jquery'
+import React, { useEffect, useState, useMemo } from 'react'
 
 interface QueueItem {
   id: string
@@ -17,24 +16,37 @@ interface AutoscaleHints {
 export default function SchedulerBoard() {
   const [q, setQ] = useState<QueueItem[]>([])
   const [hints, setHints] = useState<AutoscaleHints>({})
+  const [filter, setFilter] = useState('')
+
   useEffect(() => {
     const s = new EventSource('/api/queue/stream')
     s.onmessage = e => setQ(JSON.parse(e.data))
     return () => s.close()
   }, [])
-  useEffect(() => {
-    $('#tenantFilter').on('input', function () {
-      const v = $(this).val()?.toString().toLowerCase() || ''
-      $('.row').each(function () {
-        $(this).toggle($(this).text().toLowerCase().indexOf(v) >= 0)
-      })
-    })
-  }, [q.length])
+
   useEffect(() => {
     fetch('/api/autoscale/hints')
       .then(r => r.json())
       .then(setHints)
   }, [])
+
+  const filteredQ = useMemo(() => {
+    const lowerFilter = filter.toLowerCase()
+    if (!lowerFilter) return q
+    return q.filter(r => {
+      // Create a string representation of the row content to match jQuery .text() behavior
+      const rowText = [
+        r.id,
+        r.tenant,
+        r.eta,
+        r.pool,
+        `$${r.cost.toFixed(2)}`,
+        r.preemptSuggestion ? '✅' : '—'
+      ].join('').toLowerCase()
+      return rowText.includes(lowerFilter)
+    })
+  }, [q, filter])
+
   return (
     <div className="p-4 rounded-2xl shadow">
       <div className="flex gap-2 mb-2">
@@ -43,6 +55,8 @@ export default function SchedulerBoard() {
           id="tenantFilter"
           className="border rounded px-2 py-1"
           placeholder="filter tenant…"
+          value={filter}
+          onChange={e => setFilter(e.target.value)}
         />
         <div className="ml-auto text-sm">
           Predicted queue next min: <b>{hints.minuteAhead ?? '-'}</b>
@@ -60,7 +74,7 @@ export default function SchedulerBoard() {
           </tr>
         </thead>
         <tbody>
-          {q.map((r: QueueItem) => (
+          {filteredQ.map((r: QueueItem) => (
             <tr key={r.id} className="row border-b">
               <td>{r.id}</td>
               <td>{r.tenant}</td>
