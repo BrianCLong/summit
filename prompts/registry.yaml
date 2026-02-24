@@ -108,38 +108,39 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: competitor-signal-pack-reddit-ma-adtech-2026-02-06
+  - id: evidence-trail-peek
     version: v1
-    path: prompts/intel/competitor-signal-pack@v1.md
-    sha256: d22dd9a84addc9fdce59db7fa742284d79068152ab1da67a3eb767eafd2b0ee7
-    description: Deterministic competitor signal pack ingestion, drift detection, and docs for Reddit M&A intent.
+    path: prompts/features/evidence-trail-peek@v1.md
+    sha256: 2faa11e687cfb8778aea67883185c51b9f420149e9836fb451334ab0c0f157b1
+    description: Evidence-Trail Peek overlay with read-only APIs, telemetry, E2E coverage, and governance docs.
     scope:
       paths:
-        - intel/items/reddit-ma-adtech-2026-02-06/
-        - intel/schema/competitor_signal.schema.json
-        - intel/pipelines/
-        - cli/src/intel/
-        - cli/src/commands/intel.ts
-        - cli/src/summit.ts
-        - scripts/monitoring/reddit-ma-adtech-2026-02-06-drift.py
-        - docs/standards/reddit-ma-adtech-2026-02-06.md
-        - docs/security/data-handling/reddit-ma-adtech-2026-02-06.md
-        - docs/ops/runbooks/reddit-ma-adtech-2026-02-06.md
-        - .github/workflows/intel-drift.yml
-        - artifacts/intel/reddit-ma-adtech-2026-02-06/
-        - repo_assumptions.md
+        - apps/web/src/components/evidence/EvidenceTrailPeek.tsx
+        - apps/web/src/components/CopilotPanel.tsx
+        - apps/web/src/panes/GraphPane.tsx
+        - apps/web/src/telemetry/evidenceTrailPeek.ts
+        - apps/web/src/config/features.ts
+        - server/src/routes/evidence-trail-peek.ts
+        - server/src/routes/__tests__/evidence-trail-peek.test.ts
+        - server/src/app.ts
+        - e2e/tests/evidence-trail-peek.cy.ts
+        - docs/standards/evidence-trail-peek.md
+        - docs/security/data-handling/evidence-trail-peek.md
+        - docs/ops/runbooks/evidence-trail-peek.md
         - docs/roadmap/STATUS.json
-        - prompts/intel/competitor-signal-pack@v1.md
+        - packages/decision-ledger/decision_ledger.json
+        - prompts/features/evidence-trail-peek@v1.md
         - prompts/registry.yaml
-        - agents/examples/COMPETITOR_SIGNAL_PACK_REDDIT_20260206.json
+        - agents/examples/EVIDENCE_TRAIL_PEEK_20260208.json
       domains:
-        - intel
-        - docs
-        - ci
-        - ops
+        - ui
+        - api
+        - governance
+        - telemetry
+        - documentation
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
