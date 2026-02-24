@@ -1,0 +1,17 @@
+version: 1
+item:
+  slug: item-unknown
+  title: "Legacy Unknown Item"
+  type: "unknown"
+  date: "2026-02-06"
+  links: []
+claims:
+  registry: "subsumption/item-unknown/claims.yaml"
+required_checks:
+  discovery_status: "verified"
+  checks:
+    - "subsumption-bundle-verify"
+evidence_ids:
+  - "EVD-ITEM-UNKNOWN-001"
+docs: []
+feature_flags: []

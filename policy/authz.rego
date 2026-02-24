@@ -1,4 +1,5 @@
 package intelgraph.authz.extended
+import future.keywords.if
 
 default allow := false
 

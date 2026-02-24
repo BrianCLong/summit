@@ -2,8 +2,10 @@
 # Implements foundational attribute-based access control for core platform operations
 
 package baseline_abac
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # Default deny - explicit allow required for all operations
 default allow := false

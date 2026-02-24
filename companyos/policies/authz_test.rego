@@ -2,8 +2,9 @@
 # Tests for B1: OPA-Backed Authorization v1
 
 package companyos.authz_test
+import future.keywords.if
 
-import rego.v1
+
 import data.companyos.authz
 
 # ============================================================================

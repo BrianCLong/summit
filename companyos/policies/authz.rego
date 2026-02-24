@@ -8,8 +8,11 @@
 # - Administrative operations
 
 package companyos.authz
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 default decision := {"allow": false, "reason": "No matching policy rule"}
 

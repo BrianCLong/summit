@@ -8,8 +8,10 @@
 # - Session state
 
 package companyos.authz.stepup
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # ============================================================================
 # Step-Up Decision

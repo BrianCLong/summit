@@ -2,8 +2,11 @@
 # Epic E13: Residency, Export & Provenance
 
 package maestro.residency
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Default deny - require explicit authorization
 default allow := false

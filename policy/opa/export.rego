@@ -1,4 +1,7 @@
 package intelgraph.policy.export
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
 default allow := false
 

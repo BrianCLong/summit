@@ -1,6 +1,8 @@
 package intelgraph.rbac
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # IntelGraph Role-Based Access Control Policy
 # MIT License - Copyright (c) 2025 IntelGraph

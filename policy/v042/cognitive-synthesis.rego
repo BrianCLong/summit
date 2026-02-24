@@ -1,6 +1,8 @@
 package cognitive_synthesis
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 # MC Platform v0.4.2 Cognitive Synthesis Engine Policies
 # Multi-modal intelligence, federated learning, and adaptive cognitive architectures

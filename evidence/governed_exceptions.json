@@ -38,6 +38,7 @@
     "evidence/azure-turin-v7/pr-01/report.json",
     "evidence/item-unknown/report.json",
     "evidence/templates/report.json",
+    "evidence/templates/stamp.json",
     "evidence/EVD-UPWIND_RUNTIMEFIRST-FOUNDATION-001/report.json",
     "evidence/mcp-apps/report.json",
     "evidence/packs/EVD-PPGI-MAG-PRIV-001/report.json",

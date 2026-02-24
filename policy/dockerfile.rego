@@ -1,6 +1,9 @@
 package dockerfile
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 # Dockerfile security policy rules
 # Based on CIS Docker Benchmarks and container security best practices

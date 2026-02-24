@@ -1,4 +1,6 @@
 package ci_gate
+import future.keywords.if
+import future.keywords.contains
 
 import data.supply_chain
 import data.ci_agent_gate

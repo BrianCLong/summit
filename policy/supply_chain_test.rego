@@ -1,6 +1,8 @@
 package supply_chain
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 test_deny_missing_artifacts if {
 	# Input missing required artifacts

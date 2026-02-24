@@ -1,4 +1,5 @@
 package policy
+import future.keywords.if
 
 default decision = {"allow": false, "reason": "deny-by-default"}
 

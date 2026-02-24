@@ -2,8 +2,10 @@
 # Validates cross-tenant denial and overlay override behavior.
 
 package tenant.bundle
+import future.keywords.if
+import future.keywords.in
 
-import rego.v1
+
 
 default decision := {
     "allow": false,

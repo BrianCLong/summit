@@ -1,6 +1,9 @@
 package drift
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 
-import rego.v1
+
 
 default allow := false
 default score := 0

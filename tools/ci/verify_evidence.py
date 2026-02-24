@@ -21,32 +21,40 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items_raw = idx.get("items", [])
-    items = {}
-    if isinstance(items_raw, list):
-        for item in items_raw:
-            if isinstance(item, dict) and "evidence_id" in item:
-                items[item["evidence_id"]] = item
-    elif isinstance(items_raw, dict):
-        items = items_raw
+    exceptions_path = ROOT / "evidence" / "governed_exceptions.json"
+    exceptions = load(exceptions_path) if exceptions_path.exists() else {}
+    schema_exceptions = exceptions.get("schema", [])
 
-    if not items:
-        fail("evidence/index.json must contain non-empty 'items' map or list")
+    items = idx.get("items", [])
+    if not isinstance(items, (dict, list)) or not items:
+        fail("evidence/index.json must contain non-empty 'items'")
+
+    if isinstance(items, list):
+        # Convert list to dict for easier processing
+        items_dict = {}
+        for item in items:
+            if isinstance(item, dict) and "evidence_id" in item:
+                items_dict[item["evidence_id"]] = item
+        items = items_dict
 
     for evd_id, meta in items.items():
         files = []
         base = ROOT
         if isinstance(meta, list):
             files = meta
+            base = ROOT
         elif isinstance(meta, dict):
             if "path" in meta:
                 base = ROOT / meta["path"]
-
-            files_meta = meta.get("files", [])
-            if isinstance(files_meta, dict):
-                files = list(files_meta.values())
+                files = meta.get("files", [])
+            elif "files" in meta:
+                # Support items from list format
+                base = ROOT
+                files = meta["files"]
+                if isinstance(files, dict):
+                    files = list(files.values())
             else:
-                files = files_meta
+                continue
         else:
             continue
 
@@ -56,26 +64,30 @@ def main() -> None:
                 fail(f"{evd_id} missing file: {fp}")
 
         if any(name.endswith("report.json") for name in files):
-            report_path = base / next(name for name in files if name.endswith("report.json"))
-            # report = load(report_path)
-            # Skip strict ID check due to shared templates in repo
-            # if report.get("evidence_id") and report.get("evidence_id") != evd_id:
-            #    fail(f"{evd_id} report.json evidence_id mismatch")
+            rel_report_path = next(name for name in files if name.endswith("report.json"))
+            report_path = base / rel_report_path
+            report = load(report_path)
+            is_exception = any(str(report_path.relative_to(ROOT)) == ex for ex in schema_exceptions)
+            if report.get("evidence_id") != evd_id and not is_exception:
+                fail(f"{evd_id} report.json evidence_id mismatch (got {report.get('evidence_id')}, expected {evd_id})")
 
         if any(name.endswith("metrics.json") for name in files):
-            metrics_path = base / next(name for name in files if name.endswith("metrics.json"))
-            # metrics = load(metrics_path)
-            # if metrics.get("evidence_id") and metrics.get("evidence_id") != evd_id:
-            #    fail(f"{evd_id} metrics.json evidence_id mismatch")
+            rel_metrics_path = next(name for name in files if name.endswith("metrics.json"))
+            metrics_path = base / rel_metrics_path
+            metrics = load(metrics_path)
+            is_exception = any(str(metrics_path.relative_to(ROOT)) == ex for ex in schema_exceptions)
+            if metrics.get("evidence_id") != evd_id and not is_exception:
+                fail(f"{evd_id} metrics.json evidence_id mismatch")
 
         if any(name.endswith("stamp.json") for name in files):
-            stamp_path = base / next(name for name in files if name.endswith("stamp.json"))
-            # stamp = load(stamp_path)
-            # if stamp.get("evidence_id") and stamp.get("evidence_id") != evd_id:
-            #    fail(f"{evd_id} stamp.json evidence_id mismatch")
-            # Legacy stamps might not have these fields
-            # if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
-            #    fail(f"{evd_id} stamp.json missing generated time field")
+            rel_stamp_path = next(name for name in files if name.endswith("stamp.json"))
+            stamp_path = base / rel_stamp_path
+            stamp = load(stamp_path)
+            is_exception = any(str(stamp_path.relative_to(ROOT)) == ex for ex in schema_exceptions)
+            if stamp.get("evidence_id") != evd_id and not is_exception:
+                fail(f"{evd_id} stamp.json evidence_id mismatch")
+            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
+                fail(f"{evd_id} stamp.json missing generated time field")
 
     print("[verify_evidence] OK")
 
