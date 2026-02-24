@@ -246,24 +246,23 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: switchboard-flywheel-epic
+  - id: cse-graph-extensions
     version: v1
-    path: prompts/strategy/switchboard-flywheel-epic@v1.md
-    sha256: 952c74e698bb63a9b8bf4b654fdd0750ab40ecfb4bd973f595d39df0b2d545b0
-    description: Document Switchboard Flywheel strategy track with epic PR map, gates, and evidence artifacts.
+    path: prompts/standards/cse-graph-extensions@v1.md
+    sha256: 7871b1cd6c0f0d8228aa907773f05e169636ebf784dedb0a4f477d9d90d476ec
+    description: Define the CSE graph extensions standard, schema, and roadmap alignment updates.
     scope:
       paths:
-        - docs/roadmap/strategic/switchboard-flywheel-epic.md
+        - docs/standards/cognitive-security-engine.md
+        - docs/standards/README.md
+        - schemas/cogwar/cse.graph.v1.schema.json
         - docs/roadmap/STATUS.json
-        - prompts/strategy/switchboard-flywheel-epic@v1.md
+        - prompts/standards/cse-graph-extensions@v1.md
         - prompts/registry.yaml
-        - agents/examples/SWITCHBOARD_FLYWHEEL_EPIC_20260208.json
-        - packages/decision-ledger/decision_ledger.json
       domains:
-        - strategy
-        - governance
         - documentation
-        - switchboard
+        - governance
+        - io-cogwar
     verification:
       tiers_required:
         - C

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-10T14:05:00Z",
-  "revision_note": "Added Pydantic v2 validation performance standards initiative and evidence-first documentation alignment.",
+  "last_updated": "2026-02-08T00:45:00Z",
+  "revision_note": "Added CSE graph extensions standard and schema reference for cogwar lab alignment.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -265,7 +265,7 @@
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab. Added deterministic example and evidence budgeting notes in docs/standards/ru-ua-cogwar-lab.md."
+      "notes": "Cognitive campaign schema plus CSE graph extensions standard/schema alignment for RU-UA lab."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
