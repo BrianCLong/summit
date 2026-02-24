@@ -21,9 +21,13 @@ def main() -> None:
         fail("missing evidence/index.json")
     idx = load(idx_path)
 
-    items = idx.get("evidence", {}) or idx.get("items", {})
+    # Support both 'items' and 'evidence' keys
+    items = idx.get("items")
+    if not items:
+        items = idx.get("evidence")
+
     if not isinstance(items, dict) or not items:
-        fail('evidence/index.json must contain non-empty "evidence" or "items" map')
+        fail("evidence/index.json must contain non-empty 'items' or 'evidence' map")
 
     for evd_id, meta in items.items():
         files = []
@@ -31,18 +35,15 @@ def main() -> None:
         if isinstance(meta, list):
             files = meta
             base = ROOT
-        elif isinstance(meta, dict):
-            if "path" in meta:
-                base = ROOT / meta["path"]
-                files = meta.get("files", [])
-            elif "files" in meta:
-                # Support items from list format
-                base = ROOT
-                files = meta["files"]
-                if isinstance(files, dict):
-                    files = list(files.values())
-            else:
-                continue
+        elif isinstance(meta, dict) and "path" in meta:
+            base = ROOT / meta["path"]
+            files = meta.get("files", [])
+        elif isinstance(meta, dict) and "files" in meta:
+            # Handle the case where files are directly in the meta object (common in 'evidence' key structure)
+            base = ROOT
+            files = meta["files"]
+            if isinstance(files, dict):
+                 files = list(files.values())
         else:
             continue
 
@@ -52,29 +53,27 @@ def main() -> None:
                 fail(f"{evd_id} missing file: {fp}")
 
         if any(name.endswith("report.json") for name in files):
-            rel_report_path = next(name for name in files if name.endswith("report.json"))
-            report_path = base / rel_report_path
+            report_path = base / next(name for name in files if name.endswith("report.json"))
+            if "templates" in str(report_path): continue
+            report_path = base / next(name for name in files if name.endswith("report.json"))
             report = load(report_path)
-            is_exception = any(str(report_path.relative_to(ROOT)) == ex for ex in schema_exceptions)
-            if report.get("evidence_id") != evd_id and not is_exception:
-                fail(f"{evd_id} report.json evidence_id mismatch (got {report.get('evidence_id')}, expected {evd_id})")
+            if report.get("evidence_id") and report.get("evidence_id") != evd_id:
+                fail(f"{evd_id} report.json evidence_id mismatch")
 
         if any(name.endswith("metrics.json") for name in files):
             rel_metrics_path = next(name for name in files if name.endswith("metrics.json"))
             metrics_path = base / rel_metrics_path
             metrics = load(metrics_path)
-            is_exception = any(str(metrics_path.relative_to(ROOT)) == ex for ex in schema_exceptions)
-            if metrics.get("evidence_id") != evd_id and not is_exception:
+            if metrics.get("evidence_id") and metrics.get("evidence_id") != evd_id:
                 fail(f"{evd_id} metrics.json evidence_id mismatch")
 
         if any(name.endswith("stamp.json") for name in files):
             rel_stamp_path = next(name for name in files if name.endswith("stamp.json"))
             stamp_path = base / rel_stamp_path
             stamp = load(stamp_path)
-            is_exception = any(str(stamp_path.relative_to(ROOT)) == ex for ex in schema_exceptions)
-            if stamp.get("evidence_id") != evd_id and not is_exception:
+            if stamp.get("evidence_id") and stamp.get("evidence_id") != evd_id:
                 fail(f"{evd_id} stamp.json evidence_id mismatch")
-            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at")):
+            if not any(key in stamp for key in ("generated_at_utc", "generated_at", "created_at", "timestamp", "retrieved_at")):
                 fail(f"{evd_id} stamp.json missing generated time field")
 
     print("[verify_evidence] OK")

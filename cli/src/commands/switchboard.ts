@@ -3,6 +3,8 @@
  */
 
 import { Command } from 'commander';
+import * as fs from 'fs';
+import * as path from 'path';
 import { detectRepoRoot } from '../lib/sandbox.js';
 import { runCapsule } from '../lib/switchboard-runner.js';
 import {
@@ -11,12 +13,7 @@ import {
   verifyEvidenceBundle,
 } from '../lib/switchboard-evidence.js';
 import { replayCapsule } from '../lib/switchboard-replay.js';
-import { secretsVault } from '../lib/switchboard-secrets.js';
-import { SwitchboardRegistry } from '../lib/switchboard-registry.js';
-import { runDoctor } from '../summit-doctor.js';
-import { VERSION } from '../lib/constants.js';
-import chalk from 'chalk';
-import os from 'os';
+import { readLedgerEntries, ActionReceipt } from '../lib/switchboard-ledger.js';
 
 export function registerSwitchboardCommands(program: Command): void {
   const switchboard = program
@@ -114,88 +111,87 @@ export function registerSwitchboardCommands(program: Command): void {
       }
     });
 
-  const secrets = switchboard
-    .command('secrets')
-    .description('Manage local secrets vault');
+  const receipts = switchboard.command('receipts').description('Manage action receipts');
 
-  secrets
-    .command('set <key> [value]')
-    .description('Set a secret value')
-    .action((key: string, value?: string) => {
-      if (!value) {
-        console.error('Value is required for set');
-        process.exit(1);
-      }
-      secretsVault.setSecret(key, value);
-      console.log(`Secret '${key}' set.`);
-    });
-
-  secrets
+  receipts
     .command('list')
-    .description('List secret keys')
-    .action(() => {
-      const keys = secretsVault.listSecrets();
-      console.log('Secrets:');
-      keys.forEach((k) => console.log(` - ${k}`));
-    });
+    .description('List action receipts')
+    .option('--session <session_id>', 'Filter by session ID')
+    .action((options: { session?: string }) => {
+      try {
+        const repoRoot = detectRepoRoot(process.cwd());
+        const sessionsRoot = path.join(repoRoot, '.switchboard', 'capsules');
+        if (!fs.existsSync(sessionsRoot)) {
+          console.log('No sessions found.');
+          return;
+        }
 
-  secrets
-    .command('delete <key>')
-    .description('Delete a secret')
-    .action((key: string) => {
-      secretsVault.deleteSecret(key);
-      console.log(`Secret '${key}' deleted.`);
-    });
+        const sessionIds = options.session ? [options.session] : fs.readdirSync(sessionsRoot);
+        const allReceipts: ActionReceipt[] = [];
 
-  const registry = switchboard
-    .command('registry')
-    .description('Manage tool/server registry');
+        for (const sessionId of sessionIds) {
+          const ledgerPath = path.join(sessionsRoot, sessionId, 'ledger.jsonl');
+          if (fs.existsSync(ledgerPath)) {
+            const entries = readLedgerEntries(ledgerPath);
+            for (const entry of entries) {
+              if (entry.type === 'action_receipt') {
+                allReceipts.push(entry.data as ActionReceipt);
+              }
+            }
+          }
+        }
 
-  registry
-    .command('validate <path>')
-    .description('Validate a registry file or directory')
-    .action(async (targetPath: string) => {
-      const reg = new SwitchboardRegistry();
-      const result = await reg.load(targetPath);
-      console.log(`Loaded ${result.loaded} entries.`);
-      if (result.errors.length > 0) {
-        console.error(chalk.red('Validation errors:'));
-        result.errors.forEach((err) => console.error(` - ${err}`));
+        if (allReceipts.length === 0) {
+          console.log('No receipts found.');
+          return;
+        }
+
+        console.table(allReceipts.map(r => ({
+          ID: r.receipt_id,
+          Timestamp: r.timestamp,
+          Tool: r.tool_id,
+          Status: r.status,
+          Hash: r.hash.slice(0, 8) + '...'
+        })));
+
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : String(error));
         process.exit(1);
       }
-      console.log(chalk.green('Registry validated successfully.'));
     });
 
-  switchboard
-    .command('version')
-    .description('Display Switchboard version')
-    .action(() => {
-      console.log(`Switchboard v${VERSION}`);
-    });
+  receipts
+    .command('show <receipt_id>')
+    .description('Show full details of a receipt')
+    .action((receiptId: string) => {
+      try {
+        const repoRoot = detectRepoRoot(process.cwd());
+        const sessionsRoot = path.join(repoRoot, '.switchboard', 'capsules');
+        if (!fs.existsSync(sessionsRoot)) {
+          console.error('No sessions found.');
+          process.exit(1);
+        }
 
-  switchboard
-    .command('doctor')
-    .description('Verify local Switchboard environment')
-    .action(async () => {
-      console.log(chalk.bold('\n🩺 Switchboard Doctor'));
-      const report = await runDoctor();
-      report.results.forEach((res) => {
-        const icon = res.status === 'pass' ? '✅' : '❌';
-        console.log(`${icon} ${res.name}: ${res.message}`);
-      });
-    });
-
-  switchboard
-    .command('completion')
-    .description('Generate shell completion script')
-    .option('--shell <type>', 'Shell type (bash, zsh)', 'bash')
-    .action((options: { shell: string }) => {
-      if (options.shell === 'bash') {
-        console.log('complete -W "run evidence replay secrets registry version doctor completion" switchboard');
-      } else if (options.shell === 'zsh') {
-        console.log('compdef _switchboard switchboard\n_switchboard() {\n  _arguments "1: :(run evidence replay secrets registry version doctor completion)"\n}');
-      } else {
-        console.error(`Unsupported shell: ${options.shell}`);
+        const sessionIds = fs.readdirSync(sessionsRoot);
+        for (const sessionId of sessionIds) {
+          const ledgerPath = path.join(sessionsRoot, sessionId, 'ledger.jsonl');
+          if (fs.existsSync(ledgerPath)) {
+            const entries = readLedgerEntries(ledgerPath);
+            for (const entry of entries) {
+              if (entry.type === 'action_receipt') {
+                const receipt = entry.data as ActionReceipt;
+                if (receipt.receipt_id === receiptId) {
+                  console.log(JSON.stringify(receipt, null, 2));
+                  return;
+                }
+              }
+            }
+          }
+        }
+        console.error(`Receipt not found: ${receiptId}`);
+        process.exit(1);
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : String(error));
         process.exit(1);
       }
     });

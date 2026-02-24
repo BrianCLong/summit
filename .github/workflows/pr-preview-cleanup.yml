@@ -16,7 +16,6 @@ permissions:
 
 jobs:
   cleanup:
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

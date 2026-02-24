@@ -319,7 +319,6 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
       // Record detailed action receipt
       const inputDigest = computeDigest({
         command: step.command,
-        args: step.args,
         env // includes secrets if any
       });
 
@@ -341,11 +340,14 @@ export async function runCapsule(options: CapsuleRunOptions): Promise<CapsuleRun
           step_name: stepLabel,
           duration_ms: durationMs,
           command: step.command,
-          args: step.args,
           stdout_path: path.relative(sessionDir, stdoutPath),
           stderr_path: path.relative(sessionDir, stderrPath),
         }
       });
+
+      // Keep legacy tool_exec for compatibility or redundancy?
+      // I'll keep it as the prompt didn't say to remove it, but recordAction should be the primary receipt.
+      // But CapsuleLedger logic suggests we just append events.
 
       if (step.category === 'test') {
         ledger.append('test_result', {

@@ -127,7 +127,7 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls (CI)
+    name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
