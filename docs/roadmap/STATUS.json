@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Added Evidence-Trail Peek overlay, API, telemetry, and docs scope.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Added 24th+ order imputed intention analysis artifact.",
   "initiatives": [
+    {
+      "id": "imputed-intention-24plus",
+      "status": "complete",
+      "owner": "codex",
+      "notes": "Added governed analysis artifact for 24th–40th order imputed intention expansion."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
