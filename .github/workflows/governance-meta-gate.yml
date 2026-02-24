@@ -32,6 +32,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Install Dependencies
+        run: npm install js-yaml --no-save
+
       - name: Run Governance Meta-Gate
         run: node scripts/ci/governance-meta-gate.mjs
         env:

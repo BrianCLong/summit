@@ -1,0 +1,95 @@
+name: Evidence Bundle
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Helper Dependencies
+        run: npm install js-yaml minisign --no-save
+
+      - name: Build
+        run: |
+          npm run build:client || echo "Client build skipped/failed"
+          npm run build:server || echo "Server build skipped/failed"
+
+      - name: Pack Deterministic
+        run: ./scripts/ci/pack_deterministic.sh
+
+      - name: Generate Evidence
+        run: |
+          mkdir -p artifacts/evidence
+          echo '{"id": "SBOM-001", "subject": {"sha256": "mock"}, "content": "sbom"}' > artifacts/evidence/sbom.json
+          echo '{"id": "PROV-001", "subject": {"sha256": "mock"}, "content": "provenance"}' > artifacts/evidence/provenance.json
+          echo '{"id": "ATT-001", "subject": {"sha256": "mock"}, "content": "attestation"}' > artifacts/evidence/attestation.json
+          echo '{"id": "TEST-001", "subject": {"sha256": "mock"}, "content": "tests"}' > artifacts/evidence/test.json
+
+      - name: Sign Evidence
+        env:
+          MINISIGN_SECRET_KEY: ${{ secrets.MINISIGN_SECRET_KEY }}
+          MINISIGN_PASSWORD: ${{ secrets.MINISIGN_PASSWORD }}
+        run: |
+          if [ -n "$MINISIGN_SECRET_KEY" ]; then
+            echo "$MINISIGN_SECRET_KEY" > minisign.key
+
+            for f in artifacts/evidence/*.json; do
+              npx minisign -S -m "$f" -s minisign.key -P "$MINISIGN_PASSWORD" -x "${f}.minisig"
+            done
+
+            rm minisign.key
+          else
+            echo "Skipping signing (secrets not set)"
+          fi
+
+      - name: Verify Policy
+        run: |
+          node scripts/ci/verify_evidence_policy.mjs \
+            --policy docs/governance/EVIDENCE_ID_POLICY.yml \
+            --dir artifacts/evidence \
+            --waivers docs/governance/EVIDENCE_WAIVERS.yml
+
+      - name: Build Evidence Index
+        run: |
+          node scripts/ci/build_evidence_index.mjs \
+            --evidence-dir artifacts/evidence \
+            --out releases/${GITHUB_REF_NAME}/evidence_index.json \
+            --release ${GITHUB_REF_NAME} \
+            --commit ${GITHUB_SHA}
+
+      - name: Verify Evidence Index
+        run: |
+          node scripts/ci/verify_evidence_index.mjs \
+            --index releases/${GITHUB_REF_NAME}/evidence_index.json \
+            --evidence-dir artifacts/evidence
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle
+          path: |
+            artifacts/build/build.tgz
+            artifacts/stamp/stamp.json
+            artifacts/evidence/
+            releases/

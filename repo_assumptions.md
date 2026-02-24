@@ -1,20 +1,22 @@
-## Repository Assumptions and Validations
+# Repo Assumptions & Reality Check
 
-### Verified
-* **Package Manager**: `pnpm` (verified via `pnpm-workspace.yaml`, `package.json`, `pnpm-lock.yaml`).
-* **DB Drivers**: `pg` and `neo4j-driver` are present in `package.json` dependencies.
-* **Test Runner**: `vitest` is present in `devDependencies`, but integration tests use `tsx` for direct execution as per blueprint.
-* **CI**: GitHub Actions is used (`.github/workflows` populated).
-* **Directory Structure**: `tools/` exists, `tests/` exists.
+## Verified
+* **Build System**: `pnpm` is used (lockfile present). `package.json` defines `build` script invoking `npm run build:client` and `npm run build:server`.
+* **CI Workflows**: Existing workflows include `ci-security.yml`, `release-ga.yml`, `evidence.yml`.
+* **Release Artifacts**: `release-ga.yml` assembles a `ga-release-bundle-${TAG}`.
+* **Signing**: No explicit usage of `minisign` found in existing workflows. `cosign` mentioned in memory for images.
 
-### Assumed
-* **Node Version**: CI environment supports Node 20 (used in workflow definition).
-* **Docker Services**: `postgres:15` and `neo4j:5.12.0` images are available and sufficient for parity checks.
-* **APOC**: Neo4j APOC plugin is enabled in CI service definition (added to workflow).
-* **Network**: Localhost ports 5432 and 7687 are available in CI runner services network.
+## Assumptions
+* **Build Output**: `client` and `server` likely build to `dist/` or `build/`. We will assume `dist/` for the purpose of the evidence bundle or we will invoke the build and check.
+* **Evidence Directory**: We will create and use `evidence/` for evidence JSON files.
+* **Artifacts Directory**: We will use `artifacts/` for intermediate and final artifacts.
+* **Node Version**: Workflows use node, exact version assumed to be compatible with recent LTS (based on `actions/setup-node`).
 
-### Constraints Respected
-* **Production Deployment**: No changes made to production workflows.
-* **Secrets**: No new secrets hardcoded; workflow uses standard env vars (with defaults for CI services).
-* **Refactor**: No refactor of existing ETL/sync logic performed.
-* **Read-Only**: Validator is read-only.
+## Must-Not-Touch
+* `.github/workflows/release-ga.yml` (except for reading/referencing).
+* Existing secrets handling.
+
+## Plan
+* Create parallel `evidence-bundle` workflow.
+* Use `minisign` for evidence signing (as requested).
+* Implement deterministic packaging for build outputs.
