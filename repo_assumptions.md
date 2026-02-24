@@ -1,22 +1,43 @@
-# Repo Assumptions & Validation — CADDS Intake
+# Repo Assumptions & Validation (SpreadsheetBench Verified)
 
-Reference: [Summit Readiness Assertion](docs/SUMMIT_READINESS_ASSERTION.md).
+## Readiness assertion
 
-## Verified (inspected in repo)
+This validation respects the Summit Readiness Assertion and treats unverified paths as intentionally constrained until confirmed.
 
-- `docs/` exists and is the primary documentation root.
-- `docs/standards/` exists for standards/interop documentation.
-- `docs/security/` exists for security and data-handling guidance.
-- `docs/ops/runbooks/` exists for operational runbooks.
-- `.github/pull_request_template.md` exists and includes the AGENT-METADATA block template.
-- `docs/roadmap/STATUS.json` exists and is the execution assignment ledger.
+## Verified vs assumed directory map
 
-## Assumed (deferred pending validation)
+| Plan Path | Actual Path | Status | Notes |
+| --- | --- | --- | --- |
+| `docs/` | `docs/` | ✅ Verified | Documentation root exists. |
+| `docs/standards/` | `docs/standards/` | ✅ Verified | Standards directory exists. |
+| `docs/security/` | `docs/security/` | ✅ Verified | Security documentation root exists. |
+| `docs/ops/` | `docs/ops/` | ✅ Verified | Operations documentation root exists. |
+| `benchmarks/` | `benchmarks/` | ✅ Verified | Benchmark root exists. |
+| `runners/` | `runners/` | Deferred pending verification | Runner directory presence not confirmed. |
+| `scripts/` | `scripts/` | ✅ Verified | Scripts root exists. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Verified | CI workflows directory exists. |
 
-- `docs/ci/REQUIRED_CHECKS_POLICY.yml` defines authoritative branch protection check names.
-- The repo’s primary test runner is `pnpm`-based with supplemental `make` targets.
-- Outbound HTTP is disallowed in CI by default; fixture-driven ingestion is required.
+## Existing CI gates (assumed until confirmed)
 
-## Must-Not-Touch Files
+* `pr-quality-gate.yml` (referenced in AGENTS guidance).
+* `make smoke` golden path target.
 
-- None declared (list intentionally constrained; expand only with explicit governance direction).
+## Must-not-touch list (default)
+
+* Lockfiles: `pnpm-lock.yaml`, `package-lock.json`, `Cargo.lock`.
+* Release automation: `release-please-config.json`, `release-policy.yml`.
+* Security policy baselines and evidence bundles under `docs/ga/`, `docs/governance/`, and `evidence/`.
+
+## Validation checklist (SpreadsheetBench Verified PR1)
+
+1. Confirm benchmark abstraction location (expected: `benchmarks/`).
+2. Confirm runner abstraction location (expected: `runners/`).
+3. Confirm evidence schema conventions under `evidence/` or `docs/evidence/`.
+4. Confirm CI naming for smoke gates.
+5. Confirm formatting/lint rules for new documentation in `docs/`.
+
+## Next steps (PR1)
+
+* Add SpreadsheetBench Verified standards and data-handling docs in `docs/`.
+* Add a SpreadsheetBench Verified runbook in `docs/ops/runbooks/`.
+* Update `docs/roadmap/STATUS.json` with the new initiative.
