@@ -36,6 +36,7 @@ Status: Governed Exception. `gh issue list` failed with `error connecting to api
 - Created daily sprint log and evidence bundle.
 - Issue scan blocked by GitHub API connectivity; recorded as Governed Exception.
 - Prompt integrity and task spec registered for this run.
+- PR creation failed due to api.github.com outage; branch pushed for retry.
 
 ### Command Log
 - `gh pr list -R BrianCLong/summit -L 20 -S "is:open sort:updated-desc" --json number,title,author,updatedAt,labels,url` (success)
@@ -45,11 +46,12 @@ Status: Governed Exception. `gh issue list` failed with `error connecting to api
 
 ## Blockers
 - Governed Exception: GitHub API outage for issue scan (`api.github.com`).
+- Governed Exception: GitHub API outage for PR creation (`api.github.com`).
 
 ## End-of-Day Summary
 - Completed: Evidence bundle capture, prompt registry update, task spec creation, roadmap status refresh.
 - In progress: PR triage follow-through on #18627/#18638 (deferred pending GH API stability).
-- Blocked: Labeled issue scan (Deferred pending api.github.com recovery).
+- Blocked: Labeled issue scan and PR creation (Deferred pending api.github.com recovery).
 
 ## Finality
 All recorded deviations are governed exceptions. Next run proceeds from this record.
