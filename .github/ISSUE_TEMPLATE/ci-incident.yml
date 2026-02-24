@@ -1,0 +1,148 @@
+name: CI Incident / Pipeline Break
+description: Report a CI/CD pipeline failure, workflow break, or release gate issue
+title: "[CI] "
+labels: ["type:ci", "area:ci", "triage:needed"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## CI Incident Intake
+        
+        Use this form to report CI/CD pipeline failures, workflow breaks, or release gate issues.
+        
+        **CI Runbook**: See [CI Release Gate Runbook](../../docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md) for troubleshooting guidance.
+
+  - type: input
+    id: failing_job_link
+    attributes:
+      label: Failing Job Link
+      description: "Direct link to the failing GitHub Actions workflow run"
+      placeholder: "https://github.com/BrianCLong/summit/actions/runs/XXXXXXXXX"
+    validations:
+      required: true
+
+  - type: textarea
+    id: failure_signature
+    attributes:
+      label: Failure Signature
+      description: "Unique error message or pattern that identifies this failure"
+      placeholder: |
+        Error: ENOENT: no such file or directory, open '/app/dist/index.js'
+        
+        Or:
+        
+        OPA policy evaluation failed: release_gate.allow = false
+        Reason: critical_vulnerabilities > 0
+    validations:
+      required: true
+
+  - type: input
+    id: first_bad_commit
+    attributes:
+      label: First Bad Commit (if known)
+      description: "Commit SHA where the failure first appeared"
+      placeholder: "abc123def456 or 'unknown'"
+    validations:
+      required: false
+
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Reproduction Steps
+      description: "How to reproduce this failure locally or via GitHub Actions"
+      placeholder: |
+        **Local reproduction (if possible):**
+        1. Run: `make bootstrap`
+        2. Run: `make smoke`
+        3. Observe: [failure details]
+        
+        **GitHub Actions reproduction:**
+        1. Trigger workflow: [workflow name]
+        2. Observe failure in step: [step name]
+        
+        **Using act (if applicable):**
+        ```bash
+        act -j [job-name] --secret-file .env.local
+        ```
+    validations:
+      required: true
+
+  - type: textarea
+    id: mitigation_attempted
+    attributes:
+      label: Mitigation Attempted
+      description: "What troubleshooting steps or fixes have been tried?"
+      placeholder: |
+        - Re-ran workflow: [result]
+        - Cleared cache: [result]
+        - Reverted to commit: [SHA] - [result]
+        - Checked logs for: [pattern] - [findings]
+        - Consulted runbook section: [section name] - [outcome]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blast_radius
+    attributes:
+      label: Blast Radius
+      description: "What is affected by this CI failure?"
+      options:
+        - Single PR (isolated failure)
+        - All PRs (main branch broken)
+        - Release pipeline (blocks deployments)
+        - Nightly/scheduled jobs only
+        - Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback_plan
+    attributes:
+      label: Rollback Plan
+      description: "How to restore CI to working state if fix fails?"
+      placeholder: |
+        - Immediate: Revert PR #XXXX
+        - Alternative: Disable workflow [workflow-name] temporarily
+        - Monitoring: Watch for [metric/log pattern]
+        - Escalation: Contact @owner if not resolved in [timeframe]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: incident_type
+    attributes:
+      label: Incident Type
+      description: "Categorize the type of CI failure"
+      options:
+        - Build failure (compilation, bundling)
+        - Test failure (unit, integration, e2e)
+        - Security gate failure (CodeQL, Trivy, Gitleaks)
+        - Release gate failure (OPA policy)
+        - Deployment failure (infrastructure, services)
+        - Workflow configuration error
+        - Dependency/cache issue
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: related_issues
+    attributes:
+      label: Related Issues/PRs
+      description: "Links to related issues, PRs, or incidents"
+      placeholder: |
+        - Related to PR: #XXXX
+        - Similar incident: #YYYY
+        - Blocked by: #ZZZZ
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: runbook_consulted
+    attributes:
+      label: Runbook Checklist
+      description: "Confirm you have consulted the CI runbook"
+      options:
+        - label: I have reviewed the [CI Release Gate Runbook](../../docs/runbooks/CI_RELEASE_GATE_RUNBOOK.md)
+        - label: I have checked the troubleshooting section for this failure type
+        - label: I have verified this is not a known issue with an existing workaround

@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added 24th+ order imputed intention analysis artifact.",
+  "last_updated": "2026-02-14T00:15:00Z",
+  "revision_note": "Refined AgentApp repo recon anchors with readiness assertion and governed exceptions.",
   "initiatives": [
-    {
-      "id": "imputed-intention-24plus",
-      "status": "complete",
-      "owner": "codex",
-      "notes": "Added governed analysis artifact for 24th–40th order imputed intention expansion."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -63,25 +57,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Added sigstore bundle-first verification action, CVE-2026-22703 version floor policy gate, and digest guidance in evidence schema."
-    },
-    {
-      "id": "summit-skill-router-ga-orchestrator",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ga-preflight-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
-    },
-    {
-      "id": "summit-pr-stack-sequencer-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
       "id": "deploy-promotion-hardening",
@@ -94,6 +70,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
+    },
+    {
+      "id": "kore-agentic-stack-recon",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Repo reconnaissance for AgentApp subsumption: CLI, evidence, connectors, GraphRAG anchors."
     },
     {
       "id": "E",
