@@ -47,13 +47,15 @@ check your internet connection or https://githubstatus.com
 - Task 2: Completed. STATUS.json refreshed and validated.
 - Task 3: Blocked. Issue scan failed due to api.github.com connectivity.
 - Task 4: Completed. Prompt registered and task spec created.
+- PR creation: Blocked. `gh pr create` failed due to api.github.com connectivity.
 
 ## Governed Exceptions / Blockers
 - GitHub Issues API connectivity outage prevented labeled issue scan.
+- GitHub PR API connectivity outage prevented PR creation.
 
 ## End-of-Day Report
-- Completed: PR evidence capture, daily sprint log creation, roadmap status refresh, prompt/task-spec registration.
+- Completed: PR evidence capture, daily sprint log creation, roadmap status refresh, prompt/task-spec registration, branch push.
 - In progress: Issue scan retry once GitHub connectivity stabilizes.
-- Blocked: Labeled issue scan (api.github.com connectivity).
+- Blocked: Labeled issue scan and PR creation (api.github.com connectivity).
 
 Finality: Daily sprint log complete and ready for PR packaging.
