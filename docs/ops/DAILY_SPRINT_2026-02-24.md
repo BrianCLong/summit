@@ -48,15 +48,18 @@ ERROR: error connecting to api.github.com (Governed Exception: issue scan deferr
 - 2026-02-24: Issue scan failed due to GitHub API connectivity; recorded Governed Exception.
 - 2026-02-24: Updated docs/roadmap/STATUS.json timestamp and revision note.
 - 2026-02-24: Registered daily sprint prompt and task spec (prompts/automation/daily-sprint@v1.md, prompts/registry.yaml, agents/examples/DAILY_SPRINT_20260224_RUN1.json).
+- 2026-02-24: PR creation failed due to GitHub API connectivity; Governed Exception recorded.
 
 ## Results
 - Evidence bundle recorded; security/GA PRs highlighted in focused snapshots.
 - Roadmap status refreshed per execution invariant.
 - Issue scan deferred pending GH API connectivity.
+- PR creation deferred pending GH API connectivity.
 
 ## End-of-Day Report
 **Completed:** Evidence bundle + focused PR snapshots, roadmap status refresh.
 **In Progress:** Awaiting GH issue scan recovery for security/GA/bolt/osint/governance labels.
 **Blocked:** GH issue scan (api.github.com connectivity). Deferred pending connectivity restoration.
+**Blocked:** PR creation (api.github.com connectivity). Deferred pending connectivity restoration.
 
 Final status: Sprint log and roadmap refreshed; issue scan deferred with Governed Exception.
