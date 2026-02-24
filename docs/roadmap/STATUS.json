@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T04:34:12Z",
-  "revision_note": "Added Governed Multi-Agent OS documentation initiative with readiness-aligned governance guarantees.",
+  "last_updated": "2026-02-08T01:10:00Z",
+  "revision_note": "Added defensive front-run IO governance scope, dual-use policy, and segment governance gates.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -242,6 +242,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
+    },
+    {
+      "id": "io-front-run-defensive-rails",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Defensive front-run IO scope, dual-use prohibitions, and segment governance policy gates."
     },
     {
       "id": "ru-ua-cogwar-lab",
