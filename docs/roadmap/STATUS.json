@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added OSINT limits envelope lane-1 scaffolding initiative.",
+  "last_updated": "2026-02-08T01:11:51Z",
+  "revision_note": "Added agent data-access policy registries and deny-by-default evaluator foundation.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -9,10 +9,10 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-      "id": "sigstore-rekor-cose-cosign-bundle-2026-02-07",
+      "id": "agent-data-access-policy-pr1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Fail-closed Sigstore negative-case smoke harness + evidence schema + data handling/runbook docs."
+      "notes": "Policy registries, schemas, evaluator, and evidence-first tests for deny-by-default tool access."
     },
     {
       "id": "B",
@@ -247,12 +247,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "osint-limits-envelope-lane1",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "OSINT guardrails lane-1: source registry, risk envelopes, policy gates, fixtures, evidence scaffolding, and CI verifier."
     }
   ],
   "summary": {

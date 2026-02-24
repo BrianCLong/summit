@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "tools": {
+    "SearchOSINT": {
+      "id": "SearchOSINT",
+      "description": "Public-only OSINT search across allowlisted sources.",
+      "capabilities": ["search", "osint"],
+      "scopes": ["public.read"],
+      "rateLimitPerMin": 60,
+      "enabled": true,
+      "classification": "PUBLIC"
+    },
+    "SearchInternalIntel": {
+      "id": "SearchInternalIntel",
+      "description": "Query Summit-controlled internal intelligence stores only.",
+      "capabilities": ["search", "internal"],
+      "scopes": ["internal.read"],
+      "rateLimitPerMin": 30,
+      "enabled": true,
+      "classification": "INTERNAL"
+    },
+    "FetchProviderIntel::Example": {
+      "id": "FetchProviderIntel::Example",
+      "description": "Account-backed provider API wrapper with least-privilege scopes.",
+      "capabilities": ["fetch", "provider"],
+      "scopes": ["provider.read"],
+      "rateLimitPerMin": 10,
+      "enabled": false,
+      "classification": "CONFIDENTIAL"
+    }
+  }
+}

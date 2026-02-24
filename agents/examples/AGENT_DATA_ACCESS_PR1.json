@@ -1,0 +1,47 @@
+{
+  "task_id": "AGENT_DATA_ACCESS_PR1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agent-data-access-policy-foundation",
+    "version": "v1",
+    "sha256": "7110bddbf18d26c2b0a1111016b7c460a4e3a629783fb271443079d54bcd5607",
+    "path": "prompts/agent-data-access/policy-foundation@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      ".github/policies/agent-data-access/",
+      "src/agents/policy/",
+      "tests/agents/policy/",
+      "evidence/index.json",
+      "evidence/EVD-OSINTLEGAL-DATAACCESS-001/",
+      "evidence/EVD-OSINTLEGAL-DATAACCESS-002/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/AGENT_DATA_ACCESS_PR1.json"
+    ],
+    "domains": ["governance", "policy", "evidence", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "tests/agents/policy/policyEval.test.ts",
+      "evidence/EVD-OSINTLEGAL-DATAACCESS-001",
+      "evidence/EVD-OSINTLEGAL-DATAACCESS-002"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Policy registries validate against schemas.",
+    "Deny-by-default evaluator rejects unknown tools and restricted sources without approval.",
+    "Evidence index updated with EVD-OSINTLEGAL-DATAACCESS-001 and EVD-OSINTLEGAL-DATAACCESS-002.",
+    "Roadmap status updated with PR-1 foundation entry."
+  ],
+  "stop_conditions": [
+    "Schema validation fails for policy registries.",
+    "Evidence index update would remove existing entries.",
+    "Policy evaluator allows unknown tools."
+  ]
+}
