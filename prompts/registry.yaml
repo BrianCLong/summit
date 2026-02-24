@@ -214,6 +214,31 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: daily-sprint
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: cbabc2340157709f8ec7fc5d952de28e71eadd2a26206fc3fb8e159cebb2d13c
+    description: Orchestrate the Summit daily sprint evidence bundle, plan, and execution log.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_2026-02-24.md
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+        - agents/examples/DAILY_SPRINT_20260224_RUN1.json
+      domains:
+        - ops
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
