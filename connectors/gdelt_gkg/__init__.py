@@ -1,0 +1,1 @@
+"""GDELT GKG connector package."""

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:05:00Z",
-  "revision_note": "Expanded narrative dominance operationalization standards with new high-signal extensions.",
+  "last_updated": "2026-02-08T00:47:25Z",
+  "revision_note": "Added GDELT GKG connector skeleton and registry/docs entry.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -9,10 +9,10 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-      "id": "sprint-plus3-hosted-saas-hardening",
+      "id": "gdelt-gkg-connector-skeleton",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Sprint +3 hosted SaaS hardening: tenant status controls, billing hooks, DR evidence, and compliance pack groundwork."
+      "notes": "Added GDELT GKG connector skeleton with sample TSV parsing, registry entry, and draft docs for external narrative ingestion."
     },
     {
       "id": "B",
@@ -198,7 +198,7 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added narrative operationalization extensions (debt, partitioning, exhaustion, assumptions, compression, absorption, funnels, governance signaling) in docs/standards/narrative-dominance-tech.md."
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
       "id": "ru-ua-cogwar-lab",
