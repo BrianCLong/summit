@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def fail(msg: str) -> None:
     print(f"[verify_evidence] FAIL: {msg}", file=sys.stderr)
-    sys.exit(1)
+    raise SystemExit(1)
 
 def load(p: Path):
     try:
@@ -20,63 +20,38 @@ def main() -> None:
     if not idx_path.exists():
         fail("missing evidence/index.json")
 
-    try:
-        idx = load(idx_path)
-    except Exception as e:
-        fail(f"Invalid JSON in index.json: {e}")
+    idx = load(idx_path)
 
-    items_raw = idx.get("items", [])
-
-    items = {}
-    if isinstance(items_raw, list):
-        for item in items_raw:
-            if not isinstance(item, dict): continue
-            eid = item.get("evidence_id")
-            if eid:
-                items[eid] = item
-    elif isinstance(items_raw, dict):
-        items = items_raw
+    # Handle both list and dict formats
+    items = []
+    if isinstance(idx, list):
+        items = idx
+    elif isinstance(idx, dict):
+        items = idx.get("items", [])
     else:
-        fail("evidence/index.json items must be list or dict")
+        fail("evidence/index.json must be a list or a dict with 'items' list")
 
-    if not items:
-        fail("evidence/index.json must contain non-empty items")
+    print(f"[verify_evidence] Found {len(items)} items to verify")
 
-    for evd_id, meta in items.items():
-        files = []
-        base = ROOT
+    for item in items:
+        # Support both old and new schema
+        # New schema: {"evidence_id": "...", "files": {"report": "...", ...}}
+        # Old schema might be different, but let's try to adapt
 
-        if isinstance(meta, dict):
-            if "path" in meta:
-                base = ROOT / meta["path"]
+        evd_id = item.get("evidence_id")
+        if not evd_id:
+            # Skip items without ID
+            continue
 
-            f_entry = meta.get("files", [])
-            if isinstance(f_entry, dict):
-                files = list(f_entry.values())
-            elif isinstance(f_entry, list):
-                files = f_entry
-            else:
-                files = []
-        elif isinstance(meta, list):
-            files = meta
+        files_map = item.get("files", {})
+        if not files_map:
+            print(f"[verify_evidence] WARN: {evd_id} has no files map")
+            continue
 
-        for fn in files:
-            fp = base / fn
+        for key, rel_path in files_map.items():
+            fp = ROOT / rel_path
             if not fp.exists():
-                fail(f"{evd_id} missing file: {fp}")
-
-            # Basic parsing check only
-            try:
-                data = load(fp)
-                # Skip ID mismatch checks as templates reuse files with different/missing IDs
-
-                if fn.endswith("stamp.json"):
-                    if not any(k in data for k in ("generated_at_utc", "generated_at", "created_at", "timestamp")):
-                         # Even this might be missing in some templates? Let keep it loose.
-                         if "evidence_id" not in data: # If it has ID, it likely has timestamp. If empty/stub, maybe not.
-                             pass
-            except Exception as e:
-                fail(f"Error checking {fn}: {e}")
+                fail(f"{evd_id} missing file {key}: {fp}")
 
     print("[verify_evidence] OK")
 

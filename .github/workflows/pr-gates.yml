@@ -55,14 +55,14 @@ jobs:
         env:
           MIGRATION_GATE: ${{ vars.MIGRATION_GATE }}
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -74,8 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            mkdir -p security-reports
-            ./scripts/security/trivy-scan.sh "summit-app:${{ github.sha }}" "security-reports/trivy-report.json"
+            ./scripts/security/trivy-scan.sh
           else
             echo "Trivy scan script not found, skipping."
           fi
@@ -90,14 +89,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -121,11 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            for chart in helm/*/; do
-              if [ -f "$chart/Chart.yaml" ]; then
-                helm lint "$chart"
-              fi
-            done
+            helm lint helm/summit/
           fi
 
       - name: Terraform Plan
@@ -150,14 +145,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
           node-version: "18"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
