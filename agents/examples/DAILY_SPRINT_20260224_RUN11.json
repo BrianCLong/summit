@@ -1,0 +1,47 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN11",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-orchestrator",
+    "version": "v1",
+    "sha256": "f0dbf60a46ac5c7598c840eeafe27b79b681115f3727e749f654237ee94054fe",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/automation/daily-sprint@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/DAILY_SPRINT_20260224_RUN11.json"
+    ],
+    "domains": [
+      "documentation",
+      "operations",
+      "governance"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/ops/DAILY_SPRINT_2026-02-24.md",
+      "docs/roadmap/STATUS.json"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint ledger captured with evidence and task status.",
+    "STATUS.json updated with the run revision note."
+  ],
+  "stop_conditions": [
+    "GitHub API outage blocks issue scan or run log retrieval.",
+    "Required governance files unavailable."
+  ]
+}

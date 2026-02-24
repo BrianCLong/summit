@@ -156,6 +156,7 @@ Mitigations: Evidence-first logging, governed exception ledger entries, prioriti
 - Captured top-20 PR evidence and GA PR #18663 check snapshot.
 - Deferred issue scan and failed-run log fetch pending GitHub API connectivity.
 - Authored daily sprint ledger and staged STATUS.json refresh.
+- Registered daily sprint prompt and task spec per prompt integrity requirements.
 
 ## Task Status
 
@@ -175,6 +176,11 @@ gh pr view 18663 --json number,title,author,updatedAt,labels,headRefName,baseRef
 gh pr checks 18663
 gh issue list --state open --search "label:security OR label:ga OR label:bolt OR label:osint OR label:governance" --limit 50 --json number,title,labels,updatedAt,url
 gh run view 22344171367 --log-failed
+cat <<'EOF' > prompts/automation/daily-sprint@v1.md
+python3 - <<'PY'
+cat <<'EOF' >> prompts/registry.yaml
+cat <<'EOF' > agents/examples/DAILY_SPRINT_20260224_RUN11.json
+python3 -m json.tool docs/roadmap/STATUS.json
 ```
 
 ## End-of-Day Summary
