@@ -134,7 +134,11 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            # Improved timestamp detection using regex
+            # Matches YYYY-MM-DDTHH:MM or YYYY/MM/DD HH:MM
+            # Uses 202\d to match years 2020-2029
+            timestamp_re = re.compile(r"202\d[-/]\d{2}[-/]\d{2}[T\s]\d{2}:\d{2}")
+            if timestamp_re.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
