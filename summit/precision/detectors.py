@@ -4,12 +4,13 @@ import logging
 from typing import List, Dict, Any, Optional
 
 try:
+try:
     import torch
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
 except ImportError:
     torch = None
-    AutoTokenizer = None
-    AutoModelForSequenceClassification = None
+except ImportError:
+    torch = None
 
 logger = logging.getLogger(__name__)
 
@@ -18,16 +19,10 @@ class MismatchReport:
         self.mismatch_score = mismatch_score
         self.details = details
 
-    def to_dict(self) -> Dict[str, Any]:
-        return {
-            "mismatch_score": self.mismatch_score,
-            "details": self.details
-        }
-
-class ContentDetector:
-    def __init__(self, model_name: str = "bert-base-uncased"):
-        if torch is None or AutoTokenizer is None or AutoModelForSequenceClassification is None:
-            raise ImportError("torch and transformers are required for ContentDetector. Please install them.")
+def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
+    train_logprobs = train_vals.get("logprobs")
+    if train_logprobs is None:
+        train_logprobs = train_vals.get("log_probs")
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)

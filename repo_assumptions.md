@@ -1,21 +1,11 @@
-# Repo Assumptions
+# Repository Assumptions & Verification
 
-| Item | Status | Verified Path/Value | Notes |
-| :--- | :--- | :--- | :--- |
-| Language | Verified | Python 3.12 | `summit-ci.yml`, `requirements.in` |
-| Test Framework | Verified | `pytest` | `summit-ci.yml` |
-| CI Workflow | Verified | `.github/workflows/summit-ci.yml` | Job: `test-python` |
-| Evidence Root | Verified | `evidence/` | Also `summit_evidence/` exists |
-| Artifacts Root | Assumed | `artifacts/` | Will create if missing |
-| Schema Root | Verified | `schemas/` | |
-| Main Package | Verified | `summit/` | |
-| New Module | Assumed | `summit/osint/` | To be created |
+## Verified
+*   **Workflows:** `.github/workflows/sbom-scan.yml` exists and uses `anchore/sbom-action` (Syft).
+*   **Melange Usage:** `melange` is NOT explicitly referenced in the codebase (based on grep).
+*   **Directory Structure:** `.github/scripts/` exists. `docs/` structure exists.
 
-## Must-not-touch List
-* `summit/ingest/` (unless integrating)
-* `intelgraph/`
-* `client/`
-
-## CI Check Name Discovery
-* [x] `test-python` (pytest)
-* [x] `test-e2e` (playwright)
+## Assumptions
+*   **Proactive Hardening:** We are implementing Melange gates (version, config lint) proactively.
+*   **Workflow Target:** We will integrate these gates into `.github/workflows/sbom-scan.yml` as optional or conditional checks, or enforcement if Melange is introduced.
+*   **Toolchain:** The version gate script assumes `melange` binary might be present in the runner; if missing, it should handle that (pass or skip, as no tool means no vulnerability).
