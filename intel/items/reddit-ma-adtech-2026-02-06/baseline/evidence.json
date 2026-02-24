@@ -1,0 +1,123 @@
+{
+  "item_id": "reddit-ma-adtech-2026-02-06",
+  "sources": [
+    {
+      "claims": [
+        {
+          "claim_text": "Reddit is seeking more M&A, targeting scale leverage or user growth.",
+          "evidence": [
+            {
+              "snippet": "Reddit said it is looking for more acquisitions and targets opportunities that help it scale or grow users.",
+              "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+            }
+          ],
+          "id": "ITEM:CLAIM-01",
+          "signal_type": "ma_intent"
+        },
+        {
+          "claim_text": "Reddit is looking to buy capabilities, technologies, and companies.",
+          "evidence": [
+            {
+              "snippet": "The company said it is looking to buy capabilities, technologies, and companies.",
+              "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+            }
+          ],
+          "id": "ITEM:CLAIM-02",
+          "signal_type": "ma_intent"
+        },
+        {
+          "claim_text": "Reddit described scaled opportunities as a spectrum of opportunities.",
+          "evidence": [
+            {
+              "snippet": "Leadership described scaled opportunities as a spectrum of opportunities rather than a single category.",
+              "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+            }
+          ],
+          "id": "ITEM:CLAIM-03",
+          "signal_type": "ma_intent"
+        },
+        {
+          "claim_text": "Reddit’s adtech team is tucking in acquired tech to accelerate time-to-market from six to twelve months.",
+          "evidence": [
+            {
+              "snippet": "The adtech team is tucking in acquired tech to ship in six to twelve months instead of longer timelines.",
+              "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+            }
+          ],
+          "id": "ITEM:CLAIM-04",
+          "signal_type": "product_strategy"
+        },
+        {
+          "claim_text": "Q4 results: revenue $726M; ads $690M; DAUq 121.4M; diluted EPS $1.24.",
+          "evidence": [
+            {
+              "snippet": "Q4 results cited revenue of $726M, ad revenue of $690M, DAUq 121.4M, and diluted EPS of $1.24.",
+              "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+            }
+          ],
+          "id": "ITEM:CLAIM-05",
+          "signal_type": "kpi"
+        },
+        {
+          "claim_text": "Prior capability acquisitions include Memorable AI, Spell, Spiketrap, Oterlu, and MeaningCloud.",
+          "evidence": [
+            {
+              "snippet": "The article noted prior capability acquisitions including Memorable AI, Spell, Spiketrap, Oterlu, and MeaningCloud.",
+              "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+            }
+          ],
+          "id": "ITEM:CLAIM-08",
+          "signal_type": "ma_intent"
+        }
+      ],
+      "kind": "techcrunch",
+      "url": "https://techcrunch.com/2026/02/06/reddit-says-its-looking-for-more-acquisitions-in-adtech-and-elsewhere/"
+    },
+    {
+      "claims": [
+        {
+          "claim_text": "Q4 results: revenue $726M; ads $690M; DAUq 121.4M; diluted EPS $1.24.",
+          "evidence": [
+            {
+              "snippet": "Reddit reported Q4 2025 revenue of $726M, ad revenue of $690M, DAUq 121.4M, and diluted EPS of $1.24.",
+              "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx"
+            }
+          ],
+          "id": "ITEM:CLAIM-05",
+          "signal_type": "kpi"
+        }
+      ],
+      "kind": "reddit_ir",
+      "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx"
+    },
+    {
+      "claims": [
+        {
+          "claim_text": "AI search monetization is positioned as a future opportunity by unifying traditional and AI search.",
+          "evidence": [
+            {
+              "snippet": "Reddit framed AI search monetization as a future opportunity that unifies traditional and AI search.",
+              "url": "https://techcrunch.com/2026/02/05/reddit-looks-to-ai-search-as-its-next-big-opportunity/"
+            }
+          ],
+          "id": "ITEM:CLAIM-06",
+          "signal_type": "product_strategy"
+        },
+        {
+          "claim_text": "AI search usage growth: search WAU 60M→80M and Reddit Answers WAU 1M→15M (Q1’25→Q4’25).",
+          "evidence": [
+            {
+              "snippet": "Search WAU grew from 60M to 80M, and Reddit Answers WAU grew from 1M to 15M between Q1’25 and Q4’25.",
+              "url": "https://techcrunch.com/2026/02/05/reddit-looks-to-ai-search-as-its-next-big-opportunity/"
+            }
+          ],
+          "id": "ITEM:CLAIM-07",
+          "signal_type": "kpi"
+        }
+      ],
+      "kind": "techcrunch",
+      "url": "https://techcrunch.com/2026/02/05/reddit-looks-to-ai-search-as-its-next-big-opportunity/"
+    }
+  ],
+  "title": "Reddit says it’s looking for more acquisitions in adtech and elsewhere"
+}

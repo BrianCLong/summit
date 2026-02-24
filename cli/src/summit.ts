@@ -8,7 +8,7 @@ import { initAgentScaffold } from './adk/init.js';
 import { validateManifestCommand } from './adk/validate.js';
 import { runAgent } from './adk/run.js';
 import { packAgent } from './adk/pack.js';
-import { registerEvalCommands } from './commands/eval.js';
+import { registerIntelCommands } from './commands/intel.js';
 
 function renderResult(result: DoctorCheckResult): void {
   const statusIcon =
@@ -146,6 +146,8 @@ async function main() {
       const archive = await packAgent(agentDir, options.output);
       console.log(`Packed archive: ${archive}`);
     });
+
+  registerIntelCommands(program);
 
   await program.parseAsync(process.argv);
 }

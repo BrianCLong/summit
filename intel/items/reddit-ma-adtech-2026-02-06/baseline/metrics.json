@@ -1,0 +1,11 @@
+{
+  "bytes_in": 5727,
+  "bytes_out": 11953,
+  "claim_count": 9,
+  "cpu_ms": 0,
+  "item_id": "reddit-ma-adtech-2026-02-06",
+  "measurement_mode": "deterministic_baseline",
+  "rss_kb": 0,
+  "schema_version": "0.1.0",
+  "signal_count": 9
+}

@@ -1,0 +1,37 @@
+name: intel-drift
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  pull_request:
+    paths:
+      - 'intel/items/**'
+      - 'intel/schema/**'
+      - 'cli/src/**'
+      - 'scripts/monitoring/**'
+      - '.github/workflows/intel-drift.yml'
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run drift check
+        run: |
+          python scripts/monitoring/reddit-ma-adtech-2026-02-06-drift.py
+
+      - name: Upload drift artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reddit-ma-adtech-2026-02-06-drift
+          path: |
+            artifacts/intel/reddit-ma-adtech-2026-02-06/drift.json
+            artifacts/intel/reddit-ma-adtech-2026-02-06/report.current.json
