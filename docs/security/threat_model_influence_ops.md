@@ -1,44 +1,37 @@
-# Threat Model: Influence Ops
+# Influence Ops Threat Model
 
-## MAESTRO Layers
+## MAESTRO Alignment
 
-- Foundation
-- Data
-- Agents
-- Tools
-- Infrastructure
-- Observability
-- Security
+- **MAESTRO Layers**: Foundation, Data, Agents, Tools, Infra, Observability, Security.
 
 ## Threats Considered
 
-- Goal manipulation via adversarial narrative injection
-- Prompt/tool abuse in collection and enrichment workflows
-- Attribution overreach without review
-- Privacy over-linkage during entity resolution
-- Cross-tenant data leakage
-- Model/artifact supply-chain tampering
+- Collection abuse or ToS violations.
+- Analyst overconfidence in attribution.
+- Privacy violations from entity resolution.
+- Model supply-chain poisoning.
+- Cross-tenant data leakage.
+- Prompt injection or tool abuse within orchestration.
 
 ## Mitigations
 
-- Policy-as-code gates for attribution and identity resolution exports
-- Mandatory provenance metadata on nodes, edges, and derived hypotheses
-- Default-safe feature flags for privacy-sensitive enrichers
-- Signed playbooks, models, and connector manifests with verifiable hashes
-- Tenant-scoped storage, compute, and cache boundaries
-- Audit hooks on every high-risk transition and export action
+- Policy-as-code gates for collection, attribution, and identity resolution.
+- Provenance stamps on every edge and derived claim.
+- HITL approvals required for attribution and identity resolution exports.
+- Signed artifacts (playbooks, rules, models) with SBOM tracking.
+- Deterministic evidence bundles per job; replay required in CI.
+- Tenant isolation enforced across storage, compute, and cache layers.
+- Observability hooks for anomaly detection on coordination and export events.
 
 ## Residual Risk
 
-- Collection legality and ToS interpretation may change by jurisdiction
-- Cross-lingual misclassification can inflate false positives
-- Human reviewer inconsistency can affect calibration quality
+- API-less collection remains blocked unless explicitly approved by legal and DPIA processes.
+- Entity resolution precision drift is monitored; exports are gated when drift thresholds exceed
+  policy caps.
 
-## Go/No-Go
+## Go/No-Go Criteria
 
-Go only when:
-
-- HITL enforcement tests pass
-- tenant isolation negative tests pass
-- privacy lint gates pass
-- determinism replay checks pass
+- Determinism replay must be hash-identical.
+- Privacy lints must pass with safe defaults.
+- Policy enforcement must block unreviewed attribution exports.
+- Tenant isolation suite must pass including negative tests.

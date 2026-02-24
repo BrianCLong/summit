@@ -1,28 +1,29 @@
 # Influence Ops Collection Constraints Matrix
 
-## Decision Rule
-
-Collection is allowed only when legal basis, platform terms, and tenant policy all pass. If any
-control fails, collection is blocked.
+This matrix records permitted collection methods by platform and jurisdiction. Any row marked
+"Deferred pending legal review" is blocked until legal, ToS, and DPIA approvals are recorded.
 
 ## Matrix
 
-| Surface Type | Default Posture | Allowed Methods | Required Controls | Block Conditions |
+| Platform Category | Collection Mode | Allowed Methods | Constraints | Status |
 | --- | --- | --- | --- | --- |
-| API-backed public content | Allow with controls | Official API | Tenant purpose binding, provenance stamp, retention class | Terms mismatch, missing purpose |
-| API-less web content | Deny by default | Governed exception only | Legal approval record, robots/ToS check, residency route, rate constraints | Missing exception, jurisdiction deny |
-| Ephemeral content | Deny by default | Governed exception only | Explicit case authorization, replay-safe capture policy, retention cap | Missing case authorization |
-| Private or access-controlled channels | Deny | None in standard mode | N/A | Any attempt |
-| User-uploaded evidence | Allow with controls | Signed upload path | Malware scan, provenance chain, tenant isolation | Unverified origin, failed scan |
+| API-supported social platforms | API-first | Official API, authenticated feeds, export archives | Respect rate limits, retention class, and audit logging | Allowed |
+| Ephemeral content platforms | API-first + capture | Short-lived capture with retention windows and provenance stamps | Explicit retention policy, region-bound storage | Allowed |
+| Messaging platforms | API-first | Official export tools and enterprise connectors | Tenant consent + export audit | Allowed |
+| API-less collection (public) | Governed exception | Headless capture, curated scraping, evidence snapshots | ToS review, DPIA, legal approval by jurisdiction | Deferred pending legal review |
+| API-less collection (restricted) | Prohibited | Any automated collection beyond explicit authorization | Policy block | Prohibited |
 
-## Governed Exceptions
+## Required Approvals
 
-A governed exception must include:
+- Legal review by jurisdiction.
+- Platform ToS review.
+- DPIA completion and record in governance ledger.
+- Approved "Governed Exception" entry with evidence ID.
 
-1. Approval owner and date
-2. Jurisdiction scope
-3. Platform-specific terms assessment
-4. Expiry date
-5. Rollback condition
+## Evidence Requirements
 
-If expiry is reached, collection auto-disables until renewed.
+Every collection run MUST emit:
+
+- `report.json` with source list and constraints applied.
+- `metrics.json` with coverage and rate-limit compliance.
+- `stamp.json` with Evidence ID and policy hash.

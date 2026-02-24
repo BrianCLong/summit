@@ -1,50 +1,55 @@
-# Runbook: Influence Ops Jobs
+# Influence Ops Jobs Runbook
 
 ## Scope
 
-Operational runbook for influence-ops pipelines: ingestion, clustering, attribution review, replay,
-and evidence generation.
+Operational runbook for Influence Ops Suite job execution, replay, and incident response.
 
 ## SLOs
 
-- Pipeline success rate: >= 99%
-- Determinism replay parity: 100% for protected jobs
-- Attribution HITL SLA: p95 under 60 minutes
-- Evidence bundle completeness: 100% for merged PRs affecting influence-ops paths
+- **Job determinism**: 100% hash-identical replays for fixed inputs.
+- **Evidence completeness**: 100% jobs emit `report.json`, `metrics.json`, `stamp.json`.
+- **Policy compliance**: 0 unapproved attribution exports.
 
 ## Standard Job Flow
 
-1. Collect and normalize inputs
-2. Enrich with narrative/media/entity signals
-3. Run graph analytics and scoring
-4. Pause at HITL checkpoints where required
-5. Generate output and evidence artifacts
+1. Collection (API-first; exceptions require governed approval).
+2. Normalization to canonical event schema.
+3. Enrichment (language ID, embeddings, temporal signals).
+4. Graph analytics (CIB detection, narratives, ER, media signals).
+5. HITL checkpoints (attribution, identity resolution).
+6. Export (STIX/MISP) with audit stamps.
+
+## Replay Procedure
+
+1. Re-run job with identical inputs and pinned versions.
+2. Compare `metrics.json` hash.
+3. If mismatch, block export and open incident.
 
 ## Backfill Procedure
 
-1. Pin input snapshot and dependency versions
-2. Execute backfill in tenant-scoped batches
-3. Run determinism replay check on sampled windows
-4. Compare metric drift against baseline thresholds
-5. Release results only after gate pass
+- Use tenant-scoped replay windows.
+- Enforce retention class and region-bound storage.
+- Emit evidence bundle per batch.
 
 ## Incident Response
 
-Trigger incident when:
+- Trigger on determinism failure, policy gate violation, or export anomaly.
+- Quarantine affected outputs and issue revocation event.
+- Capture evidence bundle and submit to governance review.
 
-- determinism replay fails
-- attribution export gate is bypassed or unavailable
-- tenant isolation alert fires
+## Residency Controls
 
-Immediate actions:
+- Enforce region-bound storage.
+- Block cross-region queries unless approved policy exists.
 
-1. Freeze affected export pipelines
-2. Open incident and attach latest evidence bundle
-3. Roll back to last known good ruleset/model hash
-4. Re-run deterministic replay before restore
+## Offline/Air-Gapped Deployments
 
-## Offline and Residency Controls
+- All eval datasets stored internally.
+- No external calls in CI.
+- Model artifacts fetched only via approved registries.
 
-- CI/evals must run without external network dependency
-- tenant data and embeddings must stay in assigned region
-- cross-region retrieval requires explicit policy approval
+## Rollback
+
+- Revert to last known-good evidence bundle.
+- Disable affected playbooks via policy-as-code gate.
+- Restore deterministic replay baseline.
