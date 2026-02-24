@@ -61,6 +61,10 @@ jobs:
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh
 
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
       - name: Check Lockfile Exists
         id: check-exists
         run: |

@@ -1,3 +1,5 @@
+import future.keywords
+
 package maestro.deploy
 
 import future.keywords

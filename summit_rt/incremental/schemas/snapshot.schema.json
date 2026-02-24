@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["snapshot_id", "source", "captured_at", "fingerprints", "schema_version"],
+  "properties": {
+    "snapshot_id": {"type": "string"},
+    "source": {"type": "object"},
+    "captured_at": {"type": "string"},
+    "fingerprints": {"type": "object"},
+    "schema_version": {"type": "string"}
+  }
+}

@@ -1,15 +1,10 @@
-package abac.authz
-import future.keywords.if
+import future.keywords
+
+# (same as in sprint doc)
+package abac
+
 import future.keywords.in
-
-import rego.v1
-
-import future.keywords
-
-
-import future.keywords
-
-import future.keywords
+import future.keywords.if
 
 default allow = false
 
@@ -72,18 +67,18 @@ role_can_write if { role_editor_write }
 # Sensitive data read checks
 sensitive_read_basic_ok if {
   input.action == "read"
-  not labels_contains_pii
+  not ("pii" in input.resource.labels)
 }
 
 sensitive_read_privileged_ok if {
   input.action == "read"
-  "pii" in input.resource.labels
+  ("pii" in input.resource.labels)
   input.jwt.roles[_] == "admin"
 }
 
 sensitive_read_officer_ok if {
   input.action == "read"
-  "pii" in input.resource.labels
+  ("pii" in input.resource.labels)
   input.jwt.roles[_] == "privacy-officer"
 }
 

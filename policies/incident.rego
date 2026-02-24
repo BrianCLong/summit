@@ -1,3 +1,5 @@
+import future.keywords
+
 package companyos.incident
 import future.keywords.if
 import future.keywords.in

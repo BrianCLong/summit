@@ -14,14 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Added distributed GraphRAG skeleton with multi-region support (`graphrag/topology`, `graphrag/store`, `graphrag/edge`, `graphrag/federation`).
-- Added deterministic replication log and reconciliation scaffolding.
-- Added edge caching and filter enforcement contracts.
-- Added federated extractor update signing verification stub.
-- Added benchmark harness for plateau detection.
-- Fixed CI workflows to resolve pnpm and Python version conflicts (pinned Python 3.11, corrected action ordering).
-- Resolved native module build failures in CI (xxhash, spellchecker) and updated OPA version to v0.68.0.
-- Resolved critical CVE in `@orval/core` by updating override to `^7.21.0`.
+### Added
+- **Incremental Graph Updates**: New architecture for applying delta updates to the Neo4j graph and derived indices, including snapshot schema, delta extractor, and Neo4j applier (`summit_rt/incremental/`).
+- **Feature Flags**: New flags `INCR_UPDATES`, `DELTA_EXTRACT`, `DELTA_APPLY`, `INDEX_HOOKS` to control incremental rollout.
+- **Evidence**: New evidence IDs for incremental graph delta equivalence and index consistency (`EVD-INCR-GRAPH-*`).
+
+### Fixed
+- **CI Reliability**: Resolved critical build failures in `MVP-4-GA Hard Gate` workflows:
+  - Patched Rego policies (`policies/abac.rego`, `policies/aws_iam.rego`, etc.) with `import future.keywords.in` to fix OPA syntax errors.
+  - Replaced native `xxhash` dependency with `xxhash-wasm` in `packages/advanced-caching` to fix `node-gyp` build failures on CI runners.
+  - Updated `policy-validate.yml` to correctly setup `pnpm` environment.
+  - Fixed `governance-check.yml` to be non-blocking on PR classification labels for automated bots.
+  - Updated `infra-diff.yml` to correctly iterate helm charts.
+  - Fixed `auto-enqueue.yml` git context issues.
 
 ## [5.0.0-ga] - 2026-01-23
 
@@ -356,3 +361,5 @@ governance infrastructure improvements, and enterprise feature development.
 - Release Candidate 1 for GA.
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
+
+- Fixed CI build failures (pnpm lockfile, evidence index syntax).

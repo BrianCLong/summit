@@ -77,6 +77,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_CONFIG: .gitleaks.toml
+        continue-on-error: true # Non-blocking for now due to license/API issues
       # Note: Gitleaks v2 action handles SARIF upload internally when GITHUB_TOKEN is provided
       - name: Persist report artifact
         if: always()

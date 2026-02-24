@@ -1,9 +1,13 @@
+import future.keywords
+
 # IntelGraph Budget Policy: OPA Rego rules for tenant caps + four-eyes approval
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
 
 package intelgraph.budget
 
-import future.keywords
+import future.keywords.if
+import future.keywords.if
+import future.keywords.in
 
 # Default deny - all budget requests must be explicitly allowed
 default allow := false
@@ -110,20 +114,7 @@ monthly_room[tenant] := room if {
     spent := monthly_spending[tenant]
     room := budget.monthly_usd_limit - spent
     room >= 0
-}
-
-# Default to 0 if not defined above
-monthly_room[tenant] := 0 if {
-    not monthly_room_positive[tenant]
-}
-
-monthly_room_positive[tenant] if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    spent := monthly_spending[tenant]
-    room := budget.monthly_usd_limit - spent
-    room >= 0
-}
+} else := 0
 
 # Emergency monthly room (120% of normal limit)
 emergency_monthly_room[tenant] := room if {
@@ -133,20 +124,7 @@ emergency_monthly_room[tenant] := room if {
     emergency_limit := budget.monthly_usd_limit * 1.2
     room := emergency_limit - spent
     room >= 0
-}
-
-emergency_monthly_room[tenant] := 0 if {
-    not emergency_monthly_room_positive[tenant]
-}
-
-emergency_monthly_room_positive[tenant] if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    spent := monthly_spending[tenant]
-    emergency_limit := budget.monthly_usd_limit * 1.2
-    room := emergency_limit - spent
-    room >= 0
-}
+} else := 0
 
 # Budget calculations - daily room remaining
 daily_room[tenant] := room if {
@@ -156,21 +134,7 @@ daily_room[tenant] := room if {
     spent := daily_spending[tenant]
     room := budget.daily_usd_limit - spent
     room >= 0
-}
-
-daily_room[tenant] := result if {
-    not daily_room_explicit[tenant]
-    result := monthly_room[tenant] / 30
-}
-
-daily_room_explicit[tenant] if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    budget.daily_usd_limit
-    spent := daily_spending[tenant]
-    room := budget.daily_usd_limit - spent
-    room >= 0
-}
+} else := monthly_room[tenant] / 30 # Fallback to 1/30th of monthly
 
 # Emergency daily room (150% of normal daily limit)
 emergency_daily_room[tenant] := room if {
@@ -181,22 +145,7 @@ emergency_daily_room[tenant] := room if {
     emergency_limit := budget.daily_usd_limit * 1.5
     room := emergency_limit - spent
     room >= 0
-}
-
-emergency_daily_room[tenant] := result if {
-    not emergency_daily_room_explicit[tenant]
-    result := emergency_monthly_room[tenant] / 30
-}
-
-emergency_daily_room_explicit[tenant] if {
-    some tenant
-    budget := data.tenant_budgets[tenant]
-    budget.daily_usd_limit
-    spent := daily_spending[tenant]
-    emergency_limit := budget.daily_usd_limit * 1.5
-    room := emergency_limit - spent
-    room >= 0
-}
+} else := emergency_monthly_room[tenant] / 30
 
 # Current month spending calculation
 monthly_spending[tenant] := total if {
@@ -209,20 +158,7 @@ monthly_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in monthly_entries])
-}
-
-# Default spending to 0 if no entries
-monthly_spending[tenant] := 0 if {
-    not monthly_spending_exists[tenant]
-}
-
-monthly_spending_exists[tenant] if {
-    some tenant
-    entries := data.spending_ledger[tenant]
-    current_month := time.format(time.now_ns(), "2006-01", "UTC")
-    some entry in entries
-    startswith(entry.created_at, current_month)
-}
+} else := 0
 
 # Current day spending calculation  
 daily_spending[tenant] := total if {
@@ -235,26 +171,14 @@ daily_spending[tenant] := total if {
         entry.status in ["estimated", "reconciled"]
     ]
     total := sum([entry.total_usd | some entry in daily_entries])
-}
-
-daily_spending[tenant] := 0 if {
-    not daily_spending_exists[tenant]
-}
-
-daily_spending_exists[tenant] if {
-    some tenant
-    entries := data.spending_ledger[tenant]
-    current_date := time.format(time.now_ns(), "2006-01-02", "UTC")
-    some entry in entries
-    startswith(entry.created_at, current_date)
-}
+} else := 0
 
 # Risk assessment for operations
 operation_risk_level := "high" if {
     input.est_usd > 10.0
-} else = "medium" if {
+} else := "medium" if {
     input.est_usd > 1.0
-} else = "low" { true }
+} else := "low"
 
 # Violation reasons for debugging
 violation_reasons contains reason if {

@@ -1,3 +1,5 @@
+import future.keywords
+
 package composer.policy_shadow
 import future.keywords.in
 
