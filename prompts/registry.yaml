@@ -1208,22 +1208,38 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: switchboard-router-observability
+  - id: serious-client-tone-pack
     version: v1
-    path: prompts/switchboard/switchboard-router-observability@v1.md
-    sha256: 08dc4dfcc36f7dcc58264211c51275b2268d426f028d2fc62521ee1ef56afd4f
-    description: Centralize Switchboard router observability defaults and error logging.
+    path: prompts/promptpacks/serious-client-tone-pack@v1.md
+    sha256: 6f9d3c448afe78bca234776d5a85176c7816cb21526875453131c4436aed62d2
+    description: Clean-room serious client tone prompt pack with deterministic evaluator and governance docs.
     scope:
       paths:
-        - october2025/companyos-switchboard/apps/web/src/switchboard/
-        - docs/roadmap/STATUS.json
-        - prompts/switchboard/switchboard-router-observability@v1.md
+        - summit/promptpacks/serious_client_tone/
+        - summit/cli/run_promptpack.py
+        - summit/flags.py
+        - prompts/packs/serious-client-tone/
+        - prompts/promptpacks/serious-client-tone-pack@v1.md
         - prompts/registry.yaml
-        - agents/examples/
+        - fixtures/serious_client_tone/
+        - tests/promptpacks/test_serious_client_tone.py
+        - tests/golden/serious_client_tone/
+        - docs/standards/forbes-serious-clients-prompts-2026-02-06.md
+        - docs/security/data-handling/forbes-serious-clients-prompts-2026-02-06.md
+        - docs/ops/runbooks/forbes-serious-clients-prompts-2026-02-06.md
+        - scripts/monitoring/forbes-serious-clients-prompts-2026-02-06-drift.py
+        - scripts/monitoring/fixtures/serious-client-tone-baseline.json
+        - .github/workflows/serious-client-tone-drift.yml
+        - docs/roadmap/STATUS.json
+        - packages/decision-ledger/decision_ledger.json
+        - agents/examples/SERIOUS_CLIENT_TONE_PACK_20260206.json
       domains:
-        - switchboard
-        - observability
+        - promptpack
+        - eval
         - governance
+        - documentation
+        - ci
+        - monitoring
     verification:
       tiers_required:
         - C

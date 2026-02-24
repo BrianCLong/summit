@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added GDELT GKG 23rd-order delivery plan entry and refreshed repo validation checklist.",
+  "revision_note": "Added serious client tone prompt pack initiative and refreshed repo validation checklist.",
   "initiatives": [
     {
       "id": "sprint-plus1-incident-hub-runbook-tenant-console",
@@ -98,24 +98,6 @@
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
-      "id": "switchboard-openclaw-wedge-strategy",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ga-preflight-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
-    },
-    {
-      "id": "summit-pr-stack-sequencer-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
-    },
-    {
       "id": "gdelt-gkg-23rd-order-delivery",
       "status": "in_progress",
       "owner": "codex",
@@ -126,6 +108,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding. Added docs/promptspec/FOUNDATION_LANE1.md and minimal example in promptspec/specs/minimal_example_v0.json."
+    },
+    {
+      "id": "forbes-serious-client-tone-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Clean-room serious client tone prompt pack, deterministic evaluator, fixtures, governance docs, and drift monitor."
     },
     {
       "id": "E",
