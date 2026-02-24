@@ -10,7 +10,7 @@ When a Postgres incident hits, use the DB Observability v2 tools to capture the 
 
 ## 2) Capture a snapshot (API)
 
-```
+```text
 POST /api/admin/db-observability/snapshot
 Authorization: Bearer <admin token>
 
@@ -20,9 +20,11 @@ Authorization: Bearer <admin token>
     "parameters": { "limit": 10 }
   }
 }
-```
+
+```text
 
 Response highlights:
+
 - `data.locks`: waiting/blocking PIDs, lock modes, relations, and wait durations.
 - `data.slowQueries`: source (`pg_stat_statements` when available, otherwise the app slow log) and top statements.
 - `data.explain`: `EXPLAIN (FORMAT JSON)` for the whitelisted template you requested.
@@ -30,11 +32,13 @@ Response highlights:
 
 ## 3) Capture a snapshot (CLI)
 
-```
+```text
 cd server && pnpm db:observability -- --explain=activeSessions --params=limit=10
-```
+
+```text
 
 What you get:
+
 - A short textual summary for incident comms.
 - The full JSON payload for timelines or SIEM ingestion.
 - `--list` shows allowed explain templates; arbitrary SQL is blocked.

@@ -6,10 +6,9 @@
 2) GitHub API (if allowed):
 - List branch protections and required checks.
 
-## Known check names (Verify these)
-- CI Core (Primary Gate) / CI Core Gate ✅
-- CI / Unit Tests
-- GA Gate
+## Known check names (Verified)
+- CI Core Gate ✅
+- gate
 - Release Readiness Gate
 - SOC Controls
 - Unit Tests & Coverage

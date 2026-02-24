@@ -729,3 +729,16 @@ Every autonomous agent operating in this environment must possess a signed **Age
 - **Pre-Flight**: Orchestrator verifies signature and expiry.
 - **In-Flight**: Budget and Tool usage checked against `authority` and `gates`.
 - **Violation**: Immediate `KILL` signal sent to runtime.
+
+## Agent Roles & Permissions
+
+**Permissions**
+- Agents must operate with least-privilege.
+- Default to DENY for all operations not explicitly allowed.
+
+**Stop Conditions**
+- Stop on any unexpected failure or security alert.
+- Do not retry indefinitely.
+
+**Escalation**
+- Escalate to human operator for any blocking issues.

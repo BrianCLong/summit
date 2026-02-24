@@ -27,7 +27,7 @@
         "additionalProperties": true
       }
     },
-    "mappings": {
+    "map": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
