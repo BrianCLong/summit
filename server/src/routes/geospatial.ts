@@ -44,9 +44,9 @@ router.post('/locations', async (req, res, next) => {
 // GET /nearby - Find nearby locations
 router.get('/nearby', async (req, res, next) => {
   try {
-    const lat = parseFloat(req.query.lat as string);
-    const lon = parseFloat(req.query.lon as string);
-    const radius = parseFloat(req.query.radius as string) || 1000; // default 1km
+    const lat = parseFloat(((req.query.lat as string) as string) as string);
+    const lon = parseFloat(((req.query.lon as string) as string) as string);
+    const radius = parseFloat(((req.query.radius as string) as string) as string) || 1000; // default 1km
 
     if (isNaN(lat) || isNaN(lon)) {
       return res.status(400).json({ error: 'Invalid latitude or longitude' });
@@ -73,8 +73,8 @@ router.post('/routes', async (req, res, next) => {
 // GET /geofence/check - Check if point is in any geofence
 router.get('/geofence/check', async (req, res, next) => {
   try {
-    const lat = parseFloat(req.query.lat as string);
-    const lon = parseFloat(req.query.lon as string);
+    const lat = parseFloat(((req.query.lat as string) as string) as string);
+    const lon = parseFloat(((req.query.lon as string) as string) as string);
 
     if (isNaN(lat) || isNaN(lon)) {
       return res.status(400).json({ error: 'Invalid latitude or longitude' });
@@ -101,7 +101,7 @@ router.post('/optimize', async (req, res, next) => {
 // GET /clusters - Get location clusters
 router.get('/clusters', async (req, res, next) => {
   try {
-    const zoom = parseInt(req.query.zoom as string) || 10;
+    const zoom = parseInt(((req.query.zoom as string) as string) as string) || 10;
     const clusters = await geoService.clusterLocations(zoom);
     res.json(clusters);
   } catch (error: any) {
