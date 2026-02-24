@@ -58,7 +58,7 @@ export class IngestService {
   constructor(
     private pg: Pool,
     private neo4j: Driver
-  ) {}
+  ) { }
 
   private sanitizeCypherIdentifier(identifier: string, fallback: string): string {
     const sanitized = identifier.replace(/[^A-Za-z0-9_]/g, "_");
@@ -583,11 +583,17 @@ export class IngestService {
             break;
           }
 
-          const rows: any[] = [];
+          // Process entity batch using UNWIND for performance
+          // Group by kind to allow dynamic labeling with backticks
+          const entitiesByKind = new Map<string, any[]>();
           const fallbackUpdatedAt = new Date().toISOString();
 
           for (const entity of entities) {
-            rows.push({
+            const kind = entity.kind;
+            if (!entitiesByKind.has(kind)) {
+              entitiesByKind.set(kind, []);
+            }
+            entitiesByKind.get(kind)!.push({
               id: entity.id,
               tenantId: entity.tenant_id,
               nodeType: this.deriveEntityNodeType(entity.kind),
@@ -602,18 +608,29 @@ export class IngestService {
             });
           }
 
-          await this.executeNeo4jWrite(
-            session,
-            `UNWIND $rows AS row
-             MERGE (n:Entity {id: row.id, tenantId: row.tenantId})
-               ON CREATE SET n.createdAt = row.properties.createdAt
-             SET n += row.properties,
-                 n.updatedAt = row.properties.updatedAt,
-                 n.idempotency_token = row.idempotencyToken
-             FOREACH (_ IN CASE WHEN row.nodeType = 'Indicator' THEN [1] ELSE [] END | SET n:Indicator)
-             FOREACH (_ IN CASE WHEN row.nodeType = 'Source' THEN [1] ELSE [] END | SET n:Source)`,
-            { rows }
-          );
+          for (const [kind, batch] of entitiesByKind.entries()) {
+            // Validate kind to prevent Cypher injection
+            if (!/^[A-Za-z0-9_]+$/.test(kind)) {
+              ingestLogger.error({ kind }, 'Invalid entity kind for Neo4j sync');
+              continue;
+            }
+            await this.executeNeo4jWrite(
+              session,
+              `UNWIND $batch AS item
+               MERGE (n:Entity {id: item.id, tenantId: item.tenantId})
+                 ON CREATE SET n.createdAt = item.properties.createdAt
+               SET n += item.properties,
+                   n.updatedAt = item.properties.updatedAt,
+                   n.idempotency_token = item.idempotencyToken,
+                   n:\`${kind}\`
+               FOREACH (_ IN CASE WHEN item.nodeType = 'Indicator' THEN [1] ELSE [] END | SET n:Indicator)
+               FOREACH (_ IN CASE WHEN item.nodeType = 'Source' THEN [1] ELSE [] END | SET n:Source)`,
+              { batch },
+            );
+          }
+          }
+
+
 
           offset += entities.length;
           if (entities.length < BATCH_SIZE) hasMore = false;
@@ -640,8 +657,10 @@ export class IngestService {
             const relationshipType =
               this.deriveRelationshipType(rel.relationship_type) ||
               this.sanitizeCypherIdentifier(rel.relationship_type || "RELATED_TO", "RELATED_TO");
-            const rows = relationshipsByType.get(relationshipType) || [];
-            rows.push({
+            if (!relationshipsByType.has(relationshipType)) {
+              relationshipsByType.set(relationshipType, []);
+            }
+            relationshipsByType.get(relationshipType)!.push({
               id: rel.id,
               fromId: rel.from_entity_id,
               toId: rel.to_entity_id,
@@ -653,10 +672,14 @@ export class IngestService {
               properties: this.parseJsonObject(rel.props),
               idempotencyToken: this.buildRelationshipIdempotencyToken(rel.tenant_id, rel.id),
             });
-            relationshipsByType.set(relationshipType, rows);
           }
 
           for (const [relationshipType, rows] of relationshipsByType.entries()) {
+            // Validate relationship type to prevent Cypher injection
+            if (!/^[A-Za-z0-9_]+$/.test(relationshipType)) {
+              ingestLogger.error({ type: relationshipType }, 'Invalid relationship type for Neo4j sync');
+              continue;
+            }
             await this.executeNeo4jWrite(
               session,
               `UNWIND $rows AS row
@@ -688,6 +711,8 @@ export class IngestService {
                    r.idempotency_token = row.idempotencyToken,
                    r.updatedAt = datetime()`,
               { rows }
+            );
+          }
             );
           }
 
