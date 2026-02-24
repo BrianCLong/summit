@@ -95,7 +95,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7
-      # Note: pnpm version is read from package.json "packageManager" field
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
       - name: Setup Node
@@ -103,5 +102,5 @@ jobs:
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
-      - name: Check Drift
+      # Note: pnpm version is read from package.json "packageManager" field
         run: ./scripts/check-lockfile-drift.sh

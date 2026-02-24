@@ -12,6 +12,8 @@ import future.keywords.contains
 
 import rego.v1
 
+import future.keywords
+
 import future.keywords.if
 import future.keywords.in
 
