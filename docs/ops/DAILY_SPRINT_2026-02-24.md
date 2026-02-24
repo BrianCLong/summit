@@ -50,7 +50,7 @@ Status: Completed.
 - Investigated: #18617 ([fix: clean up Jest configs for ESM compatibility](https://github.com/BrianCLong/summit/pull/18617)).
 - Investigated: #18621 ([CI: enforce golden path](https://github.com/BrianCLong/summit/pull/18621)).
 - Investigated issue: #18597 ([CI: Golden Path Supply Chain workflow fails before jobs start](https://github.com/BrianCLong/summit/issues/18597)).
-- New/updated branch for this run: `chore/daily-sprint-2026-02-24-4` (PR creation attempted in this run).
+- Created: #18627 ([fix(ci): unblock golden-path supply-chain startup failure](https://github.com/BrianCLong/summit/pull/18627)).
 
 ### Commands Run
 - `gh pr list --repo BrianCLong/summit --limit 20 --state open --json number,title,author,updatedAt,labels,url,headRefName`
@@ -60,6 +60,9 @@ Status: Completed.
 - `gh issue view 18597 --repo BrianCLong/summit --json ...`
 - `node -e "JSON.parse(require('fs').readFileSync('docs/roadmap/STATUS.json','utf8'));"`
 - `git diff -- .github/workflows/_reusable-slsa-build.yml .github/workflows/workflow-validity.yml docs/roadmap/STATUS.json docs/ops/DAILY_SPRINT_2026-02-24.md`
+- `git push -u origin chore/daily-sprint-2026-02-24-4`
+- `gh pr create --repo BrianCLong/summit --base main --head chore/daily-sprint-2026-02-24-4 --title ... --body-file /tmp/pr_daily_sprint_2026-02-24_run4.md`
+- `gh pr edit 18627 --repo BrianCLong/summit --add-label codex --add-label codex-automation --add-label patch --add-label ci`
 
 ### Blockers and Follow-ups for Next Sprint
 - Monitor CI rerun results for `Golden Path Supply Chain` after this patch merges.
