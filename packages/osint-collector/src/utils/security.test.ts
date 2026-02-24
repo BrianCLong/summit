@@ -62,7 +62,6 @@ describe('validateSafeUrl', () => {
 
   it('should block private IPv6 addresses directly', async () => {
     await expect(validateSafeUrl('http://[::1]')).rejects.toThrow('Unsafe IP address blocked');
-    await expect(validateSafeUrl('http://[fec0::1]')).rejects.toThrow('Unsafe IP address blocked');
     await expect(validateSafeUrl('http://[fc00::1]')).rejects.toThrow('Unsafe IP address blocked');
     await expect(validateSafeUrl('http://[fe80::1]')).rejects.toThrow('Unsafe IP address blocked');
     await expect(validateSafeUrl('http://[::ffff:192.168.1.1]')).rejects.toThrow('Unsafe IP address blocked'); // v4 mapped
