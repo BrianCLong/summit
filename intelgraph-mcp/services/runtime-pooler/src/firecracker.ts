@@ -2,7 +2,7 @@ import { join } from 'path';
 import { randomUUID } from 'crypto';
 import { spawn } from 'child_process';
 import { mkdir } from 'fs/promises';
-import { execa } from 'execa';
+import execa from 'execa';
 import { parseToolClass } from './validation';
 
 export type VmSpec = {

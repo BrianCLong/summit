@@ -601,7 +601,7 @@ jobs:
       - name: Run Sigstore Verification
         uses: ./.github/actions/sigstore-verify
         with:
-          cosign_version: "3.0.4"
+          cosign_version: "3.0.5"
           artifact: "artifact.bin"
           bundle: "bundle.sigstore.json"
           evidence_id: "EVD-SIGSTORE-BUNDLEFIRST-CI-001"

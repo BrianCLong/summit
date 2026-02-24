@@ -9,5 +9,5 @@ spec:
     spec:
       containers:
         - name: marquez
-          image: marquezproject/marquez:latest
+          image: marquezproject/marquez:0.51.1
           ports: [{ containerPort: 5000 }]

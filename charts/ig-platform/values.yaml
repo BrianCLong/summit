@@ -524,8 +524,8 @@ minio:
 openlineage:
   enabled: true
   image:
-    repository: openlineage/marquez
-    tag: 'latest'
+    repository: marquezproject/marquez
+    tag: '0.51.1'
   service:
     port: 5000
   resources:

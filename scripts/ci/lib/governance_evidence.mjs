@@ -108,6 +108,31 @@ export function buildDeterminismEvidence({ scannedPaths, violations, falsePositi
   return evidence;
 }
 
+export function buildWorkflowActionVersionEvidence({ scannedRoots, violations, sha }) {
+  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
+  const evidence = {
+    schema_version: SCHEMA_VERSION,
+    gate: 'workflow-action-versions',
+    sha,
+    verdict,
+    summary: {
+      scanned_roots_count: scannedRoots.length,
+      violation_count: violations.length,
+    },
+    details: {
+      scanned_roots: scannedRoots,
+      violations: violations.map(v => ({
+        file: v.file,
+        line: v.line,
+        action: v.action,
+        version: v.version,
+      })),
+    },
+  };
+  evidence.content_hash = contentHash(evidence);
+  return evidence;
+}
+
 export function buildBranchProtectionEvidence({ branch, state, expectedChecks, actualChecks, driftDetails, sha }) {
   const stateToVerdict = {
     [VerificationState.VERIFIED_MATCH]: 'PASS',

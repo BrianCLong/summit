@@ -21,6 +21,12 @@
       "notes": "Added CI preflight for OpenLineage/OpenMetadata lockstep checks and pinned OpenLineage Python dependencies."
     },
     {
+      "id": "summit-sync-logical-decoding-mvp",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Logical decoding to Neo4j upsert path with provenance events, reconciliation repair loop, and harness-backed CI smoke."
+    },
+    {
       "id": "B",
       "name": "Federation + Ingestion Mesh",
       "epics": [

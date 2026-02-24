@@ -46,10 +46,73 @@ export interface IngestResult {
 }
 
 export class IngestService {
+  private static readonly NEO4J_SYNC_BATCH_SIZE = 1000;
+
   constructor(
     private pg: Pool,
     private neo4j: Driver,
   ) {}
+
+  private sanitizeCypherIdentifier(identifier: string, fallback: string): string {
+    const sanitized = identifier.replace(/[^A-Za-z0-9_]/g, '_');
+    if (!sanitized || !/^[A-Za-z_]/.test(sanitized)) {
+      return fallback;
+    }
+    return sanitized;
+  }
+
+  private parseJsonObject(value: unknown): Record<string, unknown> {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+
+    if (typeof value !== 'string' || value.trim() === '') {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        return parsed as Record<string, unknown>;
+      }
+      return {};
+    } catch {
+      return {};
+    }
+  }
+
+  private toIsoString(value: unknown, fallback: string): string {
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+    if (typeof value === 'string') {
+      const parsed = new Date(value);
+      if (!Number.isNaN(parsed.getTime())) {
+        return parsed.toISOString();
+      }
+    }
+    return fallback;
+  }
+
+  private buildEntityIdempotencyToken(tenantId: string, entityId: string): string {
+    return `${tenantId}:entity:${entityId}`;
+  }
+
+  private buildRelationshipIdempotencyToken(tenantId: string, relationshipId: string): string {
+    return `${tenantId}:relationship:${relationshipId}`;
+  }
+
+  private async executeNeo4jWrite(
+    session: any,
+    cypher: string,
+    params: Record<string, unknown>,
+  ): Promise<void> {
+    if (typeof session.executeWrite === 'function') {
+      await session.executeWrite((tx: any) => tx.run(cypher, params));
+      return;
+    }
+    await session.writeTransaction((tx: any) => tx.run(cypher, params));
+  }
 
   /**
    * Ingest entities and relationships with full provenance tracking
@@ -488,7 +551,7 @@ export class IngestService {
    */
   private async syncToNeo4j(tenantId: string, provenanceId: string): Promise<void> {
     const session = this.neo4j.session();
-    const BATCH_SIZE = 1000;
+    const BATCH_SIZE = IngestService.NEO4J_SYNC_BATCH_SIZE;
 
     try {
       const client = await this.pg.connect();
@@ -508,24 +571,38 @@ export class IngestService {
             break;
           }
 
-          // Process entity batch
-          // We could use UNWIND in Cypher for better performance, but keeping logic similar for now
-          // to minimize risk, just fixing the memory issue.
+          const entitiesByKind = new Map<string, any[]>();
+          const fallbackUpdatedAt = new Date().toISOString();
+
           for (const entity of entities) {
-             await session.run(
-              `MERGE (n {id: $id, tenantId: $tenantId})
-               SET n += $properties, n:${entity.kind}
-               RETURN n`,
-              {
-                id: entity.id,
-                tenantId: entity.tenant_id,
-                properties: {
-                  ...JSON.parse(entity.props),
-                  labels: entity.labels,
-                  createdAt: entity.created_at.toISOString(),
-                  updatedAt: entity.updated_at.toISOString(),
-                },
+            const safeKind = this.sanitizeCypherIdentifier(entity.kind || 'Entity', 'Entity');
+            const rows = entitiesByKind.get(safeKind) || [];
+            rows.push({
+              id: entity.id,
+              tenantId: entity.tenant_id,
+              idempotencyToken: this.buildEntityIdempotencyToken(entity.tenant_id, entity.id),
+              properties: {
+                ...this.parseJsonObject(entity.props),
+                labels: entity.labels,
+                kind: entity.kind,
+                createdAt: this.toIsoString(entity.created_at, fallbackUpdatedAt),
+                updatedAt: this.toIsoString(entity.updated_at, fallbackUpdatedAt),
               },
+            });
+            entitiesByKind.set(safeKind, rows);
+          }
+
+          for (const [safeKind, rows] of entitiesByKind.entries()) {
+            await this.executeNeo4jWrite(
+              session,
+              `UNWIND $rows AS row
+               MERGE (n:Entity {id: row.id, tenantId: row.tenantId})
+                 ON CREATE SET n.createdAt = row.properties.createdAt
+               SET n += row.properties,
+                   n.updatedAt = row.properties.updatedAt,
+                   n.idempotency_token = row.idempotencyToken
+               SET n:\`${safeKind}\``,
+              { rows },
             );
           }
 
@@ -547,25 +624,65 @@ export class IngestService {
             break;
           }
 
+          const relationshipsByType = new Map<string, any[]>();
+          const fallbackTimestamp = new Date().toISOString();
+
           for (const rel of relationships) {
-            await session.run(
-              `MATCH (from {id: $fromId, tenantId: $tenantId})
-               MATCH (to {id: $toId, tenantId: $tenantId})
-               MERGE (from)-[r:${rel.relationship_type}]->(to)
-               SET r += $properties
-               RETURN r`,
-              {
-                fromId: rel.from_entity_id,
-                toId: rel.to_entity_id,
-                tenantId: rel.tenant_id,
-                properties: {
-                  ...JSON.parse(rel.props),
-                  confidence: rel.confidence,
-                  source: rel.source,
-                  firstSeen: rel.first_seen.toISOString(),
-                  lastSeen: rel.last_seen ? rel.last_seen.toISOString() : new Date().toISOString()
-                },
-              },
+            const safeRelationshipType = this.sanitizeCypherIdentifier(
+              rel.relationship_type || 'RELATED_TO',
+              'RELATED_TO',
+            );
+            const rows = relationshipsByType.get(safeRelationshipType) || [];
+            rows.push({
+              id: rel.id,
+              fromId: rel.from_entity_id,
+              toId: rel.to_entity_id,
+              tenantId: rel.tenant_id,
+              confidence: rel.confidence,
+              source: rel.source,
+              firstSeen: this.toIsoString(rel.first_seen, fallbackTimestamp),
+              lastSeen: this.toIsoString(rel.last_seen, fallbackTimestamp),
+              properties: this.parseJsonObject(rel.props),
+              idempotencyToken: this.buildRelationshipIdempotencyToken(
+                rel.tenant_id,
+                rel.id,
+              ),
+            });
+            relationshipsByType.set(safeRelationshipType, rows);
+          }
+
+          for (const [safeRelationshipType, rows] of relationshipsByType.entries()) {
+            await this.executeNeo4jWrite(
+              session,
+              `UNWIND $rows AS row
+               MATCH (from:Entity {id: row.fromId, tenantId: row.tenantId})
+               MATCH (to:Entity {id: row.toId, tenantId: row.tenantId})
+               MERGE (s:IngestRelationshipIdempotency {idempotency_token: row.idempotencyToken})
+                 ON CREATE SET s.relationshipId = row.id, s.createdAt = datetime()
+               WITH row, from, to, s
+               FOREACH (_ IN CASE WHEN coalesce(s.applied, false) THEN [] ELSE [1] END |
+                 MERGE (from)-[r:\`${safeRelationshipType}\` {id: row.id, tenantId: row.tenantId}]->(to)
+                   ON CREATE SET r.createdAt = datetime()
+                 SET r += row.properties,
+                     r.confidence = row.confidence,
+                     r.source = row.source,
+                     r.firstSeen = row.firstSeen,
+                     r.lastSeen = row.lastSeen,
+                     r.idempotency_token = row.idempotencyToken,
+                     r.updatedAt = datetime(),
+                     s.applied = true,
+                     s.updatedAt = datetime()
+               )
+               WITH row, from, to
+               MATCH (from)-[r:\`${safeRelationshipType}\` {id: row.id, tenantId: row.tenantId}]->(to)
+               SET r += row.properties,
+                   r.confidence = row.confidence,
+                   r.source = row.source,
+                   r.firstSeen = row.firstSeen,
+                   r.lastSeen = row.lastSeen,
+                   r.idempotency_token = row.idempotencyToken,
+                   r.updatedAt = datetime()`,
+              { rows },
             );
           }
 

@@ -14,6 +14,8 @@ dependencies = [
     "opentelemetry-exporter-otlp>=1.20.0",
     "opentelemetry-instrumentation-fastapi",
     "opentelemetry-instrumentation-logging",
+    "neo4j>=5.14",
+    "psycopg[binary]>=3.1",
     "prometheus-fastapi-instrumentator",
     "python-json-logger",
     "structlog",
@@ -61,3 +63,6 @@ extend-exclude = '''
   tools/federation_mesh\.py
 )
 '''
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

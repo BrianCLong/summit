@@ -121,6 +121,7 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
@@ -197,6 +198,7 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
@@ -271,6 +273,7 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
