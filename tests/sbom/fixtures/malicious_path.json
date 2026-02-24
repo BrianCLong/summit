@@ -1,0 +1,20 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "components": [
+    {
+      "name": "malicious-lib",
+      "version": "1.0.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Custom",
+            "text": {
+              "content": "Look at my file: ../../../etc/passwd"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

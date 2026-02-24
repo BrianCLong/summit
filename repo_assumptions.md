@@ -1,11 +1,18 @@
-# Repository Assumptions & Verification
+# Repository Assumptions
 
 ## Verified
-*   **Workflows:** `.github/workflows/sbom-scan.yml` exists and uses `anchore/sbom-action` (Syft).
-*   **Melange Usage:** `melange` is NOT explicitly referenced in the codebase (based on grep).
-*   **Directory Structure:** `.github/scripts/` exists. `docs/` structure exists.
+- **Workflows:**
+  - `.github/workflows/sbom-scan.yml` exists and uses `anchore/sbom-action`.
+  - `.github/workflows/release-integrity.yml` exists and uses a mock SBOM generator.
+- **Tools:**
+  - `anchore/sbom-action` is used.
+  - `scripts/compliance/generate_sbom.ts` generates a mock SBOM.
 
-## Assumptions
-*   **Proactive Hardening:** We are implementing Melange gates (version, config lint) proactively.
-*   **Workflow Target:** We will integrate these gates into `.github/workflows/sbom-scan.yml` as optional or conditional checks, or enforcement if Melange is introduced.
-*   **Toolchain:** The version gate script assumes `melange` binary might be present in the runner; if missing, it should handle that (pass or skip, as no tool means no vulnerability).
+## Assumed
+- **Melange:** No explicit usage of `melange` or `apko` found in root, `.github/workflows`, or `docker`.
+- **Cosign:** Assumed available in GitHub Actions runner or installable via `sigstore/cosign-installer`.
+
+## Policy
+- **Refuse Melange:** Any future introduction of `melange` must be gated by version `>= 0.40.3`.
+- **Enforce Pinning:** All actions must be pinned to SHA.
+
