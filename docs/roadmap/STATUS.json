@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-24T03:45:27Z",
-  "revision_note": "Daily sprint continuation evidence refresh with live issue + CI blocker triage.",
+  "last_updated": "2026-02-24T04:04:12Z",
+  "revision_note": "Daily sprint continuation: isolated CI Core pnpm blocker and filed issue #18631 with evidence.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",

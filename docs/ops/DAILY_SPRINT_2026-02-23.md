@@ -103,3 +103,32 @@ Governed Exception: Issue scan deferred pending GitHub API connectivity.
 - Opened PR: https://github.com/BrianCLong/summit/pull/18629
 - Posted validation comment: https://github.com/BrianCLong/summit/pull/18629#issuecomment-3948760768
 - Applied labels: `codex`, `codex-automation`, `patch`, `release:patch`, `type/chore`, `risk:low`, `area:docs`.
+
+## Continuation Run (2026-02-24T04:04:12Z UTC)
+
+### Blocker Isolation Progress
+- Confirmed deterministic CI Core failure on PR #18621: `pnpm` missing in `Lint & Typecheck` job.
+  - Run: https://github.com/BrianCLong/summit/actions/runs/22332632433
+  - Job: https://github.com/BrianCLong/summit/actions/runs/22332632433/job/64618556491
+- Confirmed Workflow Drift Guard failure is policy-driven (`high` drift -> non-zero exit).
+  - Run: https://github.com/BrianCLong/summit/actions/runs/22332632575
+- Confirmed `ci-pr` Governance failure at docs governance verifier.
+  - Run: https://github.com/BrianCLong/summit/actions/runs/22332632445
+
+### Actions Taken
+- Opened blocker issue: https://github.com/BrianCLong/summit/issues/18631
+- Posted triage evidence on PR #18621: https://github.com/BrianCLong/summit/pull/18621#issuecomment-3948840215
+
+### Commands Executed
+- `gh pr checks 18621 --watch=false`
+- `gh run list --limit 20 --json ... --branch chore/ci-golden-path-18196438679557729424`
+- `gh run view 22332632575 --log-failed | tail -n 120`
+- `gh run view 22332632445 --log-failed | tail -n 120`
+- `gh run view 22332632433 --log-failed | tail -n 120`
+- `gh issue create --title "CI Core gate blocked: pnpm missing in Lint & Typecheck job" ...`
+- `gh pr comment 18621 --body-file /tmp/pr18621_triage_comment.md`
+
+### Status
+- Completed: High-signal blocker isolation + escalation with links.
+- In progress: Remediation implementation for issue #18631 (workflow patch path).
+- Blocked: GA merge readiness until CI Core/gov gates are patched and rerun green.
