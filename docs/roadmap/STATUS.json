@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:23:43Z",
-  "revision_note": "Added merge train sequencing report and governed-exception note for gh metadata rehydration.",
+  "last_updated": "2026-02-08T12:30:00Z",
+  "revision_note": "Published governed agent integration reference architecture and recorded it in the roadmap.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -260,6 +260,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "summit-architecture-brief",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "governed-agent-integration-reference",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published governed agent integration reference architecture with endpoints, events, policy hooks, and audit receipts."
     }
   ],
   "summary": {
