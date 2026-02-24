@@ -36,6 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create .env file
+        run: cp .env.example .env || touch .env
+
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
@@ -43,6 +46,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: cp .env.example .env || touch .env
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -62,6 +68,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: cp .env.example .env || touch .env
 
       - name: Build Gateway Docker Image
         run: docker compose -f docker-compose.dev.yaml build gateway
