@@ -36,6 +36,7 @@
 **Learning:** In projects with a mix of JS/JSX and TS/TSX, Tailwind configurations may only target TS/TSX files. This causes utility classes in JS/JSX files to be purged, breaking accessibility features (like `sr-only`) or layout styles.
 **Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.
 
-## 2026-02-07 - Accessibility for Loading States
-**Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
-**Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
+## 2025-10-30 - Keyboard Accessibility for Custom Dropzones
+
+**Learning:** Interactive elements implemented with generic `div` tags (using `role="button"` and `tabIndex={0}`) often forget to implement keyboard event handlers, creating barriers for non-mouse users.
+**Action:** Always pair `onClick` with `onKeyDown` (handling 'Enter' and 'Space') for any custom interactive element that isn't a native `<button>` or `<a>`.
