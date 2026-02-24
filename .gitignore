@@ -298,6 +298,9 @@ tmp-audit/
 
 # Test reports
 reports/
+!reports/
+!reports/a11y-keyboard/
+!reports/a11y-keyboard/README.md
 bug-bash-results/
 *-report.json
 lint_output.txt

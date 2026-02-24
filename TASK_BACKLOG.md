@@ -11,6 +11,7 @@ Use this backlog to steer agents. Reorder rows to reprioritize. Keep the list sh
 | TB-03 | Refresh human steering guide       | Medium   | done   | Codex       | Owner       | false      | Created `docs/HUMAN_STEERING.md`.                        |
 | TB-04 | Restricted-path coverage audit     | Medium   | ready  | Jules       | Owner       | true       | Human-only check of secrets/security folders.            |
 | TB-05 | Prime Brain prompt alignment sweep | Low      | done   | Jules       | Owner       | false      | Normalized `.agentic-prompts/` (archived stale prompts). |
+| TB-06 | Switchboard MCP evidence lane 1    | High     | in-progress | Codex   | Owner       | false      | Lane 1 evidence schemas + determinism scaffolding.       |
 
 ## How to use this backlog
 

@@ -1,0 +1,11 @@
+{
+  "evidenceId": "EVD-SWITCHBOARD-MCP-REGISTRY-001",
+  "summary": "Registry fixture demonstrating deterministic evidence layout.",
+  "findings": [
+    "Registry entries stored without secrets.",
+    "Capabilities declared explicitly."
+  ],
+  "inputs": [
+    "tests/fixtures/evidence/switchboard/EVD-SWITCHBOARD-MCP-REGISTRY-001/index.json"
+  ]
+}

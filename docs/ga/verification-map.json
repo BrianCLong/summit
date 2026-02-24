@@ -52,22 +52,6 @@
     "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
   },
   {
-    "feature": "Deterministic Evidence System",
-    "tier": "B",
-    "artifact": "docs/ga/evidence-system.md",
-    "ciStatus": "wired",
-    "evidence": [
-      "docs/ga/evidence-system.md",
-      ".github/scripts/verify-evidence.mjs",
-      "evidence/runs/koreai-agentic/index.json"
-    ],
-    "keywords": [
-      "evidence",
-      "determinism"
-    ],
-    "notes": "Evidence bundles must keep timestamps isolated to stamp.json and map evidence IDs in evidence/index.json."
-  },
-  {
     "feature": "GA Gate Artifact Closure",
     "tier": "C",
     "artifact": "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
@@ -116,14 +100,14 @@
     "artifact": "scripts/ci/verify_media_provenance.ts",
     "ciStatus": "wired",
     "evidence": [
-      "docs/governance/media_provenance.md",
-      "scripts/ci/verify_media_provenance.ts"
+      "docs/governance/media_provenance.md"
     ],
     "keywords": [
       "media",
-      "provenance"
+      "provenance",
+      "authenticity"
     ],
-    "notes": "Blocks marketing/public media changes without deterministic provenance evidence."
+    "notes": "Blocks media changes without deterministic provenance evidence."
   },
   {
     "feature": "Observability Taxonomy",
@@ -163,5 +147,24 @@
     ],
     "keyword": "rate limiting",
     "notes": "Documentation-driven contract while runtime harness is stabilized."
+  },
+  {
+    "feature": "Switchboard MCP Evidence Contract",
+    "tier": "B",
+    "artifact": "tests/agents/switchboard/evidence.determinism.test.ts",
+    "ciStatus": "pending",
+    "evidence": [
+      "docs/ga/evidence.md",
+      "src/agents/switchboard/evidence/schema/index.schema.json",
+      "src/agents/switchboard/evidence/schema/report.schema.json",
+      "src/agents/switchboard/evidence/schema/metrics.schema.json",
+      "src/agents/switchboard/evidence/schema/stamp.schema.json"
+    ],
+    "keywords": [
+      "switchboard",
+      "evidence",
+      "determinism"
+    ],
+    "notes": "Deterministic evidence artifacts with timestamp isolation in stamp.json."
   }
 ]
