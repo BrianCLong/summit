@@ -181,6 +181,14 @@ Edit `alertmanager.yml` to configure:
 - PagerDuty integration
 - Custom routing rules
 
+### Routing Resilience Coverage
+
+- Routing incident runbook: `RUNBOOKS/bgp-route-withdrawal.md`
+- Monitoring checklist: `monitoring/checklists/BGP_ROUTING_RESILIENCE_CHECKLIST.md`
+- Probe matrix: `monitoring/synthetic/bgp-reachability-probes.yaml`
+- Prometheus rules: `monitoring/prometheus/rules/bgp-routing-resilience.yml`
+- Local docker-compose rules: `monitoring/alert_rules.yml` (network routing alerts group)
+
 ## Grafana Dashboards
 
 ### Available Dashboards

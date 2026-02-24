@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GraphSelector } from './GraphSelector';
 
 // Types matching backend
 interface SimulationEntity {
@@ -77,17 +78,18 @@ export const ScenarioSimulator: React.FC = () => {
   const [entities, setEntities] = useState<SimulationEntity[]>(DEFAULT_ENTITIES);
   const [shockEnabled, setShockEnabled] = useState(false);
   const [shockDescription, setShockDescription] = useState('Cyber Attack on Grid');
+  const [importMode, setImportMode] = useState<'manual' | 'graph'>('manual');
 
   const runSimulation = async () => {
     setLoading(true);
     try {
       const shock: ShockDefinition | undefined = shockEnabled
         ? {
-            type: 'shock',
-            targetTag: 'Government',
-            intensity: 1.5,
-            description: shockDescription,
-          }
+          type: 'shock',
+          targetTag: 'Government',
+          intensity: 1.5,
+          description: shockDescription,
+        }
         : undefined;
 
       // Note: The API prefix might need to be adjusted based on setup.
@@ -135,20 +137,46 @@ export const ScenarioSimulator: React.FC = () => {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
             <h2 className="text-xl font-semibold mb-4">Configuration</h2>
 
-            <div className="mb-4">
-              <label htmlFor="scenario-entities" className="block text-sm font-medium text-slate-700 mb-2">Scenario Entities (JSON)</label>
-              <textarea
-                id="scenario-entities"
-                className="w-full h-64 p-3 border rounded font-mono text-xs bg-slate-50"
-                value={JSON.stringify(entities, null, 2)}
-                onChange={(e) => {
-                  try {
-                    setEntities(JSON.parse(e.target.value));
-                  } catch (e) {}
-                }}
-                aria-label="Edit scenario entities JSON"
-              />
+            <div className="flex items-center gap-4 mb-4 border-b border-slate-200 pb-2">
+              <button
+                className={`text-sm font-medium pb-1 ${importMode === 'manual' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}
+                onClick={() => setImportMode('manual')}
+              >
+                Manual Config
+              </button>
+              <button
+                className={`text-sm font-medium pb-1 ${importMode === 'graph' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-slate-500'}`}
+                onClick={() => setImportMode('graph')}
+              >
+                Graph Hydration
+              </button>
             </div>
+
+            {importMode === 'manual' ? (
+              <div className="mb-4">
+                <label htmlFor="scenario-entities" className="block text-sm font-medium text-slate-700 mb-2">Scenario Entities (JSON)</label>
+                <textarea
+                  id="scenario-entities"
+                  className="w-full h-64 p-3 border rounded font-mono text-xs bg-slate-50"
+                  value={JSON.stringify(entities, null, 2)}
+                  onChange={(e) => {
+                    try {
+                      setEntities(JSON.parse(e.target.value));
+                    } catch (e) { }
+                  }}
+                  aria-label="Edit scenario entities JSON"
+                />
+              </div>
+            ) : (
+              <div className="mb-4">
+                <GraphSelector
+                  onImport={(newEntities) => {
+                    setEntities(newEntities);
+                    setImportMode('manual'); // Switch back to manual to review JSON
+                  }}
+                />
+              </div>
+            )}
 
             <div className="border-t pt-4 mt-4">
               <div className="flex items-center justify-between mb-4">
@@ -204,13 +232,12 @@ export const ScenarioSimulator: React.FC = () => {
                   {result.clusters.map((cluster) => (
                     <div
                       key={cluster.label}
-                      className={`p-4 rounded-lg border-l-4 ${
-                        cluster.label.includes('Crisis') || cluster.label.includes('Stagnation')
+                      className={`p-4 rounded-lg border-l-4 ${cluster.label.includes('Crisis') || cluster.label.includes('Stagnation')
                           ? 'border-red-500 bg-red-50'
                           : cluster.label.includes('Optimistic') || cluster.label.includes('Prosperity')
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-blue-500 bg-blue-50'
-                      }`}
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-blue-500 bg-blue-50'
+                        }`}
                       role="article"
                       aria-label={`${cluster.label} Outcome Cluster`}
                     >

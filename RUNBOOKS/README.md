@@ -1,5 +1,9 @@
 # Runbooks
 
+## Network routing
+
+- Route withdrawal incident response and BYOIP failover: `RUNBOOKS/bgp-route-withdrawal.md`
+
 ## Deployment validation notes
 
 - Confirm metering sinks are configured in Helm values (`helm/summit/values.yaml`) and match the

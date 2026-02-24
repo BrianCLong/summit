@@ -1,7 +1,13 @@
 {
   "last_updated": "2026-02-24T00:00:00Z",
-  "revision_note": "Added lineage stack lockstep gate for OpenLineage/OpenMetadata compatibility hardening.",
+  "revision_note": "Added BGP routing resilience runbook, monitoring checklist, probe matrix, and route-withdrawal guardrails.",
   "initiatives": [
+    {
+      "id": "bgp-routing-resilience-hardening",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "BGP route-withdrawal runbook, BYOIP failover policy, multi-region/multi-ASN probe matrix, and prefix-automation guardrails with rollback gates."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -186,7 +192,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -210,7 +216,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
