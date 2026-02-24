@@ -274,9 +274,34 @@ export class EntityCommentService {
     commentId: string,
     attachments: EntityCommentAttachmentInput[],
   ): Promise<EntityCommentAttachment[]> {
-    const results: EntityCommentAttachment[] = [];
+    if (attachments.length === 0) {
+      return [];
+    }
 
-    for (const attachment of attachments) {
+    const results: EntityCommentAttachment[] = [];
+    const CHUNK_SIZE = 100;
+
+    // BOLT: Optimized batched insert with chunking to reduce database round-trips.
+    for (let i = 0; i < attachments.length; i += CHUNK_SIZE) {
+      const chunk = attachments.slice(i, i + CHUNK_SIZE);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+
+      chunk.forEach((attachment, index) => {
+        const offset = index * 6;
+        placeholders.push(
+          `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6})`,
+        );
+        values.push(
+          commentId,
+          attachment.fileName,
+          attachment.contentType || null,
+          attachment.sizeBytes || null,
+          attachment.storageUri || null,
+          attachment.metadata || {},
+        );
+      });
+
       const res = await client.query(
         `
           INSERT INTO maestro.entity_comment_attachments (
@@ -287,19 +312,12 @@ export class EntityCommentService {
             storage_uri,
             metadata
           )
-          VALUES ($1, $2, $3, $4, $5, $6)
+          VALUES ${placeholders.join(', ')}
           RETURNING *
         `,
-        [
-          commentId,
-          attachment.fileName,
-          attachment.contentType || null,
-          attachment.sizeBytes || null,
-          attachment.storageUri || null,
-          attachment.metadata || {},
-        ],
+        values,
       );
-      results.push(this.mapAttachmentRow(res.rows[0]));
+      results.push(...res.rows.map((row) => this.mapAttachmentRow(row)));
     }
 
     return results;
@@ -364,7 +382,24 @@ export class EntityCommentService {
     commentId: string,
     mentions: EntityCommentMention[],
   ): Promise<void> {
-    for (const mention of mentions) {
+    if (mentions.length === 0) {
+      return;
+    }
+
+    const CHUNK_SIZE = 100;
+
+    // BOLT: Optimized batched insert with chunking to reduce database round-trips.
+    for (let i = 0; i < mentions.length; i += CHUNK_SIZE) {
+      const chunk = mentions.slice(i, i + CHUNK_SIZE);
+      const values: any[] = [];
+      const placeholders: string[] = [];
+
+      chunk.forEach((mention, index) => {
+        const offset = index * 3;
+        placeholders.push(`($${offset + 1}, $${offset + 2}, $${offset + 3})`);
+        values.push(commentId, mention.userId, mention.username);
+      });
+
       await client.query(
         `
           INSERT INTO maestro.entity_comment_mentions (
@@ -372,10 +407,10 @@ export class EntityCommentService {
             mentioned_user_id,
             mentioned_username
           )
-          VALUES ($1, $2, $3)
+          VALUES ${placeholders.join(', ')}
           ON CONFLICT (comment_id, mentioned_user_id) DO NOTHING
         `,
-        [commentId, mention.userId, mention.username],
+        values,
       );
     }
   }
