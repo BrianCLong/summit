@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:47:25Z",
-  "revision_note": "Added GDELT GKG connector skeleton and registry/docs entry.",
+  "last_updated": "2026-02-08T00:43:05Z",
+  "revision_note": "Aligned OSINT source inventory with GDELT GKG access notes.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
