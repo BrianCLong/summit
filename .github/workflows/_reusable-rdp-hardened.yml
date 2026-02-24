@@ -7,7 +7,7 @@ on:
         type: string
         default: ubuntu-latest
       timeout-minutes:
-        type: integer
+        type: number
         default: 10
 
 jobs:
