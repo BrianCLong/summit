@@ -1,11 +1,6 @@
-import rego.v1
-
 
 package maestro.governance
-import future.keywords.if
-import future.keywords.in
-
-import future.keywords.in
+import rego.v1
 
 # Deny public S3 buckets
 deny[msg] {

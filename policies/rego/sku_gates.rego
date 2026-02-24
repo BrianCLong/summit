@@ -1,6 +1,5 @@
 package intelgraph.sku
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
 default allow_feature := false
 

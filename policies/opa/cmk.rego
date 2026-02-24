@@ -1,6 +1,5 @@
 package composer.cmk
-
-import future.keywords.in
+import rego.v1
 
 # Require CMK for artifacts in protected namespaces
 
@@ -21,13 +20,14 @@ allow {
 }
 
 # Wrapper decision
+
 decision := {
   "policy": "cmk",
   "mode": input.mode,
-  "allow": allow,
+  "allow": data.composer.cmk.allow,
   "violations": array.concat([], (missing)),
 }
 {
-  missing := [ {"code": "CMK_REQUIRED", "artifact": input.artifact.digest} | missing_cmk ]
+  missing := [ {"code": "CMK_REQUIRED", "artifact": input.artifact.digest} | data.composer.cmk.missing_cmk ]
 }
 

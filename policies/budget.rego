@@ -2,8 +2,7 @@
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
 
 package intelgraph.budget
-
-import future.keywords.contains
+import rego.v1
 
 import future.keywords.if
 import future.keywords.in
@@ -135,11 +134,12 @@ daily_room[tenant] := room if {
     room >= 0
 }
 
+# Fallback daily room (1/30th of monthly)
 daily_room[tenant] := room if {
     some tenant
     budget := data.tenant_budgets[tenant]
     not budget.daily_usd_limit
-    room := monthly_room[tenant] / 30 # Fallback to 1/30th of monthly
+    room := monthly_room[tenant] / 30
 }
 
 # Emergency daily room (150% of normal daily limit)
@@ -153,6 +153,7 @@ emergency_daily_room[tenant] := room if {
     room >= 0
 }
 
+# Fallback emergency daily room
 emergency_daily_room[tenant] := room if {
     some tenant
     budget := data.tenant_budgets[tenant]

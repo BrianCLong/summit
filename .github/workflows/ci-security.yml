@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-gitleaks
           path: results.sarif
           if-no-files-found: ignore
 
@@ -141,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-semgrep
           path: ${{ env.REPORT_DIR }}/semgrep.sarif
 
   dependency-scan:
@@ -181,7 +181,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-snyk
           path: ${{ env.REPORT_DIR }}/snyk.sarif
 
   filesystem-scan:
@@ -216,7 +216,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-trivy-fs
           path: ${{ env.REPORT_DIR }}/trivy-fs.sarif
 
   container-scan:
@@ -265,7 +265,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-trivy-image
           path: |
             ${{ env.REPORT_DIR }}/trivy-server.sarif
             ${{ env.REPORT_DIR }}/trivy-client.sarif
@@ -292,7 +292,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-license
           path: ${{ env.REPORT_DIR }}/trivy-license.json
 
   iac-scan:
@@ -322,7 +322,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-checkov
           path: ${{ env.REPORT_DIR }}/results.sarif
 
   zizmor:
@@ -348,7 +348,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports
+          name: security-report-zizmor
           path: zizmor.sarif
 
   opa-policy:
@@ -380,7 +380,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-opa
           path: rendered
 
   cis-benchmark:
@@ -419,7 +419,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-cis
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
 
   baseline:
@@ -437,7 +437,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-baseline
           path: ${{ env.REPORT_DIR }}/baseline-report.json
 
   dast:
@@ -483,7 +483,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-dast
           path: |
             ${{ env.REPORT_DIR }}/zap-report.html
             ${{ env.REPORT_DIR }}/zap-report.md
@@ -513,7 +513,7 @@ jobs:
       - name: Download all security reports
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: security-reports
+          pattern: security-report-*
           path: aggregated-security
           merge-multiple: true
           if-no-artifact-found: warn
@@ -588,7 +588,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports
+          name: security-report-aggregated
           path: aggregated-security/security-summary.json
       - name: Record dashboard location
         id: dashboard

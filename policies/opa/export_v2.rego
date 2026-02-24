@@ -1,10 +1,5 @@
 package export.v2
-import future.keywords.if
-import future.keywords.in
-
 import rego.v1
-
-import future.keywords.if
 
 default allow := false
 
@@ -13,10 +8,7 @@ simulate := input.simulate
 
 # Sensitivity tiers requiring step-up auth
 requires_step_up {
-  input.bundle.sensitivity == "Sensitive"
-}
-requires_step_up {
-  input.bundle.sensitivity == "Restricted"
+  input.bundle.sensitivity == "Sensitive" or input.bundle.sensitivity == "Restricted"
 }
 
 has_webauthn := input.user.webauthn == true
@@ -69,10 +61,6 @@ decision := {
   "policy_version": input.policy.version,
   "redacted": redact_record(input.record),
 } {
-  allow_effective := any_true([would_allow, simulate])
-}
-
-any_true(l) {
-  l[_] == true
+  allow_effective := (would_allow or simulate)
 }
 

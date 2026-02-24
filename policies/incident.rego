@@ -1,11 +1,5 @@
 package companyos.incident
-import future.keywords.if
-import future.keywords.in
-
 import rego.v1
-
-import future.keywords.if
-import future.keywords.in
 
 # Default to deny all actions unless explicitly allowed.
 default allow = false

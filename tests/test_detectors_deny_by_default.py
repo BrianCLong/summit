@@ -1,6 +1,3 @@
-import pytest
-torch = pytest.importorskip("torch")
-
 from summit.precision.detectors import MismatchReport, compute_mismatch_metrics
 
 
