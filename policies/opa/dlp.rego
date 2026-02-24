@@ -1,6 +1,7 @@
 import future.keywords
 
 package composer.dlp
+import future.keywords
 
 import future.keywords
 
@@ -21,4 +22,3 @@ decision = {
   "allow": not data.composer.dlp.block,
   "violations": input.dlp_hits,
 }
-

@@ -22,8 +22,7 @@ jobs:
             const labels = context.payload.pull_request.labels.map(l => l.name);
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
-              console.log("PR missing classification label (patch/minor/major). Marking as warning but not failing.");
-              // core.setFailed("PR must have a classification label: patch, minor, or major.");
+              core.setFailed("PR must have a classification label: patch, minor, or major.");
             }
 
   check-approvals:

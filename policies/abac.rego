@@ -1,10 +1,6 @@
-import future.keywords
-
 # (same as in sprint doc)
-package abac
-
-import future.keywords.in
-import future.keywords.if
+package abac.authz
+import future.keywords
 
 default allow = false
 

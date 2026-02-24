@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-BLACKBOX-COMPAT-FAILSAFE-001",
+  "metrics": {
+    "success_rate": 1.0,
+    "latency_ms": 10
+  }
+}

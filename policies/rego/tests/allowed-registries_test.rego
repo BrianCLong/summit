@@ -1,6 +1,7 @@
 import future.keywords
 
 package policies.allowedregistries
+import future.keywords
 
 test_allow_ghcr {
   allow with input as {"review": {"object": {"spec": {"template": {"spec": {"containers": [{"image": "ghcr.io/BrianCLong/summit:sha"}]}}}}}}

@@ -4,6 +4,7 @@ import future.keywords
 # Addresses Foster & Starkey dissent requirements
 
 package intelgraph.authority
+import future.keywords
 
 import future.keywords.in
 import future.keywords.if

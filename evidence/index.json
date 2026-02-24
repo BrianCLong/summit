@@ -1,35 +1,32 @@
 {
   "version": 1.0,
-  "items": [
-    {
+  "items": {
+    "EVD-PIPELINE-RESILIENCE-001": {
       "title": "Pipeline Scaffolding Check",
       "category": "pipeline",
       "artifacts": [
         "evidence/report.json",
         "evidence/metrics.json",
         "evidence/stamp.json"
-      ],
-      "evidence_id": "EVD-PIPELINE-RESILIENCE-001"
+      ]
     },
-    {
+    "EVD-SKETCHDYNAMICS-PIPELINE-001": {
       "title": "SketchDynamics End-to-End Run",
       "category": "dynamic-intent",
       "artifacts": [
         "evidence/report.json",
         "evidence/metrics.json",
         "evidence/stamp.json"
-      ],
-      "evidence_id": "EVD-SKETCHDYNAMICS-PIPELINE-001"
+      ]
     },
-    {
+    "EVD-SKETCHDYNAMICS-CLARIFY-001": {
       "title": "SketchDynamics Clarification Trigger",
       "category": "dynamic-intent",
       "artifacts": [
         "fixtures/ambiguities/critical.json"
-      ],
-      "evidence_id": "EVD-SKETCHDYNAMICS-CLARIFY-001"
+      ]
     },
-    {
+    "EVD-vfgnn-ATT-001": {
       "evidence_id": "EVD-vfgnn-ATT-001",
       "files": [
         "evidence/report.json",
@@ -37,7 +34,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-vfgnn-NEG-001": {
       "evidence_id": "EVD-vfgnn-NEG-001",
       "files": [
         "evidence/report.json",
@@ -45,7 +42,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-INHOUSE-DATA-AGENT-ARCH-001": {
       "evidence_id": "EVD-INHOUSE-DATA-AGENT-ARCH-001",
       "files": [
         "evidence/report.json",
@@ -53,7 +50,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-ATLAS-SCHEMA-001": {
       "evidence_id": "EVD-ATLAS-SCHEMA-001",
       "files": [
         "evidence/report.json",
@@ -61,7 +58,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-ATLAS-PLNR-001": {
       "evidence_id": "EVD-ATLAS-PLNR-001",
       "files": [
         "evidence/report.json",
@@ -69,7 +66,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-ATLAS-XFER-001": {
       "evidence_id": "EVD-ATLAS-XFER-001",
       "files": [
         "evidence/report.json",
@@ -77,7 +74,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-ATLAS-ATLS-001": {
       "evidence_id": "EVD-ATLAS-ATLS-001",
       "files": [
         "evidence/report.json",
@@ -85,7 +82,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-ATLAS-ATLS-002": {
       "evidence_id": "EVD-ATLAS-ATLS-002",
       "files": [
         "evidence/report.json",
@@ -93,7 +90,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-ATLAS-GOV-001": {
       "evidence_id": "EVD-ATLAS-GOV-001",
       "files": [
         "evidence/report.json",
@@ -101,7 +98,7 @@
         "evidence/stamp.json"
       ]
     },
-    {
+    "EVD-260119895-keel-ARCH-001": {
       "evidence_id": "EVD-260119895-keel-ARCH-001",
       "files": [
         "summit/evidence/templates/report.json",
@@ -109,7 +106,7 @@
         "summit/evidence/templates/stamp.json"
       ]
     },
-    {
+    "EVD-260119895-keel-STAB-002": {
       "evidence_id": "EVD-260119895-keel-STAB-002",
       "files": [
         "summit/evidence/templates/report.json",
@@ -117,7 +114,7 @@
         "summit/evidence/templates/stamp.json"
       ]
     },
-    {
+    "EVD-260119895-keel-DSCL-003": {
       "evidence_id": "EVD-260119895-keel-DSCL-003",
       "files": [
         "summit/evidence/templates/report.json",
@@ -125,7 +122,7 @@
         "summit/evidence/templates/stamp.json"
       ]
     },
-    {
+    "EVD-260119895-keel-BENCH-004": {
       "evidence_id": "EVD-260119895-keel-BENCH-004",
       "files": [
         "summit/evidence/templates/report.json",
@@ -133,7 +130,7 @@
         "summit/evidence/templates/stamp.json"
       ]
     },
-    {
+    "EVD-SSDF12-BNDL-001": {
       "evidence_id": "EVD-SSDF12-BNDL-001",
       "files": [
         "evidence/ssdf-v1-2/pr-01/report.json",
@@ -141,7 +138,7 @@
         "evidence/ssdf-v1-2/pr-01/stamp.json"
       ]
     },
-    {
+    "EVD-EXPB-CORE-001": {
       "evidence_id": "EVD-EXPB-CORE-001",
       "files": [
         "evidence/runs/expectation-baselines/report.json",
@@ -149,7 +146,7 @@
         "evidence/runs/expectation-baselines/stamp.json"
       ]
     },
-    {
+    "EVD-PRIVTEL-SCHEMA-001": {
       "evidence_id": "EVD-PRIVTEL-SCHEMA-001",
       "files": [
         "evidence/privtel/report.json",
@@ -157,55 +154,37 @@
         "evidence/privtel/stamp.json"
       ]
     },
-    {
-      "title": "Incremental Graph Delta Equivalence",
-      "category": "incremental-updates",
-      "artifacts": [
-        "evidence/EVD-INCR-GRAPH-DELTA-001/report.json",
-        "evidence/EVD-INCR-GRAPH-DELTA-001/metrics.json",
-        "evidence/EVD-INCR-GRAPH-DELTA-001/stamp.json"
-      ],
-      "evidence_id": "EVD-INCR-GRAPH-DELTA-001"
+    "EVD-BLACKBOX-COMPAT-NOTRAIN-001": {
+      "evidence_id": "EVD-BLACKBOX-COMPAT-NOTRAIN-001",
+      "files": [
+        "evidence/EVD-BLACKBOX-COMPAT-NOTRAIN-001/report.json",
+        "evidence/EVD-BLACKBOX-COMPAT-NOTRAIN-001/metrics.json",
+        "evidence/EVD-BLACKBOX-COMPAT-NOTRAIN-001/stamp.json"
+      ]
     },
-    {
-      "title": "Incremental Graph Index Consistency",
-      "category": "incremental-updates",
-      "artifacts": [
-        "evidence/EVD-INCR-GRAPH-INDEX-001/report.json",
-        "evidence/EVD-INCR-GRAPH-INDEX-001/metrics.json",
-        "evidence/EVD-INCR-GRAPH-INDEX-001/stamp.json"
-      ],
-      "evidence_id": "EVD-INCR-GRAPH-INDEX-001"
+    "EVD-BLACKBOX-COMPAT-PROMPT-001": {
+      "evidence_id": "EVD-BLACKBOX-COMPAT-PROMPT-001",
+      "files": [
+        "evidence/EVD-BLACKBOX-COMPAT-PROMPT-001/report.json",
+        "evidence/EVD-BLACKBOX-COMPAT-PROMPT-001/metrics.json",
+        "evidence/EVD-BLACKBOX-COMPAT-PROMPT-001/stamp.json"
+      ]
     },
-    {
-      "title": "Incremental Graph Rename Stability",
-      "category": "incremental-updates",
-      "artifacts": [
-        "evidence/EVD-INCR-GRAPH-RENAME-001/report.json",
-        "evidence/EVD-INCR-GRAPH-RENAME-001/metrics.json",
-        "evidence/EVD-INCR-GRAPH-RENAME-001/stamp.json"
-      ],
-      "evidence_id": "EVD-INCR-GRAPH-RENAME-001"
+    "EVD-BLACKBOX-COMPAT-QUALITY-001": {
+      "evidence_id": "EVD-BLACKBOX-COMPAT-QUALITY-001",
+      "files": [
+        "evidence/EVD-BLACKBOX-COMPAT-QUALITY-001/report.json",
+        "evidence/EVD-BLACKBOX-COMPAT-QUALITY-001/metrics.json",
+        "evidence/EVD-BLACKBOX-COMPAT-QUALITY-001/stamp.json"
+      ]
     },
-    {
-      "title": "Incremental Graph Delete Lifecycle",
-      "category": "incremental-updates",
-      "artifacts": [
-        "evidence/EVD-INCR-GRAPH-DELETE-001/report.json",
-        "evidence/EVD-INCR-GRAPH-DELETE-001/metrics.json",
-        "evidence/EVD-INCR-GRAPH-DELETE-001/stamp.json"
-      ],
-      "evidence_id": "EVD-INCR-GRAPH-DELETE-001"
-    },
-    {
-      "title": "Incremental Graph Performance",
-      "category": "incremental-updates",
-      "artifacts": [
-        "evidence/EVD-INCR-GRAPH-PERF-001/report.json",
-        "evidence/EVD-INCR-GRAPH-PERF-001/metrics.json",
-        "evidence/EVD-INCR-GRAPH-PERF-001/stamp.json"
-      ],
-      "evidence_id": "EVD-INCR-GRAPH-PERF-001"
+    "EVD-BLACKBOX-COMPAT-FAILSAFE-001": {
+      "evidence_id": "EVD-BLACKBOX-COMPAT-FAILSAFE-001",
+      "files": [
+        "evidence/EVD-BLACKBOX-COMPAT-FAILSAFE-001/report.json",
+        "evidence/EVD-BLACKBOX-COMPAT-FAILSAFE-001/metrics.json",
+        "evidence/EVD-BLACKBOX-COMPAT-FAILSAFE-001/stamp.json"
+      ]
     }
-  ]
+  }
 }

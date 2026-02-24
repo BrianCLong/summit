@@ -1,9 +1,5 @@
-import future.keywords
-
 package intelgraph.export
-
-import future.keywords.if
-import future.keywords.in
+import future.keywords
 
 # Export policy for IntelGraph GA Core — simulate/enforce, DLP redactions, WebAuthn step-up.
 # Decision object intentionally explicit for audit & UX payloads.
@@ -44,10 +40,10 @@ redactions_from_explicit[entry] {
   entry := {"path": p, "reason": "explicit"}
 }
 
-redactions := result {
-  r1 := redactions_from_tags
+redactions := r {
+  r := redactions_from_tags
   r2 := redactions_from_explicit
-  result := r1 | r2
+  r := r | r2
 }
 
 # Reasons (human-readable)
@@ -69,14 +65,9 @@ decision := {
 reasons := r {
   base := []
   rs := base
-  rs2 := cond_append(rs, needs_step_up, reason_step_up)
-  # Logic split to avoid parser confusion
-  step_up_fail := needs_step_up == true
-  step_up_fail_2 := has_step_up == false
-  step_up_fail_3 := is_enforce == true
-  # Check if we failed step-up enforcement
-  step_up_missing := step_up_fail == true
-  r := cond_append(rs2, step_up_missing, reason_no_step)
+  rs := cond_append(rs, needs_step_up, reason_step_up)
+  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
+  r := rs
 }
 
 # allow rules
@@ -85,11 +76,5 @@ allow { is_enforce; not needs_step_up }
 allow { is_enforce; needs_step_up; has_step_up }
 
 # Utility: append iff condition true
-cond_append(arr, cond, v) := out if {
-  cond == true
-  out := array.concat(arr, [v])
-}
-
-cond_append(arr, cond, _) := arr if {
-  cond == false
-}
+cond_append(arr, cond, v) = out { cond; out := array.concat(arr, [v]) }
+cond_append(arr, cond, _) = arr { not cond }

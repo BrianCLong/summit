@@ -1,7 +1,4 @@
-import future.keywords
-
 package intelgraph.sku
-
 import future.keywords
 
 default allow_feature := false
@@ -11,8 +8,8 @@ default allow_feature := false
 
 # Define gates
 gate["Team"]        = { "export.pdf", "edge.sync" }
-gate["Business"]    = gate["Team"]        | { "qos.override", "audit.evidence" }
-gate["Enterprise"]  = gate["Business"]    | { "byok", "hsm" }
+gate["Business"] = union({gate["Team"], { "qos.override", "audit.evidence" }})
+gate["Enterprise"] = union({gate["Business"], { "byok", "hsm" }})
 
 allow_feature {
   some t

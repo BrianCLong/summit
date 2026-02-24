@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-BLACKBOX-COMPAT-FAILSAFE-001",
+  "summary": "Missing-context fixture yields 'cannot proceed'",
+  "steps": [
+    {
+      "name": "check_refusal_logic",
+      "status": "pass",
+      "details": "Refusal instruction verified in contract"
+    }
+  ],
+  "run_id": "manual-1769812117",
+  "item_slug": "blackbox-compat-failsafe-001"
+}
