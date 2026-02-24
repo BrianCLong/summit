@@ -44,3 +44,7 @@
 
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
+
+## 2026-02-24 - [CI Stability and Micro-UX]
+**Learning:** Landing UX improvements often requires first addressing underlying CI/CD fragility in legacy or complex monorepos. Standardizing environment versions (pnpm, Python) and fixing resilient test patterns are prerequisite for feature work.
+**Action:** Always check CI status before starting UX work and be prepared to fix infrastructure issues to unblock the PR.
