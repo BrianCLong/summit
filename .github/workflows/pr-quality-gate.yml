@@ -1,4 +1,4 @@
-name: PR Quality Gate
+name: "[info] PR Quality Gate"
 
 on:
   pull_request:
@@ -20,10 +20,17 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -41,10 +48,17 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: 20
           cache: "pnpm"
+<<<<<<< HEAD
+=======
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -56,13 +70,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: 20
           cache: "pnpm"
@@ -95,8 +109,8 @@ jobs:
 
       - name: Generate SBOM artifact
         run: |
-          mkdir -p artifacts/sbom
-          syft packages dir:. -o cyclonedx-json --file artifacts/sbom/sbom.json
+          bash scripts/generate-sbom.sh summit ci artifacts/sbom
+          mv artifacts/sbom/summit-ci.cdx.json artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
