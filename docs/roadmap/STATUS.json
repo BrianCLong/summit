@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-07T12:00:00Z",
-  "revision_note": "Added ai-platform-daily-2026-02-07 repo assumptions artifact.",
+  "last_updated": "2026-02-09T00:00:00Z",
+  "revision_note": "Added staging/prod digest parity workflows and deployment hardening manifests.",
   "initiatives": [
-    {
-      "id": "ai-platform-daily-2026-02-07",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Captured repo assumptions artifact for ai-platform-daily-2026-02-07 intake and validation checklist."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -82,6 +76,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "deploy-promotion-hardening",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Pinned staging/prod image digests, added explicit probes in env manifests, and added pre-promote smoke + parity validation workflows."
     },
     {
       "id": "promptspec-foundation-lane1",

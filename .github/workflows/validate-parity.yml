@@ -1,0 +1,45 @@
+name: validate-parity
+on:
+  workflow_call:
+    inputs:
+      digest:
+        required: true
+        type: string
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Diff critical fields
+        run: |
+          set -euo pipefail
+          FIELDS=(
+            '.spec.template.spec.containers[0].image'
+            '.spec.template.spec.containers[0].resources.requests'
+            '.spec.template.spec.containers[0].resources.limits'
+            '.spec.template.spec.nodeSelector'
+            '.spec.template.spec.tolerations'
+            '.spec.template.spec.affinity'
+            '.spec.template.spec.volumes'
+            '.spec.template.spec.containers[0].volumeMounts'
+            '.spec.template.spec.containers[0].env[]?.name'
+            '.spec.template.spec.containers[0].envFrom[]?.configMapRef.name'
+          )
+          for f in "${FIELDS[@]}"; do
+            A=$(yq -o=json "$f" k8s/environments/staging/service-deployment.yaml | jq -S . 2>/dev/null || echo null)
+            B=$(yq -o=json "$f" k8s/environments/prod/service-deployment.yaml | jq -S . 2>/dev/null || echo null)
+            if [ "$A" != "$B" ] && [[ "$f" != ".spec.replicas" ]]; then
+              echo "::error::Parity mismatch in $f"
+              exit 1
+            fi
+          done
+          IMG="repo/service@${{ inputs.digest }}"
+          ACT=$(yq '.spec.template.spec.containers[0].image' k8s/environments/staging/service-deployment.yaml)
+          if [ "$ACT" != "$IMG" ]; then
+            echo "::error::Staging image != requested digest"
+            exit 1
+          fi
