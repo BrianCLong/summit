@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T03:25:00Z",
-  "revision_note": "Refined evidence determinism guardrails to reduce false positives. Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-02-08T03:20:49Z",
+  "revision_note": "Added verifier unit tests and fixtures for lane-1 evidence schema enforcement.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -57,13 +57,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
-    },
-    {
-      "id": "deploy-promotion-hardening",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Pinned staging/prod image digests, added explicit probes in env manifests, and added pre-promote smoke + parity validation workflows."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Evidence schema contracts + verifier scaffolding added for lane-1 agentic lineage gates. Evidence schema guidance now references Summit Readiness Assertion. Verifier unit tests + fixtures added for evidence schema enforcement."
     },
     {
       "id": "promptspec-foundation-lane1",

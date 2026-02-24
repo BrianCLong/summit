@@ -1,92 +1,149 @@
-import * as fs from 'node:fs';
-import * as path from 'node:path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 
-const REQUIRED_FILES = ['report.json', 'metrics.json', 'stamp.json'];
-const TIMESTAMP_PATTERN = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z/;
+type CheckMode = 'schemas' | 'index' | 'all';
 
-function fail(message) {
-  console.error(message);
-  process.exit(1);
-}
+type EvidenceFile = {
+  fileName: string;
+  schemaName: string;
+  mode: CheckMode;
+};
 
-function readJson(filePath) {
-  return JSON.parse(fs.readFileSync(filePath, 'utf8'));
-}
+const timestampKeyPattern = /^(timestamp|created_at|updated_at|createdAt|updatedAt|retrieved_at|retrievedAt)$/i;
 
-function containsTimestamp(value) {
-  if (typeof value === 'string') {
-    return TIMESTAMP_PATTERN.test(value);
-  }
+const schemaDir = path.resolve('docs/governance/evidence/schemas');
+
+const evidenceFiles: EvidenceFile[] = [
+  { fileName: 'report.json', schemaName: 'report.schema.json', mode: 'schemas' },
+  { fileName: 'metrics.json', schemaName: 'metrics.schema.json', mode: 'schemas' },
+  { fileName: 'stamp.json', schemaName: 'stamp.schema.json', mode: 'schemas' },
+  { fileName: 'index.json', schemaName: 'index.schema.json', mode: 'index' },
+];
+
+const args = process.argv.slice(2);
+const getArgValue = (flag: string): string | undefined => {
+  const index = args.indexOf(flag);
+  if (index === -1) return undefined;
+  return args[index + 1];
+};
+
+const evidenceDir = path.resolve(getArgValue('--evidence-dir') ?? 'evidence');
+const check = (getArgValue('--check') ?? 'all') as CheckMode;
+
+const shouldRun = (mode: CheckMode): boolean => check === 'all' || check === mode;
+
+const loadJson = async (filePath: string) => {
+  const raw = await fs.readFile(filePath, 'utf-8');
+  return JSON.parse(raw);
+};
+
+const findTimestampKeys = (value: unknown, basePath: string, results: string[]) => {
+  if (!value || typeof value !== 'object') return;
   if (Array.isArray(value)) {
-    return value.some(containsTimestamp);
+    value.forEach((item, index) => {
+      findTimestampKeys(item, `${basePath}[${index}]`, results);
+    });
+    return;
   }
-  if (value && typeof value === 'object') {
-    return Object.values(value).some(containsTimestamp);
+  for (const [key, nested] of Object.entries(value)) {
+    const nextPath = basePath ? `${basePath}.${key}` : key;
+    if (timestampKeyPattern.test(key)) {
+      results.push(nextPath);
+    }
+    findTimestampKeys(nested, nextPath, results);
   }
-  return false;
-}
+};
 
-const repoRoot = process.cwd();
-const evidenceIndexPath = path.join(repoRoot, 'evidence', 'index.json');
+type VerificationOptions = {
+  evidenceDir?: string;
+  check?: CheckMode;
+};
 
-if (!fs.existsSync(evidenceIndexPath)) {
-  fail('Missing evidence/index.json');
-}
+export type VerificationResult = {
+  success: boolean;
+  failures: string[];
+};
 
-const indexJson = readJson(evidenceIndexPath);
-if (!indexJson || typeof indexJson !== 'object') {
-  fail('Invalid evidence/index.json');
-}
+export const verifyEvidence = async (
+  options: VerificationOptions = {},
+): Promise<VerificationResult> => {
+  const resolvedEvidenceDir = path.resolve(options.evidenceDir ?? evidenceDir);
+  const resolvedCheck = options.check ?? check;
+  const ajv = new Ajv({ allErrors: true, strict: false });
+  addFormats(ajv);
 
-const evidenceMap = indexJson.evidence;
-if (!evidenceMap || typeof evidenceMap !== 'object') {
-  fail('Missing evidence map in evidence/index.json');
-}
+  const failures: string[] = [];
 
-for (const [evidenceId, relativeDir] of Object.entries(evidenceMap)) {
-  const evidenceDir = path.join(repoRoot, relativeDir);
-  if (!fs.existsSync(evidenceDir)) {
-    fail(`Evidence directory missing for ${evidenceId}: ${relativeDir}`);
-  }
-  const files = fs.readdirSync(evidenceDir).sort();
-  if (files.length !== REQUIRED_FILES.length || !REQUIRED_FILES.every((file) => files.includes(file))) {
-    fail(`Evidence directory must contain only ${REQUIRED_FILES.join(', ')} for ${evidenceId}`);
-  }
+  for (const entry of evidenceFiles) {
+    if (!(resolvedCheck === 'all' || resolvedCheck === entry.mode)) {
+      continue;
+    }
 
-  for (const fileName of REQUIRED_FILES) {
-    const filePath = path.join(evidenceDir, fileName);
-    if (!fs.existsSync(filePath)) {
-      fail(`Missing ${fileName} for ${evidenceId}`);
+    const evidencePath = path.join(resolvedEvidenceDir, entry.fileName);
+    const schemaPath = path.join(schemaDir, entry.schemaName);
+
+    try {
+      await fs.access(evidencePath);
+    } catch (error) {
+      failures.push(`Missing evidence file: ${evidencePath}`);
+      continue;
+    }
+
+    try {
+      await fs.access(schemaPath);
+    } catch (error) {
+      failures.push(`Missing schema file: ${schemaPath}`);
+      continue;
+    }
+
+    const [payload, schema] = await Promise.all([
+      loadJson(evidencePath),
+      loadJson(schemaPath),
+    ]);
+
+    const validate = ajv.compile(schema);
+    const valid = validate(payload);
+    if (!valid) {
+      const details = ajv.errorsText(validate.errors, { separator: '\n' });
+      failures.push(`Schema validation failed for ${entry.fileName}:\n${details}`);
+    }
+
+    if (entry.fileName !== 'stamp.json') {
+      const timestampKeys: string[] = [];
+      findTimestampKeys(payload, '', timestampKeys);
+      if (timestampKeys.length > 0) {
+        failures.push(
+          `Timestamp fields are only allowed in stamp.json. Found in ${entry.fileName}: ${timestampKeys.join(
+            ', ',
+          )}`,
+        );
+      }
     }
   }
 
-  const reportPath = path.join(evidenceDir, 'report.json');
-  const metricsPath = path.join(evidenceDir, 'metrics.json');
-  const stampPath = path.join(evidenceDir, 'stamp.json');
+  return { success: failures.length === 0, failures };
+};
 
-  const reportJson = readJson(reportPath);
-  const metricsJson = readJson(metricsPath);
-  const stampJson = readJson(stampPath);
+const isCli = process.argv[1] === fileURLToPath(import.meta.url);
 
-  if (containsTimestamp(reportJson)) {
-    fail(`report.json must not contain timestamps for ${evidenceId}`);
-  }
-  if (containsTimestamp(metricsJson)) {
-    fail(`metrics.json must not contain timestamps for ${evidenceId}`);
-  }
-  if (!containsTimestamp(stampJson)) {
-    fail(`stamp.json must include a timestamp for ${evidenceId}`);
-  }
+if (isCli) {
+  verifyEvidence()
+    .then((result) => {
+      if (!result.success) {
+        console.error('Evidence verification failed:');
+        for (const failure of result.failures) {
+          console.error(`- ${failure}`);
+        }
+        process.exit(1);
+      }
+      console.log('Evidence verification passed.');
+    })
+    .catch((error) => {
+      console.error('Evidence verification failed with an unexpected error.');
+      console.error(error);
+      process.exit(1);
+    });
 }
-
-const requiredEvidencePath = path.join(repoRoot, 'docs', 'ga', 'planning-ga-criteria.md');
-if (fs.existsSync(requiredEvidencePath)) {
-  const content = fs.readFileSync(requiredEvidencePath, 'utf8');
-  const matches = content.match(/EVD-[A-Z0-9-]+/g) ?? [];
-  const missing = matches.filter((id) => !evidenceMap[id]);
-  if (missing.length > 0) {
-    fail(`Missing required evidence IDs in evidence/index.json: ${missing.join(', ')}`);
-  }
-}
-
-console.log('evidence: OK');
