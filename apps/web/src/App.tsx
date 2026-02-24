@@ -36,7 +36,9 @@ const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
+
 const FeatureFlagsPage = React.lazy(() => import('@/pages/admin/FeatureFlags'))
+const RagHealthDashboard = React.lazy(() => import('@/pages/admin/RagHealthDashboard'))
 const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
@@ -296,6 +298,14 @@ function App() {
                             <MutationErrorBoundary operationName="feature flag update">
                               <FeatureFlagsPage />
                             </MutationErrorBoundary>
+                          }
+                        />
+                        <Route
+                          path="admin/rag-health"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="RAG Health">
+                              <RagHealthDashboard />
+                            </DataFetchErrorBoundary>
                           }
                         />
 
