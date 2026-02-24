@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T01:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T00:00:00Z",
+  "revision_note": "Added PR provenance + SBOM visibility workflow and policy-controller starter pack.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -241,6 +241,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "pr-provenance-sbom-visibility",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Keyless Sigstore signing + SPDX SBOM workflow with PR badge evidence and policy-controller starter pack."
     }
   ],
   "summary": {
@@ -248,7 +254,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 21,
+    "total": 18,
     "ga_blockers": []
   }
 }
