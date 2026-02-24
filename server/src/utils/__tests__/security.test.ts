@@ -1,20 +1,19 @@
-import { describe, it } from 'node:test';
-import assert from 'node:assert';
-import { validateArtifactId } from '../security.js'; // Import from local file
+import { describe, it, expect } from '@jest/globals';
+import { validateArtifactId } from '../security.js';
 
 describe('validateArtifactId', () => {
   it('should return true for simple filenames', () => {
-    assert.strictEqual(validateArtifactId('file.txt'), true);
-    assert.strictEqual(validateArtifactId('data.json'), true);
-    assert.strictEqual(validateArtifactId(undefined), true);
+    expect(validateArtifactId('file.txt')).toBe(true);
+    expect(validateArtifactId('data.json')).toBe(true);
+    expect(validateArtifactId(undefined)).toBe(true);
   });
 
   it('should return false for relative paths', () => {
-    assert.strictEqual(validateArtifactId('../file.txt'), false);
-    assert.strictEqual(validateArtifactId('a/b.txt'), false);
+    expect(validateArtifactId('../file.txt')).toBe(false);
+    expect(validateArtifactId('a/b.txt')).toBe(false);
   });
 
   it('should return false for absolute paths', () => {
-    assert.strictEqual(validateArtifactId('/etc/passwd'), false);
+    expect(validateArtifactId('/etc/passwd')).toBe(false);
   });
 });

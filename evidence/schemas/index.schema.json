@@ -1,10 +1,36 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["items"],
+  "required": ["evidence"],
   "properties": {
     "version": {
-      "type": ["string", "integer"]
+      "type": "integer"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["evidence_id", "files"],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "files": {
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            }
+          },
+          "title": { "type": "string" },
+          "category": { "type": "string" },
+          "artifacts": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        },
+        "additionalProperties": true
+      }
     },
     "mappings": {
       "type": "object",
