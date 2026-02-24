@@ -1,4 +1,4 @@
-const request = require('supertest');
+const request = require("supertest");
 
 function http(app) {
   if (app) return request(app); // in-process app
@@ -9,21 +9,21 @@ function http(app) {
     return {
       post: function (path) {
         // Return a mock request-like object for GraphQL endpoint
-        if (path === '/graphql') {
+        if (path === "/graphql") {
           return {
             send: async function (data) {
               // Simulate GraphQL response for backward compatibility
-              if (data && data.query && data.query.includes('entity')) {
+              if (data && data.query && data.query.includes("entity")) {
                 return {
                   status: 200,
                   body: { data: { entity: null } }, // Match original default
-                  headers: { 'content-type': 'application/json' },
+                  headers: { "content-type": "application/json" },
                 };
               } else {
                 return {
                   status: 200,
-                  body: { data: { ok: true, version: '1.0.0' } }, // Default response
-                  headers: { 'content-type': 'application/json' },
+                  body: { data: { ok: true, version: "1.0.0" } }, // Default response
+                  headers: { "content-type": "application/json" },
                 };
               }
             },
@@ -35,7 +35,7 @@ function http(app) {
             return {
               status: 200,
               body: {},
-              headers: { 'content-type': 'application/json' },
+              headers: { "content-type": "application/json" },
             };
           },
         };

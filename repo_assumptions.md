@@ -1,17 +1,20 @@
-# Repo Assumptions & Reality Check
+## Repository Assumptions and Validations
 
-## Verified vs Assumed
+### Verified
+* **Package Manager**: `pnpm` (verified via `pnpm-workspace.yaml`, `package.json`, `pnpm-lock.yaml`).
+* **DB Drivers**: `pg` and `neo4j-driver` are present in `package.json` dependencies.
+* **Test Runner**: `vitest` is present in `devDependencies`, but integration tests use `tsx` for direct execution as per blueprint.
+* **CI**: GitHub Actions is used (`.github/workflows` populated).
+* **Directory Structure**: `tools/` exists, `tests/` exists.
 
-| Assumption | Status | Reality |
-| :--- | :--- | :--- |
-| TypeScript, Node 18+, pnpm, GitHub Actions | **Verified** | `package.json` confirms Node >=18.18, `pnpm`. |
-| Canonical paths: `src/`, `tests/`, `docs/` | **Verified** | Directories exist. |
-| `policies/` at repo root | **Verified** | Directory exists. |
-| Existing CI check names | **Adjusted** | `.github/workflows/ci-security.yml` uses `opa-policy`, `dependency-scan`, `cis-benchmark`. Proposed `cti:policy-gate` will be new. |
-| Evidence folder conventions | **Verified** | `evidence/` exists with `EVD-...` folders. New path `evidence/cti-briefing-cloud-supplychain/` fits structure. |
+### Assumed
+* **Node Version**: CI environment supports Node 20 (used in workflow definition).
+* **Docker Services**: `postgres:15` and `neo4j:5.12.0` images are available and sufficient for parity checks.
+* **APOC**: Neo4j APOC plugin is enabled in CI service definition (added to workflow).
+* **Network**: Localhost ports 5432 and 7687 are available in CI runner services network.
 
-## Must-not-touch files
-
-* `package-lock.json` (using pnpm, so `pnpm-lock.yaml` is the source)
-* `.github/workflows/ci-security.yml` (unless explicitly adding the new job; prefer new workflow or script integration if possible to minimize merge conflicts)
-* Existing `evidence/EVD-*` folders.
+### Constraints Respected
+* **Production Deployment**: No changes made to production workflows.
+* **Secrets**: No new secrets hardcoded; workflow uses standard env vars (with defaults for CI services).
+* **Refactor**: No refactor of existing ETL/sync logic performed.
+* **Read-Only**: Validator is read-only.

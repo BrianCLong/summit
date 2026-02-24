@@ -9,15 +9,15 @@
  * - Subscriptions
  */
 
-import { contextFactory, authenticatedContextFactory } from '../factories/contextFactory';
-import { entityFactory } from '../factories/entityFactory';
-import { investigationFactory } from '../factories/investigationFactory';
+import { contextFactory, authenticatedContextFactory } from "../factories/contextFactory";
+import { entityFactory } from "../factories/entityFactory";
+import { investigationFactory } from "../factories/investigationFactory";
 
-describe('GraphQL Integration Tests', () => {
-  describe('Query Execution', () => {
-    it('should execute a simple entity query', async () => {
+describe("GraphQL Integration Tests", () => {
+  describe("Query Execution", () => {
+    it("should execute a simple entity query", async () => {
       const context = authenticatedContextFactory();
-      const entity = entityFactory({ type: 'person' });
+      const entity = entityFactory({ type: "person" });
 
       const query = `
         query GetEntity($id: ID!) {
@@ -36,7 +36,7 @@ describe('GraphQL Integration Tests', () => {
       expect(context.user).not.toBeNull();
     });
 
-    it('should execute a complex nested query', async () => {
+    it("should execute a complex nested query", async () => {
       const context = authenticatedContextFactory();
       const investigation = investigationFactory();
 
@@ -70,7 +70,7 @@ describe('GraphQL Integration Tests', () => {
       expect(variables.id).toBe(investigation.id);
     });
 
-    it('should handle pagination in queries', async () => {
+    it("should handle pagination in queries", async () => {
       const context = authenticatedContextFactory();
 
       const query = `
@@ -97,8 +97,8 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Mutation Execution', () => {
-    it('should execute a create entity mutation', async () => {
+  describe("Mutation Execution", () => {
+    it("should execute a create entity mutation", async () => {
       const context = authenticatedContextFactory();
 
       const mutation = `
@@ -114,19 +114,19 @@ describe('GraphQL Integration Tests', () => {
 
       const variables = {
         input: {
-          type: 'person',
-          name: 'John Doe',
+          type: "person",
+          name: "John Doe",
           properties: {
-            email: 'john@example.com',
+            email: "john@example.com",
           },
         },
       };
 
       expect(mutation).toBeDefined();
-      expect(variables.input.type).toBe('person');
+      expect(variables.input.type).toBe("person");
     });
 
-    it('should execute an update entity mutation', async () => {
+    it("should execute an update entity mutation", async () => {
       const context = authenticatedContextFactory();
       const entity = entityFactory();
 
@@ -143,7 +143,7 @@ describe('GraphQL Integration Tests', () => {
       const variables = {
         id: entity.id,
         input: {
-          name: 'Updated Name',
+          name: "Updated Name",
         },
       };
 
@@ -151,7 +151,7 @@ describe('GraphQL Integration Tests', () => {
       expect(variables.id).toBe(entity.id);
     });
 
-    it('should execute a delete entity mutation', async () => {
+    it("should execute a delete entity mutation", async () => {
       const context = authenticatedContextFactory();
       const entity = entityFactory();
 
@@ -171,8 +171,8 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Authorization', () => {
-    it('should enforce authentication on protected queries', async () => {
+  describe("Authorization", () => {
+    it("should enforce authentication on protected queries", async () => {
       const context = contextFactory({ user: null });
 
       const query = `
@@ -188,7 +188,7 @@ describe('GraphQL Integration Tests', () => {
       expect(query).toBeDefined();
     });
 
-    it('should enforce permission-based access control', async () => {
+    it("should enforce permission-based access control", async () => {
       const context = authenticatedContextFactory();
 
       const mutation = `
@@ -203,7 +203,7 @@ describe('GraphQL Integration Tests', () => {
       expect(mutation).toBeDefined();
     });
 
-    it('should allow access to public queries', async () => {
+    it("should allow access to public queries", async () => {
       const context = contextFactory({ user: null });
 
       const query = `
@@ -219,8 +219,8 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Error Handling', () => {
-    it('should handle validation errors', async () => {
+  describe("Error Handling", () => {
+    it("should handle validation errors", async () => {
       const context = authenticatedContextFactory();
 
       const invalidQuery = `
@@ -234,7 +234,7 @@ describe('GraphQL Integration Tests', () => {
       expect(invalidQuery).toBeDefined();
     });
 
-    it('should handle resolver errors gracefully', async () => {
+    it("should handle resolver errors gracefully", async () => {
       const context = authenticatedContextFactory();
 
       const query = `
@@ -245,13 +245,13 @@ describe('GraphQL Integration Tests', () => {
         }
       `;
 
-      const variables = { id: 'non-existent-id' };
+      const variables = { id: "non-existent-id" };
 
       expect(query).toBeDefined();
-      expect(variables.id).toBe('non-existent-id');
+      expect(variables.id).toBe("non-existent-id");
     });
 
-    it('should return proper error codes', async () => {
+    it("should return proper error codes", async () => {
       const context = contextFactory({ user: null });
 
       const protectedQuery = `
@@ -267,8 +267,8 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Data Loading and N+1 Prevention', () => {
-    it('should use DataLoader to batch entity fetches', async () => {
+  describe("Data Loading and N+1 Prevention", () => {
+    it("should use DataLoader to batch entity fetches", async () => {
       const context = authenticatedContextFactory();
 
       const query = `
@@ -286,7 +286,7 @@ describe('GraphQL Integration Tests', () => {
       expect(query).toBeDefined();
     });
 
-    it('should efficiently load nested relationships', async () => {
+    it("should efficiently load nested relationships", async () => {
       const context = authenticatedContextFactory();
 
       const query = `
@@ -311,8 +311,8 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Caching', () => {
-    it('should cache query results', async () => {
+  describe("Caching", () => {
+    it("should cache query results", async () => {
       const context = authenticatedContextFactory();
 
       const query = `
@@ -324,13 +324,13 @@ describe('GraphQL Integration Tests', () => {
         }
       `;
 
-      const variables = { id: 'test-entity-id' };
+      const variables = { id: "test-entity-id" };
 
       expect(query).toBeDefined();
       expect(variables.id).toBeDefined();
     });
 
-    it('should invalidate cache on mutations', async () => {
+    it("should invalidate cache on mutations", async () => {
       const context = authenticatedContextFactory();
 
       const mutation = `
@@ -346,8 +346,8 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Subscriptions', () => {
-    it('should subscribe to entity updates', async () => {
+  describe("Subscriptions", () => {
+    it("should subscribe to entity updates", async () => {
       const context = authenticatedContextFactory();
 
       const subscription = `
@@ -360,13 +360,13 @@ describe('GraphQL Integration Tests', () => {
         }
       `;
 
-      const variables = { entityId: 'test-entity-id' };
+      const variables = { entityId: "test-entity-id" };
 
       expect(subscription).toBeDefined();
       expect(variables.entityId).toBeDefined();
     });
 
-    it('should subscribe to investigation changes', async () => {
+    it("should subscribe to investigation changes", async () => {
       const context = authenticatedContextFactory();
 
       const subscription = `
@@ -383,23 +383,23 @@ describe('GraphQL Integration Tests', () => {
     });
   });
 
-  describe('Persisted Queries', () => {
-    it('should execute persisted queries', async () => {
+  describe("Persisted Queries", () => {
+    it("should execute persisted queries", async () => {
       const context = authenticatedContextFactory();
 
-      const persistedQueryId = 'sha256Hash12345';
-      const variables = { id: 'test-entity-id' };
+      const persistedQueryId = "sha256Hash12345";
+      const variables = { id: "test-entity-id" };
 
       expect(persistedQueryId).toBeDefined();
       expect(variables.id).toBeDefined();
     });
 
-    it('should reject unknown persisted queries', async () => {
+    it("should reject unknown persisted queries", async () => {
       const context = authenticatedContextFactory();
 
-      const invalidPersistedQueryId = 'unknown-hash';
+      const invalidPersistedQueryId = "unknown-hash";
 
-      expect(invalidPersistedQueryId).toBe('unknown-hash');
+      expect(invalidPersistedQueryId).toBe("unknown-hash");
     });
   });
 });

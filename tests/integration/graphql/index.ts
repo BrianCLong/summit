@@ -15,4 +15,4 @@ export {
   type ResolverTestOptions,
   type QueryOptions,
   type ResolverTestResult,
-} from './ResolverTestUtils';
+} from "./ResolverTestUtils";

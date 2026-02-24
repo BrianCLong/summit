@@ -7,12 +7,12 @@
  * @module tests/integration/framework
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 /**
  * Service health status
  */
-export type ServiceHealthStatus = 'healthy' | 'degraded' | 'unhealthy' | 'unknown';
+export type ServiceHealthStatus = "healthy" | "degraded" | "unhealthy" | "unknown";
 
 /**
  * Service configuration
@@ -44,7 +44,7 @@ export interface HealthCheckResult {
 export interface ServiceMockConfig {
   service: string;
   endpoint: string;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   response: any;
   statusCode?: number;
   delay?: number;
@@ -107,7 +107,7 @@ export class ServiceTestHarness extends EventEmitter {
    */
   registerService(config: ServiceConfig): this {
     this.services.set(config.name, {
-      healthEndpoint: '/health',
+      healthEndpoint: "/health",
       timeout: 5000,
       retries: 3,
       dependencies: [],
@@ -156,10 +156,10 @@ export class ServiceTestHarness extends EventEmitter {
    */
   async setup(): Promise<void> {
     if (this.isSetup) {
-      throw new Error('Test harness is already setup');
+      throw new Error("Test harness is already setup");
     }
 
-    this.emit('setup:start', { testId: this.testId });
+    this.emit("setup:start", { testId: this.testId });
 
     // Check service health in dependency order
     const serviceOrder = this.getServiceStartOrder();
@@ -169,14 +169,14 @@ export class ServiceTestHarness extends EventEmitter {
       const health = await this.checkServiceHealth(config);
       this.healthResults.set(serviceName, health);
 
-      if (health.status === 'unhealthy') {
-        this.emit('service:unhealthy', { service: serviceName, health });
+      if (health.status === "unhealthy") {
+        this.emit("service:unhealthy", { service: serviceName, health });
         throw new Error(`Service ${serviceName} is unhealthy: ${health.error}`);
       }
     }
 
     this.isSetup = true;
-    this.emit('setup:complete', { testId: this.testId });
+    this.emit("setup:complete", { testId: this.testId });
   }
 
   /**
@@ -187,7 +187,7 @@ export class ServiceTestHarness extends EventEmitter {
       return;
     }
 
-    this.emit('teardown:start', { testId: this.testId });
+    this.emit("teardown:start", { testId: this.testId });
 
     // Clear all mocks
     this.clearMocks();
@@ -196,7 +196,7 @@ export class ServiceTestHarness extends EventEmitter {
     this.healthResults.clear();
 
     this.isSetup = false;
-    this.emit('teardown:complete', { testId: this.testId });
+    this.emit("teardown:complete", { testId: this.testId });
   }
 
   /**
@@ -210,11 +210,11 @@ export class ServiceTestHarness extends EventEmitter {
       const timeoutId = setTimeout(() => controller.abort(), config.timeout);
 
       const response = await fetch(`${config.baseUrl}${config.healthEndpoint}`, {
-        method: 'GET',
+        method: "GET",
         signal: controller.signal,
         headers: {
-          'Accept': 'application/json',
-          'X-Test-Id': this.testId,
+          Accept: "application/json",
+          "X-Test-Id": this.testId,
         },
       });
 
@@ -226,7 +226,7 @@ export class ServiceTestHarness extends EventEmitter {
       if (!response.ok) {
         return {
           service: config.name,
-          status: 'unhealthy',
+          status: "unhealthy",
           latency,
           timestamp: new Date(),
           error: `Health check returned ${response.status}`,
@@ -236,7 +236,7 @@ export class ServiceTestHarness extends EventEmitter {
 
       return {
         service: config.name,
-        status: 'healthy',
+        status: "healthy",
         latency,
         timestamp: new Date(),
         details: data,
@@ -244,7 +244,7 @@ export class ServiceTestHarness extends EventEmitter {
     } catch (error: any) {
       return {
         service: config.name,
-        status: 'unhealthy',
+        status: "unhealthy",
         latency: Date.now() - startTime,
         timestamp: new Date(),
         error: error.message,
@@ -265,7 +265,7 @@ export class ServiceTestHarness extends EventEmitter {
         const health = await this.checkServiceHealth(config);
         this.healthResults.set(name, health);
 
-        if (health.status !== 'healthy') {
+        if (health.status !== "healthy") {
           allHealthy = false;
         }
       }
@@ -392,24 +392,24 @@ export function createDefaultHarness(): ServiceTestHarness {
 
   harness.registerServices([
     {
-      name: 'api',
-      baseUrl: process.env.API_BASE_URL || 'http://localhost:4000',
-      healthEndpoint: '/health',
+      name: "api",
+      baseUrl: process.env.API_BASE_URL || "http://localhost:4000",
+      healthEndpoint: "/health",
       timeout: 5000,
     },
     {
-      name: 'graph-api',
-      baseUrl: process.env.GRAPH_API_URL || 'http://localhost:4001',
-      healthEndpoint: '/health',
+      name: "graph-api",
+      baseUrl: process.env.GRAPH_API_URL || "http://localhost:4001",
+      healthEndpoint: "/health",
       timeout: 5000,
-      dependencies: ['api'],
+      dependencies: ["api"],
     },
     {
-      name: 'copilot',
-      baseUrl: process.env.COPILOT_URL || 'http://localhost:4002',
-      healthEndpoint: '/health',
+      name: "copilot",
+      baseUrl: process.env.COPILOT_URL || "http://localhost:4002",
+      healthEndpoint: "/health",
       timeout: 10000,
-      dependencies: ['api'],
+      dependencies: ["api"],
     },
   ]);
 

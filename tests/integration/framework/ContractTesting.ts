@@ -7,8 +7,8 @@
  * @module tests/integration/framework
  */
 
-import Ajv, { ValidateFunction, ErrorObject } from 'ajv';
-import addFormats from 'ajv-formats';
+import Ajv, { ValidateFunction, ErrorObject } from "ajv";
+import addFormats from "ajv-formats";
 
 /**
  * Contract definition
@@ -34,7 +34,7 @@ export interface ContractInteraction {
  * Contract request definition
  */
 export interface ContractRequest {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
   path: string;
   headers?: Record<string, string>;
   query?: Record<string, string>;
@@ -191,7 +191,7 @@ export class ContractVerifier {
       const response = await fetch(url, {
         method: interaction.request.method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           ...interaction.request.headers,
         },
         body: interaction.request.body ? JSON.stringify(interaction.request.body) : undefined,
@@ -226,9 +226,7 @@ export class ContractVerifier {
         for (const [key, value] of Object.entries(interaction.response.headers)) {
           const receivedHeader = receivedResponse.headers[key.toLowerCase()];
           if (receivedHeader !== value) {
-            responseErrors.push(
-              `Expected header ${key}="${value}", got "${receivedHeader}"`
-            );
+            responseErrors.push(`Expected header ${key}="${value}", got "${receivedHeader}"`);
           }
         }
       }
@@ -293,8 +291,8 @@ export class ContractVerifier {
  * Format AJV error for readable output
  */
 function formatAjvError(error: ErrorObject): string {
-  const path = error.instancePath || 'root';
-  const message = error.message || 'validation failed';
+  const path = error.instancePath || "root";
+  const message = error.message || "validation failed";
   return `${path}: ${message}`;
 }
 
@@ -303,101 +301,101 @@ function formatAjvError(error: ErrorObject): string {
  */
 export const CommonSchemas = {
   uuid: {
-    type: 'string',
-    format: 'uuid',
+    type: "string",
+    format: "uuid",
   },
 
   email: {
-    type: 'string',
-    format: 'email',
+    type: "string",
+    format: "email",
   },
 
   datetime: {
-    type: 'string',
-    format: 'date-time',
+    type: "string",
+    format: "date-time",
   },
 
   entity: {
-    type: 'object',
-    required: ['id', 'type', 'name'],
+    type: "object",
+    required: ["id", "type", "name"],
     properties: {
-      id: { type: 'string', format: 'uuid' },
-      type: { type: 'string' },
-      name: { type: 'string' },
-      description: { type: 'string' },
-      properties: { type: 'object' },
-      labels: { type: 'array', items: { type: 'string' } },
-      confidence: { type: 'number', minimum: 0, maximum: 1 },
-      source: { type: 'string' },
-      createdAt: { type: 'string', format: 'date-time' },
-      updatedAt: { type: 'string', format: 'date-time' },
+      id: { type: "string", format: "uuid" },
+      type: { type: "string" },
+      name: { type: "string" },
+      description: { type: "string" },
+      properties: { type: "object" },
+      labels: { type: "array", items: { type: "string" } },
+      confidence: { type: "number", minimum: 0, maximum: 1 },
+      source: { type: "string" },
+      createdAt: { type: "string", format: "date-time" },
+      updatedAt: { type: "string", format: "date-time" },
     },
   },
 
   relationship: {
-    type: 'object',
-    required: ['id', 'type', 'sourceId', 'targetId'],
+    type: "object",
+    required: ["id", "type", "sourceId", "targetId"],
     properties: {
-      id: { type: 'string', format: 'uuid' },
-      type: { type: 'string' },
-      sourceId: { type: 'string', format: 'uuid' },
-      targetId: { type: 'string', format: 'uuid' },
-      properties: { type: 'object' },
-      weight: { type: 'number', minimum: 0, maximum: 1 },
-      confidence: { type: 'number', minimum: 0, maximum: 1 },
-      createdAt: { type: 'string', format: 'date-time' },
-      updatedAt: { type: 'string', format: 'date-time' },
+      id: { type: "string", format: "uuid" },
+      type: { type: "string" },
+      sourceId: { type: "string", format: "uuid" },
+      targetId: { type: "string", format: "uuid" },
+      properties: { type: "object" },
+      weight: { type: "number", minimum: 0, maximum: 1 },
+      confidence: { type: "number", minimum: 0, maximum: 1 },
+      createdAt: { type: "string", format: "date-time" },
+      updatedAt: { type: "string", format: "date-time" },
     },
   },
 
   investigation: {
-    type: 'object',
-    required: ['id', 'title', 'status'],
+    type: "object",
+    required: ["id", "title", "status"],
     properties: {
-      id: { type: 'string', format: 'uuid' },
-      title: { type: 'string', minLength: 1 },
-      description: { type: 'string' },
+      id: { type: "string", format: "uuid" },
+      title: { type: "string", minLength: 1 },
+      description: { type: "string" },
       status: {
-        type: 'string',
-        enum: ['draft', 'open', 'in_progress', 'pending_review', 'closed', 'archived'],
+        type: "string",
+        enum: ["draft", "open", "in_progress", "pending_review", "closed", "archived"],
       },
       priority: {
-        type: 'string',
-        enum: ['low', 'medium', 'high', 'critical', 'emergency'],
+        type: "string",
+        enum: ["low", "medium", "high", "critical", "emergency"],
       },
-      createdAt: { type: 'string', format: 'date-time' },
-      updatedAt: { type: 'string', format: 'date-time' },
+      createdAt: { type: "string", format: "date-time" },
+      updatedAt: { type: "string", format: "date-time" },
     },
   },
 
   user: {
-    type: 'object',
-    required: ['id', 'email', 'role'],
+    type: "object",
+    required: ["id", "email", "role"],
     properties: {
-      id: { type: 'string', format: 'uuid' },
-      email: { type: 'string', format: 'email' },
-      username: { type: 'string' },
-      firstName: { type: 'string' },
-      lastName: { type: 'string' },
-      role: { type: 'string', enum: ['admin', 'analyst', 'viewer', 'user'] },
-      isActive: { type: 'boolean' },
-      createdAt: { type: 'string', format: 'date-time' },
+      id: { type: "string", format: "uuid" },
+      email: { type: "string", format: "email" },
+      username: { type: "string" },
+      firstName: { type: "string" },
+      lastName: { type: "string" },
+      role: { type: "string", enum: ["admin", "analyst", "viewer", "user"] },
+      isActive: { type: "boolean" },
+      createdAt: { type: "string", format: "date-time" },
     },
   },
 
   graphqlResponse: {
-    type: 'object',
+    type: "object",
     properties: {
-      data: { type: ['object', 'null'] },
+      data: { type: ["object", "null"] },
       errors: {
-        type: 'array',
+        type: "array",
         items: {
-          type: 'object',
-          required: ['message'],
+          type: "object",
+          required: ["message"],
           properties: {
-            message: { type: 'string' },
-            path: { type: 'array' },
-            extensions: { type: 'object' },
+            message: { type: "string" },
+            path: { type: "array" },
+            extensions: { type: "object" },
           },
         },
       },
@@ -405,19 +403,19 @@ export const CommonSchemas = {
   },
 
   healthResponse: {
-    type: 'object',
-    required: ['status'],
+    type: "object",
+    required: ["status"],
     properties: {
-      status: { type: 'string', enum: ['ok', 'healthy', 'degraded', 'unhealthy'] },
-      version: { type: 'string' },
-      uptime: { type: 'number' },
+      status: { type: "string", enum: ["ok", "healthy", "degraded", "unhealthy"] },
+      version: { type: "string" },
+      uptime: { type: "number" },
       services: {
-        type: 'object',
+        type: "object",
         additionalProperties: {
-          type: 'object',
+          type: "object",
           properties: {
-            status: { type: 'string' },
-            latency: { type: 'number' },
+            status: { type: "string" },
+            latency: { type: "number" },
           },
         },
       },
@@ -425,26 +423,26 @@ export const CommonSchemas = {
   },
 
   errorResponse: {
-    type: 'object',
-    required: ['error'],
+    type: "object",
+    required: ["error"],
     properties: {
-      error: { type: 'string' },
-      message: { type: 'string' },
-      code: { type: 'string' },
-      statusCode: { type: 'number' },
-      details: { type: 'object' },
+      error: { type: "string" },
+      message: { type: "string" },
+      code: { type: "string" },
+      statusCode: { type: "number" },
+      details: { type: "object" },
     },
   },
 
   paginatedResponse: (itemSchema: object) => ({
-    type: 'object',
-    required: ['items', 'total'],
+    type: "object",
+    required: ["items", "total"],
     properties: {
-      items: { type: 'array', items: itemSchema },
-      total: { type: 'number', minimum: 0 },
-      page: { type: 'number', minimum: 1 },
-      pageSize: { type: 'number', minimum: 1 },
-      hasMore: { type: 'boolean' },
+      items: { type: "array", items: itemSchema },
+      total: { type: "number", minimum: 0 },
+      page: { type: "number", minimum: 1 },
+      pageSize: { type: "number", minimum: 1 },
+      hasMore: { type: "boolean" },
     },
   }),
 };
@@ -483,24 +481,29 @@ export class ContractBuilder {
   }
 
   get(path: string, description: string): InteractionBuilder {
-    return new InteractionBuilder(this, 'GET', path, description);
+    return new InteractionBuilder(this, "GET", path, description);
   }
 
   post(path: string, description: string): InteractionBuilder {
-    return new InteractionBuilder(this, 'POST', path, description);
+    return new InteractionBuilder(this, "POST", path, description);
   }
 
   put(path: string, description: string): InteractionBuilder {
-    return new InteractionBuilder(this, 'PUT', path, description);
+    return new InteractionBuilder(this, "PUT", path, description);
   }
 
   delete(path: string, description: string): InteractionBuilder {
-    return new InteractionBuilder(this, 'DELETE', path, description);
+    return new InteractionBuilder(this, "DELETE", path, description);
   }
 
   build(): Contract {
-    if (!this.contract.name || !this.contract.version || !this.contract.provider || !this.contract.consumer) {
-      throw new Error('Contract must have name, version, provider, and consumer');
+    if (
+      !this.contract.name ||
+      !this.contract.version ||
+      !this.contract.provider ||
+      !this.contract.consumer
+    ) {
+      throw new Error("Contract must have name, version, provider, and consumer");
     }
     return this.contract as Contract;
   }
@@ -515,7 +518,7 @@ class InteractionBuilder {
 
   constructor(
     parent: ContractBuilder,
-    method: ContractRequest['method'],
+    method: ContractRequest["method"],
     path: string,
     description: string
   ) {
