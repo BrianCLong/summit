@@ -13,7 +13,7 @@ Curated open-source intelligence feeds prioritized for IntelGraph ingestion.
 7. **OpenCorporates API** – global corporate registry information.
 8. **AlienVault OTX** – community threat intelligence pulses.
 9. **Have I Been Pwned API** – breached credential and account exposure.
-10. **GDELT Project** – global news event monitoring.
+10. **GDELT Project (GKG)** – real-time global news narrative and metadata stream with graph-ready entities, themes, emotions, and locations; available via raw feeds, BigQuery (`gdelt-bq.gdeltv2.gkg`), and DOC 2.0 API for source linkage.
 11. **US Treasury OFAC SDN List** – sanctions against individuals and entities.
 12. **OpenSanctions** – consolidated sanctions and politically exposed person data.
 13. **UN Comtrade** – international trade statistics.
