@@ -7,11 +7,13 @@ const lookup = promisify(dns.lookup);
 /**
  * Validates a URL to prevent SSRF attacks.
  * Checks for private IP ranges and valid protocols.
+ * Returns the resolved IP address to prevent DNS rebinding.
  *
  * @param url The URL to validate
+ * @returns The resolved IP address
  * @throws Error if URL is invalid or unsafe
  */
-export async function validateSafeUrl(url: string): Promise<void> {
+export async function validateSafeUrl(url: string): Promise<string> {
   let parsedUrl: URL;
 
   try {
@@ -33,25 +35,20 @@ export async function validateSafeUrl(url: string): Promise<void> {
     hostname = hostname.slice(1, -1);
   }
 
-  // Check if hostname is an IP (IPv4 or IPv6)
-  if (Address4.isValid(hostname)) {
+  // Check if hostname is already an IP
+  if (Address4.isValid(hostname) || Address6.isValid(hostname)) {
+    // It's an IP, validate it directly
     checkIp(hostname);
-    return;
-  }
-
-  if (Address6.isValid(hostname)) {
-    checkIp(hostname);
-    return;
+    return hostname;
   }
 
   // 3. DNS Resolution & IP Check
   try {
     // lookup returns the first address found
     const result = await lookup(hostname);
-    // Note: There is a Time-of-Check Time-of-Use (TOCTOU) race condition here.
-    // The IP resolved here might differ from the one used by fetch() due to DNS rebinding.
-    // For a robust fix, we would need a custom HTTP Agent that uses the resolved IP.
-    checkIp(result.address);
+    const ipToValidate = result.address;
+    checkIp(ipToValidate);
+    return ipToValidate;
   } catch (error) {
     if ((error as Error).message.includes('Unsafe IP')) {
         throw error;
@@ -61,67 +58,89 @@ export async function validateSafeUrl(url: string): Promise<void> {
 }
 
 function checkIp(ip: string): void {
-  // Check IPv4
   if (Address4.isValid(ip)) {
-    // Private ranges:
-    // 10.0.0.0/8
-    // 172.16.0.0/12
-    // 192.168.0.0/16
-    // 127.0.0.0/8 (Loopback)
-    // 169.254.0.0/16 (Link-local)
-    // 0.0.0.0/8
+    // IPv4 Checks
+    const octets = ip.split('.').map(Number);
+    const o1 = octets[0];
+    const o2 = octets[1];
+    const o3 = octets[2];
 
-    if (ip.startsWith('10.') || ip.startsWith('127.') || ip.startsWith('169.254.') || ip.startsWith('192.168.') || ip.startsWith('0.')) {
+    if (
+        o1 === 0 || // 0.0.0.0/8
+        o1 === 10 || // 10.0.0.0/8
+        (o1 === 100 && (o2 & 192) === 64) || // 100.64.0.0/10
+        o1 === 127 || // 127.0.0.0/8
+        (o1 === 169 && o2 === 254) || // 169.254.0.0/16
+        (o1 === 172 && o2 >= 16 && o2 <= 31) || // 172.16.0.0/12
+        (o1 === 192 && o2 === 0 && o3 === 0) || // 192.0.0.0/24
+        (o1 === 192 && o2 === 0 && o3 === 2) || // 192.0.2.0/24
+        (o1 === 192 && o2 === 88 && o3 === 99) || // 192.88.99.0/24
+        (o1 === 192 && o2 === 168) || // 192.168.0.0/16
+        (o1 === 198 && (o2 & 254) === 18) || // 198.18.0.0/15
+        (o1 === 198 && o2 === 51 && o3 === 100) || // 198.51.100.0/24
+        (o1 === 203 && o2 === 0 && o3 === 113) || // 203.0.113.0/24
+        o1 >= 224 // Multicast (224.0.0.0/4) & Reserved (240.0.0.0/4)
+    ) {
          throw new Error(`Unsafe IP address blocked: ${ip}`);
     }
-
-    // 172.16.0.0 - 172.31.255.255
-    if (ip.startsWith('172.')) {
-        const parts = ip.split('.');
-        const secondOctet = parseInt(parts[1], 10);
-        if (secondOctet >= 16 && secondOctet <= 31) {
-            throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
-    }
-    return;
-  }
-
-  // Check IPv6
-  if (Address6.isValid(ip)) {
+  } else if (Address6.isValid(ip)) {
      const addr = new Address6(ip);
 
-     // Block Loopback (::1) and unspecified (::)
-     if (addr.isLoopback() || ip === '::' || ip === '::1') {
+     if (
+         addr.isLoopback() || // ::1
+         addr.isLinkLocal() || // fe80::/10
+         addr.isMulticast() // ff00::/8
+     ) {
          throw new Error(`Unsafe IP address blocked: ${ip}`);
      }
 
-     // Block Unique Local (fc00::/7) and Link-local (fe80::/10)
-     // Use canonical form for checking if possible, or just start checks.
-     // ip-address Address6.getCanonicalForm()
+     if (ip === '::' || ip === '0:0:0:0:0:0:0:0') throw new Error(`Unsafe IP address blocked: ${ip}`); // ::/128
 
-     let canonical = ip;
-     try {
-        canonical = addr.to4().address; // If it's a 6to4 or mapped, this helps? No.
-     } catch (e) {
-        // ignore
-     }
+     const canonical = addr.canonicalForm();
+     if (canonical) {
+        const cParts = canonical.split(':');
+        const firstHex = parseInt(cParts[0], 16);
 
-     // Simple string checks on the input IP (which comes from dns.lookup or URL)
-     const lowerIp = ip.toLowerCase();
+        // Unique Local: fc00::/7 => fcxx or fdxx
+        if ((firstHex & 0xfe00) === 0xfc00) {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
 
-     // fc00::/7 -> fc, fd
-     if (lowerIp.startsWith('fc') || lowerIp.startsWith('fd')) {
-         throw new Error(`Unsafe IP address blocked: ${ip}`);
-     }
+        // Mapped IPv4: ::ffff:0:0/96
+        if (cParts[0] === '0000' && cParts[1] === '0000' && cParts[2] === '0000' && cParts[3] === '0000' && cParts[4] === '0000' && cParts[5] === 'ffff') {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
 
-     // fe80::/10 -> fe8, fe9, fea, feb
-     if (lowerIp.startsWith('fe8') || lowerIp.startsWith('fe9') || lowerIp.startsWith('fea') || lowerIp.startsWith('feb')) {
-         throw new Error(`Unsafe IP address blocked: ${ip}`);
-     }
+        // Discard-Only: 100::/64
+        if (cParts[0] === '0100' && cParts[1] === '0000' && cParts[2] === '0000' && cParts[3] === '0000') {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
 
-     // IPv4 mapped IPv6: ::ffff:1.2.3.4
-     if (lowerIp.includes('::ffff:')) {
-         throw new Error(`IPv4-mapped IPv6 addresses are blocked: ${ip}`);
+        // Teredo: 2001:0000::/32
+        if (cParts[0] === '2001' && cParts[1] === '0000') {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
+
+        // ORCHIDv2: 2001:0020::/28
+        const secondHex = parseInt(cParts[1], 16);
+        if (cParts[0] === '2001' && (secondHex >= 0x0020 && secondHex <= 0x002f)) {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
+
+        // Documentation: 2001:0db8::/32
+        if (cParts[0] === '2001' && cParts[1] === '0db8') {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
+
+        // 6to4: 2002::/16
+        if (cParts[0] === '2002') {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
+
+        // IPv4-Embedded: 64:ff9b::/96
+        if (cParts[0] === '0064' && cParts[1] === 'ff9b' && cParts[2] === '0000' && cParts[3] === '0000' && cParts[4] === '0000' && cParts[5] === '0000') {
+             throw new Error(`Unsafe IP address blocked: ${ip}`);
+        }
      }
   }
 }
