@@ -10,7 +10,7 @@ import { PersonAssociationV1 } from './queries.js'
 /**
  * Insight types
  */
-export const InsightTypeV1 = z.enum([
+const InsightTypeV1Schema = z.enum([
   'person-network',
   'organization-network',
   'relationship-analysis',
@@ -18,19 +18,21 @@ export const InsightTypeV1 = z.enum([
   'entity-summary',
 ])
 
-export type InsightTypeV1 = z.infer<typeof InsightTypeV1>
+export const InsightTypeV1 = InsightTypeV1Schema
+export type InsightTypeV1 = z.infer<typeof InsightTypeV1Schema>
 
 /**
  * Insight status
  */
-export const InsightStatusV1 = z.enum(['pending', 'generating', 'completed', 'failed'])
+const InsightStatusV1Schema = z.enum(['pending', 'generating', 'completed', 'failed'])
 
-export type InsightStatusV1 = z.infer<typeof InsightStatusV1>
+export const InsightStatusV1 = InsightStatusV1Schema
+export type InsightStatusV1 = z.infer<typeof InsightStatusV1Schema>
 
 /**
  * Create Person Network Insight Request
  */
-export const CreatePersonNetworkInsightRequestV1 = z.object({
+const CreatePersonNetworkInsightRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   personId: z.string().uuid().describe('Person entity ID'),
   depth: z.number().int().min(1).max(3).default(2).describe('Network analysis depth'),
@@ -52,12 +54,13 @@ export const CreatePersonNetworkInsightRequestV1 = z.object({
     .optional(),
 })
 
-export type CreatePersonNetworkInsightRequestV1 = z.infer<typeof CreatePersonNetworkInsightRequestV1>
+export const CreatePersonNetworkInsightRequestV1 = CreatePersonNetworkInsightRequestV1Schema
+export type CreatePersonNetworkInsightRequestV1 = z.infer<typeof CreatePersonNetworkInsightRequestV1Schema>
 
 /**
  * Person Network Insight Data
  */
-export const PersonNetworkInsightDataV1 = z.object({
+const PersonNetworkInsightDataV1Schema = z.object({
   person: PersonEntityV1.describe('Root person entity'),
   network: z.object({
     size: z.number().int().nonnegative().describe('Total network size'),
@@ -93,17 +96,18 @@ export const PersonNetworkInsightDataV1 = z.object({
     .optional(),
 })
 
-export type PersonNetworkInsightDataV1 = z.infer<typeof PersonNetworkInsightDataV1>
+export const PersonNetworkInsightDataV1 = PersonNetworkInsightDataV1Schema
+export type PersonNetworkInsightDataV1 = z.infer<typeof PersonNetworkInsightDataV1Schema>
 
 /**
  * Create Person Network Insight Response
  */
-export const CreatePersonNetworkInsightResponseV1 = z.object({
+const CreatePersonNetworkInsightResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   insightId: z.string().uuid().describe('Unique insight identifier'),
   type: z.literal('person-network').describe('Insight type'),
   status: InsightStatusV1.describe('Insight generation status'),
-  data: PersonNetworkInsightDataV1.optional().describe('Insight data (if completed)'),
+  data: PersonNetworkInsightDataV1Schema.optional().describe('Insight data (if completed)'),
   error: z.string().optional().describe('Error message if failed'),
   metadata: z.object({
     generatedAt: z.string().datetime().describe('When the insight was generated'),
@@ -113,22 +117,24 @@ export const CreatePersonNetworkInsightResponseV1 = z.object({
   }),
 })
 
-export type CreatePersonNetworkInsightResponseV1 = z.infer<typeof CreatePersonNetworkInsightResponseV1>
+export const CreatePersonNetworkInsightResponseV1 = CreatePersonNetworkInsightResponseV1Schema
+export type CreatePersonNetworkInsightResponseV1 = z.infer<typeof CreatePersonNetworkInsightResponseV1Schema>
 
 /**
  * Get Insight Request
  */
-export const GetInsightRequestV1 = z.object({
+const GetInsightRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   insightId: z.string().uuid().describe('Insight ID'),
 })
 
-export type GetInsightRequestV1 = z.infer<typeof GetInsightRequestV1>
+export const GetInsightRequestV1 = GetInsightRequestV1Schema
+export type GetInsightRequestV1 = z.infer<typeof GetInsightRequestV1Schema>
 
 /**
  * Get Insight Response (generic)
  */
-export const GetInsightResponseV1 = z.object({
+const GetInsightResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   insightId: z.string().uuid().describe('Insight ID'),
   type: InsightTypeV1.describe('Insight type'),
@@ -143,17 +149,18 @@ export const GetInsightResponseV1 = z.object({
   }),
 })
 
-export type GetInsightResponseV1 = z.infer<typeof GetInsightResponseV1>
+export const GetInsightResponseV1 = GetInsightResponseV1Schema
+export type GetInsightResponseV1 = z.infer<typeof GetInsightResponseV1Schema>
 
 /**
  * Get Person Network Insight Response
  */
-export const GetPersonNetworkInsightResponseV1 = z.object({
+const GetPersonNetworkInsightResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   insightId: z.string().uuid().describe('Insight ID'),
   type: z.literal('person-network').describe('Insight type'),
   status: InsightStatusV1.describe('Insight status'),
-  data: PersonNetworkInsightDataV1.optional().describe('Insight data (if completed)'),
+  data: PersonNetworkInsightDataV1Schema.optional().describe('Insight data (if completed)'),
   error: z.string().optional().describe('Error message if failed'),
   metadata: z.object({
     createdAt: z.string().datetime().describe('When the insight was created'),
@@ -164,12 +171,13 @@ export const GetPersonNetworkInsightResponseV1 = z.object({
   }),
 })
 
-export type GetPersonNetworkInsightResponseV1 = z.infer<typeof GetPersonNetworkInsightResponseV1>
+export const GetPersonNetworkInsightResponseV1 = GetPersonNetworkInsightResponseV1Schema
+export type GetPersonNetworkInsightResponseV1 = z.infer<typeof GetPersonNetworkInsightResponseV1Schema>
 
 /**
  * List Insights Request
  */
-export const ListInsightsRequestV1 = z.object({
+const ListInsightsRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   filters: z
     .object({
@@ -188,12 +196,13 @@ export const ListInsightsRequestV1 = z.object({
     .optional(),
 })
 
-export type ListInsightsRequestV1 = z.infer<typeof ListInsightsRequestV1>
+export const ListInsightsRequestV1 = ListInsightsRequestV1Schema
+export type ListInsightsRequestV1 = z.infer<typeof ListInsightsRequestV1Schema>
 
 /**
  * Insight summary (for list responses)
  */
-export const InsightSummaryV1 = z.object({
+const InsightSummaryV1Schema = z.object({
   insightId: z.string().uuid().describe('Insight ID'),
   type: InsightTypeV1.describe('Insight type'),
   status: InsightStatusV1.describe('Insight status'),
@@ -201,14 +210,15 @@ export const InsightSummaryV1 = z.object({
   completedAt: z.string().datetime().optional().describe('When the insight completed'),
 })
 
-export type InsightSummaryV1 = z.infer<typeof InsightSummaryV1>
+export const InsightSummaryV1 = InsightSummaryV1Schema
+export type InsightSummaryV1 = z.infer<typeof InsightSummaryV1Schema>
 
 /**
  * List Insights Response
  */
-export const ListInsightsResponseV1 = z.object({
+const ListInsightsResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
-  insights: z.array(InsightSummaryV1).describe('Insight summaries'),
+  insights: z.array(InsightSummaryV1Schema).describe('Insight summaries'),
   pagination: z.object({
     total: z.number().int().nonnegative().describe('Total matching insights'),
     limit: z.number().int().positive().describe('Results per page'),
@@ -217,26 +227,29 @@ export const ListInsightsResponseV1 = z.object({
   }),
 })
 
-export type ListInsightsResponseV1 = z.infer<typeof ListInsightsResponseV1>
+export const ListInsightsResponseV1 = ListInsightsResponseV1Schema
+export type ListInsightsResponseV1 = z.infer<typeof ListInsightsResponseV1Schema>
 
 /**
  * Delete Insight Request
  */
-export const DeleteInsightRequestV1 = z.object({
+const DeleteInsightRequestV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   insightId: z.string().uuid().describe('Insight ID to delete'),
 })
 
-export type DeleteInsightRequestV1 = z.infer<typeof DeleteInsightRequestV1>
+export const DeleteInsightRequestV1 = DeleteInsightRequestV1Schema
+export type DeleteInsightRequestV1 = z.infer<typeof DeleteInsightRequestV1Schema>
 
 /**
  * Delete Insight Response
  */
-export const DeleteInsightResponseV1 = z.object({
+const DeleteInsightResponseV1Schema = z.object({
   version: z.literal('v1').describe('API version'),
   insightId: z.string().uuid().describe('Deleted insight ID'),
   deleted: z.boolean().describe('Whether the insight was deleted'),
   deletedAt: z.string().datetime().describe('When the insight was deleted'),
 })
 
-export type DeleteInsightResponseV1 = z.infer<typeof DeleteInsightResponseV1>
+export const DeleteInsightResponseV1 = DeleteInsightResponseV1Schema
+export type DeleteInsightResponseV1 = z.infer<typeof DeleteInsightResponseV1Schema>

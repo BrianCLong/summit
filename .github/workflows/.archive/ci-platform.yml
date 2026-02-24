@@ -181,7 +181,7 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
     needs: [build-services, build-apps]
-    if: (((github.event_name == 'pull_request') && (always())) && (github.event_name == 'pull_request')) && (always())
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -207,6 +207,7 @@ jobs:
           echo "Integration tests would run here"
 
       - name: Cleanup
+        if: always()
         run: |
           docker compose -f deploy/compose/docker-compose.dev.yml down -v
 
@@ -236,6 +237,7 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -250,5 +252,6 @@ jobs:
 
       - name: Upload Trivy scan results
         uses: github/codeql-action/upload-sarif@v3
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'

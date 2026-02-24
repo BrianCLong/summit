@@ -9,7 +9,7 @@ import { EntityMetadataV1 } from './provenance.js'
 /**
  * Person Entity - Represents an individual person
  */
-export const PersonEntityV1 = z.object({
+const PersonEntityV1Schema = z.object({
   id: z.string().uuid().describe('Unique identifier (UUID v4)'),
   type: z.literal('Person').describe('Entity type discriminator'),
   version: z.literal('v1').describe('Schema version'),
@@ -25,12 +25,13 @@ export const PersonEntityV1 = z.object({
   metadata: EntityMetadataV1.describe('Lifecycle and provenance metadata'),
 })
 
-export type PersonEntityV1 = z.infer<typeof PersonEntityV1>
+export const PersonEntityV1 = PersonEntityV1Schema
+export type PersonEntityV1 = z.infer<typeof PersonEntityV1Schema>
 
 /**
  * Organization Entity - Represents a company or organization
  */
-export const OrganizationEntityV1 = z.object({
+const OrganizationEntityV1Schema = z.object({
   id: z.string().uuid().describe('Unique identifier (UUID v4)'),
   type: z.literal('Organization').describe('Entity type discriminator'),
   version: z.literal('v1').describe('Schema version'),
@@ -47,17 +48,19 @@ export const OrganizationEntityV1 = z.object({
   metadata: EntityMetadataV1.describe('Lifecycle and provenance metadata'),
 })
 
-export type OrganizationEntityV1 = z.infer<typeof OrganizationEntityV1>
+export const OrganizationEntityV1 = OrganizationEntityV1Schema
+export type OrganizationEntityV1 = z.infer<typeof OrganizationEntityV1Schema>
 
 /**
  * Generic Entity - Union type for all entity types
  */
-export const EntityV1 = z.discriminatedUnion('type', [
-  PersonEntityV1,
-  OrganizationEntityV1,
+const EntityV1Schema = z.discriminatedUnion('type', [
+  PersonEntityV1Schema,
+  OrganizationEntityV1Schema,
 ])
 
-export type EntityV1 = z.infer<typeof EntityV1>
+export const EntityV1 = EntityV1Schema
+export type EntityV1 = z.infer<typeof EntityV1Schema>
 
 /**
  * Entity type helper for narrowing

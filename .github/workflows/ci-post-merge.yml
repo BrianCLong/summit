@@ -33,7 +33,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - uses: pnpm/action-setup@v4                - name: Install dependencies
+      - uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate SBOM
         run: pnpm generate:sbom
@@ -54,7 +56,9 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           cache: 'pnpm'
-      - uses: pnpm/action-setup@v4                - name: Install dependencies
+      - uses: pnpm/action-setup@v4
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Generate Provenance
         run: pnpm generate:provenance
