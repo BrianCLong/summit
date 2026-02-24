@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T03:02:00Z",
-  "revision_note": "Added support bundle generation endpoint with signed manifest and redacted payload reporting.",
+  "last_updated": "2026-02-08T03:21:23Z",
+  "revision_note": "Expanded Sprint +6 pilot execution plan with evidence, MAESTRO alignment, and implementation matrix.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -19,6 +19,13 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Delivery pack: sprint backlog, architecture, OAS3, OPA policy + tests, decision-policy versioning, receipt schema + example, dashboards, alerts, and runbooks."
+    },
+    {
+      "id": "sprint-plus-6-pilot-execution",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Sprint +6 plan covering pilot execution, activation funnel, feedback capture, migration tools, and v1.1 roadmap lock.",
+      "artifact": "sprint/sprint-06-pilot-execution-feedback-migration-tools-roadmap.md"
     },
     {
       "id": "B",
