@@ -41,6 +41,27 @@ async function runDeterminismGate(sha) {
   return { verdict: violations.length === 0 ? 'PASS' : 'FAIL', evidence: buildDeterminismEvidence({ scannedPaths: ['evidence/'], violations, falsePositivePatterns: [], sha }) };
 }
 
+async function runWorkflowActionVersionsGate() {
+  console.log('Running: Workflow Action Version Pinning...');
+  const verifierPath = join(ROOT, '.github/actions/verify-workflow-versions/index.cjs');
+  if (!existsSync(verifierPath)) {
+    console.log('  Status: SKIP (verifier not found)\n');
+    return { verdict: 'SKIP' };
+  }
+  try {
+    const output = execSync('node .github/actions/verify-workflow-versions/index.cjs', {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
+    console.log('  Status: PASS\n');
+    return { verdict: 'PASS', output };
+  } catch (err) {
+    console.log('  Status: FAIL\n');
+    return { verdict: 'FAIL', output: err.stdout || err.message, error: err.stderr };
+  }
+}
+
 async function runBranchProtectionGate(sha) {
   console.log('Running: Branch Protection Audit...');
   if (OFFLINE_MODE) {
@@ -120,6 +141,7 @@ async function main() {
   const results = [];
   results.push({ gate: 'Required Checks Policy', ...await runPolicyGate(sha) });
   results.push({ gate: 'Determinism Scan', ...await runDeterminismGate(sha) });
+  results.push({ gate: 'Workflow Action Versions', ...await runWorkflowActionVersionsGate() });
   results.push({ gate: 'Branch Protection', ...await runBranchProtectionGate(sha) });
   const hasBlockingFailure = results.some(r => r.verdict === 'FAIL');
   writeEvidence(results, sha);

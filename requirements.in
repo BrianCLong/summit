@@ -17,7 +17,9 @@ langchain_community
 pytest-cov
 requests
 urllib3>=2.6.0
-openlineage-dbt
+# Keep OpenLineage libraries in lockstep to avoid schema/transport drift.
+openlineage-python==1.44.*
+openlineage-dbt==1.44.*
 jsonschema>=4.0.0
 beautifulsoup4
 deepdiff

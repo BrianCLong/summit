@@ -73,6 +73,7 @@ export {
 
 export { CognitiveStateService } from '../services/CognitiveStateService.js';
 export { CascadeDetectionService } from '../services/CascadeDetectionService.js';
+export { EarlyWarningService } from '../services/EarlyWarningService.js';
 
 // Module initialization
 import type { Driver } from 'neo4j-driver';

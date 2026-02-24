@@ -1,0 +1,27 @@
+version: 1
+graph:
+  nodes:
+    person:
+      label: Person
+      id: summit.person.id
+      pk: postgres.person.id
+      fields:
+        summit.person.name: postgres.person.name
+        summit.person.email: postgres.person.email
+      provenance:
+        summit_source: postgres
+        summit_source_lsn: postgres.__meta__.lsn
+        summit_ingested_at: runtime.now
+  rels:
+    knows:
+      type: KNOWS
+      from: person
+      to: person
+      id: summit.knows.id
+      pk: postgres.knows.id
+      fields:
+        summit.knows.since: postgres.knows.since
+      provenance:
+        summit_source: postgres
+        summit_source_lsn: postgres.__meta__.lsn
+        summit_ingested_at: runtime.now

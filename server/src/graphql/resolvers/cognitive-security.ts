@@ -15,6 +15,7 @@ import {
   getProvenanceService,
   CognitiveStateService,
   CascadeDetectionService,
+  EarlyWarningService,
 } from '../../cognitive-security/index.js';
 
 import type {
@@ -52,6 +53,7 @@ const getServices = () => {
       provenance: getProvenanceService(),
       cognitiveState: CognitiveStateService.getInstance(),
       cascadeDetection: CascadeDetectionService.getInstance(),
+      earlyWarning: EarlyWarningService.getInstance(),
     };
   } catch (error: any) {
     throw new GraphQLError('Cognitive Security module not initialized', {
@@ -265,8 +267,8 @@ const Query = {
   },
 
   narrativeEarlyWarnings: async (_: unknown, { watchlistId }: { watchlistId?: string }) => {
-    // Placeholder implementation
-    return [];
+    const { earlyWarning } = getServices();
+    return earlyWarning.checkTippingPoints(watchlistId || '');
   },
 };
 

@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-24T00:00:00Z",
+  "revision_note": "Added lineage stack lockstep gate for OpenLineage/OpenMetadata compatibility hardening.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -13,6 +13,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "lineage-stack-lockstep-gate",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added CI preflight for OpenLineage/OpenMetadata lockstep checks and pinned OpenLineage Python dependencies."
     },
     {
       "id": "B",

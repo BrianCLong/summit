@@ -1,6 +1,7 @@
 import { mkdirSync } from 'fs';
 import { join } from 'path';
 import { startMicroVM, createSnapshot, restoreFromSnapshot, stopMicroVM, invokeSandbox as fcInvoke, VmHandle, VmSpec } from './firecracker';
+import { parseToolClass } from './validation';
 
 const spec: VmSpec = {
   kernelPath: process.env.FC_KERNEL_PATH ?? '/opt/intelgraph/fc/vmlinux.bin',
@@ -21,45 +22,48 @@ const EWMA_ALPHA = Number(process.env.FC_PREWARM_ALPHA ?? 0.3);
 const PREWARM_INTERVAL_MS = Number(process.env.FC_PREWARM_INTERVAL_MS ?? 30_000);
 
 export async function ensurePrewarmedSnapshot(toolClass: string) {
-  if (inFlight.has(toolClass) || warmPool.has(toolClass)) return;
-  inFlight.add(toolClass);
+  const safeToolClass = parseToolClass(toolClass);
+  if (inFlight.has(safeToolClass) || warmPool.has(safeToolClass)) return;
+  inFlight.add(safeToolClass);
   try {
     mkdirSync(SNAPSHOT_DIR, { recursive: true });
-    const baseVm = await startMicroVM(toolClass, spec);
-    const snapPath = join(SNAPSHOT_DIR, `${toolClass}.fc`);
+    const baseVm = await startMicroVM(safeToolClass, spec);
+    const snapPath = join(SNAPSHOT_DIR, `${safeToolClass}.fc`);
     await createSnapshot(baseVm, snapPath);
     await stopMicroVM(baseVm);
-    warmPool.set(toolClass, []);
+    warmPool.set(safeToolClass, []);
   } finally {
-    inFlight.delete(toolClass);
+    inFlight.delete(safeToolClass);
   }
 }
 
 export async function checkoutVm(toolClass: string): Promise<VmHandle> {
-  const pool = warmPool.get(toolClass) ?? [];
+  const safeToolClass = parseToolClass(toolClass);
+  const pool = warmPool.get(safeToolClass) ?? [];
   const handle = pool.pop();
   if (handle) {
-    warmPool.set(toolClass, pool);
-    recordUsage(toolClass);
+    warmPool.set(safeToolClass, pool);
+    recordUsage(safeToolClass);
     return handle;
   }
-  const snapshotPath = join(SNAPSHOT_DIR, `${toolClass}.fc`);
+  const snapshotPath = join(SNAPSHOT_DIR, `${safeToolClass}.fc`);
   try {
-    const vm = await restoreFromSnapshot(toolClass, snapshotPath);
-    recordUsage(toolClass);
+    const vm = await restoreFromSnapshot(safeToolClass, snapshotPath);
+    recordUsage(safeToolClass);
     return vm;
   } catch (err) {
     console.warn('snapshot restore failed, starting fresh', err);
-    recordUsage(toolClass);
-    return startMicroVM(toolClass, spec);
+    recordUsage(safeToolClass);
+    return startMicroVM(safeToolClass, spec);
   }
 }
 
 export async function releaseVm(vm: VmHandle) {
-  const pool = warmPool.get(vm.toolClass) ?? [];
+  const safeToolClass = parseToolClass(vm.toolClass);
+  const pool = warmPool.get(safeToolClass) ?? [];
   if (pool.length < Number(process.env.FC_POOL_MAX ?? 8)) {
     pool.push(vm);
-    warmPool.set(vm.toolClass, pool);
+    warmPool.set(safeToolClass, pool);
     return;
   }
   await stopMicroVM(vm);
@@ -85,21 +89,25 @@ export function startPrewarmManager(toolClasses: string[]) {
 }
 
 async function ensurePoolCapacity(toolClass: string) {
-  const pool = warmPool.get(toolClass) ?? [];
-  const target = Math.max(DEFAULT_TARGET, Math.ceil(usageEwma.get(toolClass) ?? DEFAULT_TARGET));
+  const safeToolClass = parseToolClass(toolClass);
+  const pool = warmPool.get(safeToolClass) ?? [];
+  const target = Math.max(
+    DEFAULT_TARGET,
+    Math.ceil(usageEwma.get(safeToolClass) ?? DEFAULT_TARGET),
+  );
   const deficit = target - pool.length;
   if (deficit <= 0) return;
-  const snapshotPath = join(SNAPSHOT_DIR, `${toolClass}.fc`);
+  const snapshotPath = join(SNAPSHOT_DIR, `${safeToolClass}.fc`);
   for (let i = 0; i < deficit; i += 1) {
     try {
-      const vm = await restoreFromSnapshot(toolClass, snapshotPath);
+      const vm = await restoreFromSnapshot(safeToolClass, snapshotPath);
       pool.push(vm);
     } catch (error) {
-      console.warn(`restore for prewarm ${toolClass} failed`, error);
+      console.warn(`restore for prewarm ${safeToolClass} failed`, error);
       break;
     }
   }
-  warmPool.set(toolClass, pool);
+  warmPool.set(safeToolClass, pool);
 }
 
 function recordUsage(toolClass: string) {
@@ -114,4 +122,3 @@ function recordUsage(toolClass: string) {
 }
 
 export type { VmHandle } from './firecracker';
-*** End

@@ -6,8 +6,29 @@ import { publish } from './transport/httpSse';
 import { emitFrame } from './telemetry';
 import { recordEvent } from './replay-client';
 import { startPrewarmManager } from './vm-pool';
+import {
+  rpcMethodSchema,
+  sessionIdSchema,
+  toolClassSchema,
+  parseRpcMethod,
+} from './validation';
 
 const scheduler = new Scheduler();
+const sessionCreateBodySchema = z
+  .object({ toolClass: toolClassSchema, caps: z.array(z.string()).default([]) })
+  .strict();
+const sessionInvokeBodySchema = z
+  .object({ fn: rpcMethodSchema, args: z.unknown() })
+  .strict();
+const jsonRpcInvokePayloadSchema = z
+  .object({
+    toolClass: toolClassSchema.optional(),
+    args: z.unknown().optional(),
+    sessionId: sessionIdSchema.optional(),
+    keepAlive: z.boolean().optional(),
+    caps: z.array(z.string()).optional(),
+  })
+  .strict();
 
 const TOOL_MANIFEST = [
   {
@@ -34,9 +55,7 @@ startPrewarmManager(TOOL_MANIFEST.map((t) => t.name));
 
 export function registerApi(app: FastifyInstance) {
   app.post('/v1/session', async (req, reply) => {
-    const body = z
-      .object({ toolClass: z.string(), caps: z.array(z.string()).default([]) })
-      .parse(req.body);
+    const body = sessionCreateBodySchema.parse(req.body);
     const tenant = (req.headers['x-tenant-id'] as string) ?? 'demo';
     const purpose = (req.headers['x-purpose'] as string) ?? 'ops';
     await authorize(req.headers.authorization, {
@@ -73,9 +92,19 @@ export function registerApi(app: FastifyInstance) {
   });
 
   app.post('/v1/session/:id/invoke', async (req, reply) => {
-    const params = z.object({ id: z.string() }).parse(req.params);
-    const body = z.object({ fn: z.string(), args: z.any() }).parse(req.body);
+    const params = z.object({ id: sessionIdSchema }).parse(req.params);
+    const body = sessionInvokeBodySchema.parse(req.body);
     const session = scheduler.get(params.id);
+    if (!session) {
+      return reply.code(404).send({ error: 'session not found' });
+    }
+    await authorize(req.headers.authorization, {
+      action: 'invoke',
+      tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
+      toolClass: session.vm.toolClass,
+      capabilityScopes: [],
+      purpose: (req.headers['x-purpose'] as string) ?? 'ops',
+    });
     void recordEvent(session?.recordingId, 'in', 'jsonrpc', {
       fn: body.fn,
       args: body.args,
@@ -98,8 +127,17 @@ export function registerApi(app: FastifyInstance) {
   });
 
   app.delete('/v1/session/:id', async (req, reply) => {
-    const params = z.object({ id: z.string() }).parse(req.params);
+    const params = z.object({ id: sessionIdSchema }).parse(req.params);
     const session = scheduler.get(params.id);
+    if (session) {
+      await authorize(req.headers.authorization, {
+        action: 'invoke',
+        tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
+        toolClass: session.vm.toolClass,
+        capabilityScopes: [],
+        purpose: (req.headers['x-purpose'] as string) ?? 'ops',
+      });
+    }
     await scheduler.release(params.id);
     publish(params.id, {
       event: 'session.closed',
@@ -130,6 +168,11 @@ export function registerApi(app: FastifyInstance) {
 
   app.post('/jsonrpc', async (req, reply) => {
     const body = req.body;
+    if (Array.isArray(body)) {
+      const error = jsonRpcError(null, -32600, 'Batch not supported');
+      return reply.code(501).send(error);
+    }
+
     if (typeof body !== 'object' || body === null) {
       return reply
         .code(400)
@@ -137,14 +180,23 @@ export function registerApi(app: FastifyInstance) {
     }
 
     const rpc = body as Record<string, unknown>;
-    if (rpc.jsonrpc !== '2.0' || typeof rpc.method !== 'string') {
+    let method: string;
+    try {
+      method = parseRpcMethod(rpc.method);
+    } catch {
+      return reply
+        .code(400)
+        .send(jsonRpcError(rpc.id ?? null, -32600, 'Invalid Request'));
+    }
+
+    if (rpc.jsonrpc !== '2.0') {
       return reply
         .code(400)
         .send(jsonRpcError(rpc.id ?? null, -32600, 'Invalid Request'));
     }
 
     const id = rpc.id ?? null;
-    if (rpc.method === 'mcp.ping') {
+    if (method === 'mcp.ping') {
       if (rpc.params !== undefined && typeof rpc.params !== 'object') {
         const error = jsonRpcError(id, -32602, 'Invalid params');
         void recordEvent(undefined, 'in', 'jsonrpc', rpc);
@@ -152,7 +204,7 @@ export function registerApi(app: FastifyInstance) {
         return reply.code(400).send(error);
       }
       emitFrame('in', 'jsonrpc', {
-        'rpc.method': rpc.method,
+        'rpc.method': method,
         'rpc.id': id ?? 'null',
       });
       void recordEvent(undefined, 'in', 'jsonrpc', rpc);
@@ -161,31 +213,37 @@ export function registerApi(app: FastifyInstance) {
       return reply.send(response);
     }
 
-    const invokePayload = z
-      .object({
-        toolClass: z.string().optional(),
-        args: z.any().optional(),
-        sessionId: z.string().optional(),
-        keepAlive: z.boolean().optional(),
-        caps: z.array(z.string()).optional(),
-      })
-      .parse(rpc.params ?? {});
+    const invokePayloadResult = jsonRpcInvokePayloadSchema.safeParse(
+      rpc.params ?? {},
+    );
+    if (!invokePayloadResult.success) {
+      const error = jsonRpcError(id, -32602, 'Invalid params');
+      void recordEvent(undefined, 'in', 'jsonrpc', rpc);
+      void recordEvent(undefined, 'out', 'jsonrpc', error);
+      return reply.code(400).send(error);
+    }
+    const invokePayload = invokePayloadResult.data;
 
     let session = invokePayload.sessionId
       ? (scheduler.get(invokePayload.sessionId) ?? undefined)
       : undefined;
     let created = false;
     if (!session) {
-      if (invokePayload.caps) {
-        await authorize(req.headers.authorization, {
-          action: 'allocate',
-          tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
-          toolClass: invokePayload.toolClass ?? rpc.method,
-          capabilityScopes: invokePayload.caps,
-          purpose: (req.headers['x-purpose'] as string) ?? 'ops',
-        });
+      if (invokePayload.sessionId) {
+        const err = jsonRpcError(id, -32001, 'Session not found');
+        void recordEvent(undefined, 'in', 'jsonrpc', rpc);
+        void recordEvent(undefined, 'out', 'jsonrpc', err);
+        return reply.code(404).send(err);
       }
-      session = await scheduler.allocate(invokePayload.toolClass ?? rpc.method);
+      const resolvedToolClass = invokePayload.toolClass ?? method;
+      await authorize(req.headers.authorization, {
+        action: 'allocate',
+        tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
+        toolClass: resolvedToolClass,
+        capabilityScopes: invokePayload.caps ?? [],
+        purpose: (req.headers['x-purpose'] as string) ?? 'ops',
+      });
+      session = await scheduler.allocate(resolvedToolClass);
       publish(session.id, {
         event: 'session.ready',
         data: JSON.stringify({
@@ -199,7 +257,7 @@ export function registerApi(app: FastifyInstance) {
 
     const args = invokePayload.args ?? {};
     emitFrame('in', 'jsonrpc', {
-      'rpc.method': rpc.method,
+      'rpc.method': method,
       'rpc.id': id ?? 'null',
       'mcp.session.id': session.id,
     });
@@ -213,21 +271,21 @@ export function registerApi(app: FastifyInstance) {
         action: 'invoke',
         tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
         toolClass: session.vm.toolClass,
-        capabilityScopes: invokePayload.caps,
+        capabilityScopes: invokePayload.caps ?? [],
         purpose: (req.headers['x-purpose'] as string) ?? 'ops',
       });
-      const result = await scheduler.invoke(session.id, rpc.method, args);
+      const result = await scheduler.invoke(session.id, method, args);
       publish(session.id, {
         event: 'session.invoke',
-        data: JSON.stringify({ sessionId: session.id, fn: rpc.method, result }),
+        data: JSON.stringify({ sessionId: session.id, fn: method, result }),
         recordingId: session.recordingId,
       });
       emitFrame('out', 'jsonrpc', {
         'mcp.session.id': session.id,
-        'mcp.invoke.fn': rpc.method,
+        'mcp.invoke.fn': method,
       });
       void recordEvent(session.recordingId, 'out', 'jsonrpc', {
-        method: rpc.method,
+        method,
         result,
       });
       const response = { jsonrpc: '2.0', id, result };

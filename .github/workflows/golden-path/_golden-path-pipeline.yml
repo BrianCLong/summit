@@ -124,7 +124,7 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
+        uses: pnpm/action-setup@v4 # v4
         with:
           version: 9.12.0
 
@@ -200,7 +200,7 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
+        uses: pnpm/action-setup@v4 # v4
         with:
           version: 9.12.0
 
@@ -274,7 +274,7 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
+        uses: pnpm/action-setup@v4 # v4
         with:
           version: 9.12.0
 

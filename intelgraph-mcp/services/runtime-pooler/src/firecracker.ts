@@ -1,6 +1,9 @@
 import { join } from 'path';
 import { randomUUID } from 'crypto';
+import { spawn } from 'child_process';
+import { mkdir } from 'fs/promises';
 import { execa } from 'execa';
+import { parseToolClass } from './validation';
 
 export type VmSpec = {
   kernelPath: string;
@@ -24,18 +27,16 @@ export async function startMicroVM(
   toolClass: string,
   spec: VmSpec,
 ): Promise<VmHandle> {
-  const id = `fc_${toolClass}_${randomUUID().slice(0, 8)}`;
+  const safeToolClass = parseToolClass(toolClass);
+  const id = `fc_${safeToolClass}_${randomUUID().slice(0, 8)}`;
   const apiSocket = join(RUNTIME_DIR, `${id}.sock`);
 
   if (MOCK) {
-    return { id, apiSocket, toolClass };
+    return { id, apiSocket, toolClass: safeToolClass };
   }
 
-  await execa('bash', ['-lc', `mkdir -p ${RUNTIME_DIR}`]);
-  await execa('bash', [
-    '-lc',
-    `nohup firecracker --api-sock ${apiSocket} >/tmp/${id}.log 2>&1 &`,
-  ]);
+  await mkdir(RUNTIME_DIR, { recursive: true });
+  launchFirecracker(apiSocket);
 
   await fcPut(apiSocket, '/machine-config', {
     vcpu_count: spec.vcpuCount,
@@ -57,7 +58,7 @@ export async function startMicroVM(
 
   await fcPut(apiSocket, '/actions', { action_type: 'InstanceStart' });
 
-  return { id, apiSocket, toolClass };
+  return { id, apiSocket, toolClass: safeToolClass };
 }
 
 export async function createSnapshot(handle: VmHandle, snapshotPath: string) {
@@ -73,17 +74,16 @@ export async function restoreFromSnapshot(
   toolClass: string,
   snapshotPath: string,
 ): Promise<VmHandle> {
-  const id = `fc_${toolClass}_${randomUUID().slice(0, 8)}`;
+  const safeToolClass = parseToolClass(toolClass);
+  const id = `fc_${safeToolClass}_${randomUUID().slice(0, 8)}`;
   const apiSocket = join(RUNTIME_DIR, `${id}.sock`);
 
   if (MOCK) {
-    return { id, apiSocket, toolClass, snapshotPath };
+    return { id, apiSocket, toolClass: safeToolClass, snapshotPath };
   }
 
-  await execa('bash', [
-    '-lc',
-    `nohup firecracker --api-sock ${apiSocket} >/tmp/${id}.log 2>&1 &`,
-  ]);
+  await mkdir(RUNTIME_DIR, { recursive: true });
+  launchFirecracker(apiSocket);
 
   await fcPut(apiSocket, '/snapshot/load', {
     snapshot_path: snapshotPath,
@@ -91,7 +91,7 @@ export async function restoreFromSnapshot(
     enable_diff_snapshots: false,
   });
 
-  return { id, apiSocket, toolClass, snapshotPath };
+  return { id, apiSocket, toolClass: safeToolClass, snapshotPath };
 }
 
 export async function stopMicroVM(handle: VmHandle) {
@@ -123,9 +123,31 @@ export async function invokeSandbox(
 
 async function fcPut(apiSocket: string, path: string, payload: unknown) {
   if (MOCK) return;
+  if (!path.startsWith('/')) {
+    throw new Error(`invalid firecracker path: ${path}`);
+  }
   const body = JSON.stringify(payload);
-  await execa('bash', [
-    '-lc',
-    `curl --unix-socket ${apiSocket} -s -X PUT http://localhost${path} -H 'Accept: application/json' -H 'Content-Type: application/json' -d '${body.replace(/'/g, "'\\''")}'`,
+  await execa('curl', [
+    '--unix-socket',
+    apiSocket,
+    '-s',
+    '-f',
+    '-X',
+    'PUT',
+    `http://localhost${path}`,
+    '-H',
+    'Accept: application/json',
+    '-H',
+    'Content-Type: application/json',
+    '--data-binary',
+    body,
   ]);
+}
+
+function launchFirecracker(apiSocket: string) {
+  const child = spawn('firecracker', ['--api-sock', apiSocket], {
+    detached: true,
+    stdio: 'ignore',
+  });
+  child.unref();
 }

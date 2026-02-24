@@ -551,6 +551,7 @@ export interface NarrativeCascade {
   /** Involved entities */
   originActorId?: string;
   hopIds: string[];
+  ioActorsInvolved?: string[];
 }
 
 export interface CascadeHop {

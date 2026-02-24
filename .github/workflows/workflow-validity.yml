@@ -57,6 +57,9 @@ jobs:
 
           printf '%s\n' "${WORKFLOWS[@]}" | xargs actionlint -shellcheck= -color -verbose
 
+      - name: Verify workflow and local action versions
+        uses: ./.github/actions/verify-workflow-versions
+
       - name: Summary
         if: always()
         run: |

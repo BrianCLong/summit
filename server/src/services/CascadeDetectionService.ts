@@ -41,31 +41,45 @@ export class CascadeDetectionService {
         WITH n, originActor, originRel, actor, path, length(path) as hops
         WHERE hops > 0
         
+        WITH n, originActor, originRel,
+             collect(actor.id) as reachNodes,
+             count(distinct actor) as reachCount,
+             max(hops) as maxDepth,
+             avg(hops) as avgHops,
+             collect([node in nodes(path) WHERE 'IOActor' IN labels(node) | node.id]) as ioActorLists
+             
         RETURN 
           $narrativeId as narrativeId,
           originActor.id as originActorId,
           originRel.timestamp as startTime,
-          collect(actor.id) as reachNodes,
-          count(distinct actor) as reachCount,
-          max(hops) as maxDepth,
-          avg(hops) as avgHops
+          reachNodes,
+          reachCount,
+          maxDepth,
+          avgHops,
+          ioActorLists
       `;
 
             const result = await session.run(query, { narrativeId, tenantId });
 
-            const cascades: NarrativeCascade[] = result.records.map((record: any) => ({
-                id: `cascade-${narrativeId}-${Date.now()}`,
-                narrativeId: record.get('narrativeId'),
-                startTime: record.get('startTime')?.toString() || new Date().toISOString(),
-                originNodeId: record.get('originActorId') || 'unknown',
-                originActorId: record.get('originActorId'),
-                totalHops: Math.floor((record.get('avgHops') || 0) * (record.get('reachCount')?.toNumber() || 1)),
-                maxDepth: record.get('maxDepth')?.toNumber() || 0,
-                uniqueActors: record.get('reachCount')?.toNumber() || 0,
-                velocity: record.get('reachCount')?.toNumber() / (Math.max(1, record.get('avgHops')?.toNumber() || 1)),
-                viralityScore: (record.get('reachCount')?.toNumber() || 0) / 100.0,
-                hopIds: []
-            }));
+            const cascades: NarrativeCascade[] = result.records.map((record: any) => {
+                const ioActorLists = record.get('ioActorLists') || [];
+                const flatIoActors = Array.from(new Set(ioActorLists.flat()));
+
+                return {
+                    id: `cascade-${narrativeId}-${Date.now()}`,
+                    narrativeId: record.get('narrativeId'),
+                    startTime: record.get('startTime')?.toString() || new Date().toISOString(),
+                    originNodeId: record.get('originActorId') || 'unknown',
+                    originActorId: record.get('originActorId'),
+                    totalHops: Math.floor((record.get('avgHops') || 0) * (record.get('reachCount')?.toNumber() || 1)),
+                    maxDepth: record.get('maxDepth')?.toNumber() || 0,
+                    uniqueActors: record.get('reachCount')?.toNumber() || 0,
+                    velocity: record.get('reachCount')?.toNumber() / (Math.max(1, record.get('avgHops')?.toNumber() || 1)),
+                    viralityScore: (record.get('reachCount')?.toNumber() || 0) / 100.0,
+                    hopIds: [],
+                    ioActorsInvolved: flatIoActors
+                };
+            });
 
             return cascades;
         } catch (error) {
@@ -83,14 +97,14 @@ export class CascadeDetectionService {
         const session: Session = this.driver.session();
         try {
             const query = `
-        MATCH (n:Narrative {id: $narrativeId})
+                MATCH(n: Narrative { id: $narrativeId })
         ${tenantId ? 'WHERE n.tenantId = $tenantId' : ''}
-        MATCH (actor:Entity)-[r:PROMOTES|SHARES]->(n)
+                MATCH(actor: Entity) - [r: PROMOTES | SHARES] -> (n)
         WITH actor, count(r) as promoCount
         ORDER BY promoCount DESC
         LIMIT 10
         RETURN actor.id as id, actor.label as label, promoCount as score
-      `;
+                `;
 
             const result = await session.run(query, { narrativeId, tenantId });
             return result.records.map((r: any) => ({

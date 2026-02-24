@@ -4,7 +4,7 @@
   "description": "Graph↔PG sync validator",
   "main": "src/compare/compare.mjs",
   "bin": {
-    "graph-sync-validate": "dist/cli.js"
+    "graph-sync-validate": "bin/graph-sync-validate.mjs"
   },
   "type": "module",
   "scripts": {

@@ -46,3 +46,20 @@ With these updates, you can:
 ### Testing Lineage
 
 You should write tests to replay intentional schema changes and confirm the lineage output matches expectations. Automated fixtures should assert expected Run, Dataset, and Job facets.
+
+## Lockstep Version Gate
+
+The lineage path is now sensitive to mixed schema generations. Keep ingestion and lineage stack versions aligned to avoid runtime parse failures:
+
+1. Pin OpenLineage Python dependencies in `requirements.in` to the same `1.44.x` minor.
+2. Do not deploy Marquez/OpenLineage images from `:latest`; pin explicit versions.
+3. If OpenMetadata ingestion configs are added, include the required 1.12+ fields:
+   - `queryStatementSource`
+   - `queryParserConfig`
+   - `statusLookbackDays`
+
+Run the repository gate before merge:
+
+```bash
+pnpm ci:lineage-stack-lockstep
+```
