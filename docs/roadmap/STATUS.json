@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T02:09:28Z",
-  "revision_note": "Added deterministic evidence bundle gate for koreai-agentic scaffolding.",
+  "last_updated": "2026-02-11T00:00:00Z",
+  "revision_note": "Corrected roadmap summary total after logging the Kore.ai execpolicy amendment requirement.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, evidence-first lane-1 posture, repo assumptions baseline refresh, and inline comment intake deferral."
+    },
+    {
+      "id": "kore-guardrails-hitl-audit-master-plan",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Captured Kore.ai guardrails/PII masking, HITL autonomy modes, and audit bundle subsumption master plan; naming ladder set to Assist→Copilot→Autonomous pending UX taxonomy audit; execpolicy amendment deferred pending governance countersign."
     },
     {
       "id": "B",
@@ -51,7 +57,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added koreai-agentic evidence bundle + CI verify gate."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -236,7 +242,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 18,
     "ga_blockers": []
   }
 }
