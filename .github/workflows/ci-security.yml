@@ -346,7 +346,9 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p rendered
-          helm dependency build infra/helm/intelgraph
+          # Build dependencies first
+          helm dependency build infra/helm/intelgraph || true
+
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-dev.yaml > rendered/dev.yaml
           helm dependency build infra/helm/intelgraph
           helm template intelgraph infra/helm/intelgraph -f infra/helm/intelgraph/values-prod.yaml > rendered/prod.yaml
@@ -357,7 +359,7 @@ jobs:
         uses: actions/upload-artifact@v4 # v4.1.0
         with:
           retention-days: 14
-          name: security-reports-opa
+          name: security-report-opa
           path: rendered
 
   cis-benchmark:

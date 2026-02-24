@@ -126,6 +126,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - REDIS_HOST=redis
+      - NEO4J_HOST=neo4j
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - S3_BUCKET
@@ -134,6 +135,7 @@ services:
     depends_on:
       - postgres
       - redis
+      - neo4j
     networks:
       - default
       - observability
