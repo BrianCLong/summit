@@ -1,13 +1,12 @@
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
+  preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts', '.tsx', '.mts'],
   transform: {
     '^.+\\.[cm]?[tj]sx?$': [
       'ts-jest',
       {
-        useESM: true,
-        tsconfig: 'tsconfig.test.json',
+        useESM: false,
+        tsconfig: 'tsconfig.jest.json',
       },
     ],
   },
@@ -18,6 +17,8 @@ module.exports = {
     '<rootDir>/salvage/',
     '<rootDir>/pull/',
     '<rootDir>/packages/cli/',
+    '<rootDir>/packages/work-graph/packages/',
+    '<rootDir>/server/packages_tmp/',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -74,13 +75,17 @@ module.exports = {
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
+    '^gpt-tokenizer$': '<rootDir>/__mocks__/gpt-tokenizer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
+    '^vitest$': '<rootDir>/tests/utils/vitest-jest-bridge.cjs',
     '^@intelgraph/provenance$': '<rootDir>/packages/provenance/src/index.ts',
+    '^@intelgraph/sandbox-tenant-profile$': '<rootDir>/services/sandbox-tenant-profile/src/index.ts',
     '^@intelgraph/(.*)$': '<rootDir>/packages/$1/src/index.ts',
+    '^@summit/(.*)$': '<rootDir>/packages/$1/src/index.ts',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|.*\\.mjs$))',
+    'node_modules/(?!(uuid|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill|@noble/ed25519|@noble/curves|.*\\.mjs$))',
     '<rootDir>/.disabled/',
     '<rootDir>/apps/.mobile-native-disabled/',
     '<rootDir>/apps/.desktop-electron-disabled/',

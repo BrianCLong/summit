@@ -109,7 +109,9 @@ export class FederationManager {
       sharedAt: new Date(),
       sharedBy: request.sharedBy,
       provenanceLinks: sharedObjects.flatMap((o) =>
-        this.provenanceTracker.getProvenanceChain(o.id).map((p) => p.id)
+        this.provenanceTracker
+          .getProvenanceChain(o.originalId)
+          .map((p) => p.id)
       ),
     };
 
@@ -254,7 +256,9 @@ export class FederationManager {
       sharedAt: new Date(),
       sharedBy: 'subscription-service',
       provenanceLinks: sharedObjects.flatMap((o) =>
-        this.provenanceTracker.getProvenanceChain(o.id).map((p) => p.id)
+        this.provenanceTracker
+          .getProvenanceChain(o.originalId)
+          .map((p) => p.id)
       ),
     };
 

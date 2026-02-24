@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from '@jest/globals';
+import { describe, expect, it, beforeEach, jest } from '@jest/globals';
 import { CacheAdapter, CacheManager } from '../cache.js';
 
 class InMemoryCache implements CacheAdapter {
@@ -32,7 +32,7 @@ describe('CacheManager', () => {
   });
 
   it('stores computed value when miss and returns cached on hit', async () => {
-    const factory = vi.fn().mockResolvedValue({ foo: 'bar' });
+    const factory = jest.fn().mockResolvedValue({ foo: 'bar' });
     const first = await cache.remember('demo:1', 30, factory);
     const second = await cache.remember('demo:1', 30, factory);
 

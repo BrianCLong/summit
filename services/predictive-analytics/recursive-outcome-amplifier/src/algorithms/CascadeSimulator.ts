@@ -74,7 +74,7 @@ export class CascadeSimulator {
     );
 
     // Build cascade map
-    return new CascadeMapBuilder(rootEvent.description, options.maxOrder)
+    return new CascadeMapBuilder(rootEvent.event, options.maxOrder)
       .withNodes(nodes)
       .withCriticalPaths(criticalPaths)
       .withLeveragePoints(leveragePoints)

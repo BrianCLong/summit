@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from '@jest/globals';
+import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { enqueue, setQueueClient, QueueClient, QueueJob } from '../queue.js';
 import { queueDepth } from '../metrics-queue.js';
 
@@ -23,7 +23,7 @@ describe('enqueue', () => {
   });
 
   it('enriches job with id and enqueuedAt and updates depth gauge', async () => {
-    const setSpy = vi.spyOn(queueDepth, 'set');
+    const setSpy = jest.spyOn(queueDepth, 'set');
     const queue = new InMemoryQueue();
     setQueueClient(queue);
 

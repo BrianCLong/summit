@@ -14,7 +14,7 @@ import {
 } from '../statistics.js';
 
 describe('statistics utilities', () => {
-  describe('Cohen's Kappa', () => {
+  describe("Cohen's Kappa", () => {
     it('should calculate perfect agreement', () => {
       const rater1 = ['A', 'B', 'C', 'A', 'B'];
       const rater2 = ['A', 'B', 'C', 'A', 'B'];
@@ -62,7 +62,7 @@ describe('statistics utilities', () => {
     });
   });
 
-  describe('Fleiss' Kappa', () => {
+  describe("Fleiss' Kappa", () => {
     it('should calculate perfect agreement for multiple raters', () => {
       const ratings = [
         ['A', 'A', 'A'],

@@ -116,12 +116,23 @@ function collectPointers(
     return;
   }
 
-  const range = node.range ? doc.rangeAsLinePos(node.range) : undefined;
+  const range =
+    node.range && typeof doc.rangeAsLinePos === 'function'
+      ? doc.rangeAsLinePos(node.range)
+      : undefined;
   if (range) {
     pointerMap[pointer] = {
       line: range.start.line + 1,
       column: range.start.col + 1,
     };
+  } else if (node.range && doc.lineCounter) {
+    const linePos = doc.lineCounter.linePos(node.range[0]);
+    if (linePos) {
+      pointerMap[pointer] = {
+        line: linePos.line + 1,
+        column: linePos.col + 1,
+      };
+    }
   } else if (!(pointer in pointerMap)) {
     pointerMap[pointer] = { line: 0, column: 0 };
   }

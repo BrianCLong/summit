@@ -167,15 +167,18 @@ export function getAmplificationByOrder(
 
   const result: OrderAmplification[] = [];
 
-  for (const [order, nodes] of orders.entries()) {
+  for (let order = 1; order <= cascade.maxOrder; order += 1) {
+    const nodes = orders.get(order) ?? [];
     result.push({
       order,
       nodeCount: nodes.length,
       totalMagnitude: calculateTotalMagnitude(nodes),
       avgProbability:
-        nodes.reduce((sum, n) => sum + n.probability, 0) / nodes.length,
+        nodes.length === 0
+          ? 0
+          : nodes.reduce((sum, n) => sum + n.probability, 0) / nodes.length,
     });
   }
 
-  return result.sort((a, b) => a.order - b.order);
+  return result;
 }
