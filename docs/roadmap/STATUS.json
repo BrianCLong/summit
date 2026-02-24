@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:34:47Z",
-  "revision_note": "Added action pinning preflight gate, allowlist policy, and deterministic evidence emitters.",
+  "last_updated": "2026-02-08T00:35:58Z",
+  "revision_note": "Added GHA hardening guardrails workflow plus permissions/action pinning preflight scripts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",

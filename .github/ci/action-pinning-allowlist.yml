@@ -1,0 +1,2 @@
+# Allowlist for workflows temporarily exempt from action SHA pinning enforcement.
+# Use exact paths or shell globs (e.g., .github/workflows/legacy-*.yml).
