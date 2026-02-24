@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:11:51Z",
-  "revision_note": "Added agent data-access policy registries and deny-by-default evaluator foundation.",
+  "last_updated": "2026-02-08T01:12:37Z",
+  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -247,6 +247,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "nonpublic-data-access",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published non-public data access standards, data handling guidance, and runbook with policy-gated, HITL, and secure collection patterns."
     }
   ],
   "summary": {
