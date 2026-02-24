@@ -8,6 +8,7 @@
     "start": "node synthetic-monitor.js",
     "test": "node --test test/synthetic-monitor.test.js",
     "health": "node health-check.js",
+    "validate:bgp-probes": "bash validate-bgp-probe-matrix.sh",
     "debug": "NODE_ENV=development DEBUG=* node synthetic-monitor.js"
   },
   "dependencies": {

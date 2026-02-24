@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-24T00:00:00Z",
-  "revision_note": "Added BGP routing resilience runbook, monitoring checklist, probe matrix, and route-withdrawal guardrails.",
+  "revision_note": "Added data-collection resilience governance pack (policy rules, runbook, deterministic KPI SQL, ADR, and tradeoff record).",
   "initiatives": [
     {
       "id": "bgp-routing-resilience-hardening",
@@ -30,7 +30,13 @@
       "id": "summit-sync-logical-decoding-mvp",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Logical decoding to Neo4j upsert path with provenance events, reconciliation repair loop, and harness-backed CI smoke."
+      "notes": "Logical decoding to Neo4j upsert path with provenance events, reconciliation repair loop, and harness-backed CI smoke. Added canonical Neo4j ingest write routing for Entity/Indicator/Source nodes and MENTIONS/DERIVES_FROM edges with idempotency-token sentinel gating."
+    },
+    {
+      "id": "data-collection-resilience-hardening",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added governed controls for API deprecation denial, crawl legal gating, evidence minimum fields, provider concentration alerts, response runbook, and deterministic resilience KPIs."
     },
     {
       "id": "B",
@@ -235,6 +241,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "cdc-graph-sync-audit-gates",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented Graph Sync Gate A/B/C/D evidence model, parity/recon runner, CDC provenance scaffold, Cypher templates, and PG checksum/slot setup assets."
     }
   ],
   "summary": {

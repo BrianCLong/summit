@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { Scheduler } from './scheduler';
-import { authorize } from './authz';
+import { AuthorizationError, authorize } from './authz';
 import { publish } from './transport/httpSse';
 import { emitFrame } from './telemetry';
 import { recordEvent } from './replay-client';
@@ -38,6 +38,7 @@ const TOOL_MANIFEST = [
   },
   { name: 'ping', description: 'Liveness check utility', scopes: ['read'] },
 ];
+const TOOL_NAMES = new Set(TOOL_MANIFEST.map((tool) => tool.name));
 
 const RESOURCE_MANIFEST = [
   { name: 'health', description: 'Runtime health snapshot', version: 'v1' },
@@ -56,15 +57,28 @@ startPrewarmManager(TOOL_MANIFEST.map((t) => t.name));
 export function registerApi(app: FastifyInstance) {
   app.post('/v1/session', async (req, reply) => {
     const body = sessionCreateBodySchema.parse(req.body);
+    if (!TOOL_NAMES.has(body.toolClass)) {
+      return reply.code(400).send({
+        error: `Unknown toolClass "${body.toolClass}"`,
+      });
+    }
     const tenant = (req.headers['x-tenant-id'] as string) ?? 'demo';
     const purpose = (req.headers['x-purpose'] as string) ?? 'ops';
-    await authorize(req.headers.authorization, {
-      action: 'allocate',
-      tenant,
-      toolClass: body.toolClass,
-      capabilityScopes: body.caps,
-      purpose,
-    });
+    try {
+      await authorize(req.headers.authorization, {
+        action: 'allocate',
+        tenant,
+        toolClass: body.toolClass,
+        capabilityScopes: body.caps,
+        purpose,
+      });
+    } catch (error) {
+      const authError = getAuthorizationError(error);
+      if (authError) {
+        return reply.code(authError.statusCode).send({ error: authError.message });
+      }
+      throw error;
+    }
     const session = await scheduler.allocate(body.toolClass);
     publish(session.id, {
       event: 'session.ready',
@@ -98,13 +112,26 @@ export function registerApi(app: FastifyInstance) {
     if (!session) {
       return reply.code(404).send({ error: 'session not found' });
     }
-    await authorize(req.headers.authorization, {
-      action: 'invoke',
-      tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
-      toolClass: session.vm.toolClass,
-      capabilityScopes: [],
-      purpose: (req.headers['x-purpose'] as string) ?? 'ops',
-    });
+    if (body.fn !== session.vm.toolClass) {
+      return reply.code(400).send({
+        error: `Function "${body.fn}" is not allowed for session toolClass "${session.vm.toolClass}"`,
+      });
+    }
+    try {
+      await authorize(req.headers.authorization, {
+        action: 'invoke',
+        tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
+        toolClass: session.vm.toolClass,
+        capabilityScopes: [],
+        purpose: (req.headers['x-purpose'] as string) ?? 'ops',
+      });
+    } catch (error) {
+      const authError = getAuthorizationError(error);
+      if (authError) {
+        return reply.code(authError.statusCode).send({ error: authError.message });
+      }
+      throw error;
+    }
     void recordEvent(session?.recordingId, 'in', 'jsonrpc', {
       fn: body.fn,
       args: body.args,
@@ -130,13 +157,23 @@ export function registerApi(app: FastifyInstance) {
     const params = z.object({ id: sessionIdSchema }).parse(req.params);
     const session = scheduler.get(params.id);
     if (session) {
-      await authorize(req.headers.authorization, {
-        action: 'invoke',
-        tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
-        toolClass: session.vm.toolClass,
-        capabilityScopes: [],
-        purpose: (req.headers['x-purpose'] as string) ?? 'ops',
-      });
+      try {
+        await authorize(req.headers.authorization, {
+          action: 'invoke',
+          tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
+          toolClass: session.vm.toolClass,
+          capabilityScopes: [],
+          purpose: (req.headers['x-purpose'] as string) ?? 'ops',
+        });
+      } catch (error) {
+        const authError = getAuthorizationError(error);
+        if (authError) {
+          return reply
+            .code(authError.statusCode)
+            .send({ error: authError.message });
+        }
+        throw error;
+      }
     }
     await scheduler.release(params.id);
     publish(params.id, {
@@ -228,6 +265,17 @@ export function registerApi(app: FastifyInstance) {
       ? (scheduler.get(invokePayload.sessionId) ?? undefined)
       : undefined;
     let created = false;
+    const requestedToolClass = invokePayload.toolClass ?? method;
+    if (!TOOL_NAMES.has(requestedToolClass)) {
+      const err = jsonRpcError(
+        id,
+        -32601,
+        `Method or tool not found: ${requestedToolClass}`,
+      );
+      void recordEvent(undefined, 'in', 'jsonrpc', rpc);
+      void recordEvent(undefined, 'out', 'jsonrpc', err);
+      return reply.code(400).send(err);
+    }
     if (!session) {
       if (invokePayload.sessionId) {
         const err = jsonRpcError(id, -32001, 'Session not found');
@@ -235,14 +283,24 @@ export function registerApi(app: FastifyInstance) {
         void recordEvent(undefined, 'out', 'jsonrpc', err);
         return reply.code(404).send(err);
       }
-      const resolvedToolClass = invokePayload.toolClass ?? method;
-      await authorize(req.headers.authorization, {
-        action: 'allocate',
-        tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
-        toolClass: resolvedToolClass,
-        capabilityScopes: invokePayload.caps ?? [],
-        purpose: (req.headers['x-purpose'] as string) ?? 'ops',
-      });
+      const resolvedToolClass = requestedToolClass;
+      try {
+        await authorize(req.headers.authorization, {
+          action: 'allocate',
+          tenant: (req.headers['x-tenant-id'] as string) ?? 'demo',
+          toolClass: resolvedToolClass,
+          capabilityScopes: invokePayload.caps ?? [],
+          purpose: (req.headers['x-purpose'] as string) ?? 'ops',
+        });
+      } catch (error) {
+        const authFailure = jsonRpcAuthError(id, error);
+        if (authFailure) {
+          void recordEvent(undefined, 'in', 'jsonrpc', rpc);
+          void recordEvent(undefined, 'out', 'jsonrpc', authFailure.payload);
+          return reply.code(authFailure.status).send(authFailure.payload);
+        }
+        throw error;
+      }
       session = await scheduler.allocate(resolvedToolClass);
       publish(session.id, {
         event: 'session.ready',
@@ -253,6 +311,16 @@ export function registerApi(app: FastifyInstance) {
         recordingId: session.recordingId,
       });
       created = true;
+    }
+    if (method !== session.vm.toolClass) {
+      const err = jsonRpcError(
+        id,
+        -32601,
+        `Method "${method}" not available for session toolClass "${session.vm.toolClass}"`,
+      );
+      void recordEvent(session.recordingId, 'out', 'jsonrpc', err);
+      if (created) await scheduler.release(session.id);
+      return reply.code(400).send(err);
     }
 
     const args = invokePayload.args ?? {};
@@ -294,6 +362,12 @@ export function registerApi(app: FastifyInstance) {
       }
       return reply.send(response);
     } catch (error) {
+      const authFailure = jsonRpcAuthError(id, error);
+      if (authFailure) {
+        void recordEvent(session.recordingId, 'out', 'jsonrpc', authFailure.payload);
+        if (created) await scheduler.release(session.id);
+        return reply.code(authFailure.status).send(authFailure.payload);
+      }
       const err = jsonRpcError(
         id,
         -32000,
@@ -311,5 +385,30 @@ function jsonRpcError(id: unknown, code: number, message: string) {
     jsonrpc: '2.0',
     id,
     error: { code, message },
+  };
+}
+
+function getAuthorizationError(error: unknown): AuthorizationError | undefined {
+  if (error instanceof AuthorizationError) {
+    return error;
+  }
+  return undefined;
+}
+
+function jsonRpcAuthError(
+  id: unknown,
+  error: unknown,
+): { status: number; payload: ReturnType<typeof jsonRpcError> } | undefined {
+  const authError = getAuthorizationError(error);
+  if (!authError) return undefined;
+  if (authError.reason === 'policy_unavailable') {
+    return {
+      status: authError.statusCode,
+      payload: jsonRpcError(id, -32002, authError.message),
+    };
+  }
+  return {
+    status: authError.statusCode,
+    payload: jsonRpcError(id, -32001, authError.message),
   };
 }

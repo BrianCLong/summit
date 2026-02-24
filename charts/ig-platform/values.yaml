@@ -380,7 +380,7 @@ disasterRecovery:
       channel: '#incidents'
     email:
       enabled: true
-      recipients: ['ops-team@company.com']
+      recipients: ['ops-team@example.invalid']
 
 # Web Applications
 web:

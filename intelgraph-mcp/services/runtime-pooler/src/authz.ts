@@ -12,6 +12,20 @@ export interface PolicyDecision {
   raw?: unknown;
 }
 
+export class AuthorizationError extends Error {
+  constructor(
+    public readonly statusCode: number,
+    message: string,
+    public readonly reason:
+      | 'missing_authorization'
+      | 'policy_unavailable'
+      | 'forbidden',
+  ) {
+    super(message);
+    this.name = 'AuthorizationError';
+  }
+}
+
 const OPA_URL = process.env.OPA_URL;
 
 export async function authorize(
@@ -19,7 +33,11 @@ export async function authorize(
   context: PolicyContext,
 ): Promise<PolicyDecision> {
   if (!authorization) {
-    throw new Error('Authorization header is missing. Please provide a valid token. If you are using the CLI, check your credentials via "summitctl auth status".');
+    throw new AuthorizationError(
+      401,
+      'Authorization header is missing. Please provide a valid token. If you are using the CLI, check your credentials via "summitctl auth status".',
+      'missing_authorization',
+    );
   }
   if (!OPA_URL) {
     return { allow: true };
@@ -43,13 +61,21 @@ export async function authorize(
   });
 
   if (!res.ok) {
-    throw new Error(`Policy evaluation failed with status ${res.status}. This may be a temporary service issue. Please retry in a few moments.`);
+    throw new AuthorizationError(
+      503,
+      `Policy evaluation failed with status ${res.status}. This may be a temporary service issue. Please retry in a few moments.`,
+      'policy_unavailable',
+    );
   }
 
   const body = (await res.json()) as { result?: unknown };
   const allow = resolveDecision(body.result);
   if (!allow) {
-    throw new Error(`Access forbidden for action "${context.action}" on tool "${context.toolClass}". Ensure your account has the required "${context.capabilityScopes?.join(', ') || 'basic'}" scopes.`);
+    throw new AuthorizationError(
+      403,
+      `Access forbidden for action "${context.action}" on tool "${context.toolClass}". Ensure your account has the required "${context.capabilityScopes?.join(', ') || 'basic'}" scopes.`,
+      'forbidden',
+    );
   }
   return { allow, raw: body.result };
 }

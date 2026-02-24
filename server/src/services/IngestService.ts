@@ -4,15 +4,15 @@
  * Target: ≥1e5 rows/s/worker
  */
 
-import { Pool, PoolClient } from 'pg';
-import { Driver } from 'neo4j-driver';
-import { createHash } from 'crypto';
-import { randomUUID as uuidv4 } from 'crypto';
-import logger from '../config/logger.js';
-import { meteringEmitter } from '../metering/emitter.js';
-import { getTracer } from '../observability/tracer.js';
+import { Pool, PoolClient } from "pg";
+import { Driver } from "neo4j-driver";
+import { createHash } from "crypto";
+import { randomUUID as uuidv4 } from "crypto";
+import logger from "../config/logger.js";
+import { meteringEmitter } from "../metering/emitter.js";
+import { getTracer } from "../observability/tracer.js";
 
-const ingestLogger = logger.child({ name: 'IngestService' });
+const ingestLogger = logger.child({ name: "IngestService" });
 
 export interface IngestInput {
   tenantId: string;
@@ -47,14 +47,21 @@ export interface IngestResult {
 
 export class IngestService {
   private static readonly NEO4J_SYNC_BATCH_SIZE = 1000;
+  private static readonly INDICATOR_KIND_HINTS = new Set(["indicator", "ioc"]);
+  private static readonly SOURCE_KIND_HINTS = new Set([
+    "source",
+    "document_source",
+    "media_source",
+  ]);
+  private static readonly CANONICAL_RELATIONSHIP_TYPES = new Set(["MENTIONS", "DERIVES_FROM"]);
 
   constructor(
     private pg: Pool,
-    private neo4j: Driver,
+    private neo4j: Driver
   ) {}
 
   private sanitizeCypherIdentifier(identifier: string, fallback: string): string {
-    const sanitized = identifier.replace(/[^A-Za-z0-9_]/g, '_');
+    const sanitized = identifier.replace(/[^A-Za-z0-9_]/g, "_");
     if (!sanitized || !/^[A-Za-z_]/.test(sanitized)) {
       return fallback;
     }
@@ -62,17 +69,17 @@ export class IngestService {
   }
 
   private parseJsonObject(value: unknown): Record<string, unknown> {
-    if (value && typeof value === 'object' && !Array.isArray(value)) {
+    if (value && typeof value === "object" && !Array.isArray(value)) {
       return value as Record<string, unknown>;
     }
 
-    if (typeof value !== 'string' || value.trim() === '') {
+    if (typeof value !== "string" || value.trim() === "") {
       return {};
     }
 
     try {
       const parsed = JSON.parse(value);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
         return parsed as Record<string, unknown>;
       }
       return {};
@@ -85,7 +92,7 @@ export class IngestService {
     if (value instanceof Date) {
       return value.toISOString();
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const parsed = new Date(value);
       if (!Number.isNaN(parsed.getTime())) {
         return parsed.toISOString();
@@ -102,12 +109,37 @@ export class IngestService {
     return `${tenantId}:relationship:${relationshipId}`;
   }
 
+  private normalizeRelationshipType(value: unknown): string | null {
+    if (typeof value !== "string") return null;
+    const normalized = value
+      .trim()
+      .toUpperCase()
+      .replace(/[^A-Z0-9_]/g, "_");
+    if (!normalized) return null;
+    return normalized;
+  }
+
+  private deriveRelationshipType(value: unknown): "MENTIONS" | "DERIVES_FROM" | null {
+    const normalized = this.normalizeRelationshipType(value);
+    if (!normalized) return null;
+    if (!IngestService.CANONICAL_RELATIONSHIP_TYPES.has(normalized)) return null;
+    return normalized as "MENTIONS" | "DERIVES_FROM";
+  }
+
+  private deriveEntityNodeType(kind: unknown): "Indicator" | "Source" | null {
+    if (typeof kind !== "string") return null;
+    const lowerKind = kind.toLowerCase();
+    if (IngestService.INDICATOR_KIND_HINTS.has(lowerKind)) return "Indicator";
+    if (IngestService.SOURCE_KIND_HINTS.has(lowerKind)) return "Source";
+    return null;
+  }
+
   private async executeNeo4jWrite(
     session: any,
     cypher: string,
-    params: Record<string, unknown>,
+    params: Record<string, unknown>
   ): Promise<void> {
-    if (typeof session.executeWrite === 'function') {
+    if (typeof session.executeWrite === "function") {
       await session.executeWrite((tx: any) => tx.run(cypher, params));
       return;
     }
@@ -118,11 +150,11 @@ export class IngestService {
    * Ingest entities and relationships with full provenance tracking
    */
   async ingest(input: IngestInput): Promise<IngestResult> {
-    return getTracer().withSpan('IngestService.ingest', async (span: any) => {
-      span.setAttribute('ingest.tenant_id', input.tenantId);
-      span.setAttribute('ingest.source_type', input.sourceType);
-      span.setAttribute('ingest.entity_count', input.entities.length);
-      span.setAttribute('ingest.relationship_count', input.relationships.length);
+    return getTracer().withSpan("IngestService.ingest", async (span: any) => {
+      span.setAttribute("ingest.tenant_id", input.tenantId);
+      span.setAttribute("ingest.source_type", input.sourceType);
+      span.setAttribute("ingest.entity_count", input.entities.length);
+      span.setAttribute("ingest.relationship_count", input.relationships.length);
 
       const startTime = Date.now();
       const provenanceId = uuidv4();
@@ -136,7 +168,7 @@ export class IngestService {
       const client = await this.pg.connect();
 
       try {
-        await client.query('BEGIN');
+        await client.query("BEGIN");
 
         // 1. Create provenance record
         await this.createProvenanceRecord(client, {
@@ -154,7 +186,7 @@ export class IngestService {
 
         // 3. Upsert entities in batches for performance
         const BATCH_SIZE = 1000;
-        await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
+        await getTracer().withSpan("IngestService.processEntities", async (entitySpan) => {
           for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
             const batch = input.entities.slice(i, i + BATCH_SIZE);
 
@@ -163,7 +195,7 @@ export class IngestService {
                 const stableId = this.generateStableId(
                   input.tenantId,
                   entityInput.kind,
-                  entityInput.properties,
+                  entityInput.properties
                 );
 
                 // Map external ID to stable ID
@@ -198,14 +230,14 @@ export class IngestService {
               } catch (error: any) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
                 errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
-                ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
+                ingestLogger.warn({ error, entityInput }, "Failed to ingest entity");
               }
             }
           }
         });
 
         // 4. Upsert relationships
-        await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
+        await getTracer().withSpan("IngestService.processRelationships", async (relSpan) => {
           for (const relInput of input.relationships) {
             try {
               const fromId = idMap.get(relInput.fromExternalId);
@@ -213,16 +245,12 @@ export class IngestService {
 
               if (!fromId || !toId) {
                 errors.push(
-                  `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: Entity not found`,
+                  `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: Entity not found`
                 );
                 continue;
               }
 
-              const relId = this.generateRelationshipId(
-                fromId,
-                toId,
-                relInput.relationshipType,
-              );
+              const relId = this.generateRelationshipId(fromId, toId, relInput.relationshipType);
 
               const existing = await this.findRelationshipById(client, relId);
 
@@ -251,32 +279,30 @@ export class IngestService {
             } catch (error: any) {
               const errorMessage = error instanceof Error ? error.message : String(error);
               errors.push(
-                `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
+                `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`
               );
-              ingestLogger.warn({ error, relInput }, 'Failed to ingest relationship');
+              ingestLogger.warn({ error, relInput }, "Failed to ingest relationship");
             }
           }
         });
 
         // 5. Commit PostgreSQL transaction
-        await client.query('COMMIT');
+        await client.query("COMMIT");
 
         // 6. Sync to Neo4j (best effort, with outbox fallback)
         try {
-          await getTracer().withSpan('IngestService.syncToNeo4j', async () => {
-             await this.syncToNeo4j(input.tenantId, provenanceId);
+          await getTracer().withSpan("IngestService.syncToNeo4j", async () => {
+            await this.syncToNeo4j(input.tenantId, provenanceId);
           });
         } catch (neo4jError) {
           ingestLogger.warn(
             { provenanceId, error: neo4jError },
-            'Neo4j sync failed, will retry via outbox',
+            "Neo4j sync failed, will retry via outbox"
           );
         }
 
         const took = Date.now() - startTime;
-        const throughput = Math.round(
-          ((entitiesCreated + entitiesUpdated) / took) * 1000,
-        );
+        const throughput = Math.round(((entitiesCreated + entitiesUpdated) / took) * 1000);
 
         ingestLogger.info({
           provenanceId,
@@ -293,12 +319,8 @@ export class IngestService {
         try {
           await meteringEmitter.emitIngestUnits({
             tenantId: input.tenantId,
-            units:
-              entitiesCreated +
-              entitiesUpdated +
-              relationshipsCreated +
-              relationshipsUpdated,
-            source: 'ingest-service',
+            units: entitiesCreated + entitiesUpdated + relationshipsCreated + relationshipsUpdated,
+            source: "ingest-service",
             correlationId: provenanceId,
             idempotencyKey: provenanceId,
             metadata: {
@@ -308,7 +330,7 @@ export class IngestService {
             },
           });
         } catch (err: any) {
-          ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
+          ingestLogger.warn({ err, provenanceId }, "Failed to emit ingest metering");
         }
 
         return {
@@ -321,7 +343,7 @@ export class IngestService {
           provenanceId,
         };
       } catch (error: any) {
-        await client.query('ROLLBACK');
+        await client.query("ROLLBACK");
         throw error;
       } finally {
         client.release();
@@ -336,25 +358,25 @@ export class IngestService {
   private generateStableId(
     tenantId: string,
     kind: string,
-    properties: Record<string, unknown>,
+    properties: Record<string, unknown>
   ): string {
     // Define natural keys per entity type
     const naturalKeys: Record<string, string[]> = {
-      person: ['name', 'dateOfBirth', 'nationality'],
-      organization: ['name', 'jurisdiction', 'registrationNumber'],
-      asset: ['assetType', 'serialNumber'],
-      event: ['eventType', 'timestamp', 'description'],
-      indicator: ['indicatorType', 'value'],
+      person: ["name", "dateOfBirth", "nationality"],
+      organization: ["name", "jurisdiction", "registrationNumber"],
+      asset: ["assetType", "serialNumber"],
+      event: ["eventType", "timestamp", "description"],
+      indicator: ["indicatorType", "value"],
     };
 
-    const keys = naturalKeys[kind.toLowerCase()] || ['name'];
+    const keys = naturalKeys[kind.toLowerCase()] || ["name"];
     const values = keys
       .map((key) => properties[key])
       .filter((v) => v !== undefined)
       .map((v) => String(v).toLowerCase().trim());
 
-    const composite = `${tenantId}:${kind}:${values.join(':')}`;
-    const hash = createHash('sha256').update(composite).digest('hex');
+    const composite = `${tenantId}:${kind}:${values.join(":")}`;
+    const hash = createHash("sha256").update(composite).digest("hex");
 
     return `${tenantId}:${kind}:${hash.substring(0, 16)}`;
   }
@@ -362,13 +384,9 @@ export class IngestService {
   /**
    * Generate deterministic relationship ID
    */
-  private generateRelationshipId(
-    fromId: string,
-    toId: string,
-    relationshipType: string,
-  ): string {
+  private generateRelationshipId(fromId: string, toId: string, relationshipType: string): string {
     const composite = `${fromId}:${relationshipType}:${toId}`;
-    const hash = createHash('sha256').update(composite).digest('hex');
+    const hash = createHash("sha256").update(composite).digest("hex");
     return `rel:${hash.substring(0, 16)}`;
   }
 
@@ -385,7 +403,7 @@ export class IngestService {
       userId: string;
       entityCount: number;
       relationshipCount: number;
-    },
+    }
   ): Promise<void> {
     await client.query(
       `INSERT INTO provenance_records (
@@ -400,7 +418,7 @@ export class IngestService {
         data.userId,
         data.entityCount,
         data.relationshipCount,
-      ],
+      ]
     );
   }
 
@@ -409,12 +427,9 @@ export class IngestService {
    */
   private async findEntityByStableId(
     client: PoolClient,
-    stableId: string,
+    stableId: string
   ): Promise<{ id: string } | undefined> {
-    const { rows } = await client.query(
-      `SELECT * FROM entities WHERE id = $1`,
-      [stableId],
-    );
+    const { rows } = await client.query(`SELECT * FROM entities WHERE id = $1`, [stableId]);
     return rows[0];
   }
 
@@ -431,7 +446,7 @@ export class IngestService {
       properties: Record<string, unknown>;
       userId: string;
       provenanceId: string;
-    },
+    }
   ): Promise<void> {
     await client.query(
       `INSERT INTO entities (
@@ -445,7 +460,7 @@ export class IngestService {
         JSON.stringify(data.properties),
         data.userId,
         data.provenanceId,
-      ],
+      ]
     );
   }
 
@@ -459,13 +474,13 @@ export class IngestService {
       labels: string[];
       properties: Record<string, unknown>;
       provenanceId: string;
-    },
+    }
   ): Promise<void> {
     await client.query(
       `UPDATE entities
        SET labels = $2, props = $3, updated_at = NOW(), provenance_id = $4
        WHERE id = $1`,
-      [data.id, data.labels, JSON.stringify(data.properties), data.provenanceId],
+      [data.id, data.labels, JSON.stringify(data.properties), data.provenanceId]
     );
   }
 
@@ -474,12 +489,9 @@ export class IngestService {
    */
   private async findRelationshipById(
     client: PoolClient,
-    id: string,
+    id: string
   ): Promise<{ id: string } | undefined> {
-    const { rows } = await client.query(
-      `SELECT * FROM relationships WHERE id = $1`,
-      [id],
-    );
+    const { rows } = await client.query(`SELECT * FROM relationships WHERE id = $1`, [id]);
     return rows[0];
   }
 
@@ -498,7 +510,7 @@ export class IngestService {
       confidence: number;
       source: string;
       provenanceId: string;
-    },
+    }
   ): Promise<void> {
     await client.query(
       `INSERT INTO relationships (
@@ -515,7 +527,7 @@ export class IngestService {
         data.confidence,
         data.source,
         data.provenanceId,
-      ],
+      ]
     );
   }
 
@@ -529,7 +541,7 @@ export class IngestService {
       properties?: Record<string, unknown>;
       confidence: number;
       provenanceId: string;
-    },
+    }
   ): Promise<void> {
     await client.query(
       `UPDATE relationships
@@ -541,7 +553,7 @@ export class IngestService {
         data.properties ? JSON.stringify(data.properties) : null,
         data.confidence,
         data.provenanceId,
-      ],
+      ]
     );
   }
 
@@ -563,7 +575,7 @@ export class IngestService {
         while (hasMore) {
           const { rows: entities } = await client.query(
             `SELECT * FROM entities WHERE provenance_id = $1 ORDER BY id LIMIT $2 OFFSET $3`,
-            [provenanceId, BATCH_SIZE, offset],
+            [provenanceId, BATCH_SIZE, offset]
           );
 
           if (entities.length === 0) {
@@ -571,15 +583,14 @@ export class IngestService {
             break;
           }
 
-          const entitiesByKind = new Map<string, any[]>();
+          const rows: any[] = [];
           const fallbackUpdatedAt = new Date().toISOString();
 
           for (const entity of entities) {
-            const safeKind = this.sanitizeCypherIdentifier(entity.kind || 'Entity', 'Entity');
-            const rows = entitiesByKind.get(safeKind) || [];
             rows.push({
               id: entity.id,
               tenantId: entity.tenant_id,
+              nodeType: this.deriveEntityNodeType(entity.kind),
               idempotencyToken: this.buildEntityIdempotencyToken(entity.tenant_id, entity.id),
               properties: {
                 ...this.parseJsonObject(entity.props),
@@ -589,22 +600,20 @@ export class IngestService {
                 updatedAt: this.toIsoString(entity.updated_at, fallbackUpdatedAt),
               },
             });
-            entitiesByKind.set(safeKind, rows);
           }
 
-          for (const [safeKind, rows] of entitiesByKind.entries()) {
-            await this.executeNeo4jWrite(
-              session,
-              `UNWIND $rows AS row
-               MERGE (n:Entity {id: row.id, tenantId: row.tenantId})
-                 ON CREATE SET n.createdAt = row.properties.createdAt
-               SET n += row.properties,
-                   n.updatedAt = row.properties.updatedAt,
-                   n.idempotency_token = row.idempotencyToken
-               SET n:\`${safeKind}\``,
-              { rows },
-            );
-          }
+          await this.executeNeo4jWrite(
+            session,
+            `UNWIND $rows AS row
+             MERGE (n:Entity {id: row.id, tenantId: row.tenantId})
+               ON CREATE SET n.createdAt = row.properties.createdAt
+             SET n += row.properties,
+                 n.updatedAt = row.properties.updatedAt,
+                 n.idempotency_token = row.idempotencyToken
+             FOREACH (_ IN CASE WHEN row.nodeType = 'Indicator' THEN [1] ELSE [] END | SET n:Indicator)
+             FOREACH (_ IN CASE WHEN row.nodeType = 'Source' THEN [1] ELSE [] END | SET n:Source)`,
+            { rows }
+          );
 
           offset += entities.length;
           if (entities.length < BATCH_SIZE) hasMore = false;
@@ -616,10 +625,10 @@ export class IngestService {
         while (hasMore) {
           const { rows: relationships } = await client.query(
             `SELECT * FROM relationships WHERE provenance_id = $1 ORDER BY id LIMIT $2 OFFSET $3`,
-            [provenanceId, BATCH_SIZE, offset],
+            [provenanceId, BATCH_SIZE, offset]
           );
 
-           if (relationships.length === 0) {
+          if (relationships.length === 0) {
             hasMore = false;
             break;
           }
@@ -628,11 +637,10 @@ export class IngestService {
           const fallbackTimestamp = new Date().toISOString();
 
           for (const rel of relationships) {
-            const safeRelationshipType = this.sanitizeCypherIdentifier(
-              rel.relationship_type || 'RELATED_TO',
-              'RELATED_TO',
-            );
-            const rows = relationshipsByType.get(safeRelationshipType) || [];
+            const relationshipType =
+              this.deriveRelationshipType(rel.relationship_type) ||
+              this.sanitizeCypherIdentifier(rel.relationship_type || "RELATED_TO", "RELATED_TO");
+            const rows = relationshipsByType.get(relationshipType) || [];
             rows.push({
               id: rel.id,
               fromId: rel.from_entity_id,
@@ -643,15 +651,12 @@ export class IngestService {
               firstSeen: this.toIsoString(rel.first_seen, fallbackTimestamp),
               lastSeen: this.toIsoString(rel.last_seen, fallbackTimestamp),
               properties: this.parseJsonObject(rel.props),
-              idempotencyToken: this.buildRelationshipIdempotencyToken(
-                rel.tenant_id,
-                rel.id,
-              ),
+              idempotencyToken: this.buildRelationshipIdempotencyToken(rel.tenant_id, rel.id),
             });
-            relationshipsByType.set(safeRelationshipType, rows);
+            relationshipsByType.set(relationshipType, rows);
           }
 
-          for (const [safeRelationshipType, rows] of relationshipsByType.entries()) {
+          for (const [relationshipType, rows] of relationshipsByType.entries()) {
             await this.executeNeo4jWrite(
               session,
               `UNWIND $rows AS row
@@ -661,7 +666,7 @@ export class IngestService {
                  ON CREATE SET s.relationshipId = row.id, s.createdAt = datetime()
                WITH row, from, to, s
                FOREACH (_ IN CASE WHEN coalesce(s.applied, false) THEN [] ELSE [1] END |
-                 MERGE (from)-[r:\`${safeRelationshipType}\` {id: row.id, tenantId: row.tenantId}]->(to)
+                 MERGE (from)-[r:\`${relationshipType}\` {id: row.id, tenantId: row.tenantId}]->(to)
                    ON CREATE SET r.createdAt = datetime()
                  SET r += row.properties,
                      r.confidence = row.confidence,
@@ -674,7 +679,7 @@ export class IngestService {
                      s.updatedAt = datetime()
                )
                WITH row, from, to
-               MATCH (from)-[r:\`${safeRelationshipType}\` {id: row.id, tenantId: row.tenantId}]->(to)
+               MATCH (from)-[r:\`${relationshipType}\` {id: row.id, tenantId: row.tenantId}]->(to)
                SET r += row.properties,
                    r.confidence = row.confidence,
                    r.source = row.source,
@@ -682,14 +687,13 @@ export class IngestService {
                    r.lastSeen = row.lastSeen,
                    r.idempotency_token = row.idempotencyToken,
                    r.updatedAt = datetime()`,
-              { rows },
+              { rows }
             );
           }
 
           offset += relationships.length;
-           if (relationships.length < BATCH_SIZE) hasMore = false;
+          if (relationships.length < BATCH_SIZE) hasMore = false;
         }
-
       } finally {
         client.release();
       }

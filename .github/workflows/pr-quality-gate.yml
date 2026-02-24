@@ -9,6 +9,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lineage-stack-lockstep:
+    name: Lineage Stack Lockstep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test lineage lockstep gate
+        run: pnpm test:lineage-stack-lockstep
+
+      - name: Verify lineage stack lockstep
+        run: pnpm ci:lineage-stack-lockstep
+
   validate-release-policy:
     name: Validate Release Policy
     runs-on: ubuntu-latest

@@ -1,0 +1,45 @@
+name: Routing Resilience Checks
+
+on:
+  pull_request:
+    paths:
+      - 'monitoring/**'
+      - '.github/workflows/routing-resilience-check.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'monitoring/**'
+      - '.github/workflows/routing-resilience-check.yml'
+
+jobs:
+  routing-resilience-checks:
+    name: Routing Resilience Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Validate probe matrix policy
+        run: bash monitoring/synthetic/validate-bgp-probe-matrix.sh
+
+      - name: Validate Prometheus config and rules
+        run: |
+          docker run --rm --entrypoint=/bin/promtool -v "$PWD/monitoring:/work" -w /work prom/prometheus:v2.47.0 \
+            check config prometheus.yml
+          docker run --rm --entrypoint=/bin/promtool -v "$PWD/monitoring:/work" -w /work prom/prometheus:v2.47.0 \
+            check rules prometheus/rules/bgp-routing-resilience.yml
+
+      - name: Validate Alertmanager YAML syntax
+        run: |
+          yq e '.' monitoring/alertmanager.yml > /dev/null
+          yq e '.' monitoring/alertmanager/sre-policy.yml > /dev/null
+
+      - name: Validate dashboard JSON
+        run: jq . monitoring/grafana/dashboards/routing-resilience.json > /dev/null

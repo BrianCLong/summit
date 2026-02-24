@@ -14,3 +14,8 @@ thresholds:
   rollback:
     required: true
     max_rollback_time_minutes: 30
+  collection:
+    max_contested_provider_share: 0.40
+    api_drift_detect_minutes_max: 15
+    api_drift_mitigate_minutes_max: 60
+    min_priority_archive_completeness: 0.97

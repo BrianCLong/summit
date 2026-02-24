@@ -3,8 +3,6 @@ name: Golden Path Supply Chain
 on:
   push:
     branches: ["main"]
-  pull_request:
-    branches: ["main"]
   workflow_dispatch:
 
 concurrency:

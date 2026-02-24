@@ -56,6 +56,7 @@ docker-compose -f docker-compose.monitoring.yml ps
 - **Prometheus**: http://localhost:9090
 - **Grafana**: http://localhost:3000 (admin/admin123)
 - **Alertmanager**: http://localhost:9093
+- **Blackbox Exporter**: http://localhost:9115
 
 ### 3. Configure Your Services
 
@@ -188,6 +189,9 @@ Edit `alertmanager.yml` to configure:
 - Probe matrix: `monitoring/synthetic/bgp-reachability-probes.yaml`
 - Prometheus rules: `monitoring/prometheus/rules/bgp-routing-resilience.yml`
 - Local docker-compose rules: `monitoring/alert_rules.yml` (network routing alerts group)
+- Blackbox exporter module config: `monitoring/blackbox.yml`
+- Active routing scrape jobs: `monitoring/prometheus.yml`, `monitoring/prometheus/prometheus.yml`
+- CI validation workflow: `.github/workflows/routing-resilience-check.yml`
 
 ## Grafana Dashboards
 
@@ -200,6 +204,7 @@ Edit `alertmanager.yml` to configure:
 5. **Database Performance** - PostgreSQL, Neo4j, Redis metrics
 6. **System Resources** - CPU, memory, disk, network
 7. **Investigation Analytics** - Investigation-specific metrics
+8. **Routing Resilience** - BYOIP coverage and multi-region/multi-ASN reachability
 
 ### Custom Dashboards
 

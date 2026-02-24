@@ -22,6 +22,7 @@ This is the "Fail Fast" stage. If your code is messy or insecure, we stop here.
 - **Typecheck**: Runs `pnpm run typecheck`. Ensures strict type safety across the monorepo.
 - **Security Audit**: Runs `pnpm run security:audit`. Checks for known vulnerabilities in dependencies.
 - **Security Lint**: Runs `pnpm run security:lint`. Static analysis for security patterns.
+- **Lineage Stack Lockstep**: Runs `pnpm ci:lineage-stack-lockstep` to enforce pinned OpenLineage/OpenMetadata-compatible dependency and image versions.
 
 ### 2. Unit Tests
 
@@ -58,6 +59,7 @@ You should simulate the CI checks locally before pushing.
 pnpm lint
 pnpm typecheck
 pnpm security:scan
+pnpm ci:lineage-stack-lockstep
 
 # 2. Unit Tests
 pnpm test

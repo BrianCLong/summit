@@ -18,13 +18,16 @@ This directory implements OPA (Open Policy Agent) based policy-as-code for:
 governance/
 ├── policies/           # OPA Rego policy definitions
 │   ├── container.rego  # Container security policies
-│   └── deps.rego       # Dependency policies
+│   ├── deps.rego       # Dependency policies
+│   └── collection_resilience.rego # API/crawl/evidence policy
 ├── tests/              # OPA policy unit tests
 │   ├── container_test.rego
-│   └── deps_test.rego
+│   ├── deps_test.rego
+│   └── collection_resilience_test.rego
 ├── playbooks/          # Remediation playbooks
 │   ├── drift-scenarios.md
-│   └── remediation-checklist.md
+│   ├── remediation-checklist.md
+│   └── data-collection-resilience-runbook.md
 └── sbom/               # Software Bill of Materials
     ├── demo-bom.spdx.json    # SPDX SBOM
     └── allowed-signers.pub   # Trusted public keys
@@ -59,3 +62,4 @@ Governance checks run automatically via `.github/workflows/ci-governance.yml`:
 - [Governance Loop](../docs/GOVERNANCE_LOOP.md) - Full governance process documentation
 - [Drift Scenarios](./playbooks/drift-scenarios.md) - Common policy drift scenarios
 - [Remediation Checklist](./playbooks/remediation-checklist.md) - Step-by-step remediation guide
+- [Data Collection Resilience Runbook](./playbooks/data-collection-resilience-runbook.md) - API/archive/legal incident response

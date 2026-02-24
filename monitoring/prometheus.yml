@@ -47,6 +47,54 @@ scrape_configs:
       - targets: ['summit-python:8000']
     metrics_path: '/metrics'
 
+  - job_name: 'blackbox-routing'
+    metrics_path: '/probe'
+    params:
+      module: ['http_2xx']
+    static_configs:
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: us-east
+          asn: AS7922
+          provider: isp
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: us-west
+          asn: AS7018
+          provider: isp
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: eu-central
+          asn: AS3209
+          provider: isp
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: ap-southeast
+          asn: AS2914
+          provider: isp
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: us-east
+          asn: AS16509
+          provider: cloud
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: us-central
+          asn: AS15169
+          provider: cloud
+      - targets: ['https://edge.intelgraph.ai/health']
+        labels:
+          region: eu-west
+          asn: AS8075
+          provider: cloud
+    relabel_configs:
+      - source_labels: ['__address__']
+        target_label: '__param_target'
+      - source_labels: ['__param_target']
+        target_label: 'instance'
+      - target_label: '__address__'
+        replacement: 'blackbox-exporter:9115'
+
 alerting:
   alertmanagers:
     - static_configs:

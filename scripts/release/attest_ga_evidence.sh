@@ -363,13 +363,13 @@ of the GA Evidence Pack using cosign.
 
 ## Prerequisites
 
-Install cosign (v2.0+):
+Install cosign (v3.0.5+):
 ```bash
 # macOS
 brew install cosign
 
 # Linux
-wget https://github.com/sigstore/cosign/releases/download/v2.2.4/cosign-linux-amd64
+wget https://github.com/sigstore/cosign/releases/download/v3.0.5/cosign-linux-amd64
 chmod +x cosign-linux-amd64
 sudo mv cosign-linux-amd64 /usr/local/bin/cosign
 ```
@@ -453,7 +453,7 @@ The trust anchor is:
 Check that the certificate identity matches:
 ```bash
 # Extract certificate from attestation
-cosign verify-blob-attestation --insecure-ignore-tlog \
+cosign verify-blob-attestation \
   --certificate-identity-regexp ".*" \
   --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
   --type slsaprovenance \

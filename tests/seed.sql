@@ -1,3 +1,6 @@
+drop table if exists knows;
+drop table if exists person;
+
 create table if not exists person (
   id bigint primary key,
   name text,
@@ -12,8 +15,8 @@ create table if not exists knows (
 );
 
 insert into person(id, name, email) values
-  (1, 'Ada Lovelace', 'ada@summit.test'),
-  (2, 'Alan Turing', 'alan@summit.test')
+  (1, 'Ada Lovelace', 'ada@example.invalid'),
+  (2, 'Alan Turing', 'alan@example.invalid')
 on conflict do nothing;
 
 insert into knows(id, from_id, to_id, since) values

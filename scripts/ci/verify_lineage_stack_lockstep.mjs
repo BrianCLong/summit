@@ -6,10 +6,15 @@ import process from 'node:process';
 import yaml from 'js-yaml';
 
 const REQUIRED_OPENLINEAGE_MINOR = '1.44';
+const REQUIRED_MARQUEZ_REPOSITORY = 'marquezproject/marquez';
 const REQUIRED_OPENMETADATA_FIELDS = [
   'queryStatementSource',
   'queryParserConfig',
   'statusLookbackDays',
+];
+const OPTIONAL_LOCKSTEP_REQUIREMENTS = [
+  { name: 'apache-airflow-providers-openlineage', expectedMinor: '2.9' },
+  { name: 'openmetadata-ingestion', expectedMinor: '1.12' },
 ];
 
 const failures = [];
@@ -74,11 +79,45 @@ function validateOpenLineageRequirements() {
       );
     }
   }
+
+  for (const optionalPkg of OPTIONAL_LOCKSTEP_REQUIREMENTS) {
+    const prefix = `${optionalPkg.name.toLowerCase()}==`;
+    const matches = lines.filter(line => line.toLowerCase().startsWith(prefix));
+    for (const match of matches) {
+      const versionPattern = new RegExp(
+        `==${optionalPkg.expectedMinor.replace('.', '\\.')}(?:\\.\\*|\\.\\d+)$`,
+        'i'
+      );
+      if (!versionPattern.test(match)) {
+        failures.push(
+          `requirements.in: ${optionalPkg.name} must be pinned to ${optionalPkg.expectedMinor}.x when present (found "${match}")`
+        );
+      }
+    }
+  }
 }
 
 function validateImagePins() {
   const compose = loadYaml('deploy/compose/docker-compose.full.yml');
   const composeImage = compose?.services?.openlineage?.image;
+  let composeTag = null;
+  if (typeof composeImage === 'string') {
+    const parts = composeImage.split(':');
+    if (parts.length >= 2) {
+      const repo = parts.slice(0, -1).join(':');
+      composeTag = parts.at(-1);
+      if (repo !== REQUIRED_MARQUEZ_REPOSITORY) {
+        failures.push(
+          `deploy/compose/docker-compose.full.yml: services.openlineage.image must use ${REQUIRED_MARQUEZ_REPOSITORY}`
+        );
+      }
+    } else {
+      failures.push(
+        'deploy/compose/docker-compose.full.yml: services.openlineage.image must be explicitly tagged'
+      );
+    }
+  }
+
   if (typeof composeImage === 'string' && /:latest$/iu.test(composeImage)) {
     failures.push(
       'deploy/compose/docker-compose.full.yml: services.openlineage.image must not use :latest'
@@ -87,14 +126,49 @@ function validateImagePins() {
 
   const k8s = loadYaml('k8s/marquez/deploy.yaml');
   const k8sImage = k8s?.spec?.template?.spec?.containers?.[0]?.image;
+  let k8sTag = null;
+  if (typeof k8sImage === 'string') {
+    const parts = k8sImage.split(':');
+    if (parts.length >= 2) {
+      const repo = parts.slice(0, -1).join(':');
+      k8sTag = parts.at(-1);
+      if (repo !== REQUIRED_MARQUEZ_REPOSITORY) {
+        failures.push(
+          `k8s/marquez/deploy.yaml: container image must use ${REQUIRED_MARQUEZ_REPOSITORY}`
+        );
+      }
+    } else {
+      failures.push('k8s/marquez/deploy.yaml: container image must be explicitly tagged');
+    }
+  }
+
   if (typeof k8sImage === 'string' && /:latest$/iu.test(k8sImage)) {
     failures.push('k8s/marquez/deploy.yaml: container image must not use :latest');
   }
 
   const chartValues = loadYaml('charts/ig-platform/values.yaml');
+  const chartRepo = chartValues?.openlineage?.image?.repository;
   const chartTag = chartValues?.openlineage?.image?.tag;
+  if (typeof chartRepo === 'string' && chartRepo !== REQUIRED_MARQUEZ_REPOSITORY) {
+    failures.push(
+      `charts/ig-platform/values.yaml: openlineage.image.repository must be ${REQUIRED_MARQUEZ_REPOSITORY}`
+    );
+  }
   if (typeof chartTag === 'string' && chartTag.toLowerCase() === 'latest') {
     failures.push('charts/ig-platform/values.yaml: openlineage.image.tag must not be latest');
+  }
+
+  if (
+    typeof composeTag === 'string' &&
+    typeof k8sTag === 'string' &&
+    typeof chartTag === 'string'
+  ) {
+    const normalizedChartTag = chartTag.replace(/^['"]|['"]$/gu, '');
+    if (composeTag !== k8sTag || composeTag !== normalizedChartTag) {
+      failures.push(
+        `Marquez image tag mismatch across configs (compose=${composeTag}, k8s=${k8sTag}, chart=${normalizedChartTag})`
+      );
+    }
   }
 }
 
@@ -126,7 +200,12 @@ function listCandidateConfigFiles(dirPath, files) {
       continue;
     }
 
-    if (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml')) {
+    if (
+      entry.name.endsWith('.yaml') ||
+      entry.name.endsWith('.yml') ||
+      entry.name.endsWith('.json') ||
+      entry.name.endsWith('.toml')
+    ) {
       files.push(absolute);
     }
   }

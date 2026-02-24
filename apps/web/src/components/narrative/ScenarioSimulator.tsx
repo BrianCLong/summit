@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GraphSelector } from './GraphSelector';
+import { MomentumChart } from './MomentumChart';
 
 // Types matching backend
 interface SimulationEntity {
@@ -233,10 +234,10 @@ export const ScenarioSimulator: React.FC = () => {
                     <div
                       key={cluster.label}
                       className={`p-4 rounded-lg border-l-4 ${cluster.label.includes('Crisis') || cluster.label.includes('Stagnation')
-                          ? 'border-red-500 bg-red-50'
-                          : cluster.label.includes('Optimistic') || cluster.label.includes('Prosperity')
-                            ? 'border-green-500 bg-green-50'
-                            : 'border-blue-500 bg-blue-50'
+                        ? 'border-red-500 bg-red-50'
+                        : cluster.label.includes('Optimistic') || cluster.label.includes('Prosperity')
+                          ? 'border-green-500 bg-green-50'
+                          : 'border-blue-500 bg-blue-50'
                         }`}
                       role="article"
                       aria-label={`${cluster.label} Outcome Cluster`}
@@ -263,6 +264,16 @@ export const ScenarioSimulator: React.FC = () => {
                   {' '}The dominant outcome is <strong>{result.clusters[0]?.label}</strong>.
                 </p>
               </div>
+
+              {/* Render the Momentum Chart using the simulation Id if available.
+                  The batch runner currently only returns clusters but we can simulate the UI by showing
+                  an example or by using the real simulation ID from the API if it were updated.
+                  For Epic 4 integration, we assume result.scenarioId maps to the primary simulation trace. */}
+              {result.scenarioId && (
+                <div className="mt-8">
+                  <MomentumChart simulationId={result.scenarioId} refreshInterval={0} />
+                </div>
+              )}
             </div>
           ) : (
             <div className="h-full flex items-center justify-center text-slate-400 border-2 border-dashed border-slate-200 rounded-lg">

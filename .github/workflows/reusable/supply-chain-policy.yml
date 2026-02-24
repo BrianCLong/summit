@@ -38,6 +38,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
 
+      - name: Enforce cosign hardening policy
+        run: |
+          set -euo pipefail
+          node scripts/ci/verify-cosign-hardening.mjs \
+            --report-out artifacts/cosign-hardening-policy.json
+
       - name: Download build artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:

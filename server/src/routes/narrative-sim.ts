@@ -306,6 +306,83 @@ router.get('/simulations/:id', (req, res) => {
   res.json(state);
 });
 
+router.get('/simulations/:id/arcs', (req, res) => {
+  const state = narrativeSimulationManager.getState(req.params.id);
+  if (!state) {
+    res.status(404).json({ error: 'not-found' });
+    return;
+  }
+
+  // Reconstruct time-series momentum for each tick
+  // We look through all entities' history arrays
+  const maxTick = state.tick;
+  const timeSeriesData: any[] = [];
+  const events = state.recentEvents.filter(e => e.type === 'intervention' || e.type === 'shock');
+
+  for (let t = 0; t <= maxTick; t++) {
+    const dataPoint: any = { tick: t };
+
+    state.themes.forEach(theme => {
+      let momentumSum = 0;
+      Object.values(state.entities).forEach(entity => {
+        // Find the history entry for this tick, or the closest prior tick
+        const historyEntry = [...entity.history].reverse().find(h => h.tick <= t);
+        if (historyEntry) {
+          const themeAffinity = entity.themes[theme] ?? 0;
+          const normalizedSentiment = (historyEntry.sentiment + 1) / 2;
+          momentumSum += normalizedSentiment * historyEntry.influence * themeAffinity;
+        }
+      });
+      // Clamp between 0 and 1
+      dataPoint[theme] = Math.max(0, Math.min(1, momentumSum));
+    });
+
+    timeSeriesData.push(dataPoint);
+  }
+
+  res.json({
+    data: timeSeriesData,
+    events: events.map(e => ({
+      ...e,
+      tick: e.scheduledTick || state.tick
+    }))
+  });
+});
+
+import { redTeamAgentService } from '../services/RedTeamAgentService.js';
+
+router.post('/simulations/:id/red-team/start', async (req, res) => {
+  try {
+    const { targetTheme, targetMomentum, maxTicks } = req.body;
+
+    if (!targetTheme || !targetMomentum || !maxTicks) {
+      res.status(400).json({ error: 'Missing required configuration for Red Team' });
+      return;
+    }
+
+    const campaignId = await redTeamAgentService.startCampaign({
+      simulationId: req.params.id,
+      targetTheme,
+      targetMomentum,
+      maxTicks
+    });
+
+    res.json({ status: 'started', campaignId });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/red-team/:campaignId/report', (req, res) => {
+  const report = redTeamAgentService.getReport(req.params.campaignId);
+  if (!report) {
+    res.status(404).json({ error: 'Campaign not found' });
+    return;
+  }
+
+  res.json(report);
+});
+
 router.post('/simulations/:id/tick', async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { steps } = tickSchema.parse(req.body ?? {});

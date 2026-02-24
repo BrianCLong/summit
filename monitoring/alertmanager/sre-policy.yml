@@ -12,6 +12,23 @@ route:
   repeat_interval: 12h
   receiver: 'default'
   routes:
+    # Routing incidents get dedicated network escalation
+    - match:
+        severity: critical
+        component: routing
+      receiver: 'routing-critical'
+      group_wait: 10s
+      group_interval: 2m
+      repeat_interval: 10m
+
+    - match:
+        severity: warning
+        component: routing
+      receiver: 'routing-warning'
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 1h
+
     # Critical SLO burn-rate alerts (< 15m RTO)
     - match:
         severity: critical
@@ -86,6 +103,34 @@ receivers:
         channel: '#alerts'
         title: 'IntelGraph Alert'
         text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+
+  - name: 'routing-critical'
+    pagerduty_configs:
+      - service_key: '{{ .PagerDutyServiceKey }}'
+        description: 'Routing Critical Alert'
+        severity: 'critical'
+        details:
+          component: '{{ .CommonLabels.component }}'
+          service: '{{ .CommonLabels.service }}'
+          runbook: '{{ .CommonAnnotations.runbook_url }}'
+    slack_configs:
+      - api_url: '{{ .SlackWebhookURL }}'
+        channel: '#alerts-routing'
+        title: '🚨 Routing Critical'
+        text: |
+          *Alert*: {{ .CommonLabels.alertname }}
+          *Service*: {{ .CommonLabels.service }}
+          *Runbook*: {{ .CommonAnnotations.runbook_url }}
+
+  - name: 'routing-warning'
+    slack_configs:
+      - api_url: '{{ .SlackWebhookURL }}'
+        channel: '#alerts-routing'
+        title: '⚠️ Routing Warning'
+        text: |
+          *Alert*: {{ .CommonLabels.alertname }}
+          *Service*: {{ .CommonLabels.service }}
+          *Runbook*: {{ .CommonAnnotations.runbook_url }}
 
   - name: 'slo-critical'
     pagerduty_configs:

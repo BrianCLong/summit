@@ -2,10 +2,19 @@
  * IngestService Unit Tests
  */
 
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import type { IngestService as IngestServiceType, IngestInput } from '../IngestService.js';
-import type { Pool } from 'pg';
-import type { Driver } from 'neo4j-driver';
+import {
+  jest,
+  describe,
+  it,
+  expect,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+} from "@jest/globals";
+import type { IngestService as IngestServiceType, IngestInput } from "../IngestService.js";
+import type { Pool } from "pg";
+import type { Driver } from "neo4j-driver";
 
 // Mock functions declared before mocks
 const mockPgConnect = jest.fn();
@@ -21,7 +30,7 @@ const mockLoggerWarn = jest.fn();
 const mockLoggerError = jest.fn();
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../config/database', () => ({
+jest.unstable_mockModule("../../config/database", () => ({
   getPostgresPool: jest.fn(() => ({
     connect: mockPgConnect,
     query: mockPgQuery,
@@ -36,18 +45,18 @@ jest.unstable_mockModule('../../config/database', () => ({
   })),
 }));
 
-jest.unstable_mockModule('pg', () => ({
+jest.unstable_mockModule("pg", () => ({
   Pool: jest.fn(),
 }));
 
-jest.unstable_mockModule('neo4j-driver', () => ({
+jest.unstable_mockModule("neo4j-driver", () => ({
   __esModule: true,
   default: {
     driver: jest.fn(),
   },
 }));
 
-jest.unstable_mockModule('../../config/logger', () => ({
+jest.unstable_mockModule("../../config/logger", () => ({
   __esModule: true,
   default: {
     child: () => ({
@@ -59,9 +68,9 @@ jest.unstable_mockModule('../../config/logger', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { IngestService } = await import('../IngestService.js');
+const { IngestService } = await import("../IngestService.js");
 
-describe('IngestService', () => {
+describe("IngestService", () => {
   let ingestService: IngestServiceType;
   let mockPg: jest.Mocked<Pool>;
   let mockNeo4j: jest.Mocked<Driver>;
@@ -91,40 +100,40 @@ describe('IngestService', () => {
     jest.clearAllMocks();
   });
 
-  describe('ingest', () => {
-    it('should successfully ingest entities and relationships', async () => {
+  describe("ingest", () => {
+    it("should successfully ingest entities and relationships", async () => {
       const input: IngestInput = {
-        tenantId: 'test-tenant',
-        sourceType: 's3-csv',
-        sourceId: 's3://bucket/data.csv',
-        userId: 'user-123',
+        tenantId: "test-tenant",
+        sourceType: "s3-csv",
+        sourceId: "s3://bucket/data.csv",
+        userId: "user-123",
         entities: [
           {
-            externalId: 'person-1',
-            kind: 'person',
-            labels: ['Person'],
+            externalId: "person-1",
+            kind: "person",
+            labels: ["Person"],
             properties: {
-              name: 'Alice Smith',
-              email: 'alice@example.com',
+              name: "Alice Smith",
+              email: "alice@example.invalid",
             },
           },
           {
-            externalId: 'org-1',
-            kind: 'organization',
-            labels: ['Organization'],
+            externalId: "org-1",
+            kind: "organization",
+            labels: ["Organization"],
             properties: {
-              name: 'Tech Corp',
-              industry: 'Technology',
+              name: "Tech Corp",
+              industry: "Technology",
             },
           },
         ],
         relationships: [
           {
-            fromExternalId: 'person-1',
-            toExternalId: 'org-1',
-            relationshipType: 'MEMBER_OF',
+            fromExternalId: "person-1",
+            toExternalId: "org-1",
+            relationshipType: "MEMBER_OF",
             confidence: 0.95,
-            properties: { role: 'CEO' },
+            properties: { role: "CEO" },
           },
         ],
       };
@@ -132,13 +141,13 @@ describe('IngestService', () => {
       // Mock database responses
       mockClient.query
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // BEGIN
-        .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // INSERT provenance
+        .mockResolvedValueOnce({ rows: [{ id: "prov-123" }] }) // INSERT provenance
         .mockResolvedValueOnce({ rows: [] }) // Check existing entity
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-id-1' }] }) // INSERT entity 1
+        .mockResolvedValueOnce({ rows: [{ id: "stable-id-1" }] }) // INSERT entity 1
         .mockResolvedValueOnce({ rows: [] }) // Check existing entity
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-id-2' }] }) // INSERT entity 2
+        .mockResolvedValueOnce({ rows: [{ id: "stable-id-2" }] }) // INSERT entity 2
         .mockResolvedValueOnce({ rows: [] }) // Check existing relationship
-        .mockResolvedValueOnce({ rows: [{ id: 'rel-1' }] }) // INSERT relationship
+        .mockResolvedValueOnce({ rows: [{ id: "rel-1" }] }) // INSERT relationship
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);
@@ -150,40 +159,40 @@ describe('IngestService', () => {
       expect(result.provenanceId).toBeTruthy();
 
       // Verify BEGIN was called
-      expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+      expect(mockClient.query).toHaveBeenCalledWith("BEGIN");
 
       // Verify COMMIT was called
-      expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+      expect(mockClient.query).toHaveBeenCalledWith("COMMIT");
 
       // Verify client was released
       expect(mockClient.release).toHaveBeenCalled();
     });
 
-    it('should generate stable IDs for duplicate entities', async () => {
+    it("should generate stable IDs for duplicate entities", async () => {
       const input: IngestInput = {
-        tenantId: 'test-tenant',
-        sourceType: 's3-csv',
-        sourceId: 's3://bucket/data.csv',
-        userId: 'user-123',
+        tenantId: "test-tenant",
+        sourceType: "s3-csv",
+        sourceId: "s3://bucket/data.csv",
+        userId: "user-123",
         entities: [
           {
-            externalId: 'person-1',
-            kind: 'person',
-            labels: ['Person'],
+            externalId: "person-1",
+            kind: "person",
+            labels: ["Person"],
             properties: {
-              name: 'Alice Smith',
-              dateOfBirth: '1990-01-01',
-              nationality: 'US',
+              name: "Alice Smith",
+              dateOfBirth: "1990-01-01",
+              nationality: "US",
             },
           },
           {
-            externalId: 'person-1-duplicate',
-            kind: 'person',
-            labels: ['Person'],
+            externalId: "person-1-duplicate",
+            kind: "person",
+            labels: ["Person"],
             properties: {
-              name: 'Alice Smith',
-              dateOfBirth: '1990-01-01',
-              nationality: 'US',
+              name: "Alice Smith",
+              dateOfBirth: "1990-01-01",
+              nationality: "US",
             },
           },
         ],
@@ -192,11 +201,11 @@ describe('IngestService', () => {
 
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
-        .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // Provenance
+        .mockResolvedValueOnce({ rows: [{ id: "prov-123" }] }) // Provenance
         .mockResolvedValueOnce({ rows: [] }) // Check entity 1
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Insert entity 1
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Check entity 2 (found)
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Update entity 2
+        .mockResolvedValueOnce({ rows: [{ id: "stable-1" }] }) // Insert entity 1
+        .mockResolvedValueOnce({ rows: [{ id: "stable-1" }] }) // Check entity 2 (found)
+        .mockResolvedValueOnce({ rows: [{ id: "stable-1" }] }) // Update entity 2
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);
@@ -205,17 +214,17 @@ describe('IngestService', () => {
       expect(result.entitiesUpdated).toBe(1);
     });
 
-    it('should rollback transaction on error', async () => {
+    it("should rollback transaction on error", async () => {
       const input: IngestInput = {
-        tenantId: 'test-tenant',
-        sourceType: 's3-csv',
-        sourceId: 's3://bucket/data.csv',
-        userId: 'user-123',
+        tenantId: "test-tenant",
+        sourceType: "s3-csv",
+        sourceId: "s3://bucket/data.csv",
+        userId: "user-123",
         entities: [
           {
-            kind: 'person',
-            labels: ['Person'],
-            properties: { name: 'Alice' },
+            kind: "person",
+            labels: ["Person"],
+            properties: { name: "Alice" },
           },
         ],
         relationships: [],
@@ -223,35 +232,35 @@ describe('IngestService', () => {
 
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
-        .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // Provenance
-        .mockRejectedValueOnce(new Error('Database error')); // Simulate error
+        .mockResolvedValueOnce({ rows: [{ id: "prov-123" }] }) // Provenance
+        .mockRejectedValueOnce(new Error("Database error")); // Simulate error
 
       // Service handles errors gracefully and returns a result with success: false
       const result = await ingestService.ingest(input);
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContainEqual(expect.stringContaining('Database error'));
+      expect(result.errors).toContainEqual(expect.stringContaining("Database error"));
     });
 
-    it('should handle missing relationships gracefully', async () => {
+    it("should handle missing relationships gracefully", async () => {
       const input: IngestInput = {
-        tenantId: 'test-tenant',
-        sourceType: 's3-csv',
-        sourceId: 's3://bucket/data.csv',
-        userId: 'user-123',
+        tenantId: "test-tenant",
+        sourceType: "s3-csv",
+        sourceId: "s3://bucket/data.csv",
+        userId: "user-123",
         entities: [
           {
-            externalId: 'person-1',
-            kind: 'person',
-            labels: ['Person'],
-            properties: { name: 'Alice' },
+            externalId: "person-1",
+            kind: "person",
+            labels: ["Person"],
+            properties: { name: "Alice" },
           },
         ],
         relationships: [
           {
-            fromExternalId: 'person-1',
-            toExternalId: 'org-MISSING',
-            relationshipType: 'MEMBER_OF',
+            fromExternalId: "person-1",
+            toExternalId: "org-MISSING",
+            relationshipType: "MEMBER_OF",
             confidence: 0.95,
           },
         ],
@@ -259,71 +268,67 @@ describe('IngestService', () => {
 
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
-        .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] })
+        .mockResolvedValueOnce({ rows: [{ id: "prov-123" }] })
         .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] })
+        .mockResolvedValueOnce({ rows: [{ id: "stable-1" }] })
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);
 
       expect(result.success).toBe(false);
-      expect(result.errors).toContainEqual(
-        expect.stringContaining('Entity not found'),
-      );
+      expect(result.errors).toContainEqual(expect.stringContaining("Entity not found"));
       expect(result.relationshipsCreated).toBe(0);
     });
   });
 
-  describe('generateStableId', () => {
-    it('should generate consistent IDs for same natural keys', () => {
+  describe("generateStableId", () => {
+    it("should generate consistent IDs for same natural keys", () => {
       const service = ingestService as any;
 
-      const id1 = service.generateStableId('tenant-1', 'person', {
-        name: 'Alice Smith',
-        dateOfBirth: '1990-01-01',
-        nationality: 'US',
+      const id1 = service.generateStableId("tenant-1", "person", {
+        name: "Alice Smith",
+        dateOfBirth: "1990-01-01",
+        nationality: "US",
       });
 
-      const id2 = service.generateStableId('tenant-1', 'person', {
-        name: 'Alice Smith',
-        dateOfBirth: '1990-01-01',
-        nationality: 'US',
+      const id2 = service.generateStableId("tenant-1", "person", {
+        name: "Alice Smith",
+        dateOfBirth: "1990-01-01",
+        nationality: "US",
       });
 
       expect(id1).toBe(id2);
     });
 
-    it('should generate different IDs for different tenants', () => {
+    it("should generate different IDs for different tenants", () => {
       const service = ingestService as any;
 
-      const id1 = service.generateStableId('tenant-1', 'person', {
-        name: 'Alice Smith',
+      const id1 = service.generateStableId("tenant-1", "person", {
+        name: "Alice Smith",
       });
 
-      const id2 = service.generateStableId('tenant-2', 'person', {
-        name: 'Alice Smith',
+      const id2 = service.generateStableId("tenant-2", "person", {
+        name: "Alice Smith",
       });
 
       expect(id1).not.toBe(id2);
     });
 
-    it('should include kind in ID', () => {
+    it("should include kind in ID", () => {
       const service = ingestService as any;
 
-      const id = service.generateStableId('tenant-1', 'person', {
-        name: 'Alice',
+      const id = service.generateStableId("tenant-1", "person", {
+        name: "Alice",
       });
 
-      expect(id).toContain('person');
+      expect(id).toContain("person");
     });
   });
 
-  describe('syncToNeo4j', () => {
-    it('writes batched UNWIND queries with relationship idempotency sentinel', async () => {
+  describe("syncToNeo4j", () => {
+    it("writes batched UNWIND queries with relationship idempotency sentinel", async () => {
       const runMock = jest.fn().mockResolvedValue({ records: [] });
-      const executeWriteMock = jest.fn().mockImplementation(async (work) =>
-        work({ run: runMock }),
-      );
+      const executeWriteMock = jest.fn().mockImplementation(async (work) => work({ run: runMock }));
       const closeMock = jest.fn().mockResolvedValue(undefined);
 
       mockNeo4j.session.mockReturnValue({
@@ -335,49 +340,75 @@ describe('IngestService', () => {
         .mockResolvedValueOnce({
           rows: [
             {
-              id: 'entity-1',
-              tenant_id: 'test-tenant',
-              kind: 'person',
-              labels: ['Person'],
-              props: JSON.stringify({ name: 'Alice' }),
-              created_at: new Date('2026-01-01T00:00:00.000Z'),
-              updated_at: new Date('2026-01-01T00:00:00.000Z'),
+              id: "entity-source",
+              tenant_id: "test-tenant",
+              kind: "source",
+              labels: ["Source"],
+              props: JSON.stringify({ name: "Report A" }),
+              created_at: new Date("2026-01-01T00:00:00.000Z"),
+              updated_at: new Date("2026-01-01T00:00:00.000Z"),
+            },
+            {
+              id: "entity-indicator",
+              tenant_id: "test-tenant",
+              kind: "indicator",
+              labels: ["Indicator"],
+              props: JSON.stringify({ value: "198.51.100.8" }),
+              created_at: new Date("2026-01-01T00:00:00.000Z"),
+              updated_at: new Date("2026-01-01T00:00:00.000Z"),
             },
           ],
         })
         .mockResolvedValueOnce({
           rows: [
             {
-              id: 'rel-1',
-              from_entity_id: 'entity-1',
-              to_entity_id: 'entity-2',
-              tenant_id: 'test-tenant',
-              relationship_type: 'RELATED_TO',
+              id: "rel-mentions",
+              from_entity_id: "entity-source",
+              to_entity_id: "entity-indicator",
+              tenant_id: "test-tenant",
+              relationship_type: "MENTIONS",
+              props: JSON.stringify({ confidenceSource: "extractor" }),
+              confidence: 0.95,
+              source: "unit-test",
+              first_seen: new Date("2026-01-01T00:00:00.000Z"),
+              last_seen: new Date("2026-01-01T00:00:00.000Z"),
+            },
+            {
+              id: "rel-generic",
+              from_entity_id: "entity-indicator",
+              to_entity_id: "entity-source",
+              tenant_id: "test-tenant",
+              relationship_type: "RELATED_TO",
               props: JSON.stringify({ weight: 0.9 }),
               confidence: 0.95,
-              source: 'unit-test',
-              first_seen: new Date('2026-01-01T00:00:00.000Z'),
-              last_seen: new Date('2026-01-01T00:00:00.000Z'),
+              source: "unit-test",
+              first_seen: new Date("2026-01-01T00:00:00.000Z"),
+              last_seen: new Date("2026-01-01T00:00:00.000Z"),
             },
           ],
         });
 
-      await (ingestService as any).syncToNeo4j('test-tenant', 'prov-1');
+      await (ingestService as any).syncToNeo4j("test-tenant", "prov-1");
 
       const cyphers = runMock.mock.calls.map((call) => call[0] as string);
       expect(
         cyphers.some((cypher) =>
-          cypher.includes('MERGE (n:Entity {id: row.id, tenantId: row.tenantId})'),
-        ),
+          cypher.includes("MERGE (n:Entity {id: row.id, tenantId: row.tenantId})")
+        )
       ).toBe(true);
+      expect(cyphers.some((cypher) => cypher.includes("SET n:Indicator"))).toBe(true);
+      expect(cyphers.some((cypher) => cypher.includes("SET n:Source"))).toBe(true);
       expect(
-        cyphers.some((cypher) => cypher.includes('MERGE (s:IngestRelationshipIdempotency')),
+        cyphers.some((cypher) => cypher.includes("MERGE (s:IngestRelationshipIdempotency"))
       ).toBe(true);
+      expect(cyphers.some((cypher) => cypher.includes("MERGE (from)-[r:`MENTIONS`"))).toBe(true);
 
       expect(
         runMock.mock.calls.some((call) =>
-          JSON.stringify(call[1]).includes('"idempotencyToken":"test-tenant:relationship:rel-1"'),
-        ),
+          JSON.stringify(call[1]).includes(
+            '"idempotencyToken":"test-tenant:relationship:rel-mentions"'
+          )
+        )
       ).toBe(true);
       expect(closeMock).toHaveBeenCalled();
     });

@@ -147,6 +147,7 @@ import intelGraphRouter from './routes/intel-graph.js';
 import graphragRouter from './routes/graphrag.js';
 import intentRouter from './routes/intent.js';
 import factFlowRouter from './factflow/routes.js';
+import externalAgentsRouter from './routes/external-agents.js';
 import { failoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
 import { buildApprovalsRouter } from './routes/approvals.js';
 import { shadowTrafficMiddleware } from './middleware/ShadowTrafficMiddleware.js';
@@ -461,6 +462,7 @@ export const createApp = async () => {
   app.use('/api/tenants', tenantsRouter);
   app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
+  app.use('/api/company-os/external-agents', externalAgentsRouter);
 
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
   app.use('/api', adminSmokeRouter);

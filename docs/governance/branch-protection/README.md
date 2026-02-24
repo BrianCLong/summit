@@ -3,14 +3,15 @@
 This policy is enforced automatically via CI.
 
 ## Controls
-- Enforced for admins
-- Linear history required
-- ≥2 approving reviews
-- Strict required checks
+- Policy-as-code source: `docs/ci/REQUIRED_CHECKS_POLICY.yml`
+- Drift is evaluated against live GitHub branch protection on `main`
+- Required check contexts and strict mode are enforced via drift + reconcile workflows
+- Review requirements are governed by branch/ruleset configuration
 
 ## Verification
-- scripts/ci/verify_branch_protection.mjs
+- scripts/ci/check_branch_protection_drift.mjs
 - scripts/ci/verify_required_checks.mjs
+- scripts/ci/governance-meta-gate.mjs
 
 ## Evidence
 - docs/ga/evidence/ci-governance/

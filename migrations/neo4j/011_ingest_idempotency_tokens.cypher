@@ -7,3 +7,6 @@ FOR (s:IngestRelationshipIdempotency) REQUIRE s.idempotency_token IS UNIQUE;
 
 CREATE INDEX ingest_relationship_idempotency_relationship_id_idx IF NOT EXISTS
 FOR (s:IngestRelationshipIdempotency) ON (s.relationshipId);
+
+CREATE INDEX ingest_relationship_idempotency_edge_id_idx IF NOT EXISTS
+FOR (s:IngestRelationshipIdempotency) ON (s.edgeId);

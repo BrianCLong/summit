@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto';
 const BASE_URL = process.env.REPLAY_ENGINE_URL ?? 'http://localhost:8081';
 const BATCH_SIZE = Number(process.env.REPLAY_BATCH_SIZE ?? 100);
 const BATCH_INTERVAL_MS = Number(process.env.REPLAY_BATCH_INTERVAL_MS ?? 1000);
+const REQUEST_TIMEOUT_MS = Number(process.env.REPLAY_REQUEST_TIMEOUT_MS ?? 2000);
 
 type PendingEvent = { dir: 'in' | 'out'; channel: string; payload: unknown };
 type PendingBatch = { events: PendingEvent[]; timer?: NodeJS.Timeout };
@@ -18,6 +19,7 @@ export async function createRecording(
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ sessionId, seed: '0', meta: { toolClass } }),
+      signal: requestTimeoutSignal(),
     });
     if (!res.ok) throw new Error(`replay create failed: ${res.status}`);
     const json = (await res.json()) as { id: string };
@@ -71,6 +73,7 @@ async function flush(recordingId: string) {
         'x-ig-signature': `sha256=${signature}`,
       },
       body: payload,
+      signal: requestTimeoutSignal(),
     });
     if (!res.ok) {
       console.warn('replay recordEvent failed', res.status);
@@ -90,4 +93,16 @@ function schedule(recordingId: string, batch: PendingBatch) {
     void flush(recordingId);
   }, BATCH_INTERVAL_MS);
   batch.timer.unref?.();
+}
+
+function requestTimeoutSignal(): AbortSignal | undefined {
+  if (
+    typeof AbortSignal !== 'undefined' &&
+    typeof AbortSignal.timeout === 'function' &&
+    Number.isFinite(REQUEST_TIMEOUT_MS) &&
+    REQUEST_TIMEOUT_MS > 0
+  ) {
+    return AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+  }
+  return undefined;
 }

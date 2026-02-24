@@ -1,5 +1,4 @@
 # Docker Compose configuration for IntelGraph monitoring stack
-version: '3.8'
 
 services:
   # Prometheus monitoring server
@@ -93,8 +92,20 @@ services:
     networks:
       - intelgraph-monitoring
       - intelgraph-backend
-    depends_on:
-      - redis
+
+  # Blackbox exporter for synthetic external reachability probes
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    container_name: intelgraph-blackbox-exporter
+    ports:
+      - '9115:9115'
+    volumes:
+      - ./blackbox.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    restart: unless-stopped
+    networks:
+      - intelgraph-monitoring
 
   # PostgreSQL Exporter
   postgres-exporter:
@@ -108,8 +119,6 @@ services:
     networks:
       - intelgraph-monitoring
       - intelgraph-backend
-    depends_on:
-      - postgres
 
   # Neo4j Exporter (custom)
   neo4j-exporter:
@@ -125,8 +134,6 @@ services:
     networks:
       - intelgraph-monitoring
       - intelgraph-backend
-    depends_on:
-      - neo4j
 
   # Jaeger for distributed tracing (optional)
   jaeger:

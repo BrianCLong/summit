@@ -25,3 +25,12 @@ To deploy the synthetic check as a Kubernetes CronJob:
 
 - `API_URL`: The base URL of the IntelGraph API (default: `http://localhost:3000`).
 - Probe labels required for routing visibility: `region`, `asn`, `provider`, `target`.
+- Prometheus scrape job: `blackbox-routing` (configured in `monitoring/prometheus.yml`).
+
+## Validation
+
+Validate the routing probe matrix before rollout:
+
+```bash
+pnpm --dir monitoring/synthetic run validate:bgp-probes
+```

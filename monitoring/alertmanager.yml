@@ -17,6 +17,21 @@ route:
   repeat_interval: 1h
   receiver: 'web.hook'
   routes:
+    # Routing incidents page network on-call before generic critical handling
+    - match:
+        severity: critical
+        component: routing
+      receiver: routing-critical
+      group_wait: 0s
+      repeat_interval: 5m
+
+    - match:
+        severity: warning
+        component: routing
+      receiver: routing-warning
+      group_wait: 15s
+      repeat_interval: 15m
+
     # SLO alerts
     - match:
         slo: "true"
@@ -83,6 +98,42 @@ receivers:
           {{ .Annotations.description }}
 
           *Labels:* {{ range .Labels.SortedPairs }}`{{ .Name }}={{ .Value }}` {{ end }}
+          {{ end }}
+        send_resolved: true
+
+  # Routing-critical alerts - dedicated network escalation channel
+  - name: 'routing-critical'
+    pagerduty_configs:
+      - routing_key: '${PAGERDUTY_ROUTING_KEY_ROUTING}'
+        severity: 'critical'
+        description: 'Routing critical: {{ .GroupLabels.alertname }}'
+        details:
+          component: '{{ .CommonLabels.component }}'
+          service: '{{ .CommonLabels.service }}'
+          runbook: '{{ .CommonAnnotations.runbook }}'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-routing'
+        title: '🚨 Routing Critical: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook }}
+          {{ end }}
+        send_resolved: true
+
+  # Routing-warning alerts - network visibility channel
+  - name: 'routing-warning'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts-routing'
+        title: '⚠️ Routing Warning: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *{{ .Annotations.summary }}*
+          {{ .Annotations.description }}
+          *Runbook:* {{ .Annotations.runbook }}
           {{ end }}
         send_resolved: true
 

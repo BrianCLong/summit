@@ -12,8 +12,8 @@ Deterministic CDC-to-graph validation with audit-grade gate outputs.
 ## Usage
 
 ```bash
-node packages/graph-sync-validator/bin/graph-sync-validate.mjs
-node packages/graph-sync-validator/bin/parity-recon.mjs \
+node packages/graph-sync-validator/scripts/graph-sync-validate.mjs
+node packages/graph-sync-validator/scripts/parity-recon.mjs \
   --metrics artifacts/graph-sync/metrics.json \
   --output artifacts/graph-sync/recon.json
 ```

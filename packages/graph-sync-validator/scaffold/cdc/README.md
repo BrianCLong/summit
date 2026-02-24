@@ -19,4 +19,4 @@ This is a minimal TypeScript scaffold that enforces:
 1. Read changes from logical decoding (`pgoutput`/`wal2json`) into `CdcMutation` batches.
 2. Call `processBatch(batch, deps)`.
 3. Persist consumer offsets only after Neo4j apply + OpenLineage emit both succeed.
-4. Run `packages/graph-sync-validator/bin/parity-recon.mjs` on schedule for convergence proof.
+4. Run `packages/graph-sync-validator/scripts/parity-recon.mjs` on schedule for convergence proof.

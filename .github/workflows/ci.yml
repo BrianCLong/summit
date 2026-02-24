@@ -123,6 +123,28 @@ jobs:
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
 
+  lineage-stack-lockstep:
+    name: Lineage Stack Lockstep
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version-file: .nvmrc
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test lineage lockstep gate
+        run: pnpm test:lineage-stack-lockstep
+      - name: Verify lineage stack lockstep
+        run: pnpm ci:lineage-stack-lockstep
+
   security-compliance:
     name: Security & Compliance
     uses: ./.github/workflows/_reusable-security-compliance.yml

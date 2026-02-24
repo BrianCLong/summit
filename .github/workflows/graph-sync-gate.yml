@@ -5,7 +5,7 @@ on:
     outputs:
       metrics_path:
         description: "Path to the generated metrics.json"
-        value: "packages/graph-sync-validator/metrics.json"
+        value: "artifacts/graph-sync/metrics.json"
 
 jobs:
   validate-sync:

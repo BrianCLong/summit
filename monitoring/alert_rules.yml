@@ -109,7 +109,7 @@ groups:
       # WebSocket connection issues
       - alert: WebSocketConnectionDrop
         expr: |
-          decrease(websocket_connections_active[5m]) > 50
+          delta(websocket_connections_active[5m]) < -50
         for: 2m
         labels:
           severity: warning
