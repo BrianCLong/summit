@@ -18,9 +18,9 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "pnpm exec jest",
-    "test:watch": "pnpm exec jest --watch",
-    "test:coverage": "pnpm exec jest --coverage",
+    "test": "npx jest",
+    "test:watch": "npx jest --watch",
+    "test:coverage": "npx jest --coverage",
     "lint": "if [ -d src ]; then eslint src --ext .ts; else eslint . --ext .ts; fi",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
@@ -46,12 +46,12 @@
     "pino": "^8.x"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.14",
-    "@types/node": "^20.17.16",
-    "@types/pg": "^8.11.11",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.2",
-    "typescript": "^5.7.3"
+    "@types/jest": "^29.x",
+    "@types/node": "^20.x",
+    "@types/pg": "^8.x",
+    "jest": "^29.x",
+    "ts-jest": "^29.x",
+    "typescript": "^5.x"
   },
   "peerDependencies": {
     "neo4j-driver": ">=5.0.0",

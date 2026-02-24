@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "asset_id": { "type": "string" },
+    "license": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "source": { "type": "string" },
+        "method": { "type": "string", "enum": ["scrape", "api", "manual", "purchase"] }
+      },
+      "required": ["source", "method"]
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "has_pii": { "type": "boolean" },
+        "retention_policy": { "type": "string", "enum": ["transient", "standard", "restricted"] }
+      },
+      "required": ["has_pii"],
+      "if": {
+        "properties": { "has_pii": { "const": true } }
+      },
+      "then": {
+        "required": ["retention_policy"]
+      }
+    },
+    "shareability": { "type": "string", "enum": ["public", "internal", "restricted"] }
+  },
+  "required": ["asset_id", "license", "provenance", "privacy", "shareability"],
+  "additionalProperties": false
+}

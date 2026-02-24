@@ -4,6 +4,9 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
+import torch
+
+
 @dataclass
 class MismatchReport:
     max_abs_logprob_delta: float = 0.0
@@ -11,11 +14,6 @@ class MismatchReport:
     violations: int = 0
 
 def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str, Any]) -> MismatchReport:
-    try:
-        import torch
-    except (ImportError, ModuleNotFoundError):
-        return MismatchReport()
-
     train_logprobs = train_vals.get("logprobs")
     if train_logprobs is None:
         train_logprobs = train_vals.get("log_probs")
@@ -30,8 +28,8 @@ def compute_mismatch_metrics(train_vals: dict[str, Any], rollout_vals: dict[str,
     delta = (train_logprobs - rollout_logprobs).abs()
 
     return MismatchReport(
-        max_abs_logprob_delta=float(delta.max().item()),
-        mean_abs_logprob_delta=float(delta.mean().item()),
+        max_abs_logprob_delta=delta.max().item(),
+        mean_abs_logprob_delta=delta.mean().item(),
         violations=0,
     )
 

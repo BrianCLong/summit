@@ -418,19 +418,15 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate branch protection read token
-        id: check-token
         env:
           BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-            echo "::warning::BRANCH_PROTECTION_READ_TOKEN not set, skipping drift check"
-            echo "skip=true" >> $GITHUB_OUTPUT
-          else
-            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
+            exit 1
           fi
 
       - name: Check branch protection drift
-        if: steps.check-token.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: pnpm ci:branch-protection:check
@@ -534,7 +530,7 @@ jobs:
             exit 1
           fi
 
-          if [[ "${{ needs.branch-protection-drift.result }}" != "success" && "${{ needs.branch-protection-drift.result }}" != "skipped" ]]; then
+          if [[ "${{ needs.branch-protection-drift.result }}" != "success" ]]; then
             echo "::error::Branch Protection Drift FAILED"
             exit 1
           fi

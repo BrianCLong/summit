@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-22T14:00:00Z",
-  "revision_note": "Completed Switchboard control-plane skeleton and CI hardening; established deny-by-default architecture and deterministic receipts.",
+  "last_updated": "2026-02-08T00:15:00Z",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
   "initiatives": [
-    {
-      "id": "switchboard-control-plane",
-      "status": "complete",
-      "owner": "Jules",
-      "notes": "Landed Summit Switchboard control-plane skeleton, deny-by-default policy, deterministic receipts, and registry scaffolding."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -214,11 +208,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 9,
+    "rc_ready": 8,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
