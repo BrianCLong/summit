@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:00:00Z",
-  "revision_note": "Added Postgres CDC blueprint in docs/streaming.",
+  "last_updated": "2026-02-08T00:55:32Z",
+  "revision_note": "Added sigstore bundle verification action, policy gate, and evidence schema update.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -57,7 +57,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Added sigstore bundle-first verification action, CVE-2026-22703 version floor policy gate, and digest guidance in evidence schema."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",

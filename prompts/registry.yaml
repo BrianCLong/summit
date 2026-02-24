@@ -165,29 +165,29 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: competitor-decode-evidence
+  - id: sigstore-bundle-verify
     version: v1
-    path: prompts/strategy/competitor-decode-evidence@v1.md
-    sha256: 1a73f9d0a33187daebdf969d126413b85aec5512401d850b467e24918a9a0a31
-    description: Evidence schema and determinism scaffolding for competitor decode artifacts.
+    path: prompts/ci/sigstore-bundle-verify@v1.md
+    sha256: 2e1109c6fadf94c9d5a78079e3a1c4360142df91701f7dfa9437fa6e8db82a8c
+    description: Add bundle-first sigstore verification gates with cosign version floor and trust root pinning.
     scope:
       paths:
-        - .github/scripts/required-checks/README.md
-        - required_checks.todo.md
-        - src/graphrag/evidence/schemas/
-        - src/graphrag/evidence/writeEvidence.ts
-        - tests/graphrag/evidence/evidence.spec.ts
+        - .github/actions/sigstore-verify/action.yml
+        - ci/attest/verify.sh
+        - policy/opa/sigstore.rego
+        - policy/tests/sigstore_gate_test.rego
+        - summit/evidence/schemas/report.schema.json
         - docs/roadmap/STATUS.json
-        - prompts/strategy/competitor-decode-evidence@v1.md
+        - prompts/ci/sigstore-bundle-verify@v1.md
         - prompts/registry.yaml
-        - agents/examples/COMPETITOR_DECODE_EVIDENCE_20260206.json
+        - agents/examples/SIGSTORE_BUNDLE_VERIFY_20260208.json
       domains:
-        - evidence
-        - governance
         - ci
+        - governance
+        - supply-chain
     verification:
       tiers_required:
-        - C
+        - B
       debt_budget:
         permitted: 0
         retirement_target: 0
