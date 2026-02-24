@@ -2,9 +2,9 @@ name: Comprehensive Test Suite
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   test:
@@ -17,9 +17,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9.12.0
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,13 +29,8 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      - name: Install System Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
-
       - name: Install Node Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Install Python Dependencies
         run: |
@@ -57,7 +49,7 @@ jobs:
           ./scripts/test-comprehensive.sh
 
       - name: Upload Test Results
-        if: always() || failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results

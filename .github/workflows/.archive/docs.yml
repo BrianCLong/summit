@@ -51,8 +51,6 @@ jobs:
       - name: Install pnpm
         if: ${{ vars.DOCS_DISABLE != '1' }}
         uses: pnpm/action-setup@v3
-        with:
-
       - name: Install dependencies
         if: ${{ vars.DOCS_DISABLE != '1' }}
         run: pnpm install --frozen-lockfile

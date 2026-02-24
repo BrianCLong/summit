@@ -85,3 +85,45 @@ export interface ConsensusProposal<T = any> {
   deadline: string;
   createdAt: string;
 }
+
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'pending_approval' | 'cancelled';
+
+export interface Task {
+  id: string;
+  runId: string;
+  parentTaskId?: string;
+  status: TaskStatus;
+  agent: {
+    id: string;
+    name: string;
+    kind: string;
+    modelId: string;
+  };
+  kind: string;
+  description: string;
+  input: any;
+  output?: any;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Run {
+  id: string;
+  user: { id: string };
+  tenantId?: string;
+  requestText: string;
+  createdAt: string;
+  reasoningBudget?: any; // ReasoningBudgetContract
+  reasoningBudgetEvidence?: any;
+}
+
+export interface Artifact {
+  id: string;
+  runId: string;
+  taskId: string;
+  kind: string;
+  label: string;
+  data: any;
+  createdAt: string;
+}

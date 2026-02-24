@@ -2,7 +2,7 @@ name: RDP Security Gates
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 permissions:
   contents: read
@@ -23,12 +23,7 @@ jobs:
           python-version: '3.11'
 
       - name: Run RDP Gates
-        run: |
-          if [[ ! -x ./security/gates/run_all_gates.sh ]]; then
-            echo "security/gates/run_all_gates.sh not found; skipping RDP gates."
-            exit 0
-          fi
-          ./security/gates/run_all_gates.sh
+        run: ./security/gates/run_all_gates.sh
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}

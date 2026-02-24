@@ -44,18 +44,18 @@ export class ResidencyGuard {
 
             const config = await this.getResidencyConfig(tenantId);
             if (!config) {
-                 // Default to strict if no config? Or allow?
-                 // Prompt says "No undocumented exceptions", "Only enforced boundaries with evidence".
-                 // Safest is to fail if no policy exists, or assume default region is the ONLY allowed region if inferred.
-                 // For now, if no config, we assume the tenant is native to the current region and block cross-region.
-                 if (context.targetRegion !== this.currentRegion) {
-                     throw new ResidencyViolationError(
-                         `No residency policy found. Strictly blocking cross-region access to ${context.targetRegion}.`,
-                         tenantId,
-                         context
-                     );
-                 }
-                 return;
+                // Default to strict if no config? Or allow?
+                // Prompt says "No undocumented exceptions", "Only enforced boundaries with evidence".
+                // Safest is to fail if no policy exists, or assume default region is the ONLY allowed region if inferred.
+                // For now, if no config, we assume the tenant is native to the current region and block cross-region.
+                if (context.targetRegion !== this.currentRegion) {
+                    throw new ResidencyViolationError(
+                        `No residency policy found. Strictly blocking cross-region access to ${context.targetRegion}.`,
+                        tenantId,
+                        context
+                    );
+                }
+                return;
             }
 
             const isStrict = config.residencyMode === 'strict';
@@ -71,7 +71,7 @@ export class ResidencyGuard {
                     const errorMsg = `Region ${context.targetRegion} is not allowed for tenant ${tenantId}.`;
 
                     if (isStrict) {
-                         throw new ResidencyViolationError(errorMsg, tenantId, context);
+                        throw new ResidencyViolationError(errorMsg, tenantId, context);
                     } else {
                         // In preferred mode, we might log a warning but allow if it's a critical operation?
                         console.warn(`[Residency Warning] ${errorMsg} (Mode: Preferred)`);
@@ -86,12 +86,12 @@ export class ResidencyGuard {
                 if (classificationRules) {
                     const allowedForScope = classificationRules[context.operation]; // e.g. storage: ['us-east-1']
                     if (allowedForScope && !allowedForScope.includes(context.targetRegion)) {
-                         const errorMsg = `Data classification ${context.dataClassification} prohibits ${context.operation} in ${context.targetRegion}.`;
-                         if (isStrict) {
-                             throw new ResidencyViolationError(errorMsg, tenantId, context);
-                         } else {
-                             console.warn(`[Residency Classification Warning] ${errorMsg}`);
-                         }
+                        const errorMsg = `Data classification ${context.dataClassification} prohibits ${context.operation} in ${context.targetRegion}.`;
+                        if (isStrict) {
+                            throw new ResidencyViolationError(errorMsg, tenantId, context);
+                        } else {
+                            console.warn(`[Residency Classification Warning] ${errorMsg}`);
+                        }
                     }
                 }
             }
@@ -105,7 +105,7 @@ export class ResidencyGuard {
             });
 
         } catch (error: any) {
-             otelService.addSpanAttributes({
+            otelService.addSpanAttributes({
                 'residency.status': 'violated',
                 'residency.error': error instanceof Error ? error.message : 'Unknown error'
             });
@@ -137,7 +137,7 @@ export class ResidencyGuard {
         });
     }
 
-    private async getResidencyConfig(tenantId: string): Promise<any> {
+    public async getResidencyConfig(tenantId: string): Promise<any> {
         const pool = getPostgresPool();
 
         const result = await pool.query(
@@ -167,8 +167,8 @@ export class ResidencyGuard {
                     'export': [row.region]
                 },
                 'restricted': {
-                     'storage': [row.region],
-                     'export': [row.region]
+                    'storage': [row.region],
+                    'export': [row.region]
                 }
             }
         };
@@ -190,7 +190,7 @@ export class ResidencyGuard {
             // Log real error unless it's just "table doesn't exist" during bootstrap
             const msg = e instanceof Error ? e.message : String(e);
             if (!msg.includes('relation "residency_exceptions" does not exist')) {
-                 console.error('Residency Exception Check Failed:', e);
+                console.error('Residency Exception Check Failed:', e);
             }
             return false;
         }

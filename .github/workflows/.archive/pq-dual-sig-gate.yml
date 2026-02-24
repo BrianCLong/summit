@@ -51,9 +51,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: latest
-
       - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:

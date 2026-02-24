@@ -16,14 +16,20 @@ import {
   FusionRelationship
 } from './types.js';
 import logger from '../../utils/logger.js';
+import VisionService from '../../services/VisionService.js';
+import { SignalClassificationService } from '../../sigint/SignalClassificationService.js';
 
 export class FusionService {
   private llmService: LLMService;
   private embeddingService: EmbeddingService;
+  private visionService: VisionService;
+  private signalService: SignalClassificationService;
 
   constructor() {
     this.llmService = new LLMService();
     this.embeddingService = new EmbeddingService();
+    this.visionService = new VisionService();
+    this.signalService = SignalClassificationService.getInstance();
   }
 
   private get db(): Pool {
@@ -48,7 +54,7 @@ export class FusionService {
     metadata: any = {}
   ): Promise<IngestResult> {
     const mediaSourceId = randomUUID();
-    const investigationId = metadata.investigationId || randomUUID(); // Fallback if not provided
+    const investigationId = metadata.investigationId || randomUUID();
 
     // 1. Save Media Source
     await this.db.query(
@@ -66,26 +72,38 @@ export class FusionService {
 
     try {
       // 2. Extract Entities
-      // For IMAGE/SIGNAL, we need a description first.
-      // TODO: Use VisionService or SignalAnalyzer to get description.
-      // For now, we assume 'content' contains description or text for all types.
-      const textToAnalyze = type === 'TEXT' ? content : (metadata.description || content);
+      let analysisText = content;
 
-      const extraction = await this.extractEntities(textToAnalyze, type);
+      if (type === 'IMAGE') {
+        analysisText = await this.visionService.analyzeImage(content, metadata.prompt);
+      } else if (type === 'SIGNAL') {
+        let signalData = metadata.signal;
+        if (!signalData && content.startsWith('{')) {
+          try { signalData = JSON.parse(content); } catch (e) { }
+        }
 
-      // 3. Generate Content Embedding (for the whole document)
-      let contentEmbedding = null;
-      if (type === 'TEXT' || (type === 'URL' && metadata.description)) {
-         contentEmbedding = await this.embeddingService.generateEmbedding({ text: textToAnalyze });
+        if (signalData) {
+          const classification = await this.signalService.classifySignal(signalData);
+          analysisText = `RF Signal Analysis: ${classification.label} (Confidence: ${classification.confidence}). 
+                         Tags: ${classification.tags.join(', ')}. Threat Level: ${classification.threatLevel}.
+                         Frequency: ${signalData.frequency} Hz. Bandwidth: ${signalData.bandwidth} Hz.`;
+        }
       }
 
-      // 4. Save to Postgres (Multimodal Entities)
+      const textToAnalyze = type === 'TEXT' ? content : analysisText;
+      const extraction = await this.extractEntities(textToAnalyze, type);
+
+      // 3. Generate Content Embedding
+      let contentEmbedding = null;
+      if (type === 'TEXT' || analysisText) {
+        contentEmbedding = await this.embeddingService.generateEmbedding({ text: textToAnalyze });
+      }
+
+      // 4. Save to Postgres
       const entityPromises = extraction.entities.map(async (entity) => {
         const entityId = randomUUID();
-        // Generate embedding for the entity itself
         const entityEmbedding = await this.embeddingService.generateEmbedding({ text: `${entity.label} ${entity.description || ''}` });
 
-        // Save to Postgres
         await this.db.query(
           `INSERT INTO multimodal_entities (
             id, investigation_id, media_source_id, entity_type, extracted_text,
@@ -98,7 +116,7 @@ export class FusionService {
             entity.type,
             entity.label,
             entity.confidence,
-            JSON.stringify(entityEmbedding), // pgvector handles JSON array format
+            JSON.stringify(entityEmbedding),
             JSON.stringify({ description: entity.description }),
             'LLM_EXTRACTION_V1'
           ]
@@ -112,15 +130,13 @@ export class FusionService {
       // 5. Save to Neo4j
       const session = this.neo4j.session();
       try {
-        await session.writeTransaction(async (tx: any) => {
-          // Create MediaSource Node
+        await session.writeTransaction(async (tx) => {
           await tx.run(
             `MERGE (m:MediaSource {id: $id})
              SET m.uri = $uri, m.type = $type, m.metadata = $metadata`,
             { id: mediaSourceId, uri: type === 'URL' ? content : 'raw-input', type, metadata: JSON.stringify(metadata) }
           );
 
-          // Create Entity Nodes and connect to MediaSource
           for (const entity of processedEntities) {
             await tx.run(
               `MERGE (e:Entity {name: $name, type: $type})
@@ -138,13 +154,12 @@ export class FusionService {
             );
           }
 
-          // Create Relationships between Entities
           for (const rel of extraction.relationships) {
             const sourceEntity = processedEntities.find(e => e.label === rel.sourceId || e.id === rel.sourceId);
             const targetEntity = processedEntities.find(e => e.label === rel.targetId || e.id === rel.targetId);
 
             if (sourceEntity && targetEntity) {
-               await tx.run(
+              await tx.run(
                 `MATCH (a:Entity {id: $idA}), (b:Entity {id: $idB})
                  MERGE (a)-[r:RELATED_TO {type: $relType}]->(b)
                  SET r.description = $desc, r.confidence = $conf`,
@@ -155,7 +170,7 @@ export class FusionService {
                   desc: rel.description || '',
                   conf: rel.confidence
                 }
-               );
+              );
             }
           }
         });
@@ -163,7 +178,6 @@ export class FusionService {
         await session.close();
       }
 
-      // Update Status
       await this.db.query(
         `UPDATE media_sources SET processing_status = 'COMPLETED', extraction_count = $1 WHERE id = $2`,
         [processedEntities.length, mediaSourceId]
@@ -186,17 +200,9 @@ export class FusionService {
     }
   }
 
-  /**
-   * Search using Hybrid Fusion (Vector + Graph)
-   * 1. Generate Query Embedding
-   * 2. Search Postgres (Vector)
-   * 3. Search Neo4j (Graph)
-   * 4. Merge and Rank
-   */
   async search(query: string, limit: number = 10): Promise<SearchResult[]> {
     const queryEmbedding = await this.embeddingService.generateEmbedding({ text: query });
 
-    // 1. Vector Search (Postgres)
     const vectorRes = await this.db.query(
       `SELECT id, extracted_text, entity_type, confidence, 1 - (text_embedding <=> $1) as score, metadata
        FROM multimodal_entities
@@ -219,7 +225,6 @@ export class FusionService {
       }
     }));
 
-    // 2. Graph Search (Neo4j)
     const session = this.neo4j.session();
     let graphHits: SearchResult[] = [];
 
@@ -228,7 +233,7 @@ export class FusionService {
         `CALL db.index.fulltext.queryNodes("entity_search", $query) YIELD node, score
          RETURN node.id as id, node.name as name, node.type as type, node.description as desc, score
          LIMIT $limit`,
-         { query, limit }
+        { query, limit }
       );
 
       graphHits = graphRes.records.map(rec => ({
@@ -246,12 +251,11 @@ export class FusionService {
       }));
 
     } catch (e: any) {
-      logger.warn('Graph search failed (possibly missing index)', e);
+      logger.warn('Graph search failed', e);
     } finally {
       await session.close();
     }
 
-    // 3. Fusion Ranking
     const fusionMap = new Map<string, SearchResult>();
 
     const addToMap = (hit: SearchResult, weight: number) => {
@@ -276,10 +280,10 @@ export class FusionService {
   private async extractEntities(text: string, sourceType: string): Promise<ExtractionResult> {
     let template = '';
     try {
-        template = await readFile(join(process.cwd(), 'prompts/extraction.fusion@v1.yaml'), 'utf-8');
+      template = await readFile(join(process.cwd(), 'prompts/extraction.fusion@v1.yaml'), 'utf-8');
     } catch (e: any) {
-        logger.error('Failed to load prompt file', e);
-        template = `Extract entities (Person, Org, Loc) from: {{text}}. Return JSON {entities:[], relationships:[]}`;
+      logger.error('Failed to load prompt file', e);
+      template = `Extract entities (Person, Org, Loc) from: {{text}}. Return JSON {entities:[], relationships:[]}`;
     }
 
     let promptTemplate = '';
@@ -292,21 +296,20 @@ export class FusionService {
     }
 
     const filledPrompt = promptTemplate
-        .replace('{{text}}', text)
-        .replace('{{source_type}}', sourceType);
+      .replace('{{text}}', text)
+      .replace('{{source_type}}', sourceType);
 
-    const resultStr = await this.llmService.complete({
-        prompt: filledPrompt,
-        model: 'gpt-4o',
-        temperature: 0.0,
-        responseFormat: 'json'
+    const resultStr = await this.llmService.complete(filledPrompt, {
+      model: 'gpt-4o',
+      temperature: 0.0,
+      responseFormat: 'json'
     });
 
     try {
-        return JSON.parse(resultStr) as ExtractionResult;
+      return JSON.parse(resultStr) as ExtractionResult;
     } catch (e: any) {
-        logger.error('Failed to parse LLM JSON', e);
-        return { entities: [], relationships: [] };
+      logger.error('Failed to parse LLM JSON', e);
+      return { entities: [], relationships: [] };
     }
   }
 }

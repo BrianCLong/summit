@@ -874,82 +874,82 @@ export class GraphPerformanceOptimizer {
    */
   private applySupernodeResultOptimizations(result: any, analysis: any): any {
     if (!result.nodes) return result;
-    
+
     // Identify nodes with too many connections
     const highConnectivityNodes = result.nodes.filter((node: any) => {
-      const connections = result.edges?.filter((edge: any) => 
+      const connections = result.edges?.filter((edge: any) =>
         edge.source === node.id || edge.target === node.id
       ) || [];
-      
+
       return connections.length > this.config.supernodeThreshold;
     });
-    
+
     if (highConnectivityNodes.length === 0) return result;
-    
+
     // Apply supernode handling based on config
     switch (this.config.supernodeHandling) {
       case 'paginate':
         // Limit each supernode's connections
         for (const supernode of highConnectivityNodes) {
-          const connections = result.edges?.filter((edge: any) => 
+          const connections = result.edges?.filter((edge: any) =>
             edge.source === supernode.id || edge.target === supernode.id
           );
-          
+
           if (connections.length > this.config.supernodeThreshold) {
             // Only keep first N connections
             const firstNConnections = connections.slice(0, 1000); // Use pageSize from config
-            
+
             // Remove excess connections
-            result.edges = result.edges.filter((edge: any) => 
+            result.edges = result.edges.filter((edge: any) =>
               !connections.includes(edge) || firstNConnections.includes(edge)
             );
           }
         }
         break;
-        
+
       case 'collapse':
         // Replace supernode with aggregate representation
         for (const supernode of highConnectivityNodes) {
           // In actual implementation, replace supernode with collapsed representation
           supernode.collapsed = true;
-          supernode.connectionCount = result.edges?.filter((edge: any) => 
+          supernode.connectionCount = result.edges?.filter((edge: any) =>
             edge.source === supernode.id || edge.target === supernode.id
           ).length;
         }
         break;
-        
+
       case 'sample':
         // Randomly sample connections for each supernode
         for (const supernode of highConnectivityNodes) {
-          const connections = result.edges?.filter((edge: any) => 
+          const connections = result.edges?.filter((edge: any) =>
             edge.source === supernode.id || edge.target === supernode.id
           );
-          
+
           if (connections.length > 100) { // Arbitrary threshold for sampling
             const sampled = connections
               .sort(() => Math.random() - 0.5)
               .slice(0, Math.floor(connections.length * this.config.sampleRate));
             
-            result.edges = result.edges.filter((edge: any) => 
+            result.edges = result.edges.filter((edge: any) =>
               !connections.includes(edge) || sampled.includes(edge)
             );
           }
         }
         break;
-        
+
       case 'aggregate':
         // Aggregate supernode relationships
         for (const supernode of highConnectivityNodes) {
           // Create aggregate representation
           supernode.isAggregate = true;
           supernode.aggregateInfo = {
-            totalRelationships: result.edges?.filter((edge: any) => 
+            totalRelationships: result.edges?.filter((edge: any) =>
               edge.source === supernode.id || edge.target === supernode.id
             ).length,
-            relationshipTypes: [...new Set(result.edges?.filter((edge: any) => 
+            relationshipTypes: [...new Set(result.edges?.filter((edge: any) =>
               edge.source === supernode.id || edge.target === supernode.id
             ).map((edge: any) => edge.type))],
-            topConnections: result.edges?.filter((edge: any) => 
+            topConnections: result.edges?.filter((edge: any) =>
               edge.source === supernode.id || edge.target === supernode.id
             ).slice(0, 10) // Top 10 connections
           };

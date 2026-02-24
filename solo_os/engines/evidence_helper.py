@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import os
 
-def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics: dict, audit: dict = None):
+def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics: dict):
     base_path = Path("solo_os/evidence/runs") / engine_name / run_id
     base_path.mkdir(parents=True, exist_ok=True)
 
@@ -14,10 +14,8 @@ def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics:
         "summary": summary,
         "environment": {"engine": engine_name},
         "backend": "solo_os",
-        "artifacts": ["report.json", "metrics.json", "stamp.json"]
+        "artifacts": []
     }
-    if audit:
-        report["artifacts"].append("audit.json")
 
     metrics_data = {
         "evidence_id": evidence_id,
@@ -36,9 +34,5 @@ def write_engine_evidence(engine_name: str, run_id: str, summary: dict, metrics:
         json.dump(metrics_data, f, indent=2, sort_keys=True)
     with open(base_path / "stamp.json", "w") as f:
         json.dump(stamp, f, indent=2, sort_keys=True)
-
-    if audit:
-        with open(base_path / "audit.json", "w") as f:
-            json.dump(audit, f, indent=2, sort_keys=True)
 
     return str(base_path)
