@@ -12,7 +12,6 @@ on:
 jobs:
   golden-path-investigations:
     name: Golden Path - Investigations
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -65,7 +64,6 @@ jobs:
 
   golden-path-frontend:
     name: Golden Path - Consolidated Frontend
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

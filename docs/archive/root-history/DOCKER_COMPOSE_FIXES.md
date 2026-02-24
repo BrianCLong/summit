@@ -144,7 +144,7 @@ OTEL_SERVICE_NAME: summit-worker
 | File | Changes | Lines Modified |
 |------|---------|----------------|
 | `docker-compose.yml` | Fixed postgres users, paths, env vars | ~30 lines |
-| `RUNBOOKS/dev-bootstrap.yaml` | Comprehensive bootstrap guide | Complete rewrite |
+| `runbooks/dev-bootstrap.yaml` | Comprehensive bootstrap guide | Complete rewrite |
 | `DOCKER_COMPOSE_FIXES.md` | This summary document | New file |
 
 ---
@@ -283,7 +283,7 @@ docker-compose logs <service-name>
 
 ### Updated Files
 1. **docker-compose.yml** - Fixed configurations
-2. **RUNBOOKS/dev-bootstrap.yaml** - Complete bootstrap guide with:
+2. **runbooks/dev-bootstrap.yaml** - Complete bootstrap guide with:
    - Prerequisites
    - Step-by-step instructions
    - Validation criteria
@@ -297,7 +297,7 @@ docker-compose logs <service-name>
 - ✅ ARCHITECTURE_MAP.generated.yaml reflects actual service configurations
 - ✅ REPOSITORY-STRUCTURE.md lists correct service ports and paths
 - ✅ README.md service access points updated
-- ✅ RUNBOOKS/dev-bootstrap.yaml provides operational guidance
+- ✅ runbooks/dev-bootstrap.yaml provides operational guidance
 
 ---
 
@@ -323,7 +323,7 @@ docker-compose logs <service-name>
 - **Architecture Map**: [ARCHITECTURE_MAP.generated.yaml](./ARCHITECTURE_MAP.generated.yaml)
 - **Repository Structure**: [REPOSITORY-STRUCTURE.md](./REPOSITORY-STRUCTURE.md)
 - **Main README**: [README.md](./README.md)
-- **Dev Bootstrap Runbook**: [RUNBOOKS/dev-bootstrap.yaml](./RUNBOOKS/dev-bootstrap.yaml)
+- **Dev Bootstrap Runbook**: [runbooks/dev-bootstrap.yaml](./runbooks/dev-bootstrap.yaml)
 - **Docker Compose**: [docker-compose.yml](./docker-compose.yml)
 - **Environment Example**: [.env.example](./.env.example)
 

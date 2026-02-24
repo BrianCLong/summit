@@ -5,7 +5,7 @@ This runbook operationalizes the previously defined two-phase remediation plan f
 ## Scope and Objectives
 
 - **Primary target:** Resolve the server TypeScript build blocker surfaced in `tsc_output.txt`, starting with the file-list TS6307 errors and express router typing issues.
-- **Zones:** Server backend (`server/`), CI workflows (`.github/workflows/`), and documentation (`docs/`, `RUNBOOKS/`).
+- **Zones:** Server backend (`server/`), CI workflows (`.github/workflows/`), and documentation (`docs/`, `runbooks/`).
 - **Non-goals:** UI changes, data-plane schema changes, or runtime feature additions outside the build stability effort.
 
 ## Agent Roster and Activation Steps

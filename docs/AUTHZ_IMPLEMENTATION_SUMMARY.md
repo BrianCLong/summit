@@ -644,7 +644,7 @@ pnpm test:authz:smoke
 ## Support and Maintenance
 
 ### Runbook Location
-`RUNBOOKS/authz-service-runbook.md` (to be created)
+`runbooks/authz-service-runbook.md` (to be created)
 
 ### On-Call Procedures
 

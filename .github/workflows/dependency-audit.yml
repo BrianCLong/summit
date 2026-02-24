@@ -61,7 +61,6 @@ permissions:
 jobs:
   audit:
     name: Security Audit
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     outputs:
       critical: ${{ steps.audit.outputs.critical }}

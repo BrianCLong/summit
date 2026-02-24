@@ -86,7 +86,7 @@ This playbook operationalizes the GA mission across governance, security, data i
   - Governance: CI step to validate provenance fields and deny builds missing governance verdict propagation.
 - **Observability and resilience**
   - Adopt W3C trace context; inject `governance.verdict` and `provenance.confidence` into spans and logs.
-  - Define SLOs per critical path with burn-rate alerts; auto-remediation playbooks wired to runbooks in `RUNBOOKS/`.
+  - Define SLOs per critical path with burn-rate alerts; auto-remediation playbooks wired to runbooks in `runbooks/`.
   - Chaos drills scheduled per release train; capture results as evidence and feed into policy tuning.
 - **Threat and audit readiness**
   - Maintain subsystem threat models with attack surface, mitigations, and linked controls; update on every material change.

@@ -95,7 +95,6 @@ jobs:
 
   check-drift:
     name: Check Lockfile Drift
-    if: false  # Temporarily disabled for GA merge surge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4.1.7

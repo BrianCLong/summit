@@ -324,7 +324,7 @@ curl 'http://localhost:9090/api/v1/query?query=e2e:slo:burn_rate:7d' | jq '.data
 
 - [MEGA_MERGE_SYSTEM.md](MEGA_MERGE_SYSTEM.md) - CI/CD automation
 - [docs/observability/](docs/observability/) - General observability docs
-- [RUNBOOKS/](RUNBOOKS/) - Operational runbooks
+- [runbooks/](runbooks/) - Operational runbooks
 - [observability/README.md](observability/README.md) - Observability stack setup
 
 ---

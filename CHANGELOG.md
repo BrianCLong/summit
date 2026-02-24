@@ -19,22 +19,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardized `ensureRole` middleware for case-insensitive role matching.
 
 ### Added
-- **MARS Framework Implementation**: Added Modular Agent with Reflective Search (`summit.mars`) for autonomous AI research.
-  - Implemented budget-aware Monte Carlo Tree Search (MCTS) planner.
-  - Added Design-Decompose-Implement (DDI) task decomposition pipeline.
-  - Implemented comparative reflective memory for lesson distillation from solution diffs.
-  - Added machine-verifiable artifact generation (`plan.json`, `ledger.json`, `lessons.json`, `metrics.json`, `stamp.json`).
-  - Integrated PII and secret redaction for reflective insights.
+- **Strategic Update**: Positioned Summit as the "governed control plane" for agent sprawl (vs. OpenAI Frontier).
+- **Context Receipts**: Added schema for governed context compaction (`schemas/context_receipt.v0.1.json`).
+- **Roadmap**: Updated roadmap with "Context Receipts", "Multimodal Ingestion", and "Frontier Parity".
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
-
-### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
-### Fixed
-- CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
