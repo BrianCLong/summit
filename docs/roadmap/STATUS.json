@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Seeded evidence bundle schemas, verifier workflow, and required checks discovery placeholder.",
+  "last_updated": "2026-02-08T10:06:26Z",
+  "revision_note": "Added AI adoption artifact templates and required-check discovery scaffold.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
