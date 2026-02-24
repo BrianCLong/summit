@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:33:31Z",
-  "revision_note": "Added governed GitHub Actions OIDC with AWS STS hardening guide in docs/security.",
+  "last_updated": "2026-02-08T00:34:47Z",
+  "revision_note": "Added action pinning preflight gate, allowlist policy, and deterministic evidence emitters.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
