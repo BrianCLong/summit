@@ -132,24 +132,26 @@ prompts:
     allowed_operations:
       - create
       - edit
-  - id: forbid-registry-secrets-policy
+  - id: competitor-decode-evidence
     version: v1
-    path: prompts/ci/forbid-registry-secrets-policy@v1.md
-    sha256: 7c34059ad805d708fa024e343b4d458f2a018274e8fe5d95616318f018f96c4a
-    description: Add a deterministic CI policy gate that blocks long-lived registry secrets.
+    path: prompts/strategy/competitor-decode-evidence@v1.md
+    sha256: 1a73f9d0a33187daebdf969d126413b85aec5512401d850b467e24918a9a0a31
+    description: Evidence schema and determinism scaffolding for competitor decode artifacts.
     scope:
       paths:
-        - .github/scripts/policy/
-        - .github/scripts/__tests__/
-        - .github/workflows/ci-policy-registry-secrets.yml
-        - artifacts/policy/
+        - .github/scripts/required-checks/README.md
+        - required_checks.todo.md
+        - src/graphrag/evidence/schemas/
+        - src/graphrag/evidence/writeEvidence.ts
+        - tests/graphrag/evidence/evidence.spec.ts
         - docs/roadmap/STATUS.json
-        - prompts/ci/forbid-registry-secrets-policy@v1.md
+        - prompts/strategy/competitor-decode-evidence@v1.md
         - prompts/registry.yaml
+        - agents/examples/COMPETITOR_DECODE_EVIDENCE_20260206.json
       domains:
-        - ci
+        - evidence
         - governance
-        - policy
+        - ci
     verification:
       tiers_required:
         - C

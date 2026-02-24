@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.ai/schemas/evidence/report.schema.json",
+  "title": "Competitor Decode Evidence Report",
+  "type": "object",
+  "required": ["schemaVersion", "findings"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "citations"],
+        "properties": {
+          "id": { "type": "string" },
+          "axis": { "type": "string" },
+          "title": { "type": "string" },
+          "summary": { "type": "string" },
+          "citations": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": true
+}

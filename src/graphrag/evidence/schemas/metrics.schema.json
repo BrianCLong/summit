@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.ai/schemas/evidence/metrics.schema.json",
+  "title": "Competitor Decode Evidence Metrics",
+  "type": "object",
+  "required": ["schemaVersion", "coverage", "evidenceDensity"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "coverage": { "type": "number", "minimum": 0 },
+    "evidenceDensity": { "type": "number", "minimum": 0 }
+  },
+  "additionalProperties": true
+}

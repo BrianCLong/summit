@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.ai/schemas/evidence/stamp.schema.json",
+  "title": "Competitor Decode Evidence Stamp",
+  "type": "object",
+  "required": ["schemaVersion", "runId", "generatedAt"],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "runId": { "type": "string" },
+    "generatedAt": { "type": "string", "format": "date-time" }
+  },
+  "additionalProperties": true
+}
