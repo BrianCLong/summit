@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T04:30:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register. Normalized reusable workflow path checks in validate-workflows.sh and pruned .archive.",
+  "last_updated": "2026-02-07T00:00:00Z",
+  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -237,16 +237,10 @@
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
     {
-      "id": "summit-architecture-brief",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "github-files-changed-governance-2026-02-05",
+      "id": "naio-narrative-signals-plan",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Repo reality check baseline for CODEOWNERS + branch protection parity and evidence expectations."
+      "notes": "Drafted NAIO narrative signals integration plan with PR stack, MAESTRO alignment, and evidence-first requirements in docs/narrative-signals/naio-integration-plan.md."
     }
   ],
   "summary": {
