@@ -1,0 +1,31 @@
+{
+  "dev": [
+    "nl2cypher",
+    "graphrag",
+    "entity-resolution",
+    "osint-lookup",
+    "narrative-builder",
+    "hypothesis-generator",
+    "export-csv",
+    "export-json",
+    "data-ingest",
+    "sandbox-query"
+  ],
+  "staging": [
+    "nl2cypher",
+    "graphrag",
+    "entity-resolution",
+    "osint-lookup",
+    "narrative-builder",
+    "hypothesis-generator",
+    "export-csv",
+    "export-json"
+  ],
+  "prod": [
+    "nl2cypher",
+    "graphrag",
+    "entity-resolution",
+    "export-csv",
+    "export-json"
+  ]
+}
