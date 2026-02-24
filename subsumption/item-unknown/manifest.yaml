@@ -1,31 +1,28 @@
 version: 1
 item:
-  slug: item-UNKNOWN
+  slug: item-unknown
   title: "UNKNOWN (ITEM not provided)"
-  link: "Deferred pending ITEM source"
-  date: "Deferred pending ITEM date"
-  type: "Deferred pending ITEM type"
+  type: "unknown"
+  date: "unknown"
+  links: []
 claims:
-  registry: "subsumption/item-UNKNOWN/claims.md"
+  registry: "subsumption/item-unknown/claims.yaml"
+required_checks:
+  discovery_status: "assumed"
+  checks:
+    - "subsumption-bundle-verify"
 prs:
-  - title: "feat(subsumption): add bundle manifest, evidence schemas, and CI verifier"
+  - title: "feat(subsumption): add bundle manifest + evidence schemas"
     lane: "foundation"
-    owner: "Master"
+    owner: "master"
     risk: "green"
 gates:
-  - name: "verify_subsumption_bundle"
-    deny_by_default_fixtures: true
+  - id: "subsumption-bundle-verify"
+    description: "Verify subsumption bundle completeness and determinism"
 evidence_ids:
-  - "EVD-ITEMUNKNOWN-CI-001"
-docs_targets:
-  - "docs/repo_assumptions.md"
-  - "docs/required_checks.todo.md"
-  - "docs/standards/item-UNKNOWN.md"
-  - "docs/security/data-handling/item-UNKNOWN.md"
-  - "docs/ops/runbooks/item-UNKNOWN.md"
-  - "docs/decisions/item-UNKNOWN.md"
-  - "docs/assumptions/item-UNKNOWN.md"
-required_checks_discovery:
-  status: "assumed"
-  notes: "Run discovery steps and store verified names in docs/required_checks.verified.json"
+  - "EVD-ITEMUNKNOWN-FND-001"
+docs:
+  - "docs/standards/item-unknown.md"
+  - "docs/security/data-handling/item-unknown.md"
+  - "docs/ops/runbooks/item-unknown.md"
 feature_flags: []
