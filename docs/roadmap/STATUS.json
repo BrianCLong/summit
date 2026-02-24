@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added narrative-operationalization schema + evidence ID standard entry.",
+  "last_updated": "2026-02-06T20:05:00Z",
+  "revision_note": "Registered Sprint +3 hosted SaaS hardening initiative for tenant status controls and billing readiness.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "sprint-plus3-hosted-saas-hardening",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Sprint +3 hosted SaaS hardening: tenant status controls, billing hooks, DR evidence, and compliance pack groundwork."
     },
     {
       "id": "B",
@@ -52,24 +58,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
-    },
-    {
-      "id": "summit-skill-router-ga-orchestrator",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
-    },
-    {
-      "id": "summit-ga-preflight-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
-    },
-    {
-      "id": "summit-pr-stack-sequencer-skill",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -228,7 +216,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -248,7 +236,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 16,
     "ga_blockers": []
   }
 }

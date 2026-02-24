@@ -31,6 +31,11 @@ const disableSchema = z.object({
   reason: z.string().min(3).optional(),
 });
 
+const statusSchema = z.object({
+  status: z.enum(['active', 'suspended']),
+  reason: z.string().min(3).optional(),
+});
+
 const auditQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(200).default(50),
   offset: z.coerce.number().min(0).default(0),
@@ -57,6 +62,25 @@ function ensureTenantScope(req: Request, res: Response, next: NextFunction): voi
   const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(authReq.user?.role || '');
   if (!isSuper && userTenant && userTenant !== tenantId) {
     res.status(403).json({ success: false, error: 'Forbidden' });
+    return;
+  }
+  next();
+}
+
+/**
+ * SECURITY: Middleware to enforce admin-only access for sensitive operations.
+ * Only users with ADMIN, admin, or SUPER_ADMIN roles are allowed.
+ */
+function ensureAdminRole(req: Request, res: Response, next: NextFunction): void {
+  const authReq = req as AuthenticatedRequest;
+  const role = authReq.user?.role || '';
+  const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'admin'];
+  if (!allowedRoles.includes(role)) {
+    logger.warn({ userId: authReq.user?.id, role }, 'Admin-only access denied');
+    res.status(403).json({
+      success: false,
+      error: 'Forbidden: Admin access required'
+    });
     return;
   }
   next();
@@ -244,6 +268,38 @@ router.post(
         return res.status(404).json({ success: false, error: error.message });
       }
       logger.error('Error in POST /api/tenants/:id/disable:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.patch(
+  '/:id',
+  ensureAuthenticated,
+  ensureAdminRole, // SECURITY: Only admins can change tenant status (active/suspended)
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('update', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { status, reason } = statusSchema.parse(req.body);
+      const tenantId = req.params.id;
+      const actorId = authReq.user?.id || 'unknown';
+      const updated = await tenantService.updateStatus(tenantId, status, actorId, reason);
+      return res.json({
+        success: true,
+        data: updated,
+        receipt: buildReceipt('TENANT_STATUS_UPDATED', tenantId, actorId),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      logger.error('Error in PATCH /api/tenants/:id:', error);
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   },
