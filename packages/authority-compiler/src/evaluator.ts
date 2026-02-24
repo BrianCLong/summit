@@ -11,8 +11,8 @@ import {
   Operation,
   ClassificationLevel,
   Authority,
-} from './schema/policy.schema.js';
-import { CompiledPolicy } from './compiler.js';
+} from './schema/policy.schema';
+import { CompiledPolicy } from './compiler';
 
 export interface EvaluationContext {
   /** User making the request */

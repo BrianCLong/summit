@@ -3,7 +3,7 @@
  */
 
 import { Pool } from 'pg';
-import { GDPRComplianceService, DataSubjectRequest } from '../GDPRComplianceService.js';
+import { GDPRComplianceService, DataSubjectRequest } from '../GDPRComplianceService';
 import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 jest.mock('pg');

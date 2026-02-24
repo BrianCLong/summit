@@ -4,20 +4,20 @@
  */
 
 // Event types
-export * from './types/events.js';
-export * from './types/threats.js';
-export * from './types/alerts.js';
-export * from './types/ml.js';
-export * from './types/threat-intelligence.js';
-export * from './types/hunting.js';
+export * from './types/events';
+export * from './types/threats';
+export * from './types/alerts';
+export * from './types/ml';
+export * from './types/threat-intelligence';
+export * from './types/hunting';
 
 // Interfaces
-export * from './interfaces/detector.js';
+export * from './interfaces/detector';
 
 // Utilities
-export * from './utils/scoring.js';
-export * from './utils/validators.js';
-export * from './utils/correlation.js';
+export * from './utils/scoring';
+export * from './utils/validators';
+export * from './utils/correlation';
 
 // Utility types
 export interface ThreatDetectionConfig {

@@ -17,7 +17,7 @@ import jwksClient from 'jwks-rsa';
 import type { JwksClient } from 'jwks-rsa';
 import * as crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
-import logger from '../config/logger.js';
+import logger from '../config/logger.ts';
 
 // ============================================================================
 // Types and Interfaces
@@ -453,7 +453,7 @@ export function createGitHubActionsAuth(authenticator: GitHubActionsOIDC) {
       const token = ghToken || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null);
 
       if (!token) {
-        res.status(401).json({
+        res.status(401).tson({
           error: 'GitHub Actions OIDC token required',
           code: 'GITHUB_TOKEN_MISSING',
         });
@@ -474,7 +474,7 @@ export function createGitHubActionsAuth(authenticator: GitHubActionsOIDC) {
         error: error instanceof Error ? error.message : String(error),
       });
 
-      res.status(401).json({
+      res.status(401).tson({
         error: 'GitHub Actions OIDC authentication failed',
         code: 'GITHUB_AUTH_FAILED',
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -491,7 +491,7 @@ export function requireGitHubEnvironment(allowedEnvironments: string[]) {
     const identity = (req as GitHubActionsRequest).githubIdentity;
 
     if (!identity) {
-      res.status(401).json({
+      res.status(401).tson({
         error: 'GitHub identity not found',
         code: 'GITHUB_IDENTITY_MISSING',
       });
@@ -499,7 +499,7 @@ export function requireGitHubEnvironment(allowedEnvironments: string[]) {
     }
 
     if (!identity.environment) {
-      res.status(403).json({
+      res.status(403).tson({
         error: 'GitHub environment required',
         code: 'GITHUB_ENV_REQUIRED',
       });
@@ -507,7 +507,7 @@ export function requireGitHubEnvironment(allowedEnvironments: string[]) {
     }
 
     if (!allowedEnvironments.includes(identity.environment)) {
-      res.status(403).json({
+      res.status(403).tson({
         error: `Environment '${identity.environment}' not allowed`,
         code: 'GITHUB_ENV_NOT_ALLOWED',
         allowed: allowedEnvironments,
@@ -527,7 +527,7 @@ export function requireGitHubRepository(allowedRepositories: string[]) {
     const identity = (req as GitHubActionsRequest).githubIdentity;
 
     if (!identity) {
-      res.status(401).json({
+      res.status(401).tson({
         error: 'GitHub identity not found',
         code: 'GITHUB_IDENTITY_MISSING',
       });
@@ -535,7 +535,7 @@ export function requireGitHubRepository(allowedRepositories: string[]) {
     }
 
     if (!allowedRepositories.includes(identity.repository)) {
-      res.status(403).json({
+      res.status(403).tson({
         error: `Repository '${identity.repository}' not allowed`,
         code: 'GITHUB_REPO_NOT_ALLOWED',
       });

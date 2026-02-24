@@ -13,11 +13,7 @@
           "evidence_id": { "type": "string" },
           "report": { "type": "string" },
           "metrics": { "type": "string" },
-          "stamp": { "type": "string" },
-          "sha256": {
-            "type": "object",
-            "additionalProperties": { "type": "string" }
-          }
+          "stamp": { "type": "string" }
         },
         "additionalProperties": false
       }

@@ -2,7 +2,6 @@ import { execFile } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { sanitizeFilePath } from '../utils/input-sanitization.js';
 
 type PolicyBundleVerification = {
   ok: true;
@@ -58,25 +57,7 @@ export async function loadSignedPolicy(
   sigPath?: string,
 ): Promise<PolicyBundleVerification> {
   assertNonEmptyString(bundlePath, 'bundlePath');
-
-  // Security: Prevent argument injection in execFile
-  if (bundlePath.startsWith('-')) {
-    throw new Error('bundlePath cannot start with a hyphen');
-  }
-
-  // Security: Sanitize path to prevent Path Traversal
-  const safeBundlePath = sanitizeFilePath(bundlePath);
-  validateExtension(safeBundlePath);
-
-  // Security: Pre-validate sigPath if provided
-  let safeSigPath: string | undefined;
-  if (sigPath) {
-    assertNonEmptyString(sigPath, 'sigPath');
-    if (sigPath.startsWith('-')) {
-      throw new Error('sigPath cannot start with a hyphen');
-    }
-    safeSigPath = sanitizeFilePath(sigPath);
-  }
+  validateExtension(bundlePath);
 
   const allowUnsigned =
     (process.env.ALLOW_UNSIGNED_POLICY || 'false').toLowerCase() === 'true';
@@ -87,18 +68,17 @@ export async function loadSignedPolicy(
     );
   }
 
-  const stat = await ensureFileReadable(safeBundlePath, 'policy bundle');
-  const buf = await fs.readFile(safeBundlePath);
+  const stat = await ensureFileReadable(bundlePath, 'policy bundle');
+  const buf = await fs.readFile(bundlePath);
   const digest = digestFileBuffer(buf);
 
   let signatureVerified = false;
-  if (safeSigPath) {
-    await ensureFileReadable(safeSigPath, 'policy signature');
+  if (sigPath) {
+    assertNonEmptyString(sigPath, 'sigPath');
+    await ensureFileReadable(sigPath, 'policy signature');
     await new Promise<void>((res, rej) =>
-      execFile(
-        'cosign',
-        ['verify-blob', '--signature', safeSigPath, safeBundlePath],
-        (e) => (e ? rej(e) : res()),
+      execFile('cosign', ['verify-blob', '--signature', sigPath!, bundlePath], (e) =>
+        e ? rej(e) : res(),
       ),
     );
     signatureVerified = true;
@@ -106,7 +86,7 @@ export async function loadSignedPolicy(
 
   return {
     ok: true,
-    path: path.resolve(safeBundlePath),
+    path: path.resolve(bundlePath),
     size: stat.size,
     modified: stat.mtime,
     signatureVerified,

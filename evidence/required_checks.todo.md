@@ -3,10 +3,3 @@
 2. List required status checks (exact names).
 3. Replace placeholders in `.ci/required_checks.json`.
 4. Rename plan: add PR that updates gate names if CI providers rename checks.
-
-## Placeholder checks (to be replaced)
-- summit/evidence_schema_validate
-- summit/entropy_guard
-- summit/context_bundle
-- summit/complexity_budget
-- summit/dependency_delta

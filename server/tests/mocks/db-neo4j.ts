@@ -2,18 +2,18 @@
 
 const mockSession = {
   run: async () => ({ records: [] }),
-  close: async () => { },
+  close: async () => {},
   beginTransaction: () => ({
     run: async () => ({ records: [] }),
-    commit: async () => { },
-    rollback: async () => { },
+    commit: async () => {},
+    rollback: async () => {},
   }),
 };
 
 const mockDriver = {
   session: () => mockSession,
-  close: async () => { },
-  verifyConnectivity: async () => { },
+  close: async () => {},
+  verifyConnectivity: async () => {},
 };
 
 export async function initializeNeo4jDriver(): Promise<void> {
@@ -47,10 +47,6 @@ type SessionLike = {
 
 export function instrumentSession<T extends SessionLike>(session: T): T {
   return session;
-}
-
-export function transformNeo4jIntegers(obj: any): any {
-  return obj;
 }
 
 export default {

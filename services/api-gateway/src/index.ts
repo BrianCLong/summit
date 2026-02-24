@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import express from 'express';
@@ -23,7 +24,7 @@ async function startServer() {
     cors({
       origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
       credentials: true,
-    }) as any,
+    }),
   );
 
   // Policy enforcement middleware
@@ -31,7 +32,7 @@ async function startServer() {
     '/graphql',
     policyGuard({
       dryRun: process.env.POLICY_DRY_RUN === 'true',
-    }) as any,
+    }),
   );
 
   // Apollo GraphQL Server
@@ -47,44 +48,17 @@ async function startServer() {
   app.use(
     '/graphql',
     express.json(),
-    expressMiddleware(server as any, {
-      context: createContext as any,
-    }) as any,
+    expressMiddleware(server, {
+      context: createContext,
+    }),
   );
 
-  // Health check - main endpoint
-  app.get(['/health', '/api/health'], (req, res) => {
+  // Health check
+  app.get('/health', (req, res) => {
     res.json({
-      status: 'ok',
+      status: 'healthy',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: NODE_ENV,
-    });
-  });
-
-  // K8s liveness probe
-  app.get('/health/live', (req, res) => {
-    res.json({ status: 'alive' });
-  });
-
-  // K8s readiness probe
-  app.get('/health/ready', (req, res) => {
-    res.json({ status: 'ready' });
-  });
-
-  // Standard K8s health endpoints
-  app.get('/healthz', (req, res) => {
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-    });
-  });
-
-  app.get('/readyz', (req, res) => {
-    res.json({
-      status: 'ready',
-      timestamp: new Date().toISOString(),
+      version: process.env.npm_package_version || '1.0.0',
     });
   });
 

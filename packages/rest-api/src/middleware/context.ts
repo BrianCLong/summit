@@ -5,7 +5,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { Request, Response, NextFunction, RequestContext } from '../types.js';
+import type { Request, Response, NextFunction, RequestContext } from '../types';
 
 export function contextMiddleware(options?: {
   requestIdHeader?: string;

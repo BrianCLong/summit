@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { AgentOrchestrator } from '../AgentOrchestrator.js';
-import { AgentLifecycleManager } from '../AgentLifecycleManager.js';
-import { AgentTask, AgentCapability } from '../types.js';
-import { InMemoryPersistence } from '../persistence.js';
+import { AgentOrchestrator } from '../AgentOrchestrator';
+import { AgentLifecycleManager } from '../AgentLifecycleManager';
+import { AgentTask, AgentCapability } from '../types';
+import { InMemoryPersistence } from '../persistence';
 
 describe('AgentOrchestrator System', () => {
   let orchestrator: AgentOrchestrator;

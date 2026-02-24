@@ -15,12 +15,12 @@ jest.unstable_mockModule('../../../lib/dlq/index.js', () => ({
 }));
 
 describe('EntityResolutionV2Service guardrails', () => {
-  let EntityResolutionV2Service: typeof import('../EntityResolutionV2Service.js').EntityResolutionV2Service;
+  let EntityResolutionV2Service: typeof import('../EntityResolutionV2Service').EntityResolutionV2Service;
   let provenanceLedger: { appendEntry: jest.Mock };
   const originalEnv = { ...process.env };
 
   beforeAll(async () => {
-    ({ EntityResolutionV2Service } = await import('../EntityResolutionV2Service.js'));
+    ({ EntityResolutionV2Service } = await import('../EntityResolutionV2Service'));
     ({ provenanceLedger } = await import('../../../provenance/ledger.js'));
   });
 

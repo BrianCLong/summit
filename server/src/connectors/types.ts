@@ -1,7 +1,7 @@
 
 import { Readable } from 'stream';
-import { ConnectorContext } from '../data-model/types.js';
-import { DataEnvelope } from '../types/data-envelope.js';
+import { ConnectorContext } from '../data-model/types';
+import { DataEnvelope } from '../types/data-envelope';
 
 export interface SourceConnector {
   fetchBatch(

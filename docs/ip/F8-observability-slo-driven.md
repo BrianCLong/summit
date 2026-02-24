@@ -12,7 +12,6 @@
 This disclosure describes a **comprehensive observability stack** combining OpenTelemetry, Prometheus, and Grafana with **SLO-driven alerting, proof-carrying telemetry, and automated DORA metrics tracking**. The system enables proactive operations by linking every metric to source code, ensuring all telemetry is audit-ready and actionable.
 
 **Core Innovation**:
-
 1. **Proof-Carrying Telemetry**: Every metric traceable to source code location via code annotations
 2. **SLO-Driven Alerting**: Alerts fire based on SLO burn rate (not arbitrary thresholds)
 3. **Automated DORA Metrics**: Track deployment frequency, lead time, MTTR, change failure rate
@@ -20,7 +19,6 @@ This disclosure describes a **comprehensive observability stack** combining Open
 5. **Developer Experience Metrics**: Track engineer productivity (build times, test flakiness)
 
 **Differentiation**:
-
 - **Datadog**: Proprietary black box → We provide open-source stack with code traceability
 - **New Relic**: Generic metrics → We focus on intelligence platform SLOs
 - **Prometheus alone**: No SLO tracking → We add automated SLO burn rate alerts
@@ -33,14 +31,12 @@ This disclosure describes a **comprehensive observability stack** combining Open
 ### 1.1 Technical Problem
 
 **Traditional observability is reactive**:
-
 - Alerts fire after incidents (too late)
 - Metrics lack context (which code caused this?)
 - No linkage to business SLOs
 - Compliance requirements unmet (no audit trail)
 
 **Real-world failure scenario**:
-
 ```
 [3:00 AM] Alert: API latency spike
 [3:05 AM] Engineer wakes up, checks Grafana
@@ -52,7 +48,6 @@ Total MTTR: 90 minutes (violated SLO)
 ```
 
 **What's needed**:
-
 - **Proactive alerting**: Fire before SLO breach (not after)
 - **Code traceability**: Link metric to source file
 - **Audit trails**: Prove system health for compliance
@@ -68,16 +63,16 @@ Total MTTR: 90 minutes (violated SLO)
 
 ```typescript
 // server/src/graphql/resolvers/investigation.ts
-import { metrics } from "@observability/metrics";
+import { metrics } from '@observability/metrics';
 
 export const investigationResolvers = {
   Query: {
     investigation: async (_parent, { id }, context) => {
       // Emit metric with code provenance
-      const timer = metrics.histogram("graphql_resolver_duration_ms", {
-        resolver: "investigation",
-        source_file: __filename, // Automatic via Node.js
-        source_line: new Error().stack, // Stack trace for exact location
+      const timer = metrics.histogram('graphql_resolver_duration_ms', {
+        resolver: 'investigation',
+        source_file: __filename,        // Automatic via Node.js
+        source_line: new Error().stack  // Stack trace for exact location
       });
 
       try {
@@ -85,17 +80,15 @@ export const investigationResolvers = {
         timer.observe(Date.now() - timer.start);
         return result;
       } catch (error) {
-        metrics
-          .counter("graphql_resolver_errors", {
-            resolver: "investigation",
-            error_type: error.constructor.name,
-            source_file: __filename,
-          })
-          .inc();
+        metrics.counter('graphql_resolver_errors', {
+          resolver: 'investigation',
+          error_type: error.constructor.name,
+          source_file: __filename
+        }).inc();
         throw error;
       }
-    },
-  },
+    }
+  }
 };
 ```
 
@@ -111,7 +104,7 @@ export const investigationResolvers = {
 # observability/slo-definitions.yaml
 slos:
   - name: api_latency
-    objective: 99.5% # 99.5% of requests < 200ms
+    objective: 99.5%  # 99.5% of requests < 200ms
     window: 30d
     metric: http_request_duration_ms
     threshold: 200
@@ -130,7 +123,6 @@ slos:
 ```
 
 **Burn rate alerting**:
-
 ```yaml
 # observability/prometheus/alerts.yml
 groups:
@@ -170,7 +162,6 @@ groups:
 ### 2.3 Automated DORA Metrics
 
 **DORA = DevOps Research and Assessment metrics**:
-
 1. **Deployment frequency**: How often we deploy
 2. **Lead time for changes**: Time from commit to production
 3. **Mean time to recovery (MTTR)**: Time to restore service after incident
@@ -182,30 +173,29 @@ export class DORAMetricsCollector {
   async collectDeploymentFrequency(): Promise<number> {
     // Query GitHub Actions for successful deployments
     const deployments = await this.github.listDeployments({
-      environment: "production",
-      since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+      environment: 'production',
+      since: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)  // Last 7 days
     });
 
-    return deployments.length / 7; // Deployments per day
+    return deployments.length / 7;  // Deployments per day
   }
 
   async collectLeadTime(): Promise<number> {
     // For each deployment, calculate time from first commit to deploy
     const deployments = await this.github.listDeployments({
-      environment: "production",
-      limit: 100,
+      environment: 'production',
+      limit: 100
     });
 
     const lead_times = [];
     for (const deployment of deployments) {
       const commits = await this.github.listCommits({
-        sha: deployment.sha,
+        sha: deployment.sha
       });
 
       const first_commit_time = new Date(commits[commits.length - 1].commit.author.date);
       const deploy_time = new Date(deployment.created_at);
-      const lead_time_hours =
-        (deploy_time.getTime() - first_commit_time.getTime()) / (1000 * 60 * 60);
+      const lead_time_hours = (deploy_time.getTime() - first_commit_time.getTime()) / (1000 * 60 * 60);
 
       lead_times.push(lead_time_hours);
     }
@@ -216,14 +206,14 @@ export class DORAMetricsCollector {
   async collectMTTR(): Promise<number> {
     // Query incident management system (PagerDuty, etc.)
     const incidents = await this.pagerduty.listIncidents({
-      since: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
-      status: "resolved",
+      since: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),  // Last 30 days
+      status: 'resolved'
     });
 
-    const resolution_times = incidents.map((incident) => {
+    const resolution_times = incidents.map(incident => {
       const created = new Date(incident.created_at);
       const resolved = new Date(incident.resolved_at);
-      return (resolved.getTime() - created.getTime()) / (1000 * 60); // Minutes
+      return (resolved.getTime() - created.getTime()) / (1000 * 60);  // Minutes
     });
 
     return mean(resolution_times);
@@ -232,8 +222,8 @@ export class DORAMetricsCollector {
   async collectChangeFailureRate(): Promise<number> {
     // % of deployments that caused incidents
     const deployments = await this.github.listDeployments({
-      environment: "production",
-      since: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      environment: 'production',
+      since: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     });
 
     let failed_deployments = 0;
@@ -241,7 +231,7 @@ export class DORAMetricsCollector {
       // Check if incident opened within 1 hour of deployment
       const incidents = await this.pagerduty.listIncidents({
         since: new Date(deployment.created_at),
-        until: new Date(new Date(deployment.created_at).getTime() + 60 * 60 * 1000),
+        until: new Date(new Date(deployment.created_at).getTime() + 60 * 60 * 1000)
       });
 
       if (incidents.length > 0) {
@@ -258,14 +248,14 @@ export class DORAMetricsCollector {
       lead_time_hours: await this.collectLeadTime(),
       mttr_minutes: await this.collectMTTR(),
       change_failure_rate: await this.collectChangeFailureRate(),
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     // Export to Prometheus
-    prometheusRegistry.gauge("dora_deployment_frequency").set(metrics.deployment_frequency_per_day);
-    prometheusRegistry.gauge("dora_lead_time_hours").set(metrics.lead_time_hours);
-    prometheusRegistry.gauge("dora_mttr_minutes").set(metrics.mttr_minutes);
-    prometheusRegistry.gauge("dora_change_failure_rate").set(metrics.change_failure_rate);
+    prometheusRegistry.gauge('dora_deployment_frequency').set(metrics.deployment_frequency_per_day);
+    prometheusRegistry.gauge('dora_lead_time_hours').set(metrics.lead_time_hours);
+    prometheusRegistry.gauge('dora_mttr_minutes').set(metrics.mttr_minutes);
+    prometheusRegistry.gauge('dora_change_failure_rate').set(metrics.change_failure_rate);
 
     return metrics;
   }
@@ -273,7 +263,6 @@ export class DORAMetricsCollector {
 ```
 
 **Grafana Dashboard**:
-
 ```json
 {
   "dashboard": {
@@ -281,7 +270,9 @@ export class DORAMetricsCollector {
     "panels": [
       {
         "title": "Deployment Frequency",
-        "targets": [{ "expr": "dora_deployment_frequency" }],
+        "targets": [
+          { "expr": "dora_deployment_frequency" }
+        ],
         "thresholds": [
           { "value": 1, "color": "red", "label": "< 1/day (Low)" },
           { "value": 7, "color": "yellow", "label": "1-7/day (Medium)" },
@@ -290,7 +281,9 @@ export class DORAMetricsCollector {
       },
       {
         "title": "Lead Time",
-        "targets": [{ "expr": "dora_lead_time_hours" }],
+        "targets": [
+          { "expr": "dora_lead_time_hours" }
+        ],
         "thresholds": [
           { "value": 168, "color": "red", "label": "> 1 week (Low)" },
           { "value": 24, "color": "yellow", "label": "1 day - 1 week (Medium)" },
@@ -316,22 +309,22 @@ export class ObservabilityProvenanceIntegration {
   ): Promise<void> {
     // Store in provenance ledger
     await this.provenanceLedger.record({
-      type: "METRIC_EMITTED",
+      type: 'METRIC_EMITTED',
       metric_name,
       metric_value,
       source_file: source_location.file,
       source_line: source_location.line,
       timestamp: new Date(),
-      signature: await this.sign({ metric_name, metric_value, source_location }),
+      signature: await this.sign({ metric_name, metric_value, source_location })
     });
   }
 
   async auditMetricHistory(metric_name: string, since: Date): Promise<MetricAuditTrail[]> {
     // Query provenance ledger for all emissions of this metric
     return await this.provenanceLedger.query({
-      type: "METRIC_EMITTED",
+      type: 'METRIC_EMITTED',
       metric_name,
-      since,
+      since
     });
   }
 }
@@ -359,15 +352,14 @@ export class ObservabilityProvenanceIntegration {
 
 ## 4. Performance Benchmarks
 
-| Metric               | Target      | Actual (30-day avg) |
-| -------------------- | ----------- | ------------------- |
-| API p95 latency      | <200ms      | 165ms ✅            |
-| API availability     | 99.9%       | 99.94% ✅           |
-| GraphQL resolver p95 | <500ms      | 420ms ✅            |
-| MTTR                 | <30 minutes | 22 minutes ✅       |
+| Metric | Target | Actual (30-day avg) |
+|--------|--------|---------------------|
+| API p95 latency | <200ms | 165ms ✅ |
+| API availability | 99.9% | 99.94% ✅ |
+| GraphQL resolver p95 | <500ms | 420ms ✅ |
+| MTTR | <30 minutes | 22 minutes ✅ |
 
 **DORA Metrics**:
-
 - Deployment frequency: 12/day (Elite)
 - Lead time: 4.2 hours (High)
 - MTTR: 22 minutes (Elite)
@@ -378,13 +370,11 @@ export class ObservabilityProvenanceIntegration {
 ## 5. Competitive Advantages
 
 **vs. Datadog**:
-
 - Open-source stack (lower cost)
 - Proof-carrying telemetry (code traceability)
 - Provenance integration (compliance)
 
 **vs. Prometheus/Grafana alone**:
-
 - SLO burn rate alerting (proactive)
 - Automated DORA metrics
 - Provenance ledger integration
@@ -404,7 +394,6 @@ export class ObservabilityProvenanceIntegration {
 ### Patentability Assessment
 
 **Preliminary opinion**: Moderate patentability
-
 - **Novel combination**: SLO burn rate + proof-carrying metrics + provenance
 - **Technical improvement**: 40% reduction in MTTR vs. baseline
 - **Non-obvious**: Linking metrics to code locations via stack traces is non-obvious

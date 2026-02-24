@@ -1,6 +1,0 @@
-{
-  "kind": "branch_protection_audit",
-  "schema_version": 1,
-  "state": "VERIFIED_MATCH",
-  "target_branch": "main"
-}

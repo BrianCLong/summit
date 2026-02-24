@@ -13,7 +13,6 @@ import { type PolicySimulationService } from '../../services/policyService.js';
 import type { AuthenticatedRequest } from '../../middleware/security.js';
 import { RBACManager } from '../../../../../packages/authentication/src/rbac/rbac-manager.js';
 import { requirePermission } from '../../middleware/security.js';
-import { IAuditSink } from '../../../../server/src/audit/sink.js';
 
 interface ExecuteRequestBody {
   preflight_id?: string;
@@ -41,7 +40,6 @@ export const createExecuteRouter = (
   events: EventPublisher,
   policyService?: PolicySimulationService,
   rbacManager?: RBACManager,
-  auditSink?: IAuditSink,
 ): Router => {
   const router = Router();
 
@@ -104,16 +102,6 @@ export const createExecuteRouter = (
           const currentDecision = await policyService.simulate(preflight.request);
 
           if (!currentDecision.allow) {
-            if (auditSink) {
-              await auditSink.securityAlert('Policy denied at execution time (TOCTOU prevention)', {
-                correlationId,
-                preflightId,
-                action: action ?? preflight.action,
-                reason: currentDecision.reason,
-                userId: req.user?.id,
-                tenantId: req.tenantId,
-              });
-            }
             return res.status(403).json({
               error: 'policy_denied_at_execution',
               message: 'Policy decision changed since preflight; action denied',
@@ -124,15 +112,6 @@ export const createExecuteRouter = (
 
           // Verify tenant isolation at execution time
           if (req.tenantId && preflight.request.subject?.tenantId !== req.tenantId) {
-            if (auditSink) {
-              await auditSink.securityAlert('Tenant isolation violation detected at execution', {
-                correlationId,
-                preflightId,
-                requestTenantId: preflight.request.subject?.tenantId,
-                activeTenantId: req.tenantId,
-                userId: req.user?.id,
-              });
-            }
             return res.status(403).json({
               error: 'tenant_isolation_violation',
               message: 'Tenant context mismatch between preflight and execution',
@@ -150,19 +129,6 @@ export const createExecuteRouter = (
 
       const execution = buildExecutionRecord(correlationId);
       await store.recordExecution(preflightId, execution);
-
-      if (auditSink) {
-        await auditSink.recordEvent({
-          eventType: 'task_complete',
-          level: 'info',
-          correlationId,
-          action: action ?? preflight.action,
-          message: `Action executed: ${action ?? preflight.action}`,
-          details: { preflightId, executionId: execution.executionId },
-          userId: req.user?.id,
-          tenantId: req.tenantId ?? 'unknown',
-        });
-      }
 
       events.publish({
         type: 'action.executed',

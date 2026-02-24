@@ -216,11 +216,6 @@ export default function LiveCollaborationPanel() {
               size="small"
               onClick={() => setNotificationsEnabled(!notificationsEnabled)}
               color={notificationsEnabled ? 'primary' : 'default'}
-              aria-label={
-                notificationsEnabled
-                  ? 'Disable notifications'
-                  : 'Enable notifications'
-              }
             >
               {notificationsEnabled ? (
                 <NotificationsIcon />

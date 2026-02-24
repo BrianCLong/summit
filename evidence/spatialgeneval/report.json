@@ -1,8 +1,0 @@
-{
-  "benchmark_id": "spatialgeneval",
-  "run_id": "default_run",
-  "artifacts": [
-    "evidence/spatialgeneval/metrics.json",
-    "evidence/spatialgeneval/stamp.json"
-  ]
-}

@@ -66,12 +66,6 @@ Each agent prompt is stored as a standalone file, and the Meta-Router chooses th
 | `marketing.master-generator@v1.yaml` | Master system for generating/auditing all marketing artifacts |
 | `marketing.artifact-perfection@v1.yaml` | Sub-agent for refining specific marketing content |
 
-### Competitive Intelligence
-
-| File | Purpose |
-|------|---------|
-| `competitive/competitive-intel-subsumption-engine@v4_1.md` | Switchboard-standard protocol for competitive intelligence subsumption (clean-room, evidence-first). |
-
 ---
 
 ## Usage

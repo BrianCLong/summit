@@ -6,13 +6,13 @@ import { Counter, Histogram, Gauge } from 'prom-client';
 import {
   contractTesting,
   ContractTestResult,
-} from '../testing/contractTesting.js';
+} from '../testing/contractTesting';
 import {
   migrationFramework,
   MigrationExecution,
-} from '../migrations/migrationFramework.js';
+} from '../migrations/migrationFramework';
 import { EventEmitter } from 'events';
-import { redis } from '../subscriptions/pubsub.js';
+import { redis } from '../subscriptions/pubsub';
 
 const tracer = trace.getTracer('migration-gates', '24.3.0');
 

@@ -32,7 +32,7 @@ export interface InvoiceLineItem {
   periodEnd?: Date;
   meterId?: string;
   kind?: string; // 'api', 'ingest', etc.
-  metadata?: Record<string, unknown>;
+  metadata?: Record<string, any>;
 }
 
 export enum InvoiceStatus {
@@ -110,6 +110,6 @@ export interface AuditTrail {
   entityType: 'INVOICE' | 'DISPUTE' | 'ADJUSTMENT';
   action: string;
   actorId: string;
-  changes: Record<string, { old: unknown; new: unknown }>;
+  changes: Record<string, { old: any; new: any }>;
   timestamp: Date;
 }

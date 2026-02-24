@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { Experiment, Variant, Assignment, ExperimentConfig } from './types.js';
-import { telemetryService } from '../telemetry/TelemetryService.js';
+import { Experiment, Variant, Assignment, ExperimentConfig } from './types.ts';
+import { telemetryService } from '../telemetry/TelemetryService.ts';
 
 export class ExperimentService {
   private experiments: Map<string, Experiment> = new Map();

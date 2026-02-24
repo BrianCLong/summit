@@ -1,4 +1,4 @@
-import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@intelgraph/maestro-core';
+import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '@maestro/core';
 
 export class GitHubPRSkill implements StepPlugin {
   name = 'github-pr';

@@ -1,5 +1,5 @@
 
-import { neo } from '../db/neo4j.js';
+import { neo } from '../db/neo4j';
 import * as crypto from 'crypto';
 import {
   ProvenanceEntry,
@@ -10,7 +10,7 @@ import {
   ActionNode,
   OutcomeNode,
   ProvenanceNodeType
-} from './types.js';
+} from './types';
 
 export class CanonicalGraphService {
   private static instance: CanonicalGraphService;

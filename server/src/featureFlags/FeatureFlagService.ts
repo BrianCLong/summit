@@ -1,7 +1,7 @@
 // server/src/featureFlags/FeatureFlagService.ts
 import { Redis } from 'ioredis';
-import { Logger } from '../utils/logger.js';
-import { FeatureFlag, FlagCondition, EvaluationContext } from './types.js';
+import { Logger } from '../utils/logger';
+import { FeatureFlag, FlagCondition, EvaluationContext } from './types';
 
 export interface FeatureFlagRepository {
   getFlag(flagKey: string): Promise<FeatureFlag | null>;

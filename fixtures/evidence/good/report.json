@@ -1,7 +1,0 @@
-{
-  "run_id": "fixture-good",
-  "summary": "Fixture evidence bundle for trust paradox verifier.",
-  "evidence_ids": [
-    "EVD-TRUSTPARADOX-GOV-001"
-  ]
-}

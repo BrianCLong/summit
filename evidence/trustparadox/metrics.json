@@ -1,8 +1,0 @@
-{
-  "run_id": "trustparadox-pr1",
-  "metrics": {
-    "evidence_files": 4,
-    "schema_count": 4,
-    "governance_gate": 1
-  }
-}

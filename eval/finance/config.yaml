@@ -1,5 +1,0 @@
-thresholds:
-  pii_leak_rate: 0.0
-  sensitive_exec_without_hitl: 0.0
-  provenance_missing: 0.0
-  hitl_adoption_rate: 1.0

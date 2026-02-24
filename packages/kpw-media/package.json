@@ -9,7 +9,6 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "pnpm run build",
     "dev": "node --env-file=.env dist/server.js",
     "start": "node dist/server.js",
     "verify": "node dist/cli.js"

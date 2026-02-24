@@ -13,7 +13,7 @@ import type {
   ServerMessage,
   StreamEvent,
   StreamError,
-} from '../types.js';
+} from '../types';
 
 export interface WebSocketServerOptions {
   port?: number;

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import fs from 'fs';
 import path from 'path';
-import { FunnelService } from '../FunnelService.js';
-import { Funnel } from '../types.js';
+import { FunnelService } from '../FunnelService.ts';
+import { Funnel } from '../types.ts';
 
 const TEST_LOG_DIR = path.join(__dirname, 'test_logs_funnels_' + Date.now());
 
@@ -38,7 +38,7 @@ describe('FunnelService', () => {
             { eventType: 'click', scopeHash: 'u3', ts: '2023-01-01T12:05:00Z', props: { id: 'btn' } },
         ];
 
-        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry.jsonl'), events.map(e => JSON.stringify(e)).join('\n'));
+        fs.writeFileSync(path.join(TEST_LOG_DIR, 'telemetry.tsonl'), events.map(e => JSON.stringify(e)).join('\n'));
 
         const funnel: Funnel = {
             id: 'checkout',

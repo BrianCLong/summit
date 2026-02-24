@@ -1,6 +1,6 @@
 
-import { OSINTProfile } from './types.js';
-import { Entity } from '../data-model/types.js';
+import { OSINTProfile } from './types';
+import { Entity } from '../data-model/types';
 import crypto from 'crypto';
 
 export class EntityResolutionService {

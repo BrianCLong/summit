@@ -1,5 +1,5 @@
-import { RegisteredPlugin, PluginStatus, PluginManifest, PluginPackage } from '../plugins/types.js';
-import { TrustTier, MarketplaceArtifactGovernance, LicenseType, SecurityStatus } from './types.js';
+import { RegisteredPlugin, PluginStatus, PluginManifest, PluginPackage } from '../plugins/types';
+import { TrustTier, MarketplaceArtifactGovernance, LicenseType, SecurityStatus } from './types';
 import { randomUUID } from 'crypto';
 
 export class MarketplaceService {

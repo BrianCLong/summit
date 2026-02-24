@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-PORTALKOMBAT-VEN-PROV-005",
-  "metrics": {
-    "deny_by_default": true,
-    "corroboration_required": true
-  }
-}

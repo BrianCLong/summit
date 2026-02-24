@@ -13,7 +13,7 @@ import {
   ResourceContext,
   getMultiTenantRBAC,
   resetMultiTenantRBAC,
-} from '../multi-tenant-rbac.js';
+} from '../multi-tenant-rbac.ts';
 
 describe('MultiTenantRBACManager', () => {
   let rbac: MultiTenantRBACManager;

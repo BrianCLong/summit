@@ -303,11 +303,6 @@ input PolicyContextInput {
 """
 Query input for GraphRAG
 """
-enum RetrievalStrategy {
-  BASELINE
-  KG2RAG
-}
-
 input GraphRAGQueryInput {
   query: String!
   tenantId: String!
@@ -324,8 +319,6 @@ input GraphRAGQueryInput {
   entityFilters: [EntityFilterInput!]
   relationshipFilters: [String!]
   policyContext: PolicyContextInput
-  strategy: RetrievalStrategy
-  useKg2Rag: Boolean
   maxTokens: Int
   temperature: Float
 }

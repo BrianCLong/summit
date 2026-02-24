@@ -1,7 +1,7 @@
 // @ts-nocheck
 import MiniSearch, { SearchResult } from 'minisearch';
 import { createHash } from 'crypto';
-import { computePolicyScopeId } from './psid.js';
+import { computePolicyScopeId } from './psid';
 import {
   AuthorizedDocument,
   AuthorizedEdge,
@@ -15,7 +15,7 @@ import {
   PolicyScope,
   QueryResponse,
   RetrievalResult,
-} from './types.js';
+} from './types';
 
 const cosineSimilarity = (a: number[], b: number[]): number => {
   const length = Math.min(a.length, b.length);

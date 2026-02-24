@@ -130,7 +130,5 @@ export async function routeLLM(opts: RouteOpts, payload: any) {
 }
 
 
-/*
 Env keys expected: GROQ_API_KEY, OPENROUTER_API_KEY, OPENAI_API_KEY, ANTHROPIC_API_KEY.
 Usage: call routeLLM({ tag:"fast.code", inputTokens:1200, latencyBudgetMs:1500, hardCostUsd:0, softWarnUsd:0.5, allowPaid:false }, payload).
-*/

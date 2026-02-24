@@ -4,7 +4,7 @@ import {
   Detector,
   AnomalyResult,
   Severity,
-} from '../types.js';
+} from '../types.ts';
 
 interface BehavioralData {
   sequence: string[];

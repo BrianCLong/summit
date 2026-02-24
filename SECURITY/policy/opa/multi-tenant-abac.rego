@@ -10,10 +10,8 @@
 # - Denied environment handling
 
 package summit.multitenant
-import future.keywords.if
-import future.keywords.in
 
-
+import rego.v1
 
 # ============================================================================
 # Default Deny - Explicit allow required

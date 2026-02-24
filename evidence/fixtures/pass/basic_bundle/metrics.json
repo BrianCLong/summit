@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-TEST-FIXTURE-001",
-  "metrics": {
-    "tests_passed": 10,
-    "tests_failed": 0
-  }
-}

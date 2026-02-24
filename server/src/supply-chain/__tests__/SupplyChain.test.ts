@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { SupplyChainRiskEngine } from '../SupplyChainRiskEngine.js';
-import { SBOMParser } from '../SBOMParser.js';
-import { VulnerabilityService } from '../VulnerabilityService.js';
-import { ContractAnalyzer } from '../ContractAnalyzer.js';
-import { Vendor } from '../types.js';
+import { SupplyChainRiskEngine } from '../SupplyChainRiskEngine';
+import { SBOMParser } from '../SBOMParser';
+import { VulnerabilityService } from '../VulnerabilityService';
+import { ContractAnalyzer } from '../ContractAnalyzer';
+import { Vendor } from '../types';
 
 describe('SupplyChainRiskEngine', () => {
   let engine: SupplyChainRiskEngine;

@@ -1,6 +1,6 @@
 // @ts-nocheck
 // import { Queue, Worker, Job } from 'bullmq';
-import { runCypher } from '../graph/neo4j.js';
+import { runCypher } from '../graph/neo4j';
 import Redis from 'ioredis';
 
 // Type declaration for BullMQ JobsOptions (when bullmq is not available)

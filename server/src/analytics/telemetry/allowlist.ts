@@ -1,4 +1,4 @@
-import { EventType } from './types.js';
+import { EventType } from './types.ts';
 
 /**
  * Defines allowed properties for each event type.

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "test": "echo 'Tests skipped due to Jest ESM parsing issues' && exit 0",
+    "test": "jest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

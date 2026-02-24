@@ -5,7 +5,7 @@
  * Supports hot-reloading of policy updates.
  */
 
-import { PolicyBundle, Authority, PolicyDecision, Operation } from './schema/policy.schema.js';
+import { PolicyBundle, Authority, PolicyDecision, Operation } from './schema/policy.schema';
 
 export interface CompilerOptions {
   /** Enable strict mode - reject policies with warnings */

@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { BaseConnector } from '../connectors/base.js';
-import { BaseEnricher } from '../ingest/enrichers/base.js';
-import { IngestionEvent } from '../connectors/types.js';
-import { ProvenanceLedgerV2 } from '../provenance/ledger.js';
+import { BaseConnector } from '../connectors/base';
+import { BaseEnricher } from '../ingest/enrichers/base';
+import { IngestionEvent } from '../connectors/types';
+import { ProvenanceLedgerV2 } from '../provenance/ledger';
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 

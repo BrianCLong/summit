@@ -9,9 +9,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { EvidenceTrailPeek } from '@/components/evidence/EvidenceTrailPeek';
-import { useFeatureFlag } from '@/hooks/useFeatureFlag';
-import { features } from '@/config/features';
 
 // Define types locally if not available globally
 interface TranslationResult {
@@ -25,16 +22,6 @@ interface TranslationResult {
   citations?: { id: string; source: string; url?: string; confidence: number }[];
 }
 
-const buildAnswerId = (result: TranslationResult | null) => {
-  if (!result) return undefined;
-  const astId = (result as TranslationResult & { ast?: { id?: string } }).ast?.id;
-  if (astId) return String(astId);
-  if (result.cypher) {
-    return `cypher-${result.cypher.slice(0, 24).replace(/\s+/g, '-')}`;
-  }
-  return undefined;
-};
-
 export function CopilotPanel() {
   const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState<TranslationResult | null>(null);
@@ -43,7 +30,6 @@ export function CopilotPanel() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('prompt');
   const { toast } = useToast();
-  const evidenceTrailEnabled = useFeatureFlag('evidenceTrailPeek', features.evidenceTrailPeek);
 
   // jQuery ref for the action panel
   const actionPanelRef = useRef<HTMLDivElement>(null);
@@ -153,14 +139,6 @@ export function CopilotPanel() {
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-between items-center">
             <span>Copilot v0.9</span>
-            {evidenceTrailEnabled && result && (
-              <EvidenceTrailPeek
-                answerId={buildAnswerId(result)}
-                triggerLabel="Evidence trail"
-                triggerVariant="outline"
-                contextLabel="Copilot answer"
-              />
-            )}
             {result?.isValid === false && (
               <Badge variant="destructive">Invalid Syntax</Badge>
             )}

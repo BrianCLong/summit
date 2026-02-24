@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3';
 import pino from 'pino';
-import { Watermark } from './types.js';
+import { Watermark } from './types';
 
 const logger = pino({ name: 'watermark-generator' });
 

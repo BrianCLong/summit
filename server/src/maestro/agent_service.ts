@@ -1,6 +1,6 @@
 
 import { Pool } from 'pg';
-import { MaestroAgent, AgentId, TenantId } from './model.js';
+import { MaestroAgent, AgentId, TenantId } from './model';
 
 export class MaestroAgentService {
   constructor(private db: Pool) {}

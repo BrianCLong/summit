@@ -1,5 +1,3 @@
-claims:
-  - id: "CLAIM-01"
-    description: "Legacy placeholder claim"
-    status: "implemented"
-    evidence_id: "EVD-ITEM-UNKNOWN-001"
+version: 1
+item_slug: item-unknown
+claims: []

@@ -1,4 +1,4 @@
-import { SSOProvider, SSOMetadata, SSOUserIdentity } from '../types.js';
+import { SSOProvider, SSOMetadata, SSOUserIdentity } from '../types.ts';
 
 export class LocalStubProvider implements SSOProvider {
   name = 'local-stub';

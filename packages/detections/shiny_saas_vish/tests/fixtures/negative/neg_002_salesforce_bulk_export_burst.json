@@ -1,4 +1,0 @@
-[
-  {"actor": {"user_id": "user_002"}, "action": "login", "target": {"app": "salesforce"}, "geo": {"ip": "5.6.7.8"}},
-  {"actor": {"user_id": "user_002"}, "action": "salesforce_report_export", "target": {"app": "salesforce", "resource_id": "rep1"}}
-]

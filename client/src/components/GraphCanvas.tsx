@@ -19,18 +19,15 @@ const GraphCanvas: React.FC = () => {
   const graph = useSelector((s: RootState) => s.graphData);
   const socketRef = useRef<Socket | null>(null);
 
-  const cyRef = useRef<cytoscape.Core | null>(null);
-
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // BOLT: Persistent Cytoscape instance prevents full re-initialization on every graph update.
-    // This avoids expensive destroy/recreate cycles and redundant Socket.IO connections.
-    const cy = (cyRef.current = cytoscape({
+    const cy = cytoscape({
       container: containerRef.current,
+      elements: [...graph.nodes, ...graph.edges] as ElementDefinition[],
       style: [{ selector: 'node', style: { label: 'data(id)' } }],
       layout: { name: 'grid' },
-    }));
+    });
 
     // jQuery wrapper for simple drag feedback
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,18 +53,7 @@ const GraphCanvas: React.FC = () => {
       cy.destroy();
       socketRef.current?.disconnect();
     };
-  }, [dispatch]);
-
-  useEffect(() => {
-    // BOLT: Use incremental updates via cy.json() and re-running the layout.
-    // This is significantly more efficient than recreating the entire Cytoscape instance.
-    if (cyRef.current) {
-      cyRef.current.json({
-        elements: [...graph.nodes, ...graph.edges] as ElementDefinition[],
-      });
-      cyRef.current.layout({ name: 'grid' }).run();
-    }
-  }, [graph.nodes, graph.edges]);
+  }, [dispatch, graph.nodes, graph.edges]);
 
   return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 };

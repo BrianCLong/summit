@@ -8,6 +8,3 @@
 
 ## Changed
 - None
-
-## 2026-02-03 Trust Paradox Evidence Skeleton
-- No dependency changes in this update.

@@ -42,18 +42,12 @@ import {
     ContextProcessor,
     Session,
     Event,
+    CompilationOptions,
     HistoryProcessor,
     InstructionProcessor,
     ArtifactProcessor,
     MemoryProcessor,
 } from './context/index.js';
-import {
-  EvidenceBundleManager,
-  EvidenceManagerConfig,
-  ToolRuntime,
-  buildPlanFromChain,
-  buildPlanFromRequest,
-} from './evidence/index.js';
 
 export interface MultiLLMOrchestratorConfig {
   redis?: Partial<RedisStateConfig>;
@@ -65,8 +59,6 @@ export interface MultiLLMOrchestratorConfig {
   maxChainDepth?: number;
   enableMetrics?: boolean;
   contextProcessors?: ContextProcessor[];
-  evidence?: EvidenceManagerConfig;
-  toolRuntime?: ToolRuntime;
 }
 
 export class MultiLLMOrchestrator extends EventEmitter {
@@ -79,8 +71,6 @@ export class MultiLLMOrchestrator extends EventEmitter {
   private contextCompiler: ContextCompiler;
   private config: MultiLLMOrchestratorConfig;
   private chains: Map<string, ChainConfig> = new Map();
-  private evidenceManager: EvidenceBundleManager;
-  private toolRuntime?: ToolRuntime;
 
   constructor(config: MultiLLMOrchestratorConfig = {}) {
     super();
@@ -105,8 +95,6 @@ export class MultiLLMOrchestrator extends EventEmitter {
       this.circuitRegistry,
       config.routing,
     );
-    this.evidenceManager = new EvidenceBundleManager(config.evidence);
-    this.toolRuntime = config.toolRuntime;
 
     // Initialize Context Engineering Pipeline (Google ADK Pattern)
     const processors = config.contextProcessors ?? [
@@ -118,7 +106,6 @@ export class MultiLLMOrchestrator extends EventEmitter {
     this.contextCompiler = new ContextCompiler(processors);
 
     this.setupEventForwarding();
-    this.on('event', (payload) => void this.evidenceManager.recordOrchestratorEvent(payload));
   }
 
   // ============================================================================
@@ -167,130 +154,106 @@ export class MultiLLMOrchestrator extends EventEmitter {
       metadata: {},
     };
 
-    const goal = request.messages.map((message) => message.content).join('\n');
-    const plan = buildPlanFromRequest(request, {
-      runId: sessionId,
-      planId: context.chainId,
-      goal,
-    });
-    await this.evidenceManager.createBundle(plan, sessionId);
-
-    this.emitEvent('chain:started', sessionId, context.chainId, undefined, {
-      input: goal,
-    });
-
     // Note: 'request' here overrides the session history typically.
     // However, if we want to respect the "Context as Compiled View" pattern,
     // we should really be building the request from the session + new input.
     // But 'complete' API signature takes 'request' which usually implies a direct call.
     // We will stick to the existing logic for 'complete' but add governance/scoring.
 
-    try {
-      // Run governance check on input
-      let governanceResult: GovernanceResult = { allowed: true, violations: [], warnings: [], score: 1 };
-      if (!options.skipGovernance) {
-        governanceResult = await this.governanceEngine.evaluateMessages(
-          request.messages,
-          context,
-        );
-
-        if (!governanceResult.allowed) {
-          this.emitEvent('governance:blocked', sessionId, context.chainId, undefined, {
-            violations: governanceResult.violations,
-          });
-          throw new GovernanceError('Request blocked by governance', governanceResult.violations);
-        }
-      }
-
-      // Check budget
-      const budgetCheck = await this.stateManager.checkBudget(
-        userId,
-        this.estimateRequestCost(request),
-        {
-          daily: this.config.budget?.maxDailyCostUSD ?? 50,
-          monthly: this.config.budget?.maxMonthlyCostUSD ?? 500,
-        },
+    // Run governance check on input
+    let governanceResult: GovernanceResult = { allowed: true, violations: [], warnings: [], score: 1 };
+    if (!options.skipGovernance) {
+      governanceResult = await this.governanceEngine.evaluateMessages(
+        request.messages,
+        context,
       );
 
-      if (!budgetCheck.allowed) {
-        this.emitEvent('budget:exceeded', sessionId, context.chainId, undefined, {
-          reason: budgetCheck.reason,
+      if (!governanceResult.allowed) {
+        this.emitEvent('governance:blocked', sessionId, context.chainId, undefined, {
+          violations: governanceResult.violations,
         });
-        throw new BudgetError(budgetCheck.reason ?? 'Budget exceeded');
+        throw new GovernanceError('Request blocked by governance', governanceResult.violations);
       }
-      // Route and execute request
-      const routingResult = await this.fallbackRouter.route(request, context);
-
-      if (!routingResult.success || !routingResult.response) {
-        throw new OrchestratorError(routingResult.error ?? 'All providers failed');
-      }
-
-      const response = routingResult.response;
-
-      // Update session state
-      // Note: Request messages might contain full history or just last turn.
-      // We assume just last turn for storage if length > history
-      const lastUserMessage = request.messages[request.messages.length - 1];
-      if (lastUserMessage && lastUserMessage.role === 'user') {
-          await this.stateManager.addMessage(sessionId, lastUserMessage);
-      }
-
-      await this.stateManager.addMessage(sessionId, {
-        role: 'assistant',
-        content: response.content,
-      });
-      await this.stateManager.updateUsage(sessionId, response.usage);
-
-      // Record budget usage
-      await this.stateManager.recordBudgetUsage(userId, {
-        timestamp: new Date(),
-        chainId: context.chainId,
-        stepId: context.stepId,
-        provider: response.provider,
-        model: response.model,
-        costUSD: response.usage.estimatedCostUSD,
-        tokens: response.usage.totalTokens,
-      });
-
-      // Run hallucination scoring
-      let hallucinationScore: HallucinationScore | undefined;
-      if (!options.skipHallucinationCheck && this.config.hallucinationScoring) {
-        hallucinationScore = await this.hallucinationScorer.score(
-          response,
-          context,
-          request.messages.map((m) => m.content).join('\n'),
-        );
-      }
-
-      // Run governance check on output
-      if (!options.skipGovernance) {
-        const outputGovernance = await this.governanceEngine.evaluate(
-          response.content,
-          context,
-          'response',
-        );
-        governanceResult.violations.push(...outputGovernance.violations);
-        governanceResult.warnings.push(...outputGovernance.warnings);
-        governanceResult.score = Math.min(governanceResult.score, outputGovernance.score);
-      }
-
-      this.emitEvent('chain:completed', sessionId, context.chainId, undefined, {
-        result: { success: true },
-      });
-      await this.evidenceManager.finalize(sessionId, 'completed');
-
-      return {
-        ...response,
-        governance: governanceResult,
-        hallucination: hallucinationScore,
-      };
-    } catch (error) {
-      this.emitEvent('chain:failed', sessionId, context.chainId, undefined, {
-        error: (error as Error).message,
-      });
-      await this.evidenceManager.finalize(sessionId, 'failed');
-      throw error;
     }
+
+    // Check budget
+    const budgetCheck = await this.stateManager.checkBudget(
+      userId,
+      this.estimateRequestCost(request),
+      {
+        daily: this.config.budget?.maxDailyCostUSD ?? 50,
+        monthly: this.config.budget?.maxMonthlyCostUSD ?? 500,
+      },
+    );
+
+    if (!budgetCheck.allowed) {
+      this.emitEvent('budget:exceeded', sessionId, context.chainId, undefined, {
+        reason: budgetCheck.reason,
+      });
+      throw new BudgetError(budgetCheck.reason ?? 'Budget exceeded');
+    }
+
+    // Route and execute request
+    const routingResult = await this.fallbackRouter.route(request, context);
+
+    if (!routingResult.success || !routingResult.response) {
+      throw new OrchestratorError(routingResult.error ?? 'All providers failed');
+    }
+
+    const response = routingResult.response;
+
+    // Update session state
+    // Note: Request messages might contain full history or just last turn.
+    // We assume just last turn for storage if length > history
+    const lastUserMessage = request.messages[request.messages.length - 1];
+    if (lastUserMessage && lastUserMessage.role === 'user') {
+        await this.stateManager.addMessage(sessionId, lastUserMessage);
+    }
+
+    await this.stateManager.addMessage(sessionId, {
+      role: 'assistant',
+      content: response.content,
+    });
+    await this.stateManager.updateUsage(sessionId, response.usage);
+
+    // Record budget usage
+    await this.stateManager.recordBudgetUsage(userId, {
+      timestamp: new Date(),
+      chainId: context.chainId,
+      stepId: context.stepId,
+      provider: response.provider,
+      model: response.model,
+      costUSD: response.usage.estimatedCostUSD,
+      tokens: response.usage.totalTokens,
+    });
+
+    // Run hallucination scoring
+    let hallucinationScore: HallucinationScore | undefined;
+    if (!options.skipHallucinationCheck && this.config.hallucinationScoring) {
+      hallucinationScore = await this.hallucinationScorer.score(
+        response,
+        context,
+        request.messages.map((m) => m.content).join('\n'),
+      );
+    }
+
+    // Run governance check on output
+    if (!options.skipGovernance) {
+      const outputGovernance = await this.governanceEngine.evaluate(
+        response.content,
+        context,
+        'response',
+      );
+      governanceResult.violations.push(...outputGovernance.violations);
+      governanceResult.warnings.push(...outputGovernance.warnings);
+      governanceResult.score = Math.min(governanceResult.score, outputGovernance.score);
+    }
+
+    return {
+      ...response,
+      governance: governanceResult,
+      hallucination: hallucinationScore,
+    };
   }
 
   /**
@@ -331,8 +294,6 @@ export class MultiLLMOrchestrator extends EventEmitter {
       metadata: {},
     };
 
-    const plan = buildPlanFromChain(chain, { runId: sessionId, goal: input });
-    await this.evidenceManager.createBundle(plan, sessionId);
     this.emitEvent('chain:started', sessionId, chainId, undefined, { input });
 
     const stepResults: StepResult[] = [];
@@ -460,14 +421,12 @@ export class MultiLLMOrchestrator extends EventEmitter {
       };
 
       this.emitEvent('chain:completed', sessionId, chainId, undefined, { result });
-      await this.evidenceManager.finalize(sessionId, 'completed');
       return result;
 
     } catch (error) {
       this.emitEvent('chain:failed', sessionId, chainId, undefined, {
         error: (error as Error).message,
       });
-      await this.evidenceManager.finalize(sessionId, 'failed');
       throw error;
     }
   }
@@ -661,34 +620,6 @@ export class MultiLLMOrchestrator extends EventEmitter {
 
       const response = routingResult.response;
       const latencyMs = Date.now() - startTime;
-
-      if (response.toolCalls && this.toolRuntime) {
-        const recorder = this.evidenceManager.getBundle(context.sessionId);
-        for (const call of response.toolCalls) {
-          let args: unknown = {};
-          try {
-            args = JSON.parse(call.function.arguments || '{}');
-          } catch (error) {
-            await recorder?.record({
-              type: 'tool:validation_failed',
-              timestamp: new Date().toISOString(),
-              run_id: context.sessionId,
-              plan_id: context.chainId,
-              step_id: step.id,
-              tool_name: call.function.name,
-              data: { stage: 'args', error: (error as Error).message },
-            });
-            continue;
-          }
-
-          await this.toolRuntime.runTool(call.function.name, args, {
-            runId: context.sessionId,
-            planId: context.chainId,
-            stepId: step.id,
-            recorder,
-          });
-        }
-      }
 
       // Validate output if validator provided
       if (step.validate) {

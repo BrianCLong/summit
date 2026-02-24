@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { CopilotNLQueryService } from '../services/CopilotNLQueryService.js';
+import { CopilotNLQueryService } from '../services/CopilotNLQueryService';
 import { goldenPathStepTotal } from '../monitoring/metrics.js';
 
 const router = Router();

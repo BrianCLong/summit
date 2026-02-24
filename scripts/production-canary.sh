@@ -170,16 +170,8 @@ get_p95_latency() {
     query_prometheus 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-canary"}[5m])) by (le)) * 1000'
 }
 
-get_baseline_p95() {
-    query_prometheus 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-stable"}[5m])) by (le)) * 1000'
-}
-
 get_error_rate() {
     query_prometheus 'sum(rate(http_requests_total{job="intelgraph-canary",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="intelgraph-canary"}[5m]))'
-}
-
-get_baseline_error() {
-    query_prometheus 'sum(rate(http_requests_total{job="intelgraph-stable",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="intelgraph-stable"}[5m]))'
 }
 
 get_success_rate() {
@@ -341,26 +333,54 @@ monitor_slos() {
         # Collect SLO metrics
         local p95_latency=$(get_p95_latency 2>/dev/null || echo "0")
         local error_rate=$(get_error_rate 2>/dev/null || echo "0")
-        local baseline_p95=$(get_baseline_p95 2>/dev/null || echo "0")
-        local baseline_error=$(get_baseline_error 2>/dev/null || echo "0")
+        local success_rate=$(get_success_rate 2>/dev/null || echo "0")
+        local throughput=$(get_throughput 2>/dev/null || echo "0")
         local ready_pods=$(get_pod_ready_count 2>/dev/null || echo "0")
 
-        # Run Statistical ACA Analysis
-        log_canary "🧠 Running Statistical ACA Analysis..."
-        ACA_RESULT=$(npx ts-node "$PROJECT_ROOT/scripts/mastery-aca-engine.ts" \
-            --canary-p95 "$p95_latency" \
-            --baseline-p95 "$baseline_p95" \
-            --canary-error "$error_rate" \
-            --baseline-error "$baseline_error") || {
-            log_error "🚨 ACA engine detected critical risk - triggering automatic rollback"
-            echo "$ACA_RESULT" | jq .
-            rollback_canary
-            exit 1
-        }
-
-        # Log current metrics and ACA decision
-        echo "$ACA_RESULT" | jq -r '.summary' | while read line; do log_canary "  - $line"; done
+        # Log current metrics
+        log_canary "📈 Current SLOs:"
+        log_canary "  P95 Latency: ${p95_latency}ms (threshold: <${MAX_P95_LATENCY_MS}ms)"
+        log_canary "  Error Rate: $(float_to_pct "$error_rate")% (threshold: <$(float_to_pct "$MAX_ERROR_RATE")%)"
+        log_canary "  Success Rate: $(float_to_pct "$success_rate")% (threshold: >$(float_to_pct "$MIN_SUCCESS_RATE")%)"
+        log_canary "  Throughput: ${throughput} RPS (threshold: >${MIN_THROUGHPUT_RPS} RPS)"
         log_canary "  Ready Pods: ${ready_pods}"
+
+        # Evaluate SLO violations using python for reliability
+        local violations=()
+
+        if float_gt "$p95_latency" "$MAX_P95_LATENCY_MS"; then
+            violations+=("P95 latency exceeded: ${p95_latency}ms > ${MAX_P95_LATENCY_MS}ms")
+        fi
+
+        if float_gt "$error_rate" "$MAX_ERROR_RATE"; then
+            violations+=("Error rate exceeded: $(float_to_pct "$error_rate")% > $(float_to_pct "$MAX_ERROR_RATE")%")
+        fi
+
+        if float_lt "$success_rate" "$MIN_SUCCESS_RATE"; then
+            violations+=("Success rate below threshold: $(float_to_pct "$success_rate")% < $(float_to_pct "$MIN_SUCCESS_RATE")%")
+        fi
+
+        if float_lt "$throughput" "$MIN_THROUGHPUT_RPS"; then
+            violations+=("Throughput below threshold: ${throughput} RPS < ${MIN_THROUGHPUT_RPS} RPS")
+        fi
+
+        # Check for SLO violations
+        if [ ${#violations[@]} -gt 0 ]; then
+            violation_count=$((violation_count + 1))
+            log_warning "⚠️  SLO violations detected (${violation_count}/${max_violations}):"
+            for violation in "${violations[@]}"; do
+                log_warning "  - $violation"
+            done
+
+            if [ $violation_count -ge $max_violations ]; then
+                log_error "🚨 Maximum SLO violations exceeded - triggering automatic rollback"
+                rollback_canary
+                exit 1
+            fi
+        else
+            log_success "✅ All SLOs within acceptable ranges"
+            violation_count=0
+        fi
 
         # Check pod health
         if [ "$ready_pods" -eq 0 ]; then

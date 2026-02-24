@@ -5,8 +5,8 @@ import {
   AttachmentService,
   detectPII,
   redactPII,
-} from '../src/services/AttachmentService.js';
-import { createProvenanceRecord } from './mocks/provenance.js';
+} from '../src/services/AttachmentService';
+import { createProvenanceRecord } from './mocks/provenance';
 import { describe, it, test, expect } from '@jest/globals';
 
 // Use process.cwd() since tests run from server directory

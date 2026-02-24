@@ -2,12 +2,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
-import { SchemaValidator } from './lib/config/schema-validator.js';
-import { MigrationEngine, MigrationError } from './lib/config/migration-engine.js';
-import { ConfigWatcher } from './lib/config/config-watcher.js';
+import { SchemaValidator } from './lib/config/schema-validator';
+import { MigrationEngine, MigrationError } from './lib/config/migration-engine';
+import { ConfigWatcher } from './lib/config/config-watcher';
 import { ApplicationConfiguration } from './lib/config/config.d';
-import { SecretManager } from './lib/secrets/secret-manager.js';
-import { FeatureFlagService } from './lib/config/feature-flags.js';
+import { SecretManager } from './lib/secrets/secret-manager';
+import { FeatureFlagService } from './lib/config/feature-flags';
 
 const CONFIG_FILE_PATH = path.join(__dirname, '../config/app.yaml');
 const MIGRATIONS_DIR = path.join(__dirname, '../config/migrations');

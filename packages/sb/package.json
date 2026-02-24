@@ -1,9 +1,0 @@
-{
-  "name": "@summit/flows-sb",
-  "version": "0.1.0",
-  "private": true,
-  "files": ["flows", "manifest.json"],
-  "scripts": {
-    "maestro:test": "maestro test flows"
-  }
-}

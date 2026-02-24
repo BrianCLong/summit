@@ -1,6 +1,6 @@
 import * as fc from 'fast-check';
-import { BitemporalStore } from '../BitemporalStore.js';
-import type { UpsertOptions } from '../types.js';
+import { BitemporalStore } from '../BitemporalStore';
+import type { UpsertOptions } from '../types';
 
 /**
  * Property-based tests for bitemporal storage

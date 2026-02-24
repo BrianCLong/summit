@@ -10,7 +10,6 @@ interface PartitionRecord {
   write_connection_url: string | null;
   read_connection_url: string | null;
   is_default: boolean;
-  region?: string | null;
   status?: string | null;
 }
 
@@ -22,7 +21,6 @@ export interface TenantRoute {
   writePool: Pool;
   readPool: Pool;
   source: 'default' | 'mapping' | 'static';
-  region?: string | null;
 }
 
 const routeResolutionCounter =
@@ -133,71 +131,6 @@ class TenantRouter {
       writePool,
       readPool,
       source,
-      region: partition.region,
-    };
-  }
-
-  async resolveRegionalRoute(tenantId: string | null, region: string): Promise<TenantRoute | null> {
-    if (!this.enabled || !this.writePool) {
-      return null;
-    }
-
-    await this.ensureLoaded();
-
-    // 1. Check mapping
-    const partitionKey = tenantId ? this.tenantToPartition.get(tenantId) : null;
-    let partition: PartitionRecord | undefined;
-
-    if (partitionKey) {
-      partition = this.partitions.get(partitionKey);
-    }
-
-    // 2. Regional override: If no mapping OR mapped partition is in a DIFFERENT region,
-    // find a partition native to the requested region.
-    if (!partition || (partition.region && partition.region !== region)) {
-      const regionalPool = Array.from(this.partitions.values()).find(
-        (p) => p.region === region && (p.status === 'active' || p.status === null)
-      );
-      if (regionalPool) {
-        partition = regionalPool;
-      }
-    }
-
-    // 3. Absolute fallback
-    if (!partition) {
-      partition = this.partitions.get(this.defaultPartition);
-    }
-
-    if (!partition) return null;
-
-    const writePool = this.getOrCreatePool(
-      partition.partition_key,
-      'write',
-      partition.write_connection_url,
-    );
-    const readPool = this.getOrCreatePool(
-      partition.partition_key,
-      'read',
-      partition.read_connection_url || partition.write_connection_url,
-    );
-
-    const strategy =
-      partition.strategy === 'schema'
-        ? 'schema-per-tenant'
-        : 'shared-schema';
-    const source = this.tenantToPartition.has(tenantId || '')
-      ? 'mapping'
-      : 'default';
-
-    return {
-      tenantId: tenantId || 'unknown',
-      partitionKey: partition.partition_key,
-      schema: partition.schema_name,
-      strategy,
-      writePool,
-      readPool,
-      source,
-      region: partition.region,
     };
   }
 
@@ -264,7 +197,7 @@ class TenantRouter {
     tenantMap: { tenant_id: string; partition_key: string }[] = [],
   ): void {
     this.partitions.clear();
-    partitions.forEach((row: any) => this.partitions.set(row.partition_key, { region: 'us-east-1', ...row }));
+    partitions.forEach((row: any) => this.partitions.set(row.partition_key, row));
     tenantMap.forEach(({ tenant_id, partition_key }) =>
       this.tenantToPartition.set(tenant_id, partition_key),
     );
@@ -320,8 +253,7 @@ class TenantRouter {
                  write_connection_url,
                  read_connection_url,
                  is_default,
-                 status,
-                 region
+                 status
           FROM tenant_partitions
           WHERE status IS NULL OR status = 'active'
         `,

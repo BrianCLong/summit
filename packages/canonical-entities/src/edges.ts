@@ -7,7 +7,7 @@
  * @module canonical-entities/edges
  */
 
-import { BitemporalFields, PolicyLabels } from './types.js';
+import { BitemporalFields, PolicyLabels } from './types';
 
 // -----------------------------------------------------------------------------
 // Base Edge Interface

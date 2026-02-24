@@ -4,12 +4,12 @@
 // Used in Kubernetes deployments to start queue workers
 
 import 'dotenv/config';
-import { queueWorker, WorkerFactory } from './scheduling/queue-worker.js';
-import { prometheusConductorMetrics } from './observability/prometheus.js';
+import { queueWorker, WorkerFactory } from './scheduling/queue-worker';
+import { prometheusConductorMetrics } from './observability/prometheus';
 import express from 'express';
-import { register } from '../monitoring/metrics.js';
-import { verifyStartupDependencies } from '../utils/startup-readiness.js';
-import { getRedisClient } from '../db/redis.js';
+import { register } from '../monitoring/metrics';
+import { verifyStartupDependencies } from '../utils/startup-readiness';
+import { getRedisClient } from '../db/redis';
 
 /**
  * Worker application setup
@@ -33,7 +33,7 @@ async function startWorker() {
 
   if (role === 'api') {
     // Start the main API server
-    const { createApp } = await import('../app.js');
+    const { createApp } = await import('../app');
     const app = await createApp();
     const port = process.env.PORT || 3000;
 

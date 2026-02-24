@@ -2,11 +2,8 @@
 # Enforces strict tenant boundaries and data access controls
 
 package conductor.tenant_isolation
-import future.keywords.if
-import future.keywords.in
-import future.keywords.contains
 
-
+import rego.v1
 
 # Default deny
 default allow := false
@@ -158,7 +155,7 @@ reason := "Access denied: tenant boundary violation" if {
 
 reason := "Access denied: insufficient role permissions" if {
     not allow
-    not input.role in ["admin", "super_admin", "system"]
+    input.role not in ["admin", "super_admin", "system"]
     restricted_action
 }
 
@@ -183,10 +180,6 @@ emergency_override if {
     input.sessionContext.emergencyToken
     verify_emergency_token(input.sessionContext.emergencyToken)
     input.role == "super_admin"
-}
-
-verify_emergency_token(token) if {
-    startswith(token, "EMERGENCY_")
 }
 
 allow if emergency_override

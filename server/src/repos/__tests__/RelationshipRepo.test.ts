@@ -49,14 +49,9 @@ import {
   RelationshipRepo,
   type Relationship,
   type RelationshipInput,
-} from '../RelationshipRepo.js';
+} from '../RelationshipRepo';
 import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
-import { getNeo4jBatchWriter } from '../../db/neo4jBatchWriter.js';
-
-jest.mock('../../db/neo4jBatchWriter.js', () => ({
-  getNeo4jBatchWriter: jest.fn(),
-}));
 
 describe('RelationshipRepo', () => {
   let relationshipRepo: RelationshipRepo;
@@ -64,16 +59,8 @@ describe('RelationshipRepo', () => {
   let mockPgClient: any;
   let mockNeo4jDriver: jest.Mocked<Driver>;
   let mockNeo4jSession: jest.Mocked<Session>;
-  let mockBatchWriter: any;
 
   beforeEach(() => {
-    // Mock Neo4jBatchWriter
-    mockBatchWriter = {
-      queueCreateRelationship: jest.fn(),
-      queueDeleteRelationship: jest.fn(),
-    };
-    (getNeo4jBatchWriter as jest.Mock).mockReturnValue(mockBatchWriter);
-
     // Mock PostgreSQL client
     mockPgClient = {
       query: jest.fn<any>(),
@@ -206,7 +193,7 @@ describe('RelationshipRepo', () => {
       expect(outboxCall?.[0]).toContain('outbox_events');
     });
 
-    it('should attempt batched Neo4j write', async () => {
+    it('should attempt immediate Neo4j write', async () => {
       const mockRelationshipRow = {
         id: 'rel-789',
         tenant_id: mockRelationshipInput.tenantId,
@@ -225,22 +212,16 @@ describe('RelationshipRepo', () => {
       mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any);
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+      mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
       await relationshipRepo.create(mockRelationshipInput, mockUserId);
 
-      expect(mockBatchWriter.queueCreateRelationship).toHaveBeenCalledWith(
-        mockRelationshipRow.src_id,
-        mockRelationshipRow.dst_id,
-        mockRelationshipRow.type,
-        expect.objectContaining({
-          id: mockRelationshipRow.id,
-          props: mockRelationshipRow.props,
-        }),
-        mockRelationshipRow.tenant_id,
-      );
+      expect(mockNeo4jDriver.session).toHaveBeenCalled();
+      expect(mockNeo4jSession.executeWrite).toHaveBeenCalled();
+      expect(mockNeo4jSession.close).toHaveBeenCalled();
     });
 
-    it('should commit even if Neo4j batch queue fails', async () => {
+    it('should commit even if Neo4j write fails (best effort)', async () => {
       const mockRelationshipRow = {
         id: 'rel-789',
         tenant_id: mockRelationshipInput.tenantId,
@@ -259,10 +240,9 @@ describe('RelationshipRepo', () => {
       mockPgClient.query.mockResolvedValueOnce({ rows: [mockRelationshipRow] } as any);
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
-
-      mockBatchWriter.queueCreateRelationship.mockImplementation(() => {
-        throw new Error('Queue full');
-      });
+      mockNeo4jSession.executeWrite.mockRejectedValue(
+        new Error('Neo4j connection error'),
+      );
 
       // Should not throw - best effort Neo4j write
       const result = await relationshipRepo.create(
@@ -328,18 +308,12 @@ describe('RelationshipRepo', () => {
   describe('delete', () => {
     it('should delete relationship from PostgreSQL', async () => {
       const relationshipId = 'rel-789';
-      const mockDeletedRow = {
-        id: relationshipId,
-        tenant_id: 'tenant-123',
-        src_id: 'src',
-        dst_id: 'dst',
-        type: 'KNOWS',
-      };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockDeletedRow] }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+      mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
       const result = await relationshipRepo.delete(relationshipId);
 
@@ -349,18 +323,12 @@ describe('RelationshipRepo', () => {
 
     it('should create outbox event for Neo4j deletion', async () => {
       const relationshipId = 'rel-789';
-      const mockDeletedRow = {
-        id: relationshipId,
-        tenant_id: 'tenant-123',
-        src_id: 'src',
-        dst_id: 'dst',
-        type: 'KNOWS',
-      };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockDeletedRow] }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+      mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
       await relationshipRepo.delete(relationshipId);
 
@@ -374,7 +342,7 @@ describe('RelationshipRepo', () => {
       const relationshipId = 'non-existent';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rowCount: 0 }); // DELETE
 
       const result = await relationshipRepo.delete(relationshipId);
 
@@ -382,49 +350,31 @@ describe('RelationshipRepo', () => {
       expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
     });
 
-    it('should attempt batched Neo4j delete', async () => {
+    it('should attempt Neo4j delete', async () => {
       const relationshipId = 'rel-789';
-      const mockDeletedRow = {
-        id: relationshipId,
-        tenant_id: 'tenant-123',
-        src_id: 'src',
-        dst_id: 'dst',
-        type: 'KNOWS',
-      };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockDeletedRow] }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
+      mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
       await relationshipRepo.delete(relationshipId);
 
-      expect(mockBatchWriter.queueDeleteRelationship).toHaveBeenCalledWith(
-        mockDeletedRow.src_id,
-        mockDeletedRow.dst_id,
-        mockDeletedRow.type,
-        mockDeletedRow.tenant_id,
-      );
+      expect(mockNeo4jDriver.session).toHaveBeenCalled();
+      expect(mockNeo4jSession.executeWrite).toHaveBeenCalled();
     });
 
-    it('should commit even if Neo4j batch queue fails', async () => {
+    it('should commit even if Neo4j delete fails (best effort)', async () => {
       const relationshipId = 'rel-789';
-      const mockDeletedRow = {
-        id: relationshipId,
-        tenant_id: 'tenant-123',
-        src_id: 'src',
-        dst_id: 'dst',
-        type: 'KNOWS',
-      };
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rows: [mockDeletedRow] }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
-
-      mockBatchWriter.queueDeleteRelationship.mockImplementation(() => {
-        throw new Error('Queue full');
-      });
+      mockNeo4jSession.executeWrite.mockRejectedValue(
+        new Error('Neo4j connection error'),
+      );
 
       const result = await relationshipRepo.delete(relationshipId);
 

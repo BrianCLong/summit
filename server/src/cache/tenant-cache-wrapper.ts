@@ -5,8 +5,8 @@
  * Compatible with Redis, in-memory caches, and any key-value store.
  */
 
-import { TenantContext, MinimalTenantContext, validateTenantContext } from '../security/tenant-context.js';
-import { TenantId } from '../types/identity.js';
+import { TenantContext, MinimalTenantContext, validateTenantContext } from '../security/tenant-context.ts';
+import { TenantId } from '../types/identity.ts';
 
 /**
  * Generate a tenant-scoped cache key

@@ -98,7 +98,7 @@ export class DecisionAnalysisPipeline {
       const { recommendation, rationale } = await modelService.analyze(input.question, modelContext);
 
       // Step 3: Write the final decision back to the IntelGraph.
-      const decisionObject: Omit<Decision, keyof import('../../graph/schema.js').BaseNode> = {
+      const decisionObject: Omit<Decision, keyof import('../../graph/schema').BaseNode> = {
         question: input.question,
         recommendation,
         rationale,

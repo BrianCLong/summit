@@ -1,5 +1,5 @@
 
-import { NarrativeUnit, PropagationPath, NarrativeIntent } from '../primitives.js';
+import { NarrativeUnit, PropagationPath, NarrativeIntent } from '../primitives';
 
 /**
  * HYBRID SEMANTIC-NETWORK PIPELINE

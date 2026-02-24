@@ -4,9 +4,9 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { ProvenanceLedgerBetaService } from '../services/provenance-ledger-beta.js';
-import { ingestDocument } from '../services/evidence-registration-flow.js';
-import { MerkleTreeBuilder } from '../utils/merkle-tree.js';
+import { ProvenanceLedgerBetaService } from '../services/provenance-ledger-beta';
+import { ingestDocument } from '../services/evidence-registration-flow';
+import { MerkleTreeBuilder } from '../utils/merkle-tree';
 import type {
   License,
   Source,
@@ -15,7 +15,7 @@ import type {
   Claim,
   ExportManifest,
   VerificationReport,
-} from '../types/provenance-beta.js';
+} from '../types/provenance-beta';
 
 const runAcceptance = process.env.RUN_ACCEPTANCE === 'true';
 const describeIf = runAcceptance ? describe : describe.skip;

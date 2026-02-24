@@ -5,7 +5,7 @@
  * Represents an individual person with bitemporal tracking
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface PersonIdentifiers {
   /** National ID numbers */

@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
-import type { SimulationEngineService } from '../SimulationEngineService.js';
+import type { SimulationEngineService } from '../SimulationEngineService';
 import { EventEmitter } from 'events';
 
 // Mock dependencies
@@ -25,13 +25,13 @@ class MockSimulationEngineService extends EventEmitter {
 }
 
 describe('RedTeamSimulator', () => {
-  let RedTeamSimulator: typeof import('../RedTeamSimulator.js').RedTeamSimulator;
+  let RedTeamSimulator: typeof import('../RedTeamSimulator').RedTeamSimulator;
   let eventBus: EventEmitter;
   let redTeamSimulator: InstanceType<typeof RedTeamSimulator>;
   let mockEngine: MockSimulationEngineService;
 
   beforeAll(async () => {
-    ({ RedTeamSimulator } = await import('../RedTeamSimulator.js'));
+    ({ RedTeamSimulator } = await import('../RedTeamSimulator'));
     ({ eventBus } = await import('../../lib/events/event-bus.js'));
   });
 

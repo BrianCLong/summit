@@ -65,10 +65,6 @@ on:
         description: "Container registry password/token"
         required: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   packages: write
@@ -189,10 +185,10 @@ jobs:
       - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
-        uses: anchore/sbom-action@v0
+        uses: anchore/syft-action@v0
         with:
-          image: ${{ steps.image-uri.outputs.uri }}
-          format: spdx-json, cyclonedx-json
+          image-ref: ${{ steps.image-uri.outputs.uri }}
+          output-formats: spdx-json, cyclonedx-json
 
       - name: Rename SBOMs
         if: inputs.sbom
@@ -235,7 +231,7 @@ jobs:
           echo "Achieved SLSA Level: $LEVEL"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |

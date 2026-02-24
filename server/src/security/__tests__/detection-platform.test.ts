@@ -6,7 +6,7 @@ import {
   DetectionScenarioValidator,
   PurpleTeamRunbook,
   ThreatHuntingAnalytics,
-} from '../detection-platform.js';
+} from '../detection-platform';
 
 describe('Defensive detection platform', () => {
   const baseRule = {

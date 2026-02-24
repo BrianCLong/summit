@@ -6,8 +6,8 @@
 
 import Ajv, { type JSONSchemaType } from 'ajv';
 import addFormats from 'ajv-formats';
-import type { Request, Response, NextFunction, JSONSchema } from '../types.js';
-import { ValidationException } from './error-handler.js';
+import type { Request, Response, NextFunction, JSONSchema } from '../types';
+import { ValidationException } from './error-handler';
 
 const ajv = new Ajv({
   allErrors: true,

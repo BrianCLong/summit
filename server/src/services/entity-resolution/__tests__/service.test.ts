@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { EntityResolutionService } from '../service.js';
-import { EntityInput } from '../models.js';
-import { provenanceLedger } from '../../../provenance/ledger.js';
+import { EntityResolutionService } from '../service';
+import { EntityInput } from '../models';
+import { provenanceLedger } from '../../../provenance/ledger';
 import * as neo4jModule from '../../../graph/neo4j.js';
 
 // Mocks

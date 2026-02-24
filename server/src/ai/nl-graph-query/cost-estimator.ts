@@ -8,7 +8,7 @@
  * - Memory usage
  */
 
-import type { CostEstimate } from './types.js';
+import type { CostEstimate } from './types.ts';
 import pino from 'pino';
 
 const logger = (pino as any)({ name: 'cost-estimator' });

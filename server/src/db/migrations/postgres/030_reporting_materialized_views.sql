@@ -138,7 +138,7 @@ DECLARE
   start_ts TIMESTAMPTZ;
   use_concurrent BOOLEAN;
 BEGIN
-  -- Honor override to disable  in lower-fidelity environments (e.g., pg-mem)
+  -- Honor override to disable CONCURRENTLY in lower-fidelity environments (e.g., pg-mem)
   use_concurrent :=
     COALESCE(NULLIF(current_setting('maestro.reporting_refresh_concurrent', TRUE), ''), 'on') <> 'off';
 
@@ -152,7 +152,7 @@ BEGIN
 
     BEGIN
       IF use_concurrent THEN
-        EXECUTE format('REFRESH MATERIALIZED VIEW  %s', v);
+        EXECUTE format('REFRESH MATERIALIZED VIEW CONCURRENTLY %s', v);
       ELSE
         EXECUTE format('REFRESH MATERIALIZED VIEW %s', v);
       END IF;
@@ -203,4 +203,4 @@ END;
 $$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION maestro.refresh_reporting_materialized_views IS
-  'Refreshes reporting MVs with  when available and records rows/duration/status.';
+  'Refreshes reporting MVs with CONCURRENTLY when available and records rows/duration/status.';

@@ -1,8 +1,8 @@
 import { WebSocketServer, WebSocket } from 'ws';
 import { IncomingMessage } from 'http';
-import { Qwen3TTSProvider } from '../services/voice/providers/Qwen3TTSProvider.js';
-import { SpeechJob } from '../services/voice/types.js';
-import { logger } from '../config/logger.js';
+import { Qwen3TTSProvider } from '../services/voice/providers/Qwen3TTSProvider.ts';
+import { SpeechJob } from '../services/voice/types.ts';
+import { logger } from '../config/logger.ts';
 
 export class VoiceGateway {
   private wss: WebSocketServer;

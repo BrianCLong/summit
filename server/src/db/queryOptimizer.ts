@@ -6,8 +6,9 @@ import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { getRedisClient } from '../db/redis.js';
 import * as crypto from 'crypto';
-import { neo, transformNeo4jIntegers } from './neo4j.js';
+import { neo } from './neo4j.js';
 import { CompressionUtils } from '../utils/compression.js';
+import neo4j from 'neo4j-driver'; // Import neo4j to handle Integer types
 import { logger } from '../config/logger.js';
 
 const tracer = trace.getTracer('query-optimizer', '24.3.0');
@@ -207,7 +208,7 @@ export class QueryOptimizer {
     if (context.cacheEnabled === false) {
       const rawResult = await executeQuery(query, params);
       // Normalize even if cache disabled to ensure consistent data types across app
-      return transformNeo4jIntegers(rawResult);
+      return this.transformNeo4jIntegers(rawResult);
     }
 
     // 1. Optimize first to check cache strategy
@@ -216,7 +217,7 @@ export class QueryOptimizer {
     // If caching not enabled in plan or it's a write, just execute and normalize
     if (!plan.cacheStrategy?.enabled) {
       const rawResult = await executeQuery(plan.optimizedQuery, params);
-      return transformNeo4jIntegers(rawResult);
+      return this.transformNeo4jIntegers(rawResult);
     }
 
     const resultCacheKey = this.buildResultCacheKey(query, params, context);
@@ -238,7 +239,7 @@ export class QueryOptimizer {
     const rawResult = await executeQuery(plan.optimizedQuery, params);
 
     // 4. Normalize Result
-    const normalizedResult = transformNeo4jIntegers(rawResult);
+    const normalizedResult = this.transformNeo4jIntegers(rawResult);
 
     // 5. Cache result (using normalized data)
     try {
@@ -279,6 +280,30 @@ export class QueryOptimizer {
     await redis.set(key, compressed, 'EX', ttl);
   }
 
+  // Helper to convert Neo4j Integers to standard JS numbers/strings
+  public transformNeo4jIntegers(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+
+    if (neo4j.isInt(obj)) {
+      return obj.inSafeRange() ? obj.toNumber() : obj.toString();
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(v => this.transformNeo4jIntegers(v));
+    }
+
+    if (typeof obj === 'object') {
+      const newObj: any = {};
+      for (const k in obj) {
+        if (Object.prototype.hasOwnProperty.call(obj, k)) {
+          newObj[k] = this.transformNeo4jIntegers(obj[k]);
+        }
+      }
+      return newObj;
+    }
+
+    return obj;
+  }
 
   // Invalidation Method
   async invalidateForLabels(tenantId: string, labels: string[]): Promise<void> {
@@ -887,10 +912,14 @@ export class QueryOptimizer {
       const redis = getRedisClient();
       const cached = await redis.get(cacheKey);
       if (cached) {
-        // BOLT: Optimized cache retrieval.
-        // Cached values are consistently base64-encoded compressed strings (prefixed with 0 or 1 marker).
-        // Redundant JSON.parse attempt removed to avoid guaranteed-to-fail try-catch overhead.
-        return CompressionUtils.decompressFromString(cached);
+        try {
+          // Try Decompressing if it looks like base64
+          // For now, assume it's JSON if it parses, otherwise try decompress
+          return JSON.parse(cached);
+        } catch (e: any) {
+          // Might be compressed
+          return CompressionUtils.decompressFromString(cached);
+        }
       }
       return null;
     } catch (error: any) {

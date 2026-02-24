@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-SIP2601-HARV-001",
-  "summary": "Placeholder for SIPL paper-to-requirements trace",
-  "artifacts": [
-    "modules/sipl/README.md",
-    "docs/sipl/overview.md"
-  ]
-}

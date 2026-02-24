@@ -51,7 +51,7 @@ export {
   NLQueryRequestSchema,
   GraphRAGRequestSchema,
   RiskyPromptLogSchema,
-} from './types.js';
+} from './types.ts';
 
 // Main copilot service
 export {
@@ -61,14 +61,14 @@ export {
   getCopilotService,
   type CopilotConfig,
   type RequestContext,
-} from './copilot.service.js';
+} from './copilot.service.ts';
 
 // NL-to-Query service
 export {
   NLQueryService,
   createNLQueryService,
   getNLQueryService,
-} from './nl-query.service.js';
+} from './nl-query.service.ts';
 
 // Sandbox executor
 export {
@@ -77,13 +77,13 @@ export {
   type QueryBudget,
   type DryRunPlan,
   type ExecutionResult,
-} from './sandbox-executor.service.js';
+} from './sandbox-executor.service.ts';
 
 // GraphRAG with provenance
 export {
   GraphRAGProvenanceService,
   createGraphRAGProvenanceService,
-} from './graphrag-provenance.service.js';
+} from './graphrag-provenance.service.ts';
 
 // Redaction service
 export {
@@ -93,7 +93,7 @@ export {
   CLASSIFICATION_LEVELS,
   type ClassificationLevel,
   type RedactionPolicy,
-} from './redaction.service.js';
+} from './redaction.service.ts';
 
 // Guardrails service
 export {
@@ -102,4 +102,4 @@ export {
   getGuardrailsService,
   type GuardrailConfig,
   type GuardrailCheckName,
-} from './guardrails.service.js';
+} from './guardrails.service.ts';

@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { ConnectorFactory, IngestionConnector } from '../ingestion/connectors.js';
-import { getNeo4jDriver } from '../../config/database.js';
-import { EmbeddingService } from '../../services/EmbeddingService.js';
-import { Patent, ResearchPaper } from '../types.js';
+import { ConnectorFactory, IngestionConnector } from '../ingestion/connectors.ts';
+import { getNeo4jDriver } from '../../config/database.ts';
+import { EmbeddingService } from '../../services/EmbeddingService.ts';
+import { Patent, ResearchPaper } from '../types.ts';
 
 export class IngestionService {
   private static instance: IngestionService;

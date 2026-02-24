@@ -1,88 +1,22 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
-  "required": ["evidence"],
+  "required": ["version", "items"],
   "properties": {
-    "version": {
-      "type": "integer"
-    },
-    "evidence": {
-      "type": "object",
-      "additionalProperties": {
+    "version": { "type": "number" },
+    "items": {
+      "type": "array",
+      "items": {
         "type": "object",
-        "required": ["evidence_id", "files"],
+        "required": ["id", "path"],
         "properties": {
-          "evidence_id": { "type": "string" },
-          "files": {
-            "type": "object",
-            "required": ["report", "metrics", "stamp"],
-            "properties": {
-              "report": { "type": "string" },
-              "metrics": { "type": "string" },
-              "stamp": { "type": "string" }
-            }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
-          }
+          "id": { "type": "string" },
+          "path": { "type": "string" }
         },
-        "additionalProperties": true
-      }
-    },
-    "mappings": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "required": ["report", "metrics", "stamp"],
-        "properties": {
-          "report": { "type": "string" },
-          "metrics": { "type": "string" },
-          "stamp": { "type": "string" },
-          "evidence_id": { "type": "string" },
-          "files": {
-            "type": "object",
-            "required": ["report", "metrics", "stamp"],
-            "properties": {
-              "report": { "type": "string" },
-              "metrics": { "type": "string" },
-              "stamp": { "type": "string" }
-            }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" }
-        },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }, { "required": ["report", "metrics", "stamp"] }],
-        "additionalProperties": true
+        "additionalProperties": false
       }
     }
   },
-  "definitions": {
-    "evidenceItem": {
-      "type": "object",
-      "required": [
-        "id",
-        "status",
-        "description"
-      ],
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "pending",
-            "active",
-            "deprecated"
-          ]
-        },
-        "description": {
-          "type": "string"
-        }
-      }
-    }
-  }
+  "required": ["items"],
+  "additionalProperties": false
 }

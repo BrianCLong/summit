@@ -13,8 +13,8 @@ import {
   buildGraphSnapshotAtTime,
   getLatestVersionAt,
   getValidityDuration,
-} from '../temporal.js';
-import { GraphEdge } from '../edges.js';
+} from '../temporal';
+import { GraphEdge } from '../edges';
 
 describe('Temporal Helpers', () => {
   describe('isValidAt', () => {

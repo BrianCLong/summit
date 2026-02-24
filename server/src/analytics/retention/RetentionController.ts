@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { RetentionService } from './RetentionService.js';
+import { RetentionService } from './RetentionService.ts';
 import path from 'path';
 
 // Config
@@ -13,19 +13,19 @@ export const runRetention = (req: Request, res: Response) => {
 
         // Log the action for audit (mocked here, in real app verify against dictionary)
 
-        res.json({
+        res.tson({
             status: 'success',
             deletedFiles: deletedCount,
             policyDays: days,
             timestamp: new Date().toISOString()
         });
     } catch (e: any) {
-        res.status(500).json({ error: (e as Error).message });
+        res.status(500).tson({ error: (e as Error).message });
     }
 };
 
 export const getJobStatus = (req: Request, res: Response) => {
     // In a real system, we'd track job IDs.
     // For MVP, just return static status or last run info if we had state.
-    res.json({ status: 'idle', lastRun: 'never' });
+    res.tson({ status: 'idle', lastRun: 'never' });
 };

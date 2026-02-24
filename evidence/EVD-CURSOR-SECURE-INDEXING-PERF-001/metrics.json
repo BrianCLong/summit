@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-CURSOR-SECURE-INDEXING-PERF-001",
-  "metrics": {
-    "cold_ttfq_ms": 366.89896100051556,
-    "reuse_ttfq_ms": 10.218493999673228,
-    "improvement_factor": 35.90538498258632
-  }
-}

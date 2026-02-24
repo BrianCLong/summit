@@ -1,6 +1,6 @@
 // @ts-nocheck
 import neo4j from 'neo4j-driver';
-import { getNeo4jDriver } from '../config/database.js';
+import { getNeo4jDriver } from '../config/database';
 
 export async function executeSandbox(cypher: string, rowLimit = 10) {
   if (/(CREATE|MERGE|DELETE|SET|DROP|REMOVE|CALL|LOAD)/i.test(cypher)) {

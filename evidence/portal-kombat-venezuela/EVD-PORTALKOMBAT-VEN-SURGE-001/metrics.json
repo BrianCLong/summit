@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVD-PORTALKOMBAT-VEN-SURGE-001",
-  "metrics": {
-    "reported_site_count": 150,
-    "reported_articles_2024": 3600000,
-    "topic": "venezuela",
-    "pivot_latency_hours": null
-  }
-}

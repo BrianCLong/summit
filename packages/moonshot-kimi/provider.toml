@@ -1,4 +1,0 @@
-[provider]
-name = "moonshot_kimi"
-version = "0.1.0"
-capabilities = ["chat", "tools", "vision"]

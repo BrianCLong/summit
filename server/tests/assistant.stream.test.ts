@@ -1,8 +1,8 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import request from 'supertest';
-import { mountAssistant } from '../src/routes/assistant.js';
-import { requestId } from '../src/middleware/requestId.js';
+import { mountAssistant } from '../src/routes/assistant';
+import { requestId } from '../src/middleware/requestId';
 import { jest, describe, it, expect } from '@jest/globals';
 
 // Minimal auth stub for tests

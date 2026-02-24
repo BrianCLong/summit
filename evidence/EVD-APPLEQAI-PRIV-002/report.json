@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-APPLEQAI-PRIV-002",
-  "item_slug": "APPLEQAI",
-  "summary": "Biometric gate denies non-command inference by default.",
-  "claims": ["Biometric gate denies non-command inference by default."],
-  "decisions": [{"decision": "deny_by_default", "scope": "biometric_classes"}],
-  "findings": [{"finding": "Identity, emotion, and physiology classes are blocked without overrides."}]
-}

@@ -7,14 +7,10 @@
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
-import { CacheManager, createCacheManager } from '../cache/AdvancedCachingStrategy.js';
-import { RedisService } from '../cache/redis.js';
-import { PartitioningService } from '../services/partitioning/PartitioningService.js';
 
 const repoLogger = logger.child({ name: 'CaseRepo' });
 
 export type CaseStatus = 'open' | 'active' | 'closed' | 'archived';
-export type CasePriority = 'low' | 'medium' | 'high' | 'critical';
 
 export interface Case {
   id: string;
@@ -22,7 +18,6 @@ export interface Case {
   title: string;
   description?: string;
   status: CaseStatus;
-  priority: CasePriority;
   compartment?: string;
   policyLabels: string[];
   metadata: Record<string, any>;
@@ -47,7 +42,6 @@ export interface CaseInput {
   title: string;
   description?: string;
   status?: CaseStatus;
-  priority?: CasePriority;
   compartment?: string;
   policyLabels?: string[];
   metadata?: Record<string, any>;
@@ -58,7 +52,6 @@ export interface CaseUpdateInput {
   title?: string;
   description?: string;
   status?: CaseStatus;
-  priority?: CasePriority;
   compartment?: string;
   policyLabels?: string[];
   metadata?: Record<string, any>;
@@ -70,7 +63,6 @@ interface CaseRow {
   title: string;
   description: string | null;
   status: string;
-  priority: string;
   compartment: string | null;
   policy_labels: string[];
   metadata: any;
@@ -82,30 +74,7 @@ interface CaseRow {
 }
 
 export class CaseRepo {
-  private cacheManager: CacheManager | null = null;
-  private partitioning: PartitioningService;
-
-  constructor(
-    private pg: Pool,
-    cacheManager?: CacheManager,
-    partitioning?: PartitioningService
-  ) {
-    if (cacheManager) {
-      this.cacheManager = cacheManager;
-    } else {
-      try {
-        const redisClient = RedisService.getInstance().getClient();
-        this.cacheManager = createCacheManager(redisClient, {
-          keyPrefix: 'ig:case:',
-          defaultTtl: 300, // 5 minutes
-        });
-      } catch (e) {
-        repoLogger.warn({ error: e }, 'Redis/Cache initialization failed, falling back to database only');
-        this.cacheManager = null;
-      }
-    }
-    this.partitioning = partitioning || PartitioningService.getInstance();
-  }
+  constructor(private pg: Pool) { }
 
   /**
    * Create a new case
@@ -115,10 +84,10 @@ export class CaseRepo {
 
     const { rows } = (await this.pg.query(
       `INSERT INTO maestro.cases (
-        id, tenant_id, title, description, status, priority, compartment,
+        id, tenant_id, title, description, status, compartment,
         policy_labels, metadata, created_by
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         id,
@@ -126,7 +95,6 @@ export class CaseRepo {
         input.title,
         input.description || null,
         input.status || 'open',
-        input.priority || 'medium',
         input.compartment || null,
         input.policyLabels || [],
         JSON.stringify(input.metadata || {}),
@@ -144,15 +112,7 @@ export class CaseRepo {
       'Case created',
     );
 
-    const result = this.mapRow(rows[0]);
-    if (this.cacheManager) {
-      const partitionKey = this.partitioning.getPartitionKey(result.id);
-      const cacheKey = partitionKey ? `${partitionKey}:${result.id}` : result.id;
-      this.cacheManager.set(cacheKey, result).catch((err) => {
-        repoLogger.warn({ error: err }, 'Cache write failed during create');
-      });
-    }
-    return result;
+    return this.mapRow(rows[0]);
   }
 
   /**
@@ -187,12 +147,6 @@ export class CaseRepo {
         params.push(userId);
         paramIndex++;
       }
-    }
-
-    if (input.priority !== undefined) {
-      updateFields.push(`priority = $${paramIndex}`);
-      params.push(input.priority);
-      paramIndex++;
     }
 
     if (input.compartment !== undefined) {
@@ -234,15 +188,6 @@ export class CaseRepo {
         },
         'Case updated',
       );
-
-      // Invalidate cache
-      if (this.cacheManager) {
-        const partitionKey = this.partitioning.getPartitionKey(input.id);
-        const cacheKey = partitionKey ? `${partitionKey}:${input.id}` : input.id;
-        this.cacheManager.delete(cacheKey).catch((err) => {
-          repoLogger.warn({ error: err }, 'Cache invalidation failed during update');
-        });
-      }
     }
 
     return rows[0] ? this.mapRow(rows[0]) : null;
@@ -278,15 +223,6 @@ export class CaseRepo {
 
       if (rowCount && rowCount > 0) {
         repoLogger.warn({ caseId: id }, 'Case deleted');
-
-        // Invalidate cache
-        if (this.cacheManager) {
-          const partitionKey = this.partitioning.getPartitionKey(id);
-          const cacheKey = partitionKey ? `${partitionKey}:${id}` : id;
-          this.cacheManager.delete(cacheKey).catch((err) => {
-            repoLogger.warn({ error: err }, 'Cache invalidation failed during delete');
-          });
-        }
       }
 
       return rowCount !== null && rowCount > 0;
@@ -309,30 +245,6 @@ export class CaseRepo {
    * Find case by ID
    */
   async findById(id: string, tenantId?: string): Promise<Case | null> {
-    const partitionKey = this.partitioning.getPartitionKey(id);
-    const cacheKey = partitionKey ? `${partitionKey}:${id}` : id;
-
-    // Try cache
-    if (this.cacheManager) {
-      try {
-        const cached = await this.cacheManager.get<Case>(cacheKey);
-        if (cached) {
-          // Verify tenantId if provided
-          if (!tenantId || cached.tenantId === tenantId) {
-            // Restore Date objects from JSON strings
-            return {
-              ...cached,
-              createdAt: new Date(cached.createdAt),
-              updatedAt: new Date(cached.updatedAt),
-              closedAt: cached.closedAt ? new Date(cached.closedAt) : undefined,
-            };
-          }
-        }
-      } catch (err) {
-        repoLogger.warn({ error: err }, 'Cache read failed');
-      }
-    }
-
     const params = [id];
     let query = `SELECT * FROM maestro.cases WHERE id = $1`;
 
@@ -344,16 +256,7 @@ export class CaseRepo {
     const { rows } = (await this.pg.query(query, params)) as {
       rows: CaseRow[];
     };
-    const result = rows[0] ? this.mapRow(rows[0]) : null;
-
-    // Set cache
-    if (result && this.cacheManager) {
-      this.cacheManager.set(cacheKey, result).catch((err) => {
-        repoLogger.warn({ error: err }, 'Cache write failed');
-      });
-    }
-
-    return result;
+    return rows[0] ? this.mapRow(rows[0]) : null;
   }
 
   /**
@@ -555,7 +458,6 @@ export class CaseRepo {
       title: row.title,
       description: row.description || undefined,
       status: row.status as CaseStatus,
-      priority: row.priority as CasePriority,
       compartment: row.compartment || undefined,
       policyLabels: row.policy_labels || [],
       metadata: row.metadata || {},

@@ -4,7 +4,7 @@ import {
   EWAsset,
   EWEffectType,
   SpectrumSignal,
-} from '../ElectronicWarfareService.js';
+} from '../ElectronicWarfareService';
 
 // Mock logger to avoid console output during tests
 jest.mock('../../utils/logger', () => ({

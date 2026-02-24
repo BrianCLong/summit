@@ -9,7 +9,7 @@
  * - Course of Action (COA) queries
  */
 
-import type { QueryPattern, SchemaContext } from './types.js';
+import type { QueryPattern, SchemaContext } from './types.ts';
 
 /**
  * Helper to add tenant filtering if context includes tenantId

@@ -1,37 +1,26 @@
-# Required Checks Discovery (TODO)
+# Required checks discovery (TODO)
 
 ## Goal
-Capture the canonical list of required GitHub checks for protected branches so that
-CI job names can align with branch protection rules.
+List the repository's *required* CI checks for the default branch, then map them to verifier names
+in `ci/verifiers/`.
 
-## UI Steps
-1. Navigate to the repository on GitHub.
-2. Open Settings → Branches.
-3. Select the protected branch rule (ex: main).
-4. Under "Require status checks to pass before merging", record every check name.
-5. Copy the list into this file under "Canonical Checks".
+## GitHub UI steps
+1. Repo → Settings → Branches → Branch protection rules.
+2. Open the rule for the default branch.
+3. Under “Require status checks to pass”, copy the exact check names.
 
-## API Steps (gh cli)
-```bash
-gh api repos/:owner/:repo/branches/main/protection --jq '.required_status_checks.contexts'
-```
+## GitHub API steps (alternative)
+Use the Branch Protection API to fetch required status checks for the branch:
+`GET /repos/{owner}/{repo}/branches/{branch}/protection/required_status_checks`
 
-## Temporary names (Mapping needed)
-We are using these names in our CI pipeline definitions, but they might be reported differently to GitHub:
-- `gate/evidence` (PR2)
-- `gate/supplychain` (PR4)
-- `gate/fimi` (PR7)
-- `sigstore-verify` (PR4)
-- `pidm-evidence-verify` (PIDM evidence gate)
-- `lint`
-- `typecheck`
-- `build`
-- `test`
+## Temporary convention
+Until discovered, we use temporary verifier names:
+- `ci:unit`
+- `ci:schema`
+- `ci:lint`
+- `ci:deps-delta`
 
-## Temporary Check Aliases (until canonical list is confirmed)
-- adoption-evidence-verify (temporary)
-- evidence-schema-validate (temporary)
-
-## Rename Plan
-Once the canonical list is confirmed, update workflow job names to match the
-required checks and remove temporary aliases.
+## Rename plan
+Once real check names are known:
+1. Update CI config to emit the official check names.
+2. Add a PR that renames verifiers and keeps backward-compat aliases for one week.

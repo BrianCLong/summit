@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { InvoiceService } from '../payments/InvoiceService.js';
+import { InvoiceService } from '../payments/InvoiceService';
 
 describe('InvoiceService', () => {
   let service: InvoiceService;

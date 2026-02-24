@@ -3,6 +3,8 @@ name: 🚀 Ultra Merge Orchestrator
 on:
   schedule:
     - cron: '*/30 * * * *'  # Run every 30 minutes
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       batch_size:

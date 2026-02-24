@@ -1,7 +1,7 @@
 // @ts-nocheck
 import neo4j, { Driver } from 'neo4j-driver';
-import { quotaEnforcer } from '../lib/resources/QuotaEnforcer.js';
-import { PrometheusMetrics } from '../utils/metrics.js';
+import { quotaEnforcer } from '../lib/resources/QuotaEnforcer';
+import { PrometheusMetrics } from '../utils/metrics';
 import {
   invalidateGraphQueryCache,
   recordCacheBypass,

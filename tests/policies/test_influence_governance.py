@@ -22,9 +22,7 @@ def test_policy_load():
 def test_prohibited_intents():
     prohibited = load_list("prohibited_intents.txt")
     policy = load_policy()
-        # Normalization: Replace spaces with underscores in loaded list to match policy format
-        normalized_prohibited = [p.replace(" ", "_") for p in prohibited]
-        assert sorted(normalized_prohibited) == sorted(policy["prohibited_intents"])
+    assert sorted(prohibited) == sorted(policy["prohibited_intents"])
 
     # Negative test
     for intent in prohibited:

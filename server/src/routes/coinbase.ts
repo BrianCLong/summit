@@ -2,7 +2,7 @@
 import { Router } from 'express';
 import express from 'express';
 import crypto from 'crypto';
-import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
+import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard';
 
 const router = Router();
 

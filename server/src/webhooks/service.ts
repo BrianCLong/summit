@@ -1,15 +1,15 @@
 // @ts-nocheck
 import axios, { AxiosInstance } from 'axios';
-import logger from '../utils/logger.js';
-import { addJob, queueRegistry, QueueName } from '../queues/config.js';
-import { recordDeliveryMetric } from './metrics.js';
-import { webhookRepository, WebhookRepository } from './repository.js';
-import { signPayload } from './signature.js';
+import logger from '../utils/logger';
+import { addJob, queueRegistry, QueueName } from '../queues/config';
+import { recordDeliveryMetric } from './metrics';
+import { webhookRepository, WebhookRepository } from './repository';
+import { signPayload } from './signature';
 import {
   DeliveryStatus,
   DeliveryJobData,
   WebhookEventType,
-} from './types.js';
+} from './types';
 
 const MAX_ATTEMPTS = parseInt(process.env.WEBHOOK_MAX_ATTEMPTS || '5', 10);
 const INITIAL_BACKOFF_MS = parseInt(process.env.WEBHOOK_BACKOFF_MS || '2000', 10);

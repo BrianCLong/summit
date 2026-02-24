@@ -58,9 +58,9 @@ export function buildDashboard(
 
 function normalizeRows(rows: TimeSeriesRow[]) {
   const fields = new Set<string>();
-  rows.forEach((row) => Object.keys(row.values).forEach((field) => fields.add(field)));
+  rows.forEach((row: any) => Object.keys(row.values).forEach((field) => fields.add(field)));
   return Array.from(fields).map((field) => ({
     label: field,
-    points: rows.map((row) => ({ x: row.timestamp, y: row.values[field] ?? 0 })),
+    points: rows.map((row: any) => ({ x: row.timestamp, y: row.values[field] ?? 0 })),
   }));
 }

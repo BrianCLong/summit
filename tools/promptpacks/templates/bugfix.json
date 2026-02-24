@@ -1,8 +1,0 @@
-{
-  "goal": "Fix a specific bug in the codebase.",
-  "inputs": ["Bug report/description", "Relevant source files", "Failing test case (if available)"],
-  "outputs": ["Source code fix", "Passing test case"],
-  "constraints": ["Do not change existing API contracts", "Follow project style guide"],
-  "non_goals": ["Do not refactor unrelated code", "Do not add new features"],
-  "acceptance_tests": ["Verify fix with the provided test case", "Ensure no regressions in existing tests"]
-}

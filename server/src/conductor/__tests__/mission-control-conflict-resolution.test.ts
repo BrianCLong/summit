@@ -1,4 +1,4 @@
-import { MissionControlConflictResolver } from '../mission-control/conflict-resolution.js';
+import { MissionControlConflictResolver } from '../mission-control/conflict-resolution';
 import { describe, it, expect } from '@jest/globals';
 
 describe('MissionControlConflictResolver', () => {

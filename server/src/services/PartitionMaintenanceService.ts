@@ -1,10 +1,11 @@
 import { CronJob } from 'cron';
-import { getPostgresPool } from '../db/postgres.js';
-import { logger as baseLogger } from '../config/logger.js';
+import { getPostgresPool } from '../db/postgres.ts';
+import { logger as baseLogger } from '../config/logger.ts';
 
 const logger = baseLogger.child({ service: 'PartitionMaintenanceService' });
 
 const TABLES_TO_MAINTAIN = [
+  'outbox_events',
   'provenance_ledger_v2',
 ];
 
@@ -37,15 +38,6 @@ export class PartitionMaintenanceService {
     logger.info('Starting partition maintenance');
     const pool = getPostgresPool();
 
-    // Outbox Events (using DB function)
-    try {
-      await pool.write('SELECT ensure_outbox_partition($1, $2)', [2, 6]);
-      logger.info({ tableName: 'outbox_events' }, 'Partition maintenance successful');
-    } catch (error) {
-      logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain partitions for table');
-    }
-
-    // Other tables (manual logic)
     for (const tableName of TABLES_TO_MAINTAIN) {
       try {
         await this.ensureNextMonthPartition(pool, tableName);

@@ -1,9 +1,0 @@
-{
-  "version": "0.1.0",
-  "deny_by_default": true,
-  "rules": {
-    "deny_guaranteed_earnings_language": true,
-    "require_schema_valid_output": true,
-    "redact_never_log_fields": true
-  }
-}

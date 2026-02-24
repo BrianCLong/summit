@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Pool } from 'pg';
-import { getPostgresPool } from '../config/database.js'; // Adjust import if needed
-import { logger } from '../config/logger.js';
+import { getPostgresPool } from '../config/database'; // Adjust import if needed
+import { logger } from '../config/logger';
 
 export interface SavedQuery {
   id: string;

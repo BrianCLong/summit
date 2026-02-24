@@ -1,4 +1,4 @@
-import { knn } from '../src/conductor/models.js';
+import { knn } from '../src/conductor/models';
 
 test('knn returns neighbors (empty without data)', async () => {
   const r = await knn('acme', 'entity-1', 5);

@@ -1,10 +1,10 @@
 
 import { Driver } from 'neo4j-driver';
-import { BehavioralAnalyzer } from './BehavioralAnalyzer.js';
-import { NarrativeTracker } from './NarrativeTracker.js';
-import { GraphDetector } from './GraphDetector.js';
-import { Actor, SocialPost, InfluenceCampaign, CampaignType, ThreatLevel } from './types.js';
-import logger from '../utils/logger.js';
+import { BehavioralAnalyzer } from './BehavioralAnalyzer';
+import { NarrativeTracker } from './NarrativeTracker';
+import { GraphDetector } from './GraphDetector';
+import { Actor, SocialPost, InfluenceCampaign, CampaignType, ThreatLevel } from './types';
+import logger from '../utils/logger';
 
 export class InfluenceOperationsEngine {
   private behavioralAnalyzer: BehavioralAnalyzer;

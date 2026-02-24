@@ -1,5 +1,5 @@
-import { BackupService } from './BackupService.js';
-import logger from '../utils/logger.js';
+import { BackupService } from './BackupService.ts';
+import logger from '../utils/logger.ts';
 import cron from 'node-cron';
 
 export class BackupManager {

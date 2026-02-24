@@ -96,10 +96,9 @@ export class IntelGraphClientImpl implements IntelGraphClient {
       await session.run(
         `
         MATCH (t:MaestroTask {id: $taskId})
-        WHERE t.tenantId = $tenantId OR $tenantId IS NULL
         SET t += $props
         `,
-        { taskId, props, tenantId: props.tenantId }
+        { taskId, props }
       );
     } finally {
       await session.close();
@@ -114,7 +113,6 @@ export class IntelGraphClientImpl implements IntelGraphClient {
         MATCH (t:MaestroTask {id: $artifact.taskId})
         MERGE (a:MaestroArtifact {id: $artifact.id})
         SET a += $artifact
-        SET a.tenantId = t.tenantId
         MERGE (t)-[:HAS_ARTIFACT]->(a)
         MERGE (r:MaestroRun {id: $artifact.runId})
         MERGE (r)-[:HAS_ARTIFACT]->(a)
@@ -251,8 +249,7 @@ export class IntelGraphClientImpl implements IntelGraphClient {
       const props = result.records[0].get('t').properties;
       return {
         ...props,
-        agent: props.agentId ? { id: props.agentId, name: props.agentName, kind: props.agentKind } : undefined,
-        tenantId: props.tenantId
+        agent: props.agentId ? { id: props.agentId, name: props.agentName, kind: props.agentKind } : undefined
       } as Task;
     } finally {
       await session.close();

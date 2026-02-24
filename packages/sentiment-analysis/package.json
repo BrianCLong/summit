@@ -7,7 +7,7 @@
   "description": "AI-powered sentiment analysis with BERT/RoBERTa for intelligence operations",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "jest --passWithNoTests",
+    "test": "jest",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

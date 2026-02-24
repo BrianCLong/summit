@@ -354,7 +354,7 @@ CREATE UNIQUE INDEX idx_mv_warrant_compliance_pk
 CREATE OR REPLACE FUNCTION refresh_warrant_compliance_summary()
 RETURNS void AS $$
 BEGIN
-  REFRESH MATERIALIZED VIEW  mv_warrant_compliance_summary;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY mv_warrant_compliance_summary;
 END;
 $$ LANGUAGE plpgsql;
 

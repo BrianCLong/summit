@@ -2,7 +2,7 @@ import { Redis } from 'ioredis';
 import { Mutex } from 'async-mutex';
 import { trace } from '@opentelemetry/api';
 import pino from 'pino';
-import { StampedeConfig } from './types.js';
+import { StampedeConfig } from './types';
 
 const logger = pino({ name: 'StampedeProtection' });
 const tracer = trace.getTracer('advanced-caching');

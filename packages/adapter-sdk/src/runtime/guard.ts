@@ -1,4 +1,4 @@
-import { AdapterLifecycleStage, AdapterRequest } from '../contracts/types.js';
+import { AdapterLifecycleStage, AdapterRequest } from '../contracts/types';
 
 export interface PolicyDecision {
   decision: 'allow' | 'deny';

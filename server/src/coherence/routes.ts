@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { Router, Request, Response } from 'express';
-import { CoherenceService } from './coherenceService.js';
+import { CoherenceService } from './coherenceService';
 import { z } from 'zod';
-import logger from '../utils/logger.js';
+import logger from '../utils/logger';
 import rateLimit from 'express-rate-limit';
 
 // Request schemas

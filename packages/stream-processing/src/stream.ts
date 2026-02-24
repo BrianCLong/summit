@@ -8,10 +8,10 @@ import {
   SideOutputTag,
   BackpressureStrategy,
   ProcessingContext,
-} from './types.js';
-import { WindowManager } from './window.js';
-import { WatermarkGenerator } from './watermark.js';
-import { StateManager } from './state.js';
+} from './types';
+import { WindowManager } from './window';
+import { WatermarkGenerator } from './watermark';
+import { StateManager } from './state';
 
 const logger = pino({ name: 'data-stream' });
 

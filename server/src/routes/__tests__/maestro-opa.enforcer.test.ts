@@ -1,8 +1,8 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
-import { createMaestroOPAEnforcer } from '../maestro_routes.js';
-import { logger } from '../../utils/logger.js';
+import { createMaestroOPAEnforcer } from '../maestro_routes';
+import { logger } from '../../utils/logger';
 
 const describeIf =
   process.env.NO_NETWORK_LISTEN === 'true' ? describe.skip : describe;

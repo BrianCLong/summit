@@ -1,5 +1,5 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { FuzzyMatcher } from '../engine/FuzzyMatcher.js';
+import { FuzzyMatcher } from '../engine/FuzzyMatcher';
 
 describe('FuzzyMatcher', () => {
   describe('levenshteinSimilarity', () => {

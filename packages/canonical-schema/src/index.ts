@@ -4,11 +4,11 @@
  */
 
 // Core base types
-export * from './core/base.js';
+export * from './core/base';
 
 // Entity specializations
-export * from './entities/person.js';
-export * from './entities/organization.js';
+export * from './entities/person';
+export * from './entities/organization';
 
 // ER types
-export * from './er/types.js';
+export * from './er/types';

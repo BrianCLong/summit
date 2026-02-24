@@ -1,9 +1,0 @@
-{
-  "kind": "review",
-  "text": "As an AI language model, I can say that this paper is a tapestry of research and a testament to the hard work of the authors. In conclusion, it is important to note that we should delve into the details.",
-  "meta": {
-    "llm_assisted": true,
-    "llm_tools": ["gpt-4"],
-    "human_verifier": "researcher"
-  }
-}

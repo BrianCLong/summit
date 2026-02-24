@@ -1,3 +1,0 @@
-name: session_to_pr
-steps:
-  - run: echo "Creating PR..."

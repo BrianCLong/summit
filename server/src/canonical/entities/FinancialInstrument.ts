@@ -5,7 +5,7 @@
  * Represents a financial instrument (stock, bond, contract)
  */
 
-import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.js';
+import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types.ts';
 
 export interface CanonicalFinancialInstrument extends BaseCanonicalEntity, CanonicalEntityMetadata {
   entityType: 'FinancialInstrument';

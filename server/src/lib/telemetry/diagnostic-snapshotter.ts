@@ -1,14 +1,14 @@
 
 import * as v8 from 'v8';
 import * as fs from 'fs';
-import { telemetry } from './comprehensive-telemetry.js';
+import { telemetry } from './comprehensive-telemetry.ts';
 import { Request } from 'express';
 import * as path from 'path';
 import * as os from 'os';
 import { performance } from 'perf_hooks';
 
-import { telemetryConfig } from '../../config/telemetry.js';
-import { cfg } from '../../config.js';
+import { telemetryConfig } from '../../config/telemetry.ts';
+import { cfg } from '../../config.ts';
 
 class DiagnosticSnapshotter {
   private snapshotInProgress = false;
@@ -78,7 +78,7 @@ class DiagnosticSnapshotter {
   }
 
   private captureConfigState() {
-    const configPath = path.join(os.tmpdir(), `config-state-${Date.now()}.json`);
+    const configPath = path.join(os.tmpdir(), `config-state-${Date.now()}.tson`);
     fs.writeFileSync(configPath, JSON.stringify(cfg, null, 2));
     console.log(`Configuration state captured at: ${configPath}`);
   }
@@ -96,7 +96,7 @@ class DiagnosticSnapshotter {
   }
 
   private captureActiveRequests() {
-    const activeRequestsPath = path.join(os.tmpdir(), `active-requests-${Date.now()}.json`);
+    const activeRequestsPath = path.join(os.tmpdir(), `active-requests-${Date.now()}.tson`);
     const activeRequests = {
       count: this.activeRequests.size,
       requests: Array.from(this.activeRequests).map((req: any) => ({

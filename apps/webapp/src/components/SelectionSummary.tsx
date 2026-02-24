@@ -30,7 +30,7 @@ export function SelectionSummary() {
       data-testid="selection-summary"
       aria-label="selection summary"
     >
-      <Typography variant="body2" component="div">
+      <Typography variant="body2">
         Selected node:{' '}
         <Chip
           label={selectedNodeId ?? 'None'}
@@ -43,7 +43,7 @@ export function SelectionSummary() {
           }
         />
       </Typography>
-      <Typography variant="body2" component="div">
+      <Typography variant="body2">
         Time range:{' '}
         <Chip
           label={rangeText}

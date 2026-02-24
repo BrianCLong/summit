@@ -4,7 +4,7 @@ import {
   AsyncIngestWorker,
   InMemoryAsyncIngestRepository,
   calculateBackoffDelay,
-} from '../async-pipeline.js';
+} from '../async-pipeline';
 
 describe('Async ingestion backpressure and backoff', () => {
   const payload = {

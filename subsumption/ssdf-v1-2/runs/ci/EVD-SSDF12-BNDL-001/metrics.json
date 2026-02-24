@@ -1,9 +1,0 @@
-{
-  "evidence_id": "EVD-SSDF12-BNDL-001",
-  "item_slug": "ssdf-v1-2",
-  "metrics": {
-    "docs_count": 4,
-    "fixtures_checked": 2,
-    "schemas_checked": 3
-  }
-}

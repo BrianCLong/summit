@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { GraphRAGService, GraphRAGRequest, GraphRAGResponse, Entity, Relationship } from '../GraphRAGService.js';
+import { GraphRAGService, GraphRAGRequest, GraphRAGResponse, Entity, Relationship } from '../GraphRAGService';
 import type { Driver } from 'neo4j-driver';
 import Redis from 'ioredis';
 

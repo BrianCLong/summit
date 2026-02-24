@@ -23,50 +23,48 @@ on:
   workflow_dispatch:
     inputs:
       dry_run:
-        description: "Run in dry-run mode"
-        required: false
-        default: false
+        description: "Dry run mode (no state changes, no issue writes)"
         type: boolean
+        default: false
       threshold_minutes:
-        description: "Blocker threshold in minutes"
-        required: false
-        default: "90"
-        type: string
+        description: "Age threshold (minutes) before raising blocker issues"
+        type: number
+        default: 90
       enable_issue_writes:
-        description: "Allow issue create/update actions"
-        required: false
-        default: true
+        description: "Enable issue creation/updates"
         type: boolean
+        default: true
       enable_routing:
-        description: "Enable routing label automation"
-        required: false
-        default: true
+        description: "Enable routing label application"
         type: boolean
+        default: true
       enable_escalation:
-        description: "Enable escalation automation"
-        required: false
+        description: "Enable escalation threshold checks"
+        type: boolean
         default: true
-        type: boolean
       enable_notify:
-        description: "Enable notifications"
-        required: false
-        default: false
+        description: "Enable notifications (Slack/email)"
         type: boolean
-      verbose:
-        description: "Verbose logging"
-        required: false
         default: false
-        type: boolean
       force_digest:
-        description: "Force digest generation"
-        required: false
-        default: false
+        description: "Force digest generation (ignore cadence window)"
         type: boolean
+        default: false
       force_handoff:
-        description: "Force handoff generation"
-        required: false
-        default: false
+        description: "Force handoff generation (ignore cadence window)"
         type: boolean
+        default: false
+      verbose:
+        description: "Enable verbose logging"
+        type: boolean
+        default: false
+
+  # Trigger on workflow changes (for testing)
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/release-ops-orchestrator.yml"
 
 # Prevent concurrent runs - only one orchestrator cycle at a time
 concurrency:
@@ -626,7 +624,7 @@ jobs:
           echo "::endgroup::"
 
       - name: "Upload Artifact Bundle"
-        uses: actions/upload-artifact@v4 # v4
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: release-ops-cycle-${{ github.run_id }}
           path: artifacts/release-train/

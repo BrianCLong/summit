@@ -10,11 +10,11 @@
  */
 
 import { createHash } from 'crypto';
-import { LLMRouter } from '../../../services/llm/LLMRouter.js';
-import { LLMRequest, LLMResult, LLMRouterConfig } from '../../../services/llm/interfaces.js';
-import { GovernanceVerdict } from '../../../governance/types.js';
-import { ProvenanceMetadata, ChainOfCustodyEntry } from '../types.js';
-import logger from '../../../utils/logger.js';
+import { LLMRouter } from '../../../services/llm/LLMRouter.ts';
+import { LLMRequest, LLMResult, LLMRouterConfig } from '../../../services/llm/interfaces.ts';
+import { GovernanceVerdict } from '../../../governance/types.ts';
+import { ProvenanceMetadata, ChainOfCustodyEntry } from '../types.ts';
+import logger from '../../../utils/logger.ts';
 
 // =============================================================================
 // Types
