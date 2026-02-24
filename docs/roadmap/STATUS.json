@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Added Switchboard evidence contract and determinism scaffolding for MCP control-plane Lane 1.",
+  "last_updated": "2026-02-09T00:00:00Z",
+  "revision_note": "Added Summit Switchboard (MCP) standards, data handling, runbook, and repo assumptions.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -284,6 +284,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "summit-switchboard-mcp-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published Summit Switchboard (MCP) standards, data handling, runbook, and repo assumptions for MWS."
     },
     {
       "id": "summit-architecture-brief",
