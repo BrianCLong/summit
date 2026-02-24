@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Aligned OSINT source inventory with GDELT GKG access notes.",
+  "last_updated": "2026-02-18T00:00:00Z",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.; Added Living Architecture Flows PR1 schema and contract initiative.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -51,7 +51,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added competitor decode evidence schema scaffolding and deterministic writer. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
@@ -241,6 +241,18 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "summit-architecture-brief",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "living-architecture-flows-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Schemas, types, and documentation contract for Living Architecture Flows (PR1)."
     }
   ],
   "summary": {
