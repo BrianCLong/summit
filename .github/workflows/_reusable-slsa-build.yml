@@ -70,7 +70,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  actions: read
+  contents: write
   packages: write
   id-token: write
   attestations: write
