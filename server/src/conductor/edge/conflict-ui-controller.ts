@@ -3,6 +3,7 @@
 import { Request, Response } from 'express';
 import { CRDTConflictResolver } from './crdt-conflict-resolver.js';
 import logger from '../../config/logger.js';
+import { firstString } from '../../utils/http-param.js';
 
 export class ConflictUIController {
   private conflictResolver: CRDTConflictResolver;
@@ -21,13 +22,13 @@ export class ConflictUIController {
    */
   async getConflictDeltas(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = firstString(req.params.entityId);
       const tenantId = req.headers['x-tenant-id'] as string;
 
-      if (!tenantId) {
+      if (!entityId || !tenantId) {
         res.status(400).json({
           code: 'MISSING_TENANT',
-          message: 'Tenant ID required',
+          message: 'Tenant ID and entity ID required',
           traceId: res.locals.traceId,
         });
         return;
@@ -87,14 +88,14 @@ export class ConflictUIController {
    */
   async resolveConflicts(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = firstString(req.params.entityId);
       const tenantId = req.headers['x-tenant-id'] as string;
       const { manualOverrides, approver, resolutionRationale } = req.body;
 
-      if (!tenantId) {
+      if (!entityId || !tenantId) {
         res.status(400).json({
           code: 'MISSING_TENANT',
-          message: 'Tenant ID required',
+          message: 'Tenant ID and entity ID required',
           traceId: res.locals.traceId,
         });
         return;
@@ -176,14 +177,14 @@ export class ConflictUIController {
    */
   async getConflictHistory(req: Request, res: Response): Promise<void> {
     try {
-      const { entityId } = req.params;
+      const entityId = firstString(req.params.entityId);
       const tenantId = req.headers['x-tenant-id'] as string;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseInt(firstString(req.query.limit) || '50', 10) || 50;
 
-      if (!tenantId) {
+      if (!entityId || !tenantId) {
         res.status(400).json({
           code: 'MISSING_TENANT',
-          message: 'Tenant ID required',
+          message: 'Tenant ID and entity ID required',
           traceId: res.locals.traceId,
         });
         return;

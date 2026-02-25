@@ -1,6 +1,7 @@
 import express from 'express';
 import { masteryService } from '../mastery/MasteryService.js';
 import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
+import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 
@@ -10,7 +11,11 @@ router.get('/labs', ensureAuthenticated, (req, res) => {
 
 router.post('/labs/:labId/start', ensureAuthenticated, (req, res) => {
   try {
-    const run = masteryService.startLab(req.params.labId, (req as any).user.id, (req as any).user.tenantId);
+    const run = masteryService.startLab(
+      firstStringOr(req.params.labId, ''),
+      (req as any).user.id,
+      (req as any).user.tenantId
+    );
     res.json(run);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -23,7 +28,7 @@ router.get('/runs', ensureAuthenticated, (req, res) => {
 });
 
 router.get('/runs/:runId', ensureAuthenticated, (req, res) => {
-  const run = masteryService.getRun(req.params.runId);
+  const run = masteryService.getRun(firstStringOr(req.params.runId, ''));
   if (!run || run.userId !== (req as any).user.id) {
     return res.status(404).json({ error: 'Run not found' });
   }
@@ -31,13 +36,16 @@ router.get('/runs/:runId', ensureAuthenticated, (req, res) => {
 });
 
 router.post('/runs/:runId/steps/:stepId/validate', ensureAuthenticated, async (req, res) => {
-  const run = masteryService.getRun(req.params.runId);
+  const run = masteryService.getRun(firstStringOr(req.params.runId, ''));
   if (!run || run.userId !== (req as any).user.id) {
     return res.status(404).json({ error: 'Run not found' });
   }
 
   try {
-    const result = await masteryService.validateStep(req.params.runId, req.params.stepId);
+    const result = await masteryService.validateStep(
+      firstStringOr(req.params.runId, ''),
+      firstStringOr(req.params.stepId, '')
+    );
     res.json(result);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -54,7 +62,7 @@ router.get('/certificates', ensureAuthenticated, async (req, res) => {
 });
 
 router.get('/coaching', ensureAuthenticated, (req, res) => {
-    const tripwire = req.query.tripwire as string;
+    const tripwire = firstString(req.query.tripwire);
     if (tripwire) {
         res.json(masteryService.getSuggestedLabs(tripwire));
     } else {

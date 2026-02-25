@@ -10,6 +10,7 @@ import {
   listApprovals,
   rejectApproval,
 } from '../services/approvals.js';
+import { firstString, firstStringOr } from '../utils/http-param.js';
 
 interface ApprovalPayload {
   userId?: string;
@@ -65,7 +66,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
     try {
       const role = (req as any).user?.role;
       const userId = resolveUserId(req);
-      const status = (req.query.status as ApprovalStatus | undefined) || undefined;
+      const status = (firstString(req.query.status) as ApprovalStatus | undefined) || undefined;
 
       const approvals = await listApprovals({ status });
       const visible = canApprove(role)
@@ -80,7 +81,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
 
   router.get('/:id', async (req, res, next) => {
     try {
-      const approval = await getApprovalById(req.params.id);
+      const approval = await getApprovalById(firstStringOr(req.params.id, ''));
       if (!approval) {
         return res.status(404).json({ error: 'Approval not found' });
       }
@@ -98,7 +99,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await approveApproval(
-        req.params.id,
+        firstStringOr(req.params.id, ''),
         approverId,
         req.body?.reason,
       );
@@ -156,7 +157,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await rejectApproval(
-        req.params.id,
+        firstStringOr(req.params.id, ''),
         approverId,
         req.body?.reason,
       );

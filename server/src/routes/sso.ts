@@ -9,6 +9,7 @@ import { z } from 'zod';
 import logger from '../utils/logger.js';
 import config from '../config/index.js';
 import cookieParser from 'cookie-parser'; // Assuming cookie-parser is available or similar middleware
+import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 const ssoService = new SSOService();
@@ -45,7 +46,7 @@ const ssoConfigSchema = z.object({
  * @access Private (Admin of Tenant or System Admin)
  */
 router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { id } = req.params;
+  const id = firstStringOr(req.params.id, '');
 
   // Strict Access Control:
   // Must be logged in (ensureAuthenticated handles this)
@@ -89,7 +90,7 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
  * @access Public
  */
 router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+  const tenantId = firstStringOr(req.params.tenantId, '');
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   try {
@@ -116,12 +117,12 @@ router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async 
  * @access Public
  */
 router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+  const tenantId = firstStringOr(req.params.tenantId, '');
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   // CSRF / State Validation
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.body.RelayState || req.body.state || req.query.state || req.query.RelayState;
+  const stateParam = req.body.RelayState || req.body.state || firstString(req.query.state) || firstString(req.query.RelayState);
 
   // In SAML, RelayState is passed back. In OIDC, state is passed back.
   // Note: Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),
@@ -163,11 +164,11 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
 
 // Handle GET callback (OIDC implicit/code flow sometimes uses GET)
 router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+  const tenantId = firstStringOr(req.params.tenantId, '');
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.query.state || req.query.RelayState;
+  const stateParam = firstString(req.query.state) || firstString(req.query.RelayState);
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);

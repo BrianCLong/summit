@@ -5,6 +5,7 @@ import { ensureAuthenticated as requireAuth } from '../../middleware/auth.js';
 import { eventService } from '../../events/EventService.js';
 import { EventType } from '../../integrations/foundation/contracts.js';
 import { randomUUID } from 'crypto';
+import { firstStringOr } from '../../utils/http-param.js';
 
 const router = express.Router();
 
@@ -21,7 +22,7 @@ const getJiraConfig = async (tenantId: string) => {
 
 router.post('/incidents/:id/tickets', requireAuth, async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = firstStringOr(req.params.id, '');
         const tenantId = req.user!.tenantId!;
 
         const incident = await IncidentService.get(tenantId, id);

@@ -1,7 +1,8 @@
-import pino from 'pino';
+import pinoModule from 'pino';
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
+const pino = (pinoModule as any).default || pinoModule;
 
 // AsyncLocalStorage for correlation ID propagation
 export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();

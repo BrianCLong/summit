@@ -16,6 +16,7 @@ import {
   CONTROL_MAPPINGS,
   getControlsByFramework,
 } from '../trust-center/types/control-evidence-mappings.js';
+import { firstStringOr } from '../utils/http-param.js';
 
 import type { ComplianceFramework } from '../trust-center/types/index.js';
 
@@ -231,7 +232,7 @@ router.get('/packs', async (req: Request, res: Response, next: NextFunction) => 
  */
 router.get('/packs/:packId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { packId } = req.params;
+    const packId = firstStringOr(req.params.packId, '');
 
     const pack = await regulatoryPackService.getPack(packId);
 
@@ -251,7 +252,7 @@ router.get('/packs/:packId', async (req: Request, res: Response, next: NextFunct
  */
 router.get('/packs/:packId/controls', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { packId } = req.params;
+    const packId = firstStringOr(req.params.packId, '');
 
     const pack = await regulatoryPackService.getPack(packId);
 
@@ -305,7 +306,7 @@ router.get('/controls', async (req: Request, res: Response, next: NextFunction) 
  */
 router.get('/controls/:controlId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = firstStringOr(req.params.controlId, '');
 
     const control = CONTROL_MAPPINGS[controlId];
 
@@ -325,7 +326,7 @@ router.get('/controls/:controlId', async (req: Request, res: Response, next: Nex
  */
 router.get('/controls/:controlId/evidence', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = firstStringOr(req.params.controlId, '');
     const { startDate, endDate } = req.query;
     const tenantId = (req as any).tenantId || 'default';
 
@@ -558,7 +559,7 @@ router.get('/reports/:reportId', async (req: Request, res: Response, next: NextF
  */
 router.get('/controls/:controlId/assess', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = firstStringOr(req.params.controlId, '');
     const tenantId = (req as any).tenantId || 'default';
 
     const assessment = await regulatoryPackService.assessControl(controlId, tenantId);

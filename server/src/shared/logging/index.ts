@@ -2,8 +2,9 @@
  * Centralized logging configuration
  * Exports a typed logger instance compatible with the Logger interface
  */
-import pino from 'pino';
+import pinoModule from 'pino';
 import type { Logger } from './Logger.js';
+const pino = (pinoModule as any).default || pinoModule;
 
 const pinoLogger = pino({
   level: process.env.LOG_LEVEL || 'info',
