@@ -1,0 +1,41 @@
+{
+  "title": "System Overview",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU Usage",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "rate(process_cpu_seconds_total[1m])", "legendFormat": "CPU Usage" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory Usage",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "process_resident_memory_bytes", "legendFormat": "RSS Memory" },
+        { "expr": "nodejs_heap_size_used_bytes", "legendFormat": "Heap Used" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Event Loop Lag",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "nodejs_eventloop_lag_seconds", "legendFormat": "Lag" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Handles",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "nodejs_active_handles", "legendFormat": "Handles" }
+      ]
+    }
+  ]
+}
