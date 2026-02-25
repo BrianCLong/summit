@@ -86,3 +86,64 @@
 - Blocked:
   - Issue intake intermittently blocked by GitHub API connectivity.
   - Route test execution blocked by missing local `node_modules`/`jest` binary.
+
+---
+
+## Automation Re-Run (UTC)
+- Run timestamp: 2026-02-25T10:08:58Z
+- Branch: sentinel-secure-ops-routers-2431741579196400576 (PR #18689)
+- Intake refresh status: PR list/detail APIs reachable; issue APIs unreachable from runner.
+
+### Re-Run Sprint Tasks
+
+#### Task A
+- Goal: Re-run focused authz regression validation for PR #18689 and clear prior test blocker.
+- Expected touch: none unless test harness repair is required.
+- Validation target: pnpm --filter intelgraph-server test -- --runTestsByPath src/routes/__tests__/ops-router-authz.test.ts.
+
+#### Task B
+- Goal: Refresh issue-priority intake (security/ga/governance/osint/bolt labels).
+- Expected touch: sprint artifact only.
+- Validation target: successful gh issue list query with label filter.
+
+#### Task C
+- Goal: Publish sprint progress comment to PR #18689 with validation evidence.
+- Expected touch: PR comment + sprint artifact.
+- Validation target: gh pr comment 18689 success.
+
+### Execution Outcomes
+- Task A: Blocked
+  - pnpm --filter intelgraph-server test -- --runTestsByPath src/routes/__tests__/ops-router-authz.test.ts still fails with spawn jest ENOENT because server/node_modules/.bin/jest is absent in this runner.
+  - pnpm --filter intelgraph-server install completed, but did not restore the local server jest binary link.
+  - pnpm --filter intelgraph-server install --config.production=false failed with network/DNS (ENOTFOUND cdn.sheetjs.com), preventing dependency-link remediation.
+  - Direct fallback run via root Jest (../node_modules/.bin/jest) reached the suite but execution is sandbox-blocked (listen EPERM 0.0.0.0) when Supertest attempts local bind.
+
+- Task B: Blocked
+  - gh issue list --repo BrianCLong/summit and label-filtered variant both failed with error connecting to api.github.com.
+
+- Task C: Blocked
+  - gh pr comment 18689 --repo BrianCLong/summit --body-file /tmp/pr18689-daily-sprint-comment.md failed with error connecting to api.github.com.
+
+### Command Ledger (Re-Run)
+- pnpm --filter intelgraph-server install: PASS (completed; warnings only)
+- pnpm --filter intelgraph-server test -- --runTestsByPath src/routes/__tests__/ops-router-authz.test.ts: FAIL (spawn jest ENOENT)
+- pnpm --filter intelgraph-server install --config.production=false: FAIL (ENOTFOUND cdn.sheetjs.com)
+- gh issue list --repo BrianCLong/summit ...: FAIL (error connecting to api.github.com)
+- gh issue list --repo BrianCLong/summit --search label filters ...: FAIL (error connecting to api.github.com)
+- gh pr comment 18689 --repo BrianCLong/summit --body-file /tmp/pr18689-daily-sprint-comment.md: FAIL (error connecting to api.github.com)
+
+### Re-Run Status
+- Completed:
+  - Rechecked PR #18689 branch state and re-ran dependency + test-path diagnostics.
+  - Captured deterministic blocker evidence for dependency/linking and network availability.
+- In progress:
+  - PR #18689 merge-readiness validation remains pending successful route-test execution in a runner that allows local bind and has complete server dev binaries.
+- Blocked:
+  - GitHub API connectivity for issue intake/comment publishing.
+  - Dependency fetch DNS failures (cdn.sheetjs.com) during corrective install.
+  - Local bind restrictions (listen EPERM) in this sandbox for Supertest-backed route tests.
+
+### Next Run Recommendations
+1. Retry GitHub issue and PR comment operations first; if reachable, publish this re-run summary on PR #18689.
+2. Execute route authz test in an environment with server/node_modules/.bin/jest available and loopback bind permissions.
+3. Re-run make ga-verify and node scripts/check-boundaries.cjs once test execution is restored to keep evidence current.
