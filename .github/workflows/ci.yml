@@ -199,3 +199,49 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  policy-gate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      attestations: write    # for provenance action, if used here
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Hard requirement: keep existing workflow-version pinning preflight
+      - name: Verify marketplace action versions are pinned
+        uses: ./.github/actions/verify-workflow-versions
+
+      - name: Setup Node (for SBOM/lockfile tooling example)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate SBOM (CycloneDX JSON)
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-file sbom.json --json
+
+      - name: Collect GitHub workflows metadata
+        run: |
+          node ./scripts/ci/collect_workflows.js > workflows.json
+
+      - name: Generate SLSA build provenance (attestation)
+        id: attest
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: sbom.json
+
+      - name: Move provenance bundle
+        run: cp "${{ steps.attest.outputs.bundle-path }}" provenance.json
+
+      - name: Assemble OPA input
+        run: |
+          npm install js-yaml --no-save
+          node scripts/ci/assemble_policy_input.js
+
+      - name: Run OPA policy gate
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/src" openpolicyagent/opa:latest \
+            eval -i /src/policy_input.json -d /src/policies --fail-defined 'data.summit.deny[_]'
