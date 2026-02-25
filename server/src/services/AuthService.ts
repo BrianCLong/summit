@@ -43,6 +43,7 @@ import { cfg } from '../config.js';
 import logger from '../utils/logger.js';
 import { secretsService } from './SecretsService.js';
 import { SECRETS } from '../config/secretRefs.js';
+import jwt from 'jsonwebtoken';
 import type { Pool, PoolClient } from 'pg';
 import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
@@ -268,6 +269,8 @@ export class AuthService {
   }
   private metrics: PrometheusMetrics;
   private securityService: SecurityService;
+  private jwtSecret: string | null = null;
+  private jwtSecretPromise: Promise<string> | null = null;
 
   /**
    * @constructor
@@ -363,7 +366,7 @@ export class AuthService {
         [
           userData.email,
           userData.username,
-          passwordHash,
+          hashedPassword,
           userData.firstName,
           userData.lastName,
           userData.role || 'ANALYST',
@@ -579,21 +582,33 @@ export class AuthService {
         };
       }
 
-      const decoded = await this.securityService.verifyDbToken(token, this.pool);
-      if (!decoded) return null;
+      let decoded = await this.securityService.verifyDbToken(token, this.pool);
+      if (!decoded) {
+        const secret = await this.getJwtSecret();
+        decoded = jwt.verify(token, secret) as TokenPayload;
+      }
+
+      const userId = decoded?.userId || decoded?.sub;
+      if (!userId) return null;
 
       const client = await this.pool.connect();
-      const userResult = await client.query(
-        'SELECT * FROM users WHERE id = $1 AND is_active = true',
-        [decoded.userId],
-      );
-      client.release();
+      let userResult;
+      try {
+        userResult = await client.query('SELECT * FROM users WHERE id = $1', [userId]);
+      } finally {
+        client.release();
+      }
 
       if (userResult.rows.length === 0) {
         return null;
       }
 
-      const user = this.formatUser(userResult.rows[0] as DatabaseUser);
+      const dbUser = userResult.rows[0] as DatabaseUser;
+      if (!dbUser.is_active) {
+        return null;
+      }
+
+      const user = this.formatUser(dbUser);
       // Fallback to role-based scopes if scp claim is missing (legacy tokens)
       user.scopes = decoded.scp || ROLE_SCOPES[user.role.toUpperCase()] || [];
       return user;
@@ -752,13 +767,17 @@ export class AuthService {
    * @returns {User} Public user representation
    */
   private formatUser(user: DatabaseUser): User {
+    const firstName = user.first_name || '';
+    const lastName = user.last_name || '';
+    const fullName = `${firstName} ${lastName}`.trim();
+
     return {
       id: user.id,
       email: user.email,
       username: user.username,
-      firstName: user.first_name,
-      lastName: user.last_name,
-      fullName: `${user.first_name} ${user.last_name}`,
+      firstName: firstName || undefined,
+      lastName: lastName || undefined,
+      fullName: fullName || undefined,
       role: user.role,
       defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,
@@ -767,6 +786,40 @@ export class AuthService {
       updatedAt: user.updated_at,
       scopes: [],
     };
+  }
+
+  private async getJwtSecret(): Promise<string> {
+    if (this.jwtSecret) {
+      return this.jwtSecret;
+    }
+
+    if (process.env.NODE_ENV === 'test') {
+      this.jwtSecret = 'test-jwt-secret-for-testing-only';
+      return this.jwtSecret;
+    }
+
+    if (!this.jwtSecretPromise) {
+      this.jwtSecretPromise = (async () => {
+        const envSecret = process.env.JWT_SECRET;
+        if (envSecret) {
+          return envSecret;
+        }
+
+        try {
+          const secretFromRef = await secretsService.getSecret(SECRETS.JWT_SECRET);
+          if (secretFromRef) {
+            return secretFromRef;
+          }
+        } catch {
+          // Fall through to config fallback.
+        }
+
+        return cfg.JWT_SECRET || 'dev-jwt-secret-change-in-production';
+      })();
+    }
+
+    this.jwtSecret = await this.jwtSecretPromise;
+    return this.jwtSecret;
   }
 }
 

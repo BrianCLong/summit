@@ -3,12 +3,48 @@
  */
 
 import { validateRequestLegacy as validateRequest } from '../validation.js';
-import { describe, it, test, expect } from '@jest/globals';
-import {
-  requestFactory,
-  responseFactory,
-  nextFactory,
-} from '../../../../tests/factories/requestFactory.js';
+import { describe, it, test, expect, jest } from '@jest/globals';
+
+const requestFactory = (options: Record<string, any> = {}) => ({
+  headers: {
+    'content-type': 'application/json',
+    'user-agent': 'IntelGraph-Test/1.0',
+    ...options.headers,
+  },
+  body: options.body || {},
+  query: options.query || {},
+  params: options.params || {},
+  user: options.user,
+  tenant: options.tenant,
+  cookies: options.cookies || {},
+  ip: options.ip || '127.0.0.1',
+  method: options.method || 'GET',
+  url: options.url || '/',
+  path: options.path || '/',
+  get(name: string) {
+    return this.headers[name.toLowerCase()];
+  },
+});
+
+const responseFactory = (): any => ({
+  statusCode: 200,
+  headers: {} as Record<string, string>,
+  body: null,
+  status: jest.fn().mockReturnThis(),
+  json: jest.fn().mockReturnThis(),
+  send: jest.fn().mockReturnThis(),
+  set: jest.fn().mockReturnThis(),
+  setHeader: jest.fn(function (this: any, name: string, value: string) {
+    this.headers[name] = value;
+    return this;
+  }),
+  getHeader: jest.fn(function (this: any, name: string) {
+    return this.headers[name];
+  }),
+  end: jest.fn(),
+});
+
+const nextFactory = () => jest.fn();
 
 describe('Validation Middleware', () => {
   describe('validateRequest', () => {

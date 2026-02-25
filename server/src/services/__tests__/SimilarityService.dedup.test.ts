@@ -8,16 +8,36 @@ import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals
 import type { DuplicateCandidate } from '../SimilarityService.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../../config/database.js', () => ({}));
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getPostgresPool: jest.fn(),
+}));
 jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
   otelService: {
-    wrapNeo4jOperation: jest.fn((name: string, fn: () => any) => fn()),
-    addSpanAttributes: jest.fn(),
+    wrapNeo4jOperation: (_name: string, fn: () => any) => fn(),
+    addSpanAttributes: () => undefined,
   },
 }));
-jest.unstable_mockModule('../../monitoring/metrics.js', () => ({}));
+const makeMetric = () => ({
+  labels: () => ({ inc: () => undefined }),
+  startTimer: () => () => undefined,
+  observe: () => undefined,
+  inc: () => undefined,
+});
+jest.unstable_mockModule('../../monitoring/metrics.js', () => ({
+  applicationErrors: makeMetric(),
+  vectorQueriesTotal: makeMetric(),
+  vectorQueryDurationSeconds: makeMetric(),
+}));
 jest.unstable_mockModule('../../utils/logger.js', () => ({
-  default: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
+  logger: {
+    child: () => ({
+      info: () => undefined,
+      debug: () => undefined,
+      warn: () => undefined,
+      error: () => undefined,
+    }),
+  },
+  default: { info: () => undefined, debug: () => undefined, error: () => undefined },
 }));
 
 describe('SimilarityService - Duplicate Detection', () => {

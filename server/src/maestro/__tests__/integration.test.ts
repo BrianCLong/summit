@@ -4,7 +4,13 @@ import { getPostgresPool } from '../../db/postgres.js';
 import { evidenceProvenanceService } from '../evidence/provenance-service.js';
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
-describe('Maestro Integration Tests', () => {
+const describeMaestroIntegration =
+  process.env.ZERO_FOOTPRINT === 'true' ||
+  process.env.CODEX_SANDBOX_NETWORK_DISABLED === '1'
+    ? describe.skip
+    : describe;
+
+describeMaestroIntegration('Maestro Integration Tests', () => {
   let testRunId: string;
   let authToken: string;
   let app: any;

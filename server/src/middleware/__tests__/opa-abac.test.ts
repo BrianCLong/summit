@@ -6,8 +6,36 @@
  */
 
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory.js';
-import { userFactory } from '../../../../tests/factories/userFactory.js';
+
+const requestFactory = (overrides: Record<string, any> = {}) => ({
+  body: {},
+  headers: {},
+  ip: '127.0.0.1',
+  user: undefined,
+  get(name: string) {
+    return (this.headers || {})[name] || (this.headers || {})[name.toLowerCase()];
+  },
+  ...overrides,
+});
+
+const responseFactory = () => {
+  const res: any = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
+  return res;
+};
+
+const nextFactory = () => jest.fn();
+
+const userFactory = (overrides: Record<string, any> = {}) => ({
+  id: 'user-1',
+  tenantId: 'tenant-1',
+  roles: ['viewer'],
+  residency: 'US',
+  clearance: 'public',
+  entitlements: [],
+  ...overrides,
+});
 
 // Mock function declared before mock
 const mockAxiosPost = jest.fn();
