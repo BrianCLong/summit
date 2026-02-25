@@ -1,0 +1,170 @@
+name: Summit Golden Path Scaffold
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: summit-golden-path-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  summit-golden-path:
+    name: summit-golden-path
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Governance policy checks (OPA placeholder)
+        id: policy_checks
+        continue-on-error: true
+        run: |
+          mkdir -p artifacts/summit-golden-path
+          pnpm exec tsx governance/policy-check.ts \
+            --output artifacts/summit-golden-path/policy-results.json \
+            --enforce
+
+      - name: Golden path test execution
+        id: test_execution
+        continue-on-error: true
+        run: |
+          mkdir -p artifacts/summit-golden-path
+          set +e
+          pnpm run test:quick
+          TEST_EXIT=$?
+          TEST_EXIT="${TEST_EXIT}" node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'artifacts/summit-golden-path/test-results.json';
+          const exitCode = Number(process.env.TEST_EXIT || '1');
+          const payload = {
+            command: 'pnpm run test:quick',
+            status: exitCode === 0 ? 'pass' : 'fail',
+            exit_code: exitCode,
+          };
+          fs.writeFileSync(path, JSON.stringify(payload, null, 2));
+          NODE
+          exit "${TEST_EXIT}"
+
+      - name: Generate GA evidence bundle
+        if: always()
+        run: |
+          mkdir -p artifacts/summit-golden-path
+          POLICY_OUTCOME="${{ steps.policy_checks.outcome }}" \
+          TEST_OUTCOME="${{ steps.test_execution.outcome }}" \
+          GITHUB_SHA="${{ github.sha }}" \
+          GITHUB_RUN_ID="${{ github.run_id }}" \
+          GITHUB_RUN_ATTEMPT="${{ github.run_attempt }}" \
+          GITHUB_REPOSITORY="${{ github.repository }}" \
+          GITHUB_WORKFLOW="${{ github.workflow }}" \
+          node <<'NODE'
+          const fs = require('node:fs');
+          const baseDir = 'artifacts/summit-golden-path';
+          const policyPath = `${baseDir}/policy-results.json`;
+          const testPath = `${baseDir}/test-results.json`;
+          const readJsonOrNull = (file) => {
+            if (!fs.existsSync(file)) return null;
+            return JSON.parse(fs.readFileSync(file, 'utf8'));
+          };
+
+          const policyResults = readJsonOrNull(policyPath) ?? [
+            {
+              policy_name: 'policy_check_runtime',
+              status: process.env.POLICY_OUTCOME === 'success' ? 'pass' : 'fail',
+              severity: 'high',
+              evidence_ref: policyPath,
+            },
+          ];
+
+          const testResults = readJsonOrNull(testPath) ?? {
+            command: 'pnpm run test:quick',
+            status: process.env.TEST_OUTCOME === 'success' ? 'pass' : 'fail',
+            exit_code: process.env.TEST_OUTCOME === 'success' ? 0 : 1,
+          };
+
+          const bundle = {
+            build_id: `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT}`,
+            commit_sha: process.env.GITHUB_SHA,
+            policy_results: policyResults,
+            test_results: testResults,
+            provenance: {
+              repository: process.env.GITHUB_REPOSITORY,
+              workflow: process.env.GITHUB_WORKFLOW,
+              run_id: process.env.GITHUB_RUN_ID,
+              run_attempt: process.env.GITHUB_RUN_ATTEMPT,
+            },
+            timestamp: new Date().toISOString(),
+          };
+
+          fs.writeFileSync(
+            `${baseDir}/evidence-bundle.json`,
+            JSON.stringify(bundle, null, 2),
+          );
+          NODE
+
+      - name: Notify Observer hook (stub)
+        if: always()
+        run: |
+          GITHUB_SHA="${{ github.sha }}" \
+          GITHUB_RUN_ID="${{ github.run_id }}" \
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = 'artifacts/summit-golden-path/evidence-bundle.json';
+          const bundle = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const event = {
+            event_type: 'ga.golden_path.completed',
+            build_id: bundle.build_id,
+            commit_sha: bundle.commit_sha,
+            timestamp: bundle.timestamp,
+            evidence_ref: path,
+            payload: {
+              policy_failures: bundle.policy_results.filter((result) => result.status === 'fail').length,
+              test_status: bundle.test_results.status,
+            },
+          };
+          fs.writeFileSync(
+            'artifacts/summit-golden-path/observer-event.json',
+            JSON.stringify(event, null, 2),
+          );
+          NODE
+          pnpm exec tsx services/observer/notify.ts --event-file artifacts/summit-golden-path/observer-event.json
+
+      - name: Upload evidence bundle artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-golden-path-evidence
+          path: artifacts/summit-golden-path
+          retention-days: 14
+
+      - name: Enforce gate status
+        if: always()
+        run: |
+          if [[ "${{ steps.policy_checks.outcome }}" != "success" ]]; then
+            echo "::error::Policy checks failed; blocking PR."
+            exit 1
+          fi
+          if [[ "${{ steps.test_execution.outcome }}" != "success" ]]; then
+            echo "::error::Test execution failed; blocking PR."
+            exit 1
+          fi
+          echo "Summit golden path scaffold checks passed."

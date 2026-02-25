@@ -32,6 +32,20 @@ Validate these files against `schemas/*.schema.json`.
 Evidence runs under `evidence/runs/<run_id>/` must include `report.json`, `metrics.json`,
 `stamp.json`, and `index.json`. Use `ci/evidence_verify.py` to validate run bundles.
 
+## Summit GA Golden Path schema
+
+The PR workflow scaffold (`.github/workflows/summit-golden-path.yml`) emits a JSON evidence bundle
+at `artifacts/summit-golden-path/evidence-bundle.json` using `evidence/schema.json`.
+
+Required top-level fields:
+
+- `build_id`
+- `commit_sha`
+- `policy_results`
+- `test_results`
+- `provenance`
+- `timestamp`
+
 ### Evidence ID index entry format
 
 Add a new entry under `items` in `evidence/index.json` that maps the evidence ID to the three
