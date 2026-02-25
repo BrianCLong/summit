@@ -33,7 +33,7 @@ env:
 jobs:
   config-preflight:
     name: Config Preflight
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4 # v6
@@ -44,7 +44,7 @@ jobs:
 
   lint-typecheck:
     name: Lint & Typecheck
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -71,7 +71,7 @@ jobs:
 
   build-package:
     name: Build & Package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4
@@ -98,7 +98,7 @@ jobs:
 
   unit-tests:
     name: Unit Tests (Core)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -132,7 +132,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
@@ -194,7 +194,7 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
@@ -224,7 +224,7 @@ jobs:
   deterministic-build:
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: Deterministic Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [lint-typecheck, unit-tests]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -272,7 +272,7 @@ jobs:
 
   governance-docs-integrity:
     name: Governance / Docs Integrity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
@@ -298,7 +298,7 @@ jobs:
   golden-path:
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: Golden Path Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [deterministic-build, integration-tests]
     steps:
       - uses: actions/checkout@v4 # v6
@@ -336,7 +336,7 @@ jobs:
   e2e-tests:
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' }}
     name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
@@ -378,7 +378,7 @@ jobs:
 
   soc-control-verification:
     name: SOC Control Verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       checks: write
@@ -413,7 +413,7 @@ jobs:
 
   branch-protection-drift:
     name: Governance / Branch Protection Drift
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: read
       actions: read
@@ -452,7 +452,7 @@ jobs:
 
   ci-core-gate:
     name: CI Core Gate ✅
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs:
       - config-preflight
       - lint-typecheck
