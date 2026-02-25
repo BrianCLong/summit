@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-02-25 - [Batch Insert Result Collection]
+**Learning:** When refactoring individual loop inserts into multi-row batch inserts, if the function returns the created objects, the results from each chunk's `RETURNING *` clause must be manually collected into a single array (e.g., `results.push(...res.rows)`). Forgetting this leads to incomplete return values when input size exceeds `CHUNK_SIZE`.
+**Action:** Always verify that results from all chunks are accumulated when using multi-row inserts with `RETURNING`.

@@ -278,41 +278,34 @@ export class EntityCommentService {
       return [];
     }
 
-    const results: EntityCommentAttachment[] = [];
+    // Performance optimization: Use multi-row INSERT to reduce round-trips
     const CHUNK_SIZE = 100;
+    const results: EntityCommentAttachment[] = [];
 
-    // BOLT: Optimized batched insert with chunking to reduce database round-trips.
     for (let i = 0; i < attachments.length; i += CHUNK_SIZE) {
       const chunk = attachments.slice(i, i + CHUNK_SIZE);
       const values: any[] = [];
-      const placeholders: string[] = [];
-
-      chunk.forEach((attachment, index) => {
-        const offset = index * 6;
-        placeholders.push(
-          `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6})`,
-        );
-        values.push(
-          commentId,
-          attachment.fileName,
-          attachment.contentType || null,
-          attachment.sizeBytes || null,
-          attachment.storageUri || null,
-          attachment.metadata || {},
-        );
-      });
+      const placeholders = chunk
+        .map((attachment, index) => {
+          const offset = index * 6;
+          values.push(
+            commentId,
+            attachment.fileName,
+            attachment.contentType || null,
+            attachment.sizeBytes || null,
+            attachment.storageUri || null,
+            attachment.metadata || {},
+          );
+          return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6})`;
+        })
+        .join(', ');
 
       const res = await client.query(
         `
           INSERT INTO maestro.entity_comment_attachments (
-            comment_id,
-            file_name,
-            content_type,
-            size_bytes,
-            storage_uri,
-            metadata
+            comment_id, file_name, content_type, size_bytes, storage_uri, metadata
           )
-          VALUES ${placeholders.join(', ')}
+          VALUES ${placeholders}
           RETURNING *
         `,
         values,
@@ -386,28 +379,26 @@ export class EntityCommentService {
       return;
     }
 
+    // Performance optimization: Batch insert mentions to reduce database round-trips
     const CHUNK_SIZE = 100;
 
-    // BOLT: Optimized batched insert with chunking to reduce database round-trips.
     for (let i = 0; i < mentions.length; i += CHUNK_SIZE) {
       const chunk = mentions.slice(i, i + CHUNK_SIZE);
       const values: any[] = [];
-      const placeholders: string[] = [];
-
-      chunk.forEach((mention, index) => {
-        const offset = index * 3;
-        placeholders.push(`($${offset + 1}, $${offset + 2}, $${offset + 3})`);
-        values.push(commentId, mention.userId, mention.username);
-      });
+      const placeholders = chunk
+        .map((mention, index) => {
+          const offset = index * 3;
+          values.push(commentId, mention.userId, mention.username);
+          return `($${offset + 1}, $${offset + 2}, $${offset + 3})`;
+        })
+        .join(', ');
 
       await client.query(
         `
           INSERT INTO maestro.entity_comment_mentions (
-            comment_id,
-            mentioned_user_id,
-            mentioned_username
+            comment_id, mentioned_user_id, mentioned_username
           )
-          VALUES ${placeholders.join(', ')}
+          VALUES ${placeholders}
           ON CONFLICT (comment_id, mentioned_user_id) DO NOTHING
         `,
         values,
