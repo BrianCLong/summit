@@ -182,18 +182,12 @@ function ChatMessage({ message, isUser, isLoading }) {
             ) : (
               <Typography
                 variant="body1"
-                sx={{
-                  whiteSpace: 'pre-line',
-                  '& strong': { fontWeight: 'bold' },
-                  '& em': { fontStyle: 'italic' },
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: message.replace(
-                    /\*\*(.*?)\*\*/g,
-                    '<strong>$1</strong>',
-                  ),
-                }}
-              />
+                sx={{ whiteSpace: 'pre-line' }}
+              >
+                {message.split(/\*\*(.*?)\*\*/g).map((part, i) =>
+                  i % 2 === 1 ? <strong key={i}>{part}</strong> : part
+                )}
+              </Typography>
             )}
           </Paper>
         }
