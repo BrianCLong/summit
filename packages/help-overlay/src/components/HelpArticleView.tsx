@@ -6,6 +6,16 @@
 import React from 'react';
 import type { HelpArticleViewProps } from '../types.js';
 
+/** Strip dangerous HTML: scripts, event handlers, and javascript: URLs */
+function sanitizeHtml(html: string): string {
+  return html
+    .replace(/<script[\s>][\s\S]*?<\/script>/gi, '')
+    .replace(/<iframe[\s>][\s\S]*?<\/iframe>/gi, '')
+    .replace(/\bon\w+\s*=\s*["'][^"']*["']/gi, '')
+    .replace(/\bon\w+\s*=\s*[^\s>]*/gi, '')
+    .replace(/javascript\s*:/gi, 'about:invalid');
+}
+
 export function HelpArticleView({ article, onBack }: HelpArticleViewProps): JSX.Element {
   const backButtonStyles: React.CSSProperties = {
     display: 'inline-flex',
@@ -69,7 +79,7 @@ export function HelpArticleView({ article, onBack }: HelpArticleViewProps): JSX.
       {article.currentVersion?.contentHtml ? (
         <div
           style={contentStyles}
-          dangerouslySetInnerHTML={{ __html: article.currentVersion.contentHtml }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.currentVersion.contentHtml) }}
         />
       ) : article.currentVersion?.content ? (
         <div style={contentStyles}>
