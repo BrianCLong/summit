@@ -1,5 +1,6 @@
 import { jest, describe, it, expect, beforeEach, beforeAll, afterAll } from '@jest/globals';
 import dns from 'dns';
+import { validateSafeUrl as importedValidateSafeUrl } from './security';
 
 // Declare variable for the function
 let validateSafeUrl: (url: string) => Promise<string>;
@@ -12,8 +13,7 @@ describe('validateSafeUrl', () => {
        // Note: In some environments dns.lookup is a read-only property.
        lookupSpy = jest.spyOn(dns, 'lookup');
 
-       const module = await import('./security.js');
-       validateSafeUrl = module.validateSafeUrl;
+       validateSafeUrl = importedValidateSafeUrl;
      } catch (e) {
        console.error('Setup failed:', e);
        throw e;
