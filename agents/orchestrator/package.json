@@ -28,6 +28,7 @@
     "@types/node": "^20.19.25",
     "@types/uuid": "^9.0.7",
     "@vitest/coverage-v8": "^1.0.0",
+    "eslint": "^9.39.2",
     "typescript": "^5.3.3",
     "vitest": "^1.0.0"
   },
