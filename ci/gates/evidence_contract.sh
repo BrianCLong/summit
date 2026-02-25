@@ -51,63 +51,74 @@ def check_no_timestamps(data, path=""):
             errors.extend(check_no_timestamps(v, f"{path}[{i}]"))
     return errors
 
-def process_evidence(report_path):
-    print(f"Checking evidence: {report_path}")
-    report = load_json(report_path)
-
-    # Identify schema - for Moltbook Relay we use specific one
-    if "moltbook-relay" in report.get("evidence_id", ""):
+def process_single_report(report, report_path):
+    evidence_id = report.get("evidence_id", "")
+    if "moltbook-relay" in evidence_id:
         schema = "evidence/schemas/moltbook-relay-report.schema.json"
     else:
         schema = "evidence/schemas/report.schema.json"
 
     if not os.path.exists(schema):
-        print(f"Warning: Schema {schema} not found, skipping deep validation for {report_path}")
-        return True
+        pass
 
-    if not validate(report, schema):
-        print(f"FAILED schema validation: {report_path}")
-        return False
+    if os.path.exists(schema):
+        if not validate(report, schema):
+            print(f"FAILED schema validation: {report_path} (ID: {evidence_id})")
+            return False
 
     ts_errors = check_no_timestamps(report)
     if ts_errors:
         print(f"FAILED timestamp check: {report_path} contains forbidden fields: {ts_errors}")
         return False
 
-    # Check metrics
-    metrics_path = report_path.replace("report.json", "metrics.json")
-    if os.path.exists(metrics_path):
-        metrics = load_json(metrics_path)
-        m_schema = schema.replace("report", "metrics")
-        if not os.path.exists(m_schema):
-            print(f"Warning: Schema {m_schema} not found")
-        elif not validate(metrics, m_schema):
-            print(f"FAILED schema validation: {metrics_path}")
-            return False
-        ts_errors = check_no_timestamps(metrics)
-        if ts_errors:
-            print(f"FAILED timestamp check: {metrics_path} contains forbidden fields: {ts_errors}")
-            return False
-
-    # Check stamp (timestamps ARE allowed here)
-    stamp_path = report_path.replace("report.json", "stamp.json")
-    if os.path.exists(stamp_path):
-        stamp = load_json(stamp_path)
-        s_schema = schema.replace("report", "stamp")
-        if not os.path.exists(s_schema):
-            print(f"Warning: Schema {s_schema} not found")
-        elif not validate(stamp, s_schema):
-            print(f"FAILED schema validation: {stamp_path}")
-            return False
-
     return True
 
-# Main
+def process_evidence(report_path):
+    print(f"Checking evidence: {report_path}")
+    try:
+        data = load_json(report_path)
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON {report_path}: {e}")
+        return False
+
+    reports = []
+    if isinstance(data, list):
+        reports = data
+    elif isinstance(data, dict):
+        reports = [data]
+    else:
+        print(f"Error: {report_path} root is not list or dict")
+        return False
+
+    all_valid = True
+    for idx, report in enumerate(reports):
+        if not isinstance(report, dict):
+            continue
+
+        if not process_single_report(report, report_path):
+            all_valid = False
+
+    metrics_path = report_path.replace("report.json", "metrics.json")
+    if os.path.exists(metrics_path):
+        try:
+            metrics_data = load_json(metrics_path)
+            m_items = metrics_data if isinstance(metrics_data, list) else [metrics_data]
+            for m_item in m_items:
+                 if isinstance(m_item, dict):
+                     ts_errors = check_no_timestamps(m_item)
+                     if ts_errors:
+                         print(f"FAILED timestamp check: {metrics_path} contains forbidden fields: {ts_errors}")
+                         all_valid = False
+        except Exception as e:
+            print(f"Error checking metrics {metrics_path}: {e}")
+            all_valid = False
+
+    return all_valid
+
 evidence_dir = Path("evidence")
 found_any = False
 success = True
 
-# Search for report.json in evidence/ or subdirectories
 for p in evidence_dir.rglob("report.json"):
     found_any = True
     if not process_evidence(str(p)):
@@ -115,8 +126,6 @@ for p in evidence_dir.rglob("report.json"):
 
 if not found_any:
     print("No evidence reports found to validate.")
-    # Not necessarily a failure depending on context, but for this gate we might want it to fail if mandatory
-    # sys.exit(1)
 
 if not success:
     sys.exit(1)

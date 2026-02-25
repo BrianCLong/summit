@@ -5,7 +5,6 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "rootDir": ".",
     "outDir": "./dist",
     "esModuleInterop": true,
     "downlevelIteration": true,
