@@ -80,7 +80,7 @@
 ### PRs touched
 - Investigated: #18673, #18674
 - Local merge-ready branch prepared: `chore/daily-sprint-2026-02-25-1`
-- PR creation/update: deferred in this run (no `gh pr create` executed yet).
+- PR creation/update: attempted and blocked by GitHub API connectivity (`gh pr create` failed twice with `error connecting to api.github.com`).
 
 ### Commands run
 - Succeeded:
@@ -101,3 +101,5 @@
   - Follow-up: retry issue scan at run start and persist JSON snapshot artifact.
 - Blocker 2: analytics-engine still has legacy strict-typing debt (express handler typing and implicit any), now visible after ambient-type fix.
   - Follow-up: split into a focused remediation PR for `src/server.ts` request-handler signatures and service typing cleanup.
+- Blocker 3: unable to open PR from this run due intermittent GitHub API outage.
+  - Follow-up: re-run `gh pr create --base main --head chore/daily-sprint-2026-02-25-1 --title \"chore(ops): daily sprint log + analytics-engine type-scope fix\" --body-file /tmp/pr_body_daily_sprint_2026_02_25.md` when API is reachable.
