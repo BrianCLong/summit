@@ -65,7 +65,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
     try {
       const role = (req as any).user?.role;
       const userId = resolveUserId(req);
-      const status = (req.query.status as ApprovalStatus | undefined) || undefined;
+      const status = (((req.query.statu as string)s as string) as ApprovalStatus | undefined) || undefined;
 
       const approvals = await listApprovals({ status });
       const visible = canApprove(role)

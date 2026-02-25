@@ -95,13 +95,13 @@ router.get(
 
       // Parse query params
       const input = {
-        page: parseInt(req.query.page as string, 10) || 1,
-        pageSize: parseInt(req.query.pageSize as string, 10) || 20,
-        search: req.query.search as string,
-        role: req.query.role as string,
-        isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
-        sortBy: (req.query.sortBy as any) || 'createdAt',
-        sortOrder: (req.query.sortOrder as any) || 'desc',
+        page: parseInt(((req.query.pa as string)g as string)e as string, 10) || 1,
+        pageSize: parseInt(((req.query.pageSi as string)z as string)e as string, 10) || 20,
+        search: ((req.query.sear as string)c as string)h as string,
+        role: ((req.query.ro as string)l as string)e as string,
+        isActive: ((req.query.isActiv as string)e as string) === 'true' ? true : ((req.query.isActiv as string)e as string) === 'false' ? false : undefined,
+        sortBy: (((req.query.sortB as string)y as string) as any) || 'createdAt',
+        sortOrder: (((req.query.sortOrde as string)r as string) as any) || 'desc',
       };
 
       const envelope = await userService.listUsers(
@@ -250,7 +250,7 @@ router.delete(
     try {
       const principal = (req as any).principal;
       const { id } = req.params;
-      const hardDelete = req.query.hard === 'true';
+      const hardDelete = ((req.query.har as string)d as string) === 'true';
 
       const envelope = await userService.deleteUser(
         principal.tenantId,

@@ -1,0 +1,2981 @@
+{
+  "findings": [
+    {
+      "file": ".github/workflows/.archive/_oidc-example.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/a11y-lab.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/abac-policy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/accessibility.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/add-to-project.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/admin-cli.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/adr-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/agent-audit-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/agent-governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/agentic-lifecycle.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/agentic-policy-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/agentic-task-orchestrator.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/agsm-probes.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ai-refactor-dryrun.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/airgap-deployment.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/alert-hygiene.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/api-docs-sync.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/api-docs-validation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/attest-provenance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/attest-sbom.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/audit-artifacts.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/audit-branch-protections.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/audit-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/audit.strict.nightly.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-assign.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-draft-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-fix-vulnerabilities.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-label.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-merge-ready.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-resolve-conflicts.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-rollback.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/auto-scientist.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/automated-backups.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/automerge.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/autotriage-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/backup-restore-validation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/backup-verify.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/batch-merge.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/blue-green-canary.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/branch-cleanup.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/branch-hygiene.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/branch-protection.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/build-and-push.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/build.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/canary-deployment.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/canary-progress.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/canary-rollback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cd-deploy-staging.yaml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cd-deploy.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/cd-preview.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cd-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cd-rollback.yaml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cd-rollback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cdis.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/chaos-smoke.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/check-large-files.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-cd.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-e2e-full.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-e2e-smoke.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-hardened.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-image.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-main.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-platform.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-pr-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-sharded-example.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-supply-chain.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-test.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-validate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci-zap.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci.green.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci.main.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci.pr.scoped.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci.switchboard.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_baseline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_eval.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_observability.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_perf.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_policy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_provenance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ci_sdk.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cli.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/client-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/close-when-done.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/closed-pr-excavator.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/code-quality-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/codeql-dev.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/codeql.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cognitive-targeting-engine-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/companyos-api.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/companyos-canary-slo-gate.yaml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/companyos-service-template.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/compliance-attestation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/compliance-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/compliance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/compose-k6-smoke.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/compose-ui-screens.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/config-attest.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/configure-oidc.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/conftest.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/container-hardening.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/container-security.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/contract-tests.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/contract-verify.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/conventional-commit.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/copilot-adoption-report.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/copilot-guardrail.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/copilot-refresh.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/copilot-wins-rollup.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/coverage-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/create-roadmap-issues.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cross-repo-impact.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/cut-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/danger.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/data-quality-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/data-spine-governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dead-code-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deception-sim.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/delivery-train.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/demo-validate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deno.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dependabot-auto-merge.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dependency-complexity.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dependency-review.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dependency-update.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dependency_governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-compose.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-dev.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-pipeline.yaml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-preview-canary.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-prod-canary.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-production.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-stage-canary.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-stage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy-staging.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deploy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/deployment-consistency-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/detect-deception.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dev-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dev-radar.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/docker-build-multiarch.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/docker-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/docs-deploy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/docs-screenshots.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/docs.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dr-drill.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/dr-verify.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/e2e-observability.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/e2e.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/enhanced-testing.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/entity-resolution-train.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/environment-specific-tests.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/er-precision-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/error-budget-monitoring.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ethics-checks.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/evals.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/evidence-bundle-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/evidence-bundles.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/failover-cutback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/feature-flag-branches.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/finops-monitoring.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/flags-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/flaky-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/frontend-bundle-health.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ga-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ga-supply-chain.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/gitleaks.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-build.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-deploy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-path-ci.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-paths-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-preview.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-sample.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/golden-service-pipeline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/golden.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/grafana-import.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/graph-consistency.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/graphql-validation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/helm-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/helm-governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/helm-lint-validate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/helm-validation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/iac-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/image-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/incident-automation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/index-advisor.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/infra-deploy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/k6-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/k6-load.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/k6.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/key-rotation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/labeler.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/lambda-deploy-example.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/lane-integration.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/license-compliance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/lint-actions.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/lint-docs.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/lint-yaml.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/llm-cost-snapshot.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/load-test.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/lockfile-verify.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/log-mirror.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/maestro-pipeline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/marketplace-ga-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/master-orchestrator.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/mc-platform-v041-sovereign-safeguards.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/mega-pr-excavator.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/merge-queue-config.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/merge-queue.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/merge-train-controller.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/merge-train-intelligence.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/merge.queue.kicker.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/metrics-export.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/migration-audit.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/migration-dryrun.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/mirror-to-enterprise.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ml-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ml-pipeline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/mobile.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/model-catalog-staleness.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/nightly-cve-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/nightly-ops-delta.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/nightly.ops.perf.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/operational-verification.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ops-reminders.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ops.validate.stage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/optimized-deployment.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/org-vuln-weekly.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/owasp-zap-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/owasp-zap.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ownership-audit.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pact.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/performance-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/performance-regression.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/phase2-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pilot-phase1.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pilot-security-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pipeline-cd.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pipeline-nightly-security.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pipeline-rollback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pipeline-smoke.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/platform-health.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/platform-sre-pipeline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/playwright-osint-nightly.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-checks.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-ci.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-fuzzer.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-fuzzing.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-gate.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-pack.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-sim.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/policy-test.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/populate-october-project.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/post-deploy-verification.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/post-ga-patch.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pq-dual-sig-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-auto-assign-reviewers.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-auto-update.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-green-up.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-labeler.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-policy-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-size-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-size-checker.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-stale-close.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-test-coverage-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-triage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pr-tripwire.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/preview-env.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/preview-janitor.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/preview-teardown.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/preview-ttl-reaper.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/preview.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/projects-sla.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/promise-tracker.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/promote-on-build.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/promote.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/prompt-lint.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/prov-ledger-verifier.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/provenance-build.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/prune.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/publish-model-catalog-doc.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/publish.dryrun.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/pve.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/python-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/rbac-drift.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/realtime-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/regulatory-stance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-automation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-captain-demo.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-captain.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-comprehensive.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-ga.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-hardened.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-notes.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-on-main.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-train-discipline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/release-train-evidence.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/release-verify.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/reports-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/require-labels.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/required-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/residency.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/review-sla.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/reviewdog.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/revive-closed-prs.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/route-slo-gate.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/run_pr_merge.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/runbook-drill.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/safety-harness.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/sbom-provenance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/sbom-vuln-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/sbom.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/scenario-evaluation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/schema-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/schema-validation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/scpe.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/seal-secrets.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/search-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/secrets-lint.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/secrets-rotation-reminder.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-audit.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-chaos-drills.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-companyos.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-comprehensive.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/security-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-hardening.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-policy-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-quickscan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/security-scans.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/self-hosted-runners-example.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/ses.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/slo-badge.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/slsa-attestation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/slsa-l3-airgap-build.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/slsa-l3-provenance.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/smoke-compose.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/soc2-evidence.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/sonar-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/stale-cleanup.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/stale.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/standards-guard.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/startup-race-test.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/storybook-smoke.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/strategy-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/summit-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/supply-chain-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/supply-chain.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/synthetic-journeys.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/synthetic-monitoring.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/tenant-api.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/tenant-isolation-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/tenant-simulation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/terraform-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/terraform-plan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/test-coverage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/test-policy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/threat-model-coverage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/tip.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/trivy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/turbo-ci-optimizer.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/v036-trustless-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/v037-sovereign-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/v038-quantum-gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/v040-transcendent-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/v041-go-live.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/validate-canary-config.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/validate-canary-params.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/validate-grafana-json.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/validate-model-catalog.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/validate-v035-config.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/vuln-weekly-report.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/wargame-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/web-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/webapp-e2e.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/week2-deployment.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/weekly-hygiene.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/weekly-vuln-report.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/welcome-contributors.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/.archive/workflow-audit.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/zap-dast.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/.archive/zk-deconfliction-guard.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/README-PR-AUTOMATION.md",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/README.md",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/_auth-oidc.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_deploy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-aws.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-build.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-ci-fast.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-ci-metrics.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-ci-perf.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-ga-readiness.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-governance-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-node-pnpm-setup.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-security-compliance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-setup.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-test-suite.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-test.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/_reusable-toolchain-setup.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/agentic-policy-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/ai-governance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/api-determinism-check.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/archive/_reusable-ci-security.yml.disabled",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/archive/_reusable-governance-gate.yml.disabled",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/archive/ci-template-optimized.yml.disabled",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/archive/ga-risk-gate.yml.disabled",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/archive/hello-service-ci.yml.disabled",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/archive/mirror-to-personal.yml.disabled",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/azure-turin-v7-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/backup-dr.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/branch-lifecycle.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/branch-protection-reconcile.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/ci-health-monitor.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/ci-post-merge.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/ci-runner-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/ci-security.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/cicd-observer.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/cogsec_evidence.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/config/zap-rules.tsv",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/copilot-golden-path.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/deploy-multi-region.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/error-budget-alerts.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/export-ops-evidence.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/fresh-evidence-rate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/generate-ops-evidence-pack.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/go-live-release.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/golden-main.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/golden-path/README.md",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/golden-path/_canary-rollback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/golden-path/_golden-path-pipeline.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/golden-path/ci-consolidated-example.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/governance-daily.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/graph-sync-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/hotfix-postmortem-enforcer.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/issue-backfill.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/issue-stale-guard.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/issue-triage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/jetrl-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/kev-alert.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/mcp-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/mega-pr-containment.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/mirror-to-personal.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/narrative-ci.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/nightly.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/policy-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/post-deploy-gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/post-release-canary.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/pr-conflict-forecast.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/pr-triage.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/promotion-bundle.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/rc-preparation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/redaction-trend-alerts.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/regulatory-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/release-ops-slo-issue.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/release-override.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/release-promote-guard.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/release-rollback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/release-train.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/repro-docker.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/_reusable-rdp-hardened.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/_reusable-rdp-oidc-auth.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/attestation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/build-test.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/canary-rollback.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/contract.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/e2e.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/reusable/iac_plan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/migration.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/migrations_gate.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/package.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/reusable/policy_opa.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/preview_deploy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/sast_sca.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/reusable/sbom.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/security-scan.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/security.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/reusable/smoke.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/supply-chain-policy.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/reusable/unit.yml",
+      "level": "high",
+      "rule": "yaml-parse",
+      "msg": "Invalid YAML"
+    },
+    {
+      "file": ".github/workflows/security-observability.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/security-playbook-automation.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/slsa-provenance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/solid-gate-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/summit_skill_gates.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/supplychain-drift.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/tag-verification.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/test-runners.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/weekly-assurance.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    },
+    {
+      "file": ".github/workflows/weekly-ops-evidence.yml",
+      "level": "high",
+      "rule": "concurrency-missing",
+      "msg": "No concurrency set at workflow nor job level"
+    }
+  ],
+  "summary": {
+    "high": 495,
+    "medium": 0,
+    "low": 0,
+    "total": 495,
+    "generated_at": "2026-02-25T01:58:12.416Z"
+  }
+}

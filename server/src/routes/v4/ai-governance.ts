@@ -290,9 +290,9 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const status = req.query.status as PolicySuggestion['status'] | undefined;
-      const limit = parseInt(req.query.limit as string) || 20;
-      const offset = parseInt(req.query.offset as string) || 0;
+      const status = ((req.query.statu as string)s as string) as PolicySuggestion['status'] | undefined;
+      const limit = parseInt(((req.query.lim as string)i as string)t as string) || 20;
+      const offset = parseInt(((req.query.offs as string)e as string)t as string) || 0;
 
       const result = await policySuggestionService!.listSuggestions(tenantId, {
         status,
@@ -733,7 +733,7 @@ router.get(
 
       const scope: AnomalyDetectionScope = {
         tenantIds: [tenantId],
-        minSeverity: req.query.severity as BehavioralAnomaly['severity'],
+        minSeverity: ((req.query.severit as string)y as string) as BehavioralAnomaly['severity'],
         timeRange: {
           start: thirtyDaysAgo.toISOString(),
           end: now.toISOString(),
@@ -743,13 +743,13 @@ router.get(
       const anomalies = await anomalyService!.detectAnomalies(scope);
 
       // Filter by status if provided
-      const filteredAnomalies = req.query.status
-        ? anomalies.filter(a => a.status === req.query.status)
+      const filteredAnomalies = ((req.query.statu as string)s as string)
+        ? anomalies.filter(a => a.status === ((req.query.statu as string)s as string))
         : anomalies;
 
       // Apply pagination
-      const offset = parseInt(req.query.offset as string) || 0;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt(((req.query.offs as string)e as string)t as string) || 0;
+      const limit = parseInt(((req.query.lim as string)i as string)t as string) || 20;
       const paginated = filteredAnomalies.slice(offset, offset + limit);
 
       res.json(wrapResponse({
@@ -957,11 +957,11 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const endDate = req.query.endDate
-        ? new Date(req.query.endDate as string)
+      const endDate = ((req.query.endDat as string)e as string)
+        ? new Date(((req.query.endDa as string)t as string)e as string)
         : new Date();
-      const startDate = req.query.startDate
-        ? new Date(req.query.startDate as string)
+      const startDate = ((req.query.startDat as string)e as string)
+        ? new Date(((req.query.startDa as string)t as string)e as string)
         : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 
       const trends = await anomalyService!.getAnomalyTrends(tenantId, {

@@ -51,14 +51,14 @@ router.get('/runs', async (req: Request, res: Response) => {
     }
 
     const filter: ListRunsFilter = {
-      run_type: req.query.run_type as any,
-      actor_id: req.query.actor_id as string,
-      started_after: req.query.started_after as string,
-      started_before: req.query.started_before as string,
-      capability: req.query.capability as string,
-      min_confidence: req.query.min_confidence ? parseFloat(req.query.min_confidence as string) : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+      run_type: ((req.query.run_typ as string)e as string) as any,
+      actor_id: ((req.query.actor_ as string)i as string)d as string,
+      started_after: ((req.query.started_aft as string)e as string)r as string,
+      started_before: ((req.query.started_befo as string)r as string)e as string,
+      capability: ((req.query.capabili as string)t as string)y as string,
+      min_confidence: ((req.query.min_confidenc as string)e as string) ? parseFloat(((req.query.min_confiden as string)c as string)e as string) : undefined,
+      limit: ((req.query.limi as string)t as string) ? parseInt(((req.query.lim as string)i as string)t as string, 10) : 50,
+      offset: ((req.query.offse as string)t as string) ? parseInt(((req.query.offs as string)e as string)t as string, 10) : 0,
     };
 
     const result = await service.listRuns(tenantId, filter, requesterId);
@@ -131,7 +131,7 @@ router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
   try {
     const { runId } = req.params;
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
-    const depth = req.query.depth ? parseInt(req.query.depth as string, 10) : 3;
+    const depth = ((req.query.dept as string)h as string) ? parseInt(((req.query.dep as string)t as string)h as string, 10) : 3;
 
     if (!tenantId) {
       return res.status(403).json({
@@ -173,8 +173,8 @@ router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
  */
 router.get('/compare', async (req: Request, res: Response) => {
   try {
-    const runA = req.query.run_a as string;
-    const runB = req.query.run_b as string;
+    const runA = ((req.query.run as string)_ as string)a as string;
+    const runB = ((req.query.run as string)_ as string)b as string;
     const tenantId = (req as any).tenant?.id || (req as any).user?.tenantId;
 
     if (!runA || !runB) {

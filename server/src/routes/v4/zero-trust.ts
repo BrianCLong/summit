@@ -611,16 +611,16 @@ router.get(
     try {
       const query: AuditQuery = {
         tenantId: getTenantId(req),
-        actorId: req.query.actorId as string,
-        resourceType: req.query.resourceType as string,
-        resourceId: String(req.query.resourceId || ""),
-        entryTypes: req.query.entryType
-          ? [req.query.entryType as any]
+        actorId: ((req.query.actor as string)I as string)d as string,
+        resourceType: ((req.query.resourceTy as string)p as string)e as string,
+        resourceId: String(((req.query.resourceI as string)d as string) || ""),
+        entryTypes: ((req.query.entryTyp as string)e as string)
+          ? [((req.query.entryTyp as string)e as string) as any]
           : undefined,
-        startTime: req.query.startTime as string,
-        endTime: req.query.endTime as string,
-        limit: parseInt(req.query.limit as string) || 100,
-        offset: parseInt(req.query.offset as string) || 0,
+        startTime: ((req.query.startTi as string)m as string)e as string,
+        endTime: ((req.query.endTi as string)m as string)e as string,
+        limit: parseInt(((req.query.lim as string)i as string)t as string) || 100,
+        offset: parseInt(((req.query.offs as string)e as string)t as string) || 0,
       };
 
       const entries = await zeroTrustService!.audit.queryEntries(query);
