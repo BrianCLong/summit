@@ -30,7 +30,6 @@ permissions:
 
 env:
   NODE_VERSION: '20'
-  PNPM_VERSION: '9'
 
 jobs:
   # Single setup job that all test jobs can depend on
@@ -43,9 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - uses: pnpm/action-setup@v4
       
       - uses: actions/setup-node@v4 # v4
         with:
@@ -100,9 +97,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - uses: pnpm/action-setup@v4
       
       - uses: actions/setup-node@v4 # v4
         with:
@@ -173,9 +168,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
+      - uses: pnpm/action-setup@v4
       
       - uses: actions/setup-node@v4 # v4
         with:
