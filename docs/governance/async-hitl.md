@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Async Human-in-the-Loop (HITL) Strategy
 
 **Status:** Draft

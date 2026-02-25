@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Canonical Sources for Governance Artifacts
 
 This document defines the single source of truth for critical governance artifacts in the Summit platform. All other implementations are considered deprecated and should be removed.

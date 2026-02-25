@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 Owner: @intelgraph/policy-team
 Last-Reviewed: 2026-01-27
 Evidence-IDs: EVID-OSINT-TURN-004

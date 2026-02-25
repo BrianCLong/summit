@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Final War Game Evaluation: Phase 4 (Q1 2026)
 
 ## Overview

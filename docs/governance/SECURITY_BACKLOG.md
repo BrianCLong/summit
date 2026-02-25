@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Security & Governance Backlog
 
 This is the deterministic backlog for security vulnerabilities, governance gaps, and compliance action items.

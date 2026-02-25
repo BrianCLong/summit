@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Defense Data Handling (CUI & CMMC)
 **Status:** Mandatory for Defense/Federal Clients
 **Standard:** CMMC 2.0 (Level 2), NIST SP 800-171 Rev 3

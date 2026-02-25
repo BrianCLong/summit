@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # OSINT Methodology GA Impact Assessment
 
 **Methodology Source:** Automation Turn #5 (2026-01-26)

@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Evidence ID Consistency Gate - Rollout Plan (v1.3.0)
 
 ## Executive Summary

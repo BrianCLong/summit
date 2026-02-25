@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Cloud Authorization Strategy (FedRAMP 20x)
 **Status:** Strategic Draft
 **Target:** FedRAMP Moderate / High

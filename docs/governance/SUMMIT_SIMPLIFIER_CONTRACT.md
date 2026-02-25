@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Summit Simplifier Contract
 
 **Authority:** Governance Council (Meta-Governance Framework)

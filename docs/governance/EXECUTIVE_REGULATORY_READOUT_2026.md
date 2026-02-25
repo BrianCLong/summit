@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Executive Readout: 2026 Regulatory Landscape
 **Date:** January 25, 2026
 **To:** Summit Leadership / Board

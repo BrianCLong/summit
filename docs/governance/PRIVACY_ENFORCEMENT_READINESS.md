@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Privacy Enforcement Readiness Strategy
 **Status:** Active
 **Effective Date:** January 1, 2026

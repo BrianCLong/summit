@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 Owner: Jules (Release Captain)
 Last-Reviewed: 2026-01-24
 Evidence-IDs: EVID-CI-HARDENING-001, EVID-SLO-GATE-001

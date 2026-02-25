@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 # Toolchain Controls Map (v1)
 
 This document maps Summit’s devstation toolchain and evidence artifacts to SOC 2, ISO 27001, and SLSA objectives.

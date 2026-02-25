@@ -1,3 +1,9 @@
+---
+Status: Draft
+Owner: TBD
+Last-Reviewed: 2026-02-25
+Evidence-IDs: EVD-TODO-001
+---
 **Owner**: @intelgraph/provenance-team
 **Last-Reviewed**: 2026-01-27
 **Evidence-IDs**: EVID-GOV-OSINT-POLICY-001
