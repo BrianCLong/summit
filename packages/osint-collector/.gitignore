@@ -1,0 +1,12 @@
+# Compiled output
+dist/
+*.js
+*.js.map
+*.d.ts
+!jest.config.cjs
+
+# Test coverage
+coverage/
+
+# Dependencies
+node_modules/
