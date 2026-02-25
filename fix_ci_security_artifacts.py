@@ -1,10 +1,12 @@
 import os
 
+
 def fix_ci_security_yml():
     filepath = ".github/workflows/ci-security.yml"
-    if not os.path.exists(filepath): return
+    if not os.path.exists(filepath):
+        return
 
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     # 1. Fix Gitleaks license issue by using a free alternative or removing the license check expectation if possible.

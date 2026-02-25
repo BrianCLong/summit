@@ -14,7 +14,7 @@ class SchemaLinter:
     def __init__(self, neo4j_client):
         self.client = neo4j_client
 
-    def lint(self) -> List[str]:
+    def lint(self) -> list[str]:
         warnings = []
         try:
             with self.client.driver.session() as session:
@@ -31,7 +31,8 @@ class SchemaLinter:
                 label_props = {}
                 for row in result:
                     labels = tuple(sorted(row.get("nodeLabels", [])))
-                    if not labels: continue
+                    if not labels:
+                        continue
                     prop = row.get("propertyName")
                     if labels not in label_props:
                         label_props[labels] = set()

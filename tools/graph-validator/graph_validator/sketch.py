@@ -1,5 +1,6 @@
 import math
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 
 class LogBinSketch:
     """
@@ -8,7 +9,7 @@ class LogBinSketch:
     """
     def __init__(self, base: float = 1.1):
         self.base = base
-        self.counts: Dict[int, int] = {}
+        self.counts: dict[int, int] = {}
         self.n = 0
         self.min_degree = float('inf')
         self.max_degree = float('-inf')
@@ -39,7 +40,7 @@ class LogBinSketch:
         for bin_idx, count in other.counts.items():
             self.counts[bin_idx] = self.counts.get(bin_idx, 0) + count
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "type": "log_bin_histogram",
             "base": self.base,
@@ -50,19 +51,21 @@ class LogBinSketch:
         }
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'LogBinSketch':
+    def from_dict(cls, data: dict[str, Any]) -> 'LogBinSketch':
         sketch = cls(base=data["base"])
         sketch.n = data["n"]
         sketch.min_degree = data.get("min", float('inf'))
         sketch.max_degree = data.get("max", float('-inf'))
-        if sketch.min_degree is None: sketch.min_degree = float('inf')
-        if sketch.max_degree is None: sketch.max_degree = float('-inf')
+        if sketch.min_degree is None:
+            sketch.min_degree = float('inf')
+        if sketch.max_degree is None:
+            sketch.max_degree = float('-inf')
 
         # Convert string keys back to int if JSON serialized them as strings
         sketch.counts = {int(k): v for k, v in data["counts"].items()}
         return sketch
 
-    def get_cdf(self) -> List[tuple[float, float]]:
+    def get_cdf(self) -> list[tuple[float, float]]:
         """Returns approximate CDF as (value, probability) pairs."""
         if self.n == 0:
             return []

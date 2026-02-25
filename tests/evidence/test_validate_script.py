@@ -1,13 +1,15 @@
-import sys
-import os
 import json
-import pytest
+import os
+import sys
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add scripts directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../scripts'))
 
 import evidence_validate
+
 
 class TestEvidenceValidate:
     def test_check_timestamps_location(self):
@@ -108,7 +110,7 @@ class TestEvidenceValidate:
         ]):
             with pytest.raises(SystemExit) as pytest_wrapped_e:
                 evidence_validate.main()
-            assert pytest_wrapped_e.type == SystemExit
+            assert pytest_wrapped_e.type is SystemExit
             assert pytest_wrapped_e.value.code == 1
 
     def test_integration_fail_extra_property(self, tmp_path):
@@ -149,5 +151,5 @@ class TestEvidenceValidate:
         ]):
             with pytest.raises(SystemExit) as pytest_wrapped_e:
                 evidence_validate.main()
-            assert pytest_wrapped_e.type == SystemExit
+            assert pytest_wrapped_e.type is SystemExit
             assert pytest_wrapped_e.value.code == 1

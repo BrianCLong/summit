@@ -1,5 +1,6 @@
-import pytest
 import math
+
+import pytest
 
 # --- Drift Metrics Implementation (to be moved to src later if needed) ---
 
@@ -31,7 +32,8 @@ def rank_biased_overlap(list_a, list_b, p=0.9):
     # Simplified implementation for equal length or min length.
 
     k = max(len(list_a), len(list_b))
-    if k == 0: return 1.0
+    if k == 0:
+        return 1.0
 
     overlap = 0
     rbo_score = 0

@@ -1,13 +1,15 @@
 import json
 import os
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel
+
 
 class SessionState(BaseModel):
     session_id: str
     step: int
-    history: List[Dict[str, Any]]
-    metadata: Dict[str, Any] = {}
+    history: list[dict[str, Any]]
+    metadata: dict[str, Any] = {}
 
 class CheckpointManager:
     def __init__(self, checkpoint_dir: str = "artifacts/checkpoints"):
@@ -19,12 +21,14 @@ class CheckpointManager:
 
     def save_checkpoint(self, state: SessionState) -> str:
         path = self._get_path(state.session_id, state.step)
-        with open(path, "w") as f: f.write(state.model_dump_json(indent=2))
+        with open(path, "w") as f:
+            f.write(state.model_dump_json(indent=2))
         return path
 
     def load_checkpoint(self, session_id: str, step: int) -> SessionState:
         path = self._get_path(session_id, step)
-        with open(path, "r") as f: data = json.load(f)
+        with open(path) as f:
+            data = json.load(f)
         return SessionState.model_validate(data)
 
     def get_latest_step(self, session_id: str) -> int:

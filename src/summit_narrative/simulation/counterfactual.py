@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict
 
-from ..nog.snapshot import canonical_hash
+from summit_narrative.nog.snapshot import canonical_hash
+
 from .transition import apply_intervention
 
 
@@ -11,10 +12,10 @@ from .transition import apply_intervention
 class SimResult:
     input_snapshot: str
     hypothetical_snapshot: str
-    metrics: Dict[str, Any]
+    metrics: dict[str, Any]
 
 
-def simulate(nog, intervention: Dict[str, Any]) -> SimResult:
+def simulate(nog: Any, intervention: dict[str, Any]) -> SimResult:
     base_hash = canonical_hash(nog)
     hypothetical = apply_intervention(nog, intervention)
     hypothetical_hash = canonical_hash(hypothetical)
