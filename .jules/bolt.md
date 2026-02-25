@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-08-20 - [Batched Signal Insertion Performance]
+**Learning:** In high-throughput risk scoring, individual signal insertion (N round-trips) is the primary latency driver. Batching signals into groups of 100 reduces round-trips by 99% for large datasets while staying well within PostgreSQL's parameter limits.
+**Action:** Always use multi-row `INSERT` for signal collections in `RiskRepository` and similar data models.
