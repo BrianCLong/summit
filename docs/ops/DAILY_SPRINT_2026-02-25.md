@@ -42,6 +42,10 @@
   - `#18701`: `REVIEW_REQUIRED`, `BLOCKED`, CI queue pending.
 - Confirmed boundary checks are green in this workspace:
   - `node scripts/check-boundaries.cjs` -> PASS (`No boundary violations found`).
+- Published sprint artifact branch for review handoff:
+  - Branch: `codex/daily-sprint-2026-02-25`
+  - Commit: `f258490d7b`
+  - Push: successful to `origin/codex/daily-sprint-2026-02-25`.
 
 ### Blockers encountered
 1. GitHub issues intake instability:
@@ -52,6 +56,10 @@
    - Command: `git checkout bolt/batch-risk-signals-2994823529890265405`
    - Failure: branch already attached to another local worktree at `/Users/brianlong/.codex/worktrees/c9a6/summit`.
    - Suspected root cause: active parallel automation/worktree ownership collision.
+3. PR creation API failure:
+   - Command: `gh pr create --base main --head codex/daily-sprint-2026-02-25 ...`
+   - Failure: `error connecting to api.github.com`.
+   - Suspected root cause: transient network/API availability.
 
 ## Validation Evidence
 
@@ -66,6 +74,7 @@
 ### Commands failed
 - `gh issue list --limit 100 --state open --json number,title,labels,updatedAt,url` (GitHub API connection error)
 - `git checkout bolt/batch-risk-signals-2994823529890265405` (branch in use by another worktree)
+- `gh pr create --base main --head codex/daily-sprint-2026-02-25 ...` (GitHub API connection error)
 
 ## End-of-Day Sprint Report
 
