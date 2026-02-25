@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-server",
-  "version": "4.1.4",
+  "version": "4.2.3",
   "description": "IntelGraph Platform Backend API",
   "main": "dist/src/index.js",
   "type": "module",
@@ -23,7 +23,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "case-overview-cache": "ts-node src/scripts/case-overview-cache.ts",
-    "migrate": "tsx scripts/managed-migrate.ts up",
+    "migrate": "npx tsx scripts/managed-migrate.ts up",
     "migrate:persistence": "node scripts/migrate-persistence.js",
     "verify:policies": "tsx scripts/verify_policy_lifecycle.ts && tsx scripts/verify_policy_simulation.ts",
     "worker:outbox": "node scripts/outbox-worker.js",
@@ -36,7 +36,9 @@
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
     "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts",
     "partition:maintain": "ts-node scripts/partition-maintenance.ts",
-    "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts"
+    "db:migration:check": "node --loader ts-node/esm scripts/migration_check.ts",
+    "test:security": "echo No security tests defined",
+    "ga:evidence": "echo No evidence generation defined"
   },
   "dependencies": {
     "@apollo/server": "5.2.0",

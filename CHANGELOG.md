@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- Hardened administrative routes (dr, airgap, analytics) with mandatory authentication and RBAC.
+### Security
+- Hardened administrative routes (dr, airgap, analytics) with mandatory authentication and RBAC.
+
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.

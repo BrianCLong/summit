@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: "20"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -96,7 +96,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: "20"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -120,7 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            helm lint helm/
+            find helm/ -maxdepth 1 -type d ! -name "helm" -exec helm lint {} +
           fi
 
       - name: Terraform Plan
@@ -152,7 +152,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "18"
+          node-version: "20"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

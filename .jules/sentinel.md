@@ -36,7 +36,7 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
-## 2026-03-02 - [HIGH] Unauthenticated Operational Routers
+## 2026-02-25 - [HIGH] Unauthenticated Operational Routers
 **Vulnerability:** Several sensitive operational routers (`dr.ts`, `analytics.ts`, `airgap.ts`) were mounted at the root level in `server/src/app.ts` without authentication or Role-Based Access Control (RBAC). These endpoints handled disaster recovery, system analytics, and secure data transfers.
 **Learning:** Routers mounted at the root level are often excluded from global `/api` middleware. Security audits must explicitly verify the mount point of every router to ensure standard authentication wrappers are applied.
 **Prevention:** Always wrap root-level administrative routers with `ensureAuthenticated` and `ensureRole` middleware. Prioritize standardizing all API routes under a protected prefix (e.g., `/api`) where feasible.

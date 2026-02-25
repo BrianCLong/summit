@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 2 ]]; then
-  echo "Usage: $0 <image-name> <output-file>" >&2
-  exit 64
-fi
+# Default values if not provided
+IMAGE_NAME="${1:-summit-default-scan}"
+OUTPUT_PATH="${2:-reports/trivy-report.json}"
 
-IMAGE_NAME="$1"
-OUTPUT_PATH="$2"
+if [[ $# -eq 0 ]]; then
+  echo "[trivy] No image name provided, defaulting to ${IMAGE_NAME}"
+fi
 OUTPUT_DIR="$(dirname "${OUTPUT_PATH}")"
 OUTPUT_FILE="$(basename "${OUTPUT_PATH}")"
 mkdir -p "${OUTPUT_DIR}"
