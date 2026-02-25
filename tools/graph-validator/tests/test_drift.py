@@ -1,15 +1,16 @@
-import unittest
-import os
 import json
+import os
 import shutil
 import sys
+import unittest
 
 # Add parent dir to path so we can import graph_validator
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from graph_validator.sketch import LogBinSketch
-from graph_validator.ks import ks_distance
 from graph_validator.drift import DriftDetector
+from graph_validator.ks import ks_distance
+from graph_validator.sketch import LogBinSketch
+
 
 class TestGraphValidator(unittest.TestCase):
     def setUp(self):
@@ -20,7 +21,7 @@ class TestGraphValidator(unittest.TestCase):
 
     def load_sketch(self, filepath):
         sketch = LogBinSketch()
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             for line in f:
                 try:
                     d = json.loads(line).get("degree", 0)

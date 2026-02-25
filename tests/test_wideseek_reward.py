@@ -1,5 +1,7 @@
 import pytest
+
 from summit.train.wideseek import calculate_reward, compute_group_advantages
+
 
 def test_reward_invalid_format():
     r = calculate_reward(item_f1=1.0, is_format_valid=False, has_tool_usage=True, response_length=100)

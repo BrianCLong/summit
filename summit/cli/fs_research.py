@@ -1,10 +1,16 @@
 import argparse
 import sys
 from pathlib import Path
-from summit.flags import FS_RESEARCHER_ENABLED
-from summit.agents.fs_researcher.workspace import init_workspace, write_deterministic_json, compute_stamp
+
 from summit.agents.fs_researcher.context_builder import ContextBuilder
 from summit.agents.fs_researcher.report_writer import ReportWriter
+from summit.agents.fs_researcher.workspace import (
+    compute_stamp,
+    init_workspace,
+    write_deterministic_json,
+)
+from summit.flags import FS_RESEARCHER_ENABLED
+
 
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="summit fs-research")

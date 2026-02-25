@@ -1,8 +1,11 @@
 import json
 import os
-import pytest
+
 import jsonschema
+import pytest
+
 from summit.mgi.config import MGIConfig
+
 
 def test_mgi_config_defaults():
     # Clear environment variables to test defaults

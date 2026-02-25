@@ -1,8 +1,10 @@
-import unittest
-import os
 import json
+import os
+import unittest
+
 from summit.security.audit import AuditLogger
-from summit.security.policy_enforcement import SecurityPolicyEngine, PolicyRequest
+from summit.security.policy_enforcement import PolicyRequest, SecurityPolicyEngine
+
 
 class TestPolicyEnforcement(unittest.TestCase):
     def setUp(self):
@@ -36,7 +38,7 @@ class TestPolicyEnforcement(unittest.TestCase):
         req = PolicyRequest(agent_id="agent_a", tool_name="tool_dangerous", arguments={})
         self.engine.check(req)
 
-        with open(self.log_path, "r") as f:
+        with open(self.log_path) as f:
             lines = f.readlines()
             last_line = json.loads(lines[-1])
             self.assertEqual(last_line["decision"], "DENY")

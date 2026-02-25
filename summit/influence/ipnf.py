@@ -1,12 +1,14 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from summit.graph.model import Node
+
 
 class IPNFAnalyzer:
     """
     Institutional Process Narrative Fingerprinting (IPNF)
     Identifies campaigns targeting process legitimacy.
     """
-    def identify_process_attacks(self, nodes: List[Node]) -> Dict[str, Any]:
+    def identify_process_attacks(self, nodes: list[Node]) -> dict[str, Any]:
         """
         Classifies and correlates procedural-legitimacy frames.
         """

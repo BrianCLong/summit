@@ -1,7 +1,8 @@
 import os
 
+
 def fix_workflow(filepath, fix_pnpm_version=False, inject_python=False):
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     lines = content.splitlines()

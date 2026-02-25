@@ -10,12 +10,12 @@ import sqlite3
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from time import perf_counter
 from typing import Any, Protocol
 
 
-class DeliveryStatus(str, Enum):
+class DeliveryStatus(StrEnum):
     PENDING = "pending"
     RETRYING = "retrying"
     DELIVERED = "delivered"

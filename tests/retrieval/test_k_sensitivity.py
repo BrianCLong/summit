@@ -1,5 +1,6 @@
 import pytest
 
+
 class MockUnstableRetriever:
     """
     Simulates a vector index that is sensitive to 'k'.

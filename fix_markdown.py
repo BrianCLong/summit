@@ -1,9 +1,10 @@
-import re
 import os
+import re
+
 
 def fix_file(filepath):
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             lines = f.readlines()
     except FileNotFoundError:
         return

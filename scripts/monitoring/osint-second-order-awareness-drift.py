@@ -5,14 +5,15 @@ Usage: python osint-second-order-awareness-drift.py --alerts-file alerts.json
 """
 import argparse
 import json
-import sys
 import os
-from datetime import datetime, timedelta, timezone
+import sys
+from datetime import UTC, datetime, timedelta, timezone
 
 # Ensure summit package is in path
 sys.path.append(os.getcwd())
 
 from summit.osint.meta_alerts import MetaAlertMonitor
+
 
 def main():
     parser = argparse.ArgumentParser(description="Monitor for OSINT drift and meta-alerts")
@@ -23,11 +24,11 @@ def main():
         print("No alerts file provided or file not found.")
         sys.exit(1)
 
-    with open(args.alerts_file, 'r') as f:
+    with open(args.alerts_file) as f:
         alerts = json.load(f)
 
     # Assume window is last 24 hours
-    window_start = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+    window_start = (datetime.now(UTC) - timedelta(hours=24)).isoformat()
 
     monitor = MetaAlertMonitor()
     meta_alerts = monitor.analyze_alerts(alerts, window_start)

@@ -1,11 +1,13 @@
 import time
 from typing import Any, Dict, Optional
+
 from opentelemetry import trace
+
 from .evidence import evidence_id as gen_evidence_id
-from .writer import ObservabilityWriter
 from .provenance import DecisionProvenance
-from .state import StateSnapshot
 from .redaction import Redactor
+from .state import StateSnapshot
+from .writer import ObservabilityWriter
 
 tracer = trace.get_tracer("summit.observability.agent")
 
@@ -17,21 +19,21 @@ class ObservableAgent:
         self.writer: Optional[ObservabilityWriter] = None
         self.provenance: Optional[DecisionProvenance] = None
 
-    def _ensure_observability(self, inputs: Dict[str, Any]):
+    def _ensure_observability(self, inputs: dict[str, Any]):
         eid = gen_evidence_id(inputs)
         # Re-initialize writer if evidence ID changes (new run)
         if not self.writer or self.writer.evidence_id != eid:
             self.writer = ObservabilityWriter(eid)
             self.provenance = DecisionProvenance(eid)
 
-    def decide(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def decide(self, request: dict[str, Any]) -> dict[str, Any]:
         return self._wrap_execution("decide", request)
 
-    def process(self, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def process(self, inputs: dict[str, Any]) -> dict[str, Any]:
         """Support for ShadowAgent interface."""
         return self._wrap_execution("process", inputs)
 
-    def _wrap_execution(self, method_name: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
+    def _wrap_execution(self, method_name: str, inputs: dict[str, Any]) -> dict[str, Any]:
         self._ensure_observability(inputs)
 
         with tracer.start_as_current_span(f"agent.{method_name}") as span:

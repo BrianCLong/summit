@@ -8,7 +8,7 @@ import logging
 import time
 import uuid
 from datetime import datetime, timedelta
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Literal
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
@@ -24,21 +24,21 @@ logger = logging.getLogger(__name__)
 
 
 # Enums
-class ExportType(str, Enum):
+class ExportType(StrEnum):
     analysis = "analysis"
     report = "report"
     dataset = "dataset"
     api = "api"
 
 
-class UserRole(str, Enum):
+class UserRole(StrEnum):
     analyst = "analyst"
     investigator = "investigator"
     admin = "admin"
     compliance_officer = "compliance-officer"
 
 
-class Purpose(str, Enum):
+class Purpose(StrEnum):
     investigation = "investigation"
     threat_intel = "threat-intel"
     fraud_risk = "fraud-risk"
@@ -46,26 +46,26 @@ class Purpose(str, Enum):
     research = "research"
 
 
-class Classification(str, Enum):
+class Classification(StrEnum):
     public = "public"
     internal = "internal"
     confidential = "confidential"
     restricted = "restricted"
 
 
-class DecisionEffect(str, Enum):
+class DecisionEffect(StrEnum):
     allow = "allow"
     deny = "deny"
     review = "review"
 
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     low = "low"
     medium = "medium"
     high = "high"
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     blocking = "blocking"
     warning = "warning"
 

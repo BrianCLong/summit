@@ -1,6 +1,8 @@
-from graphrag.edge.cache import EdgeCache, CacheEntry
-from graphrag.edge.service import EdgeService
 import time
+
+from graphrag.edge.cache import CacheEntry, EdgeCache
+from graphrag.edge.service import EdgeService
+
 
 def test_edge_cache_hit():
     cache = EdgeCache()

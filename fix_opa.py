@@ -1,8 +1,9 @@
 import os
 import re
 
+
 def fix_file(filepath, changes):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     original_content = content
@@ -30,7 +31,7 @@ def fix_file(filepath, changes):
 # For  ->  or ensuring  or
 
 def add_import(filepath, import_stmt="import rego.v1"):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
     if import_stmt not in content:
         # Add after package declaration
@@ -82,7 +83,7 @@ if os.path.exists("policies/rego/sku_gates.rego"):
 # policies/opa/cmk.rego:22: rego_parse_error: unexpected package
 # Remove duplicate package declaration
 if os.path.exists("policies/opa/cmk.rego"):
-    with open("policies/opa/cmk.rego", 'r') as f:
+    with open("policies/opa/cmk.rego") as f:
         lines = f.readlines()
 
     new_lines = []

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Iterable
 from urllib.parse import urlparse
@@ -8,6 +9,7 @@ DEFAULT_ALLOWED_DOMAINS = {
 }
 
 import os
+
 
 @dataclass(frozen=True)
 class AcpPolicy:

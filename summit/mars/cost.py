@@ -1,7 +1,8 @@
 import json
-from enum import Enum
+from enum import Enum, StrEnum
 
-class TaskType(str, Enum):
+
+class TaskType(StrEnum):
     DESIGN = "design"
     DECOMPOSE = "decompose"
     IMPLEMENT = "implement"

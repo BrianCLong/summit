@@ -1,4 +1,5 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 class ContextAwareSummarizer:
     """
@@ -7,7 +8,7 @@ class ContextAwareSummarizer:
     def __init__(self):
         pass
 
-    def summarize_list(self, items: List[str], max_items: int = 3) -> Dict[str, Any]:
+    def summarize_list(self, items: list[str], max_items: int = 3) -> dict[str, Any]:
         """
         Summarize a list of items by taking the top N.
         Report omissions in context_deltas.
@@ -29,7 +30,7 @@ class ContextAwareSummarizer:
             }
         }
 
-    def summarize_text(self, text: str, max_chars: int = 100) -> Dict[str, Any]:
+    def summarize_text(self, text: str, max_chars: int = 100) -> dict[str, Any]:
         """
         Summarize text by truncation.
         """

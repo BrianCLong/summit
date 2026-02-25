@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import os
-import re
 import argparse
 import json
+import os
+import re
 import sys
 from pathlib import Path
 
@@ -32,7 +32,7 @@ DEFAULT_EXCLUDES = {
 def scan_file(filepath, patterns):
     matches = []
     try:
-        with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(filepath, encoding='utf-8', errors='ignore') as f:
             content = f.read()
             for pattern, description in patterns:
                 if re.search(pattern, content):

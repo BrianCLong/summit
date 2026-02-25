@@ -1,6 +1,8 @@
 import json
 from typing import Generator
+
 from .sketch import LogBinSketch
+
 
 def read_degrees(filepath: str, max_lines: int = -1) -> Generator[int, None, None]:
     """
@@ -8,7 +10,7 @@ def read_degrees(filepath: str, max_lines: int = -1) -> Generator[int, None, Non
     Expected format: {"degree": 10, ...} or just numeric 10 on each line.
     """
     count = 0
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         for line in f:
             if max_lines > 0 and count >= max_lines:
                 break

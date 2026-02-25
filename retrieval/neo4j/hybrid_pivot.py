@@ -1,6 +1,7 @@
-import os
 import logging
-from typing import List, Dict, Any
+import os
+from typing import Any, Dict, List
+
 from retrieval.neo4j.contract import ContractRetriever
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ class HybridRetriever:
         self.contract_retriever = contract_retriever
         self.enabled = os.getenv("SUMMIT_HYBRID_RETRIEVAL", "0") == "1"
 
-    def search(self, query_text: str, query_vector: List[float], filters: Dict[str, Any], top_k: int = 10):
+    def search(self, query_text: str, query_vector: list[float], filters: dict[str, Any], top_k: int = 10):
         # Base vector search (always runs)
         vector_results = self.contract_retriever.search(query_vector, filters, top_k=top_k)
 
@@ -43,7 +44,7 @@ class PivotRetriever:
         self.client = neo4j_client
         self.enabled = os.getenv("SUMMIT_PIVOT_EXPAND", "0") == "1"
 
-    def search_and_expand(self, query_vector: List[float], filters: Dict[str, Any], hops: int = 1, top_k: int = 5):
+    def search_and_expand(self, query_vector: list[float], filters: dict[str, Any], hops: int = 1, top_k: int = 5):
         # 1. Get Pivot Nodes (Vector Search)
         pivots = self.contract_retriever.search(query_vector, filters, top_k=top_k)
 
@@ -58,10 +59,10 @@ class PivotRetriever:
             return {"pivots": pivots, "context": []}
 
         # Expansion Query
-        cypher = f"""
+        cypher = """
         MATCH (start)
         WHERE start.id IN $pivot_ids
-        CALL apoc.path.spanningTree(start, {{minLevel: 1, maxLevel: $hops, limit: 50}}) YIELD path
+        CALL apoc.path.spanningTree(start, {minLevel: 1, maxLevel: $hops, limit: 50}) YIELD path
         RETURN path
         """
         # Note: Using APOC or pure Cypher. Pure Cypher for simplicity here:

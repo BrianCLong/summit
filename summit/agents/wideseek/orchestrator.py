@@ -1,17 +1,19 @@
 import asyncio
-from typing import List, Dict, Any, Callable
-from .context import WideSeekContext
+from typing import Any, Callable, Dict, List
+
 from .budgets import WideSeekBudgets
+from .context import WideSeekContext
+
 
 class WideSeekOrchestrator:
-    def __init__(self, llm: Callable, tools: List[Any], budgets: WideSeekBudgets = WideSeekBudgets()):
+    def __init__(self, llm: Callable, tools: list[Any], budgets: WideSeekBudgets = WideSeekBudgets()):
         self.llm = llm
         self.tools = tools
         self.budgets = budgets
         self.main_context = WideSeekContext(parent_id="lead", isolated=False)
-        self.subagent_contexts: Dict[str, WideSeekContext] = {}
+        self.subagent_contexts: dict[str, WideSeekContext] = {}
 
-    async def run(self, query: str, subagents: int = 3) -> Dict[str, Any]:
+    async def run(self, query: str, subagents: int = 3) -> dict[str, Any]:
         """
         Main entry point for the WideSeek flow.
         1. Lead agent analyzes query.

@@ -4,7 +4,7 @@ Main API service for threat intelligence platform
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -28,7 +28,7 @@ app.add_middleware(
 
 
 # Enums
-class ThreatSeverity(str, Enum):
+class ThreatSeverity(StrEnum):
     CRITICAL = "CRITICAL"
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
@@ -36,7 +36,7 @@ class ThreatSeverity(str, Enum):
     INFO = "INFO"
 
 
-class IOCType(str, Enum):
+class IOCType(StrEnum):
     IP_ADDRESS = "IP_ADDRESS"
     DOMAIN = "DOMAIN"
     URL = "URL"
@@ -44,7 +44,7 @@ class IOCType(str, Enum):
     EMAIL = "EMAIL_ADDRESS"
 
 
-class TLP(str, Enum):
+class TLP(StrEnum):
     RED = "RED"
     AMBER_STRICT = "AMBER_STRICT"
     AMBER = "AMBER"

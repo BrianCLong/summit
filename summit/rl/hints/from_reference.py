@@ -1,5 +1,7 @@
 from typing import Optional
+
 from .base import Hint, HintGenerator
+
 
 class ReferenceHintGenerator(HintGenerator):
     """

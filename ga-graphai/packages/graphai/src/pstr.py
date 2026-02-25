@@ -6,13 +6,13 @@ import random
 from collections import defaultdict
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class PolicyDecision(str, Enum):
+class PolicyDecision(StrEnum):
     ALLOW = "ALLOW"
     DENY = "DENY"
     ALLOW_WITH_REDACTION = "ALLOW_WITH_REDACTION"

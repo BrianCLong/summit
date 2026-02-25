@@ -1,12 +1,13 @@
 from dataclasses import dataclass
 from typing import Set
 
+
 @dataclass(frozen=True)
 class ToolPolicy:
     """
     Governance policy for tool usage. Deny-by-default.
     """
-    allowed: Set[str]
+    allowed: set[str]
 
     def can_use(self, tool_name: str) -> bool:
         """

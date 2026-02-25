@@ -1,9 +1,10 @@
 from __future__ import annotations
+
+import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
-import json
-import hashlib
-from typing import Dict, Any
+from typing import Any, Dict
 
 EVIDENCE_ID_PREFIX = "EVID"
 
@@ -43,7 +44,7 @@ def write_deterministic_json(path: Path, obj: Any) -> None:
     data = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
     path.write_text(data, encoding="utf-8")
 
-def compute_stamp(paths: WorkspacePaths) -> Dict[str, Any]:
+def compute_stamp(paths: WorkspacePaths) -> dict[str, Any]:
     """
     Computes a deterministic hash of the workspace contents, excluding temporal metadata.
     """

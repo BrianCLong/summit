@@ -1,7 +1,14 @@
-import pytest
-from pathlib import Path
 import json
-from summit.agents.fs_researcher.workspace import init_workspace, write_deterministic_json, compute_stamp
+from pathlib import Path
+
+import pytest
+
+from summit.agents.fs_researcher.workspace import (
+    compute_stamp,
+    init_workspace,
+    write_deterministic_json,
+)
+
 
 def test_init_workspace(tmp_path):
     ws_root = tmp_path / "research_ws"

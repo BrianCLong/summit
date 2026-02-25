@@ -1,5 +1,7 @@
 import unittest
+
 from summit_rt.incremental.delta_extract_snapshotdiff import compute_delta
+
 
 class TestDeleteTombstone(unittest.TestCase):
     def test_delete_creates_tombstone(self):

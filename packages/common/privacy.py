@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Dict, List
 
 
-class DataClass(str, Enum):
+class DataClass(StrEnum):
   PUBLIC = "public"
   INTERNAL = "internal"
   CONFIDENTIAL = "confidential"

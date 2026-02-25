@@ -4,8 +4,8 @@ from summit.retrieval.structured import (
     AllowlistConfig,
     BudgetConfig,
     DisambiguationRequired,
-    StructuredRagConfig,
     StructuredQueryRequest,
+    StructuredRagConfig,
     StructuredRetrievalPipeline,
     TenantConfig,
 )

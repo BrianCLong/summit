@@ -6,13 +6,13 @@ execution runs, their artifacts, and disclosure packs for governance and complia
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Status of a Maestro run."""
 
     PENDING = "pending"
@@ -22,7 +22,7 @@ class RunStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class ArtifactKind(str, Enum):
+class ArtifactKind(StrEnum):
     """Type of artifact produced by a run."""
 
     SBOM = "sbom"

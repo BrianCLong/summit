@@ -1,8 +1,8 @@
 from summit.retrieval.structured import (
     AllowlistConfig,
     BudgetConfig,
-    StructuredRagConfig,
     StructuredQueryRequest,
+    StructuredRagConfig,
     StructuredRetrievalPipeline,
     TenantConfig,
 )

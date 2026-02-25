@@ -1,7 +1,9 @@
 import json
 import os
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from .models import AgentManifest
+
 
 class FileRegistryStorage:
     def __init__(self, storage_dir: str):
@@ -20,11 +22,11 @@ class FileRegistryStorage:
         path = self._get_path(agent_id)
         if not os.path.exists(path):
             raise FileNotFoundError(f"Agent manifest for {agent_id} not found.")
-        with open(path, "r") as f:
+        with open(path) as f:
             data = json.load(f)
         return AgentManifest.model_validate(data)
 
-    def list_agents(self) -> List[str]:
+    def list_agents(self) -> list[str]:
         agents = []
         for filename in os.listdir(self.storage_dir):
             if filename.endswith(".json"):

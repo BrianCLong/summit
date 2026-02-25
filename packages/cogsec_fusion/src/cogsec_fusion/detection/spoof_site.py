@@ -1,5 +1,6 @@
 from typing import List, Tuple
 
+
 def levenshtein_distance(s1: str, s2: str) -> int:
     if len(s1) < len(s2):
         return levenshtein_distance(s2, s1)
@@ -20,10 +21,10 @@ def levenshtein_distance(s1: str, s2: str) -> int:
     return previous_row[-1]
 
 class SpoofDetector:
-    def __init__(self, protected_domains: List[str]):
+    def __init__(self, protected_domains: list[str]):
         self.protected_domains = protected_domains
 
-    def check_domain(self, domain: str) -> List[Tuple[str, float]]:
+    def check_domain(self, domain: str) -> list[tuple[str, float]]:
         """
         Checks a domain against protected domains.
         Returns a list of (matched_domain, confidence) tuples.
@@ -44,7 +45,7 @@ class SpoofDetector:
 
         return matches
 
-    def check_content(self, html_content: str, keywords: List[str]) -> float:
+    def check_content(self, html_content: str, keywords: list[str]) -> float:
         """
         Checks content for keywords associated with protected brands.
         Returns a score between 0.0 and 1.0.

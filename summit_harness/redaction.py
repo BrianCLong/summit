@@ -1,7 +1,7 @@
 import re
 from typing import Set
 
-NEVER_LOG_FIELDS: Set[str] = {
+NEVER_LOG_FIELDS: set[str] = {
     "api_key", "token", "password", "secret", "cookie", "authorization", "bearer"
 }
 
@@ -11,7 +11,7 @@ def redact_secrets(text: str) -> str:
     """
     for field in NEVER_LOG_FIELDS:
         # Match key=value (case-insensitive)
-        text = re.sub(rf'({field})\s*=\s*[^\s,]+', rf'\1=[REDACTED]', text, flags=re.IGNORECASE)
+        text = re.sub(rf'({field})\s*=\s*[^\s,]+', r'\1=[REDACTED]', text, flags=re.IGNORECASE)
         # Match "key": "value" (case-insensitive)
         text = re.sub(rf'"{field}"\s*:\s*"[^"]+"', rf'"{field}": "[REDACTED]"', text, flags=re.IGNORECASE)
     return text

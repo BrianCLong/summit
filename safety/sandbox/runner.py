@@ -25,7 +25,7 @@ class Decision:
 
 
 def load_policy() -> dict:
-    with open(POLICY_PATH, "r", encoding="utf-8") as handle:
+    with open(POLICY_PATH, encoding="utf-8") as handle:
         return yaml.safe_load(handle)
 
 

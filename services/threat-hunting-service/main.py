@@ -4,7 +4,7 @@ Automated threat hunting workflows and playbooks
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from fastapi import FastAPI, HTTPException
@@ -28,7 +28,7 @@ app.add_middleware(
 
 
 # Enums
-class HuntStatus(str, Enum):
+class HuntStatus(StrEnum):
     PENDING = "PENDING"
     RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"
@@ -36,14 +36,14 @@ class HuntStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
-class HuntPriority(str, Enum):
+class HuntPriority(StrEnum):
     CRITICAL = "CRITICAL"
     HIGH = "HIGH"
     MEDIUM = "MEDIUM"
     LOW = "LOW"
 
 
-class DetectionType(str, Enum):
+class DetectionType(StrEnum):
     BEHAVIORAL = "BEHAVIORAL"
     SIGNATURE = "SIGNATURE"
     ANOMALY = "ANOMALY"

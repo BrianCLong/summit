@@ -1,7 +1,9 @@
 import hashlib
 import re
 from typing import List
+
 from summit.narrative.events import ConstraintSignature
+
 
 class ConstraintExtractor:
     def __init__(self):
@@ -13,7 +15,7 @@ class ConstraintExtractor:
             (r"impossible to", "action_impossible"),
         ]
 
-    def extract(self, text: str, evidence_ids: List[str]) -> ConstraintSignature:
+    def extract(self, text: str, evidence_ids: list[str]) -> ConstraintSignature:
         constraints = []
         text_lower = text.lower()
 

@@ -1,5 +1,7 @@
 import pytest
-from summit.eval.wideseek import parse_markdown_table, evaluate_table
+
+from summit.eval.wideseek import evaluate_table, parse_markdown_table
+
 
 def test_parse_markdown_table():
     md = """

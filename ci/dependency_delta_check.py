@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import pathlib
 import subprocess
 import sys
-import pathlib
 
 LOCKFILES = ["pnpm-lock.yaml", "requirements.in", "requirements.txt", "poetry.lock", "package-lock.json"]
 DELTA_DOCS = ["docs/dependency_delta.md", "deps_delta.md"]

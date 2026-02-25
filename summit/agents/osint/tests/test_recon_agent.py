@@ -1,8 +1,8 @@
-import unittest
-from unittest.mock import patch, MagicMock
 import json
-import sys
 import os
+import sys
+import unittest
+from unittest.mock import MagicMock, patch
 
 # Add project root to sys.path so we can import summit modules
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../'))

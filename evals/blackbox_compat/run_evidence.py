@@ -1,7 +1,7 @@
-import os
 import json
+import os
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 EVIDENCE_ROOT = "evidence"
 
@@ -37,7 +37,7 @@ ITEMS = [
 ]
 
 def generate_evidence():
-    timestamp = datetime.now(timezone.utc).isoformat()
+    timestamp = datetime.now(UTC).isoformat()
 
     for item in ITEMS:
         evd_id = item["id"]

@@ -3,7 +3,7 @@ import re
 
 filepath = ".github/workflows/unit-test-coverage.yml"
 
-with open(filepath, 'r') as f:
+with open(filepath) as f:
     content = f.read()
 
 if "actions/setup-python" not in content:

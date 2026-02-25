@@ -1,4 +1,5 @@
-from typing import List, Dict
+from typing import Dict, List
+
 
 class NormDefinition:
     def __init__(self, id: str, citation: str, summary: str):
@@ -18,7 +19,7 @@ NATO_COGNITIVE_CONCEPT = NormDefinition(
     summary="Cognitive Warfare Concept framing adversaries attacking trust via manipulation."
 )
 
-def get_active_norms() -> List[Dict]:
+def get_active_norms() -> list[dict]:
     return [
         vars(ICRC_COGNITIVE_WARFARE),
         vars(NATO_COGNITIVE_CONCEPT)

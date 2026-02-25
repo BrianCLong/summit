@@ -1,7 +1,8 @@
+import hashlib
 import json
 import os
-import hashlib
 from typing import Any, Dict
+
 
 class ObservabilityWriter:
     def __init__(self, evidence_id: str, base_dir: str = "artifacts/observability"):
@@ -10,13 +11,13 @@ class ObservabilityWriter:
         os.makedirs(self.directory, exist_ok=True)
         self.trace_file = os.path.join(self.directory, "trace.jsonl")
 
-    def write_event(self, event: Dict[str, Any]):
+    def write_event(self, event: dict[str, Any]):
         """Writes an event to trace.jsonl."""
         # Ensure deterministic key ordering for consistency
         with open(self.trace_file, "a") as f:
             f.write(json.dumps(event, sort_keys=True, default=str) + "\n")
 
-    def write_report(self, report: Dict[str, Any]):
+    def write_report(self, report: dict[str, Any]):
         path = os.path.join(self.directory, "report.json")
         with open(path, "w") as f:
             json.dump(report, f, indent=2, sort_keys=True, default=str)

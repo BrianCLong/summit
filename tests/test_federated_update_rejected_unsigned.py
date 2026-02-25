@@ -1,7 +1,10 @@
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from graphrag.federation.coordinator import Coordinator
 from graphrag.federation.update_signing import SignedUpdate
+
 
 @patch("graphrag.federation.coordinator.federation_enabled", return_value=True)
 def test_federated_update_rejected_unsigned(mock_enabled):

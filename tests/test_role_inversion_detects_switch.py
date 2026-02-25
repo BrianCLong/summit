@@ -1,4 +1,5 @@
-from summit.narrative.detectors.roles import RoleProfile, RoleInversionDetector
+from summit.narrative.detectors.roles import RoleInversionDetector, RoleProfile
+
 
 def test_role_inversion_detected():
     # Setup profile: strict amplifier, strict defender

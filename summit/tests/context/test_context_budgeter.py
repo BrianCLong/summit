@@ -1,7 +1,9 @@
-import unittest
-import os
 import json
-from summit.context.packer import ContextPacker, ContextItem
+import os
+import unittest
+
+from summit.context.packer import ContextItem, ContextPacker
+
 
 class TestContextPacker(unittest.TestCase):
     def test_pack_budget(self):

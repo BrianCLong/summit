@@ -1,6 +1,8 @@
 import unittest
-from summit_rt.incremental.delta_ops import DeltaOp
+
 from summit_rt.incremental.delta_extract_snapshotdiff import compute_delta
+from summit_rt.incremental.delta_ops import DeltaOp
+
 
 class TestRename(unittest.TestCase):
     def test_rename_entity(self):

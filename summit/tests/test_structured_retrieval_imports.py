@@ -6,9 +6,9 @@ from summit.retrieval.structured import (
     StructuredExecutor,
     StructuredPlanner,
     StructuredPolicy,
+    StructuredQueryRequest,
     StructuredRagConfig,
     StructuredRetrievalPipeline,
-    StructuredQueryRequest,
 )
 
 

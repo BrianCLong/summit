@@ -1,12 +1,13 @@
-from typing import List, Dict, Any
 import math
+from typing import Any, Dict, List
+
 
 class CoCAnalyzer:
     """
     Narrative “Change-of-Change” Early Warning (CoC-EW)
     Tracks narrative velocity and curvature.
     """
-    def compute_metrics(self, time_slices: List[Dict[str, Any]]) -> Dict[str, float]:
+    def compute_metrics(self, time_slices: list[dict[str, Any]]) -> dict[str, float]:
         """
         Computes velocity (1st derivative) and curvature (2nd derivative)
         over a series of narrative cluster measurements.

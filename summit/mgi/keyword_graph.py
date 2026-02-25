@@ -1,8 +1,10 @@
-from typing import Iterable, Dict, List, Set, Any
-from .tokenize import tokenize
-from .config import MGIConfig
+from typing import Any, Dict, Iterable, List, Set
 
-def build_edges(chunks: Iterable[Dict[str, Any]], config: MGIConfig) -> List[Dict[str, str]]:
+from .config import MGIConfig
+from .tokenize import tokenize
+
+
+def build_edges(chunks: Iterable[dict[str, Any]], config: MGIConfig) -> list[dict[str, str]]:
     """
     Returns edge records: {chunk_id, keyword}
     Intended ingestion: (:Chunk {id})-[:HAS_KEYWORD]->(:Keyword {term})
@@ -11,7 +13,7 @@ def build_edges(chunks: Iterable[Dict[str, Any]], config: MGIConfig) -> List[Dic
     keyword_max_degree chunks (within this batch), subsequent edges are dropped.
     """
     edges = []
-    keyword_counts: Dict[str, int] = {}
+    keyword_counts: dict[str, int] = {}
 
     # Ensure stable ordering of chunks if possible, but input is iterable.
     # We rely on input order.

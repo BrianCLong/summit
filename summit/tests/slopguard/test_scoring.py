@@ -1,5 +1,7 @@
 import pytest
+
 from summit.slopguard.scoring import get_slop_score
+
 
 def test_get_slop_score_empty():
     result = get_slop_score("")

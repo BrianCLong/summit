@@ -1,7 +1,9 @@
+import json
 import os
 import shutil
-import json
+
 from summit.observability.wrapper import ObservableAgent
+
 
 class MockAgent:
     name = "mock_agent"

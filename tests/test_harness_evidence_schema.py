@@ -1,6 +1,7 @@
 import json
-import pytest
 from pathlib import Path
+
+import pytest
 from jsonschema import validate
 
 SCHEMA_DIR = Path("evidence/schema/summit_harness")

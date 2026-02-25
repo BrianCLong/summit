@@ -1,6 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
+
 from retrieval.neo4j.schema_lint import SchemaLinter
+
 
 class TestSchemaLinter(unittest.TestCase):
     def test_lint_warnings(self):

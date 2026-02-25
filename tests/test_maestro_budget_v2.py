@@ -1,6 +1,8 @@
 import pytest
-from maestro.runtime.effort_budget.budget import EffortBudget, BudgetTracker
+
 from maestro.runtime.effort_budget.adapter import GPT53CodexAdapter
+from maestro.runtime.effort_budget.budget import BudgetTracker, EffortBudget
+
 
 def test_budget_tracking():
     budget = EffortBudget(max_tokens=2000, max_steps=2)

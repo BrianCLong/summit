@@ -1,6 +1,9 @@
-import pytest
 import asyncio
-from summit.agents.wideseek import WideSeekOrchestrator, WideSeekBudgets
+
+import pytest
+
+from summit.agents.wideseek import WideSeekBudgets, WideSeekOrchestrator
+
 
 async def mock_llm(messages):
     return "Mock LLM Response"

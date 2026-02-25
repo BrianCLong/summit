@@ -1,6 +1,8 @@
 from typing import List, Optional
+
 from .models import AgentManifest
 from .storage import FileRegistryStorage
+
 
 class AgentRegistry:
     def __init__(self, storage: FileRegistryStorage):
@@ -12,7 +14,7 @@ class AgentRegistry:
     def get_agent(self, agent_id: str) -> AgentManifest:
         return self.storage.load(agent_id)
 
-    def list_agents(self) -> List[str]:
+    def list_agents(self) -> list[str]:
         return self.storage.list_agents()
 
     def deactivate_agent(self, agent_id: str) -> None:

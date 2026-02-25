@@ -1,6 +1,13 @@
 from pathlib import Path
 
-from benchmarks.der2.regimes import Der2Config, Regime, compile_instance, load_concepts, load_library, load_tasks
+from benchmarks.der2.regimes import (
+    Der2Config,
+    Regime,
+    compile_instance,
+    load_concepts,
+    load_library,
+    load_tasks,
+)
 
 FIXTURES_ROOT = Path("benchmarks/der2/fixtures")
 

@@ -1,5 +1,7 @@
-from typing import Protocol, Iterable, Optional
+from typing import Iterable, Optional, Protocol
+
 from graphrag.topology.router import RegionRoute
+
 
 class GraphStoreRegioned(Protocol):
   def route(self, data_class: str, preferred_region: str) -> RegionRoute: ...

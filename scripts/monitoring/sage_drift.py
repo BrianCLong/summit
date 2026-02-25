@@ -1,6 +1,7 @@
-import sys
 import json
 import os
+import sys
+
 
 def check_drift(metrics_path, threshold=0.1):
     """
@@ -12,7 +13,7 @@ def check_drift(metrics_path, threshold=0.1):
         return 1
 
     try:
-        with open(metrics_path, 'r') as f:
+        with open(metrics_path) as f:
             data = json.load(f)
 
         # Check mixed outcome rate

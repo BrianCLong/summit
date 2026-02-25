@@ -1,11 +1,12 @@
+import time
 from dataclasses import dataclass, field
 from typing import List, Optional
-import time
+
 
 @dataclass
 class ConflictRecord:
     conflict_id: str
-    agents_involved: List[str]
+    agents_involved: list[str]
     description: str
     resolution_method: str
     winner_agent: Optional[str]
@@ -14,9 +15,9 @@ class ConflictRecord:
 
 @dataclass
 class ConflictLog:
-    conflicts: List[ConflictRecord] = field(default_factory=list)
+    conflicts: list[ConflictRecord] = field(default_factory=list)
 
-    def log_conflict(self, conflict_id: str, agents: List[str], description: str,
+    def log_conflict(self, conflict_id: str, agents: list[str], description: str,
                      resolution_method: str, winner: str | None, reasoning: str):
         self.conflicts.append(ConflictRecord(
             conflict_id, agents, description, resolution_method, winner, reasoning

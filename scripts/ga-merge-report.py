@@ -81,7 +81,7 @@ def classify(pr: PullRequest) -> int:
 
 def load_prs(tsv_path: str) -> list[PullRequest]:
     prs: list[PullRequest] = []
-    with open(tsv_path, "r", encoding="utf-8") as f:
+    with open(tsv_path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:

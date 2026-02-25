@@ -24,7 +24,7 @@ for filepath in files_to_fix:
         print(f"Skipping {filepath} (not found)")
         continue
 
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     if "import future.keywords" in content or "import rego.v1" in content:

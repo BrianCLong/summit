@@ -1,7 +1,7 @@
 import sys
 
 filepath = '.github/workflows/ci-verify.yml'
-with open(filepath, 'r') as f:
+with open(filepath) as f:
     lines = f.readlines()
 
 output = []

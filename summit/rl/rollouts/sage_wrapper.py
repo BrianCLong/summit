@@ -1,6 +1,7 @@
 import logging
 import random
 from typing import Any, Callable, Dict, List, Optional
+
 from ..config.sage import SAGEConfig
 from ..hints.base import HintGenerator
 
@@ -20,8 +21,8 @@ class SageRolloutWrapper:
         self.hint_generator = hint_generator
 
     def __call__(self,
-                 prompts: List[str],
-                 references: Optional[List[str]] = None,
+                 prompts: list[str],
+                 references: Optional[list[str]] = None,
                  mode: str = "train",
                  **kwargs) -> Any:
 

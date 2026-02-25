@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Any, Dict, Literal, Optional
 
@@ -13,6 +14,6 @@ class DeltaOp:
     rel: Optional[str] = None
     src_uid: Optional[str] = None
     dst_uid: Optional[str] = None
-    props: Optional[Dict[str, Any]] = None
+    props: Optional[dict[str, Any]] = None
     checksum: Optional[str] = None
     reason: Optional[str] = None

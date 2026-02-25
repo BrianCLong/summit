@@ -34,15 +34,15 @@ class Fact:
     value: str
     verdict: Verdict
     confidence: float
-    provenance: List[Provenance]
+    provenance: list[Provenance]
     notes: Optional[str] = None
-    labels: Optional[Dict[str, str]] = None
+    labels: Optional[dict[str, str]] = None
 
 
-def missing_provenance_fields(fact: Fact) -> List[str]:
+def missing_provenance_fields(fact: Fact) -> list[str]:
     if not fact.provenance:
         return ["missing_provenance"]
-    missing: List[str] = []
+    missing: list[str] = []
     for prov in fact.provenance:
         for field in REQUIRED_PROVENANCE_FIELDS:
             value = getattr(prov, field, None)
@@ -51,7 +51,7 @@ def missing_provenance_fields(fact: Fact) -> List[str]:
     return missing
 
 
-def validate_fact(fact: Fact) -> List[str]:
+def validate_fact(fact: Fact) -> list[str]:
     errors = missing_provenance_fields(fact)
     if fact.verdict == "confirmed":
         sources = {prov.source_url for prov in fact.provenance if prov.source_url}

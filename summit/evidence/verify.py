@@ -3,10 +3,12 @@ import json
 import os
 import sys
 from pathlib import Path
+
 import jsonschema
 
+
 def load_json(path):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 def validate_artifact(path, schema_path):

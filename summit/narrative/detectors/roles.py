@@ -1,7 +1,9 @@
-from dataclasses import dataclass, field
-from typing import Dict, Literal, Optional, List
-from summit.narrative.events import DetectorEvent
 import hashlib
+from dataclasses import dataclass, field
+from typing import Dict, List, Literal, Optional
+
+from summit.narrative.events import DetectorEvent
+
 
 @dataclass
 class RoleProfile:
@@ -40,11 +42,11 @@ class RoleProfile:
         return "mixed"
 
 class RoleInversionDetector:
-    def __init__(self, profiles: Dict[str, RoleProfile], threshold: float = 0.8):
+    def __init__(self, profiles: dict[str, RoleProfile], threshold: float = 0.8):
         self.profiles = profiles
         self.threshold = threshold
 
-    def detect(self, actor_id: str, action_type: Literal["originate", "amplify"], stance: Literal["critic", "defender"], event_window: Dict[str, str], evidence_ids: List[str]) -> Optional[DetectorEvent]:
+    def detect(self, actor_id: str, action_type: Literal["originate", "amplify"], stance: Literal["critic", "defender"], event_window: dict[str, str], evidence_ids: list[str]) -> Optional[DetectorEvent]:
         profile = self.profiles.get(actor_id)
         if not profile:
             return None

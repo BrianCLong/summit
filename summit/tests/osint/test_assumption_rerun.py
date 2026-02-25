@@ -1,8 +1,11 @@
-import pytest
 import json
 import os
+
+import pytest
+
 from summit.osint.assumptions import AssumptionRegistry
 from summit.osint.rerun_controller import RerunController
+
 
 def test_assumption_registry():
     registry = AssumptionRegistry()

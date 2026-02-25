@@ -15,7 +15,7 @@ class Evaluator(Protocol):
 
 
 class ProposalGenerator(Protocol):
-    def candidates(self, step: int, best_proposal: Any | None) -> list["Candidate"]: ...
+    def candidates(self, step: int, best_proposal: Any | None) -> list[Candidate]: ...
 
 
 @dataclass(frozen=True)

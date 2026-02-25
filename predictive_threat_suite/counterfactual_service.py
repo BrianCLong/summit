@@ -8,13 +8,13 @@ Supports what-if analysis for threat response strategies.
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-class ThreatLevel(str, Enum):
+class ThreatLevel(StrEnum):
     """Threat severity levels."""
 
     LOW = "low"
@@ -23,7 +23,7 @@ class ThreatLevel(str, Enum):
     CRITICAL = "critical"
 
 
-class InterventionType(str, Enum):
+class InterventionType(StrEnum):
     """Types of interventions that can be simulated."""
 
     DEPLOY_PATCH = "deploy_patch"
@@ -35,7 +35,7 @@ class InterventionType(str, Enum):
     DO_NOTHING = "do_nothing"
 
 
-class ImpactLevel(str, Enum):
+class ImpactLevel(StrEnum):
     """Impact assessment levels."""
 
     HIGHLY_POSITIVE = "highly_positive"

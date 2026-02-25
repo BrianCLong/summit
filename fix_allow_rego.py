@@ -4,7 +4,7 @@ import re
 filepath = "policies/intelgraph/abac/allow.rego"
 
 if os.path.exists(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     # Remove specific imports

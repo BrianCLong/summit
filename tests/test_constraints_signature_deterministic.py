@@ -1,5 +1,6 @@
 from summit.narrative.detectors.constraints import ConstraintExtractor
 
+
 def test_constraint_signature_determinism():
     extractor = ConstraintExtractor()
     text = "It is inevitable that this approach cannot be trusted."

@@ -5,14 +5,14 @@ import json
 import os
 import random
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from pathlib import Path
 from typing import Iterable, Sequence
 
 REDACTION_TOKEN = "[REDACTED_TOOL_DIRECTIVE]"
 
 
-class Regime(str, Enum):
+class Regime(StrEnum):
     INSTRUCTION_ONLY = "instruction_only"
     CONCEPTS = "concepts"
     RELATED_ONLY = "related_only"
@@ -75,7 +75,7 @@ class Der2Config:
 
 
 def _seed_from(bench_id: str, task_id: str) -> int:
-    digest = hashlib.sha256(f"{bench_id}:{task_id}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha256(f"{bench_id}:{task_id}".encode()).hexdigest()
     return int(digest[:16], 16)
 
 

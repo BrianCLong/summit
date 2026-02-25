@@ -1,7 +1,8 @@
 import math
 from typing import List
 
-def compute_group_advantages(rewards: List[float], epsilon: float = 1e-8) -> List[float]:
+
+def compute_group_advantages(rewards: list[float], epsilon: float = 1e-8) -> list[float]:
     """
     Computes advantages using group normalization (GRPO).
     """

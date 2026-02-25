@@ -2,9 +2,10 @@ import json
 import os
 import re
 
+
 def update_package_json():
     print("Updating package.json...")
-    with open('package.json', 'r') as f:
+    with open('package.json') as f:
         data = json.load(f)
 
     if 'test:security' not in data.get('scripts', {}):
@@ -23,7 +24,7 @@ def update_pr_gates():
         print(f"  {path} not found!")
         return
 
-    with open(path, 'r') as f:
+    with open(path) as f:
         content = f.read()
 
     # helm lint helm/ -> helm lint helm/summit/
@@ -65,7 +66,7 @@ def process_workflows():
             continue
 
         filepath = os.path.join(workflow_dir, filename)
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             content = f.read()
 
         original_content = content

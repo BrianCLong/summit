@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -60,6 +60,6 @@ class StructuredEvidenceWriter:
         _write_json(paths.query_plan, query_plan)
         _write_json(paths.metrics, metrics)
 
-        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        now = datetime.now(UTC).isoformat().replace("+00:00", "Z")
         _write_json(paths.stamp, {"generated_at": now, "run_id": run_id})
         return paths

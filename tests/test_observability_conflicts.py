@@ -1,5 +1,7 @@
 import pytest
+
 from summit.observability.conflicts import ConflictLog
+
 
 def test_conflict_logging():
     log = ConflictLog()

@@ -16,7 +16,7 @@ class Table:
     name: str
     columns: Sequence[Column]
     primary_key: Optional[Sequence[str]] = None
-    foreign_keys: Dict[str, str] = field(default_factory=dict)
+    foreign_keys: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -39,7 +39,7 @@ class StructuredQueryRequest:
     table: str
     select: Sequence[str]
     filters: Mapping[str, object] = field(default_factory=dict)
-    aggregations: Mapping[str, Tuple[str, str]] = field(default_factory=dict)
+    aggregations: Mapping[str, tuple[str, str]] = field(default_factory=dict)
     group_by: Sequence[str] = field(default_factory=list)
     limit: int = 100
     order_by: Sequence[str] = field(default_factory=list)
@@ -51,7 +51,7 @@ class QueryPlan:
     table: str
     select: Sequence[str]
     filters: Mapping[str, object]
-    aggregations: Mapping[str, Tuple[str, str]]
+    aggregations: Mapping[str, tuple[str, str]]
     group_by: Sequence[str]
     limit: int
     order_by: Sequence[str]
@@ -62,7 +62,7 @@ class QueryPlan:
 
 @dataclass(frozen=True)
 class ExecutionResult:
-    rows: Sequence[Dict[str, object]]
+    rows: Sequence[dict[str, object]]
     row_count: int
     bytes: int
 
@@ -70,4 +70,4 @@ class ExecutionResult:
 @dataclass(frozen=True)
 class PolicyDecision:
     allowed: bool
-    reasons: List[str] = field(default_factory=list)
+    reasons: list[str] = field(default_factory=list)

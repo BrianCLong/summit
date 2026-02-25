@@ -1,7 +1,9 @@
+import json
 import math
 import random
-import json
+
 from summit.mars.cost import CostModel, TaskType
+
 
 class MCTSNode:
     def __init__(self, state, task_type=None, parent=None, cost=0):

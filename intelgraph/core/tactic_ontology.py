@@ -5,13 +5,13 @@ Defines the core data structures for representing tactics, campaigns, and signat
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field
 
 
-class TacticType(str, Enum):
+class TacticType(StrEnum):
     """Enumeration of known IO tactics."""
     FIREHOSE = "firehose"  # Firehose of Falsehood
     REFLEXIVE_CONTROL = "reflexive_control"

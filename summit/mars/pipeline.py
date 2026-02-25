@@ -1,5 +1,6 @@
 from .cost import TaskType
 
+
 class ModularPipeline:
     def __init__(self, design_spec=None):
         self.design_spec = design_spec

@@ -1,14 +1,17 @@
-import pytest
-import os
 import json
+import os
 import shutil
-from summit.self_evolve.policy import EvolutionPolicy
-from summit.self_evolve.operators import OPERATORS
+
+import pytest
+
 from summit.self_evolve.concierge import ConciergeRouter
-from summit.self_evolve.meta import MetaCognitionEngine
-from summit.self_evolve.evidence import EvolutionEvidenceWriter
 from summit.self_evolve.drift import DriftDetector
+from summit.self_evolve.evidence import EvolutionEvidenceWriter
+from summit.self_evolve.meta import MetaCognitionEngine
+from summit.self_evolve.operators import OPERATORS
+from summit.self_evolve.policy import EvolutionPolicy
 from summit.self_evolve.redact import redact_data
+
 
 def test_evolution_budget_enforced():
     max_steps = 3
@@ -54,7 +57,7 @@ def test_deterministic_evidence():
     writer.write_evidence(data)
 
     path = f"artifacts/self-evolving-agents/{run_id}/evidence.json"
-    with open(path, "r") as f:
+    with open(path) as f:
         loaded = json.load(f)
     assert loaded == data
     # Clean up

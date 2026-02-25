@@ -1,7 +1,9 @@
 import logging
 import os
 from typing import Any, Dict, Optional
+
 import httpx
+
 from ..agents.registry.models import AgentManifest
 
 logger = logging.getLogger(__name__)
@@ -10,7 +12,7 @@ class PolicyEngine:
     def __init__(self, opa_url: Optional[str] = None):
         self.opa_url = opa_url or os.environ.get("OPA_URL", "http://localhost:8181")
 
-    async def evaluate(self, action: str, agent: AgentManifest, user: Dict[str, Any], extra: Dict[str, Any] = {}) -> Dict[str, Any]:
+    async def evaluate(self, action: str, agent: AgentManifest, user: dict[str, Any], extra: dict[str, Any] = {}) -> dict[str, Any]:
         input_data = {
             "action": action,
             "agent": agent.model_dump(),
@@ -30,7 +32,7 @@ class PolicyEngine:
             logger.error(f"OPA evaluation failed: {e}")
         return self.evaluate_local(action, agent, user, extra)
 
-    def evaluate_local(self, action: str, agent: AgentManifest, user: Dict[str, Any], extra: Dict[str, Any] = {}) -> Dict[str, Any]:
+    def evaluate_local(self, action: str, agent: AgentManifest, user: dict[str, Any], extra: dict[str, Any] = {}) -> dict[str, Any]:
         if action == "execute_agent":
             classification = agent.governance.classification
             user_clearance = user.get("clearance")

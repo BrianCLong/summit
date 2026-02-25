@@ -1,10 +1,10 @@
 import json
-import sys
 import os
+import sys
 
 # Check JSON
 try:
-    with open('evidence/index.json', 'r') as f:
+    with open('evidence/index.json') as f:
         json.load(f)
     print("evidence/index.json is valid JSON.")
 except Exception as e:

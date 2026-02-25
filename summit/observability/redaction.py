@@ -1,7 +1,8 @@
-from typing import Any, Dict, Set, Optional
+from typing import Any, Dict, Optional, Set
+
 
 class Redactor:
-    def __init__(self, allowlist: Optional[Set[str]] = None, denylist: Optional[Set[str]] = None):
+    def __init__(self, allowlist: Optional[set[str]] = None, denylist: Optional[set[str]] = None):
         """
         :param allowlist: If provided, only keys in this set are preserved. Others are redacted.
         :param denylist: Keys in this set are always redacted. Defaults to common sensitive keys.

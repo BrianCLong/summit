@@ -1,5 +1,7 @@
 import pytest
-from summit.policy.router import route, PolicyDecision
+
+from summit.policy.router import PolicyDecision, route
+
 
 def test_route_flag_off():
     context = {"feature_flags": {"SKILL_PRESERVING_MODE": False}}

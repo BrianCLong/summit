@@ -1,8 +1,9 @@
-import json
 import hashlib
+import json
 import os
 import sys
 from datetime import datetime
+
 
 def get_sha256(filepath):
     hasher = hashlib.sha256()

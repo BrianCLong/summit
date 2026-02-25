@@ -1,5 +1,6 @@
 import logging
 from typing import Any, Dict, List, Optional
+
 from ..config.sage import SAGEConfig
 from ..rollouts.sage_wrapper import SageRolloutWrapper
 
@@ -25,7 +26,7 @@ class GRPOTrainer:
             hint_generator=hint_generator
         )
 
-    def train_step(self, batch: Dict[str, Any]) -> Dict[str, Any]:
+    def train_step(self, batch: dict[str, Any]) -> dict[str, Any]:
         """
         Executes a single training step: Rollout -> Compute Advantage -> Update.
         """
@@ -54,10 +55,10 @@ class GRPOTrainer:
         }
 
     def _base_rollout(self,
-                      prompts: List[str],
-                      references: Optional[List[str]] = None,
+                      prompts: list[str],
+                      references: Optional[list[str]] = None,
                       mode: str = "train",
-                      **kwargs) -> List[Any]:
+                      **kwargs) -> list[Any]:
         """
         Standard rollout logic.
         """

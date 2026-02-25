@@ -1,11 +1,12 @@
-from typing import List, Dict, Any
-from datetime import datetime
+from datetime import UTC, datetime
+from typing import Any, Dict, List
+
 
 class InflectionMetric:
     """
     Computes first and second order derivatives for a time series to detect inflection points.
     """
-    def __init__(self, time_series: List[Dict[str, Any]], value_key: str = "value"):
+    def __init__(self, time_series: list[dict[str, Any]], value_key: str = "value"):
         """
         Initialize with a time series of data points.
         Each point must have 'timestamp' and the specified value_key.
@@ -14,7 +15,7 @@ class InflectionMetric:
         self.series = sorted(time_series, key=lambda x: x.get('timestamp', ''))
         self.value_key = value_key
 
-    def compute(self) -> Dict[str, Any]:
+    def compute(self) -> dict[str, Any]:
         """
         Compute velocity, acceleration, and jerk.
         """
@@ -58,7 +59,7 @@ class InflectionMetric:
 
         return {
             "target": self.series[-1].get("id", "unknown"),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "metrics": {
                 "velocity": velocity[-1] if velocity else 0.0,
                 "acceleration": acceleration[-1] if acceleration else 0.0,

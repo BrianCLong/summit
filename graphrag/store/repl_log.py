@@ -1,16 +1,17 @@
 from dataclasses import dataclass
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 @dataclass(frozen=True)
 class ReplEvent:
   event_id: str        # deterministic hash of payload
   region: str
-  payload: Dict[str, Any]
+  payload: dict[str, Any]
 
 class ReplLog:
   def __init__(self) -> None:
-    self._events: List[ReplEvent] = []
+    self._events: list[ReplEvent] = []
   def append(self, ev: ReplEvent) -> None:
     self._events.append(ev)
-  def all(self) -> List[ReplEvent]:
+  def all(self) -> list[ReplEvent]:
     return list(self._events)

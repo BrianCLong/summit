@@ -1,6 +1,7 @@
 import os
 import re
 
+
 def fix_pnpm_version_mismatch():
     print("Fixing pnpm version mismatch (removing 'version: 9' where package.json specifies 10)...")
     workflows_dir = ".github/workflows"
@@ -8,7 +9,7 @@ def fix_pnpm_version_mismatch():
         if not filename.endswith(".yml"):
             continue
         filepath = os.path.join(workflows_dir, filename)
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             content = f.read()
 
         # If pnpm/action-setup is used and specifies version: 9, remove it to let package.json dictate
@@ -33,7 +34,7 @@ def clean_action_setup_inputs():
         if not filename.endswith(".yml"):
             continue
         filepath = os.path.join(workflows_dir, filename)
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             content = f.read()
 
         # This regex is tricky blindly. I'll look for the pattern:

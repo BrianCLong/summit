@@ -1,8 +1,11 @@
-import pytest
 import os
 import shutil
+
+import pytest
+
 from maestro.runtime.compaction.compactor import ContextCompactor
 from maestro.runtime.sessions.checkpoints.manager import CheckpointManager, SessionState
+
 
 def test_deterministic_compaction():
     compactor = ContextCompactor()

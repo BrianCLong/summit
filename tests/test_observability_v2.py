@@ -1,6 +1,8 @@
 import pytest
+
 from control_plane.observability.hooks import ObservabilityHook
 from maestro.runtime.replay.replayer import AgentReplayer
+
 
 def test_observability_redaction():
     hook = ObservabilityHook(session_id="sess-obs")

@@ -3,17 +3,18 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-def analyze_workspace(workspace_path: Path) -> Dict[str, Any]:
+
+def analyze_workspace(workspace_path: Path) -> dict[str, Any]:
     metrics_path = workspace_path / "artifacts" / "metrics.json"
     if not metrics_path.exists():
         return {"error": f"Metrics not found in {workspace_path}"}
 
-    with open(metrics_path, "r") as f:
+    with open(metrics_path) as f:
         return json.load(f)
 
-def compare_metrics(current: Dict[str, Any], reference: Dict[str, Any]) -> Dict[str, Any]:
+def compare_metrics(current: dict[str, Any], reference: dict[str, Any]) -> dict[str, Any]:
     drift = {}
     for key in ["source_count", "kb_note_count", "section_count", "citation_count"]:
         if key in current and key in reference:

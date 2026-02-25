@@ -1,7 +1,8 @@
 import hashlib
 import json
-from typing import List, Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 class MultimodalEvidenceBundle:
     """Handles evidence-first ingestion of multimodal data into IntelGraph."""
@@ -10,7 +11,7 @@ class MultimodalEvidenceBundle:
         self.run_id = run_id
         self.evidence_items = []
 
-    def add_item(self, content_type: str, source: str, metadata: Dict[str, Any]) -> str:
+    def add_item(self, content_type: str, source: str, metadata: dict[str, Any]) -> str:
         """
         Adds a multimodal item (PDF, image, video transcript) to the evidence bundle.
         Returns a stable Evidence ID.
@@ -34,7 +35,7 @@ class MultimodalEvidenceBundle:
         self.evidence_items.append(item)
         return evidence_id
 
-    def generate_provenance_graph(self) -> Dict[str, Any]:
+    def generate_provenance_graph(self) -> dict[str, Any]:
         """Generates the chain-of-custody edges for the evidence bundle."""
         graph = {
             "nodes": [],
@@ -64,7 +65,7 @@ class MultimodalEvidenceBundle:
 
         return graph
 
-    def export_bundle(self) -> Dict[str, Any]:
+    def export_bundle(self) -> dict[str, Any]:
         return {
             "run_id": self.run_id,
             "evidence": self.evidence_items,

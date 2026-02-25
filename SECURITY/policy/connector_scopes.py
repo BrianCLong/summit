@@ -4,12 +4,13 @@
 import json
 import os
 
+
 def validate_scopes(agent_id, connector_id, requested_scopes):
     manifest_path = "connectors/manifest.json"
     if not os.path.exists(manifest_path):
         return True
 
-    with open(manifest_path, 'r') as f:
+    with open(manifest_path) as f:
         manifest = json.load(f)
 
     connector = next((c for c in manifest.get('connectors', []) if c['id'] == connector_id), None)

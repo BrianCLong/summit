@@ -1,10 +1,12 @@
 import unittest
-from summit.graph.model import Node, Edge
-from summit.influence.pfidg import PFIDGAnalyzer
+
+from summit.graph.model import Edge, Node
 from summit.influence.coc_ew import CoCAnalyzer
 from summit.influence.cwc import CwCDetector
 from summit.influence.ipnf import IPNFAnalyzer
 from summit.influence.irces import IRCESScorer
+from summit.influence.pfidg import PFIDGAnalyzer
+
 
 class TestInfluenceStubs(unittest.TestCase):
     def setUp(self):

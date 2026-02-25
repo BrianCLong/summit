@@ -1,5 +1,7 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 from .policy import WideSeekPolicy
+
 
 class AccessTool:
     def __init__(self, policy: WideSeekPolicy):

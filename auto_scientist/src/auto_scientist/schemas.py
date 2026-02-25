@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 from uuid import uuid4
 
 
-class NodeType(str, Enum):
+class NodeType(StrEnum):
     HYPOTHESIS = "hypothesis"
     DATASET = "dataset"
     MODEL = "model"
@@ -16,7 +16,7 @@ class NodeType(str, Enum):
     ANALYSIS = "analysis"
 
 
-class EdgeType(str, Enum):
+class EdgeType(StrEnum):
     DEPENDS_ON = "depends_on"
     REFINES = "refines"
     CONTRADICTS = "contradicts"

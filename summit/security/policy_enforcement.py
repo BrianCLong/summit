@@ -1,12 +1,14 @@
-from typing import List, Dict, Set
 from dataclasses import dataclass
+from typing import Dict, List, Set
+
 from .audit import AuditLogger
+
 
 @dataclass
 class PolicyRequest:
     agent_id: str
     tool_name: str
-    arguments: Dict
+    arguments: dict
     classification: str = "internal"
 
 @dataclass
@@ -15,7 +17,7 @@ class PolicyResult:
     reason: str
 
 class SecurityPolicyEngine:
-    def __init__(self, allowlist: Dict[str, List[str]], audit_logger: AuditLogger):
+    def __init__(self, allowlist: dict[str, list[str]], audit_logger: AuditLogger):
         self.allowlist = allowlist
         self.audit_logger = audit_logger
 

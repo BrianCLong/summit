@@ -4,6 +4,11 @@ Feature-flagged via SUMMIT_STRUCTURED_RAG.
 """
 
 from .config import AllowlistConfig, BudgetConfig, StructuredRagConfig, TenantConfig
+from .executor import DisambiguationRequired, NotFound, StructuredExecutor
+from .pipeline import PolicyViolation, StructuredRetrievalPipeline
+from .planner import PlanError, StructuredPlanner
+from .policy import StructuredPolicy
+from .schema_introspect import SchemaIntrospector
 from .types import (
     ExecutionResult,
     PolicyDecision,
@@ -11,11 +16,6 @@ from .types import (
     Schema,
     StructuredQueryRequest,
 )
-from .planner import PlanError, StructuredPlanner
-from .policy import StructuredPolicy
-from .executor import DisambiguationRequired, NotFound, StructuredExecutor
-from .schema_introspect import SchemaIntrospector
-from .pipeline import PolicyViolation, StructuredRetrievalPipeline
 
 __all__ = [
     "AllowlistConfig",

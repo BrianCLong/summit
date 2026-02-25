@@ -3,7 +3,7 @@ import yaml
 # Since preserving comments and structure in YAML with standard libs is hard,
 # I will use string replacement for specific blocks if possible, or just edit the file content logically.
 
-with open('.github/workflows/ci-verify.yml', 'r') as f:
+with open('.github/workflows/ci-verify.yml') as f:
     content = f.read()
 
 # Fix 3: Remove empty 'with:' after pnpm/action-setup if I failed earlier

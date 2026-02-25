@@ -1,8 +1,9 @@
-from typing import Set, List
+from typing import List, Set
 from urllib.parse import urlparse
 
+
 class WideSeekPolicy:
-    def __init__(self, allowlist: Set[str] = None):
+    def __init__(self, allowlist: set[str] = None):
         self.allowlist = allowlist or set()
         self.deny_all = False
 

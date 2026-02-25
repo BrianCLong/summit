@@ -1,8 +1,10 @@
-import unittest
 import os
+import unittest
 from unittest.mock import Mock
+
+from summit.mcp.catalog.schema import Catalog, Tool
 from summit.mcp.catalog.sync import ToolSync
-from summit.mcp.catalog.schema import Tool, Catalog
+
 
 class TestToolSync(unittest.TestCase):
     def test_sync_determinism(self):

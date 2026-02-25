@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import sys
-import subprocess
-import os
 import json
+import os
+import subprocess
+import sys
+
 
 def run_check(name, command):
     print(f"Running check: {name}...")

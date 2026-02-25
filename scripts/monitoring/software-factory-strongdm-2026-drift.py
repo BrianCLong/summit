@@ -5,6 +5,7 @@ import pathlib
 import sys
 from collections import defaultdict
 
+
 def load_reports(root: pathlib.Path) -> list[dict]:
     reports = []
     evidence_root = root / "artifacts" / "evidence"

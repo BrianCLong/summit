@@ -1,7 +1,10 @@
-import pytest
 import json
 import os
+
+import pytest
+
 from summit.osint.summarize_with_deltas import ContextAwareSummarizer
+
 
 def test_summary_list_truncation():
     summarizer = ContextAwareSummarizer()
@@ -25,7 +28,7 @@ def test_fixture_delta():
     if not os.path.exists(fixture_path):
         pytest.skip("Fixture not found")
 
-    with open(fixture_path, 'r') as f:
+    with open(fixture_path) as f:
         data = json.load(f)
 
     summarizer = ContextAwareSummarizer()

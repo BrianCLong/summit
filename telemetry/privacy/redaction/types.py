@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any, Dict
 
 
-class Classification(str, Enum):
+class Classification(StrEnum):
     PUBLIC = "PUBLIC"
     INTERNAL = "INTERNAL"
     PSEUDONYMIZED = "PSEUDONYMIZED"
@@ -11,7 +11,7 @@ class Classification(str, Enum):
     RESTRICTED_PII = "RESTRICTED_PII"
 
 
-class Transform(str, Enum):
+class Transform(StrEnum):
     ALLOW = "ALLOW"
     DROP = "DROP"
     MASK = "MASK"
@@ -21,7 +21,7 @@ class Transform(str, Enum):
     DP_AGG_ONLY = "DP_AGG_ONLY"
 
 
-class Linkability(str, Enum):
+class Linkability(StrEnum):
     NONE = "NONE"
     INTRA_DOMAIN = "INTRA_DOMAIN"
     CROSS_DOMAIN = "CROSS_DOMAIN"

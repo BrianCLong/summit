@@ -1,5 +1,7 @@
-from typing import List, Dict, Any, Optional
-from summit.graph.model import Node, Edge
+from typing import Any, Dict, List, Optional
+
+from summit.graph.model import Edge, Node
+
 
 class PFIDGAnalyzer:
     """
@@ -9,7 +11,7 @@ class PFIDGAnalyzer:
     def __init__(self, evidence_root: Optional[str] = None):
         self.evidence_root = evidence_root
 
-    def analyze_propagation(self, nodes: List[Node], edges: List[Edge]) -> Dict[str, Any]:
+    def analyze_propagation(self, nodes: list[Node], edges: list[Edge]) -> dict[str, Any]:
         """
         Computes influence-likelihood based on provenance consistency.
         """

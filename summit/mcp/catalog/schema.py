@@ -1,12 +1,14 @@
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 import hashlib
 import json
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class Tool(BaseModel):
     name: str
     description: Optional[str] = None
-    input_schema: Dict[str, Any] = Field(default_factory=dict, alias="inputSchema")
+    input_schema: dict[str, Any] = Field(default_factory=dict, alias="inputSchema")
 
     class Config:
         populate_by_name = True
@@ -19,7 +21,7 @@ class Tool(BaseModel):
         return hashlib.sha256(serialized.encode('utf-8')).hexdigest()
 
 class Catalog(BaseModel):
-    tools: List[Tool]
+    tools: list[Tool]
     catalog_hash: str = ""
 
     def rehash(self):

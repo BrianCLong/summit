@@ -5,10 +5,10 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 
-class Severity(str, Enum):
+class Severity(StrEnum):
     """Enumeration of compliance severities."""
 
     CRITICAL = "critical"
@@ -18,7 +18,7 @@ class Severity(str, Enum):
     INFO = "info"
 
 
-class ImpactDimension(str, Enum):
+class ImpactDimension(StrEnum):
     """Dimensions considered when producing multi-factor scoring."""
 
     ECONOMIC = "economic"

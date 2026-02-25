@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+import json
+import pathlib
 import subprocess
 import sys
-import pathlib
-import json
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ARTIFACT = ROOT / "artifacts" / "prov_context_check.json"

@@ -1,6 +1,20 @@
 import pytest
+
+from control_plane.agents.registry.models import (
+    AgentManifest,
+    Classification,
+    Context,
+    Evidence,
+    Experience,
+    Governance,
+    Instructions,
+    Model,
+    Runtime,
+    Tool,
+    ToolPermission,
+)
 from control_plane.policy.engine import PolicyEngine
-from control_plane.agents.registry.models import AgentManifest, Governance, Runtime, Experience, Context, Evidence, Model, Instructions, Tool, Classification, ToolPermission
+
 
 @pytest.fixture
 def agent_manifest():

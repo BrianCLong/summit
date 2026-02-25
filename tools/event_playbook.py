@@ -2,6 +2,7 @@
 import json
 from pathlib import Path
 
+
 def run_detectors(data: dict) -> dict:
     # Stub: purely fixture-based aggregate metrics
     nv = sum(p["v"] for p in data.get("narrative_series", []))

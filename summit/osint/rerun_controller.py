@@ -1,6 +1,8 @@
-from typing import List, Dict, Any
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List
+
 from summit.osint.assumptions import AssumptionRegistry
+
 
 class RerunController:
     """
@@ -9,7 +11,7 @@ class RerunController:
     def __init__(self, registry: AssumptionRegistry):
         self.registry = registry
 
-    def check_and_trigger(self) -> Dict[str, Any]:
+    def check_and_trigger(self) -> dict[str, Any]:
         """
         Check assumptions and generate a rerun stamp if any are invalid.
         """
@@ -17,7 +19,7 @@ class RerunController:
 
         if invalidated:
             # Generate deterministic-looking ID (in real app, use input hash)
-            run_id = f"RERUN-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+            run_id = f"RERUN-{datetime.now(UTC).strftime('%Y%m%d%H%M%S')}"
 
             return {
                 "triggered": True,
@@ -25,7 +27,7 @@ class RerunController:
                     "run_id": run_id,
                     "trigger_event": "assumption_invalidation",
                     "invalidated_assumptions": invalidated,
-                    "deterministic_timestamp": datetime.now(timezone.utc).isoformat()
+                    "deterministic_timestamp": datetime.now(UTC).isoformat()
                 }
             }
 

@@ -1,7 +1,9 @@
-from dataclasses import dataclass
-from typing import Dict, Any, Optional
-import yaml
 import os
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
+import yaml
+
 
 @dataclass(frozen=True)
 class RegionRoute:
@@ -16,7 +18,7 @@ class Router:
              # For now assume running from root
              raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
-        with open(config_path, "r") as f:
+        with open(config_path) as f:
             self.config = yaml.safe_load(f)
         self.regions = {r["name"]: r for r in self.config["regions"]}
         self.default_region = self.config["default_region"]

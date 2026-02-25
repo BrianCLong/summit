@@ -1,6 +1,8 @@
 import pytest
-from summit.observability.state import StateSnapshot
+
 from summit.observability.redaction import Redactor
+from summit.observability.state import StateSnapshot
+
 
 def test_state_snapshot_redaction():
     state = StateSnapshot(

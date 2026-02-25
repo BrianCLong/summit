@@ -1,5 +1,6 @@
-from graphrag.store.repl_log import ReplLog, ReplEvent
 from graphrag.store.reconcile import Reconciler
+from graphrag.store.repl_log import ReplEvent, ReplLog
+
 
 def test_reconcile_deterministic():
     log1 = ReplLog()

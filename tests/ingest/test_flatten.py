@@ -1,4 +1,5 @@
 import pytest
+
 from summit.ingest.flatten import StructuredFlattener
 from summit.ingest.flatten_policy import FlatteningPolicy
 

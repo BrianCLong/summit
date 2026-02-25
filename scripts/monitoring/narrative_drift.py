@@ -2,6 +2,7 @@ import argparse
 import json
 import sys
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--current", required=True, help="Current metrics.json")

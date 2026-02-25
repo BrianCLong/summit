@@ -1,11 +1,12 @@
-import sys
-import os
 import json
+import os
+import sys
 import unittest
 
 # Add hack/supplychain to path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../hack/supplychain')))
 from verify_attestation_shape import verify_shape
+
 
 class TestAttestationSchema(unittest.TestCase):
     def setUp(self):

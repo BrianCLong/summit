@@ -1,14 +1,16 @@
 from __future__ import annotations
+
+import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
-import time
+
 
 @dataclass
 class ObservabilityEvent:
     """Base class for all observability events."""
     event_type: str
     timestamp: float = field(default_factory=time.time)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 @dataclass
 class AgentSpan(ObservabilityEvent):
@@ -19,8 +21,8 @@ class AgentSpan(ObservabilityEvent):
     name: str = "agent_span"
     start_time: float = field(default_factory=time.time)
     end_time: Optional[float] = None
-    inputs: Dict[str, Any] = field(default_factory=dict)
-    outputs: Optional[Dict[str, Any]] = None
+    inputs: dict[str, Any] = field(default_factory=dict)
+    outputs: Optional[dict[str, Any]] = None
     status: str = "running"  # running, success, error
 
     def __post_init__(self):
@@ -31,7 +33,7 @@ class DecisionEvent(ObservabilityEvent):
     """Represents a final decision made by an agent."""
     decision_id: str = ""
     agent_id: str = "unknown"
-    decision: Dict[str, Any] = field(default_factory=dict)
+    decision: dict[str, Any] = field(default_factory=dict)
     confidence: float = 0.0
     reasoning: str = ""
 

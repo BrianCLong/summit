@@ -1,8 +1,11 @@
 from __future__ import annotations
+
 from typing import Any, Dict, List
+
 from summit_rt.incremental.delta_ops import DeltaOp
 
-def apply_ops(tx, ops: List[DeltaOp], ingest_time: str) -> Dict[str, int]:
+
+def apply_ops(tx, ops: list[DeltaOp], ingest_time: str) -> dict[str, int]:
     up_nodes = [o for o in ops if o.op == "UPSERT_NODE"]
     up_edges = [o for o in ops if o.op == "UPSERT_EDGE"]
     tb_nodes = [o for o in ops if o.op == "TOMBSTONE_NODE"]

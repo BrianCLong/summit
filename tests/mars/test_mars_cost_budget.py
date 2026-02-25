@@ -1,5 +1,7 @@
 import pytest
-from summit.mars.cost import CostModel, BudgetLedger, TaskType
+
+from summit.mars.cost import BudgetLedger, CostModel, TaskType
+
 
 def test_mars_cost_model():
     model = CostModel()

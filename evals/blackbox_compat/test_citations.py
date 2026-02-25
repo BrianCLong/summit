@@ -1,5 +1,6 @@
 from summit_rt.blackbox.output_validator import validate_steps
 
+
 def test_citations_pass():
     text = """
     1. Click the 'Login' button (N123).

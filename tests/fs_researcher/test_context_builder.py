@@ -1,7 +1,10 @@
-import pytest
 from pathlib import Path
-from summit.agents.fs_researcher.workspace import init_workspace
+
+import pytest
+
 from summit.agents.fs_researcher.context_builder import ContextBuilder
+from summit.agents.fs_researcher.workspace import init_workspace
+
 
 def test_context_builder_init(tmp_path):
     ws_root = tmp_path / "research_ws"

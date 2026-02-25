@@ -1,22 +1,23 @@
-from dataclasses import dataclass, field, asdict
-from typing import Any, Dict, List, Optional
 import time
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class ProvNode:
     step: str
     agent_id: Optional[str]
-    input: Dict[str, Any]
-    output: Dict[str, Any]
+    input: dict[str, Any]
+    output: dict[str, Any]
     timestamp: float = field(default_factory=time.time)
     confidence: Optional[float] = None
 
 @dataclass
 class DecisionProvenance:
     evidence_id: str
-    timeline: List[ProvNode] = field(default_factory=list)
+    timeline: list[ProvNode] = field(default_factory=list)
 
-    def record_step(self, step: str, input: Dict[str, Any], output: Dict[str, Any], agent_id: str | None = None):
+    def record_step(self, step: str, input: dict[str, Any], output: dict[str, Any], agent_id: str | None = None):
         """Records a step in the decision timeline."""
         self.timeline.append(ProvNode(
             step=step,
@@ -26,7 +27,7 @@ class DecisionProvenance:
             confidence=output.get("confidence")
         ))
 
-    def generate_report(self) -> Dict[str, Any]:
+    def generate_report(self) -> dict[str, Any]:
         """Generates a structured report of the decision timeline.
         Excludes timestamps to ensure deterministic output.
         """

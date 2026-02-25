@@ -11,7 +11,7 @@ Provides predictive, prescriptive, and scenario-building AI capabilities for:
 import logging
 import os
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from fastapi import FastAPI
@@ -57,7 +57,7 @@ app.add_middleware(
 # ============ Models ============
 
 
-class TrendType(str, Enum):
+class TrendType(StrEnum):
     MARKET = "market"
     TECHNOLOGY = "technology"
     REGULATORY = "regulatory"
@@ -65,14 +65,14 @@ class TrendType(str, Enum):
     COMPETITIVE = "competitive"
 
 
-class ThreatLevel(str, Enum):
+class ThreatLevel(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
 
-class TimeHorizon(str, Enum):
+class TimeHorizon(StrEnum):
     SHORT = "short_term"  # 0-6 months
     MEDIUM = "medium_term"  # 6-18 months
     LONG = "long_term"  # 18-36 months

@@ -1,5 +1,7 @@
 import pytest
-from graphrag.topology.router import Router, RegionRoute
+
+from graphrag.topology.router import RegionRoute, Router
+
 
 def test_region_egress_denied_disallowed_class():
     router = Router()

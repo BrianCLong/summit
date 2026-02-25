@@ -1,8 +1,9 @@
 import os
 import re
 
+
 def fix_workflow(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         lines = f.readlines()
 
     changed = False

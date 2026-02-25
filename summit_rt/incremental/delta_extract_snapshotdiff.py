@@ -1,15 +1,18 @@
 from __future__ import annotations
+
 from typing import Dict, Iterable, List, Tuple
-from summit_rt.incremental.delta_ops import DeltaOp
+
 from summit_rt.events.envelope import stable_hash
+from summit_rt.incremental.delta_ops import DeltaOp
+
 
 def compute_delta(
-    old_nodes: Dict[str, Dict],
-    new_nodes: Dict[str, Dict],
-    old_edges: Dict[str, Dict],
-    new_edges: Dict[str, Dict],
-) -> List[DeltaOp]:
-    ops: List[DeltaOp] = []
+    old_nodes: dict[str, dict],
+    new_nodes: dict[str, dict],
+    old_edges: dict[str, dict],
+    new_edges: dict[str, dict],
+) -> list[DeltaOp]:
+    ops: list[DeltaOp] = []
 
     for uid, nprops in new_nodes.items():
         checksum = stable_hash(nprops)

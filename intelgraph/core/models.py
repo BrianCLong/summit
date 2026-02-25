@@ -9,13 +9,13 @@ Models:
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 
 from pydantic import Field
 from sqlmodel import JSON, Column, SQLModel
 
 
-class PolicyOrigin(str, Enum):
+class PolicyOrigin(StrEnum):
     """Origin classification for governance."""
 
     PUBLIC = "public"
@@ -24,7 +24,7 @@ class PolicyOrigin(str, Enum):
     TOP_SECRET = "top_secret"
 
 
-class PolicySensitivity(str, Enum):
+class PolicySensitivity(StrEnum):
     """Sensitivity classification for data handling."""
 
     LOW = "low"
@@ -33,7 +33,7 @@ class PolicySensitivity(str, Enum):
     CRITICAL = "critical"
 
 
-class PolicyLegalBasis(str, Enum):
+class PolicyLegalBasis(StrEnum):
     """Legal basis for data processing."""
 
     CONSENT = "consent"

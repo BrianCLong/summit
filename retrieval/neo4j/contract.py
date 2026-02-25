@@ -1,5 +1,5 @@
 import logging
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 logger = logging.getLogger(__name__)
 
@@ -19,10 +19,10 @@ class ContractRetriever:
         self.vector_index_name = vector_index_name
 
     def search(self,
-               query_vector: List[float],
-               filters: Dict[str, Any],
+               query_vector: list[float],
+               filters: dict[str, Any],
                top_k: int = 10,
-               embedding_model_version: str = None) -> List[Dict[str, Any]]:
+               embedding_model_version: str = None) -> list[dict[str, Any]]:
         """
         Executes a vector search with mandatory filters and deterministic sorting.
         """

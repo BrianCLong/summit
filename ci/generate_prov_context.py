@@ -2,8 +2,9 @@
 import json
 import pathlib
 import sys
-import yaml
 from collections import OrderedDict
+
+import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 MAPPING_FILE = ROOT / "mappings" / "otel_to_prov.yml"
@@ -14,7 +15,7 @@ def main():
         print(f"Error: {MAPPING_FILE} not found.")
         return 1
 
-    with open(MAPPING_FILE, "r") as f:
+    with open(MAPPING_FILE) as f:
         data = yaml.safe_load(f)
 
     # Build context

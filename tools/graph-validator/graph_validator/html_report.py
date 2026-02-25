@@ -1,7 +1,8 @@
 import json
-from typing import Dict, Any
+from typing import Any, Dict
 
-def generate_html_report(report: Dict[str, Any]) -> str:
+
+def generate_html_report(report: dict[str, Any]) -> str:
     """
     Generates a simple HTML report from the JSON report.
     """

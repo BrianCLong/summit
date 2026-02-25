@@ -1,10 +1,12 @@
-from typing import List
-from ..transport.base import MCPTransport
-from .schema import Tool, Catalog
 import json
+from typing import List
+
+from ..transport.base import MCPTransport
+from .schema import Catalog, Tool
+
 
 class ToolSync:
-    def __init__(self, transports: List[MCPTransport]):
+    def __init__(self, transports: list[MCPTransport]):
         self.transports = transports
 
     def sync(self) -> Catalog:

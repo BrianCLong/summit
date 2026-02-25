@@ -1,7 +1,8 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 
 class EvidenceWriter:
     """
@@ -12,12 +13,12 @@ class EvidenceWriter:
         self.root_dir = root_dir
         self.root_dir.mkdir(parents=True, exist_ok=True)
 
-    def _write_json(self, filename: str, data: Dict[str, Any]):
+    def _write_json(self, filename: str, data: dict[str, Any]):
         p = self.root_dir / filename
         content = json.dumps(data, sort_keys=True, indent=2)
         p.write_text(content + "\n", encoding="utf-8")
 
-    def write(self, report: Dict[str, Any], metrics: Dict[str, Any], stamp: Optional[Dict[str, Any]] = None):
+    def write(self, report: dict[str, Any], metrics: dict[str, Any], stamp: Optional[dict[str, Any]] = None):
         """
         Writes report, metrics, and optionally stamp files.
         Updates index.json with references.

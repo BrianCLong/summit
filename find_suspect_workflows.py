@@ -6,7 +6,7 @@ for root, dirs, files in os.walk(".github/workflows"):
             continue
         path = os.path.join(root, file)
         try:
-            with open(path, "r") as f:
+            with open(path) as f:
                 content = f.read()
                 # Split content into jobs
                 jobs = content.split("\n  ")

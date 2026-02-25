@@ -1,5 +1,6 @@
 from graphrag.topology.router import Router
 
+
 def test_router_readonly_mode():
     router = Router()
     route = router.route("public", "us-central")

@@ -1,7 +1,8 @@
 import re
-from typing import List, Dict
+from typing import Dict, List
 
-def parse_markdown_table(markdown: str) -> List[Dict[str, str]]:
+
+def parse_markdown_table(markdown: str) -> list[dict[str, str]]:
     """
     Parses a markdown table into a list of dictionaries.
     Assumes standard markdown table format.

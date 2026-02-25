@@ -1,8 +1,10 @@
-import os
-import yaml
 import json
+import os
 import re
 import subprocess
+
+import yaml
+
 
 def fix_workflows_ordering():
     print("Fixing workflow ordering...")
@@ -11,7 +13,7 @@ def fix_workflows_ordering():
         if not filename.endswith(".yml"):
             continue
         filepath = os.path.join(workflows_dir, filename)
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             content = f.read()
 
         # Check if setup-node is used with cache: pnpm
@@ -42,7 +44,7 @@ def fix_evidence_json():
         return
 
     try:
-        with open(path, 'r') as f:
+        with open(path) as f:
             data = json.load(f)
     except Exception as e:
         print(f"Error reading evidence/index.json: {e}")
@@ -70,7 +72,7 @@ def fix_postgres_env():
             break
 
     if target_file:
-        with open(target_file, 'r') as f:
+        with open(target_file) as f:
             content = f.read()
 
         if "POSTGRES_PASSWORD" not in content:

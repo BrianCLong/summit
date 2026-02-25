@@ -1,5 +1,4 @@
 import pytest
-
 from summit_narrative.audit.log import AuditLog
 from summit_narrative.audit.schema import AuditEvent
 

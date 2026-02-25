@@ -1,11 +1,12 @@
 import json
 import os
-from typing import List, Any, Dict
+from typing import Any, Dict, List
 
-def _load_manifest(directory: str) -> Dict[str, Any]:
+
+def _load_manifest(directory: str) -> dict[str, Any]:
     manifest_path = os.path.join(directory, "manifest.json")
     if os.path.exists(manifest_path):
-        with open(manifest_path, 'r', encoding='utf-8') as f:
+        with open(manifest_path, encoding='utf-8') as f:
             try:
                 return json.load(f)
             except json.JSONDecodeError as e:
@@ -29,7 +30,7 @@ def to_context_pack(traj_paths: list[str]) -> bytes:
 
     for path in sorted_paths:
         try:
-            with open(path, 'r', encoding='utf-8') as f:
+            with open(path, encoding='utf-8') as f:
                 content = json.load(f)
 
                 if isinstance(content, dict):

@@ -4,14 +4,15 @@ import json
 import os
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import List
 
-from summit.agents.wideseek import WideSeekOrchestrator, WideSeekBudgets
-from summit.tools.wideseek import SearchTool, AccessTool, WideSeekPolicy
+from summit.agents.wideseek import WideSeekBudgets, WideSeekOrchestrator
+from summit.tools.wideseek import AccessTool, SearchTool, WideSeekPolicy
+
 
 # Mock LLM for CLI run
-async def cli_mock_llm(messages: List[dict]):
+async def cli_mock_llm(messages: list[dict]):
     # Check if this is the lead aggregator or a subagent
     last_msg = messages[-1]["content"]
     if "Create a final markdown report" in last_msg:
@@ -77,7 +78,7 @@ async def run_wideseek(args):
 
     # 4. Stamp (Time allowed here)
     stamp = {
-        "created_at": datetime.now(timezone.utc).isoformat(),
+        "created_at": datetime.now(UTC).isoformat(),
         "run_id": run_id,
         "git_commit": "HEAD" # Placeholder
     }

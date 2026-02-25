@@ -1,7 +1,7 @@
 import yaml
 
 try:
-    with open("docs/api-spec.yaml", "r") as f:
+    with open("docs/api-spec.yaml") as f:
         spec = yaml.safe_load(f)
 
     if 'paths' in spec:

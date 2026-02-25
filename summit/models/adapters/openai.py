@@ -1,8 +1,10 @@
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from .base import ModelAdapter
 
+
 class OpenAIAdapter(ModelAdapter):
-    def complete(self, messages: List[Dict[str, str]], tools: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:
+    def complete(self, messages: list[dict[str, str]], tools: Optional[list[dict[str, Any]]] = None) -> dict[str, Any]:
         # Stub implementation for MWS
         return {
             "content": "Simulated OpenAI response",

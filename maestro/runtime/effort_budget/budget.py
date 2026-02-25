@@ -1,5 +1,7 @@
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel
+
 
 class EffortBudget(BaseModel):
     max_tokens: Optional[int] = None
@@ -33,7 +35,7 @@ class BudgetTracker:
             return False
         return True
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         return {
             "used_steps": self.used_steps,
             "used_tokens": self.used_tokens,

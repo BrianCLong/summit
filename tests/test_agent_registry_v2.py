@@ -1,13 +1,27 @@
-import pytest
 import os
 import shutil
+
+import pytest
+
 from control_plane.agents.registry.models import (
-    AgentManifest, Governance, Runtime, Experience, Context, Evidence,
-    Model, Instructions, Tool, Classification, RiskLevel,
-    ToolPermission, ReplayMode, LogLevel
+    AgentManifest,
+    Classification,
+    Context,
+    Evidence,
+    Experience,
+    Governance,
+    Instructions,
+    LogLevel,
+    Model,
+    ReplayMode,
+    RiskLevel,
+    Runtime,
+    Tool,
+    ToolPermission,
 )
-from control_plane.agents.registry.storage import FileRegistryStorage
 from control_plane.agents.registry.registry import AgentRegistry
+from control_plane.agents.registry.storage import FileRegistryStorage
+
 
 @pytest.fixture
 def temp_storage_dir():

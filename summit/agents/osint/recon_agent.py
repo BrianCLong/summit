@@ -1,18 +1,21 @@
 from __future__ import annotations
+
 import json
-import urllib.request
-import urllib.parse
 import ssl
+import urllib.parse
+import urllib.request
 from typing import Dict, List, Optional
+
 from summit.flags import is_feature_enabled
 
+
 class ReconAgent:
-    def __init__(self, name: str, allowed_tools: List[str]):
+    def __init__(self, name: str, allowed_tools: list[str]):
         self.name = name
         self.allowed_tools = allowed_tools
         self.enabled = is_feature_enabled("OSINT_RECON_ENABLED", default=False)
 
-    def process(self, inputs: Dict) -> Dict:
+    def process(self, inputs: dict) -> dict:
         if not self.enabled:
             return {
                 "action": "skip",
@@ -32,7 +35,7 @@ class ReconAgent:
             }
         }
 
-    def find_subdomains(self, domain: str) -> List[str]:
+    def find_subdomains(self, domain: str) -> list[str]:
         # Implementation using crt.sh
         url = f"https://crt.sh/?q=%.{domain}&output=json"
         try:

@@ -10,12 +10,12 @@ NAME_RE = re.compile(r"^name:\s*(.+)\s*$")
 DESC_RE = re.compile(r"^description:\s*(.+)\s*$")
 
 
-def parse_skill_frontmatter(path: str) -> Tuple[str, str]:
+def parse_skill_frontmatter(path: str) -> tuple[str, str]:
     """Parse name/description from SKILL.md frontmatter."""
     name = ""
     description = ""
     in_frontmatter = False
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             if FRONTMATTER_RE.match(line):
                 if not in_frontmatter:
@@ -35,8 +35,8 @@ def parse_skill_frontmatter(path: str) -> Tuple[str, str]:
     return name, description
 
 
-def find_skills(roots: List[str]) -> List[Dict[str, str]]:
-    skills: List[Dict[str, str]] = []
+def find_skills(roots: list[str]) -> list[dict[str, str]]:
+    skills: list[dict[str, str]] = []
     seen: set = set()
     for root in roots:
         for dirpath, _dirnames, filenames in os.walk(root):
@@ -59,7 +59,7 @@ def find_skills(roots: List[str]) -> List[Dict[str, str]]:
     return skills
 
 
-def format_markdown(skills: List[Dict[str, str]]) -> str:
+def format_markdown(skills: list[dict[str, str]]) -> str:
     lines = ["Capability Map", ""]
     for skill in skills:
         desc = skill["description"] or "(no description)"

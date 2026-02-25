@@ -1,5 +1,7 @@
 import pytest
-from summit.tools.wideseek import SearchTool, AccessTool, WideSeekPolicy
+
+from summit.tools.wideseek import AccessTool, SearchTool, WideSeekPolicy
+
 
 def test_policy_allowlist():
     policy = WideSeekPolicy(allowlist={"example.com"})

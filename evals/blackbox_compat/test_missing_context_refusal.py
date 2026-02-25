@@ -1,5 +1,6 @@
 from summit_rt.blackbox.prompt_assembly import assemble
 
+
 def test_contract_inclusion():
     contract = "CONTRACT: Do not guess."
     subgraph = "NODES: ..."

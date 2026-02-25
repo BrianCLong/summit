@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from .workspace import WorkspacePaths, init_workspace
+
 
 class ContextBuilder:
     def __init__(self, workspace_paths: WorkspacePaths):
@@ -31,7 +34,7 @@ class ContextBuilder:
         with open(self.paths.root / "log.md", "a", encoding="utf-8") as f:
             f.write(f"- Archived source {source_id} from {url}\n")
 
-    def add_kb_note(self, title: str, content: str, source_refs: List[str]):
+    def add_kb_note(self, title: str, content: str, source_refs: list[str]):
         """
         Adds a note to the knowledge base with citations.
         """
@@ -42,7 +45,7 @@ class ContextBuilder:
         note_content = f"# {title}\n\n{content}\n\nSources: {citation_str}\n"
         note_file.write_text(note_content, encoding="utf-8")
 
-    def update_todo(self, completed: List[str], new_tasks: List[str]):
+    def update_todo(self, completed: list[str], new_tasks: list[str]):
         """
         Updates the todo list.
         """

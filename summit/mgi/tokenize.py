@@ -1,8 +1,8 @@
 import re
-from typing import Set, List
+from typing import List, Set
 
 # Minimal stoplist for English
-STOPWORDS: Set[str] = {
+STOPWORDS: set[str] = {
     "a", "an", "the", "and", "or", "but", "if", "then", "else", "when",
     "at", "by", "for", "from", "in", "into", "of", "off", "on", "onto",
     "to", "with", "is", "are", "was", "were", "be", "been", "being",
@@ -11,7 +11,7 @@ STOPWORDS: Set[str] = {
     "i", "me", "my", "you", "your", "yours", "not", "no", "can", "will"
 }
 
-def tokenize(text: str) -> List[str]:
+def tokenize(text: str) -> list[str]:
     """
     Deterministic tokenizer: lowercase, strip non-alphanumeric, filter stopwords.
     Returns a list of tokens.

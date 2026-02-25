@@ -1,6 +1,7 @@
-import re
 import hashlib
+import re
 from typing import Any, Dict, List, Union
+
 
 class Redactor:
     """
@@ -47,5 +48,5 @@ class Redactor:
             return {k: self.clean_obj(v) for k, v in obj.items()}
         return obj
 
-    def get_counts(self) -> Dict[str, int]:
+    def get_counts(self) -> dict[str, int]:
         return self.redacted_counts

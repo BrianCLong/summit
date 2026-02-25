@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-import os
-import sys
+import argparse
 import json
 import logging
-import argparse
-from datetime import datetime, timezone, timedelta
+import os
+import sys
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import requests
 
 # Add repo root to sys.path to import summit modules
@@ -25,20 +26,20 @@ logger = logging.getLogger(__name__)
 
 GITHUB_API_URL = "https://api.github.com"
 
-def get_headers(token: str) -> Dict[str, str]:
+def get_headers(token: str) -> dict[str, str]:
     return {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3+json",
         "X-GitHub-Api-Version": "2022-11-28"
     }
 
-def fetch_workflow_runs(owner: str, repo: str, token: str, days: int = 7) -> List[Dict[str, Any]]:
+def fetch_workflow_runs(owner: str, repo: str, token: str, days: int = 7) -> list[dict[str, Any]]:
     """Fetch workflow runs for the last N days."""
     url = f"{GITHUB_API_URL}/repos/{owner}/{repo}/actions/runs"
     headers = get_headers(token)
 
     # calculate date filter
-    since_date = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    since_date = (datetime.now(UTC) - timedelta(days=days)).isoformat()
 
     params = {
         "per_page": 100,
@@ -74,7 +75,7 @@ def fetch_workflow_runs(owner: str, repo: str, token: str, days: int = 7) -> Lis
 
     return runs
 
-def calculate_metrics(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
+def calculate_metrics(runs: list[dict[str, Any]]) -> dict[str, Any]:
     """Calculate CI/CD observability metrics."""
     metrics = {
         "total_runs": len(runs),
@@ -145,10 +146,10 @@ def calculate_metrics(runs: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     return metrics
 
-def generate_evidence(metrics: Dict[str, Any], runs: List[Dict[str, Any]], dry_run: bool = False):
+def generate_evidence(metrics: dict[str, Any], runs: list[dict[str, Any]], dry_run: bool = False):
     """Generate Evidence Bundle."""
     run_id = os.environ.get("GITHUB_RUN_ID", "local-dev")
-    evidence_id = f"EVD-CICD-OBSERVABILITY-{datetime.now(timezone.utc).strftime('%Y%m%d')}"
+    evidence_id = f"EVD-CICD-OBSERVABILITY-{datetime.now(UTC).strftime('%Y%m%d')}"
 
     # Prepare output paths
     evidence_dir = REPO_ROOT / "evidence" / evidence_id

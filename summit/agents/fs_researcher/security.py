@@ -1,6 +1,9 @@
 from __future__ import annotations
-from typing import List, Dict, Any
+
+from typing import Any, Dict, List
+
 from summit.security.pii import PIIRedactor
+
 
 class ResearcherSecurity:
     def __init__(self):
@@ -20,7 +23,7 @@ class ResearcherSecurity:
         lowered = text.lower()
         return any(kw in lowered for kw in self.injection_keywords)
 
-    def validate_source_content(self, text: str) -> Dict[str, Any]:
+    def validate_source_content(self, text: str) -> dict[str, Any]:
         """
         Performs full security validation on source content.
         """

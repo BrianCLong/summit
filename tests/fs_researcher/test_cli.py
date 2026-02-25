@@ -1,11 +1,14 @@
-import pytest
-import os
-import json
 import importlib
+import json
+import os
 from pathlib import Path
-import summit.flags
+
+import pytest
+
 import summit.cli.fs_research
+import summit.flags
 from summit.cli.fs_research import main
+
 
 def test_cli_full_run(tmp_path):
     ws_root = tmp_path / "full_ws"
@@ -27,7 +30,7 @@ def test_cli_full_run(tmp_path):
         assert (ws_root / "artifacts" / "stamp.json").exists()
 
         # Verify deterministic outputs
-        with open(ws_root / "artifacts" / "report.json", "r") as f:
+        with open(ws_root / "artifacts" / "report.json") as f:
             report = json.load(f)
             assert report["status"] == "COMPLETED"
             assert "Introduction" in report["sections"]

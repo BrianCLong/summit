@@ -1,5 +1,6 @@
-from summit.mars.pipeline import ModularPipeline
 from summit.mars.cost import TaskType
+from summit.mars.pipeline import ModularPipeline
+
 
 def test_mars_pipeline_decomposition():
     pipeline = ModularPipeline("Complex Research")

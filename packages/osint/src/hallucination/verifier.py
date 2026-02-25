@@ -10,14 +10,14 @@ from .facts import Fact, missing_provenance_fields
 CLAIM_PATTERN = re.compile(r"\b(?:claim|fact)\b", re.IGNORECASE)
 
 
-def extract_claims(report_text: str) -> List[str]:
+def extract_claims(report_text: str) -> list[str]:
     sentences = re.split(r"(?<=[.!?])\s+", report_text.strip())
     claims = [sentence for sentence in sentences if CLAIM_PATTERN.search(sentence)]
     return [claim for claim in claims if claim]
 
 
-def _collect_evidence_ids(facts: Iterable[Fact]) -> List[str]:
-    evidence_ids: List[str] = []
+def _collect_evidence_ids(facts: Iterable[Fact]) -> list[str]:
+    evidence_ids: list[str] = []
     for fact in facts:
         for prov in fact.provenance:
             if prov.evidence_id:
@@ -25,10 +25,10 @@ def _collect_evidence_ids(facts: Iterable[Fact]) -> List[str]:
     return evidence_ids
 
 
-def verify_report(report_text: str, facts: List[Fact]) -> Dict[str, Any]:
+def verify_report(report_text: str, facts: list[Fact]) -> dict[str, Any]:
     claims = extract_claims(report_text)
     evidence_ids = _collect_evidence_ids(facts)
-    unsupported_claims: List[Dict[str, str]] = []
+    unsupported_claims: list[dict[str, str]] = []
     for claim in claims:
         if not any(evidence_id in claim for evidence_id in evidence_ids):
             unsupported_claims.append(

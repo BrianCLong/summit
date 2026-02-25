@@ -1,5 +1,7 @@
 import pytest
+
 from summit.observability.evidence import evidence_id
+
 
 def test_evidence_id_deterministic():
     input1 = {"a": 1, "b": "test"}

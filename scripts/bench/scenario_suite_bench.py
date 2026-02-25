@@ -3,6 +3,7 @@ import json
 import os
 import pathlib
 
+
 def collect_suite_stats(suites_root: pathlib.Path) -> dict:
     suite_files = []
     if suites_root.exists():

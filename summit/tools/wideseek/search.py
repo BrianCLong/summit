@@ -1,5 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from .policy import WideSeekPolicy
+
 
 class SearchTool:
     def __init__(self, policy: WideSeekPolicy):
@@ -11,7 +13,7 @@ class SearchTool:
             ]
         }
 
-    def search(self, query: str) -> List[Dict[str, str]]:
+    def search(self, query: str) -> list[dict[str, str]]:
         # In a real impl, this would call an API
         results = self.mock_results.get(query.lower(), [])
 

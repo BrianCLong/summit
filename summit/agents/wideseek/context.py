@@ -1,12 +1,13 @@
-from typing import List, Dict, Any, Optional
 import copy
+from typing import Any, Dict, List, Optional
+
 
 class WideSeekContext:
     def __init__(self, parent_id: Optional[str] = None, isolated: bool = True):
-        self.messages: List[Dict[str, str]] = []
+        self.messages: list[dict[str, str]] = []
         self.parent_id = parent_id
         self.isolated = isolated
-        self.metadata: Dict[str, Any] = {}
+        self.metadata: dict[str, Any] = {}
 
     def add_message(self, role: str, content: str):
         self.messages.append({"role": role, "content": content})
@@ -20,5 +21,5 @@ class WideSeekContext:
         # Optionally copy system prompt or task instructions here
         return new_ctx
 
-    def get_history(self) -> List[Dict[str, str]]:
+    def get_history(self) -> list[dict[str, str]]:
         return self.messages

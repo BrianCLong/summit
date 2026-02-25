@@ -1,8 +1,8 @@
-import sys
-import unittest
 import json
 import os
+import sys
 import time
+import unittest
 
 # Add root to path so we can import summit_rt
 sys.path.append(os.getcwd())

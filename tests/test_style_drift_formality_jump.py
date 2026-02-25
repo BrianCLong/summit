@@ -1,5 +1,6 @@
 from summit.narrative.detectors.style import LegibilityBorrowingStyleDrift
 
+
 def test_style_drift_casual_to_legal():
     detector = LegibilityBorrowingStyleDrift()
 

@@ -1,5 +1,6 @@
 import os
 
+
 class EvolutionPolicy:
     def __init__(self, allowed_operators=None):
         # Deny-by-default: only explicitly allowed operators can run

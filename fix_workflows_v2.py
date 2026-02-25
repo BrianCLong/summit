@@ -49,7 +49,7 @@ def fix_content(content):
 
 for filename in workflow_files:
     filepath = os.path.join(workflows_dir, filename)
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         content = f.read()
 
     new_content = fix_content(content)

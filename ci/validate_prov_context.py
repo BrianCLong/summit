@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-import json
 import hashlib
+import json
 import pathlib
-import sys
 import subprocess
-from pyld import jsonld
+import sys
+
 import jsonschema
 import yaml
+from pyld import jsonld
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SPEC = ROOT / "spec" / "prov_context.jsonld"

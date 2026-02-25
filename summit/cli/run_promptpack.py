@@ -23,7 +23,7 @@ def main() -> int:
     if args.command == "promptpack":
         if args.pack_id != "serious-client-tone":
             raise SystemExit(f"Unsupported prompt pack: {args.pack_id}")
-        input_paths: List[Path] = [Path(path) for path in args.input]
+        input_paths: list[Path] = [Path(path) for path in args.input]
         report, metrics, profile = run_fixtures(input_paths)
         out_dir = Path(args.out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)

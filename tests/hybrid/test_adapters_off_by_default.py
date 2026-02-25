@@ -1,7 +1,10 @@
 import os
+
 import pytest
+
 from summit.hybrid.cassandra_adapter import CassandraAdapter
 from summit.hybrid.s3_archive_adapter import S3ArchiveAdapter
+
 
 def test_cassandra_off_by_default():
     # ensure env var is not set to on

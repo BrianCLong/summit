@@ -11,7 +11,7 @@ for filepath in target_files:
     if not os.path.exists(filepath):
         continue
 
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     # Naive injection if missing

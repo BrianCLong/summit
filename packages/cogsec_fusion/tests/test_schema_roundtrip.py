@@ -1,12 +1,13 @@
 import json
 import os
+
 import pytest
 from jsonschema import validate
 
 SCHEMA_PATH = "packages/cogsec_fusion/schema/cogsec_v1.json"
 
 def load_schema():
-    with open(SCHEMA_PATH, 'r') as f:
+    with open(SCHEMA_PATH) as f:
         return json.load(f)
 
 def test_schema_validity():

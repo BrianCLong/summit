@@ -1,7 +1,10 @@
-import pytest
 import json
-from summit.mars.planner_mcts import MCTSPlanner
+
+import pytest
+
 from summit.mars.cost import CostModel
+from summit.mars.planner_mcts import MCTSPlanner
+
 
 def test_mars_budgeted_mcts_deterministic():
     model = CostModel()

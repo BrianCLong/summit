@@ -1,6 +1,9 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from retrieval.neo4j.contract import ContractRetriever, RetrievalContractError
+
 
 @pytest.fixture
 def mock_neo4j_client():

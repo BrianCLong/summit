@@ -1,31 +1,33 @@
-from enum import Enum
-from typing import List, Optional, Dict, Any
+from enum import Enum, StrEnum
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel, Field
 
-class Classification(str, Enum):
+
+class Classification(StrEnum):
     PUBLIC = "public"
     INTERNAL = "internal"
     CONFIDENTIAL = "confidential"
     RESTRICTED = "restricted"
 
-class RiskLevel(str, Enum):
+class RiskLevel(StrEnum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
-class ToolPermission(str, Enum):
+class ToolPermission(StrEnum):
     READ_ONLY = "read-only"
     READ_WRITE = "read-write"
     ADMIN = "admin"
     SANDBOX_ONLY = "sandbox-only"
 
-class ReplayMode(str, Enum):
+class ReplayMode(StrEnum):
     DETERMINISTIC = "deterministic"
     BEST_EFFORT = "best-effort"
     NONE = "none"
 
-class LogLevel(str, Enum):
+class LogLevel(StrEnum):
     INFO = "info"
     DEBUG = "debug"
     AUDIT = "audit"
@@ -73,12 +75,12 @@ class Tool(BaseModel):
 class Runtime(BaseModel):
     model: Model
     instructions: Instructions
-    tools: List[Tool]
-    output_schema: Optional[Dict[str, Any]] = None
+    tools: list[Tool]
+    output_schema: Optional[dict[str, Any]] = None
 
 class Experience(BaseModel):
     onboarding_flow: str
-    feedback_loops: List[str] = Field(default_factory=list)
+    feedback_loops: list[str] = Field(default_factory=list)
     learning_enabled: bool = False
 
 class Context(BaseModel):
@@ -88,7 +90,7 @@ class Context(BaseModel):
 
 class Evidence(BaseModel):
     log_level: LogLevel = LogLevel.AUDIT
-    required_artifacts: List[str]
+    required_artifacts: list[str]
     replay_mode: ReplayMode = ReplayMode.DETERMINISTIC
 
 class AgentManifest(BaseModel):

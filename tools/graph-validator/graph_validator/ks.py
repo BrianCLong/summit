@@ -1,6 +1,8 @@
 import math
 from typing import List, Tuple
+
 from .sketch import LogBinSketch
+
 
 def ks_distance(sketch1: LogBinSketch, sketch2: LogBinSketch) -> float:
     """

@@ -1,8 +1,11 @@
-import pytest
 import json
 import os
+
+import pytest
+
 from summit.osint.context_shadow import ContextShadow
 from summit.osint.redaction import Redactor
+
 
 def test_redaction_basic():
     redactor = Redactor()
@@ -34,7 +37,7 @@ def test_abuse_case_pii():
     if not os.path.exists(fixture_path):
         pytest.skip("Fixture not found")
 
-    with open(fixture_path, 'r') as f:
+    with open(fixture_path) as f:
         data = json.load(f)
 
     shadow = ContextShadow(data["source_id"])

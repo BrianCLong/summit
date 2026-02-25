@@ -9,13 +9,13 @@ simple Python dictionaries in lieu of a real database.
 """
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class ConnectorKind(str, Enum):
+class ConnectorKind(StrEnum):
     FILE = "FILE"
 
 
@@ -34,7 +34,7 @@ class Stream(BaseModel):
     schema: dict[str, Any]
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     QUEUED = "QUEUED"
     RUNNING = "RUNNING"
     SUCCEEDED = "SUCCEEDED"

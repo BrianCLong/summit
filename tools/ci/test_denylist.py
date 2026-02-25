@@ -1,9 +1,11 @@
-import unittest
-import tempfile
-import shutil
-import os
 import json
-from denylist_openai_assistants import scan_directory, DENYLIST_PATTERNS
+import os
+import shutil
+import tempfile
+import unittest
+
+from denylist_openai_assistants import DENYLIST_PATTERNS, scan_directory
+
 
 class TestDenylistScanner(unittest.TestCase):
     def setUp(self):

@@ -1,5 +1,7 @@
 import pytest
-from summit.security.wideseek import redact_text, check_for_injection, sanitize_tool_output
+
+from summit.security.wideseek import check_for_injection, redact_text, sanitize_tool_output
+
 
 def test_redact_text():
     text = "Login with password=secret123&other=val"

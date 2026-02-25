@@ -1,7 +1,9 @@
 import hashlib
 import re
 from typing import Dict, List, Optional
+
 from summit.narrative.events import DetectorEvent
+
 
 class LegibilityBorrowingStyleDrift:
     def __init__(self, history_check_enabled: bool = True):
@@ -27,7 +29,7 @@ class LegibilityBorrowingStyleDrift:
             return best_style
         return "casual"
 
-    def detect(self, text: str, actor_id: str, historical_style: str, evidence_ids: List[str]) -> Optional[DetectorEvent]:
+    def detect(self, text: str, actor_id: str, historical_style: str, evidence_ids: list[str]) -> Optional[DetectorEvent]:
         current_style = self.detect_style(text)
 
         # Drift logic: if historical is "casual" and current is High Formality (academic/legal/policy)

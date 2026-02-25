@@ -3,7 +3,7 @@ import os
 
 filepath = ".github/workflows/ci-security.yml"
 
-with open(filepath, "r") as f:
+with open(filepath) as f:
     content = f.read()
 
 # Fix DAST service names

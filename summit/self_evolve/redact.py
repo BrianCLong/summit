@@ -1,9 +1,9 @@
 import re
-from typing import Dict, Any
+from typing import Any, Dict
 
 NEVER_LOG_FIELDS = ["api_key", "token", "password", "user_email"]
 
-def redact_data(data: Dict[str, Any]) -> Dict[str, Any]:
+def redact_data(data: dict[str, Any]) -> dict[str, Any]:
     redacted = data.copy()
     for field in NEVER_LOG_FIELDS:
         if field in redacted:

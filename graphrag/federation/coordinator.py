@@ -1,6 +1,8 @@
 from typing import Optional
+
 from graphrag.federation.flags import federation_enabled
 from graphrag.federation.update_signing import SignedUpdate, verify
+
 
 class Coordinator:
     def apply_update(self, update: SignedUpdate) -> bool:

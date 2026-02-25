@@ -1,7 +1,7 @@
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Generic, TypeVar
 
 from prometheus_client import Counter, Gauge, Histogram
@@ -9,7 +9,7 @@ from prometheus_client import Counter, Gauge, Histogram
 T = TypeVar("T")
 
 
-class State(str, Enum):
+class State(StrEnum):
     CLOSED = "closed"
     OPEN = "open"
     HALF_OPEN = "half-open"

@@ -1,7 +1,9 @@
 import hashlib
 import re
 from typing import Dict, List, Optional
+
 from summit.narrative.events import DetectorEvent
+
 
 class AmbiguitySpikeDetector:
     def __init__(self):
@@ -11,7 +13,7 @@ class AmbiguitySpikeDetector:
             r"situation is fluid", r"unknown"
         ]
 
-    def score(self, texts: List[str]) -> float:
+    def score(self, texts: list[str]) -> float:
         if not texts:
             return 0.0
 
@@ -26,7 +28,7 @@ class AmbiguitySpikeDetector:
 
         return count / total_texts
 
-    def detect(self, pre_event_texts: List[str], post_event_texts: List[str], event_window: Dict[str, str], evidence_ids: List[str]) -> Optional[DetectorEvent]:
+    def detect(self, pre_event_texts: list[str], post_event_texts: list[str], event_window: dict[str, str], evidence_ids: list[str]) -> Optional[DetectorEvent]:
         pre_score = self.score(pre_event_texts)
         post_score = self.score(post_event_texts)
 
@@ -58,7 +60,7 @@ class PrebunkSlotReadiness:
             r"hidden forces", r"global agenda", r"they don't want you to know"
         ]
 
-    def check_readiness(self, texts: List[str]) -> float:
+    def check_readiness(self, texts: list[str]) -> float:
         # Measure presence of templates
         count = 0
         for text in texts:

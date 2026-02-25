@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class WideSeekBudgets:
     max_turns: int = 5

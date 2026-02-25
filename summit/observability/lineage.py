@@ -1,6 +1,7 @@
+import time
 from dataclasses import dataclass, field
 from typing import Dict, List
-import time
+
 
 @dataclass
 class LineageNode:
@@ -18,8 +19,8 @@ class LineageEdge:
 
 @dataclass
 class LineageGraph:
-    nodes: Dict[str, LineageNode] = field(default_factory=dict)
-    edges: List[LineageEdge] = field(default_factory=list)
+    nodes: dict[str, LineageNode] = field(default_factory=dict)
+    edges: list[LineageEdge] = field(default_factory=list)
 
     def add_node(self, node_id: str, source_type: str, content_hash: str, confidence: float):
         if node_id not in self.nodes:
@@ -28,6 +29,6 @@ class LineageGraph:
     def add_edge(self, source_id: str, target_id: str, relation: str):
         self.edges.append(LineageEdge(source_id, target_id, relation))
 
-    def detect_weak_links(self, threshold: float = 0.5) -> List[str]:
+    def detect_weak_links(self, threshold: float = 0.5) -> list[str]:
         """Returns node IDs where confidence is below threshold."""
         return [nid for nid, node in self.nodes.items() if node.confidence < threshold]

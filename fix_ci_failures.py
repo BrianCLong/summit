@@ -1,11 +1,12 @@
 import os
 import re
 
+
 def fix_docker_compose_yaml_error():
     print("Fixing docker-compose.dev.yaml YAML syntax error...")
     path = "docker-compose.dev.yaml"
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path) as f:
             lines = f.readlines()
 
         # Look for the error around line 531 (from logs)
@@ -33,7 +34,7 @@ def remove_pnpm_cache_from_workflows():
         if not filename.endswith(".yml"):
             continue
         filepath = os.path.join(workflows_dir, filename)
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             content = f.read()
 
         if "cache: pnpm" in content:

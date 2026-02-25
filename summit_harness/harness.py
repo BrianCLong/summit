@@ -1,7 +1,9 @@
 from dataclasses import dataclass
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from .evidence import EvidenceWriter
-from .subagents import SubagentRegistry, SubagentContext
+from .subagents import SubagentContext, SubagentRegistry
+
 
 @dataclass
 class HarnessConfig:
@@ -20,7 +22,7 @@ class AgentHarness:
         self.evidence = evidence
         self.registry = registry or SubagentRegistry()
 
-    def run(self, item: str, agent_name: Optional[str] = None) -> Dict[str, Any]:
+    def run(self, item: str, agent_name: Optional[str] = None) -> dict[str, Any]:
         """
         Executes the harness loop for a given task item.
         """

@@ -1,9 +1,9 @@
 import time
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 
 
-class State(str, Enum):
+class State(StrEnum):
   CLOSED = "closed"
   OPEN = "open"
   HALF_OPEN = "half_open"

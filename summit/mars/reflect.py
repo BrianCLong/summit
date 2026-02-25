@@ -1,5 +1,7 @@
 import difflib
+
 from .redact import redact_text
+
 
 def compute_diff(solution_a, solution_b):
     # Redact before computing diff to ensure sensitive info isn't leaked in diff

@@ -1,7 +1,10 @@
 import json
+
 import pytest
-from summit.slopguard.scoring import score_artifact
+
 from summit.slopguard.policy import evaluate_artifact
+from summit.slopguard.scoring import score_artifact
+
 
 def test_high_repetition():
     text = "The paper is good. " * 20

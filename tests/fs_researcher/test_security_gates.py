@@ -1,5 +1,7 @@
 import pytest
+
 from summit.agents.fs_researcher.security import ResearcherSecurity
+
 
 def test_pii_redaction():
     sec = ResearcherSecurity()

@@ -1,12 +1,14 @@
-from typing import List, Dict, Any
-from summit.graph.model import Node, Edge
+from typing import Any, Dict, List
+
+from summit.graph.model import Edge, Node
+
 
 class CwCDetector:
     """
     Coordination Without Content (CwC) Detector
     Detects coordination using non-semantic interaction features.
     """
-    def score_coordination(self, nodes: List[Node], edges: List[Edge]) -> Dict[str, Any]:
+    def score_coordination(self, nodes: list[Node], edges: list[Edge]) -> dict[str, Any]:
         """
         Scores coordination based on temporal and topological similarity.
         """

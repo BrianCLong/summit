@@ -1,7 +1,8 @@
-import time
 import json
-import random
 import os
+import random
+import time
+
 
 def run_benchmark():
     sizes = [1000, 10000, 100000] # Tokens

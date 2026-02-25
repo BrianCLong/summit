@@ -1,7 +1,10 @@
-import os
 import json
+import os
+
 import pytest
+
 from summit.textualizer.core import to_context_pack
+
 
 def test_to_context_pack_ordering_and_redaction(tmp_path):
     # Setup test data

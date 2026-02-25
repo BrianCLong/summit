@@ -1,7 +1,10 @@
-import pytest
 from pathlib import Path
-from summit.agents.fs_researcher.workspace import init_workspace
+
+import pytest
+
 from summit.agents.fs_researcher.report_writer import ReportWriter
+from summit.agents.fs_researcher.workspace import init_workspace
+
 
 def test_report_writer_no_tools(tmp_path):
     ws_root = tmp_path / "research_ws"
@@ -35,6 +38,7 @@ def test_write_section(tmp_path):
     assert "## Intro" in (ws_root / "report.md").read_text()
 
 from unittest.mock import patch
+
 
 def test_write_section_failure(tmp_path):
     ws_root = tmp_path / "research_ws"

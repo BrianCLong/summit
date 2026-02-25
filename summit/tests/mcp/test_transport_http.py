@@ -1,9 +1,11 @@
-import unittest
 import json
-import threading
 import os
+import threading
+import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
+
 from summit.mcp.transport.http_sse import HttpMCPTransport
+
 
 class FakeMCPServer(BaseHTTPRequestHandler):
     def do_POST(self):

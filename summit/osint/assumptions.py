@@ -1,12 +1,13 @@
-from typing import List, Dict, Any, Callable, Optional
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+from typing import Any, Callable, Dict, List, Optional
+
 
 class AssumptionRegistry:
     """
     Registry for tracking analysis assumptions and verifying their validity.
     """
     def __init__(self):
-        self.assumptions: Dict[str, Dict[str, Any]] = {}
+        self.assumptions: dict[str, dict[str, Any]] = {}
 
     def register(self, id: str, statement: str, validity_condition: Callable[[], bool]):
         """
@@ -16,11 +17,11 @@ class AssumptionRegistry:
             "id": id,
             "statement": statement,
             "validity_condition": validity_condition,
-            "last_verified": datetime.now(timezone.utc).isoformat(),
+            "last_verified": datetime.now(UTC).isoformat(),
             "is_valid": True
         }
 
-    def verify_all(self) -> List[str]:
+    def verify_all(self) -> list[str]:
         """
         Verify all assumptions. Return list of invalidated assumption IDs.
         """
@@ -35,7 +36,7 @@ class AssumptionRegistry:
             except Exception:
                 is_valid = False
 
-            data["last_verified"] = datetime.now(timezone.utc).isoformat()
+            data["last_verified"] = datetime.now(UTC).isoformat()
             data["is_valid"] = is_valid
 
             if not is_valid:
@@ -43,7 +44,7 @@ class AssumptionRegistry:
 
         return invalidated
 
-    def export(self) -> List[Dict[str, Any]]:
+    def export(self) -> list[dict[str, Any]]:
         """
         Export the registry artifacts conforming to assumptions.schema.json
         """
@@ -57,5 +58,5 @@ class AssumptionRegistry:
             for data in self.assumptions.values()
         ]
 
-    def get_assumption(self, id: str) -> Optional[Dict[str, Any]]:
+    def get_assumption(self, id: str) -> Optional[dict[str, Any]]:
         return self.assumptions.get(id)

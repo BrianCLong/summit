@@ -1,8 +1,10 @@
-import yaml
 import os
 
+import yaml
+
+
 def fix_workflow(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     # Load with round-trip loader if possible to preserve comments?

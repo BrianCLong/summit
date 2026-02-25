@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from scripts.ci.validate_evidence_schema import run_cli
 
 

@@ -1,10 +1,11 @@
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class DriftDetector:
     def __init__(self, threshold: float = 0.1):
         self.threshold = threshold
 
-    def detect_regression(self, current_metrics: Dict[str, float], baseline_metrics: Dict[str, float]) -> bool:
+    def detect_regression(self, current_metrics: dict[str, float], baseline_metrics: dict[str, float]) -> bool:
         for metric, value in current_metrics.items():
             if metric in baseline_metrics:
                 baseline = baseline_metrics[metric]

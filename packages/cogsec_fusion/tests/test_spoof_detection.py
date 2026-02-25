@@ -1,6 +1,7 @@
 import pytest
 from cogsec_fusion.detection.spoof_site import SpoofDetector
 
+
 def test_domain_spoof():
     detector = SpoofDetector(protected_domains=["example.com"])
 

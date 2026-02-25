@@ -1,5 +1,7 @@
 import pytest
+
 from summit.observability.lineage import LineageGraph
+
 
 def test_lineage_graph():
     graph = LineageGraph()

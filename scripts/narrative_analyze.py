@@ -3,16 +3,17 @@ import hashlib
 import json
 import os
 import sys
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 # Make sure we can import summit modules
 sys.path.append(os.getcwd())
 
-from summit.narrative.detectors.constraints import ConstraintExtractor
-from summit.narrative.detectors.roles import RoleProfile, RoleInversionDetector
-from summit.narrative.detectors.style import LegibilityBorrowingStyleDrift
 from summit.narrative.detectors.ambiguity import AmbiguitySpikeDetector, PrebunkSlotReadiness
+from summit.narrative.detectors.constraints import ConstraintExtractor
+from summit.narrative.detectors.roles import RoleInversionDetector, RoleProfile
+from summit.narrative.detectors.style import LegibilityBorrowingStyleDrift
 from summit.narrative.events import DetectorEvent
+
 
 def calculate_file_hash(filepath):
     sha256_hash = hashlib.sha256()
@@ -22,7 +23,7 @@ def calculate_file_hash(filepath):
             sha256_hash.update(byte_block)
     return sha256_hash.hexdigest()
 
-def sanitize_metadata(metadata: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_metadata(metadata: dict[str, Any]) -> dict[str, Any]:
     """Remove potential timestamps from metadata."""
     sanitized = {}
     for k, v in metadata.items():
@@ -43,7 +44,7 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    events: List[DetectorEvent] = []
+    events: list[DetectorEvent] = []
 
     # 1. Constraints
     constraint_extractor = ConstraintExtractor()

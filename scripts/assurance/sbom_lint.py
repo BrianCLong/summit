@@ -1,6 +1,7 @@
 import json
-import sys
 import os
+import sys
+
 
 def lint_sbom(filepath):
     if not os.path.exists(filepath):
@@ -8,7 +9,7 @@ def lint_sbom(filepath):
         return False
 
     try:
-        with open(filepath, 'r') as f:
+        with open(filepath) as f:
             data = json.load(f)
     except Exception as e:
         print(f"Error: Failed to parse JSON: {e}")

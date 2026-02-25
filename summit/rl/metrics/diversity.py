@@ -1,7 +1,8 @@
-from typing import List, Dict, Union
 import statistics
+from typing import Dict, List, Union
 
-def calculate_mixed_outcome_rate(rewards: List[float]) -> float:
+
+def calculate_mixed_outcome_rate(rewards: list[float]) -> float:
     """
     Calculates whether a group has mixed outcomes (some success, some failure).
     Useful for detecting if SAGE is effectively exploring diverse solutions.
@@ -14,7 +15,7 @@ def calculate_mixed_outcome_rate(rewards: List[float]) -> float:
     has_failure = any(r <= 0 for r in rewards)
     return 1.0 if (has_success and has_failure) else 0.0
 
-def calculate_group_stats(rewards: List[float]) -> Dict[str, float]:
+def calculate_group_stats(rewards: list[float]) -> dict[str, float]:
     """
     Computes summary stats for a group's rewards.
     """
@@ -27,7 +28,7 @@ def calculate_group_stats(rewards: List[float]) -> Dict[str, float]:
         "mixed": calculate_mixed_outcome_rate(rewards)
     }
 
-def detect_advantage_collapse(advantages: List[float], threshold: float = 1e-4) -> bool:
+def detect_advantage_collapse(advantages: list[float], threshold: float = 1e-4) -> bool:
     """
     Returns True if advantages are collapsed (variance below threshold).
     """

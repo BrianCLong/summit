@@ -1,6 +1,6 @@
 import yaml
 
-with open('pnpm-workspace.yaml', 'r') as f:
+with open('pnpm-workspace.yaml') as f:
     data = yaml.safe_load(f)
 
 data['packages'] = list(dict.fromkeys(data['packages'])) # Deduplicate preserving order

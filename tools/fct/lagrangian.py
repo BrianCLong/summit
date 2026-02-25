@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Iterable
 from dataclasses import dataclass
-from enum import Enum
+from enum import Enum, StrEnum
 
 import numpy as np
 
 from .metrics import EPS, fairness_report
 
 
-class FairnessConstraint(str, Enum):
+class FairnessConstraint(StrEnum):
     """Supported fairness notions for training."""
 
     DEMOGRAPHIC_PARITY = "demographic_parity"

@@ -19,7 +19,6 @@ import subprocess
 import sys
 from datetime import datetime
 
-
 _SENSITIVE_PATTERNS = [
     (re.compile(r"(?i)(authorization:\s*bearer\s+)[^\s]+"), r"\1[REDACTED]"),
     (re.compile(r"(?i)(x-api-key:\s*)[^\s]+"), r"\1[REDACTED]"),

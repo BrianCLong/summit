@@ -1,14 +1,14 @@
 """Maestro domain models for Runs, Artifacts, and Disclosure Packs."""
 
 from datetime import datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from typing import Any
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
 
-class RunStatus(str, Enum):
+class RunStatus(StrEnum):
     """Status of a run."""
 
     PENDING = "pending"
@@ -18,7 +18,7 @@ class RunStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
-class ArtifactKind(str, Enum):
+class ArtifactKind(StrEnum):
     """Type of artifact."""
 
     SBOM = "sbom"
@@ -135,7 +135,7 @@ class DisclosurePack(BaseModel):
 # Models for Maestro Conductor (Multi-agent workflows)
 
 
-class AgentType(str, Enum):
+class AgentType(StrEnum):
     """Type of agent."""
 
     CODE_GENERATION = "code_generation"
@@ -157,7 +157,7 @@ class Agent(BaseModel):
     is_active: bool = Field(default=True, description="Whether the agent is available for new work")
 
 
-class WorkItemStatus(str, Enum):
+class WorkItemStatus(StrEnum):
     """Status of a work item."""
 
     PENDING = "pending"
@@ -189,7 +189,7 @@ class WorkItem(BaseModel):
     )
 
 
-class ReviewStatus(str, Enum):
+class ReviewStatus(StrEnum):
     """Status of a review."""
 
     PENDING = "pending"

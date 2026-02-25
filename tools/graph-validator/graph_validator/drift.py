@@ -1,5 +1,6 @@
-from .sketch import LogBinSketch
 from .ks import ks_distance, ks_p_value_approx
+from .sketch import LogBinSketch
+
 
 class DriftResult:
     def __init__(self, d: float, p_value: float, status: str, threshold_d: float, threshold_p: float):

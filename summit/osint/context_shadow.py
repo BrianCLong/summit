@@ -1,6 +1,8 @@
 import json
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from summit.osint.redaction import Redactor
+
 
 class ContextShadow:
     """
@@ -8,10 +10,10 @@ class ContextShadow:
     """
     def __init__(self, source_id: str):
         self.source_id = source_id
-        self.adjacency: List[Dict[str, Any]] = []
+        self.adjacency: list[dict[str, Any]] = []
         self.redactor = Redactor()
 
-    def add_adjacency(self, type_: str, content: Dict[str, Any], rank: int):
+    def add_adjacency(self, type_: str, content: dict[str, Any], rank: int):
         """
         Add adjacent item (recommendation, reply, etc).
         Content is automatically redacted.
@@ -31,7 +33,7 @@ class ContextShadow:
         }
         self.adjacency.append(entry)
 
-    def export_lineage(self) -> Dict[str, Any]:
+    def export_lineage(self) -> dict[str, Any]:
         """
         Export the lineage artifact conforming to context.lineage.schema.json
         """
@@ -50,7 +52,7 @@ class ContextShadow:
             }
         }
 
-    def get_full_shadow(self) -> Dict[str, Any]:
+    def get_full_shadow(self) -> dict[str, Any]:
         """
         Return the full shadow with redacted content (internal use/debugging).
         """

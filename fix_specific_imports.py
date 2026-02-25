@@ -13,7 +13,7 @@ for filepath in files_to_update_imports:
         print(f"Skipping {filepath} (not found)")
         continue
 
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     # Replace specific imports with general import

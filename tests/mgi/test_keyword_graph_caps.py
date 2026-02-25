@@ -1,8 +1,11 @@
-import pytest
 import os
-from summit.mgi.keyword_graph import build_edges
+from dataclasses import dataclass, field
+
+import pytest
+
 from summit.mgi.config import MGIConfig
-from dataclasses import field, dataclass
+from summit.mgi.keyword_graph import build_edges
+
 
 # Mock config for testing
 @dataclass(frozen=True)

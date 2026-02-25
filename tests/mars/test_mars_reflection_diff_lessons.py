@@ -1,5 +1,6 @@
 from summit.mars.reflect import ReflectionEngine
 
+
 def test_mars_reflection_diff_lessons():
     engine = ReflectionEngine()
     solution_a = "Approached the problem with a simple linear search."

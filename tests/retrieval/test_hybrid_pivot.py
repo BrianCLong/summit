@@ -1,8 +1,11 @@
 import os
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from retrieval.neo4j.contract import ContractRetriever
 from retrieval.neo4j.hybrid_pivot import HybridRetriever, PivotRetriever
+
 
 @pytest.fixture
 def mock_contract_retriever():

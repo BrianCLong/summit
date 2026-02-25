@@ -1,6 +1,7 @@
-from typing import List, Dict, Set
+from typing import Dict, List, Set
 
-def compute_f1(pred_set: Set[str], gold_set: Set[str]) -> float:
+
+def compute_f1(pred_set: set[str], gold_set: set[str]) -> float:
     if not pred_set or not gold_set:
         return 0.0
     tp = len(pred_set & gold_set)
@@ -13,7 +14,7 @@ def compute_f1(pred_set: Set[str], gold_set: Set[str]) -> float:
 def normalize_text(text: str) -> str:
     return text.lower().strip()
 
-def evaluate_table(prediction: List[Dict[str, str]], ground_truth: List[Dict[str, str]]) -> Dict[str, float]:
+def evaluate_table(prediction: list[dict[str, str]], ground_truth: list[dict[str, str]]) -> dict[str, float]:
     """
     Computes Item F1 and Row F1 for a predicted table against ground truth.
     Assumes prediction and ground truth have same columns/schema for simplicity,

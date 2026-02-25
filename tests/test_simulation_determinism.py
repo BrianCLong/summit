@@ -1,6 +1,7 @@
 import json
 
 from summit_narrative.nog.model import Edge, NarrativeOperatingGraph, Node
+
 from summit_narrative.simulation.counterfactual import simulate
 
 

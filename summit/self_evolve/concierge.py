@@ -1,5 +1,6 @@
-from typing import List, Dict, Any
 from collections import OrderedDict
+from typing import Any, Dict, List
+
 
 class ConciergeRouter:
     def __init__(self, capacity: int = 4):
@@ -24,5 +25,5 @@ class ConciergeRouter:
 
         return self.registry[name]
 
-    def get_active_specialists(self) -> List[str]:
+    def get_active_specialists(self) -> list[str]:
         return list(self.active_specialists.keys())

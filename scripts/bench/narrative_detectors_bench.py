@@ -1,9 +1,10 @@
+import argparse
 import json
-import time
 import os
 import subprocess
 import sys
-import argparse
+import time
+
 
 def main():
     parser = argparse.ArgumentParser()

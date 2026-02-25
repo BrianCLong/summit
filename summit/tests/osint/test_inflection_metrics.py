@@ -1,7 +1,10 @@
-import pytest
 import json
 import os
+
+import pytest
+
 from summit.osint.inflection import InflectionMetric
+
 
 def test_inflection_metrics_simple():
     # Linear growth: vel constant, accel 0
@@ -97,7 +100,7 @@ def test_inflection_point_detection():
 def test_fixture_loading():
     fixture_path = os.path.join(os.path.dirname(__file__), "../fixtures/inflection/simple_series.json")
     if os.path.exists(fixture_path):
-        with open(fixture_path, 'r') as f:
+        with open(fixture_path) as f:
             data = json.load(f)
         metric = InflectionMetric(data)
         result = metric.compute()

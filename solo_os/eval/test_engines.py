@@ -1,12 +1,14 @@
-import unittest
-from solo_os.engines.registry import registry
-from solo_os.engines.signal_engine import SignalEngine
-from solo_os.engines.revenue_engine import RevenueEngine
-from solo_os.engines.orchestration_engine import OrchestrationEngine
-from solo_os.engines.content_engine import ContentEngine
-from solo_os.engines.base import RunRequest
-from pathlib import Path
 import shutil
+import unittest
+from pathlib import Path
+
+from solo_os.engines.base import RunRequest
+from solo_os.engines.content_engine import ContentEngine
+from solo_os.engines.orchestration_engine import OrchestrationEngine
+from solo_os.engines.registry import registry
+from solo_os.engines.revenue_engine import RevenueEngine
+from solo_os.engines.signal_engine import SignalEngine
+
 
 class TestEngines(unittest.TestCase):
     @classmethod

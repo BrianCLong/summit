@@ -32,7 +32,7 @@ def load_item() -> dict:
 
 
 def snippet_hash(url: str, snippet: str) -> str:
-    return sha256(f"{url}:{snippet}".encode("utf-8")).hexdigest()
+    return sha256(f"{url}:{snippet}".encode()).hexdigest()
 
 
 def build_report(item: dict, source_filter: str) -> dict:

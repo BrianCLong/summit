@@ -1,7 +1,7 @@
-from .harness import AgentHarness, HarnessConfig
 from .evidence import EvidenceWriter
+from .harness import AgentHarness, HarnessConfig
+from .subagents import SubagentContext, SubagentRegistry, SubagentSpec
 from .tool_policy import ToolPolicy
-from .subagents import SubagentSpec, SubagentContext, SubagentRegistry
 
 __all__ = [
     "AgentHarness",

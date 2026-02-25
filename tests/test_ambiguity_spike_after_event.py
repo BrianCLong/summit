@@ -1,5 +1,6 @@
 from summit.narrative.detectors.ambiguity import AmbiguitySpikeDetector
 
+
 def test_ambiguity_spike_detected():
     detector = AmbiguitySpikeDetector()
 

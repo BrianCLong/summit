@@ -1,6 +1,8 @@
 from typing import Any, Optional
 from urllib.parse import urlparse
+
 import httpx
+
 from .auth import AzureAuthProvider
 from .catalog import AzureFoundryCatalog
 

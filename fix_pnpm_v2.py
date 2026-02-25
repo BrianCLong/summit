@@ -1,7 +1,8 @@
 import os
 
+
 def fix_file(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         content = f.read()
 
     if 'actions/setup-node' not in content:

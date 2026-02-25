@@ -1,5 +1,5 @@
 path = "CHANGELOG.md"
-with open(path, "r") as f:
+with open(path) as f:
     lines = f.readlines()
 
 new_lines = []

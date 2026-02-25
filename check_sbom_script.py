@@ -1,6 +1,6 @@
 import re
 
-with open("scripts/generate-sbom.sh", "r") as f:
+with open("scripts/generate-sbom.sh") as f:
     content = f.read()
     print("Content Length:", len(content))
     # Look for syft output arguments

@@ -1,12 +1,14 @@
 import argparse
-import sys
-import os
 import json
-from .sketch import LogBinSketch
+import os
+import sys
+
 from .drift import DriftDetector
 from .evidence import EvidenceGenerator
-from .io import build_sketch_from_file
 from .html_report import generate_html_report
+from .io import build_sketch_from_file
+from .sketch import LogBinSketch
+
 
 def cmd_baseline_build(args):
     print(f"Building baseline from {args.input}...")
@@ -21,7 +23,7 @@ def cmd_window_run(args):
     print(f"Running validation on {args.input} against {args.baseline}...")
 
     # Load baseline
-    with open(args.baseline, "r") as f:
+    with open(args.baseline) as f:
         baseline_data = json.load(f)
     baseline_sketch = LogBinSketch.from_dict(baseline_data)
 

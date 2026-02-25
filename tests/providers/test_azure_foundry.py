@@ -1,9 +1,12 @@
 import os
 import time
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import MagicMock, AsyncMock, patch
+
 from summit.providers.azure_foundry.auth import AzureAuthProvider
 from summit.providers.azure_foundry.client import AzureFoundryProvider
+
 
 def test_auth_provider_token_generation():
     # Provide dummy credentials

@@ -1,12 +1,14 @@
-from typing import List, Dict, Any
-from summit.graph.model import Node, Edge
+from typing import Any, Dict, List
+
+from summit.graph.model import Edge, Node
+
 
 class IRCESScorer:
     """
     Influence Risk “Causal Envelope” Scoring (IRCES)
     Produces auditable risk scores with minimal causal subgraphs.
     """
-    def compute_risk_envelope(self, entity_id: str, full_graph: Dict[str, List[Any]]) -> Dict[str, Any]:
+    def compute_risk_envelope(self, entity_id: str, full_graph: dict[str, list[Any]]) -> dict[str, Any]:
         """
         Computes risk score and extracts the minimal causal set.
         """

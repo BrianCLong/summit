@@ -1,5 +1,6 @@
-from typing import List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List
+
 
 class MetaAlertMonitor:
     """
@@ -9,7 +10,7 @@ class MetaAlertMonitor:
         self.silence_threshold_hours = silence_threshold_hours
         self.thrashing_count = thrashing_count
 
-    def analyze_alerts(self, alert_history: List[Dict[str, Any]], window_start: str) -> List[Dict[str, Any]]:
+    def analyze_alerts(self, alert_history: list[dict[str, Any]], window_start: str) -> list[dict[str, Any]]:
         """
         Analyze a history of alerts within a time window.
         """

@@ -1,8 +1,10 @@
-import unittest
 import json
+import unittest
 from unittest.mock import MagicMock
+
 from summit_rt.incremental.delta_extract_snapshotdiff import compute_delta
 from summit_rt.incremental.neo4j_delta_apply import apply_ops
+
 
 class TestIncrementalUpdates(unittest.TestCase):
     def setUp(self):

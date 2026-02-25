@@ -1,5 +1,7 @@
 import pytest
+
 from intelgraph.provenance.multimodal import MultimodalEvidenceBundle
+
 
 def test_multimodal_ingest():
     bundle = MultimodalEvidenceBundle(run_id="run-123")

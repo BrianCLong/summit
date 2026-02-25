@@ -1,4 +1,5 @@
 import os
+
 import yaml
 
 # Workflows we already fixed or identified
@@ -14,10 +15,11 @@ files_to_check = [
 # Add more from the suspect list
 import re
 
+
 def fix_file(path):
     if not os.path.exists(path):
         return
-    with open(path, "r") as f:
+    with open(path) as f:
         content = f.read()
 
     # Split by jobs

@@ -2,13 +2,14 @@
 import json
 import os
 import sys
-from jsonschema import validate, ValidationError
+
+from jsonschema import ValidationError, validate
 
 SCHEMA_PATH = "control_plane/agents/manifest.schema.json"
 DEFAULT_MANIFEST_DIRS = ["agents/"]
 
 def validate_manifest(file_path, schema):
-    with open(file_path, 'r') as f:
+    with open(file_path) as f:
         try:
             instance = json.load(f)
             validate(instance=instance, schema=schema)
@@ -29,7 +30,7 @@ def main():
         print(f"Schema not found at {SCHEMA_PATH}")
         sys.exit(1)
 
-    with open(SCHEMA_PATH, 'r') as f:
+    with open(SCHEMA_PATH) as f:
         schema = json.load(f)
 
     success = True

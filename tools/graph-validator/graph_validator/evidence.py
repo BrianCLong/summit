@@ -1,20 +1,21 @@
-import json
 import hashlib
+import json
 import os
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 def compute_hash(data: Any) -> str:
     encoded = json.dumps(data, sort_keys=True).encode('utf-8')
     return hashlib.sha256(encoded).hexdigest()
 
 class EvidenceGenerator:
-    def __init__(self, run_id: str, git_sha: str, config: Dict[str, Any]):
+    def __init__(self, run_id: str, git_sha: str, config: dict[str, Any]):
         self.run_id = run_id
         self.git_sha = git_sha
         self.config = config
         self.config_hash = compute_hash(config)
 
-    def generate_stamp(self) -> Dict[str, Any]:
+    def generate_stamp(self) -> dict[str, Any]:
         return {
             "tool": "graph-validator",
             "version": "1.0.0",
@@ -24,7 +25,7 @@ class EvidenceGenerator:
             "pipeline": "graph-validator"
         }
 
-    def save_artifacts(self, out_dir: str, report: Dict[str, Any], metrics: Dict[str, Any]):
+    def save_artifacts(self, out_dir: str, report: dict[str, Any], metrics: dict[str, Any]):
         os.makedirs(out_dir, exist_ok=True)
 
         stamp = self.generate_stamp()

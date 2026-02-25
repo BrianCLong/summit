@@ -1,8 +1,9 @@
 import os
 import re
 
+
 def fix_workflow(filepath):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         content = f.read()
 
     # Look for setup-node step

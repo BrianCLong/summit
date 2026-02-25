@@ -1,7 +1,7 @@
-import os
-import json
-import sys
 import hashlib
+import json
+import os
+import sys
 
 ARTIFACTS_DIR = "artifacts/observability"
 
@@ -35,7 +35,7 @@ def check_drift():
                 trace_content = f.read()
                 trace_hash = hashlib.sha256(trace_content).hexdigest()
 
-            with open(stamp_path, "r") as f:
+            with open(stamp_path) as f:
                 try:
                     stamp_data = json.load(f)
                     if stamp_data.get("trace_sha256") != trace_hash:

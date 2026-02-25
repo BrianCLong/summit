@@ -1,5 +1,7 @@
 import pytest
+
 from summit.observability.provenance import DecisionProvenance
+
 
 def test_provenance_recording():
     prov = DecisionProvenance(evidence_id="EVD-TEST-001")

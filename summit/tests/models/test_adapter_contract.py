@@ -1,6 +1,8 @@
 import unittest
-from summit.models.adapters.openai import OpenAIAdapter
+
 from summit.models.adapters.anthropic import AnthropicAdapter
+from summit.models.adapters.openai import OpenAIAdapter
+
 
 class TestModelAdapters(unittest.TestCase):
     def test_openai_contract(self):

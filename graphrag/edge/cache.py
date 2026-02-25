@@ -1,15 +1,16 @@
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
 
 @dataclass
 class CacheEntry:
-  snippets: List[str]
-  prov_uris: List[str]
+  snippets: list[str]
+  prov_uris: list[str]
   expires_at_epoch: int  # only runtime; do not persist deterministically
 
 class EdgeCache:
   def __init__(self) -> None:
-    self._m: Dict[str, CacheEntry] = {}
+    self._m: dict[str, CacheEntry] = {}
   def get(self, key: str) -> Optional[CacheEntry]:
     return self._m.get(key)
   def put(self, key: str, entry: CacheEntry) -> None:

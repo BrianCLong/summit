@@ -1,4 +1,4 @@
-with open('.github/workflows/ci-verify.yml', 'r') as f:
+with open('.github/workflows/ci-verify.yml') as f:
     lines = f.readlines()
 
 new_lines = []
