@@ -2,121 +2,89 @@ import { Request, Response, NextFunction } from 'express';
 import { escape } from 'html-escaper';
 
 /**
- * Recursively removes any keys that start with '$' or '.',
- * which could be used to execute malicious queries (e.g. NoSQL injection).
- *
- * Hardened to prevent:
- * - Prototype Pollution (__proto__, constructor, prototype)
- * - Property injection via inheritance (uses hasOwnProperty)
- * - Destruction of special objects (Date, RegExp, Buffer)
- * - XSS (HTML escapes all strings)
- *
- * Performance:
- * - Copy-on-Write (CoW) pattern to skip allocations for clean objects
- * - O(1) character checks for keys
+ * Recursively sanitizes an object to prevent NoSQL injection and Prototype Pollution.
+ * Also escapes HTML characters in strings to provide basic XSS protection.
+ * Uses a Copy-on-Write pattern to avoid unnecessary mutations and allocations.
  */
-function sanitize(obj: any): any {
-    if (typeof obj === 'string') {
-        const sanitized = escape(obj);
-        return sanitized !== obj ? sanitized : obj;
+export function sanitize<T>(obj: T): T {
+    if (obj === null || typeof obj !== 'object') {
+        if (typeof obj === 'string') {
+            const escaped = escape(obj);
+            return (escaped !== obj ? escaped : obj) as unknown as T;
+        }
+        return obj;
     }
 
-    if (!obj || typeof obj !== 'object') return obj;
-
-    // Explicitly preserve special object types
-    if (obj instanceof Date || obj instanceof RegExp || Buffer.isBuffer(obj)) {
+    // Preservation list for instances that should not be traversed/mutated
+    if (obj instanceof Date || obj instanceof RegExp || obj instanceof Buffer) {
         return obj;
     }
 
     if (Array.isArray(obj)) {
-        let hasChanged = false;
-        const sanitizedArray = obj.map(item => {
-            const sanitizedItem = sanitize(item);
-            if (sanitizedItem !== item) hasChanged = true;
-            return sanitizedItem;
-        });
-        return hasChanged ? sanitizedArray : obj;
+        let newArr: any[] | null = null;
+        for (let i = 0; i < obj.length; i++) {
+            const val = obj[i];
+            const sanitizedVal = sanitize(val);
+            if (sanitizedVal !== val) {
+                if (!newArr) newArr = [...obj];
+                newArr[i] = sanitizedVal;
+            }
+        }
+        return (newArr || obj) as unknown as T;
     }
 
-    let hasChanged = false;
-    const clean: any = {};
-    const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
-
+    let newObj: any | null = null;
     for (const key in obj) {
-        if (!Object.prototype.hasOwnProperty.call(obj, key)) {
-            hasChanged = true;
-            continue;
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+            // 1. Prototype Pollution protection
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+                if (!newObj) newObj = { ...obj };
+                delete newObj[key];
+                continue;
+            }
+
+            // 2. NoSQL injection protection (stripping keys starting with $ or .)
+            if (key[0] === '$' || key[0] === '.') {
+                if (!newObj) newObj = { ...obj };
+                delete newObj[key];
+                continue;
+            }
+
+            const val = (obj as any)[key];
+            const sanitizedVal = sanitize(val);
+            if (sanitizedVal !== val) {
+                if (!newObj) newObj = { ...obj };
+                newObj[key] = sanitizedVal;
+            }
         }
-
-        // Fast character checks for NoSQL injection protection and Prototype Pollution
-        if (key.length > 0 && (key[0] === '$' || key[0] === '.')) {
-            hasChanged = true;
-            continue;
-        }
-
-        if (dangerousKeys.includes(key)) {
-            hasChanged = true;
-            continue;
-        }
-
-        const value = obj[key];
-        const sanitizedValue = sanitize(value);
-
-        if (sanitizedValue !== value) {
-            hasChanged = true;
-        }
-
-        clean[key] = sanitizedValue;
     }
 
-    // Check if any keys were removed by comparing key counts if hasChanged is still false
-    if (!hasChanged && Object.keys(obj).length !== Object.keys(clean).length) {
-        hasChanged = true;
-    }
-
-    // If no keys were removed or modified, return the original object (CoW)
-    return hasChanged ? clean : obj;
+    return (newObj || obj) as unknown as T;
 }
 
-export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
-    if (process.env.DEBUG_TESTS) {
-        console.warn('[Sanitization] Custom sanitizeInput middleware called for path:', req.path);
-    }
-
+/**
+ * Express middleware to sanitize request body, query, and params.
+ */
+export const sanitizationMiddleware = (req: Request, _res: Response, next: NextFunction) => {
     if (req.body) {
         req.body = sanitize(req.body);
     }
 
     if (req.query) {
-        try {
-            const sanitizedQuery = sanitize(req.query);
-            Object.defineProperty(req, 'query', {
-                value: sanitizedQuery,
-                writable: true,
-                configurable: true,
-                enumerable: true
-            });
-        } catch (err: any) {
-            if (process.env.DEBUG_TESTS) {
-                console.warn('[Sanitization] Warning: Could not sanitize req.query:', err.message);
-            }
-        }
+        // Use defineProperty to bypass potential read-only locks on query/params
+        Object.defineProperty(req, 'query', {
+            value: sanitize(req.query),
+            writable: true,
+            configurable: true
+        });
     }
 
     if (req.params) {
-        try {
-            const sanitizedParams = sanitize(req.params);
-            Object.defineProperty(req, 'params', {
-                value: sanitizedParams,
-                writable: true,
-                configurable: true,
-                enumerable: true
-            });
-        } catch (err: any) {
-            if (process.env.DEBUG_TESTS) {
-                console.warn('[Sanitization] Warning: Could not sanitize req.params:', err.message);
-            }
-        }
+        Object.defineProperty(req, 'params', {
+            value: sanitize(req.params),
+            writable: true,
+            configurable: true
+        });
     }
 
     next();

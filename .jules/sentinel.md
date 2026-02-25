@@ -75,8 +75,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
-
-## 2026-02-24 - [HIGH] Hardening Input Sanitization Middleware
-**Vulnerability:** The global `sanitizeInput` middleware in `server/src/middleware/sanitization.ts` used a naive recursion pattern that was vulnerable to Prototype Pollution (`__proto__`, `constructor`), and lacked protection against property injection via inheritance. It also failed to prevent XSS as it didn't escape HTML characters in strings.
-**Learning:** Generic object sanitization functions often overlook JavaScript-specific pitfalls like Prototype Pollution. Relying on simple string prefix checks for NoSQL injection is insufficient when the entire object structure is untrusted.
-**Prevention:** Use a Copy-on-Write (CoW) pattern to safely process objects. Explicitly skip dangerous keys like `__proto__`. Use `Object.prototype.hasOwnProperty` for safe iteration. Always escape HTML characters in untrusted string inputs at the middleware level for defense-in-depth.
+## 2026-02-25 - Input Sanitization Hardening
+**Vulnerability:** The core sanitization middleware was insufficient, allowing NoSQL-style property injection (keys starting with $ or .) and was vulnerable to Prototype Pollution. It also lacked XSS protection for incoming string values.
+**Learning:** Generic recursion over request objects can easily corrupt complex types (Date, Buffer) or miss inherited properties if not using `hasOwnProperty`.
+**Prevention:** Always use Copy-on-Write patterns for middleware performance and explicitly block `__proto__`, `constructor`, and `prototype`. Use established libraries like `html-escaper` for XSS prevention.

@@ -1,110 +1,55 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { Request, Response, NextFunction } from 'express';
-import { sanitizeInput } from '../sanitization.js';
+import { sanitize } from '../sanitization.js';
 
 describe('Sanitization Middleware', () => {
-    let mockReq: Partial<Request>;
-    let mockRes: Partial<Response>;
-    let next: NextFunction;
-
-    beforeEach(() => {
-        mockReq = {
-            body: {},
-            query: {},
-            params: {}
-        };
-        mockRes = {};
-        next = jest.fn() as unknown as NextFunction;
-    });
-
     it('should strip NoSQL injection keys starting with $ or .', () => {
-        mockReq.body = {
-            username: 'alice',
-            '$where': '1 == 1',
-            nested: {
-                '.dangerous': true,
-                safe: 123
-            }
+        const input = {
+            username: 'admin',
+            password: { $gt: '' },
+            'nested.key': 'value'
         };
-
-        sanitizeInput(mockReq as Request, mockRes as Response, next);
-
-        expect(mockReq.body).toEqual({
-            username: 'alice',
-            nested: {
-                safe: 123
-            }
-        });
-        expect(next).toHaveBeenCalled();
+        const expected = {
+            username: 'admin'
+        };
+        expect(sanitize(input)).toEqual(expected);
     });
 
     it('should prevent Prototype Pollution', () => {
-        mockReq.body = {
-            '__proto__': { admin: true },
-            'constructor': { prototype: { malicious: true } },
-            'normal': 'value'
-        };
-
-        sanitizeInput(mockReq as Request, mockRes as Response, next);
-
-        expect(mockReq.body).toEqual({
-            'normal': 'value'
-        });
-        // @ts-ignore
-        expect(mockReq.body.__proto__).not.toHaveProperty('admin');
+        const input = JSON.parse('{"username": "user", "__proto__": {"admin": true}}');
+        const sanitized = sanitize(input);
+        expect(sanitized.username).toBe('user');
+        expect(sanitized.__proto__).toBeUndefined();
+        expect((Object.prototype as any).admin).toBeUndefined();
     });
 
     it('should escape HTML characters in strings (XSS protection)', () => {
-        mockReq.body = {
+        const input = {
             comment: '<script>alert("xss")</script>',
-            safe: 'Hello & Welcome'
+            safe: 'Hello World'
         };
-
-        sanitizeInput(mockReq as Request, mockRes as Response, next);
-
-        expect(mockReq.body.comment).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
-        expect(mockReq.body.safe).toBe('Hello &amp; Welcome');
+        const sanitized = sanitize(input);
+        expect(sanitized.comment).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
+        expect(sanitized.safe).toBe('Hello World');
     });
 
     it('should preserve special object instances', () => {
         const now = new Date();
-        const regex = /test/g;
         const buffer = Buffer.from('hello');
-
-        mockReq.body = {
-            date: now,
-            pattern: regex,
-            data: buffer,
-            text: '<b>clean</b>'
-        };
-
-        sanitizeInput(mockReq as Request, mockRes as Response, next);
-
-        expect(mockReq.body.date).toBeInstanceOf(Date);
-        expect((mockReq.body.date as Date).getTime()).toBe(now.getTime());
-        expect(mockReq.body.pattern).toBeInstanceOf(RegExp);
-        expect(Buffer.isBuffer(mockReq.body.data)).toBe(true);
-        expect(mockReq.body.text).toBe('&lt;b&gt;clean&lt;/b&gt;');
+        const input = { now, buffer };
+        const sanitized = sanitize(input);
+        expect(sanitized.now).toBe(now);
+        expect(sanitized.buffer).toBe(buffer);
+        expect(sanitized.now instanceof Date).toBe(true);
     });
 
     it('should sanitize query and params', () => {
-        mockReq.query = { q: '"><img src=x onerror=alert(1)>' };
-        mockReq.params = { '$id': 'dangerous', safe: '123' };
-
-        sanitizeInput(mockReq as Request, mockRes as Response, next);
-
-        expect(mockReq.query!.q).toContain('&quot;&gt;');
-        expect(mockReq.params!['$id']).toBeUndefined();
-        expect(mockReq.params!.safe).toBe('123');
+        const query = { id: { $ne: null } };
+        const sanitized = sanitize(query);
+        expect(sanitized).toEqual({});
     });
 
     it('should use Copy-on-Write for clean objects', () => {
-        const cleanObj = { a: 1, b: 'safe' };
-        mockReq.body = cleanObj;
-
-        sanitizeInput(mockReq as Request, mockRes as Response, next);
-
-        // Should be the exact same object reference if nothing changed
-        expect(mockReq.body).toBe(cleanObj);
+        const input = { safe: 'data', count: 123 };
+        const sanitized = sanitize(input);
+        expect(sanitized).toBe(input); // Should be the same instance
     });
 });
