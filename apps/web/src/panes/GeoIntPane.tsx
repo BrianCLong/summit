@@ -6,7 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import { useLazyQuery } from '@apollo/client/react';
 import { gql } from '@apollo/client';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/Tabs';
