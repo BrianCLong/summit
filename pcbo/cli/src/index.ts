@@ -79,6 +79,7 @@ async function main(): Promise<void> {
     } catch (error) {
       throw new Error(
         `failed to parse orchestrator response: ${(error as Error).message}`,
+        { cause: error },
       );
     }
 

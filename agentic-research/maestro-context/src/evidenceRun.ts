@@ -19,8 +19,8 @@ export async function runEvidence(evid: string) {
   const ctx: AgentContext = {
     turns: Array.from({ length: 60 }).map((_, i) => ({
       role: i % 2 === 0 ? "user" : "assistant",
-      content: `turn-${i} content ${\"x\".repeat(40)}`,
-      observation: i % 3 === 0 ? `obs-${i} ${\"y\".repeat(50)}` : undefined,
+      content: `turn-${i} content ${"x".repeat(40)}`,
+      observation: i % 3 === 0 ? `obs-${i} ${"y".repeat(50)}` : undefined,
       action: i % 5 === 0 ? `tool:${i}` : undefined,
     })),
   };

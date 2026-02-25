@@ -151,14 +151,8 @@ class NLQCompiler {
       regex: /recent\s+(\w+)s?\s+(?:in\s+the\s+)?(?:last\s+)?(\d+)\s+(days?|hours?|weeks?)/i,
       template: (m: RegExpMatchArray) => {
         const unit = m[3].toLowerCase();
-        let duration = 'w';
-        if (unit.startsWith('day')) {
-          duration = 'd';
-        } else if (unit.startsWith('hour')) {
-          duration = 'h';
-        } else {
-          duration = 'w';
-        }
+        const duration = unit.startsWith('day') ? 'd' :
+          unit.startsWith('hour') ? 'h' : 'w';
         return `MATCH (n:${this.capitalize(m[1])}) WHERE n.createdAt > datetime() - duration('P${m[2]}${duration.toUpperCase()}') RETURN n ORDER BY n.createdAt DESC`;
       },
     },

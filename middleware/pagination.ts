@@ -100,7 +100,7 @@ export function decodeCursor(cursor: string): string {
     return id;
   } catch (error) {
     logger.error('Failed to decode cursor:', error);
-    throw new Error('Invalid cursor');
+    throw new Error('Invalid cursor', { cause: error });
   }
 }
 
