@@ -5,7 +5,7 @@ import { CheckCircle, ShieldCheck, Clock, FileJson, Link as LinkIcon, Download }
 const MOCK_RECEIPT = {
   id: 'RCPT-2026-02-12-XYZ',
   timestamp: '2026-02-12T14:30:00Z',
-  actor: 'alice@example.com',
+  actor: 'actor@example.com',
   action: 'approve',
   resource: 'REQ-101',
   policy_version: 'v1.2.3',

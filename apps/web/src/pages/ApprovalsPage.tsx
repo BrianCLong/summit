@@ -5,7 +5,7 @@ import { Check, X, Clock, FileText, Shield, AlertTriangle } from 'lucide-react';
 const MOCK_REQUESTS = [
   {
     id: 'REQ-101',
-    requestor: 'alice@example.com',
+    requestor: 'requester1@example.com',
     action: 'deploy:production',
     resource: 'service-payment',
     status: 'pending',
@@ -15,7 +15,7 @@ const MOCK_REQUESTS = [
   },
   {
     id: 'REQ-102',
-    requestor: 'bob@example.com',
+    requestor: 'requester2@example.com',
     action: 'delete:database',
     resource: 'db-users-replica',
     status: 'pending',
@@ -25,7 +25,7 @@ const MOCK_REQUESTS = [
   },
   {
     id: 'REQ-103',
-    requestor: 'charlie@example.com',
+    requestor: 'requester3@example.com',
     action: 'read:audit-logs',
     resource: 'logs-2025',
     status: 'approved',
