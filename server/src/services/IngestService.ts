@@ -13,6 +13,13 @@ import { meteringEmitter } from '../metering/emitter.js';
 import { getTracer } from '../observability/tracer.js';
 
 const ingestLogger = logger.child({ name: 'IngestService' });
+const tracer =
+  typeof getTracer === 'function'
+    ? getTracer()
+    : {
+        withSpan: async (_name: string, fn: (span: any) => Promise<any>) =>
+          fn({ setAttribute: () => {} }),
+      };
 
 export interface IngestInput {
   tenantId: string;
@@ -55,7 +62,7 @@ export class IngestService {
    * Ingest entities and relationships with full provenance tracking
    */
   async ingest(input: IngestInput): Promise<IngestResult> {
-    return getTracer().withSpan('IngestService.ingest', async (span: any) => {
+    return tracer.withSpan('IngestService.ingest', async (span: any) => {
       span.setAttribute('ingest.tenant_id', input.tenantId);
       span.setAttribute('ingest.source_type', input.sourceType);
       span.setAttribute('ingest.entity_count', input.entities.length);
@@ -91,7 +98,7 @@ export class IngestService {
 
         // 3. Upsert entities in batches for performance
         const BATCH_SIZE = 1000;
-        await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
+        await tracer.withSpan('IngestService.processEntities', async (entitySpan) => {
           for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
             const batch = input.entities.slice(i, i + BATCH_SIZE);
 
@@ -142,7 +149,7 @@ export class IngestService {
         });
 
         // 4. Upsert relationships
-        await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
+        await tracer.withSpan('IngestService.processRelationships', async (relSpan) => {
           for (const relInput of input.relationships) {
             try {
               const fromId = idMap.get(relInput.fromExternalId);
@@ -200,7 +207,7 @@ export class IngestService {
 
         // 6. Sync to Neo4j (best effort, with outbox fallback)
         try {
-          await getTracer().withSpan('IngestService.syncToNeo4j', async () => {
+          await tracer.withSpan('IngestService.syncToNeo4j', async () => {
              await this.syncToNeo4j(input.tenantId, provenanceId);
           });
         } catch (neo4jError) {

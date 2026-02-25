@@ -1,79 +1,73 @@
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { UsageKind } from '../../types/usage.js';
-
-// Track calls for assertions
-let queryCallCount = 0;
-let releaseCallCount = 0;
-
-// Mock modules before imports
-jest.mock('../../config/database.js', () => ({
-  getPostgresPool: () => ({
-    connect: () => Promise.resolve({
-      query: () => {
-        queryCallCount++;
-        return Promise.resolve({ rowCount: 1 });
-      },
-      release: () => {
-        releaseCallCount++;
-      },
-    }),
-  }),
-}));
-
-jest.mock('../../utils/logger.js', () => ({
-  default: {
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-  },
-  error: jest.fn(),
-}));
-
-jest.mock('../../utils/metrics.js', () => ({
-  PrometheusMetrics: class {
-    createCounter(): void {}
-    incrementCounter(): void {}
-  }
-}));
-
-// Import after mocks
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { UsageMeteringService } from '../UsageMeteringService.js';
 
 describe('UsageMeteringService', () => {
   let service: UsageMeteringService;
 
   beforeEach(() => {
-    // Reset call counts
-    queryCallCount = 0;
-    releaseCallCount = 0;
-
-    // Reset singleton
-    (UsageMeteringService as any).instance = null;
-
-    // Get fresh instance
-    service = UsageMeteringService.getInstance();
+    service = new UsageMeteringService();
   });
 
-  it('should record a usage event', async () => {
+  it('records usage events and auto-generates ids when missing', async () => {
+    const now = new Date('2026-01-01T00:00:00.000Z').toISOString();
+
     await service.record({
+      id: '',
       tenantId: 't1',
-      kind: 'custom' as UsageKind,
+      dimension: 'custom',
       quantity: 10,
-      unit: 'calls'
+      unit: 'calls',
+      source: 'unit-test',
+      occurredAt: now,
+      recordedAt: now,
     });
 
-    expect(queryCallCount).toBeGreaterThan(0);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    const events = await service.getEvents('t1', { dimension: 'custom' });
+    expect(events).toHaveLength(1);
+    expect(events[0].id).toMatch(/^usage_/);
+    expect(events[0].quantity).toBe(10);
   });
 
-  it('should record a batch of events', async () => {
-    await service.recordBatch([
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 1, unit: 'u' },
-      { tenantId: 't1', kind: 'custom' as UsageKind, quantity: 2, unit: 'u' }
-    ]);
+  it('aggregates usage totals within a time range', async () => {
+    const jan1 = new Date('2026-01-01T00:00:00.000Z').toISOString();
+    const jan2 = new Date('2026-01-02T00:00:00.000Z').toISOString();
+    const jan3 = new Date('2026-01-03T00:00:00.000Z').toISOString();
 
-    // BEGIN + 2 inserts + COMMIT = 4 calls
-    expect(queryCallCount).toBe(4);
-    expect(releaseCallCount).toBeGreaterThan(0);
+    await service.record({
+      id: 'evt1',
+      tenantId: 't1',
+      dimension: 'custom',
+      quantity: 1,
+      unit: 'calls',
+      source: 'unit-test',
+      occurredAt: jan1,
+      recordedAt: jan1,
+    });
+
+    await service.record({
+      id: 'evt2',
+      tenantId: 't1',
+      dimension: 'custom',
+      quantity: 2,
+      unit: 'calls',
+      source: 'unit-test',
+      occurredAt: jan2,
+      recordedAt: jan2,
+    });
+
+    await service.record({
+      id: 'evt3',
+      tenantId: 't1',
+      dimension: 'other',
+      quantity: 100,
+      unit: 'calls',
+      source: 'unit-test',
+      occurredAt: jan2,
+      recordedAt: jan2,
+    });
+
+    const aggregation = await service.getAggregation('t1', 'custom', jan1, jan3);
+    expect(aggregation.totalQuantity).toBe(3);
+    expect(aggregation.eventCount).toBe(2);
   });
 });

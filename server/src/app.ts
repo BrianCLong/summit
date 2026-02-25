@@ -155,9 +155,20 @@ export const createApp = async () => {
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
-  const tracer = initializeTracing();
+  const tracer =
+    typeof initializeTracing === 'function'
+      ? initializeTracing()
+      : ({
+          isInitialized: () => true,
+          initialize: async () => undefined,
+        } as any);
   // Ensure initialized if this entry point is used standalone (e.g. tests)
-  if (!tracer.isInitialized()) {
+  if (
+    tracer &&
+    typeof tracer.isInitialized === 'function' &&
+    !tracer.isInitialized() &&
+    typeof tracer.initialize === 'function'
+  ) {
     await tracer.initialize();
   }
 

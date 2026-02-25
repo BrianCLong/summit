@@ -54,7 +54,8 @@ export function createReasonForAccessMiddleware(config: ReasonForAccessConfig) {
     const requestId = (req as any).reqId || req.headers['x-request-id'];
     const legalBasis = req.headers['x-legal-basis'] as string | undefined;
 
-    writeAudit({
+    Promise.resolve(
+      writeAudit({
       userId,
       action: 'REASON_FOR_ACCESS_PROVIDED',
       resourceType: 'http',
@@ -68,7 +69,8 @@ export function createReasonForAccessMiddleware(config: ReasonForAccessConfig) {
       },
       ip: req.ip,
       userAgent: req.get('user-agent') || undefined,
-    }).catch(() => {
+    }),
+    ).catch(() => {
       // non-blocking audit failure
     });
 

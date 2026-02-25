@@ -59,7 +59,11 @@ jest.unstable_mockModule('../../config/logger', () => ({
 }));
 
 // Dynamic imports AFTER mocks are set up
-const { IngestService } = await import('../IngestService.js');
+let IngestService: typeof import('../IngestService.js').IngestService;
+
+beforeAll(async () => {
+  ({ IngestService } = await import('../IngestService.js'));
+});
 
 describe('IngestService', () => {
   let ingestService: IngestServiceType;
