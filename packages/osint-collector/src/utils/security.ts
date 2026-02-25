@@ -27,7 +27,6 @@ export async function validateSafeUrl(url: string): Promise<string> {
     throw new Error(`Unsafe protocol: ${parsedUrl.protocol}`);
   }
 
-  // 2. Hostname Check
   let hostname = parsedUrl.hostname;
 
   // Remove brackets for IPv6 check if present
@@ -35,9 +34,8 @@ export async function validateSafeUrl(url: string): Promise<string> {
     hostname = hostname.slice(1, -1);
   }
 
-  // Check if hostname is already an IP
+  // 2. Check if hostname is already an IP
   if (Address4.isValid(hostname) || Address6.isValid(hostname)) {
-    // It's an IP, validate it directly
     checkIp(hostname);
     return hostname;
   }
@@ -45,21 +43,21 @@ export async function validateSafeUrl(url: string): Promise<string> {
   // 3. DNS Resolution & IP Check
   try {
     // lookup returns the first address found
-    const result = await lookup(hostname);
+    // family: 0 means IPv4 or IPv6
+    const result = await lookup(hostname, { family: 0 });
     const ipToValidate = result.address;
     checkIp(ipToValidate);
     return ipToValidate;
-  } catch (error) {
-    if ((error as Error).message.includes('Unsafe IP')) {
+  } catch (error: any) {
+    if (error.message && error.message.includes('Unsafe IP')) {
         throw error;
     }
-    throw new Error(`DNS lookup failed for ${hostname}: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`DNS lookup failed for ${hostname}: ${error.message || String(error)}`);
   }
 }
 
 function checkIp(ip: string): void {
   if (Address4.isValid(ip)) {
-    // IPv4 Checks
     const octets = ip.split('.').map(Number);
     const o1 = octets[0];
     const o2 = octets[1];
@@ -94,53 +92,43 @@ function checkIp(ip: string): void {
          throw new Error(`Unsafe IP address blocked: ${ip}`);
      }
 
-     if (ip === '::' || ip === '0:0:0:0:0:0:0:0') throw new Error(`Unsafe IP address blocked: ${ip}`); // ::/128
+     const parts = addr.parsedAddress; // 8 parts of hex strings
 
-     const canonical = addr.canonicalForm();
-     if (canonical) {
-        const cParts = canonical.split(':');
-        const firstHex = parseInt(cParts[0], 16);
+     // Helper to get hex value of part i
+     const p = (i: number) => parseInt(parts[i], 16);
 
-        // Unique Local: fc00::/7 => fcxx or fdxx
-        if ((firstHex & 0xfe00) === 0xfc00) {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // ::/128 (Unspecified)
+     if (parts.every(x => parseInt(x, 16) === 0)) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // Mapped IPv4: ::ffff:0:0/96
-        if (cParts[0] === '0000' && cParts[1] === '0000' && cParts[2] === '0000' && cParts[3] === '0000' && cParts[4] === '0000' && cParts[5] === 'ffff') {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // Unique Local: fc00::/7 (fc00-fdff)
+     if ((p(0) & 0xfe00) === 0xfc00) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // Discard-Only: 100::/64
-        if (cParts[0] === '0100' && cParts[1] === '0000' && cParts[2] === '0000' && cParts[3] === '0000') {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // Site Local: fec0::/10 (deprecated)
+     if ((p(0) & 0xffc0) === 0xfec0) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // Teredo: 2001:0000::/32
-        if (cParts[0] === '2001' && cParts[1] === '0000') {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // IPv4 Mapped: ::ffff:0:0/96
+     if (parts.slice(0, 5).every(x => parseInt(x, 16) === 0) && p(5) === 0xffff) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // ORCHIDv2: 2001:0020::/28
-        const secondHex = parseInt(cParts[1], 16);
-        if (cParts[0] === '2001' && (secondHex >= 0x0020 && secondHex <= 0x002f)) {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // IPv4 Compatible: ::0.0.0.0/96 (deprecated)
+     // Covered by ::/128 if all zero, but if last 32 bits are not zero:
+     if (parts.slice(0, 6).every(x => parseInt(x, 16) === 0) && (p(6) !== 0 || p(7) !== 0)) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // Documentation: 2001:0db8::/32
-        if (cParts[0] === '2001' && cParts[1] === '0db8') {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // Discard: 100::/64
+     if (p(0) === 0x0100 && parts.slice(1, 4).every(x => parseInt(x, 16) === 0)) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // 6to4: 2002::/16
-        if (cParts[0] === '2002') {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
+     // Teredo: 2001::/32
+     if (p(0) === 0x2001 && p(1) === 0x0000) throw new Error(`Unsafe IP address blocked: ${ip}`);
 
-        // IPv4-Embedded: 64:ff9b::/96
-        if (cParts[0] === '0064' && cParts[1] === 'ff9b' && cParts[2] === '0000' && cParts[3] === '0000' && cParts[4] === '0000' && cParts[5] === '0000') {
-             throw new Error(`Unsafe IP address blocked: ${ip}`);
-        }
-     }
+     // ORCHIDv2: 2001:20::/28
+     if (p(0) === 0x2001 && p(1) >= 0x0020 && p(1) <= 0x002f) throw new Error(`Unsafe IP address blocked: ${ip}`);
+
+     // Documentation: 2001:db8::/32
+     if (p(0) === 0x2001 && p(1) === 0x0db8) throw new Error(`Unsafe IP address blocked: ${ip}`);
+
+     // 6to4: 2002::/16
+     if (p(0) === 0x2002) throw new Error(`Unsafe IP address blocked: ${ip}`);
+
+     // 64:ff9b::/96 (IPv4-Embedded)
+     if (p(0) === 0x0064 && p(1) === 0xff9b && parts.slice(2, 6).every(x => parseInt(x, 16) === 0)) throw new Error(`Unsafe IP address blocked: ${ip}`);
   }
 }
