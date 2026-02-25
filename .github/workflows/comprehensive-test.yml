@@ -38,7 +38,7 @@ jobs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Install Node dependencies
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
 
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -53,14 +53,14 @@ jobs:
 
     - name: Run Summit (Python) Tests
       run: |
-        python -m pytest --cov=summit summit/tests
+        python -m pytest --cov=summit --cov-report=xml summit/tests
       env:
         PYTHONPATH: .
 
     - name: Run Server (Node) Tests
       run: |
         # Run specific passing suites to ensure baseline stability
-        pnpm --filter intelgraph-server test src/services/__tests__/UsageMeteringService.test.ts src/services/__tests__/FcrService.test.ts src/llm/__tests__/nvidia-nim.test.ts src/middleware/__tests__/tenantHeader.test.ts
+        pnpm --filter intelgraph-server test src/services/__tests__/UsageMeteringService.test.ts src/services/__tests__/FcrService.test.ts src/llm/__tests__/nvidia-nim.test.ts src/middleware/__tests__/tenantHeader.test.ts --coverage
 
     - name: Verify Web App Build
       run: |
@@ -73,3 +73,13 @@ jobs:
       run: pnpm exec playwright test e2e/smoke.spec.ts
       env:
         PLAYWRIGHT_USE_WEBSERVER: 'true'
+
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: |
+          playwright-report/
+          coverage.xml
+          server/coverage/

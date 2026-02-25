@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import type { GlobalTrafficSteering as GlobalTrafficSteeringType } from '../GlobalTrafficSteering.js';
 
 const getResidencyConfigMock = jest.fn();
 const resolveTargetRegionMock = jest.fn();
@@ -34,7 +35,7 @@ resolveTargetRegionMock.mockReturnValue('us-east-1');
 const { GlobalTrafficSteering } = await import('../GlobalTrafficSteering.js');
 
 describe('GlobalTrafficSteering', () => {
-    let steering: GlobalTrafficSteering;
+    let steering: GlobalTrafficSteeringType;
 
     beforeEach(() => {
         jest.clearAllMocks();
