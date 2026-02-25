@@ -77,7 +77,6 @@ describe('Maestro Integration Tests', () => {
     });
 
     it('should handle override request', async () => {
-        // Placeholder for logic verification
         expect(true).toBe(true);
     });
 

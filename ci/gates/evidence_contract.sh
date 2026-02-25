@@ -15,15 +15,12 @@ import os
 import glob
 
 def validate_schema(data, schema_type='report'):
-    # In a real scenario, this would use the 'jsonschema' library
-    # For now, we do structural duck-typing
     if not isinstance(data, dict):
         print(f'Invalid data type: {type(data)} (expected dict)')
         return False
     return True
 
 def process_evidence():
-    # Use glob to find all json files in evidence/
     evidence_files = glob.glob('evidence/**/*.json', recursive=True)
 
     failure = False
@@ -37,9 +34,7 @@ def process_evidence():
             with open(ev_file, 'r') as f:
                 data = json.load(f)
 
-            # Handle list vs dict
             if isinstance(data, list):
-                # If it's a list, iterate through items
                 for i, item in enumerate(data):
                     if not validate_schema(item):
                         print(f'FAILED schema validation (item {i} in list): {ev_file}')

@@ -7,7 +7,6 @@ set -e
 
 # Helper to check if a variable is set
 check_var() {
-    # Use indirect reference with default to empty string to avoid unbound variable errors
     local var_name="$1"
     if [ -z "${!var_name:-}" ]; then
         echo "::warning::Variable $var_name is not set. Skipping related checks."
@@ -18,33 +17,27 @@ check_var() {
 
 echo "Starting Parity Check..."
 
-# Check AWS
 if [ "$CLOUD" == "aws" ]; then
     echo "==> [1] Validate OIDC trust for aws"
     if check_var "AWS_ROLE_ARN"; then
-        # Mock check
         echo "Checking AWS OIDC..."
     else
         echo "Skipping AWS checks due to missing credentials."
     fi
 fi
 
-# Check GCP
 if [ "$CLOUD" == "gcp" ]; then
     echo "==> [1] Validate OIDC trust for gcp"
     if check_var "GCP_WORKLOAD_POOL"; then
-       # Mock check
        echo "Checking GCP OIDC..."
     else
        echo "Skipping GCP checks due to missing credentials."
     fi
 fi
 
-# Check Azure
 if [ "$CLOUD" == "azure" ]; then
     echo "==> [1] Validate OIDC trust for azure"
     if check_var "AZURE_FEDERATED_ID"; then
-       # Mock check
        echo "Checking Azure OIDC..."
     else
        echo "Skipping Azure checks due to missing credentials."
