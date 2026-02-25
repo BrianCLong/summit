@@ -37,6 +37,7 @@ export class RiskRepository {
       // Reduces database round-trips from O(N) to O(N/chunkSize).
       if (input.signals && input.signals.length > 0) {
         const chunkSize = 100;
+        const now = new Date();
         for (let i = 0; i < input.signals.length; i += chunkSize) {
           const chunk = input.signals.slice(i, i + chunkSize);
           const values: any[] = [];
@@ -52,7 +53,7 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(),
+              sig.detectedAt || now,
             );
             placeholders.push(
               `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
