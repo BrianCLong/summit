@@ -1,0 +1,22 @@
+# Evidence Map
+# This file maps policy controls to technical evidence implementation
+# Created to satisfy CI Gates requirement
+
+version: 1.0
+last_updated: 2026-02-25
+
+evidence_definitions:
+  - id: EV-001
+    description: "Code review approval"
+    source: "github_pull_request"
+
+  - id: EV-002
+    description: "Automated test results"
+    source: "ci_pipeline"
+
+control_mappings:
+  - control_id: G-001
+    evidence_ids: [EV-001]
+
+  - control_id: G-002
+    evidence_ids: [EV-002]
