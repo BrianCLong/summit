@@ -26,7 +26,7 @@ async function enableMocking() {
   })
 }
 
-enableMocking().then(() => {
+enableMocking().catch(console.error).then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <Provider store={store}>
