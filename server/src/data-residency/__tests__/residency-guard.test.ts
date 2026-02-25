@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import type { ResidencyGuard } from "../residency-guard.js";
 
 const queryMock = jest.fn();
 jest.unstable_mockModule('../../db/postgres.js', () => ({

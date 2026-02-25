@@ -10,9 +10,6 @@ describe('Maestro Integration Tests', () => {
   let app: any;
 
   beforeAll(async () => {
-    // Disable zero footprint mode for integration tests
-    process.env.ZERO_FOOTPRINT = 'false';
-
     // Create app
     app = await createApp();
 

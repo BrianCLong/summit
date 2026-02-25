@@ -31,7 +31,7 @@ export function EmptyState({
   action,
   className,
 }: EmptyStateProps) {
-  const IconComponent = typeof icon === 'string' ? iconMap[icon] : null
+  const IconComponent = typeof icon === 'string' ? iconMap[icon as keyof typeof iconMap] : null
 
   return (
     <div
@@ -44,7 +44,7 @@ export function EmptyState({
         {IconComponent ? (
           <IconComponent className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         ) : (
-          icon
+          <div aria-hidden="true">{icon}</div>
         )}
       </div>
       <h3 className="mb-2 text-lg font-semibold">{title}</h3>

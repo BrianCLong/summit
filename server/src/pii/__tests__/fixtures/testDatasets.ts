@@ -199,7 +199,7 @@ export const mixedSensitivityDataset = [
       socialSecurityNumber: '555-12-3456',
       salary: 150000,
       bankAccount: {
-        accountNumber: '5555666677778888',
+        accountNumber: 'XXXX-XXXX-XXXX-XXXX',
         routingNumber: '123456789',
       },
     },

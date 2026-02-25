@@ -1,6 +1,7 @@
 const path = require('path');
 
 module.exports = {
+  useESM: true,
   preset: 'ts-jest',
   testEnvironment: 'node',
   roots: ['.'],

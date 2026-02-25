@@ -1,6 +1,5 @@
 {
   "evidence_id": "EVD-REPLITAGENT-SCAFF-001",
-  "summary": "Replit Agent Scaffold validation",
   "item_slug": "replit-agent-scaffold",
   "claims": [
     "Scaffold generator remains disabled by default and deterministic when enabled."

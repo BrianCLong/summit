@@ -55,10 +55,6 @@ def process_evidence(report_path):
     print(f"Checking evidence: {report_path}")
     report = load_json(report_path)
 
-    if not isinstance(report, dict):
-        print(f"Warning: {report_path} is not a dictionary, skipping schema validation")
-        return True
-
     # Identify schema - for Moltbook Relay we use specific one
     if "moltbook-relay" in report.get("evidence_id", ""):
         schema = "evidence/schemas/moltbook-relay-report.schema.json"
@@ -75,9 +71,8 @@ def process_evidence(report_path):
 
     ts_errors = check_no_timestamps(report)
     if ts_errors:
-        # Downgrade to warning for now to satisfy CI if legacy evidence exists
-        print(f"WARNING: timestamp check: {report_path} contains forbidden fields: {ts_errors}")
-        # return False
+        print(f"FAILED timestamp check: {report_path} contains forbidden fields: {ts_errors}")
+        return False
 
     # Check metrics
     metrics_path = report_path.replace("report.json", "metrics.json")
