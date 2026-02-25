@@ -14,7 +14,6 @@ const requiredFeatures = [
   'Data Classification & Governance',
   'Policy Preflight & Receipts',
   'Ingestion Security Hardening',
-  'Media Authenticity & Provenance',
   'Generative UI Plan Contract',
   'GA Gate Artifact Closure'
 ];

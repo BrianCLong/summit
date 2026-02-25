@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-25T09:00:38Z",
-  "revision_note": "Daily sprint 2026-02-25: secured ops router authz regression tests + PR blocker triage.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
   "initiatives": [
-    {
-      "id": "daily-sprint-2026-02-25",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Focused sprint on PR #18689 authz regression tests, PR #18674 blocker triage, and evidence logging in docs/ops/DAILY_SPRINT_2026-02-25.md."
-    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -180,7 +174,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -204,7 +198,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
