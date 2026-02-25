@@ -1,8 +1,8 @@
-# Summit Governed Tool Loop Architecture
+> Owner: Platform Engineering
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Draft
-**Owner:** Platform Engineering
-**Compliance:** SLSA Level 3, SOC 2 Type II
 
 ## 1. Context & Motivation
 

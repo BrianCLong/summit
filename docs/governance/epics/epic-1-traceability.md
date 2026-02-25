@@ -1,7 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 ## Epic 1 — “Council to Code” Traceability (every wish becomes a shipped artifact or a corpse)
 

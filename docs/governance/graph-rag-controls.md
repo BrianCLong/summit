@@ -1,9 +1,8 @@
-# GraphRAG Governance & Audit Controls
+> Owner: Governance
+> Last-Reviewed: 2026-01-24
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Owner:** Governance
-**Last-Reviewed:** 2026-01-24
-**Evidence-IDs:** none
-**Status:** active
 
 ## Overview
 

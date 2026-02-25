@@ -1,8 +1,8 @@
-# Draft PR Conveyor Policy
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**ID**: POLICY-PR-002
-**Status**: Active
-**Enforcement**: Automated (CI)
 
 ## Objective
 To prevent the accumulation of stale work-in-progress (WIP) and ensure the Merge Queue remains fluid and high-velocity.

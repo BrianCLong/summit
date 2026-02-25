@@ -1,4 +1,8 @@
-# Control Spec: DT-001 Zero-Trust Data Governance
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 ## Control Objective
 Ensure that no data asset is accessed, processed, or deployed within the Summit platform without explicit, verified provenance and sensitivity classification. All data access must be purpose-bound and policy-authorized.

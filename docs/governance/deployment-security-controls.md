@@ -1,7 +1,8 @@
-Owner: Jules (Release Captain)
-Last-Reviewed: 2026-01-24
-Evidence-IDs: EVID-CI-HARDENING-001, EVID-SLO-GATE-001
-Status: active
+> Owner: Jules (Release Captain)
+> Last-Reviewed: 2026-01-24
+> Evidence-IDs: EVID-CI-HARDENING-001, EVID-SLO-GATE-001
+> Status: active
+
 
 # Deployment Security & SLO Controls
 

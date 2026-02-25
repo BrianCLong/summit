@@ -1,12 +1,8 @@
-# Canonical Sources for Governance Artifacts
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-This document defines the single source of truth for critical governance artifacts in the Summit platform. All other implementations are considered deprecated and should be removed.
-
-## 1. SBOM Generation
-- **Canonical Script:** `scripts/compliance/generate_sbom.ts`
-- **Output Location:** `.evidence/sbom.json`
-- **Format:** CycloneDX v1.4 (JSON)
-- **Trigger:** `npm run generate:sbom`
 
 ## 2. Provenance Attestation
 - **Canonical Script:** `scripts/compliance/generate_provenance.ts`

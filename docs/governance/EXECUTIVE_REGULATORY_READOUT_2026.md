@@ -1,7 +1,8 @@
-# Executive Readout: 2026 Regulatory Landscape
-**Date:** January 25, 2026
-**To:** Summit Leadership / Board
-**From:** Regulatory Intelligence Lead
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 ## 1. What Changed in the Regulatory Landscape
 The "Wait and See" era is over. 2026 brings enforcement-heavy regimes with direct impact on Summit's architecture and go-to-market.

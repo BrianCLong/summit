@@ -1,12 +1,8 @@
-# Audit Export Contract
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-## Overview
-This document defines the contract for exporting audit and evidence data to external systems.
-
-## Data Classification
-- **Level 1 (Public)**: Documentation, schemas, public threat intel.
-- **Level 2 (Internal)**: Detection rules, metrics, non-PII telemetry.
-- **Level 3 (Restricted)**: PII, session tokens, raw logs (must be redacted).
 
 ## Never-Log Fields
 The following fields must NEVER be exported or logged in raw form:

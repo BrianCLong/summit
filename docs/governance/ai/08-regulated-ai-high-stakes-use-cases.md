@@ -1,9 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-# Epic 8: Regulated AI & High-Stakes Use Cases (compliance by design)
 
 1.  Identify regulated/high-stakes categories (employment, credit, health, education, legal).
 2.  Prohibit high-stakes decisions without explicit governance and human review.

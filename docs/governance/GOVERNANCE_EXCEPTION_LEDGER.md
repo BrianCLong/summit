@@ -1,8 +1,8 @@
-# Governance Exception Ledger
+> Owner: Release Operations
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Active
-**Owner:** Release Operations
-**Review Cycle:** Weekly (Monday 09:00 UTC)
 
 This ledger tracks temporary deviations from the [Governance Gate Policies](./GA_RISK_GATE.md) and [Green CI Contract](./GREEN_CI_CONTRACT.md). All exceptions must be explicitly approved, time-bound, and tracked to closure.
 

@@ -1,6 +1,8 @@
-# Media Authenticity & Provenance (Governance Module)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Summit Readiness Assertion:** This control is asserted as mandatory under the Summit Readiness Assertion and therefore inherits the governance authority chain defined in `docs/SUMMIT_READINESS_ASSERTION.md`. The present state is enforceable and future work is explicitly sequenced.
 
 ## Policy Statement
 

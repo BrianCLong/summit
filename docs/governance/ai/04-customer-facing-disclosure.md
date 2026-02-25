@@ -1,12 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-# Epic 4: Customer-Facing Disclosure & Claims Discipline (don’t create liability)
-
-1.  Define what you will disclose: AI is used, limitations, expected behavior, escalation path.
-2.  Create AI UX patterns: confidence cues, citations, “check this” warnings where appropriate.
 3.  Publish acceptable use and prohibited use for AI features.
 4.  Align marketing claims to measured performance; keep evidence packs.
 5.  Add “no reliance” language where appropriate (bounded, enforceable).

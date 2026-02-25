@@ -51,7 +51,10 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types (documented in docs/ga/MERGE_TRAIN_STATUS.md)
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Run ${{ matrix.task }}
         run: |
           case "${{ matrix.task }}" in
@@ -90,9 +93,7 @@ jobs:
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -110,7 +111,10 @@ jobs:
           until docker exec summit-redis-test redis-cli ping | grep -q PONG; do sleep 2; done
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
 
       - name: Run database migrations
         run: cd server && npx tsx scripts/run-migrations.ts
@@ -135,9 +139,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Verify runtime configuration
         run: pnpm verify:runtime
       - name: Run verification scripts
@@ -149,16 +159,16 @@ jobs:
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Build twice and compare checksums
         run: |
           set -euo pipefail
@@ -222,7 +232,10 @@ jobs:
           node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
       - name: Start Services
@@ -251,13 +264,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
       - name: Install dependencies (for governance docs)
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Verify governance docs
         run: pnpm ci:docs-governance
 
@@ -271,12 +290,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
           cache: "pnpm"
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Run SOC control tests
         run: |
           mkdir -p soc-compliance-reports

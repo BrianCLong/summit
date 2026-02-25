@@ -1,9 +1,8 @@
-# Evidence Budget Policy
+> Owner: AI Governance
+> Last-Reviewed: 2026-01-26
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Active
-**Owner:** AI Governance
-**Enforcement:** Automated (CI/Runtime)
-**Last Updated:** 2026-01-26
 
 ## 1. Purpose
 

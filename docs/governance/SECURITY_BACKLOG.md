@@ -1,11 +1,8 @@
-# Security & Governance Backlog
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-This is the deterministic backlog for security vulnerabilities, governance gaps, and compliance action items.
-
-## Schema Definition
-
-| Field             | Description                                                                |
-| :---------------- | :------------------------------------------------------------------------- |
 | **id**            | Unique identifier (e.g., SEC-001).                                         |
 | **category**      | code_scanning, dependabot, provenance, disclosure, iam, secret_management. |
 | **severity**      | P0 (Critical), P1 (High), P2 (Medium), P3 (Low).                           |

@@ -1,7 +1,8 @@
-# Summit Governance Control Catalog
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Canonical Source:** `docs/governance/control_domain_map.yaml`
-**Enforcement:** `scripts/ci/verify_governance_docs.mjs`
 
 ## Overview
 

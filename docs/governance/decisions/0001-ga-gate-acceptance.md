@@ -1,13 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-20
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-20
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-# Merge Authorization Record: GA Governance Gate
-
-**Date:** 2026-01-20
-**Decision Authority:** Jules, Release Captain
-**Subject:** Acceptance of Governance Drift & Evidence Freshness Gates
 
 ## 1. Review Summary
 

@@ -1,6 +1,8 @@
-# OSINT Methodology GA Impact Assessment
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Methodology Source:** Automation Turn #5 (2026-01-26)
 
 ## 1. GA-Blocking Requirements
 

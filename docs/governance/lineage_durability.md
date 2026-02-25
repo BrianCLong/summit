@@ -1,7 +1,8 @@
-# Lineage Durability & Recovery Standards
+> Owner: Governance Engineering
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Effective Date:** 2026-01-25
-**Owner:** Governance Engineering
 
 ## 1. Durability Tiers
 

@@ -1,8 +1,8 @@
-# Security Ledger
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-This document tracks security threats, mitigations, and their verification status via evidence artifacts.
-
-## Threat Model: Retrieval Substrate
 
 | ID | Threat | Severity | Mitigation | Verification | Status |
 |---|---|---|---|---|---|

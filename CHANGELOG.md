@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
+### Changed
+- **Database Performance**: Refactored `EntityCommentService` to use multi-row batched inserts for attachments and mentions, reducing database round-trips from O(N) to O(N/100).
+- **CI/CD Reliability**: Moved `pnpm/action-setup` before `actions/setup-node` across all workflows to ensure `pnpm` availability for caching.
+- **Transitive Type Resolution**: Implemented automated removal of problematic `@types/hapi__*` stub types in CI to resolve workspace-wide `tsc` failures.
+- **Monorepo Versioning**: Synchronized root, server, and client package versions to `4.2.3` for ecosystem consistency.
+
 ### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.

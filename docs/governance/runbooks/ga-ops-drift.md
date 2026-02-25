@@ -1,8 +1,8 @@
-# Governance Drift Detector Runbook
+> Owner: Governance Operator
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**ID**: RUNBOOK-GOV-001
-**Owner**: Governance Operator
-**Frequency**: Weekly (Monday AM)
 
 ## Objective
 To detect and remediate unauthorized modifications to the Critical GA Governance Gates.

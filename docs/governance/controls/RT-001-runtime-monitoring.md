@@ -1,4 +1,8 @@
-# Control Spec: RT-001 Runtime Bias & Drift Monitoring
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 ## Control Objective
 Continuously monitor deployed AI models for statistical drift, performance degradation, and bias emergence in real-time. Automatically trigger interventions (alerts, circuit breakers) when thresholds are breached.

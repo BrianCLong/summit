@@ -1,4 +1,8 @@
-# Control Spec: OP-001 Cross-Functional Governance Council Oversight
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 ## Control Objective
 Establish and maintain a cross-functional Governance Council (Engineering, Legal, Product, Risk) to review systemic risks, approve high-autonomy policies, and oversee compliance posture.

@@ -1,7 +1,8 @@
-# Fresh Evidence Rate (7d)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Control ID:** GOV-EVID-004
-**Objective:** Ensure CI consistently emits verifiable, timely evidence bundles.
 
 **Definition**
 % of `main` runs in last 7 days producing a verified evidence bundle

@@ -1,7 +1,8 @@
-Owner: Jules
-Last-Reviewed: 2025-05-23
-Evidence-IDs: policy.governance.drift, policy.evidence.freshness
-Status: active
+> Owner: Jules
+> Last-Reviewed: 2025-05-23
+> Evidence-IDs: policy.governance.drift, policy.evidence.freshness
+> Status: active
+
 
 # GA Governance Drift & Evidence Policy
 

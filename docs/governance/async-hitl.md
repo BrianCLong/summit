@@ -1,8 +1,8 @@
-# Async Human-in-the-Loop (HITL) Strategy
+> Owner: Jules
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Draft
-**Owner:** Jules
-**Context:** Automation Turn #5
 
 ## 1. The Problem with Blocking Approvals
 The legacy `approvals` table model blocks agent execution until a human physically clicks "Approve". This destroys velocity and forces humans to be synchronous parts of the loop.

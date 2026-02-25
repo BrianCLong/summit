@@ -1,8 +1,8 @@
-# GA Ops Ownership
+> Owner: Jules
+> Last-Reviewed: 2025-10-27
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-> **Owner:** Jules
-> **Status:** Authoritative
-> **Last Updated:** 2025-10-27
 
 This table defines the single authoritative owner for each operational surface in the Summit GA governance model.
 

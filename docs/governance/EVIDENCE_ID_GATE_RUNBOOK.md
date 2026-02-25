@@ -1,11 +1,8 @@
-# Evidence ID Consistency Gate - Operator Runbook
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-## Service Overview
-- **Name**: Evidence ID Consistency Gate
-- **Purpose**: Validate Evidence-IDs in governance documents against evidence registry
-- **Component**: Part of Governance Verification Suite v1.3.0+ 
-- **Uptime SLA**: 99.9% (Integrated into critical CI/CD paths)
-- **Contact**: #governance-team (primary), #platform-eng (secondary)
 
 ## Critical Operating Metrics
 

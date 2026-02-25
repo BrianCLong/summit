@@ -1,8 +1,8 @@
-# Summit Evidence Map
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Operational
-**Purpose:** Defines the machine-verifiable evidence artifacts required for Governance, Risk, and Compliance (GRC) certification.
-**Reference:** Extends `docs/governance/CONTROL_EVIDENCE_INDEX.md`.
 
 ## 1. Zero-Trust Data Governance (DT-001)
 

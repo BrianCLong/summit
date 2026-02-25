@@ -1,8 +1,8 @@
-# Executive Summary: Summit Governed Agent Architecture
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** Proposed
-**Target:** GA Readiness
-**Source Signal:** Vercel "AI Code Elements" + Summit Governance Mandates
 
 ## Why This Matters for GA
 

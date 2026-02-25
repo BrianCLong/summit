@@ -1,8 +1,8 @@
-# Zero-Trust Data Governance Blueprint
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Version:** 1.0.0
-**Status:** PILOT
-**Owner:** @summit/governance
 
 ## Executive Summary
 

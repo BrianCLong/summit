@@ -1,9 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-# Epic 9: AI Governance & Board Visibility (treat AI as enterprise risk)
 
 1.  Establish AI governance council with a charter and decision SLAs.
 2.  Maintain AI risk register: data rights, hallucination harm, bias, security, vendor lock-in.

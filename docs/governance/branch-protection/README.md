@@ -1,5 +1,11 @@
 # Branch Protection Policy
 
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
+
 This policy is enforced automatically via CI.
 
 ## Controls

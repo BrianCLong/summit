@@ -1,5 +1,11 @@
 # Probabilistic Actor Attribution & Confidence Model
 
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
+
 ## 1. Overview
 
 Summit uses a **Probabilistic Attribution Model** rather than binary "bot/human" labels. This approach acknowledges the ambiguity of modern hybrid actors and provides defensible confidence intervals for downstream enforcement.

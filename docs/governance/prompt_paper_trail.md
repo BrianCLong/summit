@@ -1,13 +1,8 @@
-# Summit Prompt Paper Trail Governance
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-## Overview
-Every AI prompt can create a durable record that may later be reviewed (eDiscovery, regulators, litigation, audits). Summit treats prompts and outputs as business communications with governance, retention, and controls.
-
-## Capabilities
-- **Prompt Event Logging:** All prompt events are captured with metadata.
-- **Redaction:** Sensitive data (secrets, PII) is redacted before storage.
-- **Policy Enforcement:** "Deny by default" policy checks purpose and classification.
-- **Retention:** Configurable retention periods with legal hold overrides.
 
 ## Data Model
 See `evidence/schemas/prompt_event.schema.json` for the canonical event structure.

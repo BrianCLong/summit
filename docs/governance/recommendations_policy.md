@@ -1,5 +1,11 @@
 # Recommendations Policy
 
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
+
 Only the following next steps are allowed to be recommended by the system:
 
 - monitor

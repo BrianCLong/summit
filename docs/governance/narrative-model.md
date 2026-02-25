@@ -1,9 +1,8 @@
-# Narrative Model Governance (GOV-NARR-001)
+> Owner: Governance
+> Last-Reviewed: 2026-01-22
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Owner:** Governance
-**Last-Reviewed:** 2026-01-22
-**Status:** Active
-**Authority:** Chief AI Officer
 
 ## Purpose
 To establish the governance framework for Narrative Intelligence models, ensuring they operate within ethical boundaries and provide attributable, high-fidelity signals for Information Operations (IO) detection.

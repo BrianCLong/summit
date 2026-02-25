@@ -1,8 +1,8 @@
-# Summit Simplifier Contract
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Authority:** Governance Council (Meta-Governance Framework)
-**Scope:** All Maestro-orchestrated agent workflows and CI pipelines
-**Status:** Active
 
 ## 1) Readiness Assertion & Governance Alignment
 

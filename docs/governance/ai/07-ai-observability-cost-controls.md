@@ -1,9 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-# Epic 7: AI Observability & Cost Controls (LLMs can torch margin)
 
 1.  Instrument cost per AI action (tokens, calls, retrieval, tools) by tenant.
 2.  Implement budgets and quotas per plan/tenant with graceful degradation.

@@ -1,8 +1,8 @@
-# Annual GA Retrospective & Control Evolution (2026)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Date:** 2026-01-24
-**Author:** Jules (Release Captain)
-**Scope:** Governance, Security, and Release Operations
 
 ---
 

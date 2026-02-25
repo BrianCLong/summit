@@ -38,7 +38,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
-      - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
 
@@ -48,17 +47,17 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version-file: .nvmrc
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types (documented in docs/ga/MERGE_TRAIN_STATUS.md)
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
 
       - name: Lint (strict)
         run: pnpm lint --max-warnings 0
@@ -80,6 +79,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+
+      - name: Pre-build Cleanup
+        run: |
+          # Ensure a clean slate and workaround broken types
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -109,7 +113,10 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          # Workaround for broken transitive types (documented in docs/ga/MERGE_TRAIN_STATUS.md)
+          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
 
       - name: Run unit tests (blocking)
         if: github.event_name != 'pull_request'
