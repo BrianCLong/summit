@@ -42,7 +42,6 @@ export function useExplanationBookmark() {
       toast({
         title: "Bookmark Failed",
         description: "Could not save explanation.",
-        variant: "destructive",
       });
       return null;
     }

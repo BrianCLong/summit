@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { CheckCircle, ShieldCheck, Clock, FileJson, Link as LinkIcon, Download } from 'lucide-react';
+import { CheckCircle, ShieldCheck, Clock, FileJson, FileText, Link as LinkIcon, Download } from 'lucide-react';
 
 const MOCK_RECEIPT = {
   id: 'RCPT-2026-02-12-XYZ',
@@ -108,4 +108,3 @@ export default function ReceiptsPage() {
     </div>
   );
 }
-new file mode 100644

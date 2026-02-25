@@ -132,7 +132,12 @@ export const DataFetchErrorBoundary: React.FC<DataFetchErrorBoundaryProps> = ({
         boundaryType: 'data_fetch',
       }}
       fallback={(props) => (
-        <DataFetchErrorFallback {...props} dataSourceName={dataSourceName} />
+        <DataFetchErrorFallback
+          {...props}
+          dataSourceName={dataSourceName}
+          isRetrying={false}
+          maxRetries={3}
+        />
       )}
     >
       {children}
