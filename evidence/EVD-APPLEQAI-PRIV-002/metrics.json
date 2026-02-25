@@ -1,7 +1,0 @@
-{
-  "evidence_id": "EVD-APPLEQAI-PRIV-002",
-  "metrics": {
-    "blocked_classes": 3,
-    "allowed_classes": 1
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-POSTIZ-COMPLY-002",
-  "metrics": [
-    { "name": "oauth_preferred", "value": true, "unit": "boolean", "provenance": "verified" },
-    { "name": "scrape_disallowed", "value": true, "unit": "boolean", "provenance": "verified" },
-    { "name": "no_api_key_paste", "value": true, "unit": "boolean", "provenance": "verified" }
-  ]
-}
