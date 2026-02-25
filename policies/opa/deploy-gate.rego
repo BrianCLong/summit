@@ -1,4 +1,6 @@
-package maestro.deploy
+package docker.policy
+
+import future.keywords.in
 
 # Allow dev deploys only from maintainers and CI bots
 allow {

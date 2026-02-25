@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
     "test": "NODE_OPTIONS='--experimental-vm-modules' jest",
-    "lint": "eslint src",
+    "lint": "pnpm exec eslint src",
     "type-check": "tsc --noEmit",
     "seed-templates": "node dist/scripts/seed-templates.js"
   },

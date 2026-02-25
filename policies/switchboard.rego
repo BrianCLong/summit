@@ -1,4 +1,6 @@
-package switchboard
+package summit.switchboard
+
+import future.keywords.in
 
 default allow = false
 

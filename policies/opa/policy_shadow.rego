@@ -1,5 +1,7 @@
 package composer.policy_shadow
 
+import future.keywords.in
+
 # Combine sub-decisions and emit a consolidated verdict
 
 verdict := {

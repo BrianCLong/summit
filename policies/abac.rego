@@ -1,6 +1,9 @@
-# (same as in sprint doc)
-package abac.authz
+package intelgraph.abac
 
+import future.keywords.if
+import future.keywords.in
+
+# Default deny
 default allow = false
 
 # Rule to check if tenant is isolated
