@@ -66,46 +66,46 @@ evidence_check:
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
 
-# Automatically added missing codes
-- code: SCHEMA_MAJOR_UNSUPPORTED
-  description: "Schema major version is not supported"
-  category: automated_fix
-- code: SCHEMA_VERSION_INVALID
-  description: "Schema version is invalid"
-  category: automated_fix
-- code: JSON_PARSE_ERROR
-  description: "Error parsing JSON"
-  category: automated_fix
-- code: MISSING_FIELD
-  description: "Required field is missing"
-  category: automated_fix
-- code: INVALID_ENUM
-  description: "Value is not a valid enum member"
-  category: automated_fix
-- code: DRIFT_DETECTED
-  description: "Drift detected in configuration"
-  category: automated_fix
-- code: DRIFT_ERROR
-  description: "Error checking for drift"
-  category: automated_fix
-- code: SIG_ORPHAN
-  description: "Signature without matching artifact"
-  category: automated_fix
-- code: SIG_INVALID
-  description: "Invalid signature"
-  category: automated_fix
-- code: COSIGN_MISSING
-  description: "Cosign tool is missing"
-  category: automated_fix
-- code: SIG_MISSING
-  description: "Signature is missing"
-  category: automated_fix
-- code: ATTESTATION_MISSING
-  description: "Attestation is missing"
-  category: automated_fix
-- code: SHA256SUMS_INVALID_FORMAT
-  description: "Invalid format for SHA256SUMS file"
-  category: automated_fix
-- code: INVALID_JSON
-  description: "Invalid JSON format"
-  category: automated_fix
+automated_fixes:
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: "Schema major version is not supported"
+    category: automated_fix
+  - code: SCHEMA_VERSION_INVALID
+    description: "Schema version is invalid"
+    category: automated_fix
+  - code: JSON_PARSE_ERROR
+    description: "Error parsing JSON"
+    category: automated_fix
+  - code: MISSING_FIELD
+    description: "Required field is missing"
+    category: automated_fix
+  - code: INVALID_ENUM
+    description: "Value is not a valid enum member"
+    category: automated_fix
+  - code: DRIFT_DETECTED
+    description: "Drift detected in configuration"
+    category: automated_fix
+  - code: DRIFT_ERROR
+    description: "Error checking for drift"
+    category: automated_fix
+  - code: SIG_ORPHAN
+    description: "Signature without matching artifact"
+    category: automated_fix
+  - code: SIG_INVALID
+    description: "Invalid signature"
+    category: automated_fix
+  - code: COSIGN_MISSING
+    description: "Cosign tool is missing"
+    category: automated_fix
+  - code: SIG_MISSING
+    description: "Signature is missing"
+    category: automated_fix
+  - code: ATTESTATION_MISSING
+    description: "Attestation is missing"
+    category: automated_fix
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: "Invalid format for SHA256SUMS file"
+    category: automated_fix
+  - code: INVALID_JSON
+    description: "Invalid JSON format"
+    category: automated_fix

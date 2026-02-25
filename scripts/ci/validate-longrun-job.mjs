@@ -66,8 +66,20 @@ const main = () => {
   }
 
   const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8'));
-  const ajv = new Ajv({ allErrors: true, strict: false });
+const ajv = new Ajv({ allErrors: true, strict: false });
   addFormats(ajv);
+
+  // Attempt to load Draft 2020-12 meta-schema
+  try {
+    const metaSchemaPath = path.join(workspaceRoot, "node_modules", "ajv", "dist", "refs", "json-schema-draft-2020-12", "schema.json");
+    if (fs.existsSync(metaSchemaPath)) {
+      const metaSchema = JSON.parse(fs.readFileSync(metaSchemaPath, "utf-8"));
+      ajv.addMetaSchema(metaSchema);
+    }
+  } catch (e) {
+    // Ignore if not found
+  }
+
   const validate = ajv.compile(schema);
 
   const jobPaths = collectJobPaths();
