@@ -2,20 +2,20 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 // Mock dependencies
-jest.mock('../LLMService', () => {
-  return class MockLLMService {
+jest.unstable_mockModule('../LLMService.js', () => ({
+  default: class MockLLMService {
     constructor(config: unknown) {}
     async summarize(text: string) { return 'Summary of ' + text; }
     async extract(text: string, entities: unknown) { return { Person: ['John'] }; }
     async complete(params: unknown) { return 'Positive'; }
-  };
-});
+  },
+}));
 
 const mockDetectAnomalies = jest.fn() as any;
 const mockCalculateRiskScore = jest.fn() as any;
 const mockComputeGraphMetrics = jest.fn() as any;
 
-jest.mock('../mlAnalysisService', () => ({
+jest.unstable_mockModule('../mlAnalysisService.js', () => ({
   mlAnalysisService: {
     detectAnomalies: (...args: unknown[]) => mockDetectAnomalies(...args),
     calculateRiskScore: (...args: unknown[]) => mockCalculateRiskScore(...args),
@@ -28,7 +28,7 @@ jest.mock('../mlAnalysisService', () => ({
 // BUT since we import it via module name in the source, we mock it via module path if mapped, or relative path.
 // The source uses: import { requireFunc } from '../utils/require.js';
 // Jest resolver will look for it.
-jest.mock('../../utils/require', () => ({
+jest.unstable_mockModule('../../utils/require.js', () => ({
   requireFunc: (path: string) => {
     // console.log('Mock requireFunc called with', path);
     if (path.includes('VisionService')) {
@@ -50,14 +50,16 @@ jest.mock('../../utils/require', () => ({
 }));
 
 // Mock logger
-jest.mock('../../utils/logger.js', () => ({
-  info: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-}), { virtual: true });
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  default: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  },
+}));
 
-import { IntelligenceAnalysisService } from '../IntelligenceAnalysisService.js';
+const { IntelligenceAnalysisService } = await import('../IntelligenceAnalysisService.js');
 
 describe('IntelligenceAnalysisService', () => {
   let service: IntelligenceAnalysisService;

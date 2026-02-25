@@ -3,7 +3,7 @@
  */
 
 import { requestId } from '../requestId.js';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory.js';
+import { requestFactory, responseFactory, nextFactory } from '../../../tests/mocks/request-factory.js';
 import { describe, it, expect } from '@jest/globals';
 
 describe('requestId middleware', () => {

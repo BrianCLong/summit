@@ -1,5 +1,4 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { HumintService } from '../HumintService.js';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { SourceReliability, SourceStatus, ReportGrading } from '../../types/humint.js';
 
 // Mock dependencies
@@ -23,12 +22,14 @@ const mockDriver = {
   configuration: jest.fn(),
 };
 
-jest.mock('../../config/database.js', () => ({
+jest.unstable_mockModule('../../config/database.js', () => ({
   getPostgresPool: () => ({
     query: mockQuery,
   }),
   getNeo4jDriver: () => mockDriver,
 }));
+
+const { HumintService } = await import('../HumintService.js');
 
 describe('HumintService', () => {
   let service: HumintService;
@@ -36,7 +37,8 @@ describe('HumintService', () => {
   const userId = 'user-456';
 
   beforeEach(() => {
-    // Reset singleton instance for testing if possible, or just reset mocks
+    // Ensure each test gets a fresh service wired to this file's mocks.
+    (HumintService as any).instance = undefined;
     jest.clearAllMocks();
     service = HumintService.getInstance();
   });

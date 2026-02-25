@@ -8,20 +8,52 @@ import { jest, describe, it, expect, beforeEach, beforeAll } from '@jest/globals
 import type { DuplicateCandidate } from '../SimilarityService.js';
 
 // Mock dependencies
-jest.unstable_mockModule('../../config/database.js', () => ({}));
+jest.unstable_mockModule('../../config/database.js', () => ({
+  __esModule: true,
+  getPostgresPool: jest.fn(),
+}));
 jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
+  __esModule: true,
   otelService: {
-    wrapNeo4jOperation: jest.fn((name: string, fn: () => any) => fn()),
+    wrapNeo4jOperation: jest.fn(async (_name: string, fn: () => any) => fn()),
     addSpanAttributes: jest.fn(),
   },
 }));
-jest.unstable_mockModule('../../monitoring/metrics.js', () => ({}));
-jest.unstable_mockModule('../../utils/logger.js', () => ({
-  default: { info: jest.fn(), debug: jest.fn(), error: jest.fn() },
+jest.unstable_mockModule('../../monitoring/metrics.js', () => ({
+  __esModule: true,
+  vectorQueriesTotal: {
+    labels: jest.fn(() => ({ inc: jest.fn() })),
+  },
+  vectorQueryDurationSeconds: {
+    startTimer: jest.fn(() => jest.fn()),
+  },
+  applicationErrors: {
+    labels: jest.fn(() => ({ inc: jest.fn() })),
+  },
 }));
+jest.unstable_mockModule('../../utils/logger.js', () => {
+  const stubLogger = {
+    info: jest.fn(),
+    debug: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    child: jest.fn(function () {
+      return stubLogger;
+    }),
+  };
+  return {
+    __esModule: true,
+    logger: stubLogger,
+    default: stubLogger,
+  };
+});
 
 describe('SimilarityService - Duplicate Detection', () => {
   let SimilarityService: typeof import('../SimilarityService.js').SimilarityService;
+  let mockOtelService: {
+    wrapNeo4jOperation: jest.Mock;
+    addSpanAttributes: jest.Mock;
+  };
   let service: InstanceType<typeof SimilarityService>;
   let mockPool: any;
   let mockClient: any;
@@ -29,11 +61,18 @@ describe('SimilarityService - Duplicate Detection', () => {
   beforeAll(async () => {
     const module = await import('../SimilarityService.js');
     SimilarityService = module.SimilarityService;
+    const otelModule = await import('../../monitoring/opentelemetry.js');
+    mockOtelService = otelModule.otelService as typeof mockOtelService;
   });
 
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
+    if (mockOtelService?.wrapNeo4jOperation) {
+      mockOtelService.wrapNeo4jOperation.mockImplementation(
+        async (_name: string, fn: () => any) => fn(),
+      );
+    }
 
     // Create mock client
     mockClient = {

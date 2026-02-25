@@ -1,13 +1,15 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { DeceptionService } from '../DeceptionService.js';
-import { neo } from '../../db/neo4j.js';
+const runMock = jest.fn();
 
 // Mock neo4j
-jest.mock('../../db/neo4j.js', () => ({
+jest.unstable_mockModule('../../db/neo4j.js', () => ({
   neo: {
-    run: jest.fn(),
+    run: runMock,
   },
 }));
+
+const { neo } = await import('../../db/neo4j.js');
+const { DeceptionService } = await import('../DeceptionService.js');
 
 describe('DeceptionService', () => {
   let service: DeceptionService;

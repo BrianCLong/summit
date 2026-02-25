@@ -4,19 +4,19 @@ const readMock = jest.fn() as jest.MockedFunction<
   (...args: any[]) => Promise<{ rows: any[] }>
 >;
 
-jest.mock('../../config/database.js', () => ({
+jest.unstable_mockModule('../../config/database.js', () => ({
   getPostgresPool: () => ({
     read: readMock,
   }),
 }));
 
-jest.mock('../../utils/logger.js', () => ({
+jest.unstable_mockModule('../../utils/logger.js', () => ({
   default: {
     error: jest.fn(),
   },
 }));
 
-import { TenantUsageService } from '../TenantUsageService.js';
+const { TenantUsageService } = await import('../TenantUsageService.js');
 
 describe('TenantUsageService', () => {
   beforeEach(() => {
