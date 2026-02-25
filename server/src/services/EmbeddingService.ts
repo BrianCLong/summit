@@ -5,7 +5,7 @@
 
 import logger from '../utils/logger.js';
 import crypto from 'crypto';
-import { applicationErrors } from '../monitoring/metrics.js';
+import * as metrics from '../monitoring/metrics.js';
 
 // Force inclusion in patch
 interface EmbeddingMetrics {
@@ -96,7 +96,7 @@ class EmbeddingService {
       return embedding;
     } catch (error: any) {
       this.metrics.errorCount++;
-      applicationErrors
+      metrics.applicationErrors
         .labels('embedding_service', 'GenerationError', 'error')
         .inc();
 
