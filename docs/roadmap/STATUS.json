@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-24T23:31:23Z",
+  "revision_note": "Added Summit Subsumption Engine v2 repo-verified plan initiative and execution notes.",
   "initiatives": [
+    {
+      "id": "summit-subsumption-engine-v2",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Chief-inspired, clean-room task workflow engine plan refined to repo-native package/CI layout with deterministic artifact and policy-gate constraints."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
