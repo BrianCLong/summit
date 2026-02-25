@@ -1,5 +1,6 @@
 import logger from '../config/logger.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
+import { RedisService } from '../db/redis.js';
 import fs from 'fs';
 import readline from 'readline';
 import { promisify } from 'util';
@@ -9,6 +10,12 @@ import zlib from 'zlib';
 const execAsync = promisify(exec);
 
 export class RestoreService {
+  private redis: RedisService;
+
+  constructor() {
+    this.redis = RedisService.getInstance();
+  }
+
   async restorePostgres(filepath: string): Promise<void> {
     logger.info(`Starting PostgreSQL restore from ${filepath}...`);
     try {
@@ -63,6 +70,9 @@ export class RestoreService {
         let relBatch: any[] = [];
         const BATCH_SIZE = 1000;
 
+        // Map old ID -> new ID
+        const idMap = new Map<number | string, number | string>();
+
         for await (const line of rl) {
             if (!line.trim()) continue;
             try {
@@ -71,14 +81,14 @@ export class RestoreService {
                 if (item.type === 'node') {
                     nodeBatch.push(item);
                     if (nodeBatch.length >= BATCH_SIZE) {
-                        await this.processNodeBatch(session, nodeBatch);
+                        await this.processNodeBatch(session, nodeBatch, idMap);
                         nodesCount += nodeBatch.length;
                         nodeBatch = [];
                     }
                 } else if (item.type === 'rel') {
                     relBatch.push(item);
                     if (relBatch.length >= BATCH_SIZE) {
-                        await this.processRelBatch(session, relBatch);
+                        await this.processRelBatch(session, relBatch, idMap);
                         relsCount += relBatch.length;
                         relBatch = [];
                     }
@@ -89,11 +99,11 @@ export class RestoreService {
         }
 
         if (nodeBatch.length > 0) {
-            await this.processNodeBatch(session, nodeBatch);
+            await this.processNodeBatch(session, nodeBatch, idMap);
             nodesCount += nodeBatch.length;
         }
         if (relBatch.length > 0) {
-            await this.processRelBatch(session, relBatch);
+            await this.processRelBatch(session, relBatch, idMap);
             relsCount += relBatch.length;
         }
 
@@ -107,41 +117,126 @@ export class RestoreService {
     }
   }
 
-  private async processNodeBatch(session: any, batch: any[]) {
+  private async processNodeBatch(session: any, batch: any[], idMap: Map<number | string, number | string>) {
       const batchesByLabel = new Map<string, any[]>();
       for (const item of batch) {
           const labelKey = item.labels ? item.labels.sort().join(':') : '';
           if (!batchesByLabel.has(labelKey)) batchesByLabel.set(labelKey, []);
-          batchesByLabel.get(labelKey)!.push(item.props);
+          const props = item.props || {};
+          // Temporarily store old ID in props for retrieval after creation
+          batchesByLabel.get(labelKey)!.push({ ...props, _restore_id: item.elementId });
       }
 
       for (const [labels, propsList] of batchesByLabel.entries()) {
           const cypherLabels = labels ? `:${labels}` : '';
-          await session.run(
-              `UNWIND $propsList AS props CREATE (n${cypherLabels}) SET n = props`,
+          // Create nodes, return new ID and the old ID stored in _restore_id, then remove _restore_id
+          const result = await session.run(
+              `UNWIND $propsList AS props
+               CREATE (n${cypherLabels})
+               SET n = props
+               WITH n, n._restore_id as oldId
+               REMOVE n._restore_id
+               RETURN id(n) as newId, oldId`,
               { propsList }
           );
+
+          for (const record of result.records) {
+              const newId = record.get('newId');
+              const oldId = record.get('oldId');
+
+              const safeNewId = typeof newId === 'object' && 'toNumber' in newId ? newId.toNumber() : newId;
+              // oldId type depends on what was in JSON, typically number or string
+
+              if (oldId !== null && oldId !== undefined) {
+                  idMap.set(oldId, safeNewId);
+              }
+          }
       }
   }
 
-  private async processRelBatch(session: any, batch: any[]) {
+  private async processRelBatch(session: any, batch: any[], idMap: Map<number | string, number | string>) {
       const batchesByType = new Map<string, any[]>();
       for (const item of batch) {
           const type = item.typeName;
+          const newStartId = idMap.get(item.startId);
+          const newEndId = idMap.get(item.endId);
+
+          if (newStartId === undefined || newEndId === undefined) {
+              // This can happen if relationships refer to nodes not yet processed or failed to create
+              // With BackupService ensuring nodes first, this implies missing node data
+              continue;
+          }
+
           if (!batchesByType.has(type)) batchesByType.set(type, []);
-          batchesByType.get(type)!.push(item);
+          batchesByType.get(type)!.push({ ...item, startId: newStartId, endId: newEndId });
       }
 
       for (const [type, items] of batchesByType.entries()) {
+          // Note: using id(n) lookup is fast if we assume internal IDs match
           await session.run(
               `
               UNWIND $items AS item
-              MATCH (a {id: item.startId}), (b {id: item.endId})
+              MATCH (a), (b)
+              WHERE id(a) = item.startId AND id(b) = item.endId
               CREATE (a)-[r:${type}]->(b)
               SET r = item.props
               `,
               { items }
           );
+      }
+  }
+
+  async restoreRedis(filepath: string): Promise<void> {
+      logger.info(`Starting Redis restore from ${filepath}...`);
+      const client = this.redis.getClient();
+      if (!client) throw new Error('Redis client unavailable');
+
+      try {
+        const fileStream = fs.createReadStream(filepath);
+        let input;
+
+        if (filepath.endsWith('.gz')) {
+             input = fileStream.pipe(zlib.createGunzip());
+        } else {
+             input = fileStream;
+        }
+
+        const rl = readline.createInterface({
+            input: input,
+            crlfDelay: Infinity
+        });
+
+        let count = 0;
+        let pipeline = client.pipeline();
+        const BATCH_SIZE = 1000;
+
+        for await (const line of rl) {
+            if (!line.trim()) continue;
+            try {
+                const { key, value } = JSON.parse(line);
+                if (key && value) {
+                    pipeline.set(key, value);
+                    count++;
+                }
+
+                if (count % BATCH_SIZE === 0) {
+                    await pipeline.exec();
+                    pipeline = client.pipeline();
+                }
+            } catch (e) {
+                logger.warn('Failed to parse line in Redis backup file', e);
+            }
+        }
+
+        if (count % BATCH_SIZE !== 0) {
+            await pipeline.exec();
+        }
+
+        logger.info(`Redis restore completed. Restored ${count} keys.`);
+
+      } catch (error: any) {
+          logger.error('Redis restore failed', error);
+          throw error;
       }
   }
 }

@@ -1,7 +1,7 @@
 
 import { getPostgresPool } from './postgres.js';
 import logger from '../utils/logger.js';
-import { RedisService } from '../cache/redis.js';
+import { RedisService } from './redis.js';
 import { coldStorageService } from '../services/ColdStorageService.js';
 
 export class PartitionManager {

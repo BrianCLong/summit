@@ -1,14 +1,15 @@
 
-import { RedisService } from '../cache/redis.js';
+import { RedisService, getRedisClient } from '../db/redis.js';
 import logger from '../config/logger.js';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import fs from 'fs/promises';
+import { createWriteStream, createReadStream } from 'fs';
 import path from 'path';
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import { createWriteStream } from 'fs';
 import zlib from 'zlib';
 import { PrometheusMetrics } from '../utils/metrics.js';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 const execAsync = promisify(exec);
 
@@ -33,6 +34,7 @@ export interface BackupOptions {
 
 export class BackupService {
   private backupRoot: string;
+  private s3Client: S3Client | null = null;
   private s3Config: S3Config | null = null;
   private redis: RedisService;
 
@@ -48,6 +50,15 @@ export class BackupService {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
         };
+
+        this.s3Client = new S3Client({
+          region: this.s3Config.region,
+          endpoint: this.s3Config.endpoint,
+          credentials: (this.s3Config.accessKeyId && this.s3Config.secretAccessKey) ? {
+            accessKeyId: this.s3Config.accessKeyId,
+            secretAccessKey: this.s3Config.secretAccessKey
+          } : undefined
+        });
     }
   }
 
@@ -59,20 +70,22 @@ export class BackupService {
   }
 
   async uploadToS3(filepath: string, key: string): Promise<void> {
-      if (!this.s3Config) {
+      if (!this.s3Client || !this.s3Config) {
           logger.warn('Skipping S3 upload: No S3 configuration found.');
           return;
       }
       logger.info(`Uploading ${filepath} to S3 bucket ${this.s3Config.bucket} as ${key}...`);
 
       try {
-          if (process.env.USE_AWS_CLI === 'true') {
-             await execAsync(`aws s3 cp "${filepath}" "s3://${this.s3Config.bucket}/${key}" --region ${this.s3Config.region}`);
-          } else {
-              // Simulating upload delay
-              await new Promise(r => setTimeout(r, 500));
-              logger.info('Simulated S3 upload complete.');
-          }
+          const fileContent = createReadStream(filepath);
+          const command = new PutObjectCommand({
+            Bucket: this.s3Config.bucket,
+            Key: key,
+            Body: fileContent,
+          });
+
+          await this.s3Client.send(command);
+          logger.info(`Successfully uploaded ${key} to S3.`);
       } catch (error: any) {
           logger.error('Failed to upload to S3', error);
           throw error;
@@ -180,25 +193,38 @@ export class BackupService {
 
           const writeTarget = outputStream || fileStream;
 
-          // Full logical backup (removed LIMIT)
-          const nodeResult = await session.run('MATCH (n) RETURN n');
+          // Full logical backup with internal IDs for restoration mapping
+          const nodeResult = await session.run('MATCH (n) RETURN n, id(n) as internalId');
           for (const record of nodeResult.records) {
               const node = record.get('n');
-              const line = JSON.stringify({ type: 'node', labels: node.labels, props: node.properties }) + '\n';
+              const internalId = record.get('internalId');
+              // Convert Neo4j integer to string/number safe for JSON
+              const elementId = typeof internalId === 'object' && 'toNumber' in internalId ? internalId.toNumber() : internalId;
+
+              const line = JSON.stringify({
+                  type: 'node',
+                  labels: node.labels,
+                  props: node.properties,
+                  elementId: elementId
+              }) + '\n';
               writeTarget.write(line);
           }
 
-          const relResult = await session.run('MATCH (a)-[r]->(b) RETURN r, a.id as startId, b.id as endId');
+          const relResult = await session.run('MATCH (a)-[r]->(b) RETURN r, id(a) as startId, id(b) as endId');
           for (const record of relResult.records) {
               const rel = record.get('r');
               const startId = record.get('startId');
               const endId = record.get('endId');
+
+              const safeStartId = typeof startId === 'object' && 'toNumber' in startId ? startId.toNumber() : startId;
+              const safeEndId = typeof endId === 'object' && 'toNumber' in endId ? endId.toNumber() : endId;
+
               const line = JSON.stringify({
                   type: 'rel',
                   typeName: rel.type,
                   props: rel.properties,
-                  startId,
-                  endId
+                  startId: safeStartId,
+                  endId: safeEndId
               }) + '\n';
               writeTarget.write(line);
           }
@@ -242,42 +268,53 @@ export class BackupService {
        const client = this.redis.getClient();
        if (!client) throw new Error('Redis client not available');
 
-       // Check if cluster or standalone
-       const isCluster = (client as any).constructor.name === 'Cluster';
-
-       if (isCluster) {
-          // @ts-ignore
-          const nodes = client.nodes ? client.nodes('master') : [];
-          if (nodes.length > 0) {
-              logger.info(`Triggering BGSAVE on ${nodes.length} master nodes...`);
-              await Promise.all(nodes.map((node: any) => node.bgsave().catch((e: any) =>
-                  logger.warn(`Failed to trigger BGSAVE on node ${node.options.host}: ${e.message}`)
-              )));
-          } else {
-              logger.warn('No master nodes found in cluster for backup.');
-          }
-       } else {
-           // @ts-ignore
-           await client.bgsave();
-       }
-
        const dir = await this.ensureBackupDir('redis');
        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-       const filename = `redis-backup-log-${timestamp}.txt`;
+       const filename = `redis-backup-${timestamp}.jsonl`;
        const filepath = path.join(dir, filename);
+       const finalPath = options.compress ? `${filepath}.gz` : filepath;
 
-       await fs.writeFile(filepath, `Redis BGSAVE triggered successfully. Last save timestamp: ${new Date().toISOString()}`);
+       const fileStream = createWriteStream(finalPath);
+       const outputStream = options.compress ? zlib.createGzip() : null;
+       if (outputStream) outputStream.pipe(fileStream as unknown as NodeJS.WritableStream);
+       const writeTarget = outputStream || fileStream;
 
+       const stream = client.scanStream({ match: '*', count: 100 });
+
+       for await (const keys of stream) {
+         if (keys.length > 0) {
+           const pipeline = client.pipeline();
+           keys.forEach((key: string) => pipeline.get(key));
+           const values = await pipeline.exec();
+
+           keys.forEach((key: string, index: number) => {
+             const val = values?.[index]?.[1];
+             if (typeof val === 'string') {
+               writeTarget.write(JSON.stringify({ key, value: val }) + '\n');
+             }
+           });
+         }
+       }
+
+       writeTarget.end();
+
+       await new Promise<void>((resolve, reject) => {
+           fileStream.on('finish', () => resolve());
+           fileStream.on('error', (err: any) => reject(err));
+       });
+
+       const stats = await fs.stat(finalPath);
+       backupMetrics.setGauge('size_bytes', stats.size, { type: 'redis' });
        backupMetrics.observeHistogram('duration_seconds', (Date.now() - startTime) / 1000, { type: 'redis', status: 'success' });
 
        if (options.uploadToS3) {
-           const s3Key = `redis/${path.basename(filepath)}`;
-           await this.uploadToS3(filepath, s3Key);
+           const s3Key = `redis/${path.basename(finalPath)}`;
+           await this.uploadToS3(finalPath, s3Key);
        }
 
-       await this.recordBackupMeta('redis', filepath, 0);
+       await this.recordBackupMeta('redis', finalPath, stats.size);
 
-       return filepath;
+       return finalPath;
      } catch (error: any) {
        logger.error('Redis backup failed', error);
        throw error;
@@ -315,7 +352,7 @@ export class BackupService {
         results.neo4j = `Failed: ${e}`;
      }
      try {
-        results.redis = await this.backupRedis({ uploadToS3 });
+        results.redis = await this.backupRedis({ compress: true, uploadToS3 });
      } catch (e: any) {
         results.redis = `Failed: ${e}`;
      }
