@@ -54,6 +54,9 @@
 ### Task 3 - Merge-readiness prep
 - Scoped code changes to one file (`server/src/security/__tests__/ops-router-authz.test.ts`).
 - Diff remains security-focused and reviewable.
+- Attempted PR comment publication:
+  - `gh pr comment 18689 --repo BrianCLong/summit --body-file /tmp/pr18689_comment.md`
+  - Result: failed (`error connecting to api.github.com`).
 
 ## Planned vs Completed
 - Planned tasks: 3
@@ -61,7 +64,7 @@
   - Restored authz regression coverage in active security branch.
   - Produced full sprint evidence ledger.
 - In progress: 1
-  - Publish PR update (push + comment) after final local commit.
+  - Publish PR comment update on #18689 once GitHub API connectivity recovers.
 
 ## PRs Touched
 - [#18689](https://github.com/BrianCLong/summit/pull/18689) - `🛡️ Sentinel: [HIGH] Secure unauthenticated operational/administrative routers`.
@@ -75,9 +78,10 @@
 
 ## Blockers and Follow-ups
 1. GitHub issue API intermittently unavailable from this environment; retry issue intake at next run start.
-2. `intelgraph-server` test script requires PATH shim for `jest` in this worktree; follow-up should harden script/toolchain resolution if this reproduces on CI or clean clones.
+2. GitHub PR comment endpoint intermittently unavailable from this environment; retry comment publication on #18689.
+3. `intelgraph-server` test script requires PATH shim for `jest` in this worktree; follow-up should harden script/toolchain resolution if this reproduces on CI or clean clones.
 
 ## End-of-Day Summary
 - **Completed:** Reintroduced and validated ops router authz regression coverage on #18689; rebuilt daily sprint evidence file.
-- **In progress:** Commit/push/comment cycle for #18689 branch update.
-- **Blocked:** GitHub issue intake endpoint intermittency (`error connecting to api.github.com`).
+- **In progress:** PR comment publication on #18689 once API connectivity recovers.
+- **Blocked:** GitHub issue and PR comment API intermittency (`error connecting to api.github.com`).
