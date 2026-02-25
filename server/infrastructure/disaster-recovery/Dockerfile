@@ -1,5 +1,5 @@
 FROM alpine:3.19
-RUN apk add --no-cache postgresql16-client redis bash aws-cli coreutils tar gzip
+RUN apk add --no-cache postgresql16-client redis bash aws-cli coreutils tar gzip curl
 COPY backup.sh /scripts/backup.sh
 COPY restore.sh /scripts/restore.sh
 COPY verify_backup.sh /scripts/verify_backup.sh
