@@ -36,6 +36,11 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
+## 2026-03-02 - [HIGH] Unauthenticated Operational Routers
+**Vulnerability:** Several sensitive operational routers (`dr.ts`, `analytics.ts`, `airgap.ts`) were mounted at the root level in `server/src/app.ts` without authentication or Role-Based Access Control (RBAC). These endpoints handled disaster recovery, system analytics, and secure data transfers.
+**Learning:** Routers mounted at the root level are often excluded from global `/api` middleware. Security audits must explicitly verify the mount point of every router to ensure standard authentication wrappers are applied.
+**Prevention:** Always wrap root-level administrative routers with `ensureAuthenticated` and `ensureRole` middleware. Prioritize standardizing all API routes under a protected prefix (e.g., `/api`) where feasible.
+
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
