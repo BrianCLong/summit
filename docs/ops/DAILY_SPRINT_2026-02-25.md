@@ -68,6 +68,7 @@
 ### Blockers
 - GitHub issue intake blocked intermittently by `api.github.com` connectivity.
 - Targeted Jest execution blocked by missing dependencies in `server/` workspace (`spawn jest ENOENT`, pnpm warns local package exists without `node_modules`).
+- PR comment publication back to `#18690` blocked by the same GitHub API connectivity outage.
 
 ### Recommended Follow-ups (Tomorrow)
 1. Run `pnpm install` (root + workspace) and re-run targeted repository tests for `#18690`.
