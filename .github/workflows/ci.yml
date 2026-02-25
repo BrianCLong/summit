@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "**/*.md"
 
@@ -39,7 +39,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
@@ -57,7 +57,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -105,7 +105,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
