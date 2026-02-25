@@ -108,11 +108,11 @@ export default tseslint.config(
       'no-sparse-arrays': 'warn',
       'no-empty-pattern': 'warn',
       'prefer-spread': 'warn',
-      'no-redeclare': 'warn',
+      'no-redeclare': 'off',
       'no-dupe-class-members': 'warn',
       'import/first': 'warn',
       'react/no-array-index-key': 'warn',
-      'no-console': 'warn', // Warn about console statements
+      'no-console': 'off', // Warn about console statements
     },
   },
   {

@@ -23,7 +23,7 @@ for (let i = 0; i < iterations; i += 1) {
 }
 const elapsed = performance.now() - start;
 
-console.log(
+// console.log(
   `Compiled ${iterations} procedures in ${elapsed.toFixed(2)}ms (budget ${maxMs}ms)`,
 );
 assert.ok(

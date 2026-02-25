@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: none
+Status: active
+
 # Zero-Trust Data Governance Blueprint
 
 **Version:** 1.0.0
