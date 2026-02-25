@@ -381,7 +381,7 @@ export class VideoPipeline {
             objects: imageEmbedding.objects,
             faces: imageEmbedding.faces,
             sceneType: this.classifyScene(imageEmbedding.objects),
-          };
+          } as KeyFrame;
         } catch (error) {
           logger.warn('Failed to analyze frame', {
             frameNumber: frame.frameNumber,
