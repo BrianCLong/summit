@@ -145,6 +145,9 @@ code review of these specific changes is recommended before promoting to product
 | Merge automation script | `scripts/ga-merge-train.sh` |
 | PR report generator | `scripts/ga-merge-report.py` |
 | Assessment report | `docs/ga-merge-train/GA-MERGE-ASSESSMENT.md` |
+| Changelog | `docs/ga-merge-train/CHANGELOG-v5.0.0.md` |
+| Release notes | `docs/ga-merge-train/RELEASE-NOTES-v5.0.0-rc.1.md` |
+| PR description | `docs/ga-merge-train/PR-DESCRIPTION.md` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -167,6 +170,6 @@ git push --force origin main
 - [ ] Security review of Tier 7 PRs (recommended)
 - [ ] Full regression suite in CI/CD environment
 - [ ] Staging deployment and smoke test
-- [ ] Release candidate tag: `v5.0.0-rc.1`
-- [ ] Changelog generated from merged PRs
-- [ ] Release notes published
+- [x] Release candidate tag: `v5.0.0-rc.1`
+- [x] Changelog generated from merged PRs
+- [x] Release notes published
