@@ -91,7 +91,7 @@ has been validated against all available GA readiness checks.
 | Check | Status | Root Cause |
 |-------|--------|------------|
 | typecheck | KNOWN FAIL | Missing type defs in services/graph-core |
-| lint (eslint) | KNOWN FAIL | Missing @eslint/js package |
+| lint (eslint) | **NOW PASSING** | @eslint/js installed, 5 errors fixed (0 errors, 182 warnings) |
 | ci:docs-governance | KNOWN FAIL | Missing js-yaml dependency |
 | config:validate | KNOWN FAIL | Missing compiled module |
 | test:smoke | KNOWN FAIL | Requires running Docker stack |
@@ -105,6 +105,14 @@ has been validated against all available GA readiness checks.
 | auto-enqueue.yml | Removed duplicate `with:` key on setup-node step |
 | Prettier formatting | Fixed AGENTS.md, STATUS.json, ci.yml formatting |
 | SERVICE_INVENTORY.md | Regenerated via living-documents verifier |
+| InboundAlertService | HMAC-SHA256 signature verification (was plain string compare) |
+| IntelligentCopilot | Removed XSS-vulnerable dangerouslySetInnerHTML |
+| ESLint (5 errors) | Parse error, useless assignments, missing error cause |
+| ruff (1000+ fixes) | Import sorting, style modernization across 430 Python files |
+| mypy (10 errors) | Missing return type annotations, import path fix |
+| docker-compose.dev.yaml | Removed merge conflict marker at EOF |
+| _reusable-governance-gate.yml | Resolved merge conflict (kept full implementation) |
+| **`make ga` Lint+Test** | **NOW PASSING** (was failing on @eslint/js, ruff, mypy) |
 
 ## Conflict Resolution Notes
 
