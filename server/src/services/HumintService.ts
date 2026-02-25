@@ -14,17 +14,29 @@ import {
 import { Driver, Session } from 'neo4j-driver';
 
 // Helper for snake_case -> camelCase conversion if needed, but we'll map manually
+const rowsFromResult = <T = any>(result: any): T[] => {
+  if (Array.isArray(result?.rows)) return result.rows as T[];
+  if (Array.isArray(result)) return result as T[];
+  if (result && typeof result === 'object') return [result as T];
+  return [];
+};
+
+const firstRowFromResult = <T = any>(result: any): T | undefined => {
+  const rows = rowsFromResult<T>(result);
+  return rows[0];
+};
+
 const mapSource = (row: any): HumintSource => ({
   id: row.id,
   cryptonym: row.cryptonym,
   reliability: row.reliability,
-  accessLevel: row.access_level,
+  accessLevel: row.access_level ?? row.accessLevel,
   status: row.status,
-  recruitedAt: row.recruited_at,
-  handlerId: row.handler_id,
-  tenantId: row.tenant_id,
-  createdAt: row.created_at,
-  updatedAt: row.updated_at,
+  recruitedAt: row.recruited_at ?? row.recruitedAt,
+  handlerId: row.handler_id ?? row.handlerId,
+  tenantId: row.tenant_id ?? row.tenantId,
+  createdAt: row.created_at ?? row.createdAt,
+  updatedAt: row.updated_at ?? row.updatedAt,
 });
 
 const mapReport = (row: any): IntelReport => ({
@@ -35,18 +47,20 @@ const mapReport = (row: any): IntelReport => ({
   status: row.status,
   disseminationList: row.dissemination_list,
   createdAt: row.created_at,
-  createdBy: row.created_by,
-  tenantId: row.tenant_id,
+  createdBy: row.created_by ?? row.createdBy,
+  tenantId: row.tenant_id ?? row.tenantId,
 });
 
 export class HumintService {
   private static instance: HumintService;
-  private pool: ManagedPostgresPool;
-  private neo4j: Driver;
+  private constructor() {}
 
-  private constructor() {
-    this.pool = getPostgresPool();
-    this.neo4j = getNeo4jDriver();
+  private get pool(): ManagedPostgresPool {
+    return getPostgresPool();
+  }
+
+  private get neo4j(): Driver {
+    return getNeo4jDriver();
   }
 
   public static getInstance(): HumintService {
@@ -85,7 +99,11 @@ export class HumintService {
     ];
 
     const result = await this.pool.query(query, values);
-    const source = mapSource(result.rows[0]);
+    const row = firstRowFromResult(result);
+    if (!row) {
+      throw new Error('Failed to create source: database did not return a row');
+    }
+    const source = mapSource(row);
 
     // Create node in GraphDB
     const session = this.neo4j.session();
@@ -123,7 +141,8 @@ export class HumintService {
       'SELECT * FROM humint_sources WHERE id = $1 AND tenant_id = $2',
       [sourceId, tenantId]
     );
-    return result.rows.length ? mapSource(result.rows[0]) : null;
+    const row = firstRowFromResult(result);
+    return row ? mapSource(row) : null;
   }
 
   async listSources(tenantId: string): Promise<HumintSource[]> {
@@ -131,7 +150,7 @@ export class HumintService {
       'SELECT * FROM humint_sources WHERE tenant_id = $1 ORDER BY created_at DESC',
       [tenantId]
     );
-    return result.rows.map(mapSource);
+    return rowsFromResult(result).map(mapSource);
   }
 
   // --- Intel Reporting ---
@@ -162,7 +181,11 @@ export class HumintService {
     ];
 
     const result = await this.pool.query(query, values);
-    return mapReport(result.rows[0]);
+    const row = firstRowFromResult(result);
+    if (!row) {
+      throw new Error('Failed to create report: database did not return a row');
+    }
+    return mapReport(row);
   }
 
   async updateReportStatus(
@@ -174,7 +197,8 @@ export class HumintService {
       'UPDATE humint_reports SET status = $1, updated_at = NOW() WHERE id = $2 AND tenant_id = $3 RETURNING *',
       [status, reportId, tenantId]
     );
-    return result.rows.length ? mapReport(result.rows[0]) : null;
+    const row = firstRowFromResult(result);
+    return row ? mapReport(row) : null;
   }
 
   async listReports(tenantId: string, sourceId?: string): Promise<IntelReport[]> {
@@ -188,7 +212,7 @@ export class HumintService {
 
     query += ' ORDER BY created_at DESC';
     const result = await this.pool.query(query, params);
-    return result.rows.map(mapReport);
+    return rowsFromResult(result).map(mapReport);
   }
 
   // --- Debriefing ---
