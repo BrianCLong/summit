@@ -135,8 +135,16 @@ all feature content was included.
 | #17591 | Unify Data-Run Lineage and Build Attestations | MEDIUM |
 | #18006 | CI/CD Security Governance Verdict System | MEDIUM |
 
-**Recommendation**: These PRs were merged with force-resolution. A security-focused
-code review of these specific changes is recommended before promoting to production.
+### Security Review Results (2026-02-25)
+
+| PR # | Title | Verdict |
+|-----:|-------|---------|
+| #17890 | Fix insecure signature verification in InboundAlertService | **FIXED** — replaced string comparison with HMAC-SHA256 + timingSafeEqual |
+| #18063 | Fix Stored XSS in IntelligentCopilot | **FIXED** — removed dangerouslySetInnerHTML, use safe React rendering |
+| #17899 | Harden authorization and multi-tenant isolation | **VERIFIED** — tenant isolation + RBAC code present and correct |
+| #18322 | Harden Search Evidence and Auth Middleware | **VERIFIED** — scope/role/permission checks in auth middleware |
+| #18045 | Harden evidence search with RBAC and tenant isolation | **VERIFIED** — tenant scoping enforced |
+| #17972 | CVE-2026-25145 Melange Path Traversal Remediation | **VERIFIED** — version gate + secure tar extraction in place |
 
 ## Deliverables
 
@@ -167,7 +175,7 @@ git push --force origin main
 - [x] Living documents regenerated (SERVICE_INVENTORY.md)
 - [x] All actionable validation checks passing
 - [x] Integration branch pushed to remote
-- [ ] Security review of Tier 7 PRs (recommended)
+- [x] Security review of Tier 7 PRs (2 CRITICAL/HIGH fixed, 4 verified OK)
 - [ ] Full regression suite in CI/CD environment
 - [ ] Staging deployment and smoke test
 - [x] Release candidate tag: `v5.0.0-rc.1`
