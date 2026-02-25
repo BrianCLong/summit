@@ -317,7 +317,7 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
     }
 
     // Optionally include full provenance chain
-    if (((req.query.include_provenanc as string)e as string) === 'true') {
+    if (req.query.include_provenance === 'true') {
       const provenance = await provenanceLedger.getProvenanceChain(
         req.params.id,
       );
@@ -355,16 +355,16 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
 router.get('/claims', async (req: Request, res: Response) => {
   try {
     const filters: ClaimQueryFilters = {
-      investigation_id: ((req.query.investigation_ as string)i as string)d as string,
-      created_by: ((req.query.created_ as string)b as string)y as string,
-      claim_type: ((req.query.claim_typ as string)e as string) as any,
-      confidence_min: ((req.query.confidence_mi as string)n as string)
-        ? parseFloat(((req.query.confidence_m as string)i as string)n as string)
+      investigation_id: req.query.investigation_id as string,
+      created_by: req.query.created_by as string,
+      claim_type: req.query.claim_type as any,
+      confidence_min: req.query.confidence_min
+        ? parseFloat(req.query.confidence_min as string)
         : undefined,
-      confidence_max: ((req.query.confidence_ma as string)x as string)
-        ? parseFloat(((req.query.confidence_m as string)a as string)x as string)
+      confidence_max: req.query.confidence_max
+        ? parseFloat(req.query.confidence_max as string)
         : undefined,
-      source_id: ((req.query.source_ as string)i as string)d as string,
+      source_id: req.query.source_id as string,
     };
 
     const claims = await provenanceLedger.queryClaims(filters);

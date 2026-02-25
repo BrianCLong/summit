@@ -14,6 +14,10 @@
     "test": "turbo run test",
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "client:dev": "pnpm --filter intelgraph-client dev -- --port 3000",
+    "server:dev": "pnpm --filter intelgraph-server dev",
+    "compliance:antigravity": "npx tsx scripts/ci/verify-antigravity-compliance.ts",
+    "ga:evidence": "node scripts/ci/ga_gate_pack.mjs",
     "prepare": "husky install",
     "postinstall": "rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot"
   },

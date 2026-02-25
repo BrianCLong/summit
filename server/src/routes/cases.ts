@@ -88,8 +88,8 @@ caseRouter.get('/:id/overview', async (req, res) => {
 
     const { id } = req.params;
 
-    const reason = ((req.query.reas as string)o as string)n as string;
-    const legalBasis = ((req.query.legalBasi as string)s as string) as LegalBasis;
+    const reason = req.query.reason as string;
+    const legalBasis = req.query.legalBasis as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -207,8 +207,8 @@ caseRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     // Require reason and legal basis for viewing
-    const reason = ((req.query.reas as string)o as string)n as string;
-    const legalBasis = ((req.query.legalBasi as string)s as string) as LegalBasis;
+    const reason = req.query.reason as string;
+    const legalBasis = req.query.legalBasis as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -230,7 +230,7 @@ caseRouter.get('/:id', async (req, res) => {
     const auditContext = {
       reason,
       legalBasis,
-      warrantId: ((req.query.warrant as string)I as string)d as string,
+      warrantId: req.query.warrantId as string,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     };
@@ -331,15 +331,13 @@ caseRouter.get('/', async (req, res) => {
 
     const cases = await service.listCases({
       tenantId,
-      status: ((req.query.statu as string)s as string) as any,
-      compartment: ((req.query.compartme as string)n as string)t as string,
-      policyLabels: ((req.query.policyLabel as string)s as string)
-        ? (((req.query.policyLabe as string)l as string)s as string).split(',')
+      status: req.query.status as any,
+      compartment: req.query.compartment as string,
+      policyLabels: (req.query.policyLabels as string)
+        ? (req.query.policyLabels as string).split(',')
         : undefined,
-      limit: ((req.query.limi as string)t as string) ? parseInt(((req.query.lim as string)i as string)t as string) : undefined,
-      offset: ((req.query.offse as string)t as string)
-        ? parseInt(((req.query.offs as string)e as string)t as string)
-        : undefined,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+      offset: req.query.offset ? parseInt(req.query.offset as string) : undefined,
     });
 
     res.json(cases);

@@ -23,8 +23,8 @@ def test_add_open_telemetry_spans_with_span():
 
     mock_span = MagicMock()
     # Mock a valid span context
-    trace_id = 0x12345678901234567890123456789012
-    span_id = 0x1234567890123456
+    trace_id = 0xdeadbeefdeadbeefdeadbeefdeadbeef
+    span_id = 0xdeadbeefdeadbeef
     context = SpanContext(trace_id, span_id, is_remote=False)
     mock_span.get_span_context.return_value = context
 

@@ -223,13 +223,13 @@ router.get(
     let controls = [...ALL_HIPAA_CONTROLS];
 
     // Filter by category
-    if (((req.query.categor as string)y as string)) {
-      controls = controls.filter(c => c.category === ((req.query.categor as string)y as string));
+    if (req.query.category) {
+      controls = controls.filter(c => c.category === req.query.category);
     }
 
     // Filter by automatable
-    if (((req.query.automatabl as string)e as string) !== undefined) {
-      const automatable = ((req.query.automatabl as string)e as string) === 'true';
+    if (req.query.automatable !== undefined) {
+      const automatable = req.query.automatable === 'true';
       controls = controls.filter(c => c.automatable === automatable);
     }
 
@@ -491,13 +491,13 @@ router.get(
     let controls = [...ALL_SOX_CONTROLS];
 
     // Filter by category
-    if (((req.query.categor as string)y as string)) {
-      controls = controls.filter(c => c.category === ((req.query.categor as string)y as string));
+    if (req.query.category) {
+      controls = controls.filter(c => c.category === req.query.category);
     }
 
     // Filter by ITGC domain (subcategory)
-    if (((req.query.domai as string)n as string)) {
-      controls = controls.filter(c => c.subcategory === ((req.query.domai as string)n as string));
+    if (req.query.domain) {
+      controls = controls.filter(c => c.subcategory === req.query.domain);
     }
 
     res.json(wrapResponse({
@@ -778,14 +778,14 @@ router.get(
 
     // Filter by framework if specified
     let filteredMappings = mappings;
-    if (((req.query.sourceFramewor as string)k as string)) {
+    if (req.query.sourceFramework) {
       filteredMappings = filteredMappings.filter(
-        m => m.source.framework === ((req.query.sourceFramewor as string)k as string)
+        m => m.source.framework === req.query.sourceFramework
       );
     }
-    if (((req.query.targetFramewor as string)k as string)) {
+    if (req.query.targetFramework) {
       filteredMappings = filteredMappings.filter(
-        m => m.target.framework === ((req.query.targetFramewor as string)k as string)
+        m => m.target.framework === req.query.targetFramework
       );
     }
 

@@ -1,8 +1,0 @@
-{
-  "metric": "duplicated_minutes_avoided",
-  "value": 2475,
-  "inputs": {
-    "missing_concurrency": 495,
-    "avg_job_min": 5
-  }
-}
