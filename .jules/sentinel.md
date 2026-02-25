@@ -75,7 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
-## 2026-02-25 - Input Sanitization Hardening
-**Vulnerability:** The core sanitization middleware was insufficient, allowing NoSQL-style property injection (keys starting with $ or .) and was vulnerable to Prototype Pollution. It also lacked XSS protection for incoming string values.
-**Learning:** Generic recursion over request objects can easily corrupt complex types (Date, Buffer) or miss inherited properties if not using `hasOwnProperty`.
-**Prevention:** Always use Copy-on-Write patterns for middleware performance and explicitly block `__proto__`, `constructor`, and `prototype`. Use established libraries like `html-escaper` for XSS prevention.
+
+## 2026-03-02 - [MEDIUM] Fragile Input Sanitization and Prototype Pollution
+**Vulnerability:** The `sanitizeInput` middleware was fragile and failed to protect against Prototype Pollution or deep NoSQL injection attempts. It was also prone to breaking instances of `Date`, `Buffer`, or `RegExp` during recursive sanitization.
+**Learning:** General-purpose recursive sanitization must use a Copy-on-Write (CoW) pattern to be safe and non-destructive. It must explicitly block reserved JS keys (`__proto__`, `constructor`, `prototype`) and filter database-specific injection tokens (e.g., keys starting with `$`).
+**Prevention:** Use a robust, recursive CoW sanitizer that preserves object instances and explicitly drops malicious keys. Ensure it covers `req.body`, `req.query`, and `req.params`.

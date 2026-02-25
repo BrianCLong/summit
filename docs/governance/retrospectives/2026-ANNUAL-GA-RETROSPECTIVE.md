@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Annual GA Retrospective & Control Evolution (2026)
 
 **Date:** 2026-01-24

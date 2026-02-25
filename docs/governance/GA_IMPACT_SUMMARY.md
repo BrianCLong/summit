@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # GA Impact Summary: AI Governance & Compliance
 
 **Date:** 2026-01-23

@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # External Signals Integration Report (2026-01-25)
 
 **Executor:** Jules (Release Captain)

@@ -56,8 +56,7 @@ def process_evidence(report_path):
     report = load_json(report_path)
 
     # Identify schema - for Moltbook Relay we use specific one
-    evidence_id = report.get("evidence_id", "") if isinstance(report, dict) else ""
-    if "moltbook-relay" in evidence_id:
+    if "moltbook-relay" in report.get("evidence_id", ""):
         schema = "evidence/schemas/moltbook-relay-report.schema.json"
     else:
         schema = "evidence/schemas/report.schema.json"

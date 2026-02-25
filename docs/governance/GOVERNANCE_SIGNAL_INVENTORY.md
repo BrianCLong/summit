@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Governance Signal Inventory
 
 | Signal Name | Source Concept | Type | Regulatory Drivers | Summit Relevance |

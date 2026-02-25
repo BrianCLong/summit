@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Security Ledger
 
 This document tracks security threats, mitigations, and their verification status via evidence artifacts.

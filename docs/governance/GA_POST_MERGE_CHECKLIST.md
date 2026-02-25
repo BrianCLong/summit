@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # GA Post-Merge Verification Checklist
 
 **Role:** Release Captain

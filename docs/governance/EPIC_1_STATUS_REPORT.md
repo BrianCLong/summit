@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Epic 1: "Glass Box" Agent Governance - Status Report
 
 **Report Date:** 2026-01-20

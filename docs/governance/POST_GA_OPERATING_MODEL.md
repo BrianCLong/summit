@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Post-GA Operating Model (Day-2)
 
 **Effective Date:** 2026-01-08

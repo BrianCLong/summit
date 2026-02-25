@@ -96,6 +96,7 @@ if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
 fi
 
 # Create summary file
+mkdir -p "$(dirname "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json")"
 cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
 {
   "artifactName": "$ARTIFACT_NAME",

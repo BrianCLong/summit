@@ -40,3 +40,6 @@ dependencies:
     version: 0.1.0
     repository: file://../istio-config
     condition: istio-config.enabled
+  - name: summit-service
+    version: 0.1.0
+    repository: "file://../charts/summit-service"

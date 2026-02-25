@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Governance Audit Event Definitions
 
 This document defines the schema and semantics for new audit event types associated with continuous compliance, authenticity verification, and human accountability.

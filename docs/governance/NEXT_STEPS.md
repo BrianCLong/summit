@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Recommended Next Actions (Weekly Conveyor)
 
 **Date**: 2026-01-25

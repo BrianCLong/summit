@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 **Owner**: @intelgraph/provenance-team
 **Last-Reviewed**: 2026-01-27
 **Evidence-IDs**: EVID-GOV-OSINT-POLICY-001

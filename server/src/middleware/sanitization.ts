@@ -1,91 +1,98 @@
 import { Request, Response, NextFunction } from 'express';
-import { escape } from 'html-escaper';
 
 /**
- * Recursively sanitizes an object to prevent NoSQL injection and Prototype Pollution.
- * Also escapes HTML characters in strings to provide basic XSS protection.
- * Uses a Copy-on-Write pattern to avoid unnecessary mutations and allocations.
+ * Robust input sanitization using Copy-on-Write pattern.
+ * Protects against Prototype Pollution and NoSQL injection.
+ * Preserves Date, Buffer, and RegExp instances.
  */
-export function sanitize<T>(obj: T): T {
-    if (obj === null || typeof obj !== 'object') {
-        if (typeof obj === 'string') {
-            const escaped = escape(obj);
-            return (escaped !== obj ? escaped : obj) as unknown as T;
-        }
-        return obj;
+function sanitize(obj: any): any {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (obj instanceof Date || obj instanceof Buffer || obj instanceof RegExp) {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    let hasChanged = false;
+    const cleanedArray = obj.map(item => {
+      const sanitizedItem = sanitize(item);
+      if (sanitizedItem !== item) hasChanged = true;
+      return sanitizedItem;
+    });
+    return hasChanged ? cleanedArray : obj;
+  }
+
+  let hasChanged = false;
+  const cleanObj: any = {};
+
+  for (const key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      // 🛡️ Block Prototype Pollution keys
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        hasChanged = true;
+        continue;
+      }
+
+      // 🛡️ Filter NoSQL injection keys (starting with $)
+      if (key[0] === '$') {
+        hasChanged = true;
+        continue;
+      }
+
+      const value = obj[key];
+      const sanitizedValue = sanitize(value);
+
+      if (sanitizedValue !== value) {
+        hasChanged = true;
+      }
+
+      // 🛡️ Drop keys that become empty objects after sanitization (e.g., pure NoSQL injection)
+      if (
+        sanitizedValue !== null &&
+        typeof sanitizedValue === 'object' &&
+        !(sanitizedValue instanceof Date || sanitizedValue instanceof Buffer || sanitizedValue instanceof RegExp) &&
+        !Array.isArray(sanitizedValue) &&
+        Object.keys(sanitizedValue).length === 0 &&
+        typeof value === 'object' &&
+        value !== null &&
+        Object.keys(value).length > 0
+      ) {
+        hasChanged = true;
+        continue;
+      }
+
+      cleanObj[key] = sanitizedValue;
     }
+  }
 
-    // Preservation list for instances that should not be traversed/mutated
-    if (obj instanceof Date || obj instanceof RegExp || obj instanceof Buffer) {
-        return obj;
-    }
-
-    if (Array.isArray(obj)) {
-        let newArr: any[] | null = null;
-        for (let i = 0; i < obj.length; i++) {
-            const val = obj[i];
-            const sanitizedVal = sanitize(val);
-            if (sanitizedVal !== val) {
-                if (!newArr) newArr = [...obj];
-                newArr[i] = sanitizedVal;
-            }
-        }
-        return (newArr || obj) as unknown as T;
-    }
-
-    let newObj: any | null = null;
-    for (const key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key)) {
-            // 1. Prototype Pollution protection
-            if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
-                if (!newObj) newObj = { ...obj };
-                delete newObj[key];
-                continue;
-            }
-
-            // 2. NoSQL injection protection (stripping keys starting with $ or .)
-            if (key[0] === '$' || key[0] === '.') {
-                if (!newObj) newObj = { ...obj };
-                delete newObj[key];
-                continue;
-            }
-
-            const val = (obj as any)[key];
-            const sanitizedVal = sanitize(val);
-            if (sanitizedVal !== val) {
-                if (!newObj) newObj = { ...obj };
-                newObj[key] = sanitizedVal;
-            }
-        }
-    }
-
-    return (newObj || obj) as unknown as T;
+  return hasChanged ? cleanObj : obj;
 }
 
 /**
- * Express middleware to sanitize request body, query, and params.
+ * Middleware to sanitize req.body, req.query, and req.params.
+ * Uses Object.defineProperty to ensure updates succeed even on read-only properties.
  */
-export const sanitizationMiddleware = (req: Request, _res: Response, next: NextFunction) => {
-    if (req.body) {
-        req.body = sanitize(req.body);
-    }
+export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+  if (req.body) {
+    req.body = sanitize(req.body);
+  }
 
-    if (req.query) {
-        // Use defineProperty to bypass potential read-only locks on query/params
-        Object.defineProperty(req, 'query', {
-            value: sanitize(req.query),
-            writable: true,
-            configurable: true
+  ['query', 'params'].forEach((prop) => {
+    const originalValue = (req as any)[prop];
+    if (originalValue) {
+      const sanitizedValue = sanitize(originalValue);
+      if (sanitizedValue !== originalValue) {
+        Object.defineProperty(req, prop, {
+          value: sanitizedValue,
+          writable: true,
+          configurable: true,
+          enumerable: true
         });
+      }
     }
+  });
 
-    if (req.params) {
-        Object.defineProperty(req, 'params', {
-            value: sanitize(req.params),
-            writable: true,
-            configurable: true
-        });
-    }
-
-    next();
+  next();
 };

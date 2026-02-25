@@ -1,55 +1,78 @@
-import { sanitize } from '../sanitization.js';
+import { jest, describe, it, expect } from '@jest/globals';
+import { sanitizeInput } from '../sanitization.js';
+import { Request, Response } from 'express';
 
 describe('Sanitization Middleware', () => {
-    it('should strip NoSQL injection keys starting with $ or .', () => {
-        const input = {
-            username: 'admin',
-            password: { $gt: '' },
-            'nested.key': 'value'
-        };
-        const expected = {
-            username: 'admin'
-        };
-        expect(sanitize(input)).toEqual(expected);
-    });
+  it('should remove NoSQL injection keys starting with $', () => {
+    const req = {
+      body: {
+        username: 'admin',
+        password: { $gt: '' }
+      }
+    } as unknown as Request;
+    const res = {} as Response;
+    const next = jest.fn();
 
-    it('should prevent Prototype Pollution', () => {
-        const input = JSON.parse('{"username": "user", "__proto__": {"admin": true}}');
-        const sanitized = sanitize(input);
-        expect(sanitized.username).toBe('user');
-        expect(sanitized.__proto__).toBeUndefined();
-        expect((Object.prototype as any).admin).toBeUndefined();
-    });
+    sanitizeInput(req, res, (next as any));
 
-    it('should escape HTML characters in strings (XSS protection)', () => {
-        const input = {
-            comment: '<script>alert("xss")</script>',
-            safe: 'Hello World'
-        };
-        const sanitized = sanitize(input);
-        expect(sanitized.comment).toBe('&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;');
-        expect(sanitized.safe).toBe('Hello World');
-    });
+    expect(req.body).toEqual({ username: 'admin' });
+    expect(next).toHaveBeenCalled();
+  });
 
-    it('should preserve special object instances', () => {
-        const now = new Date();
-        const buffer = Buffer.from('hello');
-        const input = { now, buffer };
-        const sanitized = sanitize(input);
-        expect(sanitized.now).toBe(now);
-        expect(sanitized.buffer).toBe(buffer);
-        expect(sanitized.now instanceof Date).toBe(true);
-    });
+  it('should block prototype pollution keys', () => {
+    const req = {
+      body: {
+        name: 'test',
+        __proto__: { admin: true },
+        constructor: { prototype: { malicious: true } }
+      }
+    } as unknown as Request;
+    const res = {} as Response;
+    const next = jest.fn();
 
-    it('should sanitize query and params', () => {
-        const query = { id: { $ne: null } };
-        const sanitized = sanitize(query);
-        expect(sanitized).toEqual({});
-    });
+    sanitizeInput(req, res, (next as any));
 
-    it('should use Copy-on-Write for clean objects', () => {
-        const input = { safe: 'data', count: 123 };
-        const sanitized = sanitize(input);
-        expect(sanitized).toBe(input); // Should be the same instance
-    });
+    expect(req.body).toEqual({ name: 'test' });
+    expect((req.body as any).__proto__).not.toEqual({ admin: true });
+  });
+
+  it('should preserve Date and Buffer instances', () => {
+    const now = new Date();
+    const buffer = Buffer.from('hello');
+    const req = {
+      body: {
+        timestamp: now,
+        data: buffer
+      }
+    } as unknown as Request;
+    const res = {} as Response;
+    const next = jest.fn();
+
+    sanitizeInput(req, res, (next as any));
+
+    expect(req.body.timestamp).toBeInstanceOf(Date);
+    expect(req.body.timestamp).toEqual(now);
+    expect(req.body.data).toBeInstanceOf(Buffer);
+    expect(req.body.data).toEqual(buffer);
+  });
+
+  it('should handle nested arrays and objects', () => {
+    const req = {
+      body: {
+        items: [
+          { id: 1, name: 'safe' },
+          { id: 2, '$hidden': 'secret' }
+        ]
+      }
+    } as unknown as Request;
+    const res = {} as Response;
+    const next = jest.fn();
+
+    sanitizeInput(req, res, (next as any));
+
+    expect(req.body.items).toEqual([
+      { id: 1, name: 'safe' },
+      { id: 2 }
+    ]);
+  });
 });

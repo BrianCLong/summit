@@ -1,3 +1,8 @@
+Owner: Governance
+Last-Reviewed: 2026-02-25
+Evidence-IDs: missing
+Status: active
+
 # Executive Readout: 2026 Regulatory Landscape
 **Date:** January 25, 2026
 **To:** Summit Leadership / Board

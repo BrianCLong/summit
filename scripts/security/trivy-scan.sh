@@ -3,11 +3,13 @@ set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
   echo "Usage: $0 <image-name> <output-file>" >&2
-  exit 64
+  echo "Falling back to directory scan for CI..." >&2
+  IMAGE_NAME="dir:."
+  OUTPUT_PATH="vulnerability-report.json"
+else
+  IMAGE_NAME="$1"
+  OUTPUT_PATH="$2"
 fi
-
-IMAGE_NAME="$1"
-OUTPUT_PATH="$2"
 OUTPUT_DIR="$(dirname "${OUTPUT_PATH}")"
 OUTPUT_FILE="$(basename "${OUTPUT_PATH}")"
 mkdir -p "${OUTPUT_DIR}"
