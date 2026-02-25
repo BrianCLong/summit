@@ -58,6 +58,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
@@ -92,7 +95,11 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
+        run: |
+          bash scripts/generate-sbom.sh summit-platform latest artifacts/sbom
+          # Locate the main CDX JSON (assuming it contains 'main' or 'npm' or is the only one)
+          # For consistency with next step, copy the npm or main one to artifacts/sbom/sbom.json
+          find artifacts/sbom -name "*.cdx.json" | head -n 1 | xargs -I {} cp {} artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
