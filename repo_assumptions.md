@@ -1,40 +1,27 @@
-# Repo Assumptions & Validation
+# Repository Assumptions Validation — github-copilot-pr-metrics-2026
 
-## Verified vs Assumed Directory List
+## Verified
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+- `connectors/github/copilot_metrics/` already exists and provides authenticated Copilot metrics client scaffolding, so PR metrics support was added as a package extension instead of a parallel connector tree.
+- `evidence/schemas/` is the canonical schema directory for evidence artifacts.
+- `scripts/monitoring/` is the established location for drift detectors.
+- `.github/workflows/` already includes dedicated, scoped CI workflows, so a new targeted workflow was added for this item.
 
-## CI Check Names (Exact)
+## Assumed
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+- Evidence IDs in this lane may use deterministic string IDs where existing schema does not enforce a single global format.
+- CI check labels for this lane can be represented as step names (`metrics-schema-validate`, `deterministic-output-check`, and `no-unstable-fields`) before a wider gate aggregator is introduced.
+- GitHub auth will be supplied through existing connector mechanisms (`GITHUB_TOKEN` or GitHub App token broker), with production token strategy finalized in API integration phase.
 
-## Evidence Schema Conventions (Exact)
+## Must-Not-Touch Files
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+- `docs/SUMMIT_READINESS_ASSERTION.md`
+- `docs/governance/CONSTITUTION.md`
+- `docs/governance/META_GOVERNANCE.md`
+- `agent-contract.json`
 
-## Must-Not-Touch List (Guardrails)
+## Deferred Pending PR2
 
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- Live endpoint verification for the new Copilot PR throughput and time-to-merge fields.
+- Final endpoint contract if GitHub introduces a dedicated PR metrics subresource.
+- Production secret-path decision (GitHub App installation token service vs direct PAT fallback).
