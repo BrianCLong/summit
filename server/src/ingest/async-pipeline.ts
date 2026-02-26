@@ -52,6 +52,7 @@ export interface AsyncIngestRepository {
     error?: string,
   ): Promise<void>;
   countProcessingForTenant(tenantId: string): Promise<number>;
+  getProcessingCounts(tenantIds: string[]): Promise<Map<string, number>>;
 }
 
 function stableStringify(value: unknown): string {
@@ -296,6 +297,29 @@ export class PgAsyncIngestRepository implements AsyncIngestRepository {
     return Number(rows[0]?.count || 0);
   }
 
+  async getProcessingCounts(tenantIds: string[]): Promise<Map<string, number>> {
+    if (tenantIds.length === 0) return new Map();
+
+    const { rows } = await this.pool.query(
+      `SELECT tenant_id, COUNT(*)::int AS count
+         FROM ingest_async_jobs
+        WHERE tenant_id = ANY($1)
+          AND status = 'PROCESSING'
+        GROUP BY tenant_id`,
+      [tenantIds],
+    );
+
+    const map = new Map<string, number>();
+    // Initialize with 0 for all requested tenants to ensure safe lookups
+    tenantIds.forEach((id) => map.set(id, 0));
+
+    rows.forEach((row: any) => {
+      map.set(row.tenant_id, Number(row.count));
+    });
+
+    return map;
+  }
+
   private mapRow(row: Record<string, unknown>): AsyncIngestJob {
     return {
       id: row.id as string,
@@ -450,6 +474,19 @@ export class InMemoryAsyncIngestRepository implements AsyncIngestRepository {
       (job: any) => job.tenantId === tenantId && job.status === 'PROCESSING',
     ).length;
   }
+
+  async getProcessingCounts(tenantIds: string[]): Promise<Map<string, number>> {
+    const map = new Map<string, number>();
+    tenantIds.forEach((id) => map.set(id, 0));
+
+    const jobs = Array.from(this.jobs.values());
+    for (const job of jobs) {
+      if (job.status === 'PROCESSING' && tenantIds.includes(job.tenantId)) {
+        map.set(job.tenantId, (map.get(job.tenantId) || 0) + 1);
+      }
+    }
+    return map;
+  }
 }
 
 export class AsyncIngestDispatcher {
@@ -529,6 +566,11 @@ export class AsyncIngestWorker {
       now,
     );
 
+    const uniqueTenants = Array.from(
+      new Set(events.map((e) => e.job.tenantId)),
+    );
+    const dbCounts = await this.repo.getProcessingCounts(uniqueTenants);
+
     for (const event of events) {
       const tenantId = event.job.tenantId;
 
@@ -538,8 +580,7 @@ export class AsyncIngestWorker {
       }
 
       const active =
-        (this.inFlight.get(tenantId) || 0) +
-        (await this.repo.countProcessingForTenant(tenantId));
+        (this.inFlight.get(tenantId) || 0) + (dbCounts.get(tenantId) || 0);
 
       if (active >= this.options.maxTenantConcurrency!) {
         const delayMs = calculateBackoffDelay(
