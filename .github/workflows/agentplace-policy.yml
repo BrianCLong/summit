@@ -34,7 +34,7 @@ jobs:
           {
             "name": "CI-Test-Agent",
             "version": "1.0.0",
-            "owner": "ci@example.com",
+            "owner": "user@localhost",
             "description": "CI Test",
             "capabilities": ["network_access"],
             "permissions": ["read"],

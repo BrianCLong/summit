@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: summit
+  neo4j:
+    image: neo4j:5.12.0-community
+    environment:
+      NEO4J_AUTH: neo4j/password

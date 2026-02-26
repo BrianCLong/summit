@@ -13,7 +13,7 @@ def main():
     manifest = {
         "name": "BenchmarkAgent",
         "version": "1.0.0",
-        "owner": "bench@example.com",
+        "owner": "bench-user",
         "description": "Benchmarking",
         "capabilities": ["network_access", "file_system", "system_calls"],
         "permissions": ["read", "write", "execute"],

@@ -20,7 +20,7 @@ class TestAgentEvaluator(unittest.TestCase):
         manifest = {
             "name": "TestAgent",
             "version": "1.0.0",
-            "owner": "test@example.com",
+            "owner": "test-user",
             "description": "A test agent",
             "capabilities": ["network_access"],
             "permissions": ["read"],
@@ -34,7 +34,7 @@ class TestAgentEvaluator(unittest.TestCase):
         manifest = {
             "name": "HighRiskAgent",
             "version": "1.0.0",
-            "owner": "admin@example.com",
+            "owner": "admin-user",
             "description": "Admin agent",
             "capabilities": ["system_calls"],
             "permissions": ["admin"],
