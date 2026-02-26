@@ -1,0 +1,5 @@
+version: 1
+evidence:
+  - id: "EV-001"
+    description: "Placeholder evidence map"
+    source: "system"

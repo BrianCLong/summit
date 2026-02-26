@@ -11,7 +11,6 @@ import {
 } from '@/contexts/KeyboardShortcutsContext'
 import { Badge } from '@/components/ui/Badge'
 import { Command } from 'lucide-react'
-import { isMac } from '@/lib/utils'
 
 export function KeyboardShortcutsHelp(): React.ReactElement {
   const { isHelpOpen, closeHelp, shortcuts } = useKeyboardShortcuts()
