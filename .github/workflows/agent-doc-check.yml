@@ -1,0 +1,85 @@
+name: agent-doc-check
+
+on:
+  pull_request:
+    paths:
+      - "schemas/agent-doc.schema.json"
+      - "scripts/generate_agent_docs.py"
+      - "scripts/policy/agent_doc_policy_check.py"
+      - "scripts/monitoring/agent-doc-drift.py"
+      - "spec/agents/**"
+      - "tests/schema/test_agent_doc_schema.py"
+      - "tests/tooling/test_generate_agent_docs.py"
+      - "tests/security/test_agent_doc_policy.py"
+      - "docs/standards/google-agent-docs.md"
+      - "docs/security/data-handling/google-agent-docs.md"
+      - "docs/ops/runbooks/agent-docs.md"
+  push:
+    branches: ["main"]
+    paths:
+      - "schemas/agent-doc.schema.json"
+      - "scripts/generate_agent_docs.py"
+      - "scripts/policy/agent_doc_policy_check.py"
+      - "scripts/monitoring/agent-doc-drift.py"
+      - "spec/agents/**"
+      - "tests/schema/test_agent_doc_schema.py"
+      - "tests/tooling/test_generate_agent_docs.py"
+      - "tests/security/test_agent_doc_policy.py"
+
+jobs:
+  agent-doc-schema-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip jsonschema pytest
+      - name: Generate agent docs
+        run: AGENT_DOCS_ENABLED=true AGENT_DOCS_TIMESTAMP=1970-01-01T00:00:00Z python scripts/generate_agent_docs.py --output-dir spec/agents
+      - name: Validate schema and policy tests
+        run: pytest tests/schema/test_agent_doc_schema.py tests/tooling/test_generate_agent_docs.py tests/security/test_agent_doc_policy.py
+
+  agent-doc-determinism-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - name: Regenerate and assert no drift
+        run: |
+          AGENT_DOCS_ENABLED=true AGENT_DOCS_TIMESTAMP=1970-01-01T00:00:00Z python scripts/generate_agent_docs.py --output-dir spec/agents
+          AGENT_DOCS_ENABLED=true AGENT_DOCS_TIMESTAMP=1970-01-01T00:00:00Z python scripts/generate_agent_docs.py --check --output-dir spec/agents
+          git diff --exit-code -- spec/agents/summit.agent.json spec/agents/report.json spec/agents/metrics.json spec/agents/stamp.json
+      - name: Enforce deterministic JSON and no dynamic values
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          import sys
+          from pathlib import Path
+
+          deterministic_files = [
+              Path("spec/agents/summit.agent.json"),
+              Path("spec/agents/report.json"),
+              Path("spec/agents/metrics.json"),
+          ]
+          timestamp_pattern = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+
+          for path in deterministic_files:
+              data = json.loads(path.read_text(encoding="utf-8"))
+              expected = json.dumps(data, indent=2, sort_keys=True) + "\n"
+              actual = path.read_text(encoding="utf-8")
+              if expected != actual:
+                  print(f"FAIL non-deterministic key ordering: {path}")
+                  sys.exit(1)
+              if timestamp_pattern.search(actual):
+                  print(f"FAIL dynamic timestamp in deterministic file: {path}")
+                  sys.exit(1)
+
+          print("OK deterministic files are stable")
+          PY
+      - name: Enforce policy constraints
+        run: python scripts/policy/agent_doc_policy_check.py --input-dir spec/agents

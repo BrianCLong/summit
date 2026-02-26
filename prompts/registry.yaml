@@ -922,3 +922,37 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: maestro-spec-interview-v1
+    version: v1
+    path: prompts/maestro/maestro_spec_interview_v1.md
+    sha256: 3fa16277a3b1f65b40b17b645b673cef3a2a2e9fd69ed58fae07eec5d3586fe6
+    description: Deterministic multi-phase spec interview orchestration with Jules/Codex seed generation.
+    scope:
+      paths:
+        - prompts/maestro/maestro_spec_interview_v1.md
+        - prompts/registry.yaml
+        - agents/maestro/
+        - agents/examples/MAESTRO_SPEC_INTERVIEW_V1_20260225.json
+        - schemas/maestro_spec.schema.json
+        - schemas/spec_bundle.schema.json
+        - scripts/emit_spec_bundle.py
+        - tests/maestro/
+        - docs/standards/maestro_spec.md
+        - docs/ops/runbooks/maestro_spec.md
+        - docs/security/data-handling/maestro_spec.md
+        - docs/repo_assumptions.md
+        - docs/roadmap/STATUS.json
+      domains:
+        - maestro
+        - governance
+        - documentation
+        - evidence
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

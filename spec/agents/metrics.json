@@ -1,0 +1,8 @@
+{
+  "item": "google-agent-docs",
+  "metrics": {
+    "agent_spec_count": 1,
+    "deterministic_file_count": 3,
+    "policy_constraint_coverage_pct": 100
+  }
+}

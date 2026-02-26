@@ -77,6 +77,22 @@
         "label": "feature:PROMPT_REGISTRY_ENABLED"
       }
     },
+    "design-mcp-enabled": {
+      "key": "design-mcp-enabled",
+      "name": "Design MCP Pipeline",
+      "description": "Gate governed Design MCP artifact ingestion and planner execution",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["frontend", "design", "mcp", "preview"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "branch": "feat/design-mcp",
+        "label": "feature:DESIGN_MCP_ENABLED"
+      }
+    },
     "new-ui-dashboard": {
       "key": "new-ui-dashboard",
       "name": "New UI Dashboard",

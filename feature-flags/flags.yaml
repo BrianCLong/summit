@@ -49,3 +49,4 @@ features:
   # Memory Bridge
   memory_bridge_enabled: { default: false, owners: [security, platform] }
   memory_bridge_lane2_enabled: { default: false, owners: [security, platform] }
+  SUMMIT_ORCHESTRATOR_V1: { default: false, owners: [agents, governance] }

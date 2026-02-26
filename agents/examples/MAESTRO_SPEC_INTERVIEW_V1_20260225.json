@@ -1,0 +1,63 @@
+{
+  "task_id": "MAESTRO_SPEC_INTERVIEW_V1_20260225",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "maestro-spec-interview-v1",
+    "version": "v1",
+    "sha256": "3fa16277a3b1f65b40b17b645b673cef3a2a2e9fd69ed58fae07eec5d3586fe6",
+    "path": "prompts/maestro/maestro_spec_interview_v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "prompts/maestro/maestro_spec_interview_v1.md",
+      "prompts/registry.yaml",
+      "agents/maestro/",
+      "agents/examples/MAESTRO_SPEC_INTERVIEW_V1_20260225.json",
+      "schemas/maestro_spec.schema.json",
+      "schemas/spec_bundle.schema.json",
+      "scripts/emit_spec_bundle.py",
+      "tests/maestro/",
+      "docs/standards/maestro_spec.md",
+      "docs/ops/runbooks/maestro_spec.md",
+      "docs/security/data-handling/maestro_spec.md",
+      "docs/repo_assumptions.md",
+      "docs/roadmap/STATUS.json"
+    ],
+    "domains": [
+      "maestro",
+      "governance",
+      "documentation",
+      "evidence"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": [
+      "artifacts/maestro/<slug>/spec_bundle.json",
+      "artifacts/maestro/<slug>/report.json",
+      "artifacts/maestro/<slug>/metrics.json",
+      "artifacts/maestro/<slug>/stamp.json",
+      "tests/maestro/test_interview_engine.py",
+      "tests/maestro/test_emit_spec_bundle.py"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Prompt registry includes maestro_spec_interview_v1 with hash lock.",
+    "Emitter produces deterministic bundle artifacts with IDs and section coverage.",
+    "Jules and Codex seed tasks are generated from requirement sections.",
+    "Definition-of-done scoring and blocking question logic are present."
+  ],
+  "stop_conditions": [
+    "Missing required interview section summaries.",
+    "Definition-of-done score below threshold 20/25.",
+    "Blocking contradictions remain unresolved."
+  ]
+}

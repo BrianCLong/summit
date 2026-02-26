@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/schemas/maestro_spec.schema.json",
+  "title": "MaestroSpecInterviewInput",
+  "description": "Input payload for maestro_spec_interview_v1 deterministic spec bundle generation.",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "mode",
+    "title",
+    "scope",
+    "section_summaries",
+    "functional_requirements",
+    "non_functional_requirements",
+    "data_model",
+    "agent_design",
+    "interfaces",
+    "risk_analysis",
+    "acceptance_criteria"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": {
+      "type": "string",
+      "pattern": "^1\\.0$"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["standard", "adversarial", "mvs", "compliance"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "section_summaries": {
+      "type": "object",
+      "required": [
+        "functional_requirements",
+        "non_functional_requirements",
+        "data_model",
+        "agent_design",
+        "interfaces",
+        "risk_analysis",
+        "acceptance_criteria"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "functional_requirements": { "type": "string", "minLength": 1 },
+        "non_functional_requirements": { "type": "string", "minLength": 1 },
+        "data_model": { "type": "string", "minLength": 1 },
+        "agent_design": { "type": "string", "minLength": 1 },
+        "interfaces": { "type": "string", "minLength": 1 },
+        "risk_analysis": { "type": "string", "minLength": 1 },
+        "acceptance_criteria": { "type": "string", "minLength": 1 }
+      }
+    },
+    "functional_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "non_functional_requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "data_model": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "agent_design": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "interfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "risk_analysis": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  }
+}

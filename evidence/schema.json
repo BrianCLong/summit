@@ -26,12 +26,7 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": [
-          "policy_name",
-          "status",
-          "severity",
-          "evidence_ref"
-        ],
+        "required": ["policy_name", "status", "severity", "evidence_ref"],
         "additionalProperties": false,
         "properties": {
           "policy_name": {
@@ -40,20 +35,11 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "pass",
-              "fail",
-              "warn"
-            ]
+            "enum": ["pass", "fail", "warn"]
           },
           "severity": {
             "type": "string",
-            "enum": [
-              "low",
-              "medium",
-              "high",
-              "critical"
-            ]
+            "enum": ["low", "medium", "high", "critical"]
           },
           "evidence_ref": {
             "type": "string",
@@ -64,29 +50,18 @@
     },
     "test_results": {
       "type": "object",
-      "required": [
-        "status"
-      ],
+      "required": ["status"],
       "additionalProperties": true,
       "properties": {
         "status": {
           "type": "string",
-          "enum": [
-            "pass",
-            "fail",
-            "warn"
-          ]
+          "enum": ["pass", "fail", "warn"]
         }
       }
     },
     "provenance": {
       "type": "object",
-      "required": [
-        "repository",
-        "workflow",
-        "run_id",
-        "run_attempt"
-      ],
+      "required": ["repository", "workflow", "run_id", "run_attempt"],
       "additionalProperties": true,
       "properties": {
         "repository": {

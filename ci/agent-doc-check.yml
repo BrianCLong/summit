@@ -1,0 +1,8 @@
+version: 1
+checks:
+  - name: schema-validation
+    command: pytest tests/schema/test_agent_doc_schema.py
+  - name: determinism
+    command: AGENT_DOCS_ENABLED=true AGENT_DOCS_TIMESTAMP=1970-01-01T00:00:00Z python3 scripts/generate_agent_docs.py --check --output-dir spec/agents
+  - name: policy-lint
+    command: python3 scripts/policy/agent_doc_policy_check.py --input-dir spec/agents

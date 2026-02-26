@@ -1,0 +1,16 @@
+{
+  "artifacts": [
+    {
+      "path": "spec/agents/summit.agent.json",
+      "type": "agent_spec"
+    }
+  ],
+  "evidence_ids": [
+    "EVD-AGDOC-SCHEMA-001",
+    "EVD-AGDOC-GENERATOR-001",
+    "EVD-AGDOC-POLICY-001"
+  ],
+  "feature_flag_default": "AGENT_DOCS_ENABLED=false",
+  "item": "google-agent-docs",
+  "summary": "Deterministic and policy-aware agent docs are generated for Summit modules."
+}

@@ -1,40 +1,34 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation (SAM Workstream)
 
-## Verified vs Assumed Directory List
+## Verified Structure (relevant to SAM)
 
 | Path | Status | Notes |
 | --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| `summit/train/entrypoint.py` | ✅ Verified | Exists but is a stub (`run_train` TODO). |
+| `summit/post_training/recipes/typhoon_s/opd_trainer.py` | ✅ Verified | Active PyTorch training step surface. |
+| `summit/optim/` | ❌ Not present before PR1 | Created by PR1 for SAM implementation. |
+| `summit/training/loop.py` | ❌ Not present | PR2 should target `summit/train/entrypoint.py` and/or `summit/post_training/recipes/*`. |
+| `tests/` | ✅ Verified | Root Python tests run from this directory (`pytest.ini testpaths = tests`). |
+| `summit/ci/required_checks.json` | ✅ Verified | Contains check name inventory used by Summit CI conventions. |
 
-## CI Check Names (Exact)
+## CI Check Names (local config snapshot)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+From `summit/ci/required_checks.json`:
 
-## Evidence Schema Conventions (Exact)
+- `summit-ci/evidence-verify`
+- `summit-ci/prompt-determinism`
+- `summit-ci/tool-schema-drift`
+- `summit-ci/policy-gates`
+- `summit-ci/unit`
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+## Evidence Conventions (observed)
 
-## Must-Not-Touch List (Guardrails)
+- Evidence validators exist under `summit/ci/verify_evidence.py`.
+- Required artifacts commonly include `report.json`, `metrics.json`, `stamp.json`.
+- Determinism convention: keep timestamps out of `metrics/report`; isolate run metadata in `stamp.json`.
 
-Deferred pending validation. Baseline expectations:
+## SAM Plan Implications
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+1. PR1 can land as an isolated optimizer extension (`summit/optim/sam.py`) + unit tests.
+2. PR2 integration should avoid non-existent `summit/training/loop.py`.
+3. PR3 sharpness probe should emit to existing evidence artifact conventions.

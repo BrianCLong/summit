@@ -1,7 +1,31 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-25T16:55:00Z",
+  "revision_note": "Added governed design-mcp ingestion lane and retained existing deterministic bundle initiatives.",
   "initiatives": [
+    {
+      "id": "composio-orchestrator-dag-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic DAG orchestrator slice in agents/orchestrator with edge policy gating, evidence ID contract, and artifact triad outputs."
+    },
+    {
+      "id": "design-mcp-governed-ingestion-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Design MCP adapter, deterministic UI artifact importer, implementation planner guardrails, feature flag default OFF, and CI design artifact verification lane."
+    },
+    {
+      "id": "google-agent-docs-subsumption-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Machine-readable agent-doc schema, deterministic generator outputs, policy enforcement, CI checks, and drift monitor scaffold."
+    },
+    {
+      "id": "maestro-spec-interview-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Prompt registry entry, deterministic spec bundle emitter, schemas, task seeds, and runbook/security standards for Maestro spec interviews."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -174,7 +198,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -198,7 +222,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
