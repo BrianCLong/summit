@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added Amazon Key event-platform analysis brief and governance-aligned recommendations.",
   "initiatives": [
+    {
+      "id": "amazon-key-event-platform-analysis",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published governed analysis of Amazon Key and Key-like reference architecture for Summit/IntelGraph planning."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
