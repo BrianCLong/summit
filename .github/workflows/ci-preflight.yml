@@ -36,6 +36,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create Dummy Env File
+        run: |
+          touch .env
+          echo "POSTGRES_PASSWORD=dummy" >> .env
+          echo "NEO4J_PASSWORD=dummy" >> .env
+          echo "JWT_SECRET=dummy_secret_at_least_32_characters" >> .env
+
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
@@ -62,6 +69,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create Dummy Env File
+        run: |
+          touch .env
+          echo "POSTGRES_PASSWORD=dummy" >> .env
+          echo "NEO4J_PASSWORD=dummy" >> .env
+          echo "JWT_SECRET=dummy_secret_at_least_32_characters" >> .env
 
       - name: Build Gateway Docker Image
         run: docker compose -f docker-compose.dev.yaml build gateway

@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: timescale/timescaledb:latest-pg14
+    environment:
+      - POSTGRES_PASSWORD=ci-postgres-password
+    ports:
+      - "5432:5432"
+  neo4j:
+    image: neo4j:4.4-community
+    environment:
+      - NEO4J_AUTH=none
+    ports:
+      - "7474:7474"
+      - "7687:7687"

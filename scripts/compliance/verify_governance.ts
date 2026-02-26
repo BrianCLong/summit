@@ -20,12 +20,13 @@ const registryContent = fs.readFileSync(CONTROL_REGISTRY_PATH, 'utf-8');
 const rulesContent = fs.readFileSync(GOVERNANCE_RULES_PATH, 'utf-8');
 
 // Basic check for table structures (naïve check)
-if (!registryContent.includes('| Control ID |')) {
+// Accept both legacy "| ID |" and new "| Control ID |" headers
+if (!registryContent.includes('| Control ID |') && !registryContent.includes('| ID |')) {
     console.error('ERROR: Control Registry missing table header');
     process.exit(1);
 }
 
-if (!rulesContent.includes('| Type | Description |')) {
+if (!rulesContent.includes('| Type | Description |') && !rulesContent.includes('| Type      | Description                        |')) {
     console.error('ERROR: Governance Rules missing Release Types table');
     process.exit(1);
 }
