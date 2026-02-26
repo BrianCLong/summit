@@ -1,0 +1,31 @@
+name: Qwen3.5 Medium vs Claude Sonnet 4.5
+description: Comparison profile based on VentureBeat coverage and Alibaba claims.
+version: 1.0.0
+
+baseline:
+  model_id: claude-sonnet-4.5
+  accuracy: 0.85
+  p95_latency_ms: 1200
+  cost_per_1k_tokens: 0.015
+
+target:
+  model_id: qwen3.5-medium
+  claims:
+    - performance_comparable_to_sonnet_4_5: true
+    - open_source: true
+    - cost_efficient: true
+
+  expected_metrics:
+    accuracy: ">= 0.84"
+    p95_latency_ms: "<= 1500"
+    cost_per_1k_tokens: "<= 0.010"
+
+benchmark_suite:
+  - coding_capability
+  - complex_reasoning
+  - instruction_following
+
+seeds:
+  - 42
+  - 2024
+  - 1337
