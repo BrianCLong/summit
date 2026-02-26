@@ -13,7 +13,7 @@ describe('McpServer Contract', () => {
       id: 1,
       method: "initialize",
       params: {
-        protocolVersion: "2025-06-18",
+        protocolVersion: "2025-11-25",
         capabilities: {},
         clientInfo: { name: "test-client", version: "1.0.0" }
       }
@@ -21,7 +21,7 @@ describe('McpServer Contract', () => {
 
     const response = await server.handleRequest(request);
     expect(response.result.serverInfo.name).toBe("summit-mcp-server");
-    expect(response.result.protocolVersion).toBe("2025-06-18");
+    expect(response.result.protocolVersion).toBe("2025-11-25");
   });
 
   it('should list tools', async () => {
