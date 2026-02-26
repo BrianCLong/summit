@@ -1,0 +1,51 @@
+[
+  {
+    "entryId": "550e8400-e29b-41d4-a716-446655440000",
+    "sequenceNumber": "0",
+    "previousHash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "currentHash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+    "operation": "CREATE",
+    "entityId": "entity-001",
+    "entityType": "Person",
+    "timestamp": "2026-01-15T10:00:00.000Z",
+    "actor": "analyst-alice",
+    "purpose": "investigation-456",
+    "metadata": {
+      "source": "manual-entry",
+      "confidence": 0.95
+    }
+  },
+  {
+    "entryId": "550e8400-e29b-41d4-a716-446655440001",
+    "sequenceNumber": "1",
+    "previousHash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+    "currentHash": "f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1",
+    "operation": "UPDATE",
+    "entityId": "entity-001",
+    "entityType": "Person",
+    "timestamp": "2026-01-15T11:00:00.000Z",
+    "actor": "analyst-bob",
+    "purpose": "investigation-456",
+    "metadata": {
+      "field": "confidence",
+      "oldValue": 0.95,
+      "newValue": 0.98
+    }
+  },
+  {
+    "entryId": "550e8400-e29b-41d4-a716-446655440002",
+    "sequenceNumber": "2",
+    "previousHash": "f0e1d2c3b4a5f6e7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1",
+    "currentHash": "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    "operation": "ACCESS",
+    "entityId": "entity-002",
+    "entityType": "Organization",
+    "timestamp": "2026-01-15T12:00:00.000Z",
+    "actor": "analyst-alice",
+    "purpose": "investigation-456",
+    "metadata": {
+      "accessType": "read",
+      "context": "cross-reference"
+    }
+  }
+]
