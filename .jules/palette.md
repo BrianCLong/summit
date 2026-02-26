@@ -44,3 +44,7 @@
 
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
+
+## 2026-03-01 - Search Interaction Polish
+**Learning:** Users often click "clear" on a search bar and expect to immediately type a new query, but default implementations often leave focus on the clear button or blur it.
+**Action:** Always programmatically focus the input element after a "clear" action to maintain user flow.
