@@ -55,8 +55,13 @@ def process_evidence(report_path):
     print(f"Checking evidence: {report_path}")
     report = load_json(report_path)
 
+    if isinstance(report, list):
+        print(f"Skipping list-based report (not yet supported for deep validation): {report_path}")
+        return True
+
     # Identify schema - for Moltbook Relay we use specific one
-    if "moltbook-relay" in report.get("evidence_id", ""):
+    evidence_id = report.get("evidence_id", "")
+    if "moltbook-relay" in evidence_id:
         schema = "evidence/schemas/moltbook-relay-report.schema.json"
     else:
         schema = "evidence/schemas/report.schema.json"

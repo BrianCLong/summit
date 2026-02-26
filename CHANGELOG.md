@@ -20,16 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added adoption plan for GitHub Repository Dashboard features.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
+- Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
+- Context manifest schema versioning and provenance validation for CEP core.
+- **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
 ### Fixed
 - Fixed version inconsistency across root and server packages (aligned to 4.2.3).
 - Fixed server start path in smoke test workflow.
 - Fixed missing test reference in Jet-RL CI workflow.
-
-### Added
-- Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
-- Context manifest schema versioning and provenance validation for CEP core.
-- **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
 ### Fixed
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
