@@ -24,6 +24,7 @@ class ArtifactKind(str, Enum):
     SBOM = "sbom"
     SLSA_PROVENANCE = "slsa_provenance"
     RISK_ASSESSMENT = "risk_assessment"
+    SPECIFICATION = "specification"
     BUILD_LOG = "build_log"
     TEST_REPORT = "test_report"
     OTHER = "other"

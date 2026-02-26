@@ -1,0 +1,18 @@
+meta:
+  id: workflow.maestro_spec_interview@v1
+  owner: architecture
+  purpose: Orchestrate a multi-phase interview to produce a production-grade spec.
+  tags: [maestro, interview, spec]
+
+modelConfig:
+  model: gpt-4-turbo
+  temperature: 0.2
+
+inputs:
+  system_name: string
+  problem_description: string
+
+template: |
+  # Maestro Spec Interview: {{system_name}}
+
+  {{> maestro.maestro-spec-interview-v1 system_name="{{system_name}}" problem_description="{{problem_description}}"}}

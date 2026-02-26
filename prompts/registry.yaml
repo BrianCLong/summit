@@ -922,3 +922,25 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: maestro-spec-interview-v1
+    version: v1
+    path: prompts/maestro/maestro-spec-interview-v1.md
+    sha256: 8f4a5c81a1cca034d8ff916420b619795cfc2858745f252f2548063809dbf697
+    description: Conduct a structured, multi-phase interview to produce a production-grade specification.
+    scope:
+      paths:
+        - prompts/maestro/maestro-spec-interview-v1.md
+        - prompts/registry.yaml
+      domains:
+        - orchestration
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
