@@ -21,6 +21,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { CommandPaletteProvider } from '../../contexts/CommandPaletteContext'
 import { NotificationProvider } from '../../contexts/NotificationContext'
+import { isMac } from '../../lib/utils'
 
 // Import page components (to be created)
 import Overview from './pages/Overview'
@@ -148,7 +149,7 @@ function ContextBar() {
 
         <div className="flex items-center space-x-4">
           <button className="text-sm text-blue-600 hover:text-blue-800">
-            Command Palette (⌘K)
+            Command Palette ({isMac ? '⌘' : 'Ctrl'}K)
           </button>
           <div className="h-6 w-px bg-gray-300" />
           <button className="text-sm text-gray-600 hover:text-gray-800">
