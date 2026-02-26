@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "timestamp": "20260225-230238",
+    "mode": "offline",
+    "nodeVersion": "v22.22.0",
+    "platform": "linux",
+    "arch": "x64",
+    "gitSha": "28015eab85b2ef8a91d4014c7d0965c02eb32f03"
+  },
+  "artifacts": [],
+  "commands": [
+    {
+      "command": "mock tenant-scan-static.json",
+      "exitCode": 0
+    }
+  ]
+}
