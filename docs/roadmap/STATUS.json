@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added flex-node-selector GA subsumption MWS with deterministic artifacts, policy validation, and drift monitoring scaffolds.",
   "initiatives": [
+    {
+      "id": "databricks-flex-node-subsumption-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit-native flex node selector scaffold with deterministic scoring, policy allowlists, CI hooks, and evidence artifacts."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",

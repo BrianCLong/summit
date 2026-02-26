@@ -1,40 +1,19 @@
-# Repo Assumptions & Validation
+# Repo Assumptions
 
-## Verified vs Assumed Directory List
+Verified: PARTIAL (live repo inspection completed for `summit/` and `docs/roadmap/STATUS.json`).
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+Assumed:
+- `summit/infra/` can host infra-planning Python modules.
+- `summit/policies/` can host policy YAML assets.
+- `artifacts/` remains the canonical location for machine-verifiable outputs.
+- CI can invoke scriptable checks from repository scripts and pytest.
 
-## CI Check Names (Exact)
+Must-Not-Touch:
+- Existing policy engines and unrelated core scoring logic.
+- Existing evidence schema files outside this flexible-node slice.
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+Validation Checklist:
+- Confirm module naming conventions in `summit/`.
+- Confirm CI check names and required branch protections.
+- Confirm artifact schema review process for generated JSON evidence.
+- Confirm evidence identifier pattern acceptance (`SUMMIT-FLEXNODE-<hash>`).
