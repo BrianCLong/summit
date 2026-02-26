@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-25T00:00:00Z",
+  "revision_note": "Added Summit Trust & Safety Proof Pack v0.1 artifact for pre-GA evidence hardening and scorecard gating.",
   "initiatives": [
+    {
+      "id": "summit-trust-safety-proof-pack-v0-1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published docs/SUMMIT_TRUST_SAFETY_PROOF_PACK_V0_1.md to define proof modules, scorecard gates, and evidence contract for GA readiness."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
