@@ -6,6 +6,7 @@
   "type": "module",
   "packageManager": "pnpm@9.12.0",
   "scripts": {
+    "ga:evidence": "echo \"Evidence collection placeholder\"",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
