@@ -1,0 +1,4 @@
+version: 1
+evidence:
+  - id: EVID-AHO-001
+    description: "Agentic Human Outsourcing Detection"

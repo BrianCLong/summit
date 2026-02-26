@@ -1,3 +1,9 @@
+---
+Status: Active
+Owner: Ops Team
+Last-Reviewed: 2026-02-26
+---
+
 # Runbook: Agentic Human Outsourcing Incident
 
 ## 1. Trigger

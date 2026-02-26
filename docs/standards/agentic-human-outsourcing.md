@@ -1,3 +1,10 @@
+---
+Status: Draft
+Owner: Security Team
+Last-Reviewed: 2026-02-26
+Evidence-IDs: [EVID-AHO-001]
+---
+
 # Agentic Human Outsourcing Standard
 
 ## 1. Overview
