@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/evidence/report.schema.json",
+  "type": "object",
+  "required": ["evidence_id", "summary", "classification"],
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "classification": {
+      "type": "string",
+      "enum": ["PUBLIC", "INTERNAL", "RESTRICTED"]
+    },
+    "summary": { "type": "string" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

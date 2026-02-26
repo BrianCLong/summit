@@ -1,0 +1,7 @@
+name: ga-cogops
+acceptance:
+  - evidence schemas validated
+  - policy gates passing
+  - assembler e2e passing
+status: in_progress
+owner: codex

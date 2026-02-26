@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added cogops-feb2026 evidence system foundation artifacts and CI verifier wiring.",
   "initiatives": [
+    {
+      "id": "cogops-feb2026-foundation-pr1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "PR1 evidence system scaffold: schemas, deterministic writer/index, fixtures, and ci-verify workflow."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
