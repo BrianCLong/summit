@@ -16,6 +16,7 @@
     "test:ci": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --passWithNoTests --coverage --reporters=default --reporters=jest-junit",
     "test:quarantine": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.quarantine.config.cjs --passWithNoTests",
     "test:integration": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --testPathPattern=integration --passWithNoTests",
+    "test:security": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts src/routes/__tests__/vulnerability_repro.test.ts",
     "test:unit": "node scripts/run-jest.mjs",
     "test:marketplace": "tsx --test tests/plugins/marketplace.sandbox.test.ts",
     "lint": "eslint .",

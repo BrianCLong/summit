@@ -95,7 +95,9 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh summit-platform v4.2.3 artifacts/sbom
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          bash scripts/generate-sbom.sh summit-platform "v$VERSION" artifacts/sbom
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true

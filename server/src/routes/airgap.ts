@@ -67,7 +67,8 @@ airgapRouter.post('/import', async (req: any, res) => {
 // Get Import
 airgapRouter.get('/imports/:id', async (req: any, res) => {
     try {
-        const result = await service.getImport(req.params.id, req.tenantId);
+        const importId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+        const result = await service.getImport(importId, req.tenantId);
         if (!result) return res.status(404).json({ error: 'Import not found' });
         res.json(result);
     } catch (e: any) {

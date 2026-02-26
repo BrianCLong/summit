@@ -23,10 +23,11 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
 router.get(
   '/path',
   asyncHandler(async (req: any, res: any) => {
-    const sourceId = req.query.sourceId as string;
-    const targetId = req.query.targetId as string;
-    const algorithm = req.query.algorithm as 'shortest' | 'k-paths' | undefined;
-    const { k, maxDepth } = req.query;
+    const sourceId = (Array.isArray(req.query.sourceId) ? req.query.sourceId[0] : req.query.sourceId) as string;
+    const targetId = (Array.isArray(req.query.targetId) ? req.query.targetId[0] : req.query.targetId) as string;
+    const algorithm = (Array.isArray(req.query.algorithm) ? req.query.algorithm[0] : req.query.algorithm) as 'shortest' | 'k-paths' | undefined;
+    const k = Array.isArray(req.query.k) ? req.query.k[0] : req.query.k;
+    const maxDepth = Array.isArray(req.query.maxDepth) ? req.query.maxDepth[0] : req.query.maxDepth;
 
     if (!sourceId || !targetId) {
       return res.status(400).json({ error: 'sourceId and targetId are required' });
@@ -49,8 +50,8 @@ router.get(
 router.get(
   '/community',
   asyncHandler(async (req: any, res: any) => {
-    const algorithm = req.query.algorithm as 'louvain' | 'leiden' | 'lpa' | undefined;
-    const dp = (req.query.dp as string) || 'true';
+    const algorithm = (Array.isArray(req.query.algorithm) ? req.query.algorithm[0] : req.query.algorithm) as 'louvain' | 'leiden' | 'lpa' | undefined;
+    const dp = (Array.isArray(req.query.dp) ? req.query.dp[0] : req.query.dp) as string || 'true';
     const result = await analyticsService.detectCommunities(
       algorithm || 'lpa'
     );
@@ -75,11 +76,12 @@ router.get(
 router.get(
   '/centrality',
   asyncHandler(async (req: any, res: any) => {
-    const algorithm = req.query.algorithm as 'betweenness' | 'eigenvector' | undefined;
-    const limit = req.query.limit;
+    const algorithm = (Array.isArray(req.query.algorithm) ? req.query.algorithm[0] : req.query.algorithm) as 'betweenness' | 'eigenvector' | undefined;
+    const limitParam = Array.isArray(req.query.limit) ? req.query.limit[0] : req.query.limit;
+    const limit = limitParam ? parseInt(limitParam as string) : 20;
     const result = await analyticsService.calculateCentrality(
       algorithm || 'betweenness',
-      { limit: limit ? parseInt(limit as string) : 20 }
+      { limit }
     );
     res.json(result);
   })
@@ -92,7 +94,7 @@ router.get(
 router.get(
   '/patterns',
   asyncHandler(async (req: any, res: any) => {
-    const type = req.query.type as 'temporal-motifs' | 'co-travel' | 'financial-structuring' | undefined;
+    const type = (Array.isArray(req.query.type) ? req.query.type[0] : req.query.type) as 'temporal-motifs' | 'co-travel' | 'financial-structuring' | undefined;
     if (!type) {
       return res.status(400).json({ error: 'Pattern type is required (temporal-motifs, co-travel, financial-structuring)' });
     }
@@ -110,7 +112,7 @@ router.get(
 router.get(
   '/anomaly',
   asyncHandler(async (req: any, res: any) => {
-    const type = req.query.type as 'degree' | 'temporal-spike' | 'selector-misuse' | undefined;
+    const type = (Array.isArray(req.query.type) ? req.query.type[0] : req.query.type) as 'degree' | 'temporal-spike' | 'selector-misuse' | undefined;
     if (!type) {
       return res.status(400).json({ error: 'Anomaly type is required (degree, temporal-spike, selector-misuse)' });
     }

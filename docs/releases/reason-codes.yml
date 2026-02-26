@@ -93,3 +93,15 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+release_reasons:
+  - code: SEC-PATCH
+    description: Security vulnerability fix
+  - code: BUG-FIX
+    description: General bug fix
+  - code: UX-ENHANCEMENT
+    description: User experience improvement
+  - code: A11Y-FIX
+    description: Accessibility improvement
+  - code: GOV-COMPLIANCE
+    description: Governance or compliance requirement
