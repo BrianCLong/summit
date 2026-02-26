@@ -1,0 +1,15 @@
+name: offline_local
+description: "Offline-first profile using local LLM backend"
+mode: offline
+backend:
+  type: local_openai
+  base_url: http://127.0.0.1:1234/v1/
+  model: local-model
+constraints:
+  network_allowed: false
+  deterministic: true
+  temperature: 0
+  seed: 42
+policies:
+  - no_pii_egress
+  - deterministic_replay
