@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
+        with:
+          fetch-depth: 2  # Need HEAD~1 for git diff
 
       - uses: pnpm/action-setup@v4
 
@@ -35,7 +37,7 @@ jobs:
 
       - name: Run UX Governance Check
         run: |
-          node scripts/ux-ci-enforcer.js
+          node scripts/ux-ci-enforcer.cjs
 
       - name: Upload UX Governance Report
         if: failure()
