@@ -1,0 +1,25 @@
+version: "1.0"
+risk_weights:
+  permissions:
+    read: 1
+    write: 5
+    execute: 10
+    admin: 50
+  capabilities:
+    network_access: 10
+    file_system: 20
+    system_calls: 50
+  data_access:
+    public: 0
+    internal: 10
+    confidential: 30
+    pii: 50
+
+thresholds:
+  low: 20
+  medium: 50
+  high: 80
+
+governance:
+  require_manual_approval_above: 50
+  auto_reject_above: 90
