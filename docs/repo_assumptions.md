@@ -1,16 +1,26 @@
-# Repo Assumptions & Verification
+# Repository Assumptions for Design MCP Subsumption
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+Status: **Assumed pending local verification**.
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Assumed Paths
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+- `src/agents/`
+- `src/connectors/`
+- `src/graphrag/`
+- `.github/workflows/`
+- `.github/scripts/`
+- `docs/architecture/`
+- `docs/security/`
+
+## Must-Not-Touch Boundaries
+
+- Existing GraphRAG pipeline
+- Production CI workflows
+- Core connectors
+
+## Validation Checklist Before PR1
+
+- Confirm workspace/package topology under `pnpm`.
+- Confirm package-local test runner conventions (`vitest` vs `jest`).
+- Confirm required CI check names and branch protections.
+- Confirm canonical evidence ID schema and validator locations.
