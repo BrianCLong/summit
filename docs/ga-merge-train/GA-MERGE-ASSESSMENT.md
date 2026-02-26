@@ -164,6 +164,12 @@ all feature content was included.
 | Changelog | `docs/ga-merge-train/CHANGELOG-v5.0.0.md` |
 | Release notes | `docs/ga-merge-train/RELEASE-NOTES-v5.0.0-rc.1.md` |
 | PR description | `docs/ga-merge-train/PR-DESCRIPTION.md` |
+| Security scan report | `docs/ga-merge-train/SECURITY-SCAN-REPORT.md` |
+| Threat model | `docs/ga-merge-train/THREAT-MODEL-v5.0.0.md` |
+| CI/CD security assessment | `docs/ga-merge-train/CICD-SECURITY-ASSESSMENT.md` |
+| Injection vulnerability audit | `docs/ga-merge-train/INJECTION-AUDIT-v5.0.0.md` |
+| External agent prompts | `docs/ga-merge-train/EXTERNAL-AGENT-PROMPTS.md` |
+| Provenance ledger library | `libs/provenance/` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -189,3 +195,8 @@ git push --force origin main
 - [x] Release candidate tag: `v5.0.0-rc.1`
 - [x] Changelog generated from merged PRs
 - [x] Release notes published
+- [x] Threat model documented (STRIDE analysis, risk matrix)
+- [x] CI/CD security assessment completed (workflow audit, supply chain)
+- [x] Injection vulnerability audit completed (SQL, XSS, SSRF, path traversal)
+- [x] Provenance ledger library implemented (11/11 acceptance tests pass)
+- [x] External agent prompts generated (10 prompts for Codex, Claude Code, Antigravity)
