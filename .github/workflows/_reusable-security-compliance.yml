@@ -45,12 +45,32 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+          retention-days: 7
+
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./dist
+            ./.turbo
+          key: ${{ runner.os }}-build-${{ github.job }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,rs,go}', '**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ github.job }}-
+          retention-days: 7
+
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
-
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
         with:
