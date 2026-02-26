@@ -1,0 +1,172 @@
+{
+  "$schema": "golden-path-fixture-v1",
+  "description": "Representative test data for IntelGraph v5.0.0 golden path: Investigation → Entities → Relationships → Copilot",
+  "investigation": {
+    "id": "inv-golden-001",
+    "name": "Operation Nightfall",
+    "description": "Investigation into suspected financial network",
+    "status": "ACTIVE",
+    "priority": "HIGH",
+    "createdBy": "analyst-alice",
+    "createdAt": "2026-01-15T10:00:00.000Z",
+    "tenantId": "tenant-acme"
+  },
+  "entities": [
+    {
+      "id": "entity-001",
+      "type": "Person",
+      "name": "John Smith",
+      "properties": {
+        "aliases": ["J. Smith", "JS"],
+        "nationality": "US",
+        "confidence": 0.95
+      },
+      "source": "HUMINT",
+      "createdBy": "analyst-alice"
+    },
+    {
+      "id": "entity-002",
+      "type": "Organization",
+      "name": "Apex Holdings Ltd",
+      "properties": {
+        "jurisdiction": "BVI",
+        "registrationDate": "2020-03-15",
+        "confidence": 0.88
+      },
+      "source": "OSINT",
+      "createdBy": "analyst-bob"
+    },
+    {
+      "id": "entity-003",
+      "type": "Person",
+      "name": "Maria Garcia",
+      "properties": {
+        "nationality": "ES",
+        "role": "Director",
+        "confidence": 0.92
+      },
+      "source": "FININT",
+      "createdBy": "analyst-alice"
+    },
+    {
+      "id": "entity-004",
+      "type": "Location",
+      "name": "1234 Commerce Blvd, Suite 500",
+      "properties": {
+        "city": "Miami",
+        "state": "FL",
+        "country": "US",
+        "coordinates": { "lat": 25.7617, "lng": -80.1918 }
+      },
+      "source": "GEOINT",
+      "createdBy": "analyst-bob"
+    },
+    {
+      "id": "entity-005",
+      "type": "Event",
+      "name": "Wire Transfer #TXN-2026-001",
+      "properties": {
+        "amount": 250000,
+        "currency": "USD",
+        "date": "2026-01-10",
+        "confidence": 0.99
+      },
+      "source": "FININT",
+      "createdBy": "analyst-alice"
+    }
+  ],
+  "relationships": [
+    {
+      "id": "rel-001",
+      "type": "DIRECTS",
+      "sourceId": "entity-001",
+      "targetId": "entity-002",
+      "properties": { "since": "2020-04-01", "strength": 0.90 }
+    },
+    {
+      "id": "rel-002",
+      "type": "EMPLOYED_BY",
+      "sourceId": "entity-003",
+      "targetId": "entity-002",
+      "properties": { "role": "Director", "since": "2020-03-15", "strength": 0.95 }
+    },
+    {
+      "id": "rel-003",
+      "type": "LOCATED_AT",
+      "sourceId": "entity-002",
+      "targetId": "entity-004",
+      "properties": { "type": "registered_address", "strength": 0.85 }
+    },
+    {
+      "id": "rel-004",
+      "type": "INITIATED",
+      "sourceId": "entity-001",
+      "targetId": "entity-005",
+      "properties": { "role": "sender", "strength": 0.99 }
+    },
+    {
+      "id": "rel-005",
+      "type": "RECEIVED_BY",
+      "sourceId": "entity-005",
+      "targetId": "entity-002",
+      "properties": { "role": "beneficiary", "strength": 0.99 }
+    },
+    {
+      "id": "rel-006",
+      "type": "ASSOCIATES_WITH",
+      "sourceId": "entity-001",
+      "targetId": "entity-003",
+      "properties": { "context": "business", "strength": 0.70, "confidence": 0.80 }
+    }
+  ],
+  "provenance": [
+    {
+      "entryId": "prov-001",
+      "operation": "CREATE",
+      "entityId": "entity-001",
+      "entityType": "Person",
+      "actor": "analyst-alice",
+      "purpose": "investigation-nightfall",
+      "timestamp": "2026-01-15T10:05:00.000Z"
+    },
+    {
+      "entryId": "prov-002",
+      "operation": "CREATE",
+      "entityId": "entity-002",
+      "entityType": "Organization",
+      "actor": "analyst-bob",
+      "purpose": "investigation-nightfall",
+      "timestamp": "2026-01-15T10:10:00.000Z"
+    },
+    {
+      "entryId": "prov-003",
+      "operation": "ACCESS",
+      "entityId": "entity-001",
+      "entityType": "Person",
+      "actor": "analyst-charlie",
+      "purpose": "cross-reference",
+      "timestamp": "2026-01-15T11:00:00.000Z"
+    }
+  ],
+  "copilotQueries": [
+    {
+      "query": "What connections does John Smith have to Apex Holdings?",
+      "expectedEntities": ["entity-001", "entity-002"],
+      "expectedRelationships": ["rel-001"],
+      "expectedConfidence": 0.9
+    },
+    {
+      "query": "Show me the financial transactions for this investigation",
+      "expectedEntities": ["entity-005"],
+      "expectedRelationships": ["rel-004", "rel-005"],
+      "expectedConfidence": 0.95
+    }
+  ],
+  "expectedGraphMetrics": {
+    "totalNodes": 5,
+    "totalEdges": 6,
+    "avgDegree": 2.4,
+    "maxDegree": 4,
+    "connectedComponents": 1
+  }
+}
