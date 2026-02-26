@@ -20,13 +20,14 @@ class UXCIEnforcer {
   }
 
   getChangedFiles() {
+    const execOptions = { encoding: 'utf-8', maxBuffer: 50 * 1024 * 1024 }; // 50MB buffer for large repos
     try {
       // Get list of files changed in current commit/PR
-      const changedFiles = execSync('git diff --name-only HEAD~1 HEAD', { encoding: 'utf-8' });
+      const changedFiles = execSync('git diff --name-only HEAD~1 HEAD', execOptions);
       return changedFiles.trim().split('\n').filter(f => f.length > 0);
     } catch (e) {
       console.log('Not in a git repository, checking all tracked files');
-      const allFiles = execSync('git ls-files', { encoding: 'utf-8' });
+      const allFiles = execSync('git ls-files', execOptions);
       return allFiles.trim().split('\n').filter(f => f.length > 0);
     }
   }
