@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added Copilot Usage Metrics API (PR throughput + time-to-merge) subsumption initiative and evidence-governance plan.",
   "initiatives": [
+    {
+      "id": "copilot-usage-metrics-api-2026-02-19",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Foundation + Innovation lane plan for GitHub Copilot Usage Metrics API delivery-impact fields (pull_request_throughput, time_to_merge) with governed evidence and rollback criteria."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
