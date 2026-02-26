@@ -1,0 +1,23 @@
+{
+  "id": "prov_api_1",
+  "timestamp": "2025-12-03T12:30:00Z",
+  "actor": {
+    "type": "service",
+    "id": "deploy-bot",
+    "roles": ["governance-bot"]
+  },
+  "action": "deploy",
+  "subject": {
+    "type": "artifact",
+    "id": "api:1.0.0"
+  },
+  "context": {
+    "commit": "abcd1234",
+    "branch": "main",
+    "prNumber": 42,
+    "env": "prod",
+    "metadata": {
+      "pipeline": "ci-golden-path"
+    }
+  }
+}
