@@ -1,0 +1,29 @@
+name: ai-mockup-2026-benchmark
+
+on:
+  pull_request:
+    paths:
+      - 'benchmarks/ai-mockup-2026/**'
+      - 'reports/ai-mockup-2026/**'
+      - 'scripts/monitoring/ai-mockup-2026-drift.py'
+      - '.github/workflows/ai-mockup-2026-benchmark.yml'
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install deps
+        run: pip install pyyaml pytest
+      - name: Deterministic benchmark gate
+        run: python3 benchmarks/ai-mockup-2026/runner.py --check
+      - name: Drift detection gate
+        run: python3 scripts/monitoring/ai-mockup-2026-drift.py
+      - name: Tests
+        run: pytest benchmarks/ai-mockup-2026/test_runner.py
