@@ -49,6 +49,13 @@ const navItems: NavItem[] = [
     action: 'read',
   },
   {
+    name: 'Investigations',
+    href: '/investigations',
+    icon: FileText as React.ComponentType<{ className?: string }>,
+    resource: 'investigations',
+    action: 'read',
+  },
+  {
     name: 'Alerts',
     href: '/alerts',
     icon: AlertTriangle as React.ComponentType<{ className?: string }>,
@@ -216,21 +223,21 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
           Intelligence
         </div>
-        {navItems.slice(0, 3).map(item => (
+        {navItems.slice(0, 4).map(item => (
           <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 7).map(item => (
+        {navItems.slice(4, 8).map(item => (
           <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(7).map(item => (
+        {navItems.slice(8).map(item => (
           <NavItemComponent key={item.href} item={item} user={user} />
         ))}
       </div>

@@ -55,6 +55,7 @@ const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboa
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
+const InvestigationsPage = React.lazy(() => import('@/pages/Investigations'))
 
 // New Switchboard Pages
 const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
@@ -176,6 +177,12 @@ function App() {
                         <Route path="investigation" element={
                           <DataFetchErrorBoundary dataSourceName="Investigation Canvas">
                             <InvestigationCanvas />
+                          </DataFetchErrorBoundary>
+                        } />
+
+                        <Route path="investigations" element={
+                          <DataFetchErrorBoundary dataSourceName="Investigations">
+                            <InvestigationsPage />
                           </DataFetchErrorBoundary>
                         } />
 
