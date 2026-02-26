@@ -1,40 +1,19 @@
-# Repo Assumptions & Validation
+# Unity Packaging Subsumption Assumptions
 
-## Verified vs Assumed Directory List
+## Verified
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+- `summit/` Python package exists and already contains CLI + tests.
+- `policies/` directory exists for policy YAML artifacts.
+- `docs/roadmap/STATUS.json` exists and tracks active initiatives.
 
-## CI Check Names (Exact)
+## Assumed
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+- CI can execute `python -m unittest` for targeted suites.
+- Artifact naming convention accepts `artifacts/package-report.json`, `artifacts/metrics.json`, and `artifacts/stamp.json`.
+- Required check name for policy enforcement can be introduced as `check-unity-policy` in a future workflow.
 
-## Evidence Schema Conventions (Exact)
+## Must-Not-Touch (Intentionally constrained)
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- Core evaluator surfaces outside `summit/pkg` additions.
+- Scoring engine paths unrelated to package scanning.
+- Provenance chain and ledger primitives.

@@ -1,0 +1,14 @@
+{
+  "name": "com.company.analytics",
+  "version": "1.2.3",
+  "dependencies": {
+    "com.company.core": "2.0.0",
+    "com.company.math": "1.4.1"
+  },
+  "scopedRegistries": [
+    {
+      "name": "company",
+      "url": "https://packages.company.internal"
+    }
+  ]
+}
