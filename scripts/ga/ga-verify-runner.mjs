@@ -18,6 +18,11 @@ const steps = [
     env: { GA_VERIFY_MODE: 'true' },
   },
   { name: 'ga:smoke', command: 'pnpm', args: ['ga:smoke'] },
+  {
+    name: 'ga:maestro-spec',
+    command: 'node',
+    args: ['scripts/ga/verify-maestro-spec.mjs', 'artifacts/maestro/sample/spec_bundle.json'],
+  },
 ];
 
 const gitSha = spawnSync('git', ['rev-parse', 'HEAD'], {
