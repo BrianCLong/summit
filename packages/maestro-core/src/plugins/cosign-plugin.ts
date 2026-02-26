@@ -3,8 +3,8 @@
  * Handles container image signing and verification using Sigstore Cosign
  */
 
-import { execSync } from 'child_process';
-import { writeFileSync, readFileSync, existsSync } from 'fs';
+import { execFileSync } from 'child_process';
+import { writeFileSync, readFileSync, existsSync, unlinkSync } from 'fs';
 import { createHash } from 'crypto';
 import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '../engine';
 
@@ -151,14 +151,14 @@ export class CosignPlugin implements StepPlugin {
         stepConfig.output_signature &&
         existsSync(stepConfig.output_signature)
       ) {
-        execSync(`rm -f "${stepConfig.output_signature}"`);
+        unlinkSync(stepConfig.output_signature);
       }
 
       if (
         stepConfig.output_certificate &&
         existsSync(stepConfig.output_certificate)
       ) {
-        execSync(`rm -f "${stepConfig.output_certificate}"`);
+        unlinkSync(stepConfig.output_certificate);
       }
 
       console.log(
@@ -211,7 +211,7 @@ export class CosignPlugin implements StepPlugin {
     args.push(config.image);
 
     try {
-      const result = execSync(`"${this.cosignPath}" ${args.join(' ')}`, {
+      const result = execFileSync(this.cosignPath, args, {
         encoding: 'utf8',
         stdio: ['inherit', 'pipe', 'pipe'],
       });
@@ -265,7 +265,7 @@ export class CosignPlugin implements StepPlugin {
     args.push(config.image);
 
     try {
-      const result = execSync(`"${this.cosignPath}" ${args.join(' ')}`, {
+      const result = execFileSync(this.cosignPath, args, {
         encoding: 'utf8',
       });
 
@@ -330,7 +330,7 @@ export class CosignPlugin implements StepPlugin {
     args.push(config.image);
 
     try {
-      const result = execSync(`"${this.cosignPath}" ${args.join(' ')}`, {
+      const result = execFileSync(this.cosignPath, args, {
         encoding: 'utf8',
         stdio: ['inherit', 'pipe', 'pipe'],
       });
@@ -382,7 +382,7 @@ export class CosignPlugin implements StepPlugin {
     args.push(config.image);
 
     try {
-      const result = execSync(`"${this.cosignPath}" ${args.join(' ')}`, {
+      const result = execFileSync(this.cosignPath, args, {
         encoding: 'utf8',
       });
 
@@ -507,7 +507,7 @@ export class CosignPlugin implements StepPlugin {
 
   private async getCosignVersion(): Promise<string> {
     try {
-      const version = execSync(`"${this.cosignPath}" version`, {
+      const version = execFileSync(this.cosignPath, ['version'], {
         encoding: 'utf8',
       });
       const versionMatch = version.match(/v\d+\.\d+\.\d+/);
@@ -526,7 +526,7 @@ export class CosignPlugin implements StepPlugin {
 
     for (const path of possiblePaths) {
       try {
-        execSync(`"${path}" version`, { stdio: 'ignore' });
+        execFileSync(path, ['version'], { stdio: 'ignore' });
         return path;
       } catch {
         continue;

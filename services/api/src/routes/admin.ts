@@ -97,7 +97,7 @@ adminRouter.get('/policy', requirePermission('user:read'), (_req, res) => {
   }
 });
 
-adminRouter.put('/policy', requirePermission('user:read'), (req, res) => {
+adminRouter.put('/policy', requirePermission('admin:write'), (req, res) => {
   try {
     const p = path.join(process.cwd(), 'policies', 'policy.rego');
     const content = String(req.body?.content || '');

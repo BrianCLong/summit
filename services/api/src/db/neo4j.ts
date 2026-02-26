@@ -193,6 +193,15 @@ class Neo4jConnection {
     maxDepth: number = 6,
     relationshipTypes?: string[],
   ): Promise<any[]> {
+    // SECURITY: Validate relationship types against strict alphanumeric+underscore pattern
+    const VALID_REL_TYPE = /^[A-Z_][A-Z0-9_]*$/;
+    if (relationshipTypes) {
+      for (const rt of relationshipTypes) {
+        if (!VALID_REL_TYPE.test(rt)) {
+          throw new Error(`Invalid relationship type: ${rt}`);
+        }
+      }
+    }
     const relationshipFilter = relationshipTypes
       ? `:${relationshipTypes.join('|:')}`
       : '';
@@ -234,13 +243,21 @@ class Neo4jConnection {
     tenantId: string,
     algorithm: 'betweenness' | 'closeness' | 'degree' | 'pagerank' = 'pagerank',
   ): Promise<any[]> {
-    // Note: This requires APOC procedures for advanced graph algorithms
+    // Runtime validation: algorithm must be from strict allowlist
+    const ALLOWED_ALGORITHMS = ['betweenness', 'closeness', 'degree', 'pagerank'] as const;
+    if (!ALLOWED_ALGORITHMS.includes(algorithm)) {
+      throw new Error(`Invalid centrality algorithm: ${algorithm}`);
+    }
+
+    // SECURITY: Use parameterized $tenantId instead of string interpolation.
+    // The algorithm is safe to interpolate after allowlist validation above.
+    // APOC internal queries use $tid parameter binding for tenantId.
     const query = `
       MATCH (e:Entity {tenantId: $tenantId})
       WHERE e.id IN $entityIds
       CALL apoc.algo.${algorithm}Centrality(
-        'MATCH (n:Entity {tenantId: "${tenantId}"}) WHERE n.id IN $entityIds RETURN id(n) as id',
-        'MATCH (n:Entity {tenantId: "${tenantId}"})-[r:RELATES_TO]-(m:Entity {tenantId: "${tenantId}"}) WHERE n.id IN $entityIds AND m.id IN $entityIds RETURN id(n) as source, id(m) as target',
+        'MATCH (n:Entity) WHERE n.tenantId = $tid AND n.id IN $entityIds RETURN id(n) as id',
+        'MATCH (n:Entity)-[r:RELATES_TO]-(m:Entity) WHERE n.tenantId = $tid AND m.tenantId = $tid AND n.id IN $entityIds AND m.id IN $entityIds RETURN id(n) as source, id(m) as target',
         'both'
       )
       YIELD nodeId, score
@@ -249,7 +266,7 @@ class Neo4jConnection {
       ORDER BY score DESC
     `;
 
-    return this.executeQuery(query, { entityIds, tenantId });
+    return this.executeQuery(query, { entityIds, tenantId, tid: tenantId });
   }
 
   async close(): Promise<void> {

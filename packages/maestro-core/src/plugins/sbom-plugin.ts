@@ -3,8 +3,8 @@
  * Generates and manages SPDX/CycloneDX SBOMs with Syft integration
  */
 
-import { execSync, spawn } from 'child_process';
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { execFileSync, spawn } from 'child_process';
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
 import { join, resolve } from 'path';
 import { createHash } from 'crypto';
 import { StepPlugin, RunContext, WorkflowStep, StepExecution } from '../engine';
@@ -177,7 +177,7 @@ export class SBOMPlugin implements StepPlugin {
     try {
       // Clean up local artifacts
       if (stepConfig.output && existsSync(stepConfig.output)) {
-        execSync(`rm -f "${stepConfig.output}"`);
+        unlinkSync(stepConfig.output);
       }
 
       // If we attached to an image, we could potentially remove the attestation
@@ -211,7 +211,7 @@ export class SBOMPlugin implements StepPlugin {
     }
 
     try {
-      const result = execSync(`"${this.syftPath}" ${args.join(' ')}`, {
+      const result = execFileSync(this.syftPath, args, {
         encoding: 'utf8',
         maxBuffer: 50 * 1024 * 1024, // 50MB buffer for large SBOMs
         timeout: 300000, // 5 minute timeout
@@ -359,12 +359,16 @@ export class SBOMPlugin implements StepPlugin {
       writeFileSync(tempFile, sbomData);
 
       // Attach using cosign
-      const attestCmd = `cosign attest --predicate "${tempFile}" --type ${this.getCosignType(config.format)} "${image}"`;
-
-      execSync(attestCmd, { stdio: 'inherit' });
+      // SECURITY: Use execFileSync with argument array to prevent command injection
+      execFileSync('cosign', [
+        'attest',
+        '--predicate', tempFile,
+        '--type', this.getCosignType(config.format),
+        image,
+      ], { stdio: 'inherit' });
 
       // Clean up
-      execSync(`rm -f "${tempFile}"`);
+      unlinkSync(tempFile);
     } catch (error) {
       throw new Error(
         `Failed to attach SBOM to image: ${(error as Error).message}`,
@@ -383,7 +387,7 @@ export class SBOMPlugin implements StepPlugin {
 
   private async getSyftVersion(): Promise<string> {
     try {
-      const version = execSync(`"${this.syftPath}" version`, {
+      const version = execFileSync(this.syftPath, ['version'], {
         encoding: 'utf8',
       });
       return version.split('\n')[0] || 'unknown';
@@ -401,7 +405,7 @@ export class SBOMPlugin implements StepPlugin {
 
     for (const path of possiblePaths) {
       try {
-        execSync(`"${path}" version`, { stdio: 'ignore' });
+        execFileSync(path, ['version'], { stdio: 'ignore' });
         return path;
       } catch {
         continue;

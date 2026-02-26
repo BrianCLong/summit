@@ -243,6 +243,12 @@ export class AssetTrackingService {
   ): Promise<AssetGraphLink> {
     const validated = CreateGraphLinkSchema.parse(input);
 
+    // SECURITY: Validate relationship type against strict allowlist to prevent Cypher injection
+    const VALID_REL_TYPE = /^[A-Z_][A-Z0-9_]*$/;
+    if (!VALID_REL_TYPE.test(validated.relationshipType)) {
+      throw new Error(`Invalid relationship type: ${validated.relationshipType}. Must be alphanumeric uppercase with underscores.`);
+    }
+
     const session = this.ctx.getNeo4jSession();
     try {
       const id = uuidv4();

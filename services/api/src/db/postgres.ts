@@ -28,7 +28,7 @@ class PostgreSQLConnection {
       connectionTimeoutMillis: 10000, // How long to wait for a connection
       ssl:
         process.env.NODE_ENV === 'production'
-          ? { rejectUnauthorized: false }
+          ? { rejectUnauthorized: true }
           : false,
     };
 
