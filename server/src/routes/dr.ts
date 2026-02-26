@@ -1,11 +1,16 @@
 import express from 'express';
 import { BackupInventoryService } from '../dr/backup-inventory/BackupInventoryService.js';
 import { PolicyChecker } from '../dr/backup-inventory/PolicyChecker.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { BackupPolicy } from '../dr/backup-inventory/types.js';
 
 const router = express.Router();
 const service = BackupInventoryService.getInstance();
 const checker = new PolicyChecker();
+
+// All DR routes require authentication and operator role
+router.use(ensureAuthenticated);
+router.use(ensureRole(['ADMIN', 'admin', 'OPERATOR', 'operator']));
 
 // Initial seed or manual reporting endpoint
 router.post('/backups', (req, res) => {

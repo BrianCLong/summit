@@ -1,11 +1,16 @@
 import { Router } from 'express';
 import { AnalyticsService } from '../services/AnalyticsService.js';
 import { logger } from '../config/logger.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
 
 const router = Router();
 const analyticsService = AnalyticsService.getInstance();
+
+// All analytics routes require authentication and appropriate roles
+router.use(ensureAuthenticated);
+router.use(ensureRole(['ADMIN', 'admin', 'ANALYST', 'analyst']));
 
 // Helper to handle async route errors
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
