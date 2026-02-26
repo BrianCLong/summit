@@ -154,6 +154,18 @@ all feature content was included.
 | #18045 | Harden evidence search with RBAC and tenant isolation | **VERIFIED** — tenant scoping enforced |
 | #17972 | CVE-2026-25145 Melange Path Traversal Remediation | **VERIFIED** — version gate + secure tar extraction in place |
 
+### Injection Audit Remediation (2026-02-26)
+
+| ID | Finding | Fix Applied |
+|----|---------|-------------|
+| CYP-01 | Cypher injection via tenantId in calculateCentrality | **FIXED** — parameterized $tid, runtime algorithm allowlist |
+| CYP-02 | Cypher injection via relationship type in AssetTrackingService | **FIXED** — strict regex validation `/^[A-Z_][A-Z0-9_]*$/` |
+| CYP-04 | Cypher injection via relationship type array filter | **FIXED** — same regex validation before interpolation |
+| CMD-02 | Command injection in cosign-plugin via execSync | **FIXED** — replaced with execFileSync + argument arrays |
+| CMD-03 | Command injection in sbom-plugin via execSync | **FIXED** — replaced with execFileSync + unlinkSync |
+| MISC-01 | Postgres SSL rejectUnauthorized:false in prod | **FIXED** — set to true |
+| MISC-02 | Policy write endpoint uses user:read permission | **FIXED** — changed to admin:write |
+
 ## Deliverables
 
 | Artifact | Path |
