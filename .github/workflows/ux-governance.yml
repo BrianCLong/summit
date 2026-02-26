@@ -34,7 +34,7 @@ jobs:
 
       - name: Run UX Governance Check
         run: |
-          node scripts/ux-ci-enforcer.js
+          node scripts/ux-ci-enforcer.cjs
 
       - name: Upload UX Governance Report
         if: failure()
