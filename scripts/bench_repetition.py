@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-from typing import Any, Dict, List
 import argparse
 import json
 import os
 import sys
 from pathlib import Path
+from typing import Any, Dict, List
 
 # Add repo root to python path so we can import summit
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -40,12 +40,12 @@ def main() -> None:
         }
     ]
 
-    report: Dict[str, Any] = {
+    report: dict[str, Any] = {
         "summary": {"total": 0, "harmful": 0, "beneficial": 0, "reinforced": 0},
         "details": []
     }
 
-    metrics: Dict[str, Any] = {
+    metrics: dict[str, Any] = {
         "repetition_scores": [],
         "harmful_rate": 0.0
     }
