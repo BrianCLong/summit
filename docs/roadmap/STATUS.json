@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added AI front door minimal winning slice (policy gateway, deterministic evidence artifacts, abuse fixture tests).",
   "initiatives": [
+    {
+      "id": "ai-front-door-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Deterministic AI front door policy gateway with allow/deny decisions, evidence IDs, and regression tests."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
