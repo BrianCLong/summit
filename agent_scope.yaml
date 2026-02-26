@@ -1,0 +1,9 @@
+task_name: "adverse-event-monitor"
+inputs: ["electronic-medical-records", "unstructured-clinical-notes"]
+outputs: ["adverse-event-reports", "clinician-alerts"]
+out_of_scope: ["patient-direct-contact", "treatment-modification-autonomous"]
+decomposition:
+  - "Extract patient notes"
+  - "Identify adverse events"
+  - "Grade severity"
+  - "Generate report"

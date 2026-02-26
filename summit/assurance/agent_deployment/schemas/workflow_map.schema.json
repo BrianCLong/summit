@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Workflow Integration Map",
+  "type": "object",
+  "properties": {
+    "upstream_systems": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Systems providing data to the agent."
+    },
+    "downstream_systems": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Systems consuming data from the agent."
+    },
+    "handoff_points": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Specific points where data is handed off."
+    },
+    "human_intervention_nodes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Nodes where human intervention is required."
+    }
+  },
+  "required": ["upstream_systems", "downstream_systems", "handoff_points", "human_intervention_nodes"]
+}

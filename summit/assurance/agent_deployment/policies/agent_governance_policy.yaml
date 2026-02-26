@@ -1,0 +1,16 @@
+# Agent Governance Policy
+# Encodes oversight and risk management (CLAIM-04)
+
+governance:
+  status: "enforced"
+  deny_by_default: true
+  oversight_mechanism: "continuous_monitoring"
+  risk_level: "high"
+  compliance_tags: ["SOC2", "MIT_SLOAN_5_HEAVY_LIFTS"]
+  accountability_chain:
+    - role: "Product Owner"
+      responsibility: "ROI and Scoping"
+    - role: "Security Council"
+      responsibility: "Policy and Data Safety"
+    - role: "SRE Team"
+      responsibility: "Monitoring and Drift"

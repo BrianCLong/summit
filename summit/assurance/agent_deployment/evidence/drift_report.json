@@ -1,0 +1,7 @@
+{
+  "drift_detected": false,
+  "findings": [
+    "Checked agent_scope.yaml for scope creep."
+  ],
+  "timestamp": "2026-02-26T12:00:00Z"
+}

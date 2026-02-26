@@ -1,0 +1,6 @@
+{
+  "upstream_systems": ["data-spine", "intelgraph-neo4j"],
+  "downstream_systems": ["case-management-ui", "pager-duty"],
+  "handoff_points": ["api-v1-events", "redpanda-topic-results"],
+  "human_intervention_nodes": ["threat-validation", "escalation-approval"]
+}

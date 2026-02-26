@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Scope Definition",
+  "type": "object",
+  "properties": {
+    "task_name": {
+      "type": "string",
+      "description": "The name of the task the agent is responsible for."
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicit inputs required by the agent."
+    },
+    "outputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicit outputs produced by the agent."
+    },
+    "out_of_scope": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicitly defined boundaries of what the agent will not do."
+    },
+    "decomposition": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Decomposed steps of the task."
+    }
+  },
+  "required": ["task_name", "inputs", "outputs", "out_of_scope", "decomposition"]
+}

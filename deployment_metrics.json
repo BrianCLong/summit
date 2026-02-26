@@ -1,0 +1,14 @@
+{
+  "performance_kpis": {
+    "latency_ms": 1500,
+    "accuracy": 0.95
+  },
+  "reliability_metrics": {
+    "uptime": 0.999,
+    "error_rate": 0.01
+  },
+  "drift_indicators": {
+    "scope_drift": 0.0,
+    "privilege_drift": 0.0
+  }
+}

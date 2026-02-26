@@ -1,0 +1,21 @@
+# Human Control Matrix
+# Encodes authority and escalation (CLAIM-05)
+
+collaboration:
+  human_in_the_loop: true
+  authority_levels:
+    - node: "autonomous-execution"
+      level: "low"
+    - node: "privileged-actions"
+      level: "high"
+      require_countersign: true
+  override_chain:
+    - role: "Admin"
+      method: "cli-override"
+    - role: "Security Council"
+      method: "policy-bypass-exception"
+  escalation_paths:
+    - trigger: "confidence-below-threshold"
+      action: "human-review"
+    - trigger: "drift-detected"
+      action: "pause-and-escalate"
