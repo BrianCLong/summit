@@ -1,16 +1,31 @@
-# Repo Assumptions & Verification
+# Repo Assumptions & Verification - Local Notes Semantic Synthesis
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified Paths
+| Path | Status | Notes |
+| --- | --- | --- |
+| `summit/` | ✅ Verified | Root Python package. |
+| `summit/ingest/` | ✅ Verified | Existing ingestion logic (Python). |
+| `summit/graph/` | ✅ Verified | Existing graph logic (Python). |
+| `summit/evidence/` | ✅ Verified | Existing evidence logic (Python). |
+| `docs/governance/` | ✅ Verified | Governance documentation. |
+| `.github/workflows/` | ✅ Verified | CI workflows. |
+| `scripts/` | ✅ Verified | Utility scripts. |
+| `tests/` | ✅ Verified | Test suites. |
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Assumed Paths (New)
+| Path | Role |
+| --- | --- |
+| `summit/ingestion/` | New deterministic notes ingestion pipeline. |
+| `summit/embeddings/` | Pluggable local embedding provider. |
+| `summit/report/` | Semantic report generation. |
+| `artifacts/` | Output directory for deterministic connection artifacts. |
+| `samples/notes/` | Sample corpus for validation. |
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Must-Not-Touch List
+- `summit/ingest/*` (unless integrating)
+- `summit/api/*`
+- `package.json`, `pnpm-lock.yaml`
+- `pyproject.toml`, `requirements.in` (unless adding critical deps)
+
+## Required Renames
+- None. `summit/ingestion` will be used for the new pipeline to distinguish it from the legacy `summit/ingest`.
