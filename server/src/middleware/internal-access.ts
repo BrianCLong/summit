@@ -6,9 +6,6 @@ const isConsoleEnabled = () =>
 const internalRoles = new Set(['admin', 'system.internal', 'ops', 'platform-admin']);
 
 function hasAdminRole(req: Request): boolean {
-  const roleHeader =
-    (req.headers['x-user-role'] as string | undefined) ||
-    (req.headers['x-role'] as string | undefined);
   const roles: string[] = [];
 
   if ((req as any).user?.role) {
@@ -17,9 +14,9 @@ function hasAdminRole(req: Request): boolean {
   if (Array.isArray((req as any).user?.roles)) {
     roles.push(...(req as any).user.roles);
   }
-  if (roleHeader) {
-    roles.push(roleHeader);
-  }
+
+  // SEC-2025-004: Do not trust x-user-role or x-role headers for internal access.
+  // Rely exclusively on the authenticated req.user object.
 
   return roles.some((role) => internalRoles.has(role));
 }

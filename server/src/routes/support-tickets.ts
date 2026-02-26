@@ -165,15 +165,13 @@ router.get('/tickets/:id/comments', async (req, res) => {
 
 const resolveActor = (req: express.Request) => {
   const user = (req as any).user;
-  const idHeader = req.headers['x-user-id'];
-  const roleHeader = req.headers['x-user-role'];
 
-  const id = (user?.sub || user?.id || (Array.isArray(idHeader) ? idHeader[0] : idHeader) || '').toString();
+  // SEC-2025-005: Do not trust x-user-id or x-user-role headers for actor resolution.
+  // Rely exclusively on the authenticated req.user object.
+  const id = (user?.sub || user?.id || '').toString();
   const roles = Array.isArray(user?.roles)
     ? (user?.roles as string[])
-    : roleHeader
-      ? [roleHeader].flat()
-      : [];
+    : [];
 
   return { id, roles };
 };
