@@ -1,40 +1,24 @@
-# Repo Assumptions & Validation
+# Repository Assumptions Log — Formae Subsumption Slice
 
-## Verified vs Assumed Directory List
+## Verified
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+- Repository root is `BrianCLong/summit` working tree.
+- Roadmap status file exists at `docs/roadmap/STATUS.json`.
 
-## CI Check Names (Exact)
+## Assumed (Pending Local/CI Confirmation)
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+- Existing evidence schema must not be broken by new multi-cloud artifacts.
+- Existing CI check names must remain stable; add new checks without renaming incumbents.
+- Multi-cloud implementation lane can begin as standards/docs + deterministic artifact contract before runtime wiring.
 
-## Evidence Schema Conventions (Exact)
+## Must-Not-Touch Constraints
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+- Core evidence contracts and required CI gate names.
+- Release pipeline behavior outside additive workflow integration.
 
 ## Validation Checklist
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- [ ] Confirm canonical evidence schema filename and required fields.
+- [ ] Confirm CI workflow naming conventions and required checks.
+- [ ] Confirm implementation zone ownership for `pkg`/`internal`/`packages` equivalent paths.
+- [ ] Confirm naming conventions for new artifact files and policy gate IDs.
