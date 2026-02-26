@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added gemini-enterprise-adapter minimal slice with deny-by-default policy + deterministic evidence artifacts.",
   "initiatives": [
+    {
+      "id": "gemini-enterprise-adapter-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Workspace-bound Gemini enterprise adapter scaffold, policy ingestion stub, and deterministic evidence report artifacts."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
