@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- MIT Sloan "5 Heavy Lifts" AI Agent Deployment Assurance module.
+- CI gates for agent scoping, governance, and readiness scoring.
+
+### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
