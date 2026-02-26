@@ -1,0 +1,12 @@
+modules:
+  core:
+    path: summit/governance
+    allowed_dependencies: []
+  automations:
+    path: summit/automations
+    allowed_dependencies: [core]
+  experience:
+    path: summit/experience
+    allowed_dependencies: [core]
+rules:
+  cross_module_requires_event: true
