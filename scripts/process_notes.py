@@ -30,13 +30,24 @@ def main():
     # 3. Artifact Generation
     connections_path = os.path.join(args.out_dir, "connections.json")
     with open(connections_path, "w") as f:
-        json.dump(bridges, f, indent=2)
+        # Wrap in report format for verify_evidence.py
+        report_data = {
+            "evidence_id": "EVD-NOTES-BRIDGE-001",
+            "item_slug": "local-notes-semantic",
+            "summary": "Top semantic bridges between local notes.",
+            "bridges": bridges,
+            "artifacts": []
+        }
+        json.dump(report_data, f, indent=2)
 
     metrics = {
-        "num_notes": len(set(n["doc_id"] for n in notes)),
-        "num_chunks": len(notes),
-        "num_bridges": len(bridges),
-        "avg_similarity": sum(b["similarity_score"] for b in bridges) / len(bridges) if bridges else 0
+        "evidence_id": "EVD-NOTES-METRIC-001",
+        "metrics": {
+            "num_notes": float(len(set(n["doc_id"] for n in notes))),
+            "num_chunks": float(len(notes)),
+            "num_bridges": float(len(bridges)),
+            "avg_similarity": float(sum(b["similarity_score"] for b in bridges) / len(bridges)) if bridges else 0.0
+        }
     }
     metrics_path = os.path.join(args.out_dir, "metrics.json")
     with open(metrics_path, "w") as f:
@@ -51,6 +62,9 @@ def main():
 
     # 5. Stamp (Deterministic metadata)
     stamp = {
+        "evidence_id": "EVD-NOTES-STAMP-001",
+        "created_utc": "2025-01-01T00:00:00Z",
+        "git_commit": "0000000000000000000000000000000000000000",
         "model_name": provider.model_name,
         "chunker_version": "v1.0.0",
         "embedding_fingerprint": provider.get_fingerprint(),

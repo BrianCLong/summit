@@ -15,7 +15,8 @@ def check_drift(artifacts_dir="artifacts"):
         stamp = json.load(f)
 
     with open(connections_path, "r") as f:
-        connections = json.load(f)
+        connections_data = json.load(f)
+        connections = connections_data.get("bridges", [])
 
     print("--- Semantic Drift Monitoring ---")
     print(f"Embedding Fingerprint: {stamp['embedding_fingerprint']}")

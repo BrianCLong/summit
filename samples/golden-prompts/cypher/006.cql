@@ -1,1 +1,0 @@
-MATCH (n:Entity) RETURN n LIMIT 1;
