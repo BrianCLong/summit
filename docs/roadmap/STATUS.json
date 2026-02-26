@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-25T00:00:00Z",
+  "revision_note": "Added Summit golden-path demo, intelligence schemas, evidence bundle contract, GA checklist, and GTM positioning artifacts.",
   "initiatives": [
+    {
+      "id": "summit-shadow-procurement-package",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Repo-ready package for demo spec, insight/dashboard/evidence schemas, GA checklist, revenue model, pilot deck outline, and competitive positioning."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
