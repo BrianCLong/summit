@@ -1,0 +1,12 @@
+agents:
+  - name: researcher
+    role: research_specialist
+  - name: critic
+    role: quality_assurance
+edges:
+  - from: researcher
+    to: critic
+policy:
+  allowed_edges:
+    - from: researcher
+      to: critic
