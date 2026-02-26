@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added coordination evaluation and CI governance initiative with deterministic artifacts.",
   "initiatives": [
+    {
+      "id": "coordination-evaluation-governance",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Introduced coordination schema, deterministic scoring artifacts, CI quality gate, context hash ledger, and operations runbook."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",

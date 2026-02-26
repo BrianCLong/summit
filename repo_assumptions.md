@@ -1,40 +1,21 @@
-# Repo Assumptions & Validation
+# Coordination Evaluation Repository Assumptions
 
-## Verified vs Assumed Directory List
+## Assumed Structure
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+- `summit/evals/` hosts evaluation modules and deterministic artifact emitters.
+- `summit/ci/` hosts hard gates that block CI on quality regressions.
+- `summit/agents/` hosts shared agent utilities, including context propagation primitives.
+- `docs/` hosts standards, security handling, and ops runbooks.
 
-## CI Check Names (Exact)
+## Must-Not-Touch Guardrails
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+- Core evaluation harness internals remain unchanged; this slice adds extension modules only.
+- Existing CI checks remain active; coordination check is additive.
+- Existing evidence schemas remain untouched; coordination artifacts use separate filenames.
 
 ## Validation Checklist
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- [x] Confirmed existing evidence artifacts use deterministic JSON serialization.
+- [x] Confirmed existing CI checks have explicit named scripts in `summit/ci/`.
+- [x] Confirmed Python test harness accepts pytest-style tests under `summit/evals/**/tests`.
+- [x] Confirmed artifacts can be emitted to `artifacts/` without mutating base schemas.
