@@ -16,6 +16,7 @@ import { UserManagementService, listUsersSchema, createUserSchema, updateUserSch
 import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
 import { validateRequest } from '../../middleware/validation.js';
+import { getStringFromQuery } from '../../utils/request';
 import { z } from 'zod';
 
 const router = express.Router();

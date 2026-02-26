@@ -1,6 +1,6 @@
-[submodule "skills/vendor/agent-skills-context-engineering"]
-path = skills/vendor/agent-skills-context-engineering
-url = https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering.git
-[submodule "skills/vendor/vercel-labs-agent-skills"]
-	path = skills/vendor/vercel-labs-agent-skills
-	url = https://github.com/vercel-labs/agent-skills.git
+[submodule "lib/context-shell"]
+	path = libs/context-shell
+	url = https://github.com/BrianCLong/context-shell.git
+[submodule "packages/osint-collector"]
+	path = packages/osint-collector
+	url = https://github.com/BrianCLong/osint-collector.git

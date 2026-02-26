@@ -26,7 +26,11 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../packages/osint-collector/src/**/*",
+    "../libs/context-shell/node/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
