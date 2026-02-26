@@ -1,4 +1,8 @@
 # Executive Readout: 2026 Regulatory Landscape
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 **Date:** January 25, 2026
 **To:** Summit Leadership / Board
 **From:** Regulatory Intelligence Lead

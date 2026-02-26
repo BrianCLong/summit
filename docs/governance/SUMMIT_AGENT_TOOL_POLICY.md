@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Summit Agent Tool Policy (v1)
 
 This policy defines which developer/CI tools AI agents (Codex, Claude Code, Gemini, Qwen) may invoke, under what constraints, and how evidence must be produced.

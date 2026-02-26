@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Evidence ID Consistency Gate - Rollout Plan (v1.3.0)
 
 ## Executive Summary

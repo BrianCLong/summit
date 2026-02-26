@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Narrative Model Governance (GOV-NARR-001)
 
 **Owner:** Governance

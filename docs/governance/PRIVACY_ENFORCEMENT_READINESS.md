@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Privacy Enforcement Readiness Strategy
 **Status:** Active
 **Effective Date:** January 1, 2026

@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Security & Governance Backlog
 
 This is the deterministic backlog for security vulnerabilities, governance gaps, and compliance action items.

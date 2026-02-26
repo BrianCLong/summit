@@ -1,14 +1,11 @@
-package maestro.deploy
+package opa.deploy_gate
 
-# Allow dev deploys only from maintainers and CI bots
+import future.keywords
+
 allow {
-  input.env == "dev"
-  some role
-  role := input.actor.role
-  role == "maintainer" or role == "ci-bot"
+  input.user.role == "maintainer"
 }
 
-deny[msg] {
-  not allow
-  msg := sprintf("deploy denied: env=%v actor=%v", [input.env, input.actor.user])
+allow {
+  input.user.role == "ci-bot"
 }

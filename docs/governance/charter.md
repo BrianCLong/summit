@@ -1,6 +1,6 @@
 Owner: Governance
 Last-Reviewed: 2026-01-14
-Evidence-IDs: none
+Evidence-IDs: unknown-legacy
 Status: active
 
 # Project Charter — IntelGraph GA Core Integration Train

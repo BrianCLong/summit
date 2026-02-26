@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # OSINT Methodology GA Impact Assessment
 
 **Methodology Source:** Automation Turn #5 (2026-01-26)

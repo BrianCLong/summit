@@ -11,8 +11,12 @@ ARTIFACT_NAME=${1:-"summit-platform"}
 BUILD_COMMAND=${2:-"npm run build"}
 BUILD_ENV=${3:-"production"}
 NUM_BUILDS=${4:-2}
-TEMP_DIR=${5:-"./build-test"}
+TEMP_DIR=${5:-"build-test"} # Changed default from ./build-test to build-test to avoid rsync exclude issues
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Normalize TEMP_DIR
+# If it starts with ./, strip it for the rsync exclude pattern
+EXCLUDE_DIR=${TEMP_DIR#./}
 
 # Create temporary directory for builds
 mkdir -p "$TEMP_DIR"
@@ -22,6 +26,7 @@ echo "   Artifact: $ARTIFACT_NAME"
 echo "   Command: $BUILD_COMMAND"
 echo "   Environment: $BUILD_ENV"
 echo "   Test builds: $NUM_BUILDS"
+echo "   Temp Dir: $TEMP_DIR"
 
 # Function to perform a single build
 perform_build() {
@@ -34,7 +39,8 @@ perform_build() {
     mkdir -p "$build_dir"
     
     # Copy source to build directory to isolate
-    rsync -a --exclude="$TEMP_DIR" --exclude="node_modules" --exclude=".git" . "$build_dir/"
+    # We exclude the temp dir itself to prevent infinite recursion if it's inside the source tree
+    rsync -a --exclude="$EXCLUDE_DIR" --exclude="node_modules" --exclude=".git" . "$build_dir/"
     
     # Change to build directory
     cd "$build_dir"
@@ -48,19 +54,26 @@ perform_build() {
     eval "$BUILD_COMMAND"
     
     # Calculate checksum of build output
-    cd "$TEMP_DIR"
-    if [ -d "$build_dir/dist" ]; then
-        find "$build_dir/dist" -type f -exec sha256sum {} \; | sort -k2 > "$build_dir/checksums.txt"
-    elif [ -f "$build_dir/$ARTIFACT_NAME" ]; then
-        sha256sum "$build_dir/$ARTIFACT_NAME" > "$build_dir/checksums.txt"
+    # We need to go back to the original directory to find the checksum file relative to TEMP_DIR
+    # or use absolute paths. Here we stay in build_dir but write checksums there.
+
+    if [ -d "dist" ]; then
+        find "dist" -type f -exec sha256sum {} \; | sort -k2 > "checksums.txt"
+    elif [ -f "$ARTIFACT_NAME" ]; then
+        sha256sum "$ARTIFACT_NAME" > "checksums.txt"
     else
-        # If no standard output directory, checksum all files in dist
-        if [ -d "$build_dir" ]; then
-            find "$build_dir" -name "dist" -o -name "*.js" -o -name "*.ts" -o -name "*.json" -o -name "*.html" -o -name "*.css" | xargs sha256sum | sort -k2 > "$build_dir/checksums.txt"
+        # If no standard output directory, checksum all files in dist if it exists, or common build artifacts
+        if [ -d "dist" ]; then
+             find "dist" -type f -exec sha256sum {} \; | sort -k2 > "checksums.txt"
+        else
+             # Fallback: look for likely build artifacts in current dir
+             find . -maxdepth 2 -not -path '*/.*' -name "*.js" -o -name "*.ts" -o -name "*.json" -o -name "*.html" -o -name "*.css" | grep -v "node_modules" | xargs sha256sum | sort -k2 > "checksums.txt"
         fi
     fi
     
     echo "✅ Build #$build_number completed, checksums calculated"
+    # Return to original directory
+    cd - > /dev/null
 }
 
 # Perform multiple builds
@@ -75,7 +88,7 @@ echo "🔍 Comparing build outputs..."
 FIRST_CHECKSUM_FILE="$TEMP_DIR/build-1/checksums.txt"
 
 if [ ! -f "$FIRST_CHECKSUM_FILE" ]; then
-    echo "❌ Error: First build checksum file not found"
+    echo "❌ Error: First build checksum file not found at $FIRST_CHECKSUM_FILE"
     exit 1
 fi
 

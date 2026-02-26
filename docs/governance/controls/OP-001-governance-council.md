@@ -1,4 +1,8 @@
 # Control Spec: OP-001 Cross-Functional Governance Council Oversight
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 ## Control Objective
 Establish and maintain a cross-functional Governance Council (Engineering, Legal, Product, Risk) to review systemic risks, approve high-autonomy policies, and oversee compliance posture.

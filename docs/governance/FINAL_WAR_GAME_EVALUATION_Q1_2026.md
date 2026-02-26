@@ -1,4 +1,8 @@
 # Final War Game Evaluation: Phase 4 (Q1 2026)
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 ## Overview
 This document summarizes the final war game evaluation of the IntelGraph platform following the completion of Phase 4 (Operational Mastery & Global Scale).

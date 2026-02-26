@@ -1,33 +1,8 @@
-package composer.cmk
+package opa.cmk
 
-# Require CMK for artifacts in protected namespaces
+import future.keywords
 
-needs_cmk {
-  input.tenant.protected == true
+deny[msg] {
+  not input.encryption.cmk_enabled
+  msg := "CMK encryption required"
 }
-
-missing_cmk {
-  needs_cmk
-  not input.artifact.kms_key_id
-}
-
-allow {
-  not needs_cmk
-} else = allow {
-  needs_cmk
-  not missing_cmk
-}
-
-# Wrapper decision
-package composer.decision_cmk
-
-decision := {
-  "policy": "cmk",
-  "mode": input.mode,
-  "allow": data.composer.cmk.allow,
-  "violations": array.concat([], (missing)),
-}
-{
-  missing := [ {"code": "CMK_REQUIRED", "artifact": input.artifact.digest} | data.composer.cmk.missing_cmk ]
-}
-

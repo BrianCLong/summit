@@ -1,0 +1,73 @@
+name: SOC Controls (CI)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  soc-verification:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: summit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: pnpm/action-setup@v4
+      with:
+        run_install: false
+        version: 9
+
+    - uses: actions/setup-node@v4
+      with:
+        cache: 'pnpm'
+        node-version: 22
+
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+
+    - name: Verify SOC Controls
+      run: |
+        # Wait for DB to be ready
+        until pg_isready -h localhost -p 5432 -U postgres; do
+          echo "Waiting for postgres..."
+          sleep 2
+        done
+
+        # Run compliance checks
+        # Using environment variables for DB connection to avoid 'root' role error
+        export PGUSER=postgres
+        export PGPASSWORD=password
+        export PGHOST=localhost
+        export PGPORT=5432
+        export PGDATABASE=summit_test
+
+        npx tsx scripts/compliance/soc_controls_verify.ts
+      env:
+        NODE_OPTIONS: --max-old-space-size=4096
+
+    - name: Upload Compliance Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: soc-compliance-report
+        path: soc-compliance-reports
+        retention-days: 90

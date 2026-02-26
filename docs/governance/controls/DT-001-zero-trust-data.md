@@ -1,4 +1,8 @@
 # Control Spec: DT-001 Zero-Trust Data Governance
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 ## Control Objective
 Ensure that no data asset is accessed, processed, or deployed within the Summit platform without explicit, verified provenance and sensitivity classification. All data access must be purpose-bound and policy-authorized.

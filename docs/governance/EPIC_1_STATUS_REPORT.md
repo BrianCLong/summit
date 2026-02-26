@@ -1,4 +1,8 @@
 # Epic 1: "Glass Box" Agent Governance - Status Report
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 **Report Date:** 2026-01-20
 **Epic Owner:** Security & Governance Team

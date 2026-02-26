@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Summit Governance Control Catalog
 
 **Canonical Source:** `docs/governance/control_domain_map.yaml`

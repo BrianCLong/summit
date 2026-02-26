@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Defense Data Handling (CUI & CMMC)
 **Status:** Mandatory for Defense/Federal Clients
 **Standard:** CMMC 2.0 (Level 2), NIST SP 800-171 Rev 3

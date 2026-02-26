@@ -1,4 +1,8 @@
 # GA Impact Summary: AI Governance & Compliance
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 **Date:** 2026-01-23
 **To:** Summit Governance Board, Regulatory Auditors

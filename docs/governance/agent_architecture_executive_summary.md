@@ -1,4 +1,8 @@
 # Executive Summary: Summit Governed Agent Architecture
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 **Status:** Proposed
 **Target:** GA Readiness

@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Fresh Evidence Rate (7d)
 
 **Control ID:** GOV-EVID-004

@@ -100,7 +100,7 @@ async function runBuild() {
 
     console.log(`✅ Build completed successfully in ${outputDir}`);
   } catch (error) {
-    console.error('❌ Build failed:', error);
+  console.error('Build failed', e);
     process.exit(1);
   }
 }

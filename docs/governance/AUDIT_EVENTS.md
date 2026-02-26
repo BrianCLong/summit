@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Governance Audit Event Definitions
 
 This document defines the schema and semantics for new audit event types associated with continuous compliance, authenticity verification, and human accountability.

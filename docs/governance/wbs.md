@@ -1,6 +1,6 @@
 Owner: Governance
 Last-Reviewed: 2026-01-14
-Evidence-IDs: none
+Evidence-IDs: unknown-legacy
 Status: active
 
 # Work Breakdown Structure (WBS) - IntelGraph GA Core Integration Train

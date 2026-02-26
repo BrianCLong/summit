@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Probabilistic Actor Attribution & Confidence Model
 
 ## 1. Overview

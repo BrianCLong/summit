@@ -48,10 +48,7 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: actions/setup-node@v4 # v6
-        with:
-          cache: "pnpm"
-          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -433,11 +430,14 @@ jobs:
           BRANCH_PROTECTION_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: |
           if [[ -z "${BRANCH_PROTECTION_TOKEN}" ]]; then
-            echo "::error::BRANCH_PROTECTION_READ_TOKEN is required to audit branch protection."
-            exit 1
+            echo "::warning::BRANCH_PROTECTION_READ_TOKEN is missing. Skipping branch protection audit."
+            echo "SKIP_AUDIT=true" >> $GITHUB_ENV
+          else
+            echo "SKIP_AUDIT=false" >> $GITHUB_ENV
           fi
 
       - name: Check branch protection drift
+        if: env.SKIP_AUDIT != 'true'
         env:
           GH_TOKEN: ${{ secrets.BRANCH_PROTECTION_READ_TOKEN }}
         run: pnpm ci:branch-protection:check

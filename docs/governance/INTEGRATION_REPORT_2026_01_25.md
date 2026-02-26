@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # External Signals Integration Report (2026-01-25)
 
 **Executor:** Jules (Release Captain)

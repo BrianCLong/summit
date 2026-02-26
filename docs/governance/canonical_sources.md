@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Canonical Sources for Governance Artifacts
 
 This document defines the single source of truth for critical governance artifacts in the Summit platform. All other implementations are considered deprecated and should be removed.

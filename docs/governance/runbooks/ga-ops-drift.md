@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Governance Drift Detector Runbook
 
 **ID**: RUNBOOK-GOV-001

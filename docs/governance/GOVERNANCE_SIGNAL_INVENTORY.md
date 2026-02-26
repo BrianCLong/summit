@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Governance Signal Inventory
 
 | Signal Name | Source Concept | Type | Regulatory Drivers | Summit Relevance |

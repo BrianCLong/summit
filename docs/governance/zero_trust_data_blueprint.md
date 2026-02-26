@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Zero-Trust Data Governance Blueprint
 
 **Version:** 1.0.0

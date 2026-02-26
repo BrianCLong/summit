@@ -1,4 +1,8 @@
 # Control Spec: RT-001 Runtime Bias & Drift Monitoring
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
 
 ## Control Objective
 Continuously monitor deployed AI models for statistical drift, performance degradation, and bias emergence in real-time. Automatically trigger interventions (alerts, circuit breakers) when thresholds are breached.

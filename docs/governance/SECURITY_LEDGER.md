@@ -1,3 +1,8 @@
+Owner: Engineering
+Status: active
+Last-Reviewed: 2024-01-01
+Evidence-IDs: unknown-legacy
+
 # Security Ledger
 
 This document tracks security threats, mitigations, and their verification status via evidence artifacts.

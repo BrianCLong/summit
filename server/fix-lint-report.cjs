@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable no-console */
 const fs = require('fs');
 
 console.log('Reading lint report...');
