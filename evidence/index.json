@@ -408,6 +408,14 @@
         "metrics": "evidence/EVD-NARRATIVE-CI-METRICS-001/metrics.json",
         "stamp": "evidence/EVD-NARRATIVE-CI-METRICS-001/stamp.json"
       }
+    },
+    "EVD-INFOWAR-REG-001": {
+      "evidence_id": "EVD-INFOWAR-REG-001",
+      "files": {
+        "report": "evidence/INFOWAR/report.json",
+        "metrics": "evidence/INFOWAR/metrics.json",
+        "stamp": "evidence/INFOWAR/stamp.json"
+      }
     }
   }
 }

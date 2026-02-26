@@ -2,12 +2,16 @@ import { readFileSync, readdirSync, existsSync, statSync } from 'fs';
 import { join } from 'path';
 
 const BLACKLIST = [
-  /api[_-]key/i,
-  /secret/i,
-  /password/i,
-  /token/i,
-  /auth/i,
-  /cookie/i,
+  /\bapi[_-]key\b/i,
+  /\bsecret\b/i,
+  /\bpassword\b/i,
+  /\btoken\b/i,
+  /\bauth\b/i,
+  /\bcookie\b/i,
+  /\bphone_number\b/i,
+  /\bssn\b/i,
+  /\bemail_address\b/i,
+  /\bprivate_handle\b/i,
 ];
 
 function checkNeverLog(dir: string) {
