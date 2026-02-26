@@ -25,7 +25,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
-import { cn } from '@/lib/utils'
+import { cn, MODIFIER_KEY } from '@/lib/utils'
 
 interface NavigationProps {
   user: User | null
@@ -206,7 +206,7 @@ export function Navigation({ user }: NavigationProps) {
           <Command className="h-4 w-4 mr-2" />
           Search...
           <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-            <span className="text-xs">⌘</span>K
+            <span className="text-xs">{MODIFIER_KEY}</span>K
           </kbd>
         </Button>
       </div>
