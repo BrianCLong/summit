@@ -1,40 +1,32 @@
-# Repo Assumptions & Validation
+# Kafka Push Proxy Repo Assumptions Validation
 
-## Verified vs Assumed Directory List
+## Scope
+Validation checkpoint for PR-1 scaffold of `ingestion/kafka_push_proxy`.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Checklist
 
-## CI Check Names (Exact)
+1. **Ingestion module layout and naming** — **Verified**
+   - Repository contains Python ingestion entrypoints under `ingestion/` and ingestor modules under `ingestion/ingestors/`.
+   - New module path `ingestion/kafka_push_proxy/` aligns with existing Python ingestion layout.
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+2. **Evidence ID pattern** — **Partially verified (intentionally constrained)**
+   - Multiple active patterns exist (`EVID-cti-YYYYMMDD-<sha8>`, `EVID-SC-...`, `EVID-SERA-CLI-...`).
+   - No single repository-wide canonical pattern was identified for all domains in this pass.
+   - Decision: PR-1 scaffold defers evidence-id canonicalization pending schema-layer implementation PR.
 
-## Evidence Schema Conventions (Exact)
+3. **CI check names and thresholds** — **Verified**
+   - Existing workflows include `policy-check` and `determinism-check` jobs.
+   - No top-level `schema-validate` job name was found in the sampled CI workflows, so schema validation naming remains deferred pending gate mapping in a follow-up PR.
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+4. **Must-not-touch surfaces** — **Verified by constraint**
+   - This PR does not modify `core/engine/*`, `evidence/schema/*.json`, or release workflows.
 
-## Must-Not-Touch List (Guardrails)
+## Commands used
 
-Deferred pending validation. Baseline expectations:
+- `find . -maxdepth 3 -type d -name ingestion | head`
+- `rg --files ingestion | head -n 50`
+- `rg -n "EVID-[A-Za-z]+-|EVID-" . | head -n 40`
+- `rg -n "policy-check|schema-validate|determinism-check|rate-limit-check|replay-check" .github/workflows scripts/ci docs/CI_STANDARDS.md | head -n 80`
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Status
+Ready for PR-1 scaffold merge with feature flag default OFF.
