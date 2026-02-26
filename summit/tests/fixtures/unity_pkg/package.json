@@ -1,0 +1,9 @@
+{
+  "name": "com.company.analytics",
+  "version": "1.2.3",
+  "displayName": "Analytics Package",
+  "dependencies": {
+    "com.company.core": "1.0.0",
+    "com.company.utils": "2.4.1"
+  }
+}
