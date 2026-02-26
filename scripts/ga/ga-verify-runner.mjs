@@ -6,7 +6,10 @@ const steps = [
   {
     name: 'sanitize:type-stubs',
     command: 'bash',
-    args: ['-lc', 'rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot'],
+    args: [
+      '-lc',
+      'find node_modules -name "hapi__catbox" -type d -path "*/@types/*" -exec rm -rf {} + && find node_modules -name "hapi__shot" -type d -path "*/@types/*" -exec rm -rf {} + && find node_modules -name "react-native" -type d -path "*/@types/*" -exec rm -rf {} +',
+    ],
   },
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
