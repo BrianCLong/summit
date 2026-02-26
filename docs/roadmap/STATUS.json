@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added unity-package-subsumption-mws initiative for deterministic Unity package governance artifacts and CI policy checks.",
   "initiatives": [
+    {
+      "id": "unity-package-subsumption-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Minimal winning slice for Unity-style package ingest, semver + registry policy validation, dependency DAG evidence, and deterministic artifact emission."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",

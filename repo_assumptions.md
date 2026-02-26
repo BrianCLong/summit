@@ -38,3 +38,20 @@ Deferred pending validation. Baseline expectations:
 3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
 4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
 5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+
+## Unity Package Subsumption Addendum
+
+### Verified folder structure
+- `summit/`, `summit/cli/`, and `summit/tests/` are present and usable for Python modules and test fixtures.
+- `policies/` and `scripts/monitoring/` are present for policy and operational scripts.
+
+### CI check names
+- Added deterministic local checks through `python -m summit.cli.summit_pkg_scan ...` and `node scripts/check-boundaries.cjs`.
+- Formal workflow check name for Unity policy gate is intentionally constrained pending CI workflow registration.
+
+### Existing evidence schema
+- Existing Summit evidence patterns include report + metrics + stamp artifacts.
+- Unity scan MWS emits `package-report.json`, `metrics.json`, and `stamp.json` deterministically.
+
+### Must-not-touch files
+- Core evaluator/scoring/provenance chains were intentionally constrained and not modified in this slice.
