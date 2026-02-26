@@ -1,0 +1,12 @@
+ga_version: MVP-4
+required:
+  - id: sbom
+    artifact: artifacts/sbom.json
+  - id: slsa
+    artifact: artifacts/provenance.json
+  - id: security-ledger
+    artifact: docs/security/SECURITY_LEDGER.md
+  - id: governance-acceptance
+    artifact: docs/governance/GOVERNANCE_ACCEPTANCE.md
+  - id: graph-sync-validator
+    artifact: packages/graph-sync-validator/metrics.json

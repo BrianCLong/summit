@@ -4,6 +4,7 @@
 
 _Version: 2025-11-27_
 
+
 ---
 
 ## How to Use This Model
@@ -13,6 +14,7 @@ _Version: 2025-11-27_
 3. **Calculate savings** across each value driver
 4. **Build summary** for executive presentation
 5. **Validate assumptions** with customer stakeholders
+
 
 ---
 
@@ -52,6 +54,7 @@ _Version: 2025-11-27_
 | Annual maintenance/support | `${{X}}` | Typically 15-20% of license |
 | Infrastructure cost (if on-prem) | `${{X}}` | Customer-provided or estimated |
 
+
 ---
 
 ## 2. Value Drivers & Calculations
@@ -86,6 +89,7 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 | Annual value per analyst | $18,400 | 230 × $80 |
 | Total (10 analysts) | **$184,000** | $18,400 × 10 |
 
+
 ---
 
 ### 2.2 Increased Case Throughput
@@ -111,6 +115,7 @@ Total annual value = Additional cases × Number of analysts × Value per case
 | Additional cases/analyst | 15 | 50 × 0.30 |
 | Value per case | $5,000 | Depends on context |
 | Total (10 analysts) | **$750,000** | 15 × 10 × $5,000 |
+
 
 ---
 
@@ -147,6 +152,7 @@ Remediation savings = C × D
 | Remediation savings | **$30,000** | $50,000 × 0.60 |
 | **Compliance Total** | **$70,000** | |
 
+
 ---
 
 ### 2.4 Reduced Tool/License Consolidation
@@ -170,6 +176,7 @@ Total savings = A × (B + C)
 | Fully retired | 30% | |
 | Reduced seats | 20% | |
 | **Tool savings** | **$100,000** | $200k × 0.50 |
+
 
 ---
 
@@ -196,6 +203,7 @@ Avoided cost = Expected annual cost × C
 | Expected annual cost | $50,000 | 0.10 × $500k |
 | Risk reduction | 50% | Conservative |
 | **Avoided cost** | **$25,000** | $50k × 0.50 |
+
 
 ---
 
@@ -225,6 +233,7 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 | Avoided hires | 0.6 | 2 - 1.4 |
 | **Avoided cost** | **$96,000** | 0.6 × $160k |
 
+
 ---
 
 ## 3. Total Cost of Ownership (3-Year)
@@ -251,6 +260,7 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 | Expected incident costs | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
 | New hire costs (growth) | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
 | **Total Current State Cost** | **${{X}}** | **${{X}}** | **${{X}}** | **${{X}}** |
+
 
 ---
 
@@ -289,6 +299,7 @@ Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
 | **ROI** | **462%** |
 | **Payback Period** | **2.8 months** |
 
+
 ---
 
 ## 5. Sensitivity Analysis
@@ -301,11 +312,13 @@ Show how ROI changes with different assumptions:
 | Base Case | 40% | 30% | {{X}}% |
 | Optimistic | 50% | 40% | {{X}}% |
 
+
 ---
 
 ## 6. Executive Summary Template
 
 Use this format for business case presentations:
+
 
 ---
 
@@ -315,29 +328,45 @@ Use this format for business case presentations:
 **Date:** {{Date}}
 
 **Current State:**
+
 - {{N}} analysts spending {{X}} hours/week on inefficient search and correlation
+
 - {{N}} cases per year; growth of {{X}}% expected
+
 - {{$X}} annual spend on fragmented tools
+
 - {{N}} audit findings related to provenance/documentation
 
 **With Summit:**
+
 - Reduce analyst inefficiency by **{{X}}%**
+
 - Increase case throughput by **{{X}}%**
+
 - Consolidate tools, saving **{{$X}}** annually
+
 - Eliminate provenance-related audit findings
 
 **Investment:**
+
 - Pilot: **${{X}}** ({{N}} weeks)
+
 - Production (Year 1): **${{X}}**
+
 - 3-Year TCO: **${{X}}**
 
 **Returns:**
+
 - Annual value: **${{X}}**
+
 - 3-Year net benefit: **${{X}}**
+
 - **ROI: {{X}}%**
+
 - **Payback: {{X}} months**
 
 **Recommendation:** Proceed with {{N}}-week pilot to validate assumptions and success criteria.
+
 
 ---
 
@@ -374,6 +403,7 @@ Use these questions to gather data during sales discovery:
 16. "Is your case volume growing? By how much?"
 17. "Are you planning to hire more analysts to handle growth?"
 18. "What does it cost to hire and onboard a new analyst?"
+
 
 ---
 
