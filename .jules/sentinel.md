@@ -71,6 +71,11 @@ router.post('/secrets/rotate', rotateHandler);
 **Learning:** Naive string concatenation for security controls is fragile. Security logic must be robust against input variations (like comments) or structural manipulation.
 **Prevention:** When auto-injecting security clauses into SQL, validate that the query structure is safe (e.g., no comments) and sanitize inputs (e.g., strip trailing semicolons). Use parser-based modification or strict validation instead of simple concatenation where possible.
 
+## 2026-02-26 - [CRITICAL] Unauthenticated Access to Administrative and Data-Heavy Routes
+**Vulnerability:** The `airgapRouter` (data import/export), `analyticsRouter` (graph analytics), and `drRouter` (disaster recovery) were missing authentication and role-based access control (RBAC). This allowed unauthenticated users to trigger resource-intensive graph operations, export system data, or manipulate backup statuses.
+**Learning:** Resource-intensive or administrative modules are often developed in isolation and may miss standard security middleware. Defaulting to open access for any route is a critical security risk.
+**Prevention:** Apply `ensureAuthenticated` and `ensureRole` at the router level for all administrative and system-level modules. Implement "secure by default" by applying middleware globally to the router before defining endpoints.
+
 ## 2026-03-01 - [HIGH] Hardening Evidence Search and RBAC
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.

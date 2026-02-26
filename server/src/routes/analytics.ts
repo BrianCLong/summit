@@ -23,16 +23,19 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
 router.get(
   '/path',
   asyncHandler(async (req: any, res: any) => {
-    const { sourceId, targetId, algorithm, k, maxDepth } = req.query;
+    const sourceId = req.query.sourceId as string;
+    const targetId = req.query.targetId as string;
+    const algorithm = req.query.algorithm as 'shortest' | 'k-paths' | undefined;
+    const { k, maxDepth } = req.query;
 
     if (!sourceId || !targetId) {
       return res.status(400).json({ error: 'sourceId and targetId are required' });
     }
 
     const result = await analyticsService.findPaths(
-      sourceId as string,
-      targetId as string,
-      (algorithm as 'shortest' | 'k-paths') || 'shortest',
+      sourceId,
+      targetId,
+      algorithm || 'shortest',
       { k, maxDepth }
     );
     res.json(result);
@@ -46,9 +49,10 @@ router.get(
 router.get(
   '/community',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm, dp = 'true' } = req.query;
+    const algorithm = req.query.algorithm as 'louvain' | 'leiden' | 'lpa' | undefined;
+    const dp = (req.query.dp as string) || 'true';
     const result = await analyticsService.detectCommunities(
-      (algorithm as 'louvain' | 'leiden' | 'lpa') || 'lpa'
+      algorithm || 'lpa'
     );
 
     // Apply Differential Privacy to community sizes if enabled
@@ -71,9 +75,10 @@ router.get(
 router.get(
   '/centrality',
   asyncHandler(async (req: any, res: any) => {
-    const { algorithm, limit } = req.query;
+    const algorithm = req.query.algorithm as 'betweenness' | 'eigenvector' | undefined;
+    const limit = req.query.limit;
     const result = await analyticsService.calculateCentrality(
-      (algorithm as 'betweenness' | 'eigenvector') || 'betweenness',
+      algorithm || 'betweenness',
       { limit: limit ? parseInt(limit as string) : 20 }
     );
     res.json(result);
@@ -87,12 +92,12 @@ router.get(
 router.get(
   '/patterns',
   asyncHandler(async (req: any, res: any) => {
-    const { type } = req.query;
+    const type = req.query.type as 'temporal-motifs' | 'co-travel' | 'financial-structuring' | undefined;
     if (!type) {
       return res.status(400).json({ error: 'Pattern type is required (temporal-motifs, co-travel, financial-structuring)' });
     }
     const result = await analyticsService.minePatterns(
-      type as 'temporal-motifs' | 'co-travel' | 'financial-structuring'
+      type
     );
     res.json(result);
   })
@@ -105,12 +110,12 @@ router.get(
 router.get(
   '/anomaly',
   asyncHandler(async (req: any, res: any) => {
-    const { type } = req.query;
+    const type = req.query.type as 'degree' | 'temporal-spike' | 'selector-misuse' | undefined;
     if (!type) {
       return res.status(400).json({ error: 'Anomaly type is required (degree, temporal-spike, selector-misuse)' });
     }
     const result = await analyticsService.detectAnomalies(
-      type as 'degree' | 'temporal-spike' | 'selector-misuse'
+      type
     );
     res.json(result);
   })
