@@ -208,6 +208,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
+        with:
           run_install: false
 
       - uses: actions/setup-node@v4
@@ -451,6 +452,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: pnpm/action-setup@v4
+        with:
         with:
           run_install: false
 

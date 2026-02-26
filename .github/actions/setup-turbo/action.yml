@@ -3,7 +3,6 @@ runs:
   using: 'composite'
   steps:
     - uses: pnpm/action-setup@v4
-      with: { version: 9 }
     - run: corepack enable
       shell: bash
     - run: pnpm i --frozen-lockfile

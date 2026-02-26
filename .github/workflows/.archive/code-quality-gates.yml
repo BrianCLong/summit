@@ -41,6 +41,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
+        with:
           run_install: false
 
       - name: Enable corepack
@@ -421,6 +422,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
+        with:
           run_install: false
 
       - name: Enable corepack
@@ -496,6 +498,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
+        with:
           run_install: false
 
       - name: Enable corepack
