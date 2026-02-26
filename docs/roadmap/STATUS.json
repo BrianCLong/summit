@@ -217,6 +217,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "ui-automation-subsumption",
+      "status": "in_progress",
+      "owner": "Jules",
+      "notes": "Scaffold UI Automation module (PR1), deterministic runner (PR2), policy engine (PR3), and evidence artifacts (PR4)."
     }
   ],
   "summary": {
