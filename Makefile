@@ -4,7 +4,7 @@
 include Makefile.merge-train
 
 .PHONY: up down restart logs shell clean
-.PHONY: dev test lint build format ci
+.PHONY: dev test lint build format ci modulith-check
 .PHONY: db-migrate db-seed sbom k6
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release provenance ci-check prereqs contracts policy-sim rerere dupescans
 .PHONY: bootstrap
@@ -100,7 +100,11 @@ release: ## Build Python wheel and Docker image tagged with project version
 	docker build -t $(IMAGE) -f Dockerfile .
 	docker tag $(IMAGE) $(IMAGE_NAME):latest
 
-ci: lint test validate-ops
+ci: lint test modulith-check validate-ops
+
+modulith-check: ## Run modular boundary verification
+	@echo "Running Modulith check..."
+	@PYTHONPATH=. python3 summit/modulith/main.py
 
 k6:     ## Perf smoke (TARGET=http://host:port make k6)
 	./ops/k6/smoke.sh
