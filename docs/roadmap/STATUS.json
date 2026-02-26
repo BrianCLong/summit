@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added modulith boundary verifier MWS scaffolding and deterministic artifact gate tracking.",
   "initiatives": [
+    {
+      "id": "modulith-boundary-verifier-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Introduced summit.modulith static import boundary verifier, deterministic artifacts, and acceptance test coverage for MBV evidence IDs."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
