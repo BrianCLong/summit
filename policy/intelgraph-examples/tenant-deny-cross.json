@@ -1,0 +1,17 @@
+{
+  "user": {
+    "userId": "user-002",
+    "tenantId": "acme-corp",
+    "roles": ["analyst"],
+    "permissions": ["entity:read"],
+    "activePurposes": ["investigation-123"]
+  },
+  "resource": {
+    "resourceId": "entity-xyz",
+    "resourceType": "entity",
+    "tenantId": "globex-inc",
+    "purpose": "investigation-456",
+    "retentionTier": "standard"
+  },
+  "operation": "READ"
+}

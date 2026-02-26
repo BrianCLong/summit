@@ -1,0 +1,11 @@
+{
+  "data": {
+    "retentionTier": "ephemeral",
+    "createdAtNs": 1000000000000000000
+  },
+  "currentTimestamp": 1000691200000000000,
+  "operation": "purge",
+  "user": {
+    "permissions": []
+  }
+}

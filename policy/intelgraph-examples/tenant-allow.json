@@ -1,0 +1,28 @@
+{
+  "user": {
+    "userId": "user-001",
+    "tenantId": "acme-corp",
+    "roles": ["analyst"],
+    "permissions": ["entity:read", "entity:write"],
+    "activePurposes": ["investigation-123"],
+    "oidcClaims": {
+      "sub": "user-001",
+      "iss": "https://auth.intelgraph.dev/realms/main",
+      "aud": "intelgraph-api",
+      "exp": 9999999999,
+      "email_verified": true,
+      "groups": ["analysts"]
+    }
+  },
+  "resource": {
+    "resourceId": "entity-abc",
+    "resourceType": "entity",
+    "tenantId": "acme-corp",
+    "purpose": "investigation-123",
+    "retentionTier": "standard",
+    "classification": "internal"
+  },
+  "operation": "READ",
+  "currentTimestamp": 1700000000,
+  "expectedAudience": "intelgraph-api"
+}
