@@ -1,0 +1,27 @@
+{
+  "name": "UnityShield Subsumption Verifier",
+  "slug": "unityshield",
+  "version": "1.0.0",
+  "bundle_path": "subsumption/unityshield/",
+  "required_files": [
+    "manifest.yaml",
+    "claims.md",
+    "MASTER_PLAN.md",
+    "CONVERGENCE_PROTOCOL.md",
+    "prompts/A_Codex_Foundation.md",
+    "prompts/B_Aegis_Policy.md",
+    "prompts/C_Maestro_Performance.md",
+    "prompts/D_Codex_Innovation.md",
+    "prompts/E_Antigravity_Convergence.md"
+  ],
+  "policy_gates": [
+    "subsumption-bundle-verify",
+    "governance-evidence"
+  ],
+  "validation_rules": {
+    "manifest_version": "1",
+    "item_slug_match": "unityshield",
+    "evidence_id_prefix": "EVD-UNITYSHIELD-",
+    "performance_p95_limit_ms": 2000
+  }
+}

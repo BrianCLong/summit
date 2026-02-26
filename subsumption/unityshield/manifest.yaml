@@ -1,0 +1,53 @@
+version: 1
+item:
+  slug: unityshield
+  title: "UnityShield Platform"
+  type: "government-data-aggregation"
+  date_version: "v1.0.0 / 2025-12-03"
+  intriguing_claim: "Achieves ingestion rates of 14TB/hour with <40ms latency and supports 15,000 concurrent users while maintaining 99.999% system uptime."
+  links:
+    - name: "UnityShield Platform PRD"
+      ref: "UnityShield Platform PRD.markdown"
+
+required_checks:
+  discovery: "assumed"
+  verified:
+    - "subsumption-bundle-verify"
+    - "governance-evidence"
+
+constraints:
+  pr_cap: 10
+  max_yellow: 3
+  max_red: 0
+  performance:
+    p95_latency_ms: 2000
+    peak_vusers: 500
+    error_budget_percent: 0.5
+  infra:
+    - postgresql
+    - neo4j
+    - redis
+
+prs:
+  - title: "chore(subsumption): add unityshield bundle scaffold"
+    lane: "foundation"
+    owner: "Jules"
+    risk: "green"
+    evidence_ids: ["EVD-UNITYSHIELD-GOV-001"]
+
+gates:
+  - id: "subsumption-bundle-verify"
+    description: "Verify UnityShield bundle completeness and determinism"
+  - id: "governance-evidence"
+    description: "Validate all required policy evidence artifacts"
+
+evidence_ids:
+  - "EVD-UNITYSHIELD-GOV-001"
+  - "EVD-UNITYSHIELD-FND-001"
+  - "EVD-UNITYSHIELD-SEC-001"
+
+docs_targets:
+  - "docs/standards/unityshield.md"
+  - "docs/security/data-handling/unityshield.md"
+  - "docs/ops/runbooks/unityshield.md"
+  - "docs/decisions/unityshield-subsumption.md"
