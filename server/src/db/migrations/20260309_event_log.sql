@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS event_log (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- SAFE: table created in same migration
 CREATE INDEX IF NOT EXISTS idx_event_log_tenant_date ON event_log(tenant_id, occurred_at);
 
 CREATE TABLE IF NOT EXISTS inbound_alert_configs (
@@ -48,4 +49,5 @@ CREATE TABLE IF NOT EXISTS incidents (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- SAFE: table created in same migration
 CREATE INDEX IF NOT EXISTS idx_incidents_tenant ON incidents(tenant_id);

@@ -80,3 +80,10 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+## 2026-02-26 - Hardening Administrative and Analytics Routes
+
+**Vulnerability:** administrative routers (`airgapRouter`, `analyticsRouter`, `drRouter`) lacked mandatory authentication and role-based access control (RBAC), exposing sensitive data export, high-computation analytics, and disaster recovery functions to unauthenticated users.
+
+**Learning:** Administrative routes were implemented in isolated files and integrated into `app.ts` without verifying that the parent router or the routes themselves enforced authentication. This allowed "shadow" administrative endpoints to exist outside the primary secure path.
+
+**Prevention:** Always apply security middleware (`ensureAuthenticated`, `ensureRole`) at the router level in the router definition file itself, ensuring defense-in-depth even if integration points change. Implement automated tests (`vulnerability_repro.test.ts`) that specifically check for 401 Unauthorized status on all sensitive base routes.
