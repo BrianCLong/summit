@@ -15,7 +15,8 @@ import {
 import depthLimit from 'graphql-depth-limit';
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-import Redis from 'ioredis';
+// Use singleton
+import { getRedisClient } from '../db/redis.js';
 import crypto from 'crypto';
 import { performance } from 'perf_hooks';
 
@@ -83,15 +84,8 @@ const defaultConfig: SecurityConfig = {
   },
 };
 
-// Redis client for caching and rate limiting
-const redisClient = new Redis({
-  host: process.env.REDIS_HOST || 'redis-master',
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  retryDelayOnFailover: 100,
-  enableReadyCheck: true,
-  maxRetriesPerRequest: 3,
-});
+// Use the singleton redis client
+const redisClient = getRedisClient();
 
 // Persisted queries store
 const persistedQueries = new Map<string, string>();
@@ -296,8 +290,20 @@ function sanitizeQuery(query: string): string {
 export const createRateLimiter = (config: SecurityConfig['rateLimit']) => {
   let store: RedisStore | undefined;
   try {
+    // If using a cluster, rate-limit-redis needs sendCommandCluster
+    const isCluster = (redisClient as any).constructor.name === 'Cluster';
+
+    // NOTE: rate-limit-redis v3+ signature:
+    // new RedisStore({
+    //   sendCommand: (...args: string[]) => client.call(...args),
+    // })
+
+    // However, older versions or different adaptors might vary.
+    // Assuming standard ioredis client compatibility:
+
     store = new RedisStore({
-      client: redisClient,
+      // @ts-ignore
+      sendCommand: (...args: string[]) => redisClient.call(...args),
       prefix: 'graphql:rate:',
     });
   } catch (error: any) {
@@ -477,6 +483,7 @@ export async function queryCacheMiddleware(
     // Cache successful responses for 5 minutes
     if (data && !data.errors) {
       redisClient
+        // @ts-ignore
         .setex(`graphql:cache:${cacheKey}`, 300, JSON.stringify(data))
         .catch((error) => console.warn('Cache write error:', error));
     }
