@@ -1,0 +1,10 @@
+profile: offline-local
+mode: offline
+network_allowed: false
+backend: local_openai
+deterministic: true
+base_url: http://localhost:1234/v1
+artifacts:
+  - report.json
+  - metrics.json
+  - stamp.json

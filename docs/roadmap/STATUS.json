@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added offline-local runtime profile initiative with backend adapter, determinism evidence, network guard, and drift monitor scaffolding.",
   "initiatives": [
+    {
+      "id": "offline-local-runtime-profile",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Offline-first local OpenAI-compatible backend adapter, offline profile, CI egress guard, determinism stamp helper, benchmark harness, and weekly drift workflow scaffold."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",

@@ -1,40 +1,27 @@
-# Repo Assumptions & Validation
+# Repository Assumptions Validation (Offline-Local Profile)
 
-## Verified vs Assumed Directory List
+## Verified Paths
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+- `agents/`
+- `runtime/`
+- `evidence/`
+- `ci/`
+- `docs/`
+- `scripts/`
 
-## CI Check Names (Exact)
+## Assumed Paths Introduced in This Change
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+- `runtime/backends/`
+- `runtime/config/profiles/`
+- `runtime/profiles/offline_local.yaml`
+- `scripts/bench/`
+- `scripts/monitoring/`
+- `docs/ops/runbooks/offline-local.md`
+- `docs/security/data-handling/offline-local.md`
+- `docs/standards/offline-local.md`
 
-## Evidence Schema Conventions (Exact)
+## Risk Areas
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- Existing runtime orchestration entrypoints may not yet load `runtime/profiles/offline_local.yaml`.
+- CI required-check mapping may need explicit registration for `offline_profile_check`.
+- Local OpenAI-compatible backend call semantics can vary between model hosts; endpoint compatibility must be verified in environment.
