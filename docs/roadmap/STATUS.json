@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added HF 2602.20093 subsumption scaffold initiative and repo reality check document.",
   "initiatives": [
+    {
+      "id": "hf-2602-20093-subsumption-scaffold",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published grounded scaffold docs and repo reality check for HF 2602.20093 subsumption lane pending paper excerpts."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
