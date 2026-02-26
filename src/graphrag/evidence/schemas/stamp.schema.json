@@ -1,0 +1,11 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Stamp Schema",
+  "type": "object",
+  "properties": {
+    "evidence_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "signature": { "type": "string" }
+  },
+  "required": ["evidence_id", "timestamp", "signature"]
+}
