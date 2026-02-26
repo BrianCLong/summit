@@ -12,6 +12,7 @@ This document defines the data classification and retention rules for Maestro Sp
 ## Never-Log List
 
 The following data must never be logged or stored in cleartext:
+
 - API keys
 - Access tokens
 - Secrets

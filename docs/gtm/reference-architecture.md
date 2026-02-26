@@ -3,19 +3,18 @@
 **Version:** 1.0
 **Date:** November 20, 2025
 
-
 ---
 
 ## Overview
 
 Summit is an **AI-First Company Operating System** built on a foundation of governance, provenance, and intelligent automation. This document provides reference architectures for deploying Summit across different scenarios.
 
-
 ---
 
 ## Architecture Principles
 
 ### 1. **Graph-Native**
+
 All entities, relationships, and provenance are stored in a knowledge graph (Neo4j), enabling:
 
 - Semantic queries and traversals
@@ -27,6 +26,7 @@ All entities, relationships, and provenance are stored in a knowledge graph (Neo
 - AI-powered insights and recommendations
 
 ### 2. **Policy-Driven**
+
 Every action passes through the policy engine (OPA), ensuring:
 
 - Attribute-based access control (ABAC)
@@ -38,6 +38,7 @@ Every action passes through the policy engine (OPA), ensuring:
 - Audit trail for all decisions
 
 ### 3. **Agent-Orchestrated**
+
 AI agents automate work while respecting governance:
 
 - Human-in-command: agents recommend, humans approve
@@ -49,6 +50,7 @@ AI agents automate work while respecting governance:
 - Auditable: complete provenance for all agent actions
 
 ### 4. **Event-Driven**
+
 Workflows and agents react to events:
 
 - Webhook triggers from external systems
@@ -60,6 +62,7 @@ Workflows and agents react to events:
 - User-initiated actions
 
 ### 5. **Multi-Tenant**
+
 White-label edition supports multiple isolated tenants:
 
 - Database-level isolation
@@ -70,12 +73,11 @@ White-label edition supports multiple isolated tenants:
 
 - Per-tenant customization
 
-
 ---
 
 ## Component Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                            USER INTERFACES                               │
 ├────────────────┬───────────────┬─────────────────┬───────────────────────┤
@@ -156,7 +158,6 @@ White-label edition supports multiple isolated tenants:
 └─────────────────┴────────────────┴─────────────────┴────────────────────┘
 ```
 
-
 ---
 
 ## Deployment Architectures
@@ -165,7 +166,7 @@ White-label edition supports multiple isolated tenants:
 
 **Use Case:** Small to mid-size organization with single data center or cloud region.
 
-```
+```text
 ┌────────────────────────────────────────────────────────────┐
 │                      AWS/GCP/Azure                         │
 │                     (Single Region)                        │
@@ -242,14 +243,13 @@ White-label edition supports multiple isolated tenants:
 
 - **Total: ~$1,550/month**
 
-
 ---
 
 ### 2. White-Label (Multi-Tenant) - Multi-Region
 
 **Use Case:** Partner serving multiple clients across regions.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          GLOBAL INFRASTRUCTURE                           │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -326,14 +326,13 @@ White-label edition supports multiple isolated tenants:
 
 - **Per-tenant cost: ~$700/month**
 
-
 ---
 
 ### 3. Hosted SaaS - High Availability
 
 **Use Case:** Fully managed SaaS with 99.9% uptime SLA.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         PRODUCTION (US-EAST-1)                           │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -428,14 +427,13 @@ White-label edition supports multiple isolated tenants:
 
 - **Total: ~$8,000/month**
 
-
 ---
 
 ## Security Architecture
 
 ### Defense in Depth
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ Layer 7: Application Security                                           │
 │ • Input validation, output encoding                                     │
@@ -488,14 +486,13 @@ White-label edition supports multiple isolated tenants:
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-
 ---
 
 ## Integration Architecture
 
 ### Connector Framework
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────┐
 │                    External Systems                            │
 ├──────────┬──────────┬──────────┬──────────┬──────────┬────────┤
@@ -543,12 +540,11 @@ White-label edition supports multiple isolated tenants:
 └────────────────────────────────────────────────────────────────┘
 ```
 
-
 ---
 
 ## Monitoring & Observability
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         OBSERVABILITY STACK                              │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -608,7 +604,6 @@ White-label edition supports multiple isolated tenants:
 
 - Security events (failed logins, policy violations)
 
-
 ---
 
 ## Scaling Guide
@@ -653,7 +648,6 @@ White-label edition supports multiple isolated tenants:
 
 - Enterprise (>2000 users): m5.8xlarge+ (32+ vCPU, 128+ GB RAM)
 
-
 ---
 
 ## Backup & Recovery
@@ -685,7 +679,6 @@ White-label edition supports multiple isolated tenants:
 - Quarterly disaster recovery drills
 
 - Documented runbooks
-
 
 ---
 

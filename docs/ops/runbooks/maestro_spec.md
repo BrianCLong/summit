@@ -12,10 +12,12 @@ This runbook covers the operation and troubleshooting of the Maestro Spec Interv
 ## Troubleshooting
 
 ### Failure: Score below 20
+
 - **Cause**: Missing sections or open questions.
 - **Fix**: Resolve all open questions and ensure scope is defined.
 
 ### Failure: Missing IDs
+
 - **Cause**: Requirement added without ID generator.
 - **Fix**: Re-run the engine to ensure ID assignment logic is applied.
 

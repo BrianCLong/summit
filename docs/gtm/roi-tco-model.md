@@ -2,8 +2,7 @@
 
 **Purpose:** Framework for calculating return on investment and total cost of ownership for Summit deployments. Use to build business cases and justify pilot/production investments.
 
-_Version: 2025-11-27_
-
+## Version: 2025-11-27
 
 ---
 
@@ -14,7 +13,6 @@ _Version: 2025-11-27_
 3. **Calculate savings** across each value driver
 4. **Build summary** for executive presentation
 5. **Validate assumptions** with customer stakeholders
-
 
 ---
 
@@ -54,7 +52,6 @@ _Version: 2025-11-27_
 | Annual maintenance/support | `${{X}}` | Typically 15-20% of license |
 | Infrastructure cost (if on-prem) | `${{X}}` | Customer-provided or estimated |
 
-
 ---
 
 ## 2. Value Drivers & Calculations
@@ -65,7 +62,7 @@ _Version: 2025-11-27_
 
 **Calculation:**
 
-```
+```text
 Current weekly hours on inefficient tasks = {{A}} hours/analyst/week
 Expected reduction with Summit = {{B}}% (typically 30-50%)
 Hours saved per analyst per week = A × B
@@ -89,7 +86,6 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 | Annual value per analyst | $18,400 | 230 × $80 |
 | Total (10 analysts) | **$184,000** | $18,400 × 10 |
 
-
 ---
 
 ### 2.2 Increased Case Throughput
@@ -98,7 +94,7 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 
 **Calculation:**
 
-```
+```text
 Current cases per analyst per year = {{A}}
 Expected throughput increase = {{B}}% (typically 20-40%)
 Additional cases per analyst = A × B
@@ -116,7 +112,6 @@ Total annual value = Additional cases × Number of analysts × Value per case
 | Value per case | $5,000 | Depends on context |
 | Total (10 analysts) | **$750,000** | 15 × 10 × $5,000 |
 
-
 ---
 
 ### 2.3 Reduced Audit/Compliance Burden
@@ -125,7 +120,7 @@ Total annual value = Additional cases × Number of analysts × Value per case
 
 **Calculation:**
 
-```
+```text
 Current compliance hours per analyst per year = {{A}}
 Expected reduction = {{B}}% (typically 40-60%)
 Hours saved per analyst = A × B
@@ -152,7 +147,6 @@ Remediation savings = C × D
 | Remediation savings | **$30,000** | $50,000 × 0.60 |
 | **Compliance Total** | **$70,000** | |
 
-
 ---
 
 ### 2.4 Reduced Tool/License Consolidation
@@ -161,7 +155,7 @@ Remediation savings = C × D
 
 **Calculation:**
 
-```
+```text
 Current annual spend on tools Summit can replace/reduce = {{A}}
 Tools fully retired = {{B}}% of spend
 Tools reduced (fewer seats) = {{C}}% of spend
@@ -177,7 +171,6 @@ Total savings = A × (B + C)
 | Reduced seats | 20% | |
 | **Tool savings** | **$100,000** | $200k × 0.50 |
 
-
 ---
 
 ### 2.5 Risk Reduction / Avoided Costs
@@ -186,7 +179,7 @@ Total savings = A × (B + C)
 
 **Calculation:**
 
-```
+```text
 Probability of significant incident per year = {{A}}%
 Average cost per incident = {{B}}
 Expected annual cost = A × B
@@ -204,7 +197,6 @@ Avoided cost = Expected annual cost × C
 | Risk reduction | 50% | Conservative |
 | **Avoided cost** | **$25,000** | $50k × 0.50 |
 
-
 ---
 
 ### 2.6 Headcount Avoidance
@@ -213,7 +205,7 @@ Avoided cost = Expected annual cost × C
 
 **Calculation:**
 
-```
+```text
 Projected case volume growth = {{A}}% per year
 Without Summit: New analysts needed = Current analysts × A
 With Summit: New analysts needed = Current analysts × A × (1 - Throughput increase)
@@ -232,7 +224,6 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 | With Summit: New hires | 1.4 | 2 × 0.70 |
 | Avoided hires | 0.6 | 2 - 1.4 |
 | **Avoided cost** | **$96,000** | 0.6 × $160k |
-
 
 ---
 
@@ -261,7 +252,6 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 | New hire costs (growth) | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
 | **Total Current State Cost** | **${{X}}** | **${{X}}** | **${{X}}** | **${{X}}** |
 
-
 ---
 
 ## 4. ROI Summary
@@ -280,7 +270,7 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 
 ### 4.2 ROI Calculation
 
-```
+```text
 3-Year Total Value = Annual Value × 3 (or sum if growing)
 3-Year Total Cost = Summit TCO
 3-Year Net Benefit = Total Value - Total Cost
@@ -299,7 +289,6 @@ Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
 | **ROI** | **462%** |
 | **Payback Period** | **2.8 months** |
 
-
 ---
 
 ## 5. Sensitivity Analysis
@@ -312,13 +301,11 @@ Show how ROI changes with different assumptions:
 | Base Case | 40% | 30% | {{X}}% |
 | Optimistic | 50% | 40% | {{X}}% |
 
-
 ---
 
 ## 6. Executive Summary Template
 
 Use this format for business case presentations:
-
 
 ---
 
@@ -367,7 +354,6 @@ Use this format for business case presentations:
 
 **Recommendation:** Proceed with {{N}}-week pilot to validate assumptions and success criteria.
 
-
 ---
 
 ## 7. Discovery Questions for ROI Inputs
@@ -375,6 +361,7 @@ Use this format for business case presentations:
 Use these questions to gather data during sales discovery:
 
 **Productivity:**
+
 1. "How many hours per week do analysts spend searching for and correlating data across tools?"
 2. "How many different tools/systems do analysts access in a typical investigation?"
 3. "What's the average time to complete a case from assignment to close?"
@@ -404,7 +391,6 @@ Use these questions to gather data during sales discovery:
 17. "Are you planning to hire more analysts to handle growth?"
 18. "What does it cost to hire and onboard a new analyst?"
 
-
 ---
 
-_Version: 2025-11-27 | Update assumptions quarterly based on customer feedback_
+### Version: 2025-11-27 | Update assumptions quarterly based on customer feedback
