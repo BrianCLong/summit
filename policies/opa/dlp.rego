@@ -1,3 +1,6 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 package composer.dlp
 
 # input.dlp_hits: array of findings from your scanners (post-redaction)

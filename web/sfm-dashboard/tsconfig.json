@@ -4,7 +4,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
     "skipLibCheck": true,

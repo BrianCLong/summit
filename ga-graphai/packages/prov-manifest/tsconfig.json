@@ -7,7 +7,7 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true
+    "strict": true, "types": ["node", "jest", "uuid"]
   },
   "include": ["src", "tests"]
 }

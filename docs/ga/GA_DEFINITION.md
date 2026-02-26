@@ -1,4 +1,4 @@
-# GA DEFINITION (IMMUTABLE CONTROL DOCUMENT)
+# GA DEFINITION (IMMUTABLE CONTROL DOCUMENT) (IMMUTABLE CONTROL DOCUMENT)
 
 > **Status**: FROZEN
 > **Version**: 1.0.0
@@ -374,6 +374,9 @@ require_signed_commits: true
 ## PART 8: COMPLIANCE & EVIDENCE AUTOMATION
 
 ### 8.1 Control Registry
+
+| Control ID | Name | Description | Enforcement |
+|---|---|---|---|
 
 All compliance controls mapped to:
 - **File**: Source of truth for control logic

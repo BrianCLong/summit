@@ -10,7 +10,7 @@
     "target": "ES2022",
     "moduleResolution": "NodeNext",
     "skipLibCheck": true,
-    "strict": true
+    "strict": true, "types": ["node", "jest", "uuid"]
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]

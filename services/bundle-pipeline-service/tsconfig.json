@@ -11,7 +11,7 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "types": ["node", "jest"]

@@ -7,7 +7,7 @@
     "allowImportingTsExtensions": false,
     "outDir": "dist",
     "rootDir": ".",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,

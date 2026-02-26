@@ -6,7 +6,7 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "bundler",

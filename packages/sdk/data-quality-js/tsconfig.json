@@ -4,7 +4,7 @@
     "module": "CommonJS",
     "declaration": true,
     "outDir": "dist",
-    "strict": true
+    "strict": true, "types": ["node", "jest", "uuid"]
   },
   "include": ["src/**/*"]
 }

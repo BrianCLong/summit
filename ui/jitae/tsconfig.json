@@ -6,7 +6,7 @@
     "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "jsx": "react-jsx",
     "types": ["vite/client"]
   },

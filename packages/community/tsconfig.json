@@ -6,7 +6,7 @@
     "declaration": true,
     "allowImportingTsExtensions": false,
     "composite": false,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,

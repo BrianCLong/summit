@@ -4,7 +4,7 @@
     "module": "ES2022",
     "outDir": "dist",
     "moduleResolution": "Bundler",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "esModuleInterop": true
   },
   "include": ["src"]

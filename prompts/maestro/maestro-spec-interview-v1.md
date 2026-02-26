@@ -2,7 +2,7 @@
 
 ## Prompt Name
 
-`maestro_spec_interview_v1`
+`maestro-spec-interview-v1`
 
 ## Purpose
 

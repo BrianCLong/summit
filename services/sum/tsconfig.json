@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "declaration": true,
     "sourceMap": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "noEmitOnError": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true

@@ -8,7 +8,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2022",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true

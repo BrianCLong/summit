@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Added `maestro_spec_interview_v1` prompt for structured requirements engineering interviews.
+- Added `SPECIFICATION` artifact kind to Maestro models to track produced specs.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
@@ -203,3 +205,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
+
+## [4.2.3] - 2026-02-26
+### Added
+- Maestro Spec Interview Prompt (v1) for structured requirements engineering.
+- Orchestration workflow for multi-phase specification generation.
+### Changed
+- Standardized CI environment to Python 3.11 and Node.js 20.
+- Updated OPA image to 0.68.0-rootless for consistent gate evaluation.
+### Fixed
+- PII scanner false positives on versioned filenames.
+- Missing infrastructure stubs for CI gates.

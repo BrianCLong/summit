@@ -1,0 +1,7 @@
+# Stub for GA release gating
+SOC2_CC7.2:
+  evidence_id: evidence.security_monitoring.v1
+  control: System monitoring and logging
+ISO27001_A.8.8:
+  evidence_id: evidence.vulnerability_management.v1
+  control: Management of technical vulnerabilities

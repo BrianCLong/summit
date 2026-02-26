@@ -1,3 +1,6 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 package compliance
 
 pass["chg-DEPLOY-001"]["Prod deploy has CI run, commit, artifact digest"] {

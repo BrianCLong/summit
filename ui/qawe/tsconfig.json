@@ -10,7 +10,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "types": ["vite/client"]
   },
   "include": ["src"],

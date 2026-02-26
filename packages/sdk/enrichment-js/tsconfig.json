@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "declaration": true,
     "esModuleInterop": true,
-    "strict": true
+    "strict": true, "types": ["node", "jest", "uuid"]
   },
   "include": ["src/**/*"]
 }

@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "rootDir": "ts",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "skipLibCheck": true,
     "types": ["node"]
   },

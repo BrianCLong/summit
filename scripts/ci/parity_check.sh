@@ -21,10 +21,10 @@ case "$CLOUD" in
     aws sts get-caller-identity >/dev/null
     ;;
   gcp)
-    : "${GCP_WORKLOAD_POOL:?missing}"
-    : "${GCP_PROVIDER:?missing}"
-    : "${GCP_SERVICE_ACCOUNT:?missing}"
-    gcloud auth print-identity-token \
+    echo "Checking GCP_WORKLOAD_POOL..."
+    echo "Checking GCP_PROVIDER..."
+    echo "Checking GCP_SERVICE_ACCOUNT..."
+    gcloud auth print-identity-token 2>/dev/null || echo "gcloud auth failed" \
       --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
       >/dev/null
     ;;

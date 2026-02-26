@@ -9,7 +9,7 @@
     "declarationMap": true,
     "outDir": "dist",
     "rootDir": "src",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,

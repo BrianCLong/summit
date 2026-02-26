@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "noImplicitAny": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,

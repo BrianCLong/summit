@@ -11,7 +11,7 @@
     "moduleResolution": "bundler",
     "module": "ESNext",
     "target": "ES2022",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "skipLibCheck": true,
     "resolveJsonModule": true
   },

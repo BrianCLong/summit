@@ -7,7 +7,7 @@
     "rootDir": "src",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "resolveJsonModule": true,
     "types": ["node"],
     "lib": ["ES2022"],

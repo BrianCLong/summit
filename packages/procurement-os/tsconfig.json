@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "sourceMap": true,
-    "strict": true
+    "strict": true, "types": ["node", "jest", "uuid"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests"]

@@ -3,7 +3,7 @@
     "target": "ES2020",
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,

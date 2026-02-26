@@ -12,7 +12,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "skipLibCheck": true,
     "composite": true,
     "types": ["node"]

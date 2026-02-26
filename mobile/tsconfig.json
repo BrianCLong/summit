@@ -3,7 +3,7 @@
     "target": "es2017",
     "module": "esnext",
     "jsx": "react-native",
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,

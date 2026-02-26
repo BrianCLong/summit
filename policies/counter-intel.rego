@@ -1,3 +1,6 @@
+import future.keywords.if
+import future.keywords.in
+import future.keywords.contains
 # Placeholder for Counter-Intelligence Policy
 # This file is intended to house the Rego policies that will govern
 # the automated aspects of the counter-intelligence framework.

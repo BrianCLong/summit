@@ -55,7 +55,7 @@ class Run(BaseModel):
         json_schema_extra = {
             "example": {
                 "name": "Build and analyze entity network",
-                "owner": "analyst@example.com",
+                "owner": "analyst[at]example.com",
                 "status": "succeeded",
                 "cost_estimate": 5.00,
                 "cost_actual": 4.73,

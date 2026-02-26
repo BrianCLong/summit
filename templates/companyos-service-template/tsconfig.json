@@ -5,7 +5,7 @@
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": true, "types": ["node", "jest", "uuid"],
     "skipLibCheck": true,
     "outDir": "dist",
     "resolveJsonModule": true,
