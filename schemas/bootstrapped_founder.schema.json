@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit/schemas/bootstrapped_founder.schema.json",
+  "title": "Bootstrapped Founder Report",
+  "type": "object",
+  "required": ["evidence_ids", "idea_id", "demand_validation", "mvp_spec"],
+  "properties": {
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^BFP-[A-Z]+-[0-9]{3}$"
+      },
+      "minItems": 1
+    },
+    "idea_id": {
+      "type": "string",
+      "pattern": "^IDEA-[a-f0-9]{12}$"
+    },
+    "demand_validation": {
+      "type": "object",
+      "required": ["status", "method", "summary"],
+      "properties": {
+        "status": { "type": "string" },
+        "method": { "type": "string" },
+        "summary": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "mvp_spec": {
+      "type": "object",
+      "required": ["scope", "feature_flag", "default_enabled"],
+      "properties": {
+        "scope": { "type": "string" },
+        "feature_flag": { "type": "string" },
+        "default_enabled": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": true
+}
