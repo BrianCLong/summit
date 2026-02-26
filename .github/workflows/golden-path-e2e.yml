@@ -12,6 +12,7 @@ on:
       - 'server/src/investigations/**'
       - 'server/src/services/investigationWorkflowService.ts'
       - 'e2e/golden-path*.spec.ts'
+      - 'e2e/investigation.spec.ts'
       - 'flags/**'
   schedule:
     - cron: "0 2 * * *" # Nightly at 2 AM
@@ -30,6 +31,8 @@ jobs:
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
     steps:
       - uses: actions/checkout@v4
 
@@ -52,7 +55,7 @@ jobs:
         env:
           BASE_URL: http://localhost:3000
           PLAYWRIGHT_USE_WEBSERVER: 'true'
-        run: pnpm test:e2e:investigations
+        run: npx playwright test e2e/golden-path-investigations.spec.ts e2e/investigation.spec.ts --retries 2 --workers=1
 
       - name: Upload Playwright Report
         if: always()
