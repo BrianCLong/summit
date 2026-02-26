@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-25T20:29:21Z",
+  "revision_note": "Added Summit next-priority GA roadmap and execution-compression plan.",
   "initiatives": [
+    {
+      "id": "summit-next-priority-ga-roadmap",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published prioritized P0-P3 roadmap with Golden Path demo as single integration anchor and MAESTRO-aligned mitigations."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
