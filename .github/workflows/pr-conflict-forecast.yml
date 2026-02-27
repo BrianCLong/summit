@@ -24,7 +24,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
+
           node-version: "22.x"
           cache: "pnpm"
 
@@ -38,14 +38,14 @@ jobs:
 
       - name: Upload Forecast Report (JSON)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
+
           name: pr-conflict-forecast-json
           path: docs/ops/pr-forecast/PR_CONFLICT_FORECAST.json
           retention-days: 7
 
       - name: Upload Forecast Report (Markdown)
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
+
           name: pr-conflict-forecast-md
           path: docs/ops/pr-forecast/PR_CONFLICT_FORECAST.md
           retention-days: 7

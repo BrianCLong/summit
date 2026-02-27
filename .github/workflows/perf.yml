@@ -36,7 +36,7 @@ jobs:
 
       - name: Archive k6 results
         uses: actions/upload-artifact@v4 # v6
-        with:
+
           retention-days: 14
           name: k6-results
           path: |

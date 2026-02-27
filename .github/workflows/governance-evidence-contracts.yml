@@ -27,17 +27,16 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
+
           node-version: '20'
           cache: 'pnpm'
 
       - name: Setup Python
         uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
-        with:
+
           python-version: "3.11"
 
       - name: Install Dependencies
@@ -54,7 +53,7 @@ jobs:
 
       - name: Upload Governance Evidence
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
-        with:
+
           name: governance-evidence
           path: artifacts/governance/*.evidence.json
           retention-days: 14

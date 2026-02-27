@@ -152,7 +152,7 @@ jobs:
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4 # v4
-        with:
+
           name: opa-test-results-${{ github.run_id }}
           path: |
             test-results/
@@ -162,7 +162,7 @@ jobs:
       - name: Publish JUnit Results
         if: always()
         uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
-        with:
+
           report_paths: test-results/*-junit.xml
           fail_on_failure: true
           include_passed: true

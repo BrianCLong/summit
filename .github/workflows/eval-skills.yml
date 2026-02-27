@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
+
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
 
@@ -30,7 +30,7 @@ jobs:
         run: make eval-skills-changed
       - name: Upload eval artifacts
         uses: actions/upload-artifact@v4
-        with:
+
           name: eval-skills-changed
           path: evals/skills/**/artifacts/**
 
@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
+
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
 
@@ -49,6 +49,6 @@ jobs:
         run: make eval-skills-all
       - name: Upload eval artifacts
         uses: actions/upload-artifact@v4
-        with:
+
           name: eval-skills-suite
           path: evals/skills/**/artifacts/**

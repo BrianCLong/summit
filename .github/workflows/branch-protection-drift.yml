@@ -73,7 +73,7 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@v2
         continue-on-error: true
-        with:
+
           app-id: ${{ secrets.BRANCH_PROTECTION_APP_ID }}
           private-key: ${{ secrets.BRANCH_PROTECTION_APP_PRIVATE_KEY }}
 
@@ -146,7 +146,7 @@ jobs:
 
       - name: Upload Drift Report
         uses: actions/upload-artifact@v4 # v4
-        with:
+
           name: branch-protection-drift-report
           path: |
             ${{ env.OUT_DIR }}/branch_protection_drift_report.md
@@ -157,7 +157,7 @@ jobs:
         id: dedup
         if: steps.check.outputs.drift_detected == 'true' && github.event_name != 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
+
           script: |
             const branch = '${{ steps.branch.outputs.branch }}';
             const missing = ${{ steps.check.outputs.missing_count }};
@@ -323,7 +323,7 @@ jobs:
         if: steps.dedup.outputs.action == 'create' && github.event.inputs.dry_run != 'true' && github.event_name != 'pull_request'
         id: create
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
+
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('issue_body.md', 'utf8');
@@ -345,7 +345,7 @@ jobs:
       - name: Update Issue
         if: steps.dedup.outputs.action == 'update' && github.event.inputs.dry_run != 'true' && github.event_name != 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
+
           script: |
             const fs = require('fs');
             const body = fs.readFileSync('issue_body.md', 'utf8');
@@ -365,7 +365,7 @@ jobs:
       - name: Auto-Close on Resolution
         if: steps.check.outputs.drift_detected == 'false' && github.event.inputs.dry_run != 'true' && github.event_name != 'pull_request'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v7
-        with:
+
           script: |
             // Find open drift issues and close them
             const issues = await github.rest.issues.listForRepo({

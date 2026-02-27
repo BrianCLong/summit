@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
-        with:
+
           fetch-depth: 0 # Needed for patch generation if used
 
       - name: Install pnpm
@@ -32,7 +32,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
+
           node-version: "20"
           cache: "pnpm"
 
@@ -58,7 +58,7 @@ jobs:
 
       - name: Upload Analysis Artifacts
         uses: actions/upload-artifact@v4 # v6
-        with:
+
           name: mega-pr-${{ inputs.pr_number }}-plan
           path: artifacts/pr-containment/${{ inputs.pr_number }}
           retention-days: 14

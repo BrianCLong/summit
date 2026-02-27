@@ -21,7 +21,7 @@ jobs:
         # version is read from package.json packageManager field
 
       - uses: actions/setup-node@v4 # v6
-        with:
+
           node-version: 20
           cache: "pnpm"
           cache-dependency-path: apps/web/pnpm-lock.yaml

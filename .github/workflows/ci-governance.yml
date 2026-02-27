@@ -21,7 +21,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
+
           node-version: 20
       - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/branch-protection-as-code/manifest.yaml
 
@@ -42,7 +42,7 @@ jobs:
         if: steps.check-token.outputs.has_token == 'true'
       - uses: actions/setup-node@v4
         if: steps.check-token.outputs.has_token == 'true'
-        with:
+
           node-version: 20
       - name: Fetch branch protection rules
         if: steps.check-token.outputs.has_token == 'true'

@@ -30,7 +30,7 @@ jobs:
       # Note: pnpm version is read from package.json "packageManager" field
       - name: Setup Node
         uses: actions/setup-node@v4 # v4
-        with:
+
           cache: 'pnpm'
           node-version-file: .nvmrc
 
@@ -99,7 +99,7 @@ jobs:
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4.6.0
-        with:
+
           name: sboms
           path: |
             sbom.*.json

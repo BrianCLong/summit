@@ -21,7 +21,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
+
           node-version: 20
           cache: "pnpm"
       - name: Install Dependencies
@@ -42,7 +42,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
+
           node-version: 20
           cache: "pnpm"
       - name: Install Dependencies
@@ -60,7 +60,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
-        with:
+
           node-version: 20
           cache: "pnpm"
 
@@ -77,7 +77,7 @@ jobs:
     name: Vulnerability and Security Scan
     if: ${{ contains(github.event.pull_request.labels.*.name, 'run-info-security') }}
     uses: ./.github/workflows/ci-security.yml
-    with:
+
       run_dast: false # DAST is too slow for a PR check
     secrets:
       snyk_token: ${{ secrets.SNYK_TOKEN }}
@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
-        with:
+
           name: sbom-cyclonedx
           path: artifacts/sbom/sbom.json
           retention-days: 14

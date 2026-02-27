@@ -81,7 +81,7 @@ jobs:
 
       - name: Checkout at tagged commit
         uses: actions/checkout@v4 # v6
-        with:
+
           ref: ${{ steps.params.outputs.tag }}
           fetch-depth: 0
 
@@ -101,7 +101,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
-        with:
+
           cache: 'pnpm'
           node-version: "20"
 
@@ -134,7 +134,7 @@ jobs:
     steps:
       - name: Checkout at tagged commit
         uses: actions/checkout@v4 # v6
-        with:
+
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
 
@@ -195,7 +195,7 @@ jobs:
 
       - name: Upload Verification Output
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
+
           name: verification-output
           path: artifacts/verification/
           retention-days: 90
@@ -229,13 +229,13 @@ jobs:
     steps:
       - name: Checkout at tagged commit
         uses: actions/checkout@v4 # v6
-        with:
+
           ref: ${{ needs.verify.outputs.tag }}
           fetch-depth: 0
 
       - name: Download Verification Output
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
+
           name: verification-output
           path: staging/verification
 
@@ -389,14 +389,14 @@ jobs:
 
       - name: Upload RC Pipeline Bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
+
           name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
         uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
-        with:
+
           name: verification-output
           failOnError: false
 

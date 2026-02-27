@@ -45,7 +45,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v4.1.7 (pinned to v4 branch tip)
-        with:
+
           fetch-depth: 0
 
       - name: Set up pnpm
@@ -54,18 +54,18 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v4.0.3
-        with:
+
           node-version: "20"
           cache: "pnpm"
 
       - name: Set up Python
         uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
-        with:
+
           python-version: "3.11"
 
       - name: Set up Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5.0.1
-        with:
+
           go-version: "1.21"
 
       # Install supply chain tools with strict pinning
@@ -126,7 +126,7 @@ jobs:
       # Upload source SBOMs immediately to free disk space before Docker build
       - name: Upload Source SBOMs
         uses: actions/upload-artifact@v4 # v4.3.3
-        with:
+
           name: sboms-source-${{ env.VERSION }}
           path: ./sboms/
           retention-days: 90
@@ -134,7 +134,7 @@ jobs:
       # Upload source vulnerability reports immediately
       - name: Upload Source Vulnerability Reports
         uses: actions/upload-artifact@v4 # v4.3.3
-        with:
+
           name: vulnerability-reports-source-${{ env.VERSION }}
           path: ./vulnerability-reports/
           retention-days: 90
@@ -217,7 +217,7 @@ jobs:
       - name: Upload Container SBOMs
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         uses: actions/upload-artifact@v4 # v4.3.3
-        with:
+
           name: sboms-container-${{ env.VERSION }}
           path: ./sboms/
           retention-days: 90
@@ -226,7 +226,7 @@ jobs:
       - name: Upload Container Vulnerability Reports
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         uses: actions/upload-artifact@v4 # v4.3.3
-        with:
+
           name: vulnerability-reports-container-${{ env.VERSION }}
           path: ./vulnerability-reports/
           retention-days: 90
@@ -235,7 +235,7 @@ jobs:
       - name: Upload Release Evidence Bundle
         if: github.event_name == 'push' && github.ref_type == 'tag'
         uses: actions/upload-artifact@v4 # v4.3.3
-        with:
+
           name: release-evidence-${{ env.VERSION }}
           path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
           retention-days: 90
@@ -252,13 +252,13 @@ jobs:
 
       - name: Download Source SBOMs
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
-        with:
+
           name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./sboms
 
       - name: Download Source Vulnerability Reports
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
-        with:
+
           name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./vulnerability-reports
 
@@ -287,13 +287,13 @@ jobs:
     steps:
       - name: Download Release Evidence Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
-        with:
+
           name: release-evidence-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./releases
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.0.5
-        with:
+
           name: "Release ${{ needs.supply-chain-integrity.outputs.release-version }}"
           body: |
             ## Summit Platform Release ${{ needs.supply-chain-integrity.outputs.release-version }}

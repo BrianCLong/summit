@@ -120,7 +120,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
+
           ref: ${{ inputs.ref }}
           fetch-depth: 0
 
@@ -136,7 +136,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
+
           node-version-file: .nvmrc
 
       - name: Install Dependencies
@@ -192,7 +192,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
+
           ref: ${{ inputs.ref }}
 
       - name: Setup pnpm
@@ -200,7 +200,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
+
           node-version-file: .nvmrc
 
       - name: Install Dependencies
@@ -222,7 +222,7 @@ jobs:
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4 # v4
-        with:
+
           name: release-bundle-${{ inputs.release_tag }}
           path: |
             artifacts/release/${{ needs.verify-evidence.outputs.sha }}/
@@ -258,12 +258,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
+
           ref: ${{ inputs.ref }}
 
       - name: Download Release Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
+
           name: release-bundle-${{ inputs.release_tag }}
           path: release-bundle
 

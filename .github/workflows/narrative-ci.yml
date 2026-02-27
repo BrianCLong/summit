@@ -20,12 +20,12 @@ jobs:
       NARRATIVE_CI_ENABLED: "false"
     steps:
       - uses: actions/checkout@v4
-        with:
+
           fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
+
           node-version: "20"
 
       - name: Install dependencies
@@ -45,7 +45,7 @@ jobs:
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
-        with:
+
           version: v0.68.0
 
       - name: OPA policy tests
@@ -61,7 +61,7 @@ jobs:
 
       - name: Upload evidence
         uses: actions/upload-artifact@v4
-        with:
+
           name: narrative-ci-evidence
           path: |
             evidence/**

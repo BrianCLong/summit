@@ -17,12 +17,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
+
           fetch-depth: 0
 
       - name: Enforce migration gate label
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-        with:
+
           script: |
             const pr = context.payload.pull_request;
             if (!pr) {
@@ -61,7 +61,7 @@ jobs:
 
       - name: Upload migration gate summary
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
+
           name: migration-gate-summary
           path: migration-gate-summary.txt
           retention-days: 7

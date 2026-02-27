@@ -28,7 +28,7 @@ jobs:
 
       - name: Download Metrics
         uses: actions/download-artifact@v7
-        with:
+
           name: graph-sync-metrics
           path: packages/graph-sync-validator/
 
@@ -58,7 +58,7 @@ jobs:
 
       - name: Authenticate via OIDC
         uses: aws-actions/configure-aws-credentials@v4
-        with:
+
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/summit-ga-deploy
           aws-region: us-east-1
 

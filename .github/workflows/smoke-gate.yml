@@ -87,7 +87,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
+
           node-version: '20'
 
       - name: Get pnpm store directory
@@ -96,7 +96,7 @@ jobs:
 
       - name: Cache pnpm dependencies
         uses: actions/cache@v4
-        with:
+
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
@@ -202,7 +202,7 @@ jobs:
       - name: Upload smoke logs
         if: failure()
         uses: actions/upload-artifact@v4
-        with:
+
           name: smoke-gate-logs
           path: |
             smoke-server.log

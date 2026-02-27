@@ -62,7 +62,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
+
           fetch-depth: 0
 
       - name: Capture SHA
@@ -74,7 +74,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
+
           node-version: '20'
 
       - name: Get pnpm store directory
@@ -83,7 +83,7 @@ jobs:
 
       - name: Setup pnpm cache
         uses: actions/cache@v4
-        with:
+
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
@@ -149,7 +149,7 @@ jobs:
       - name: Upload Evidence Artifact
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-        with:
+
           name: go-live-evidence-${{ steps.capture-sha.outputs.sha }}
           path: artifacts/evidence/go-live/${{ steps.capture-sha.outputs.sha }}/
           retention-days: 90
