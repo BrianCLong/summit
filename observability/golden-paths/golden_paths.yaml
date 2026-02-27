@@ -1,0 +1,195 @@
+# Golden Path Definitions — IntelGraph v5.0.0
+#
+# Golden paths are synthetic probe scenarios that exercise critical
+# user journeys end-to-end. They run in preview, staging, and production
+# environments and feed into SLO burn-rate calculations.
+#
+# The verify_goldens.sh script evaluates these definitions against
+# Prometheus metrics to produce a pass/fail gate.
+
+version: "1.0"
+probe_interval: 30s
+timeout: 10s
+
+paths:
+  # ── Core API ──
+  - name: api-health
+    description: "API server health endpoint responds within SLO"
+    probe:
+      method: GET
+      url: "{{BASE_URL}}/health/ready"
+      expected_status: 200
+    slo:
+      availability: 0.999
+      p99_latency_ms: 200
+
+  - name: graphql-introspection
+    description: "GraphQL introspection query succeeds"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/graphql"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+      body: '{"query":"{ __schema { types { name } } }"}'
+      expected_status: 200
+    slo:
+      availability: 0.999
+      p99_latency_ms: 500
+
+  # ── Entity CRUD ──
+  - name: entity-create-read
+    description: "Create entity via GraphQL, then read it back"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/graphql"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+        X-Tenant-ID: "{{PROBE_TENANT}}"
+      body: |
+        {"query":"mutation { createEntity(input: { type: PERSON, name: \"probe-entity-{{TIMESTAMP}}\", tenantId: \"{{PROBE_TENANT}}\" }) { id name } }"}
+      expected_status: 200
+      expected_body_contains: "probe-entity-"
+    slo:
+      availability: 0.995
+      p99_latency_ms: 1000
+
+  # ── Graph Traversal ──
+  - name: graph-1hop-traversal
+    description: "1-hop neighborhood query returns within SLO"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/graphql"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+        X-Tenant-ID: "{{PROBE_TENANT}}"
+      body: |
+        {"query":"query { entity(id: \"{{PROBE_ENTITY_ID}}\") { relationships(depth: 1) { edges { node { id type name } } } } }"}
+      expected_status: 200
+    slo:
+      availability: 0.995
+      p99_latency_ms: 500
+
+  - name: graph-2hop-traversal
+    description: "2-hop traversal query with filters"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/graphql"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+        X-Tenant-ID: "{{PROBE_TENANT}}"
+      body: |
+        {"query":"query { entity(id: \"{{PROBE_ENTITY_ID}}\") { relationships(depth: 2, filter: { types: [AFFILIATED_WITH] }) { edges { node { id name } } } } }"}
+      expected_status: 200
+    slo:
+      availability: 0.99
+      p99_latency_ms: 2000
+
+  # ── Search ──
+  - name: search-query
+    description: "Full-text search returns results within SLO"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/search/query"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+        X-Tenant-ID: "{{PROBE_TENANT}}"
+      body: '{"q":"probe-test","limit":10}'
+      expected_status: 200
+    slo:
+      availability: 0.995
+      p99_latency_ms: 300
+
+  # ── Ingest ──
+  - name: ingest-webhook
+    description: "HTTP ingest webhook accepts events"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/ingest/events"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+        X-Tenant-ID: "{{PROBE_TENANT}}"
+      body: |
+        {"source":"golden-path-probe","type":"PROBE_EVENT","data":{"name":"probe-{{TIMESTAMP}}"}}
+      expected_status: 202
+    slo:
+      availability: 0.995
+      p99_latency_ms: 500
+
+  # ── WebSocket ──
+  - name: websocket-connect
+    description: "WebSocket connection establishes within SLO"
+    probe:
+      type: websocket
+      url: "{{WS_URL}}/socket.io/?EIO=4&transport=websocket"
+      headers:
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+      expected: "connected"
+      timeout: 5s
+    slo:
+      availability: 0.99
+      p99_latency_ms: 1000
+
+  # ── Auth ──
+  - name: auth-token-validation
+    description: "Token validation endpoint responds correctly"
+    probe:
+      method: GET
+      url: "{{BASE_URL}}/auth/validate"
+      headers:
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+      expected_status: 200
+    slo:
+      availability: 0.999
+      p99_latency_ms: 100
+
+  # ── Provenance ──
+  - name: provenance-query
+    description: "Provenance chain query returns audit trail"
+    probe:
+      method: POST
+      url: "{{BASE_URL}}/graphql"
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer {{PROBE_TOKEN}}"
+        X-Tenant-ID: "{{PROBE_TENANT}}"
+      body: |
+        {"query":"query { provenanceChain(entityId: \"{{PROBE_ENTITY_ID}}\", limit: 5) { events { id action actor timestamp } } }"}
+      expected_status: 200
+    slo:
+      availability: 0.99
+      p99_latency_ms: 1000
+
+# ── Composite SLO ──
+composite_slos:
+  - name: platform-availability
+    description: "Overall platform availability (weighted)"
+    components:
+      - path: api-health
+        weight: 0.3
+      - path: graphql-introspection
+        weight: 0.2
+      - path: entity-create-read
+        weight: 0.15
+      - path: search-query
+        weight: 0.15
+      - path: ingest-webhook
+        weight: 0.1
+      - path: websocket-connect
+        weight: 0.1
+    target: 0.995
+    window: 30d
+    burn_rate_alerts:
+      fast:
+        multiplier: 14
+        window: 5m
+        severity: page
+      slow:
+        multiplier: 6
+        window: 1h
+        severity: ticket

@@ -197,6 +197,78 @@
       "type": "boolean",
       "defaultValue": true,
       "tags": ["observability", "monitoring"]
+    },
+    "search-ga-enabled": {
+      "key": "search-ga-enabled",
+      "name": "Search GA",
+      "description": "Enable GA search features (Typesense backend, alias reindex, scoped keys)",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["ga", "search", "v5.0.0"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "ga_phase": "P8",
+        "flip_order": 1,
+        "flip_after": "P6 promote",
+        "scope": "all-tenants"
+      }
+    },
+    "realtime-enabled": {
+      "key": "realtime-enabled",
+      "name": "Realtime Subscriptions",
+      "description": "Enable WebSocket/SSE realtime graph subscriptions and presence",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["ga", "realtime", "v5.0.0"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "ga_phase": "P8",
+        "flip_order": 2,
+        "flip_after": "P6 promote",
+        "scope": "pilot-tenants-then-all"
+      }
+    },
+    "reports-renderer-v2-enabled": {
+      "key": "reports-renderer-v2-enabled",
+      "name": "Reports Renderer v2",
+      "description": "Enable Playwright-based PDF renderer with redaction and signing",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["ga", "reports", "v5.0.0"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "ga_phase": "P8",
+        "flip_order": 3,
+        "flip_after": "P6 promote",
+        "scope": "all-tenants"
+      }
+    },
+    "copilot-v2-enabled": {
+      "key": "copilot-v2-enabled",
+      "name": "Copilot v2",
+      "description": "Enable v2 AI copilot with enhanced graph reasoning and safe rendering",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["ga", "copilot", "ai", "v5.0.0"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "ga_phase": "P8",
+        "flip_order": 4,
+        "flip_after": "P6 promote",
+        "scope": "all-tenants"
+      }
     }
   },
   "killSwitches": {
