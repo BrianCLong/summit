@@ -77,6 +77,10 @@ receivers:
         send_resolved: true
       - api_url: 'http://localhost/dummy'
         send_resolved: true
+    # PagerDuty integration key must be provided here or via template expansion
+    pagerduty_configs:
+      - service_key: 'YOUR_PAGERDUTY_KEY'
+        send_resolved: true
 
   - name: 'warning'
     slack_configs:
