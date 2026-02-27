@@ -1,4 +1,3 @@
-# Temporary evidence map to satisfy CI gate
 ga_version: MVP-4
 required:
   - id: sbom

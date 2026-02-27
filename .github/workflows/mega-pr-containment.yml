@@ -57,8 +57,6 @@ jobs:
             $FLAGS
 
       - name: Upload Analysis Artifacts
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: mega-pr-${{ inputs.pr_number }}-plan
+        uses: actions/upload-artifact@v4 # v6          name: mega-pr-${{ inputs.pr_number }}-plan
           path: artifacts/pr-containment/${{ inputs.pr_number }}
           retention-days: 14

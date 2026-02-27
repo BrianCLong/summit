@@ -36,7 +36,5 @@ jobs:
             --output packages/graph-sync-validator/metrics.json
 
       - name: Upload Metrics
-        uses: actions/upload-artifact@v4
-        with:
-          name: graph-sync-metrics
+        uses: actions/upload-artifact@v4          name: graph-sync-metrics
           path: packages/graph-sync-validator/metrics.json

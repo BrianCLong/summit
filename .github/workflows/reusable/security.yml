@@ -20,9 +20,7 @@ jobs:
           path: .
           output-file: sbom.spdx.json
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: sbom-spdx
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: sbom-spdx
           path: sbom.spdx.json
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # 0.24.0

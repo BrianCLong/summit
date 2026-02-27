@@ -46,7 +46,5 @@ jobs:
 
       - name: Upload Evidence
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: supplychain-evidence
+        uses: actions/upload-artifact@v4          name: supplychain-evidence
           path: artifacts/supplychain/

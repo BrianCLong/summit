@@ -221,9 +221,7 @@ jobs:
           fi
 
       - name: Upload Release Artifacts
-        uses: actions/upload-artifact@v4 # v4
-        with:
-          name: release-bundle-${{ inputs.release_tag }}
+        uses: actions/upload-artifact@v4 # v4          name: release-bundle-${{ inputs.release_tag }}
           path: |
             artifacts/release/${{ needs.verify-evidence.outputs.sha }}/
             artifacts/evidence/go-live/${{ needs.verify-evidence.outputs.sha }}/
@@ -262,9 +260,7 @@ jobs:
           ref: ${{ inputs.ref }}
 
       - name: Download Release Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
-          name: release-bundle-${{ inputs.release_tag }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4          name: release-bundle-${{ inputs.release_tag }}
           path: release-bundle
 
       - name: Create Git Tag

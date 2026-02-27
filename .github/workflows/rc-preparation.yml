@@ -180,9 +180,7 @@ jobs:
           fi
 
       - name: Upload RC Bundle Artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: ${{ steps.prepare.outputs.artifact_name }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6          name: ${{ steps.prepare.outputs.artifact_name }}
           path: ${{ steps.prepare.outputs.artifact_dir }}
           retention-days: 90
 

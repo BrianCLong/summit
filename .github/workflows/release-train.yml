@@ -69,18 +69,14 @@ jobs:
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: client-dist
+        uses: actions/upload-artifact@v4 # v6          name: client-dist
           path: client/dist
           retention-days: 5
           if-no-files-found: warn
 
       - name: Upload Server Artifacts
         if: hashFiles('server/dist/**') != ''
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: server-dist
+        uses: actions/upload-artifact@v4 # v6          name: server-dist
           path: server/dist
           retention-days: 5
           if-no-files-found: warn
@@ -135,9 +131,7 @@ jobs:
           fi
 
       - name: Upload Evidence Artifacts
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: evidence-bundle
+        uses: actions/upload-artifact@v4 # v6          name: evidence-bundle
           path: evidence
           retention-days: 90
           if-no-files-found: warn

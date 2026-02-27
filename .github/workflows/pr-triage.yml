@@ -36,9 +36,7 @@ jobs:
           npx tsx scripts/ops/pr_triage.ts --out docs/ops/pr-triage/
 
       - name: Upload Triage Report
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: pr-triage-report
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6          name: pr-triage-report
           path: docs/ops/pr-triage/
           retention-days: 7
 

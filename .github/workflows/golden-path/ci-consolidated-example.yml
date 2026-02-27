@@ -43,11 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
-      - uses: actions/setup-node@v4 # v4
+      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3      - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -100,11 +96,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
-      - uses: actions/setup-node@v4 # v4
+      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3      - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -134,9 +126,7 @@ jobs:
           name: ${{ matrix.suite }}-coverage
       
       - name: Upload test results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: test-results-${{ matrix.suite }}-${{ matrix.os }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: test-results-${{ matrix.suite }}-${{ matrix.os }}
           path: |
             test-results/
             coverage/
@@ -173,11 +163,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
-      - uses: actions/setup-node@v4 # v4
+      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3      - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'

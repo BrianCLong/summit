@@ -216,9 +216,7 @@ jobs:
 
       - name: Upload Skills Evidence
         if: always()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: skills-evidence
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6          name: skills-evidence
           path: evidence/skills
           retention-days: 14
 
@@ -254,11 +252,7 @@ jobs:
           echo "sha=${SHA}" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
-        with:
-          version: 10
-
-      - name: Setup Node.js
+        uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4      - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "20"
@@ -338,9 +332,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: verification-output
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: verification-output
           path: artifacts/verification/
           retention-days: 90
 
@@ -412,9 +404,7 @@ jobs:
           echo "Signature created: staging/ga-bundle/provenance.json.sig"
 
       - name: Upload GA Bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: ga-bundle-staging
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: ga-bundle-staging
           path: staging/ga-bundle/
           retention-days: 90
 
@@ -439,15 +429,11 @@ jobs:
           ref: ${{ needs.gate.outputs.tag }}
 
       - name: Download GA Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: ga-bundle-staging
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0          name: ga-bundle-staging
           path: staging/ga-bundle
 
       - name: Download Verification Output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: verification-output
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0          name: verification-output
           path: staging/verification
 
       - name: Install Cosign
@@ -489,9 +475,7 @@ jobs:
           fi
 
       - name: Upload Publish Guard Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: publish-guard-report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: publish-guard-report
           path: artifacts/publish-guard/
           retention-days: 90
 
@@ -615,16 +599,12 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload GA Release Bundle
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle-${{ needs.gate.outputs.tag }}
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@b54d29a59e55046d1f7fc8226cdda507e6b9cf62 # v5
-        with:
-          name: |
+        uses: geekyeggo/delete-artifact@b54d29a59e55046d1f7fc8226cdda507e6b9cf62 # v5          name: |
             ga-bundle-staging
             verification-output
             publish-guard-report
@@ -711,9 +691,7 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Download GA Release Bundle
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0          name: ga-release-bundle-${{ needs.gate.outputs.tag }}
           path: ga-release-bundle
 
       - name: Verify Bundle Integrity

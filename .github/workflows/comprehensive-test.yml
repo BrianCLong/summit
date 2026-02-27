@@ -54,9 +54,7 @@ jobs:
 
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
+        uses: actions/upload-artifact@v4          name: test-results
           path: |
             coverage/
             server/coverage/

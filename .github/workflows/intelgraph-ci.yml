@@ -53,9 +53,7 @@ jobs:
             policy/
 
       - name: Upload OPA Bundle as Artifact
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: opa-bundle
+        uses: actions/upload-artifact@v4 # v6          name: opa-bundle
           path: policy/bundle.tar.gz
           retention-days: 7
 

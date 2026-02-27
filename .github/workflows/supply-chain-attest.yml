@@ -80,9 +80,7 @@ jobs:
           subject-path: artifacts/build.tar.gz
 
       - name: Upload artifacts (for audit)
-        uses: actions/upload-artifact@v4
-        with:
-          name: supply-chain
+        uses: actions/upload-artifact@v4          name: supply-chain
           path: |
             artifacts/build.tar.gz
             artifacts/sbom.spdx.json

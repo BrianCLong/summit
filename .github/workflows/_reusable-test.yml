@@ -231,9 +231,7 @@ jobs:
 
       - name: Upload coverage reports
         if: always() && inputs.upload-coverage
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: coverage-${{ matrix.os }}-${{ matrix.node }}-${{ inputs.test-type }}
+        uses: actions/upload-artifact@v4 # v6          name: coverage-${{ matrix.os }}-${{ matrix.node }}-${{ inputs.test-type }}
           path: |
             coverage/
             test-results/

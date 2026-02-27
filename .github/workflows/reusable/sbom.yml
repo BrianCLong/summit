@@ -94,8 +94,6 @@ jobs:
           EOF
 
       - name: Upload SBOM artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: sbom-${{ inputs.service }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: sbom-${{ inputs.service }}
           path: artifacts/sbom/sbom.${{ inputs.service }}.json
           retention-days: 30

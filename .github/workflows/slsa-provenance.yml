@@ -85,9 +85,7 @@ jobs:
       contents: read
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: summit-artifacts
+        uses: actions/download-artifact@v7          name: summit-artifacts
           path: dist
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v3
@@ -101,9 +99,7 @@ jobs:
     needs: [provenance]
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v7
-        with:
-          name: summit-artifacts
+        uses: actions/download-artifact@v7          name: summit-artifacts
           path: dist
       - name: Verify checksums
         run: |

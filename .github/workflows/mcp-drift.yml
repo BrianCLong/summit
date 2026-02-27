@@ -20,7 +20,5 @@ jobs:
       - name: Run Drift Detector
         run: npx tsx scripts/monitoring/createos-drift.ts
       - name: Upload Drift Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: mcp-drift-report
+        uses: actions/upload-artifact@v4          name: mcp-drift-report
           path: artifacts/metrics/mcp_drift.json

@@ -194,9 +194,7 @@ jobs:
           fi
 
       - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: verification-output
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6          name: verification-output
           path: artifacts/verification/
           retention-days: 90
 
@@ -234,9 +232,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download Verification Output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: verification-output
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7          name: verification-output
           path: staging/verification
 
       - name: Build Promotion Bundle
@@ -388,16 +384,12 @@ jobs:
           ls -la "${BUNDLE_DIR}/"
 
       - name: Upload RC Pipeline Bundle
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6          name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
           path: ${{ steps.assemble.outputs.bundle_dir }}
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
-        with:
-          name: verification-output
+        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5          name: verification-output
           failOnError: false
 
       - name: Generate Job Summary

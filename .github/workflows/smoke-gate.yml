@@ -201,9 +201,7 @@ jobs:
 
       - name: Upload smoke logs
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-gate-logs
+        uses: actions/upload-artifact@v4          name: smoke-gate-logs
           path: |
             smoke-server.log
             server/server.log

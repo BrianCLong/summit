@@ -87,9 +87,7 @@ jobs:
           fi
 
       - name: Upload GA evidence artifacts (if any)
-        uses: actions/upload-artifact@v4
-        with:
-          name: ga-evidence
+        uses: actions/upload-artifact@v4          name: ga-evidence
           path: |
             artifacts/**
             evidence/**

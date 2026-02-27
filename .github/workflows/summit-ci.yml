@@ -44,9 +44,7 @@ jobs:
           pytest --cov=summit --cov-report=xml --cov-fail-under=9 summit/tests/
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
+        uses: actions/upload-artifact@v4          name: coverage-report
           path: coverage.xml
 
   test-e2e:

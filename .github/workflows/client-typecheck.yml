@@ -66,8 +66,6 @@ jobs:
 
       - name: Upload typecheck report
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: client-typecheck-report
+        uses: actions/upload-artifact@v4          name: client-typecheck-report
           path: docs/ops/typescript/client-typecheck-report.json
           retention-days: 7
