@@ -44,3 +44,8 @@
 
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
+
+## 2025-03-05 - Centralized Keyboard Modifiers
+
+**Learning:** When platform-aware shortcuts are scattered across multiple components, maintaining consistency and accessibility (e.g., in ARIA labels) becomes difficult. Centralizing these as constants like `MODIFIER_KEY` and `SHIFT_KEY` simplifies implementation and ensures a unified UX.
+**Action:** Utilize centralized `MODIFIER_KEY` and `SHIFT_KEY` constants for all keyboard shortcut hints and ensure `aria-label` remains descriptive (e.g., using "Command" instead of "⌘" for screen readers).
