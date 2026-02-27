@@ -23,6 +23,13 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
+
+    // DEBUGGING: Log result if rows are missing
+    if (!result.rows || result.rows.length === 0) {
+        console.error('INSERT run failed, result:', result);
+        throw new Error('Failed to create test run: No rows returned');
+    }
+
     testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)
