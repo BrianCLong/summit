@@ -26,6 +26,7 @@ def load(p: Path) -> object:
 
 EVIDENCE_ID_RE = re.compile(r"^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$")
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
+ISO_RE = re.compile(r"202\d-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
 def _require(cond: bool, msg: str) -> None:
     if not cond:
@@ -134,7 +135,7 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            if ISO_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
