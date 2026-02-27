@@ -67,12 +67,22 @@ If a file appears in the **Conflict Hotspots** list:
 You can generate the report locally at any time:
 
 ```bash
-# Requires GITHUB_TOKEN in environment
-export GITHUB_TOKEN=your_token_here
+# Live mode (default): uses gh CLI and retries transient API failures.
 npx tsx scripts/ops/pr_triage.ts
 ```
 
 The report will be saved to `docs/ops/pr-triage/`.
+
+If GitHub is unreachable, the script automatically falls back to a local snapshot at `scripts/ops/snapshots/pr_list.json`.
+You can override this behavior:
+
+```bash
+# Force snapshot input
+PR_TRIAGE_SNAPSHOT=scripts/ops/snapshots/pr_list.json npx tsx scripts/ops/pr_triage.ts
+
+# Disable snapshot fallback (fail fast if GitHub is unavailable)
+PR_TRIAGE_ALLOW_SNAPSHOT=0 npx tsx scripts/ops/pr_triage.ts
+```
 
 ## Integration
 
