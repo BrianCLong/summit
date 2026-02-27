@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -74,8 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            mkdir -p artifacts/security
-            ./scripts/security/trivy-scan.sh summit-app:latest artifacts/security/trivy-report.json
+            ./scripts/security/trivy-scan.sh
           else
             echo "Trivy scan script not found, skipping."
           fi
@@ -97,7 +96,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -121,7 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            find helm/ -maxdepth 2 -name Chart.yaml -exec dirname {} \; | xargs -I {} helm lint {}
+            helm lint helm/
           fi
 
       - name: Terraform Plan
@@ -153,7 +152,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
