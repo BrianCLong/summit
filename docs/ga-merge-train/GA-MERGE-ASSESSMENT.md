@@ -182,6 +182,11 @@ all feature content was included.
 | Injection vulnerability audit | `docs/ga-merge-train/INJECTION-AUDIT-v5.0.0.md` |
 | External agent prompts | `docs/ga-merge-train/EXTERNAL-AGENT-PROMPTS.md` |
 | Provenance ledger library | `libs/provenance/` |
+| OPA/ABAC policies (6 packages) | `policy/intelgraph/` |
+| OPA policy guide | `docs/ga-merge-train/OPA-POLICY-GUIDE-v5.0.0.md` |
+| Policy simulation script | `scripts/opa-policy-sim.sh` |
+| Testing strategy | `docs/ga-merge-train/TESTING-STRATEGY-v5.0.0.md` |
+| Security-critical tests (23) | `tests/unit/security-critical.test.ts` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -212,3 +217,6 @@ git push --force origin main
 - [x] Injection vulnerability audit completed (SQL, XSS, SSRF, path traversal)
 - [x] Provenance ledger library implemented (11/11 acceptance tests pass)
 - [x] External agent prompts generated (10 prompts for Codex, Claude Code, Antigravity)
+- [x] OPA/ABAC policies implemented (6 packages, 80/80 tests pass, p95 ~50µs)
+- [x] Testing strategy documented (6-layer, 23 security-critical tests pass)
+- [x] Security-critical unit tests (HMAC, Cypher injection, XSS, SSRF, prototype pollution)

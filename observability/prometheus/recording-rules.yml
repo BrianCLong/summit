@@ -1,0 +1,53 @@
+groups:
+  - name: http_slo_recording
+    interval: 30s
+    rules:
+      - record: job:http_request_duration_seconds:p95
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_request_duration_seconds_bucket[5m])
+          )
+
+      - record: job:http_request_duration_seconds:p99
+        expr: |
+          histogram_quantile(0.99,
+            rate(http_request_duration_seconds_bucket[5m])
+          )
+
+      - record: job:http_requests:error_ratio_5m
+        expr: |
+          sum(rate(http_request_errors_total[5m]))
+          /
+          sum(rate(http_requests_total[5m]))
+
+      - record: job:http_requests:rate5m
+        expr: |
+          sum(rate(http_requests_total[5m]))
+
+  - name: neo4j_recording
+    interval: 30s
+    rules:
+      - record: job:neo4j_query_duration_seconds:p95
+        expr: |
+          histogram_quantile(0.95,
+            rate(neo4j_query_duration_seconds_bucket[5m])
+          )
+
+      - record: job:neo4j_query_duration_seconds:p99
+        expr: |
+          histogram_quantile(0.99,
+            rate(neo4j_query_duration_seconds_bucket[5m])
+          )
+
+  - name: ingest_recording
+    interval: 30s
+    rules:
+      - record: job:ingest_events:rate5m
+        expr: |
+          sum(rate(ingest_events_total[5m])) by (connector, status)
+
+      - record: job:ingest_events:error_ratio_5m
+        expr: |
+          sum(rate(ingest_events_total{status="error"}[5m]))
+          /
+          sum(rate(ingest_events_total[5m]))

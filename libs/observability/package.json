@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/observability",
+  "version": "1.0.0",
+  "description": "OpenTelemetry instrumentation and metrics for IntelGraph",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./instrumentation": "./src/instrumentation.ts",
+    "./metrics": "./src/metrics.ts"
+  },
+  "scripts": {
+    "test": "jest --config jest.config.ts"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.46.0",
+    "@opentelemetry/exporter-prometheus": "^0.51.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.51.0",
+    "@opentelemetry/resources": "^1.25.0",
+    "@opentelemetry/sdk-node": "^0.51.0",
+    "@opentelemetry/semantic-conventions": "^1.25.0",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "jest": "^29.7.0",
+    "typescript": "^5.4.0"
+  }
+}

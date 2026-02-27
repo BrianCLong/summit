@@ -1,0 +1,75 @@
+groups:
+  - name: intelgraph-cost-guardrails
+    rules:
+      - alert: BudgetThreshold80Percent
+        expr: intelgraph_budget_utilization_ratio > 0.80
+        for: 5m
+        labels:
+          severity: warning
+          team: finops
+        annotations:
+          summary: "Budget utilization above 80% for {{ $labels.environment }}"
+          description: >
+            Budget utilization for environment {{ $labels.environment }}
+            has exceeded 80% (current: {{ $value | humanizePercentage }}).
+            Review spending and consider scaling down non-critical workloads.
+          runbook_url: "https://docs.intelgraph.io/runbooks/cost-budget-warning"
+
+      - alert: BudgetThreshold90Percent
+        expr: intelgraph_budget_utilization_ratio > 0.90
+        for: 5m
+        labels:
+          severity: critical
+          team: finops
+        annotations:
+          summary: "Budget utilization above 90% for {{ $labels.environment }}"
+          description: >
+            Budget utilization for environment {{ $labels.environment }}
+            has exceeded 90% (current: {{ $value | humanizePercentage }}).
+            Immediate action required to prevent budget overrun.
+          runbook_url: "https://docs.intelgraph.io/runbooks/cost-budget-critical"
+
+      - alert: BudgetExceeded
+        expr: intelgraph_budget_utilization_ratio >= 1.0
+        for: 1m
+        labels:
+          severity: critical
+          team: finops
+        annotations:
+          summary: "Budget exceeded for {{ $labels.environment }}"
+          description: >
+            Budget for environment {{ $labels.environment }} has been exceeded
+            (current: {{ $value | humanizePercentage }}).
+            Cost controls should be engaged immediately.
+          runbook_url: "https://docs.intelgraph.io/runbooks/cost-budget-exceeded"
+
+      - alert: CostAnomalyDetected
+        expr: >
+          (intelgraph_daily_cost_usd - intelgraph_daily_cost_usd offset 1d)
+          / intelgraph_daily_cost_usd offset 1d > 0.20
+        for: 10m
+        labels:
+          severity: warning
+          team: finops
+        annotations:
+          summary: "Cost anomaly detected in {{ $labels.environment }}"
+          description: >
+            Day-over-day cost increase exceeds 20% for environment
+            {{ $labels.environment }}. Today: ${{ $value }}.
+            Investigate for unexpected usage spikes or misconfigurations.
+          runbook_url: "https://docs.intelgraph.io/runbooks/cost-anomaly"
+
+      - alert: HighCopilotSpend
+        expr: >
+          sum(rate(intelgraph_cost_usd_total{operation="copilot_query"}[24h])) * 86400 > 100
+        for: 15m
+        labels:
+          severity: warning
+          team: finops
+        annotations:
+          summary: "Copilot spend exceeds $100/day"
+          description: >
+            Daily copilot query cost has exceeded $100 (current projected:
+            ${{ $value | humanize }}). Review copilot usage patterns and
+            consider implementing per-tenant copilot rate limits.
+          runbook_url: "https://docs.intelgraph.io/runbooks/copilot-cost"

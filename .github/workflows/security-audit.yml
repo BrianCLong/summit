@@ -1,0 +1,260 @@
+name: Security Audit
+
+# IntelGraph v5.0.0 GA - Dedicated security audit workflow
+# Complements ci-security.yml (full suite) with focused, scheduled auditing.
+# Runs on PRs for fast feedback, weekly for continuous assurance, and on-demand.
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 3 * * 1" # Weekly: Monday 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: CodeQL Analysis (JavaScript/TypeScript)
+  # ---------------------------------------------------------------------------
+  codeql:
+    name: CodeQL Analysis (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+        env:
+          HUSKY: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          config: |
+            paths:
+              - client
+              - server
+              - packages
+
+      - name: Build TypeScript
+        run: |
+          pnpm --filter intelgraph-server build || true
+          pnpm --filter client build || true
+        continue-on-error: true
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}/audit"
+          upload: always
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Dependency Review (PRs only)
+  # ---------------------------------------------------------------------------
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0, SSPL-1.0, EUPL-1.1
+          comment-summary-in-pr: always
+
+  # ---------------------------------------------------------------------------
+  # Job 3: License Compliance Check
+  # ---------------------------------------------------------------------------
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check for prohibited licenses
+        run: |
+          echo "Checking for copyleft and prohibited licenses..."
+          mkdir -p audit-reports
+
+          # Generate license listing
+          pnpm licenses list --json > audit-reports/licenses.json 2>/dev/null || true
+
+          # Check for prohibited licenses using Trivy
+          if command -v trivy &> /dev/null || which trivy &> /dev/null; then
+            trivy fs --scanners license --format json --output audit-reports/trivy-license.json . || true
+          fi
+
+          # Manual check for known copyleft licenses
+          PROHIBITED="GPL-3.0-only|GPL-3.0-or-later|AGPL-3.0-only|AGPL-3.0-or-later|SSPL-1.0|EUPL-1.1"
+          if [ -f audit-reports/licenses.json ]; then
+            if grep -iE "$PROHIBITED" audit-reports/licenses.json; then
+              echo "::error::Prohibited copyleft license detected in dependencies"
+              exit 1
+            fi
+          fi
+
+          echo "No prohibited licenses detected."
+
+      - name: Upload license audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-audit-report
+          path: audit-reports/
+          retention-days: 90
+
+  # ---------------------------------------------------------------------------
+  # Job 4: Container Image Scan (if Dockerfile exists)
+  # ---------------------------------------------------------------------------
+  trivy-container:
+    name: Container Image Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check for Dockerfile
+        id: check-dockerfile
+        run: |
+          if [ -f Dockerfile ] || [ -f server/Dockerfile ]; then
+            echo "has_dockerfile=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_dockerfile=false" >> $GITHUB_OUTPUT
+            echo "No Dockerfile found, skipping container scan."
+          fi
+
+      - name: Build container image for scanning
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true'
+        run: |
+          if [ -f Dockerfile ]; then
+            docker build -t audit-scan/intelgraph:local -f Dockerfile .
+          elif [ -f server/Dockerfile ]; then
+            docker build -t audit-scan/intelgraph:local -f server/Dockerfile .
+          fi
+
+      - name: Trivy container scan
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true'
+        uses: aquasecurity/trivy-action@v0.24.0
+        with:
+          image-ref: audit-scan/intelgraph:local
+          format: sarif
+          output: trivy-container.sarif
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+
+      - name: Upload container SARIF
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true' && (github.event.pull_request.head.repo.full_name == github.repository || github.event_name != 'pull_request')
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-container.sarif
+          category: trivy-container-audit
+
+      - name: Upload container scan artifact
+        if: steps.check-dockerfile.outputs.has_dockerfile == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-container-scan
+          path: trivy-container.sarif
+          retention-days: 30
+
+  # ---------------------------------------------------------------------------
+  # Aggregate: Security Audit Summary
+  # ---------------------------------------------------------------------------
+  audit-summary:
+    name: Security Audit Summary
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - codeql
+      - dependency-review
+      - license-check
+      - trivy-container
+    steps:
+      - name: Audit summary
+        run: |
+          echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Audit | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL Analysis | ${{ needs.codeql.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Review | ${{ needs.dependency-review.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| License Compliance | ${{ needs.license-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Container Image Scan | ${{ needs.trivy-container.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          FAILED=0
+          for result in \
+            "${{ needs.codeql.result }}" \
+            "${{ needs.license-check.result }}" \
+            "${{ needs.trivy-container.result }}"; do
+            if [[ "$result" == "failure" ]]; then
+              FAILED=1
+            fi
+          done
+
+          # dependency-review is PR-only so may be skipped
+          if [[ "${{ needs.dependency-review.result }}" == "failure" ]]; then
+            FAILED=1
+          fi
+
+          if [[ "$FAILED" -eq 1 ]]; then
+            echo "::error::Security audit found issues requiring attention."
+            exit 1
+          fi
+
+          echo "All security audits passed or were skipped appropriately."

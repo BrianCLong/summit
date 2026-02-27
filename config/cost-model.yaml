@@ -1,0 +1,19 @@
+version: '1.0'
+unitCosts:
+  graphql_query: 0.000002        # $2 per 1M queries
+  graphql_mutation: 0.000005     # $5 per 1M mutations
+  ingest_event: 0.0001           # $0.10 per 1k events
+  ingest_file_mb: 0.01           # $0.01 per MB
+  graph_1hop: 0.000001           # $1 per 1M
+  graph_2hop: 0.000005           # $5 per 1M
+  graph_3hop: 0.00001            # $10 per 1M
+  storage_gb_month: 0.05
+  copilot_query: 0.10
+  ml_inference: 0.01
+budgets:
+  development: { monthly: 500, alert_threshold: 0.80 }
+  staging: { monthly: 1000, alert_threshold: 0.80 }
+  production: { monthly: 10000, alert_threshold: 0.80 }
+anomalyDetection:
+  enabled: true
+  threshold: 0.20
