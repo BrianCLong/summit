@@ -178,7 +178,7 @@ export class ConflictUIController {
     try {
       const { entityId } = req.params;
       const tenantId = req.headers['x-tenant-id'] as string;
-      const limit = parseInt(req.query.limit as string) || 50;
+      const limit = parseInt((req.query.limit as string) || 50;
 
       if (!tenantId) {
         res.status(400).json({

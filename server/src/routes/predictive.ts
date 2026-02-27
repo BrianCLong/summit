@@ -13,7 +13,7 @@ const router = express.Router();
 router.get('/forecast/:signal', async (req: Request, res: Response) => {
   try {
     const signal = req.params.signal;
-    const horizon = parseInt(req.query.horizon as string) || 24;
+    const horizon = parseInt((req.query.horizon as string) || 24;
 
     const result = await predictiveThreatService.forecastSignal(signal, horizon);
     res.json(result);

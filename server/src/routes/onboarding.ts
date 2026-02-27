@@ -167,8 +167,8 @@ router.get(
   requireFeatureFlag('onboarding.sampleContent'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const persona = (req.query.persona as string) || 'analyst';
-      const type = req.query.type as string | undefined;
+      const persona = ((req.query.persona as string) || 'analyst';
+      const type = (req.query.type as string) as string | undefined;
 
       const result = await enhancedOnboardingService.getSampleContent(
         persona as any,
@@ -218,7 +218,7 @@ router.get(
   requireFeatureFlag('onboarding.contextualHelp'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const route = (req.query.route as string) || '/';
+      const route = ((req.query.route as string) || '/';
       const { id: userId } = req.user!;
 
       const result = await enhancedOnboardingService.getContextualHelp(route, userId);
@@ -268,12 +268,12 @@ router.get(
         return;
       }
 
-      const period = (req.query.period as 'daily' | 'weekly' | 'monthly') || 'weekly';
-      const startDate = req.query.startDate
-        ? new Date(req.query.startDate as string)
+      const period = ((req.query.period as string) as 'daily' | 'weekly' | 'monthly') || 'weekly';
+      const startDate = (req.query.startDate as string)
+        ? new Date((req.query.startDate as string)
         : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const endDate = req.query.endDate
-        ? new Date(req.query.endDate as string)
+      const endDate = (req.query.endDate as string)
+        ? new Date((req.query.endDate as string)
         : new Date();
 
       const result = await enhancedOnboardingService.getAnalyticsSummary(

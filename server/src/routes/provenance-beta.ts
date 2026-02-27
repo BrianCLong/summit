@@ -317,7 +317,7 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
     }
 
     // Optionally include full provenance chain
-    if (req.query.include_provenance === 'true') {
+    if ((req.query.include_provenance as string) === 'true') {
       const provenance = await provenanceLedger.getProvenanceChain(
         req.params.id,
       );
@@ -355,16 +355,16 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
 router.get('/claims', async (req: Request, res: Response) => {
   try {
     const filters: ClaimQueryFilters = {
-      investigation_id: req.query.investigation_id as string,
-      created_by: req.query.created_by as string,
-      claim_type: req.query.claim_type as any,
-      confidence_min: req.query.confidence_min
-        ? parseFloat(req.query.confidence_min as string)
+      investigation_id: (req.query.investigation_id as string) as string,
+      created_by: (req.query.created_by as string) as string,
+      claim_type: (req.query.claim_type as string) as any,
+      confidence_min: (req.query.confidence_min as string)
+        ? parseFloat((req.query.confidence_min as string)
         : undefined,
-      confidence_max: req.query.confidence_max
-        ? parseFloat(req.query.confidence_max as string)
+      confidence_max: (req.query.confidence_max as string)
+        ? parseFloat((req.query.confidence_max as string)
         : undefined,
-      source_id: req.query.source_id as string,
+      source_id: (req.query.source_id as string) as string,
     };
 
     const claims = await provenanceLedger.queryClaims(filters);
