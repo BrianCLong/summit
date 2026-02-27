@@ -36,6 +36,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create Dummy .env
+        run: echo "POSTGRES_PASSWORD=dummy" > .env
+
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
