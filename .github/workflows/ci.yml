@@ -50,10 +50,9 @@ jobs:
           path: |
             ~/.pnpm-store
             node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
-          retention-days: 7
+            ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-
 
       - name: Cache build
         uses: actions/cache@v4
@@ -62,9 +61,6 @@ jobs:
             ./dist
             ./.turbo
           key: ${{ runner.os }}-build-${{ github.job }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,rs,go}', '**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ github.job }}-
-          retention-days: 7
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
@@ -88,10 +84,9 @@ jobs:
           path: |
             ~/.pnpm-store
             node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
-          retention-days: 7
+            ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-
 
       - name: Cache build
         uses: actions/cache@v4
@@ -100,9 +95,6 @@ jobs:
             ./dist
             ./.turbo
           key: ${{ runner.os }}-build-${{ github.job }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,rs,go}', '**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ github.job }}-
-          retention-days: 7
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -124,10 +116,9 @@ jobs:
           path: |
             ~/.pnpm-store
             node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
-          retention-days: 7
+            ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-
 
       - name: Cache build
         uses: actions/cache@v4
@@ -136,9 +127,6 @@ jobs:
             ./dist
             ./.turbo
           key: ${{ runner.os }}-build-${{ github.job }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,rs,go}', '**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ github.job }}-
-          retention-days: 7
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -180,10 +168,9 @@ jobs:
           path: |
             ~/.pnpm-store
             node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
-          retention-days: 7
+            ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -240,10 +227,9 @@ jobs:
           path: |
             ~/.pnpm-store
             node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          key: ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-deps-
-          retention-days: 7
+            ${{ runner.os }}-deps-node-${{ hashFiles('.nvmrc') }}-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
