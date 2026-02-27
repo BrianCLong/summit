@@ -37,10 +37,10 @@ jobs:
 
       - name: Run Tests
         run: |
-          if [[ -f tests/graphci/test_evidence_layout.py ]]; then
-            pytest tests/graphci/test_evidence_layout.py
+          if [[ -f ci/graphci/tests/test_determinism.py ]]; then
+            pytest ci/graphci/tests/test_determinism.py
           else
-            echo "tests/graphci/test_evidence_layout.py not found; skipping pytest."
+            echo "ci/graphci/tests/test_determinism.py not found; skipping pytest."
           fi
 
       - name: Determinism Verification
