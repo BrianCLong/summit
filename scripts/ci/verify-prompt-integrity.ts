@@ -2,7 +2,7 @@ import path from 'node:path';
 import { assertScopeCompliance, ensureHashMatches, getChangedFiles, getPromptByHash, loadPromptRegistry } from './lib/prompt-registry';
 
 function usage(): never {
-  // eslint-disable-next-line no-console
+
   console.error('Usage: ts-node scripts/ci/verify-prompt-integrity.ts --prompt-hash <hash> [--registry <path>] [--diff-base <ref>]');
   process.exit(1);
 }
@@ -47,7 +47,7 @@ function main(): void {
   const changedFiles = getChangedFiles(diffBase);
   assertScopeCompliance(prompt, changedFiles);
 
-  // eslint-disable-next-line no-console
+
   console.log(`Prompt integrity verified for ${prompt.id} with ${changedFiles.length} changed file(s).`);
 }
 
