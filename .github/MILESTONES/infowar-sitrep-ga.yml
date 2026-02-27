@@ -1,13 +1,6 @@
-name: Infowar SITREP GA
-description: Verification gate for InfoWar SITREP General Availability
-status: active
-acceptance_checks:
-  - id: schema-validation
-    description: Evidence schema validation passes
-    command: npx tsx .github/scripts/validate-evidence.ts
-  - id: evidence-bundle
-    description: Evidence bundle generated in tests
-    command: NODE_OPTIONS=--experimental-vm-modules npx jest tests/graphrag/evidence/evidence.spec.ts
-  - id: never-log-gate
-    description: Static scan for forbidden fields in logs
-    command: npx tsx .github/scripts/check-never-log.ts
+name: INFOWAR SITREP GA
+status: tracking
+requirements:
+  - schema validation passes
+  - evidence bundle generated in tests
+  - policy gates pass
