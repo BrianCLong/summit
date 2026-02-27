@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  neo4j:
+    image: neo4j:5.11.0
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    ports:
+      - "7687:7687"
+      - "7474:7474"
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=intelgraph
+      - POSTGRES_USER=intelgraph
+    ports:
+      - "5432:5432"

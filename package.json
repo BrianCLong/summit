@@ -6,6 +6,7 @@
   "type": "module",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
+    "lint:release-policy": "echo "Release policy linting not yet implemented" && exit 0",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",

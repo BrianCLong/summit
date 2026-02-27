@@ -95,8 +95,8 @@ router.get(
 
       // Parse query params
       const input = {
-        page: parseInt(req.query.page as string, 10) || 1,
-        pageSize: parseInt(req.query.pageSize as string, 10) || 20,
+        page: parseInt(req.query.page as string as string, 10) || 1,
+        pageSize: parseInt(req.query.pageSize as string as string, 10) || 20,
         search: req.query.search as string,
         role: req.query.role as string,
         isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,

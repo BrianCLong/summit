@@ -49,13 +49,13 @@ router.post('/tickets', express.json(), async (req, res) => {
 router.get('/tickets', async (req, res) => {
   try {
     const options: ListTicketsOptions = {
-      status: req.query.status as any,
+      status: (req.query.status as string) as any,
       priority: req.query.priority as any,
       category: req.query.category as any,
       reporter_id: req.query.reporter_id as string,
       assignee_id: req.query.assignee_id as string,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+      limit: req.query.limit ? parseInt(req.query.limit as string as string, 10) : 50,
+      offset: req.query.offset ? parseInt(req.query.offset as string as string, 10) : 0,
     };
 
     const [tickets, count] = await Promise.all([

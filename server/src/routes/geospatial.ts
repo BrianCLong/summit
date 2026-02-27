@@ -101,7 +101,7 @@ router.post('/optimize', async (req, res, next) => {
 // GET /clusters - Get location clusters
 router.get('/clusters', async (req, res, next) => {
   try {
-    const zoom = parseInt(req.query.zoom as string) || 10;
+    const zoom = parseInt(req.query.zoom as string as string) || 10;
     const clusters = await geoService.clusterLocations(zoom);
     res.json(clusters);
   } catch (error: any) {

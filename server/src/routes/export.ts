@@ -67,7 +67,7 @@ exportRouter.use(tenantHeader());
 exportRouter.get('/provenance', async (req, res) => {
   try {
     const scope = String(req.query.scope || '');
-    const id = String(req.query.id || '');
+    const id = String((req.query.id as string) || '');
     const format = String(req.query.format || 'json').toLowerCase();
     const ts = Number(req.query.ts || 0);
     const sig = String(req.query.sig || '');
@@ -132,7 +132,7 @@ exportRouter.get('/provenance', async (req, res) => {
     if (to) filter.to = to;
     if (contains) filter.contains = contains;
     const first = Math.min(Number(req.query.first || 1000), 5000);
-    const offset = Math.max(Number(req.query.offset || 0), 0);
+    const offset = Math.max(Number((req.query.offset as string) || 0), 0);
 
     // Cache JSON responses 60s
     const cacheKey = `exp:${crypto

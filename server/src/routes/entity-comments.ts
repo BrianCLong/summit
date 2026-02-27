@@ -170,10 +170,10 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
 
     const { id } = req.params;
     const limit = req.query.limit
-      ? parseInt(req.query.limit as string, 10)
+      ? parseInt(req.query.limit as string as string, 10)
       : undefined;
     const offset = req.query.offset
-      ? parseInt(req.query.offset as string, 10)
+      ? parseInt(req.query.offset as string as string, 10)
       : undefined;
 
     await authorizer({

@@ -619,8 +619,8 @@ router.get(
           : undefined,
         startTime: req.query.startTime as string,
         endTime: req.query.endTime as string,
-        limit: parseInt(req.query.limit as string) || 100,
-        offset: parseInt(req.query.offset as string) || 0,
+        limit: parseInt((req.query.limit as string) as string) || 100,
+        offset: parseInt((req.query.offset as string) as string) || 0,
       };
 
       const entries = await zeroTrustService!.audit.queryEntries(query);

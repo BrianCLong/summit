@@ -290,9 +290,9 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const status = req.query.status as PolicySuggestion['status'] | undefined;
-      const limit = parseInt(req.query.limit as string) || 20;
-      const offset = parseInt(req.query.offset as string) || 0;
+      const status = (req.query.status as string) as PolicySuggestion['status'] | undefined;
+      const limit = parseInt((req.query.limit as string) as string) || 20;
+      const offset = parseInt((req.query.offset as string) as string) || 0;
 
       const result = await policySuggestionService!.listSuggestions(tenantId, {
         status,
@@ -743,13 +743,13 @@ router.get(
       const anomalies = await anomalyService!.detectAnomalies(scope);
 
       // Filter by status if provided
-      const filteredAnomalies = req.query.status
-        ? anomalies.filter(a => a.status === req.query.status)
+      const filteredAnomalies = (req.query.status as string)
+        ? anomalies.filter(a => a.status === (req.query.status as string))
         : anomalies;
 
       // Apply pagination
-      const offset = parseInt(req.query.offset as string) || 0;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const offset = parseInt((req.query.offset as string) as string) || 0;
+      const limit = parseInt((req.query.limit as string) as string) || 20;
       const paginated = filteredAnomalies.slice(offset, offset + limit);
 
       res.json(wrapResponse({
