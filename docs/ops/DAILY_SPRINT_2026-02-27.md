@@ -81,6 +81,8 @@ Captured from `gh run list --repo BrianCLong/summit --limit 20`.
 7. `node scripts/check-boundaries.cjs` - passed.
 8. `GITHUB_TOKEN="$(gh auth token)" ... npx tsx scripts/ops/pr_triage.ts ...` - blocked (`no oauth token found` and toolchain/network friction).
 9. `pnpm exec tsx scripts/ops/pr_triage.ts --out docs/ops/pr-triage` - blocked (`Command "tsx" not found` due dependencies not installed in this worktree).
+10. `git push -u origin codex/daily-sprint-2026-02-27` - succeeded.
+11. `gh pr create --repo BrianCLong/summit --base main --head codex/daily-sprint-2026-02-27 ...` - failed after 3 retries (`error connecting to api.github.com`).
 
 ### Completed Changes
 - Added retry/backoff and snapshot fallback logic to `scripts/ops/pr_triage.ts`.
@@ -88,8 +90,8 @@ Captured from `gh run list --repo BrianCLong/summit --limit 20`.
 - Added persisted snapshot write on successful live fetch for deterministic fallback behavior.
 
 ## PRs Touched
-- No PR branch was directly updated in this run due API instability and detached-worktree starting state.
-- Local branch prepared for push/PR: `codex/daily-sprint-2026-02-27`.
+- Branch pushed: `origin/codex/daily-sprint-2026-02-27` at commit `e8f57d3cb5`.
+- PR creation attempt blocked by GitHub API instability (three retries failed).
 
 ## Blockers and Follow-Ups
 
@@ -105,5 +107,5 @@ Captured from `gh run list --repo BrianCLong/summit --limit 20`.
 
 ## End-of-Day Status
 - Completed: PR triage script resilience patch, roadmap status update, daily sprint artifact with evidence and blockers.
-- In progress: live PR/run diagnostics for failing CI branch `feat/maestro-spec-interview-prompt-2211639584769178855`.
+- In progress: live PR/run diagnostics for failing CI branch `feat/maestro-spec-interview-prompt-2211639584769178855` and PR opening for `codex/daily-sprint-2026-02-27`.
 - Blocked: GitHub API intermittency and missing local TypeScript runner dependencies in this worktree.
