@@ -89,6 +89,6 @@ module.exports = {
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons', 'default'],
   },
-  // setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.cjs'],
+  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.cjs'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
