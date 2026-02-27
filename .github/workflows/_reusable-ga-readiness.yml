@@ -136,6 +136,13 @@ jobs:
           # Use the hardened script that no longer uses mocks
           node scripts/generate-evidence-bundle.js
 
+      # 5. Plan Stability Gate
+      - name: Render Plan Heatmap
+        run: python3 tools/plan_heatmap.py
+
+      - name: Enforce Plan Stability Gate
+        run: python3 tools/plan_gate.py
+
       - name: Upload Readiness Artifacts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4

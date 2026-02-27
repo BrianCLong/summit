@@ -1,0 +1,9 @@
+overrides:
+  - pattern: "MATCH (e:Evidence)-[:DERIVED_FROM]->"
+    rate: 0.10
+  - pattern: "MATCH (a:Agent)-[:REMEMBERED]->"
+    rate: 0.10
+  - pattern: "MATCH (d:Document)-[:CITES]->"
+    rate: 0.10
+default_rate: 0.01
+enabled: true

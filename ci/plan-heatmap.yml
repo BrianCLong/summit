@@ -1,0 +1,37 @@
+name: Plan Heatmap Render
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Hourly
+  workflow_dispatch:
+
+jobs:
+  render-heatmap:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install pyyaml
+
+      - name: Download Plan Samples
+        # Assuming samples are stored as artifacts from previous runs or a bucket
+        # For simulation, we create a dummy sample if none exist
+        run: |
+          mkdir -p .plan-samples
+          echo '{"query_signature": "MATCH (n) RETURN n", "plan": {"operatorType": "ProduceResults"}, "timestamp": "2023-10-27T10:00:00"}' > .plan-samples/sample_1.json
+
+      - name: Render Heatmap
+        run: python3 tools/plan_heatmap.py
+
+      - name: Upload Heatmap Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-heatmap
+          path: artifacts/plan-stability/heatmap.json
