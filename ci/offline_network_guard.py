@@ -4,7 +4,6 @@ from urllib.parse import urlparse
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("offline_network_guard")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "::1"]
