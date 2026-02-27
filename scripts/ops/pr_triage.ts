@@ -47,6 +47,7 @@ interface Hotspot {
 interface PRTriageReport {
   generatedAt: string;
   baseBranch: string;
+  dataSource: string;
   prs: PRData[];
   mergeTrain: MergeTrainItem[];
   hotspots: Hotspot[];
@@ -59,6 +60,9 @@ const [OWNER, REPO] = GITHUB_REPOSITORY.split('/');
 const OUTPUT_DIR = process.argv.includes('--out')
   ? process.argv[process.argv.indexOf('--out') + 1]
   : 'docs/ops/pr-triage';
+const SNAPSHOT_FILE = path.join(OUTPUT_DIR, 'PR_TRIAGE_SNAPSHOT.json');
+const FETCH_RETRIES = 3;
+const RETRY_BASE_DELAY_MS = 1200;
 
 const CRITICAL_PATHS = [
   '.github/workflows',
@@ -70,6 +74,10 @@ const CRITICAL_PATHS = [
 ];
 
 // Helper for GitHub API using native fetch
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function githubFetch(endpoint: string, options: any = {}) {
     const url = `https://api.github.com${endpoint}`;
     const headers = {
@@ -87,25 +95,52 @@ async function githubFetch(endpoint: string, options: any = {}) {
     return response.json();
 }
 
+async function githubFetchWithRetry(endpoint: string, options: any = {}) {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= FETCH_RETRIES; attempt++) {
+    try {
+      return await githubFetch(endpoint, options);
+    } catch (error) {
+      lastError = error;
+      if (attempt === FETCH_RETRIES) break;
+      const delay = RETRY_BASE_DELAY_MS * attempt;
+      console.warn(
+        `GitHub API call failed for ${endpoint} (attempt ${attempt}/${FETCH_RETRIES}); retrying in ${delay}ms`
+      );
+      await sleep(delay);
+    }
+  }
+  throw lastError;
+}
+
 async function fetchOpenPRs() {
   if (!GITHUB_TOKEN) {
     console.warn('⚠️ GITHUB_TOKEN not set. Running in MOCK mode.');
-    return getMockPRs();
+    return { prs: getMockPRs(), source: 'mock' };
   }
 
   try {
     const params = new URLSearchParams({ state: 'open', per_page: '100', sort: 'created', direction: 'asc' });
-    return await githubFetch(`/repos/${OWNER}/${REPO}/pulls?${params}`);
+    const prs = await githubFetchWithRetry(`/repos/${OWNER}/${REPO}/pulls?${params}`);
+    return { prs, source: 'github-api' };
   } catch (error: any) {
-    console.error('Failed to fetch PRs:', error.message);
-    process.exit(1);
+    if (fs.existsSync(SNAPSHOT_FILE)) {
+      console.warn(
+        `Failed to fetch PRs from GitHub API (${error.message}). Falling back to ${SNAPSHOT_FILE}.`
+      );
+      const snapshot = JSON.parse(fs.readFileSync(SNAPSHOT_FILE, 'utf-8'));
+      return { prs: snapshot, source: 'snapshot' };
+    }
+    throw new Error(
+      `Failed to fetch PRs and no snapshot is available at ${SNAPSHOT_FILE}: ${error.message}`
+    );
   }
 }
 
 async function fetchPRFiles(prNumber: number) {
   if (!GITHUB_TOKEN) return [];
   try {
-    const data = await githubFetch(`/repos/${OWNER}/${REPO}/pulls/${prNumber}/files?per_page=100`);
+    const data = await githubFetchWithRetry(`/repos/${OWNER}/${REPO}/pulls/${prNumber}/files?per_page=100`);
     return data.map((f: any) => f.filename);
   } catch (error) {
     console.error(`Failed to fetch files for PR #${prNumber}`);
@@ -118,10 +153,10 @@ async function fetchPRChecks(ref: string) {
 
     try {
         // Get combined status (commit status API)
-        const statusRes = await githubFetch(`/repos/${OWNER}/${REPO}/commits/${ref}/status`);
+        const statusRes = await githubFetchWithRetry(`/repos/${OWNER}/${REPO}/commits/${ref}/status`);
 
         // Get check runs (Check Runs API)
-        const checksRes = await githubFetch(`/repos/${OWNER}/${REPO}/commits/${ref}/check-runs`);
+        const checksRes = await githubFetchWithRetry(`/repos/${OWNER}/${REPO}/commits/${ref}/check-runs`);
 
         const failures: string[] = [];
         let status: 'SUCCESS' | 'FAILURE' | 'PENDING' | 'MISSING' = 'SUCCESS';
@@ -182,7 +217,7 @@ function getMockPRs() {
 async function analyze() {
   console.log(`Starting PR Triage for ${OWNER}/${REPO}...`);
 
-  const rawPrs = await fetchOpenPRs();
+  const { prs: rawPrs, source } = await fetchOpenPRs();
   const processedPrs: PRData[] = [];
   const fileMap = new Map<string, number[]>(); // filename -> list of PR numbers
 
@@ -338,6 +373,7 @@ async function analyze() {
   const report: PRTriageReport = {
       generatedAt: new Date().toISOString(),
       baseBranch: 'main',
+      dataSource: source,
       prs: processedPrs,
       mergeTrain,
       hotspots: hotspots.slice(0, 10) // Top 10
@@ -346,6 +382,9 @@ async function analyze() {
   // Write JSON
   if (!fs.existsSync(OUTPUT_DIR)) {
       fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  }
+  if (source === 'github-api') {
+      fs.writeFileSync(SNAPSHOT_FILE, JSON.stringify(rawPrs, null, 2));
   }
   fs.writeFileSync(path.join(OUTPUT_DIR, 'PR_TRIAGE_REPORT.json'), JSON.stringify(report, null, 2));
 
@@ -361,6 +400,7 @@ function generateMarkdown(report: PRTriageReport): string {
 
 **Generated At:** ${report.generatedAt}
 **Base Branch:** ${report.baseBranch}
+**Data Source:** ${report.dataSource}
 **Total Open PRs:** ${report.prs.length}
 
 ## 🚂 Recommended Merge Train

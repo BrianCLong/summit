@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-27T00:40:00Z",
+  "revision_note": "Added daily sprint PR triage resilience initiative and documented deterministic fallback behavior.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -13,6 +13,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "daily-sprint-2026-02-27-pr-triage-resilience",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Hardened scripts/ops/pr_triage.ts with GitHub API retry/backoff and snapshot fallback to keep daily sprint triage deterministic during API instability."
     },
     {
       "id": "B",
