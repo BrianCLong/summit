@@ -21,6 +21,37 @@ describe('StrategicPlanRepo Optimization', () => {
     repo = new StrategicPlanRepo(mockPool);
   });
 
+  describe('getObjectivesByPlan', () => {
+    it('should use bulk queries to avoid N+1 problem', async () => {
+      const planId = 'plan-123';
+      const mockObjectives = [
+        { id: 'obj-1', plan_id: planId, name: 'Obj 1' },
+        { id: 'obj-2', plan_id: planId, name: 'Obj 2' },
+      ];
+
+      const mockMilestones = [
+        { id: 'ms-1', parent_id: 'obj-1', parent_type: 'objective', name: 'MS 1' },
+        { id: 'ms-2', parent_id: 'obj-2', parent_type: 'objective', name: 'MS 2' },
+      ];
+
+      const mockKeyResults = [
+        { id: 'kr-1', objective_id: 'obj-1', description: 'KR 1', target_value: 100, current_value: 0, weight: 1.0, status: 'NOT_STARTED' },
+        { id: 'kr-2', objective_id: 'obj-2', description: 'KR 2', target_value: 100, current_value: 0, weight: 1.0, status: 'NOT_STARTED' },
+      ];
+
+      mockPool.query.mockResolvedValueOnce({ rows: mockObjectives });
+      mockPool.query.mockResolvedValueOnce({ rows: mockMilestones });
+      mockPool.query.mockResolvedValueOnce({ rows: mockKeyResults });
+
+      const result = await repo.getObjectivesByPlan(planId);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].milestones).toHaveLength(1);
+      expect(result[0].keyResults).toHaveLength(1);
+      expect(mockPool.query).toHaveBeenCalledTimes(3);
+    });
+  });
+
   describe('getInitiativesByPlan', () => {
     it('should use bulk queries to avoid N+1 problem', async () => {
       const planId = 'plan-123';

@@ -497,13 +497,45 @@ export class StrategicPlanRepo {
   }
 
   async getObjectivesByPlan(planId: string): Promise<StrategicObjective[]> {
-    const queryRes = await this.pg.query(
+    const { rows: objectives } = await this.pg.query(
       `SELECT * FROM strategic_objectives WHERE plan_id = $1 ORDER BY created_at ASC`,
       [planId],
     );
-    const rows = (queryRes as any)?.rows || [];
 
-    return rows.map((row: any) => this.mapObjectiveRow(row));
+    if (objectives.length === 0) return [];
+
+    const objectiveIds = objectives.map((row: any) => row.id);
+
+    // BOLT: Optimize by fetching all milestones and key results in bulk to avoid N+1 queries
+    const [milestonesRes, keyResultsRes] = await Promise.all([
+      this.pg.query(
+        `SELECT * FROM strategic_milestones WHERE parent_id = ANY($1) AND parent_type = 'objective' ORDER BY due_date ASC`,
+        [objectiveIds],
+      ),
+      this.pg.query(
+        `SELECT * FROM strategic_key_results WHERE objective_id = ANY($1) ORDER BY due_date ASC`,
+        [objectiveIds],
+      ),
+    ]);
+
+    const milestonesMap = new Map<string, Milestone[]>();
+    milestonesRes.rows.forEach((row: any) => {
+      if (!milestonesMap.has(row.parent_id)) milestonesMap.set(row.parent_id, []);
+      milestonesMap.get(row.parent_id)!.push(this.mapMilestoneRow(row));
+    });
+
+    const keyResultsMap = new Map<string, KeyResult[]>();
+    keyResultsRes.rows.forEach((row: any) => {
+      if (!keyResultsMap.has(row.objective_id)) keyResultsMap.set(row.objective_id, []);
+      keyResultsMap.get(row.objective_id)!.push(this.mapKeyResultRow(row));
+    });
+
+    return objectives.map((row: any) => {
+      const objective = this.mapObjectiveRow(row);
+      objective.milestones = milestonesMap.get(objective.id) || [];
+      objective.keyResults = keyResultsMap.get(objective.id) || [];
+      return objective;
+    });
   }
 
   async deleteObjective(id: string, userId: string): Promise<boolean> {
