@@ -187,6 +187,14 @@ all feature content was included.
 | Policy simulation script | `scripts/opa-policy-sim.sh` |
 | Testing strategy | `docs/ga-merge-train/TESTING-STRATEGY-v5.0.0.md` |
 | Security-critical tests (23) | `tests/unit/security-critical.test.ts` |
+| CI/CD security gates (4 workflows) | `.github/workflows/ci-security-gates.yml`, `deploy-pipeline.yml`, `release-pipeline.yml`, `security-audit.yml` |
+| Cost guardrails library | `libs/cost/` |
+| Cost model config | `config/cost-model.yaml` |
+| Observability library (OTel SDK) | `libs/observability/` |
+| Grafana cost dashboard | `observability/grafana/dashboards/cost-overview.json` |
+| Prometheus alerting rules | `observability/prometheus/alerts/cost-alerts.yaml` |
+| Prometheus recording rules | `observability/prometheus/recording-rules.yml` |
+| Release orchestration plan | `docs/ga-merge-train/RELEASE-ORCHESTRATION-v5.0.0.md` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -220,3 +228,7 @@ git push --force origin main
 - [x] OPA/ABAC policies implemented (6 packages, 80/80 tests pass, p95 ~50µs)
 - [x] Testing strategy documented (6-layer, 23 security-critical tests pass)
 - [x] Security-critical unit tests (HMAC, Cypher injection, XSS, SSRF, prototype pollution)
+- [x] CI/CD security gates (4 workflows: SAST/DAST, container scanning, SBOM, staged rollout)
+- [x] Cost guardrails library (metering, budget enforcement, anomaly detection, daily reports)
+- [x] Observability stack (OTel SDK, Grafana dashboard, Prometheus alerts + recording rules)
+- [x] Release orchestration plan documented (P0–P8 phases, 17 agents, gate definitions)

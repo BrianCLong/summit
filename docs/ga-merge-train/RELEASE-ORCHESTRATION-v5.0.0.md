@@ -146,22 +146,20 @@ Rollback procedure:
 | `reports.renderer.v2.enabled` | All tenants | After P6 promote |
 | `copilot.v2.enabled` | All tenants | After P6 promote |
 
-## Current Status (2026-02-26)
+## Current Status (2026-02-27)
 
 ### Completed
 - [x] P0: 597 PRs merged, CI checks stabilized
+- [x] P1: Observability instrumentation — OTel SDK (`libs/observability/`), Grafana cost dashboard, Prometheus alerting rules + recording rules
+- [x] P1: CI/CD security gates — 4 GitHub Actions workflows (ci-security-gates, deploy-pipeline, release-pipeline, security-audit) with SAST/DAST, container scanning, SBOM generation
+- [x] P1: Cost guardrails — metering library (`libs/cost/`), budget enforcement middleware, anomaly detection, Prometheus metrics, daily reports, config (`config/cost-model.yaml`)
 - [x] P3 (partial): OPA ABAC policies (6 packages, 80/80 tests)
 - [x] P3 (partial): Injection audit (32 findings, 7 critical/high fixed)
 - [x] P3 (partial): Threat model (STRIDE analysis)
 - [x] P5 (partial): Chaos experiments defined (14 experiments in repo)
 - [x] P6 (partial): Provenance ledger library (11/11 tests pass)
 - [x] P6 (partial): Release notes and changelog generated
-- [x] P7 (partial): Testing strategy documented (6-layer)
-
-### In Progress
-- [ ] P1: Observability instrumentation (OTel SDK, dashboards, alerts)
-- [ ] P1: CI/CD security gates (workflows, scanning)
-- [ ] P1: Cost guardrails (metering, budgets)
+- [x] P7 (partial): Testing strategy documented (6-layer, 23 security-critical tests)
 
 ### Remaining
 - [ ] P2: Migration gate implementation
