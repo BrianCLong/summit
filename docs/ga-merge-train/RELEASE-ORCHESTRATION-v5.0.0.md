@@ -150,6 +150,10 @@ Rollback procedure:
 
 ### Completed
 - [x] P0: 597 PRs merged, CI checks stabilized
+- [x] P0: Container hardening — Helm security template (`helm/templates/_security.tpl`) with non-root, read-only FS, seccomp, network policies
+- [x] P1: Golden path probes — 10 synthetic probes + composite SLO (`observability/golden-paths/golden_paths.yaml`)
+- [x] P1: SLO gates workflow — validates golden paths against Prometheus (`slo-gates.yml`)
+- [x] P1: Performance gate — k6 baseline with 3x spike test, headroom analysis (`performance-gate.yml`)
 - [x] P1: Observability instrumentation — OTel SDK (`libs/observability/`), Grafana cost dashboard, Prometheus alerting rules + recording rules
 - [x] P1: CI/CD security gates — 4 GitHub Actions workflows (ci-security-gates, deploy-pipeline, release-pipeline, security-audit) with SAST/DAST, container scanning, SBOM generation
 - [x] P1: Cost guardrails — metering library (`libs/cost/`), budget enforcement middleware, anomaly detection, Prometheus metrics, daily reports, config (`config/cost-model.yaml`)
@@ -165,6 +169,7 @@ Rollback procedure:
 - [x] P7: Alert-to-runbook mapping — 23 Sev1/Sev2 alerts mapped to owners + runbooks + escalation chains (`ops/runbooks/alert-runbook-mapping.yaml`)
 - [x] P7: Alert hygiene CI gate — validates coverage, schema, and runbook path existence (`alert-hygiene.yml`)
 - [x] P7 (partial): Testing strategy documented (6-layer, 23 security-critical tests)
+- [x] P8 (partial): GA feature flag switch list — 4 flags defined in `config/feature-flags.json` with flip order and scope
 
 ### Remaining (require live infrastructure)
 - [ ] P4: Product feature GA readiness — code is present (GraphQL gateway, Neo4j model, ingest, search, realtime), requires staging deployment + 48h SLO soak

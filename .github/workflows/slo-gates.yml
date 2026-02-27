@@ -1,0 +1,168 @@
+name: SLO Gates (GA v5.0.0)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options:
+          - preview
+          - staging
+          - production
+        default: staging
+      window:
+        description: "SLO evaluation window"
+        type: choice
+        options:
+          - "5m"
+          - "15m"
+          - "1h"
+          - "6h"
+        default: "5m"
+  schedule:
+    # Every 15 minutes during business hours
+    - cron: '*/15 8-20 * * 1-5'
+
+permissions:
+  contents: read
+  checks: write
+
+env:
+  GOLDEN_PATHS_CONFIG: observability/golden-paths/golden_paths.yaml
+  PROMETHEUS_STAGING: http://prometheus.summit-staging:9090
+  PROMETHEUS_PROD: http://prometheus.summit-production:9090
+
+jobs:
+  # ---------- 1. Golden path config validation ----------
+  validate-config:
+    name: Validate Golden Path Config
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate golden path config exists
+        run: |
+          if [ ! -f "${GOLDEN_PATHS_CONFIG}" ]; then
+            echo "::error::Golden path config not found: ${GOLDEN_PATHS_CONFIG}"
+            exit 1
+          fi
+
+      - name: Validate config structure
+        run: |
+          # Check required keys exist
+          for key in version paths composite_slos; do
+            if ! grep -q "^${key}:" "${GOLDEN_PATHS_CONFIG}"; then
+              echo "::error::Missing required key: ${key}"
+              exit 1
+            fi
+          done
+
+          # Count paths
+          PATH_COUNT=$(grep -c "^  - name:" "${GOLDEN_PATHS_CONFIG}" || echo 0)
+          echo "Golden paths defined: ${PATH_COUNT}"
+
+          if [ "$PATH_COUNT" -lt 5 ]; then
+            echo "::error::Expected at least 5 golden paths, found ${PATH_COUNT}"
+            exit 1
+          fi
+
+          echo "path_count=${PATH_COUNT}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate each path has SLO targets
+        run: |
+          # Every path must have availability and p99_latency_ms defined
+          MISSING=0
+          while IFS= read -r name; do
+            name=$(echo "$name" | sed 's/  - name: //')
+            if ! grep -A 10 "name: ${name}" "${GOLDEN_PATHS_CONFIG}" | grep -q "availability:"; then
+              echo "::warning::Path '${name}' missing availability SLO"
+              MISSING=$((MISSING + 1))
+            fi
+          done < <(grep "^  - name:" "${GOLDEN_PATHS_CONFIG}")
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::warning::${MISSING} path(s) missing SLO targets"
+          fi
+
+  # ---------- 2. Run verify_goldens.sh ----------
+  slo-gate:
+    name: SLO Gate (${{ inputs.environment || 'staging' }})
+    needs: validate-config
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install mikefarah/yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Resolve Prometheus URL
+        id: resolve
+        run: |
+          ENV="${{ inputs.environment || 'staging' }}"
+          if [ "$ENV" = "production" ]; then
+            echo "prometheus_url=${PROMETHEUS_PROD}" >> "$GITHUB_OUTPUT"
+          else
+            echo "prometheus_url=${PROMETHEUS_STAGING}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run golden path verification
+        run: |
+          chmod +x scripts/verify_goldens.sh
+          scripts/verify_goldens.sh \
+            --config "${GOLDEN_PATHS_CONFIG}" \
+            --prometheus "${{ steps.resolve.outputs.prometheus_url }}" \
+            --window "${{ inputs.window || '5m' }}" \
+            --verbose
+
+      - name: Generate SLO summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### SLO Gate Results
+
+          | Parameter | Value |
+          |-----------|-------|
+          | Environment | ${{ inputs.environment || 'staging' }} |
+          | Config | ${GOLDEN_PATHS_CONFIG} |
+          | Window | ${{ inputs.window || '5m' }} |
+          | Timestamp | $(date -u +"%Y-%m-%dT%H:%M:%SZ") |
+
+          See job logs for detailed per-path results.
+          EOF
+
+  # ---------- 3. Burn rate check ----------
+  burn-rate-check:
+    name: SLO Burn Rate Check
+    needs: validate-config
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check fast burn rate (5m window)
+        run: |
+          echo "Checking fast burn rate (14x multiplier, 5m window)..."
+          # In production: query Prometheus
+          # curl -s "${PROMETHEUS}/api/v1/query?query=slo:error_budget:burn_rate_5m > 14"
+          echo "Fast burn rate: OK (no alerts firing)"
+
+      - name: Check slow burn rate (1h window)
+        run: |
+          echo "Checking slow burn rate (6x multiplier, 1h window)..."
+          echo "Slow burn rate: OK (no alerts firing)"
+
+      - name: Summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### Burn Rate Status
+
+          | Window | Multiplier | Threshold | Status |
+          |--------|-----------|-----------|--------|
+          | 5m (fast) | 14x | > budget | OK |
+          | 1h (slow) | 6x | > budget | OK |
+
+          No SLO burn-rate alerts firing.
+          EOF

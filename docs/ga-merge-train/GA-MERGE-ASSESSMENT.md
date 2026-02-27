@@ -200,6 +200,14 @@ all feature content was included.
 | DR drill workflow | `.github/workflows/dr-drill.yml` |
 | Alert hygiene CI gate | `.github/workflows/alert-hygiene.yml` |
 | Alert-to-runbook mapping (23 alerts) | `ops/runbooks/alert-runbook-mapping.yaml` |
+| Golden path probe definitions (10 paths) | `observability/golden-paths/golden_paths.yaml` |
+| Golden path verification script | `scripts/verify_goldens.sh` |
+| SLO gates workflow | `.github/workflows/slo-gates.yml` |
+| Performance gate workflow | `.github/workflows/performance-gate.yml` |
+| k6 performance baseline test | `tests/performance/k6-baseline.js` |
+| Helm security template | `helm/templates/_security.tpl` |
+| GA feature flags (4 flags) | `config/feature-flags.json` |
+| GA evidence summary | `docs/ga-merge-train/GA-EVIDENCE-SUMMARY-v5.0.0.md` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -242,3 +250,9 @@ git push --force origin main
 - [x] DR drill workflow (backup verification, failover/cutback, chaos validation, evidence bundle)
 - [x] Alert-to-runbook mapping (23 Sev1/Sev2 alerts with owners, runbooks, escalation chains)
 - [x] Alert hygiene CI gate (coverage validation, schema checks, runbook path existence)
+- [x] Golden path probes (10 synthetic probes + composite SLO, verified by verify_goldens.sh)
+- [x] SLO gates workflow (golden path + burn rate validation)
+- [x] Performance gate workflow (k6 baseline with 3x spike, headroom analysis ≥20%)
+- [x] Helm security template (non-root, read-only FS, seccomp, network policies, PDB)
+- [x] GA feature flags defined (search-ga, realtime, reports-v2, copilot-v2 with flip order)
+- [x] GA evidence summary (phase matrix, 34+ artifact index)

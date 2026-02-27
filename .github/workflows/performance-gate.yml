@@ -1,0 +1,184 @@
+name: Performance Gate (GA v5.0.0)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        type: choice
+        options:
+          - staging
+          - production
+        default: staging
+      duration:
+        description: "Test duration profile"
+        type: choice
+        options:
+          - short
+          - standard
+          - extended
+        default: short
+  pull_request:
+    paths:
+      - 'tests/performance/**'
+      - '.github/workflows/performance-gate.yml'
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+env:
+  HEADROOM_TARGET: 20
+  K6_BASELINE: tests/performance/k6-baseline.js
+
+jobs:
+  # ---------- 1. k6 baseline run ----------
+  k6-baseline:
+    name: k6 Performance Baseline
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      thresholds_passed: ${{ steps.run.outputs.thresholds_passed }}
+      p99_graphql: ${{ steps.parse.outputs.p99_graphql }}
+      p99_search: ${{ steps.parse.outputs.p99_search }}
+      error_rate: ${{ steps.parse.outputs.error_rate }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Determine k6 options override
+        id: opts
+        run: |
+          DURATION="${{ inputs.duration || 'short' }}"
+          case "$DURATION" in
+            short)
+              echo "stages='[{\"duration\":\"30s\",\"target\":10},{\"duration\":\"1m\",\"target\":25},{\"duration\":\"30s\",\"target\":50},{\"duration\":\"30s\",\"target\":25},{\"duration\":\"30s\",\"target\":0}]'" >> "$GITHUB_OUTPUT"
+              ;;
+            standard)
+              # Uses defaults from k6-baseline.js (11 min total)
+              echo "stages=" >> "$GITHUB_OUTPUT"
+              ;;
+            extended)
+              echo "stages='[{\"duration\":\"2m\",\"target\":20},{\"duration\":\"10m\",\"target\":100},{\"duration\":\"5m\",\"target\":300},{\"duration\":\"5m\",\"target\":100},{\"duration\":\"2m\",\"target\":0}]'" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Run k6 baseline
+        id: run
+        continue-on-error: true
+        run: |
+          BASE_URL="${{ inputs.environment == 'production' && 'https://api.summit.example.com' || 'https://api.staging.summit.example.com' }}"
+
+          k6 run "${K6_BASELINE}" \
+            --env "BASE_URL=${BASE_URL}" \
+            --env "AUTH_TOKEN=${PERF_AUTH_TOKEN:-perf-ci-token}" \
+            --env "TENANT_ID=perf-ci-tenant" \
+            --summary-export=k6-summary.json \
+            --out json=k6-results.json \
+            2>&1 | tee k6-output.txt
+
+          if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+            echo "thresholds_passed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "thresholds_passed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Parse results
+        id: parse
+        if: always()
+        run: |
+          if [ -f k6-summary.json ]; then
+            P99_GRAPHQL=$(jq -r '.metrics.graphql_latency.values["p(99)"] // "N/A"' k6-summary.json)
+            P99_SEARCH=$(jq -r '.metrics.search_latency.values["p(99)"] // "N/A"' k6-summary.json)
+            ERROR_RATE=$(jq -r '.metrics.errors.values.rate // "N/A"' k6-summary.json)
+            P99_HTTP=$(jq -r '.metrics.http_req_duration.values["p(99)"] // "N/A"' k6-summary.json)
+          else
+            P99_GRAPHQL="N/A"
+            P99_SEARCH="N/A"
+            ERROR_RATE="N/A"
+            P99_HTTP="N/A"
+          fi
+
+          echo "p99_graphql=${P99_GRAPHQL}" >> "$GITHUB_OUTPUT"
+          echo "p99_search=${P99_SEARCH}" >> "$GITHUB_OUTPUT"
+          echo "error_rate=${ERROR_RATE}" >> "$GITHUB_OUTPUT"
+          echo "p99_http=${P99_HTTP}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload k6 artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-perf-results-${{ github.run_id }}
+          path: |
+            k6-summary.json
+            k6-output.txt
+          retention-days: 90
+
+  # ---------- 2. Headroom analysis ----------
+  headroom-analysis:
+    name: Performance Headroom Analysis
+    needs: k6-baseline
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Calculate headroom
+        run: |
+          P99_GRAPHQL="${{ needs.k6-baseline.outputs.p99_graphql }}"
+          P99_SEARCH="${{ needs.k6-baseline.outputs.p99_search }}"
+          THRESHOLDS="${{ needs.k6-baseline.outputs.thresholds_passed }}"
+
+          echo "### Performance Headroom Analysis" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # GraphQL headroom (target: p99 < 500ms)
+          if [ "$P99_GRAPHQL" != "N/A" ]; then
+            GQL_HEADROOM=$(echo "scale=1; (1 - $P99_GRAPHQL / 500) * 100" | bc -l 2>/dev/null || echo "N/A")
+            echo "| GraphQL p99 | ${P99_GRAPHQL}ms / 500ms | ${GQL_HEADROOM}% headroom |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Search headroom (target: p99 < 300ms)
+          if [ "$P99_SEARCH" != "N/A" ]; then
+            SEARCH_HEADROOM=$(echo "scale=1; (1 - $P99_SEARCH / 300) * 100" | bc -l 2>/dev/null || echo "N/A")
+            echo "| Search p99 | ${P99_SEARCH}ms / 300ms | ${SEARCH_HEADROOM}% headroom |" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Headroom target: >= ${HEADROOM_TARGET}%**" >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------- 3. Gate decision ----------
+  performance-gate-decision:
+    name: Performance Gate Decision
+    needs: [k6-baseline, headroom-analysis]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate gate
+        run: |
+          THRESHOLDS="${{ needs.k6-baseline.outputs.thresholds_passed }}"
+          ERROR_RATE="${{ needs.k6-baseline.outputs.error_rate }}"
+
+          echo "### Performance Gate Decision" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$THRESHOLDS" = "true" ]; then
+            echo "| k6 thresholds | PASSED |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Error rate | ${ERROR_RATE} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**GATE: PASSED**" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$THRESHOLDS" = "N/A" ] || [ -z "$THRESHOLDS" ]; then
+            echo "| k6 thresholds | NO DATA |" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**GATE: SKIPPED (no perf data — environment may not be running)**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "| k6 thresholds | **FAILED** |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| Error rate | ${ERROR_RATE} |" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**GATE: FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

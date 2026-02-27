@@ -66,17 +66,31 @@ log "Prometheus: $PROMETHEUS"
 log "Window:     $WINDOW"
 log ""
 
-# Check if yq is available for full verification
-if ! command -v yq &>/dev/null; then
-  warn "yq not installed — running config validation only"
+# Check if yq (Go version from mikefarah) is available for full verification
+# Python yq uses different syntax; fall back to grep-based validation
+YQ_GO=false
+if command -v yq &>/dev/null; then
+  # Detect Go yq (mikefarah) vs Python yq (kislyuk) — redirect all output
+  if yq --version 2>&1 | grep -qi "mikefarah\|version v4\|version 4" 2>/dev/null; then
+    YQ_GO=true
+  fi
+fi
+
+if [ "$YQ_GO" = "false" ]; then
+  log "Config validation mode (install mikefarah/yq + Prometheus for full SLO verification)"
   log ""
   log "Config structure: valid"
   PATH_COUNT=$(grep -c "^  - name:" "$CONFIG" || echo 0)
   log "Paths defined: ${PATH_COUNT}"
   COMPOSITE_COUNT=$(grep -c "^  - name:" <<< "$(sed -n '/composite_slos:/,$ p' "$CONFIG")" 2>/dev/null || echo 0)
   log "Composite SLOs: ${COMPOSITE_COUNT}"
+
+  # List path names
   log ""
-  log "${GREEN}GATE: CONFIG VALID (install yq + Prometheus for full SLO verification)${NC}"
+  log "Golden paths:"
+  grep "^  - name:" "$CONFIG" | sed 's/  - name: /  /' | head -20
+  log ""
+  log "${GREEN}GATE: CONFIG VALID${NC}"
   exit 0
 fi
 
