@@ -207,9 +207,12 @@ fi
 log "Querying GitHub branch protection for $BRANCH..."
 
 API_ENDPOINT="repos/${REPO}/branches/${BRANCH}/protection/required_status_checks"
-API_ERROR=""
-GITHUB_CHECKS=""
-GITHUB_COUNT=0
+    if [[ "$FAIL_ON_DRIFT" == "true" ]]; then
+        log_error "Branch protection API inaccessible; failing because --fail-on-drift is active"
+        exit 1
+    else
+        log_warn "Branch protection API inaccessible; running in advisory mode"
+    fi
 API_ACCESSIBLE=true
 
 # Try to fetch branch protection
