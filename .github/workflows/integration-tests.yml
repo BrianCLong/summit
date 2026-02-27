@@ -21,6 +21,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: password
           POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
         ports:
           - 5432:5432
         options: >-
@@ -59,12 +60,33 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
+      - name: Cache deps
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-deps-
+          retention-days: 7
+
+      - name: Cache build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./dist
+            ./.turbo
+          key: ${{ runner.os }}-build-${{ github.job }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,rs,go}', '**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ github.job }}-
+          retention-days: 7
+
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
