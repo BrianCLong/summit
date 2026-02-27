@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "trace_id": { "type": "string" },
+    "autonomy_level": { "type": "integer" },
+    "token_usage": {
+      "type": "object",
+      "properties": {
+        "prompt": { "type": "integer" },
+        "completion": { "type": "integer" },
+        "total": { "type": "integer" }
+      }
+    },
+    "token_detail": {
+      "type": "object",
+      "properties": {
+        "model": { "type": "string" }
+      }
+    }
+  },
+  "required": ["trace_id", "autonomy_level"]
+}
