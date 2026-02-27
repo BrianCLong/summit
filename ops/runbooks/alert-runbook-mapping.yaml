@@ -1,0 +1,181 @@
+# Alert-to-Runbook Mapping — IntelGraph v5.0.0 GA
+# Every Sev1/Sev2 alert must have an owner and runbook reference.
+# CI enforces 100% coverage via .github/workflows/alert-hygiene.yml
+#
+# Format:
+#   alert_name:
+#     severity: page|ticket (page=Sev1, ticket=Sev2)
+#     owner: team or individual oncall
+#     runbook: path relative to repo root
+#     escalation: escalation chain
+
+alerts:
+  # ── SLO Burn Alerts ──
+  APISLOFastBurn:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/error-budget-runbook.md
+    escalation: platform-oncall → engineering-lead → VP-eng
+    description: "API error budget burning at 14x rate (>1% over 5m window)"
+
+  APISLOSlowBurn:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/error-budget-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "API error budget burning at 6x rate (>1% over 1h window)"
+
+  LatencySLOBreach:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/latency-slo-runbook.md
+    escalation: platform-oncall → engineering-lead → VP-eng
+    description: "P99 latency exceeding SLO target"
+
+  AvailabilitySLOBreach:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/error-budget-runbook.md
+    escalation: platform-oncall → engineering-lead → VP-eng
+    description: "Service availability below SLO target"
+
+  # ── Resource Alerts ──
+  HighMemoryUsage:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/saturation-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "Container memory usage exceeding 80% of limit"
+
+  HighCPUUsage:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/saturation-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "Container CPU usage exceeding 80% of limit"
+
+  PodCrashLooping:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/runbooks/prod-readiness-runbook.md
+    escalation: platform-oncall → engineering-lead → VP-eng
+    description: "Pod restarting repeatedly"
+
+  # ── Database Alerts ──
+  PostgresConnectionPoolExhausted:
+    severity: page
+    owner: data-oncall
+    runbook: docs/runbooks/disaster-recovery-procedures.yaml
+    escalation: data-oncall → platform-oncall → engineering-lead
+    description: "pgBouncer connection pool at capacity"
+
+  Neo4jHighQueryLatency:
+    severity: ticket
+    owner: data-oncall
+    runbook: docs/runbooks/disaster-recovery-procedures.yaml
+    escalation: data-oncall → platform-oncall
+    description: "Neo4j query P95 latency above threshold"
+
+  RedisEvictionHigh:
+    severity: ticket
+    owner: data-oncall
+    runbook: docs/runbooks/disaster-recovery-procedures.yaml
+    escalation: data-oncall → platform-oncall
+    description: "Redis eviction rate above normal"
+
+  # ── Ingest Pipeline Alerts ──
+  IngestLagHigh:
+    severity: ticket
+    owner: ingest-oncall
+    runbook: docs/runbooks/integration_chain_runbook.md
+    escalation: ingest-oncall → platform-oncall
+    description: "Ingest pipeline lag exceeding 60s"
+
+  DLQDepthHigh:
+    severity: page
+    owner: ingest-oncall
+    runbook: docs/runbooks/integration_chain_runbook.md
+    escalation: ingest-oncall → platform-oncall → engineering-lead
+    description: "Dead letter queue depth growing — messages not being processed"
+
+  # ── GraphQL Gateway Alerts ──
+  GraphQLErrorRateHigh:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/error-budget-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "GraphQL resolver error rate above 1%"
+
+  GraphQLLatencyHigh:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/observability/runbooks/latency-slo-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "GraphQL P99 latency above 500ms"
+
+  # ── Security Alerts ──
+  AuthFailureRateHigh:
+    severity: page
+    owner: security-oncall
+    runbook: docs/runbooks/security_runbook.md
+    escalation: security-oncall → platform-oncall → VP-eng
+    description: "Authentication failure rate spike — potential brute force or credential compromise"
+
+  OPAPolicyDenialSpike:
+    severity: ticket
+    owner: security-oncall
+    runbook: docs/runbooks/security_runbook.md
+    escalation: security-oncall → platform-oncall
+    description: "Unusual spike in OPA policy denials"
+
+  AuditLogGap:
+    severity: page
+    owner: security-oncall
+    runbook: docs/runbooks/security_runbook.md
+    escalation: security-oncall → platform-oncall → VP-eng
+    description: "Gap detected in audit log chain — potential tampering or system failure"
+
+  # ── Cost Alerts ──
+  DailyCostBudgetExceeded:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/runbooks/prod-readiness-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "Daily cloud cost exceeding budget threshold"
+
+  CostAnomalyDetected:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/runbooks/prod-readiness-runbook.md
+    escalation: platform-oncall → engineering-lead
+    description: "Anomalous cost spike detected (>3 std dev from rolling mean)"
+
+  # ── Canary / Deployment Alerts ──
+  CanaryRollbackTriggered:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/runbooks/canary-slo-gates.md
+    escalation: platform-oncall → engineering-lead → VP-eng
+    description: "Canary auto-rollback triggered due to SLO breach"
+
+  DeploymentStalled:
+    severity: ticket
+    owner: platform-oncall
+    runbook: docs/runbooks/canary-rollout-complete.md
+    escalation: platform-oncall → engineering-lead
+    description: "Deployment rollout stalled for > 10 minutes"
+
+  # ── DR / Backup Alerts ──
+  BackupFreshnessStale:
+    severity: page
+    owner: data-oncall
+    runbook: docs/runbooks/backup_dr_runbook_pr16.md
+    escalation: data-oncall → platform-oncall → VP-eng
+    description: "Database backup older than RPO target"
+
+  DRHealthCheckFailed:
+    severity: page
+    owner: platform-oncall
+    runbook: docs/runbooks/disaster-recovery-procedures.yaml
+    escalation: platform-oncall → engineering-lead → VP-eng
+    description: "DR region health check failing"

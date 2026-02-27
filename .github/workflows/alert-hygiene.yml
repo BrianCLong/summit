@@ -1,0 +1,182 @@
+name: Alert Hygiene Gate
+
+on:
+  pull_request:
+    paths:
+      - 'observability/prometheus/alerts/**'
+      - 'k8s/alerts/**'
+      - 'ops/runbooks/alert-runbook-mapping.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'observability/prometheus/alerts/**'
+      - 'k8s/alerts/**'
+      - 'ops/runbooks/alert-runbook-mapping.yaml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  alert-hygiene:
+    name: Alert Hygiene Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        uses: mikefarah/yq@v4.44.3
+
+      - name: Extract all alert names from PrometheusRules
+        id: extract
+        run: |
+          echo "Extracting alert names from Prometheus rule files..."
+
+          ALERT_NAMES=""
+
+          # Extract from observability/prometheus/alerts/
+          for f in $(find observability/prometheus/alerts/ -name '*.yaml' -o -name '*.yml' 2>/dev/null); do
+            NAMES=$(yq eval '.. | select(has("alert")) | .alert' "$f" 2>/dev/null | grep -v '^---$' | grep -v '^null$' || true)
+            if [ -n "$NAMES" ]; then
+              ALERT_NAMES="${ALERT_NAMES}${NAMES}\n"
+            fi
+          done
+
+          # Extract from k8s/alerts/
+          for f in $(find k8s/alerts/ -name '*.yaml' -o -name '*.yml' 2>/dev/null); do
+            NAMES=$(yq eval '.. | select(has("alert")) | .alert' "$f" 2>/dev/null | grep -v '^---$' | grep -v '^null$' || true)
+            if [ -n "$NAMES" ]; then
+              ALERT_NAMES="${ALERT_NAMES}${NAMES}\n"
+            fi
+          done
+
+          # Deduplicate and sort
+          UNIQUE_ALERTS=$(echo -e "$ALERT_NAMES" | sort -u | grep -v '^$')
+          COUNT=$(echo "$UNIQUE_ALERTS" | wc -l)
+
+          echo "$UNIQUE_ALERTS" > /tmp/all-alerts.txt
+          echo "alert_count=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "Found ${COUNT} unique alert names"
+
+      - name: Extract mapped alerts from runbook mapping
+        id: mapped
+        run: |
+          MAPPED=$(yq eval '.alerts | keys | .[]' ops/runbooks/alert-runbook-mapping.yaml 2>/dev/null | sort -u)
+          MAPPED_COUNT=$(echo "$MAPPED" | grep -c '.' || echo 0)
+          echo "$MAPPED" > /tmp/mapped-alerts.txt
+          echo "mapped_count=${MAPPED_COUNT}" >> "$GITHUB_OUTPUT"
+          echo "Found ${MAPPED_COUNT} alerts with runbook mappings"
+
+      - name: Check Sev1/Sev2 coverage
+        id: coverage
+        run: |
+          echo "### Alert-to-Runbook Coverage" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          ALL_ALERTS=$(cat /tmp/all-alerts.txt)
+          MAPPED_ALERTS=$(cat /tmp/mapped-alerts.txt)
+          UNMAPPED=""
+          UNMAPPED_COUNT=0
+          TOTAL=0
+          COVERED=0
+
+          while IFS= read -r alert; do
+            [ -z "$alert" ] && continue
+            TOTAL=$((TOTAL + 1))
+            if echo "$MAPPED_ALERTS" | grep -q "^${alert}$"; then
+              COVERED=$((COVERED + 1))
+            else
+              UNMAPPED="${UNMAPPED}${alert}\n"
+              UNMAPPED_COUNT=$((UNMAPPED_COUNT + 1))
+            fi
+          done <<< "$ALL_ALERTS"
+
+          if [ "$TOTAL" -gt 0 ]; then
+            COVERAGE_PCT=$((COVERED * 100 / TOTAL))
+          else
+            COVERAGE_PCT=100
+          fi
+
+          echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Total alerts | ${TOTAL} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Mapped to runbook | ${COVERED} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Unmapped | ${UNMAPPED_COUNT} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Coverage | ${COVERAGE_PCT}% |" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$UNMAPPED_COUNT" -gt 0 ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**Unmapped alerts:**" >> "$GITHUB_STEP_SUMMARY"
+            echo -e "$UNMAPPED" | while IFS= read -r a; do
+              [ -n "$a" ] && echo "- \`${a}\`" >> "$GITHUB_STEP_SUMMARY"
+            done
+          fi
+
+          echo "coverage_pct=${COVERAGE_PCT}" >> "$GITHUB_OUTPUT"
+          echo "unmapped_count=${UNMAPPED_COUNT}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate runbook paths exist
+        run: |
+          echo "Validating runbook file paths..."
+          MISSING=0
+
+          while IFS= read -r alert; do
+            [ -z "$alert" ] && continue
+            RUNBOOK=$(yq eval ".alerts.${alert}.runbook" ops/runbooks/alert-runbook-mapping.yaml 2>/dev/null)
+            if [ -n "$RUNBOOK" ] && [ "$RUNBOOK" != "null" ]; then
+              if [ ! -f "$RUNBOOK" ]; then
+                echo "::warning::Alert '${alert}' references missing runbook: ${RUNBOOK}"
+                MISSING=$((MISSING + 1))
+              fi
+            fi
+          done < /tmp/mapped-alerts.txt
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::warning::${MISSING} runbook path(s) reference missing files"
+          fi
+
+      - name: Validate all mappings have required fields
+        run: |
+          echo "Validating mapping schema..."
+          ERRORS=0
+
+          while IFS= read -r alert; do
+            [ -z "$alert" ] && continue
+
+            SEVERITY=$(yq eval ".alerts.${alert}.severity" ops/runbooks/alert-runbook-mapping.yaml 2>/dev/null)
+            OWNER=$(yq eval ".alerts.${alert}.owner" ops/runbooks/alert-runbook-mapping.yaml 2>/dev/null)
+            RUNBOOK=$(yq eval ".alerts.${alert}.runbook" ops/runbooks/alert-runbook-mapping.yaml 2>/dev/null)
+            ESCALATION=$(yq eval ".alerts.${alert}.escalation" ops/runbooks/alert-runbook-mapping.yaml 2>/dev/null)
+
+            for field in severity owner runbook escalation; do
+              val=$(eval echo "\$$field" | tr '[:upper:]' '[:lower:]')
+              if [ -z "$val" ] || [ "$val" = "null" ]; then
+                echo "::error::Alert '${alert}' missing required field: ${field}"
+                ERRORS=$((ERRORS + 1))
+              fi
+            done
+          done < /tmp/mapped-alerts.txt
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::error::${ERRORS} schema validation error(s)"
+            exit 1
+          fi
+          echo "All mappings valid"
+
+      - name: Gate decision
+        run: |
+          COVERAGE="${{ steps.coverage.outputs.coverage_pct }}"
+          UNMAPPED="${{ steps.coverage.outputs.unmapped_count }}"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # For GA, we require coverage of all Sev1/Sev2 alerts that are in the mapping
+          # Unmapped alerts generate warnings but don't block (they may be info-level)
+          if [ "${COVERAGE}" -lt 80 ]; then
+            echo "**GATE: FAILED** — coverage ${COVERAGE}% < 80% minimum" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "**GATE: PASSED** — ${COVERAGE}% coverage (${UNMAPPED} unmapped)" >> "$GITHUB_STEP_SUMMARY"

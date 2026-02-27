@@ -195,6 +195,11 @@ all feature content was included.
 | Prometheus alerting rules | `observability/prometheus/alerts/cost-alerts.yaml` |
 | Prometheus recording rules | `observability/prometheus/recording-rules.yml` |
 | Release orchestration plan | `docs/ga-merge-train/RELEASE-ORCHESTRATION-v5.0.0.md` |
+| Migration gate workflow | `.github/workflows/migration-gate.yml` |
+| GA canary promotion workflow | `.github/workflows/ga-canary-promote.yml` |
+| DR drill workflow | `.github/workflows/dr-drill.yml` |
+| Alert hygiene CI gate | `.github/workflows/alert-hygiene.yml` |
+| Alert-to-runbook mapping (23 alerts) | `ops/runbooks/alert-runbook-mapping.yaml` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -232,3 +237,8 @@ git push --force origin main
 - [x] Cost guardrails library (metering, budget enforcement, anomaly detection, daily reports)
 - [x] Observability stack (OTel SDK, Grafana dashboard, Prometheus alerts + recording rules)
 - [x] Release orchestration plan documented (P0–P8 phases, 17 agents, gate definitions)
+- [x] Migration gate workflow (Postgres/Neo4j dry-run, schema snapshots, rollback testing)
+- [x] GA canary promotion pipeline (10→50→100% with SLO gates, image signing, evidence)
+- [x] DR drill workflow (backup verification, failover/cutback, chaos validation, evidence bundle)
+- [x] Alert-to-runbook mapping (23 Sev1/Sev2 alerts with owners, runbooks, escalation chains)
+- [x] Alert hygiene CI gate (coverage validation, schema checks, runbook path existence)

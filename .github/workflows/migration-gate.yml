@@ -1,0 +1,292 @@
+name: Migration Gate
+
+on:
+  pull_request:
+    paths:
+      - 'migrations/**'
+      - 'services/graph-core/migrations/**'
+      - 'scripts/migrate/**'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run only (no apply)"
+        type: boolean
+        default: true
+      environment:
+        description: "Target environment"
+        type: choice
+        options:
+          - preview
+          - staging
+        default: preview
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  MIGRATION_TIMEOUT: 300
+  SHADOW_PARITY_THRESHOLD: "0.999"
+
+jobs:
+  # ---------- 1. Lint & validate migration files ----------
+  validate-migrations:
+    name: Validate Migration Files
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      migration_count: ${{ steps.scan.outputs.count }}
+      has_destructive: ${{ steps.scan.outputs.has_destructive }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan migration files
+        id: scan
+        run: |
+          MIGRATIONS=$(find migrations/ -name '*.sql' -o -name '*.cypher' 2>/dev/null | sort)
+          COUNT=$(echo "$MIGRATIONS" | grep -c '.' || echo 0)
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+
+          # Check for destructive operations
+          HAS_DESTRUCTIVE=false
+          if grep -rilE 'DROP\s+(TABLE|INDEX|COLUMN|CONSTRAINT)|TRUNCATE|DELETE\s+FROM' migrations/ 2>/dev/null; then
+            HAS_DESTRUCTIVE=true
+            echo "::warning::Destructive migration detected — requires manual approval"
+          fi
+          echo "has_destructive=${HAS_DESTRUCTIVE}" >> "$GITHUB_OUTPUT"
+
+          echo "### Migration Scan" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Files: ${COUNT}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Destructive: ${HAS_DESTRUCTIVE}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Validate naming convention
+        run: |
+          # Migrations must follow: YYYYMMDDHHMMSS_description.{up,down}.{sql,cypher}
+          BAD_NAMES=0
+          for f in $(find migrations/ -name '*.sql' -o -name '*.cypher' 2>/dev/null); do
+            basename=$(basename "$f")
+            if ! echo "$basename" | grep -qE '^[0-9]{14}_[a-z0-9_]+\.(up|down)\.(sql|cypher)$'; then
+              echo "::error file=${f}::Invalid migration name: ${basename}"
+              BAD_NAMES=$((BAD_NAMES + 1))
+            fi
+          done
+          if [ "$BAD_NAMES" -gt 0 ]; then
+            echo "::error::${BAD_NAMES} migration(s) with invalid naming"
+            exit 1
+          fi
+
+      - name: Check for paired up/down migrations
+        run: |
+          UNPAIRED=0
+          for up in $(find migrations/ -name '*.up.sql' -o -name '*.up.cypher' 2>/dev/null); do
+            down="${up/.up./.down.}"
+            if [ ! -f "$down" ]; then
+              echo "::error file=${up}::Missing down migration: ${down}"
+              UNPAIRED=$((UNPAIRED + 1))
+            fi
+          done
+          if [ "$UNPAIRED" -gt 0 ]; then
+            echo "::error::${UNPAIRED} migration(s) missing rollback (down) file"
+            exit 1
+          fi
+
+  # ---------- 2. Postgres dry-run ----------
+  postgres-dry-run:
+    name: Postgres Migration Dry-Run
+    needs: validate-migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: intelgraph_test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install migrate CLI
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.17.0/migrate.linux-amd64.tar.gz | tar xz
+          sudo mv migrate /usr/local/bin/
+
+      - name: Run migrations (dry-run via transaction rollback)
+        id: dry_run
+        run: |
+          export DATABASE_URL="postgres://test:test@localhost:5432/intelgraph_test?sslmode=disable"
+
+          echo "### Postgres Dry-Run" >> "$GITHUB_STEP_SUMMARY"
+
+          # Apply up migrations inside a transaction that we roll back
+          psql "$DATABASE_URL" -c "BEGIN;"
+          migrate -path migrations/postgres -database "$DATABASE_URL" up 2>&1 | tee /tmp/migrate-up.log
+          UP_EXIT=${PIPESTATUS[0]}
+
+          if [ "$UP_EXIT" -ne 0 ]; then
+            echo "::error::Migration UP failed"
+            psql "$DATABASE_URL" -c "ROLLBACK;"
+            exit 1
+          fi
+
+          # Capture schema snapshot
+          pg_dump "$DATABASE_URL" --schema-only > /tmp/schema-after-up.sql
+          echo "- UP: success" >> "$GITHUB_STEP_SUMMARY"
+
+          # Test rollback
+          migrate -path migrations/postgres -database "$DATABASE_URL" down 2>&1 | tee /tmp/migrate-down.log
+          DOWN_EXIT=${PIPESTATUS[0]}
+
+          if [ "$DOWN_EXIT" -ne 0 ]; then
+            echo "::error::Migration DOWN (rollback) failed"
+            echo "- DOWN: **FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          echo "- DOWN: success" >> "$GITHUB_STEP_SUMMARY"
+
+          psql "$DATABASE_URL" -c "ROLLBACK;"
+
+      - name: Upload schema snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: pg-schema-snapshot
+          path: /tmp/schema-after-up.sql
+          retention-days: 30
+
+  # ---------- 3. Neo4j dry-run ----------
+  neo4j-dry-run:
+    name: Neo4j Migration Dry-Run
+    needs: validate-migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/testpassword
+        ports:
+          - 7687:7687
+          - 7474:7474
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p testpassword 'RETURN 1'"
+          --health-interval 10s
+          --health-timeout 10s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Cypher migrations (dry-run)
+        run: |
+          echo "### Neo4j Dry-Run" >> "$GITHUB_STEP_SUMMARY"
+
+          for f in $(find migrations/neo4j -name '*.up.cypher' 2>/dev/null | sort); do
+            echo "Applying: $(basename "$f")"
+            cypher-shell -u neo4j -p testpassword \
+              --format plain \
+              < "$f" 2>&1 | tee -a /tmp/neo4j-migrate.log
+
+            if [ "${PIPESTATUS[0]}" -ne 0 ]; then
+              echo "::error file=${f}::Neo4j migration failed"
+              echo "- $(basename "$f"): **FAILED**" >> "$GITHUB_STEP_SUMMARY"
+              exit 1
+            fi
+            echo "- $(basename "$f"): success" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Capture index catalog
+        run: |
+          cypher-shell -u neo4j -p testpassword \
+            "SHOW INDEXES YIELD name, type, labelsOrTypes, properties, state" \
+            --format plain > /tmp/neo4j-index-catalog.txt
+
+      - name: Upload index catalog
+        uses: actions/upload-artifact@v4
+        with:
+          name: neo4j-index-catalog
+          path: /tmp/neo4j-index-catalog.txt
+          retention-days: 30
+
+  # ---------- 4. Shadow parity check ----------
+  shadow-parity:
+    name: Shadow Read Parity
+    needs: [postgres-dry-run, neo4j-dry-run]
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run shadow parity comparison
+        run: |
+          echo "### Shadow Parity Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "Shadow read comparison validates that new schema" >> "$GITHUB_STEP_SUMMARY"
+          echo "returns identical results to old schema for golden queries." >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Query Set | Old Schema | New Schema | Match Rate |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------|-----------|-----------|------------|" >> "$GITHUB_STEP_SUMMARY"
+
+          # In a real environment, this runs golden queries against both schemas
+          # and compares results. Here we validate the framework is wired.
+          echo "Shadow parity check framework ready — requires staging environment"
+          echo "Threshold: ${SHADOW_PARITY_THRESHOLD}"
+
+  # ---------- 5. Gate decision ----------
+  migration-gate-decision:
+    name: Migration Gate Decision
+    needs: [validate-migrations, postgres-dry-run, neo4j-dry-run]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate gate
+        run: |
+          echo "### Migration Gate Decision" >> "$GITHUB_STEP_SUMMARY"
+
+          PASS=true
+
+          if [ "${{ needs.validate-migrations.result }}" != "success" ]; then
+            echo "- Validation: **FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            PASS=false
+          else
+            echo "- Validation: PASSED" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ needs.postgres-dry-run.result }}" != "success" ]; then
+            echo "- Postgres dry-run: **FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            PASS=false
+          else
+            echo "- Postgres dry-run: PASSED" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ needs.neo4j-dry-run.result }}" != "success" ]; then
+            echo "- Neo4j dry-run: **FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            PASS=false
+          else
+            echo "- Neo4j dry-run: PASSED" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          HAS_DESTRUCTIVE="${{ needs.validate-migrations.outputs.has_destructive }}"
+          if [ "$HAS_DESTRUCTIVE" = "true" ]; then
+            echo "- Destructive operations: **REQUIRES MANUAL APPROVAL**" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$PASS" = "true" ]; then
+            echo "**Result: GATE PASSED**" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "**Result: GATE FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

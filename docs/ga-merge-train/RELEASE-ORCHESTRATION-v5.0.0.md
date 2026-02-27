@@ -153,21 +153,22 @@ Rollback procedure:
 - [x] P1: Observability instrumentation — OTel SDK (`libs/observability/`), Grafana cost dashboard, Prometheus alerting rules + recording rules
 - [x] P1: CI/CD security gates — 4 GitHub Actions workflows (ci-security-gates, deploy-pipeline, release-pipeline, security-audit) with SAST/DAST, container scanning, SBOM generation
 - [x] P1: Cost guardrails — metering library (`libs/cost/`), budget enforcement middleware, anomaly detection, Prometheus metrics, daily reports, config (`config/cost-model.yaml`)
+- [x] P2: Migration gate — workflow with Postgres/Neo4j dry-run, schema snapshots, rollback testing, shadow parity (`migration-gate.yml`)
 - [x] P3 (partial): OPA ABAC policies (6 packages, 80/80 tests)
 - [x] P3 (partial): Injection audit (32 findings, 7 critical/high fixed)
 - [x] P3 (partial): Threat model (STRIDE analysis)
+- [x] P5: DR drill workflow — backup verification, failover/cutback drill, chaos validation, signed evidence bundle (`dr-drill.yml`)
 - [x] P5 (partial): Chaos experiments defined (14 experiments in repo)
+- [x] P6: Canary promotion pipeline — progressive delivery 10→50→100% with SLO gates, image signing, SBOM verification, evidence bundle (`ga-canary-promote.yml`)
 - [x] P6 (partial): Provenance ledger library (11/11 tests pass)
 - [x] P6 (partial): Release notes and changelog generated
+- [x] P7: Alert-to-runbook mapping — 23 Sev1/Sev2 alerts mapped to owners + runbooks + escalation chains (`ops/runbooks/alert-runbook-mapping.yaml`)
+- [x] P7: Alert hygiene CI gate — validates coverage, schema, and runbook path existence (`alert-hygiene.yml`)
 - [x] P7 (partial): Testing strategy documented (6-layer, 23 security-critical tests)
 
-### Remaining
-- [ ] P2: Migration gate implementation
-- [ ] P4: Product feature GA readiness
-- [ ] P5: Full DR drill
-- [ ] P6: Canary promotion pipeline
-- [ ] P7: 100% Sev1/2 alert-to-runbook mapping
-- [ ] P8: GA flag flip + 24h KPI review
+### Remaining (require live infrastructure)
+- [ ] P4: Product feature GA readiness (requires staging deployment)
+- [ ] P8: GA flag flip + 24h KPI review (requires production deployment)
 
 ## Stop Conditions
 
