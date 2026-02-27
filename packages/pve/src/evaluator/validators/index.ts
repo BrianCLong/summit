@@ -12,3 +12,4 @@ export * from './MetadataInvariantValidator.js';
 export * from './CIIntegrityValidator.js';
 export * from './DependencyAuditValidator.js';
 export * from './SecurityScanValidator.js';
+export * from './APISurfaceValidator.js';
