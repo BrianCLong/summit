@@ -1,0 +1,9 @@
+services:
+  - name: bundle
+    url: http://bundles.summit.local
+decision_logs:
+  console: true
+discovery:
+  name: /discovery
+labels:
+  app: summit-agent-runner
