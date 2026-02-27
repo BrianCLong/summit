@@ -14,7 +14,7 @@ on:
         description: "PNPM version (optional, defaults to repo pin)"
         required: false
         type: string
-        default: "10.0.0"
+        default: ""
       install-deps:
         description: "Whether to install dependencies (defaults to true)"
         required: false
@@ -112,7 +112,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
-          version: ${{ steps.resolve-pnpm.outputs.pnpm }}
           run_install: ${{ inputs.install-deps }}
 
       - name: Setup Node.js
