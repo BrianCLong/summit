@@ -18,6 +18,7 @@ const Graph = ({ elements, neighborhoodMode }) => {
   const cyRef = useRef(null);
   const cyInstance = useRef(null);
   const workerRef = useRef(null);
+  const neighborhoodHandlerRef = useRef(null);
 
   useEffect(() => {
     workerRef.current = new Worker(
@@ -139,14 +140,28 @@ const Graph = ({ elements, neighborhoodMode }) => {
     };
 
     const handler = (e) => showNeighborhood(e.target);
+    const existingHandler = neighborhoodHandlerRef.current;
+
+    if (existingHandler) {
+      cy.removeListener('tap', 'node', existingHandler);
+      neighborhoodHandlerRef.current = null;
+    }
 
     if (neighborhoodMode) {
+      neighborhoodHandlerRef.current = handler;
       cy.on('tap', 'node', handler);
     } else {
-      cy.removeListener('tap', 'node', handler);
       reset();
     }
-  }, [neighborhoodMode]);
+
+    return () => {
+      const activeHandler = neighborhoodHandlerRef.current;
+      if (activeHandler) {
+        cy.removeListener('tap', 'node', activeHandler);
+        neighborhoodHandlerRef.current = null;
+      }
+    };
+  }, [neighborhoodMode, elements]);
 
   return <div id="cy" ref={cyRef} style={{ height: '80vh', width: '100%' }} />;
 };

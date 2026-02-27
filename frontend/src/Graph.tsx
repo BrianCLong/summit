@@ -26,6 +26,9 @@ const Graph: React.FC<GraphProps> = ({ elements, neighborhoodMode }) => {
   const cyRef = useRef<HTMLDivElement | null>(null);
   const cyInstance = useRef<cytoscape.Core | null>(null);
   const workerRef = useRef<Worker | null>(null);
+  const neighborhoodHandlerRef = useRef<
+    ((e: cytoscape.EventObject) => void) | null
+  >(null);
 
   useEffect(() => {
     workerRef.current = new Worker(
@@ -139,16 +142,28 @@ const Graph: React.FC<GraphProps> = ({ elements, neighborhoodMode }) => {
     };
 
     const handler = (e: cytoscape.EventObject) => showNeighborhood(e.target);
+    const existingHandler = neighborhoodHandlerRef.current;
+
+    if (existingHandler) {
+      cy.removeListener('tap', 'node', existingHandler);
+      neighborhoodHandlerRef.current = null;
+    }
 
     if (neighborhoodMode) {
+      neighborhoodHandlerRef.current = handler;
       cy.on('tap', 'node', handler);
-      return () => {
-        cy.removeListener('tap', 'node', handler);
-      };
     } else {
       reset();
     }
-  }, [neighborhoodMode]);
+
+    return () => {
+      const activeHandler = neighborhoodHandlerRef.current;
+      if (activeHandler) {
+        cy.removeListener('tap', 'node', activeHandler);
+        neighborhoodHandlerRef.current = null;
+      }
+    };
+  }, [neighborhoodMode, elements]);
 
   return <div id="cy" ref={cyRef} style={{ height: '80vh', width: '100%' }} />;
 };

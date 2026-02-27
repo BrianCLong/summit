@@ -32,6 +32,30 @@ interface GraphData {
   edges: EdgeElement[];
 }
 
+interface RawNode {
+  id?: string;
+  label?: string;
+  properties?: {
+    text?: string;
+    name?: string;
+    deception_score?: number;
+  };
+}
+
+interface RawEdge {
+  source?: string;
+  target?: string;
+  type?: string;
+}
+
+interface RawGraphResponse {
+  nodes?: RawNode[];
+  edges?: RawEdge[];
+}
+
+const asArray = <T,>(value: T[] | unknown): T[] =>
+  Array.isArray(value) ? value : [];
+
 function App() {
   const [graphData, setGraphData] = useState<GraphData>({
     nodes: [],
@@ -43,28 +67,34 @@ function App() {
   useEffect(() => {
     fetch('/api/graph')
       .then((res) => res.json())
-      .then((data) => {
-        const formattedNodes = data.nodes.map((n: any) => ({
+      .then((data: RawGraphResponse) => {
+        const formattedNodes = asArray<RawNode>(data?.nodes).map((n) => ({
           data: {
-            id: n.id,
-            label: n.properties.text || n.properties.name,
-            type: n.label,
-            deception_score: n.properties.deception_score || 0,
+            id: n.id || '',
+            label: n.properties?.text || n.properties?.name || n.id || '',
+            type: n.label || 'unknown',
+            deception_score: n.properties?.deception_score || 0,
           },
         }));
-        const formattedEdges = data.edges.map((e: any) => ({
-          data: { source: e.source, target: e.target, label: e.type },
-        }));
+        const formattedEdges = asArray<RawEdge>(data?.edges)
+          .filter((e) => Boolean(e.source) && Boolean(e.target))
+          .map((e) => ({
+            data: {
+              source: e.source as string,
+              target: e.target as string,
+              label: e.type || 'related_to',
+            },
+          }));
         setGraphData({ nodes: formattedNodes, edges: formattedEdges });
       })
-      .catch((err) => console.error('Failed to fetch graph data:', err));
+      .catch(() => setGraphData({ nodes: [], edges: [] }));
   }, []);
 
   useEffect(() => {
     fetch('/api/agent-actions')
       .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch((err) => console.error('Failed to fetch agent actions:', err));
+      .then((data: unknown) => setEvents(asArray<EventItem>(data)))
+      .catch(() => setEvents([]));
   }, []);
 
   return (

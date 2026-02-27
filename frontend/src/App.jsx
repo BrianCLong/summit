@@ -3,6 +3,8 @@ import Graph from './Graph';
 import TimelinePanel from './TimelinePanel';
 import './App.css';
 
+const asArray = (value) => (Array.isArray(value) ? value : []);
+
 function App() {
   const [graphData, setGraphData] = useState({ nodes: [], edges: [] });
   const [neighborhoodMode, setNeighborhoodMode] = useState(false);
@@ -15,27 +17,33 @@ function App() {
     fetch('/api/graph')
       .then((res) => res.json())
       .then((data) => {
-        const formattedNodes = data.nodes.map((n) => ({
+        const formattedNodes = asArray(data?.nodes).map((n) => ({
           data: {
-            id: n.id,
-            label: n.properties.text || n.properties.name,
-            type: n.label,
-            deception_score: n.properties.deception_score || 0,
+            id: n?.id || '',
+            label: n?.properties?.text || n?.properties?.name || n?.id || '',
+            type: n?.label || 'unknown',
+            deception_score: n?.properties?.deception_score || 0,
           },
         }));
-        const formattedEdges = data.edges.map((e) => ({
-          data: { source: e.source, target: e.target, label: e.type },
-        }));
+        const formattedEdges = asArray(data?.edges)
+          .filter((e) => e?.source && e?.target)
+          .map((e) => ({
+            data: {
+              source: e.source,
+              target: e.target,
+              label: e.type || 'related_to',
+            },
+          }));
         setGraphData({ nodes: formattedNodes, edges: formattedEdges });
       })
-      .catch((err) => console.error('Failed to fetch graph data:', err));
+      .catch(() => setGraphData({ nodes: [], edges: [] }));
   }, []);
 
   useEffect(() => {
     fetch('/api/agent-actions')
       .then((res) => res.json())
-      .then((data) => setEvents(data))
-      .catch((err) => console.error('Failed to fetch agent actions:', err));
+      .then((data) => setEvents(asArray(data)))
+      .catch(() => setEvents([]));
   }, []);
 
   const toggleForecast = () => {
@@ -49,11 +57,11 @@ function App() {
       )
         .then((res) => res.json())
         .then((data) => {
-          const formatted = data.edges.map((e, idx) => ({
+          const formatted = asArray(data?.edges).map((e, idx) => ({
             data: {
-              source: e.source,
-              target: e.target,
-              label: `ETA: ${e.timestamp}`,
+              source: e?.source,
+              target: e?.target,
+              label: `ETA: ${e?.timestamp || 'Unknown'}`,
             },
             classes: 'forecast',
             id: `forecast-${idx}`,
@@ -61,7 +69,10 @@ function App() {
           setForecastEdges(formatted);
           setForecastIndex(formatted.length - 1);
         })
-        .catch((err) => console.error('Failed to fetch forecast:', err));
+        .catch(() => {
+          setForecastEdges([]);
+          setForecastIndex(0);
+        });
     }
   };
 
