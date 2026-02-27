@@ -167,7 +167,7 @@ Rollback procedure:
 - [x] P7 (partial): Testing strategy documented (6-layer, 23 security-critical tests)
 
 ### Remaining (require live infrastructure)
-- [ ] P4: Product feature GA readiness (requires staging deployment)
+- [ ] P4: Product feature GA readiness — code is present (GraphQL gateway, Neo4j model, ingest, search, realtime), requires staging deployment + 48h SLO soak
 - [ ] P8: GA flag flip + 24h KPI review (requires production deployment)
 
 ## Stop Conditions
