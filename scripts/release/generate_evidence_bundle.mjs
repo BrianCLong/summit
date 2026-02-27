@@ -32,6 +32,7 @@ function main() {
     }
   }
 
+  // Generate hashes
   const bundle = files.map(f => {
     if (!fs.existsSync(f)) {
       console.error(`Error: File not found: ${f}`);
@@ -43,9 +44,18 @@ function main() {
     };
   });
 
+  // Sort bundle by file path for deterministic ordering
+  bundle.sort((a, b) => a.file.localeCompare(b.file));
+
+  // Bundle output (deterministic: no timestamp)
   const output = {
-    generatedAt: new Date().toISOString(),
     bundle
+  };
+
+  // Stamp output (non-deterministic: timestamp)
+  const stamp = {
+    generatedAt: new Date().toISOString(),
+    filesCount: bundle.length
   };
 
   const artifactsDir = 'artifacts';
@@ -56,7 +66,11 @@ function main() {
   const outputPath = path.join(artifactsDir, 'evidence-bundle.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
 
+  const stampPath = path.join(artifactsDir, 'stamp.json');
+  fs.writeFileSync(stampPath, JSON.stringify(stamp, null, 2));
+
   console.log(`Evidence bundle generated at ${outputPath} with ${bundle.length} entries.`);
+  console.log(`Stamp generated at ${stampPath}`);
 }
 
 main();
