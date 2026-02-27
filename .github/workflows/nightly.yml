@@ -19,7 +19,6 @@ jobs:
       - name: Use pinned pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
         with:
-        with:
           run_install: false
 
       - name: Setup Node

@@ -567,7 +567,6 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-        with:
           run_install: false
 
       - uses: actions/setup-node@v4

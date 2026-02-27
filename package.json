@@ -118,7 +118,6 @@
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
-    "ga:evidence": "npm run compliance:evidence",
     "regulatory:build": "npx tsx cli/src/cli.ts regulatory build",
     "regulatory:diff": "npx tsx cli/src/cli.ts regulatory diff",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
@@ -127,7 +126,8 @@
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "ga:evidence": "npm run compliance:evidence"
   },
   "keywords": [
     "intelligence-analysis",
