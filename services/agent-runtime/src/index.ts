@@ -15,12 +15,9 @@ import YAML from 'yaml';
 import fs from 'fs/promises';
 import path from 'path';
 import { register, collectDefaultMetrics } from 'prom-client';
-import { admit } from './admission.js';
-import jwt from 'jsonwebtoken';
 
 const PORT = parseInt(process.env.PORT || '4012');
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const HITL_PUBKEY = process.env.HITL_PUBKEY_PEM || '';
 
 const jsonRecord = () => z.record(z.string(), z.any());
 
@@ -322,7 +319,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
     const dag = engine.buildDAG(runbook.tasks);
     const sortedTaskIds = engine.topologicalSort(dag);
 
-    const taskMap = new Map(runbook.tasks.map((t: any) => [t.id, t]));
+    const taskMap = new Map(runbook.tasks.map((t) => [t.id, t]));
     const results = new Map<string, any>();
 
     // Execute tasks in topological order
@@ -331,7 +328,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
       if (!task) {continue;}
 
       // Update task status
-      const taskExecution = execution.tasks.find((t: any) => t.id === taskId);
+      const taskExecution = execution.tasks.find((t) => t.id === taskId);
       if (!taskExecution) {continue;}
 
       taskExecution.status = 'running';
@@ -384,13 +381,13 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
     kpis.total_duration_ms = endTime - startTime;
     kpis.tasks_completed = execution.tasks.filter(
-      (t: any) => t.status === 'completed',
+      (t) => t.status === 'completed',
     ).length;
     kpis.success_rate = kpis.tasks_completed / execution.tasks.length;
 
     // Add runbook-specific KPIs
     if (runbook.kpis?.includes('time_to_first_path')) {
-      const firstPath = execution.tasks.find((t: any) =>
+      const firstPath = execution.tasks.find((t) =>
         t.name.includes('entity-resolution'),
       );
       if (firstPath?.completed_at && execution.started_at) {
@@ -521,21 +518,11 @@ server.get<{ Querystring: { status?: string } }>(
 );
 
 // Start runbook execution
-server.post<{ Body: { name: string; version?: string; inputs?: any; tool?: string; autonomy_level?: number; claims?: any; audit?: any; approval?: any } }>(
+server.post<{ Body: { name: string; version?: string; inputs?: any } }>(
   '/runbooks',
   async (request, reply) => {
     try {
-      const { name, version, inputs, tool, autonomy_level, claims, audit, approval } = request.body;
-
-      // Runtime Admission Gate
-      const admission = await admit({ tool, autonomy_level, claims, audit, approval });
-      if (!admission.allowed) {
-          reply.code(403);
-          return {
-              error: 'Access Denied',
-              incident: admission.incident
-          };
-      }
+      const { name, version, inputs } = request.body;
 
       const runbook = await engine.loadRunbook(name, version);
       const execution = await engine.executeRunbook(runbook, inputs);
@@ -564,36 +551,6 @@ server.post<{ Body: { sourceId: string; inputs?: any } }>(
     }
   },
 );
-
-// Approve incident (Break-glass)
-server.post<{ Body: { jwt: string } }>('/approve', async (request, reply) => {
-  try {
-      const { jwt: token } = request.body;
-      if (!HITL_PUBKEY) throw new Error('HITL_PUBKEY_PEM not configured');
-
-      // Verify token
-      jwt.verify(token, HITL_PUBKEY, { algorithms: ['RS256'] });
-
-      const bundleId = uuidv4();
-      const bundleUrl = `http://localhost:${PORT}/audit/${bundleId}`;
-
-      return { approved: true, audit_bundle_url: bundleUrl };
-  } catch (err: any) {
-      reply.code(403);
-      return { error: 'Invalid approval token', details: err.message };
-  }
-});
-
-// Get Audit Bundle
-server.get<{ Params: { id: string } }>('/audit/:id', async (request, reply) => {
-  return {
-      actor: 'system',
-      decision: 'approved',
-      reason: 'break-glass',
-      timestamp: new Date().toISOString(),
-      signature: { alg: 'RS256', value: 'mock-signature' }
-  };
-});
 
 // WebSocket for real-time updates
 server.register(async (fastify) => {

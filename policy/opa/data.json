@@ -1,3 +1,0 @@
-{
-  "allowlist": { "tools": ["search", "read_store", "write_store", "neo4j_query", "qdrant_query", "s3_attach_evidence"] }
-}

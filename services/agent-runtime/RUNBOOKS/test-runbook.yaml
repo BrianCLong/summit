@@ -1,6 +1,0 @@
-name: test-runbook
-version: 1.0.0
-tasks:
-  - id: task1
-    name: Task 1
-    uses: connector:elastic

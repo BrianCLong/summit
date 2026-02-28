@@ -1,37 +1,29 @@
-import { v4 as uuidv4 } from 'uuid';
-import { evaluate, OpaInput } from './opa_client.js';
+import { evaluate } from "./opa_client"; // HTTP POST /v1/data/runtime/agent_runtime
 
 export async function admit(run: any) {
-  const input: OpaInput = {
+  const input = {
     request: { tool: run.tool },
     agent: { autonomy_level: run.autonomy_level },
-    human_approval: { signed: !!(run.approval && run.approval.jwt) },
+    human_approval: { signed: !!run.approval?.jwt },
     evidence: {
-      audit_bundle_signed: run.audit?.bundle_signed === true,
-    },
+      claims_logging_uri: run.claims?.uri,
+      audit_bundle_signed: run.audit?.bundle_signed === true
+    }
   };
 
-  if (run.claims?.uri) {
-    input.evidence.claims_logging_uri = run.claims.uri;
-  }
-
   const decision = await evaluate(input);
-
-  if (decision.result?.deny && decision.result.deny.length > 0) {
+  if (decision.result?.deny && decision.result.deny.length) {
     return {
-      allowed: false,
       status: 403,
       incident: {
         reason: decision.result.deny,
         evidence: input,
-        operation_token: uuidv4(),
-      },
+        operation_token: run.operation_token // enable break‑glass later
+      }
     };
   }
-
-  if (decision.result?.violation && decision.result.violation.length > 0) {
-    console.warn('Policy violation:', decision.result.violation);
+  if (decision.result?.violation && decision.result.violation.length) {
+    // soft‑fail: allow but emit incident for missing non‑blocking requirements
   }
-
-  return { allowed: true, status: 202 };
+  return { status: 202 };
 }
