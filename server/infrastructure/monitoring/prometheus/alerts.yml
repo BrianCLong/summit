@@ -14,22 +14,22 @@ groups:
           description: 'IntelGraph application has been down for more than 1 minute.'
 
       - alert: IntelGraphHighErrorRate
-        expr: rate(http_requests_total{job="intelgraph-app",status=~"5.."}[5m]) > 0.1
+        expr: sum(rate(http_requests_total{job="intelgraph-app",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="intelgraph-app"}[5m])) > 0.01
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: 'High error rate in IntelGraph'
-          description: 'IntelGraph is experiencing a high error rate ({{ $value }} errors/sec).'
+          description: 'IntelGraph is experiencing a high error rate (> 1%). Current: {{ $value | humanizePercentage }}.'
 
       - alert: IntelGraphHighLatency
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-app"}[5m])) > 2
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-app"}[5m])) > 0.5
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: 'High latency in IntelGraph'
-          description: '95th percentile latency is {{ $value }}s, which is above the 2s threshold.'
+          description: '95th percentile latency is {{ $value }}s, which is above the 500ms threshold.'
 
   - name: database.rules
     rules:
