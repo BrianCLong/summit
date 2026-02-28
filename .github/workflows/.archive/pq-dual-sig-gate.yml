@@ -22,7 +22,7 @@ env:
 jobs:
   pq-dual-signature-verification:
     name: PQ Dual Signature Verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     strategy:
@@ -510,7 +510,7 @@ jobs:
 
   verification-summary:
     name: Verification Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: pq-dual-signature-verification
 
     steps:

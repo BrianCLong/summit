@@ -19,7 +19,7 @@ env:
 jobs:
   # Determine what changed to optimize build
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       packages: ${{ steps.filter.outputs.packages }}
       services: ${{ steps.filter.outputs.services }}
@@ -47,7 +47,7 @@ jobs:
 
   # Install dependencies with aggressive caching
   install:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -93,7 +93,7 @@ jobs:
   build-packages:
     needs: [install, changes]
     if: ((needs.changes.outputs.packages == 'true' || github.ref == 'refs/heads/main') && (needs.changes.outputs.services == 'true' || github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -141,7 +141,7 @@ jobs:
   # Build services (depends on packages)
   build-services:
     needs: [build-packages, changes]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -188,7 +188,7 @@ jobs:
   # Build Docker images with layer caching
   build-docker:
     needs: [build-services]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -233,7 +233,7 @@ jobs:
   # Typecheck with caching
   typecheck:
     needs: [install]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -275,7 +275,7 @@ jobs:
   # Lint with caching
   lint:
     needs: [install]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -310,7 +310,7 @@ jobs:
   # Test with sharding
   test:
     needs: [build-packages]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -360,7 +360,7 @@ jobs:
   # Merge coverage from shards
   coverage:
     needs: [test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

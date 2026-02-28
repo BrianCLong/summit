@@ -12,7 +12,7 @@ on:
 jobs:
   static-analysis:
     name: Static Tenant Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +37,7 @@ jobs:
 
   dynamic-verification:
     name: Dynamic Isolation Verify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:15

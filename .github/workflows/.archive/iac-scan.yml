@@ -30,7 +30,7 @@ permissions:
 jobs:
   iac-scan:
     name: Checkov IaC Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout repo

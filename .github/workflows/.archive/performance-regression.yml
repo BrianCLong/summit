@@ -27,7 +27,7 @@ env:
 jobs:
   bundle-size-check:
     name: 📦 Bundle Size Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -151,7 +151,7 @@ jobs:
 
   build-performance:
     name: 🏗️ Build Performance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -239,7 +239,7 @@ jobs:
 
   runtime-performance:
     name: 🚀 Runtime Performance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -369,7 +369,7 @@ jobs:
   performance-summary:
     name: 📊 Performance Summary
     needs: [bundle-size-check, build-performance, runtime-performance]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Post performance summary
         uses: actions/github-script@v7

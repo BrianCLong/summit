@@ -63,7 +63,7 @@ concurrency:
 jobs:
   generate-dashboard:
     name: Generate Dashboard
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:
@@ -74,7 +74,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # jq is pre-installed on ubuntu-latest
+          # jq is pre-installed on ubuntu-24.04
           which jq || sudo apt-get install -y jq
 
           # Install yq for YAML processing
@@ -150,7 +150,7 @@ jobs:
   # Notify on blocked candidates
   notify-blocked:
     name: Notify Blocked
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: generate-dashboard
     if: always() && needs.generate-dashboard.result == 'success'
 

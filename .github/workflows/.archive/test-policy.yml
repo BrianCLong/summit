@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   enforce:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       status: ${{ steps.record_status.outputs.status }}
     steps:
@@ -71,7 +71,7 @@ jobs:
   comment:
     needs: enforce
     if: needs.enforce.outputs.status == 'fail'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Download policy report
         uses: actions/download-artifact@v4

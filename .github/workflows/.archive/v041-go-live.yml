@@ -21,7 +21,7 @@ on:
 
 jobs:
   launch:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: ${{ github.event.inputs.environment }}
     timeout-minutes: 30
 

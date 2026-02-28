@@ -35,7 +35,7 @@ env:
 jobs:
   # Single setup job that all test jobs can depend on
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 📦 Setup Dependencies
     outputs:
       cache-key: ${{ steps.cache.outputs.cache-primary-key }}
@@ -87,7 +87,7 @@ jobs:
           - accessibility
         # Optionally test on multiple OS
         os:
-          - ubuntu-latest
+          - ubuntu-24.04
         # Can add node versions if needed
         # node-version: [18, 20]
         
@@ -145,7 +145,7 @@ jobs:
   # Aggregate results from all test jobs
   test-summary:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 📊 Test Summary
     
     steps:
@@ -167,7 +167,7 @@ jobs:
   # Quality gates - run in parallel with tests
   lint:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: ✨ Lint
     
     steps:
@@ -200,7 +200,7 @@ jobs:
   docker-build:
     if: contains(github.event.pull_request.labels.*.name, 'docker')
     needs: [test, lint]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 🐳 Docker Build
     
     steps:

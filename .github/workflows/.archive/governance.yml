@@ -10,7 +10,7 @@ on:
 jobs:
   schemas:
     name: Validate governance schemas
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -46,7 +46,7 @@ jobs:
 
   policy-tests:
     name: Test OPA policies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -57,7 +57,7 @@ jobs:
 
   policy-eval:
     name: Evaluate governance decisions
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - schemas
       - policy-tests

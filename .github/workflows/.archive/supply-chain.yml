@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   plan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.images.outputs.matrix }}
     steps:
@@ -37,7 +37,7 @@ jobs:
     if: ${{ fromJSON(needs.plan.outputs.matrix).image != null && fromJSON(needs.plan.outputs.matrix).image != '' }}
     strategy:
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -100,7 +100,7 @@ jobs:
           path: manifests/
 
   dashboards:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Render burn-down snapshot

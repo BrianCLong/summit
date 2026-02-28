@@ -35,7 +35,7 @@ on:
 
 jobs:
   check-adr-update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Check if ADR updated for foundational changes
 
     steps:

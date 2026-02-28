@@ -17,7 +17,7 @@ permissions:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
@@ -34,7 +34,7 @@ jobs:
 
   security:
     name: Security Scans
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       # Trivy Scan (FS)
@@ -59,7 +59,7 @@ jobs:
   build-and-push:
     name: Build & Push
     needs: [test, security]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write

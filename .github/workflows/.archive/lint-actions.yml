@@ -2,14 +2,14 @@ name: Lint Workflows & Terraform
 on: [pull_request]
 jobs:
   actionlint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4 # v4.1.7
       - uses: reviewdog/action-actionlint@256e554de0010a009397c9abc77855f634cf7353 # v1.4.0
   tflint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     steps:

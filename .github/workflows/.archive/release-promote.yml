@@ -49,7 +49,7 @@ jobs:
   # ==========================================================================
   validate:
     name: Validate Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       api_digest: ${{ steps.digests.outputs.api_digest }}
       web_digest: ${{ steps.digests.outputs.web_digest }}
@@ -171,7 +171,7 @@ jobs:
   deploy-canary:
     name: Deploy Canary (${{ inputs.action }})
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     outputs:
       canary_weight: ${{ steps.weight.outputs.weight }}
@@ -280,7 +280,7 @@ jobs:
   validate-canary:
     name: Validate Canary
     needs: [validate, deploy-canary]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       passed: ${{ steps.slo-check.outputs.passed }}
       metrics_url: ${{ steps.metrics.outputs.url }}
@@ -378,7 +378,7 @@ jobs:
   auto-rollback:
     name: Auto-Rollback
     needs: [validate, deploy-canary, validate-canary]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -476,7 +476,7 @@ jobs:
   manual-rollback:
     name: Manual Rollback
     needs: validate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -557,7 +557,7 @@ jobs:
     name: Finalize Release
     needs: [validate, deploy-canary, validate-canary]
     if: ((inputs.action == 'promote-100' && needs.validate-canary.outputs.passed == 'true') && (inputs.skip_evidence != 'true')) && (inputs.skip_evidence != 'true')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:

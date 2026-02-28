@@ -15,7 +15,7 @@ jobs:
   lifecycle-test:
     name: pause->resume
     if: false && (vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
 
     steps:

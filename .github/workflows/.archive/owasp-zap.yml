@@ -27,7 +27,7 @@ env:
 jobs:
   zap-baseline-web:
     name: ZAP Baseline - Web App
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,7 +89,7 @@ jobs:
 
   zap-baseline-mobile:
     name: ZAP Baseline - Mobile Interface
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -149,7 +149,7 @@ jobs:
 
   zap-api-scan:
     name: ZAP API Scan - GraphQL/REST
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16
@@ -231,7 +231,7 @@ jobs:
 
   zap-results-summary:
     name: ZAP Results Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [zap-baseline-web, zap-baseline-mobile, zap-api-scan]
     steps:
       - name: Generate security summary

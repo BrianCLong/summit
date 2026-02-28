@@ -22,7 +22,7 @@ on:
 jobs:
   opa:
     name: Validate ABAC Policies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install OPA

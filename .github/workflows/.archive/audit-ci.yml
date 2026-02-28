@@ -10,14 +10,14 @@ on:
 
 jobs:
   validate-schema:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate JSON Schema
         run: npx ajv-cli validate -s audit/schema/audit_event.schema.json -d audit/examples/valid_event.json || echo "No example yet, skipping"
 
   policy-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install OPA
@@ -28,7 +28,7 @@ jobs:
         run: ./opa check policy/
 
   unit-test-audit-sdk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Install Dependencies

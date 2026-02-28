@@ -13,7 +13,7 @@ jobs:
   # 1. Deterministic Build & Lint
   build-lint-strict:
     name: "Build & Lint (Strict)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4
@@ -27,7 +27,7 @@ jobs:
 
   quarantine-tests:
     name: "Quarantine Tests (Flaky)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4 # v6
@@ -45,7 +45,7 @@ jobs:
   # 2. Security Gates
   security-gate:
     name: "Security Gate (Gitleaks + Snyk)"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4 # v6
         with:
@@ -72,7 +72,7 @@ jobs:
   # 3. Policy Compliance
   policy-check:
     name: "Governance Policy Check"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4 # v6
       - name: Setup OPA
@@ -88,7 +88,7 @@ jobs:
   smoke-test:
     name: "Golden Path Smoke"
     needs: [build-lint-strict]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4 # v6
       - name: Bootstrap & Smoke
@@ -100,7 +100,7 @@ jobs:
   mvp4-ga-gate:
     name: "MVP-4-GA Promotion Gate"
     needs: [build-lint-strict, security-gate, policy-check, smoke-test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: always()
     steps:
       - name: Verify All Gates Passed

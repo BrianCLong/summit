@@ -35,7 +35,7 @@ permissions:
 jobs:
   export-metrics:
     name: 📈 Export Release Captain Metrics
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     if: ((${{ github.repository_owner == 'BrianCLong' }}) && (steps.check-alerts.outputs.circuit_open == 'true' || steps.check-alerts.outputs.health_low == 'true')) && (always())
     steps:
@@ -257,7 +257,7 @@ EOF
 
   validate-metrics:
     name: 🔍 Validate Metrics
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: export-metrics
     steps:
     - name: Download metrics artifact

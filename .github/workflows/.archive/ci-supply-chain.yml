@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   build-and-sbom:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -102,7 +102,7 @@ jobs:
       # provenance-name: provenance.intoto.jsonl
 
   scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-and-sbom
     permissions:
       contents: read

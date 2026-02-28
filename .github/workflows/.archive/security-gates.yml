@@ -2,7 +2,7 @@ name: Security Gates
 on: [pull_request]
 jobs:
   sca_sast:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout @v4/**
       - uses: pnpm/action-setup @docs/releases/RELEASE_NOTES_v3.0.0-ga.md

@@ -17,7 +17,7 @@ on:
 
 jobs:
   validate-adaptive-canary-weights:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Validate Adaptive Canary Score Weights
 
     steps:
@@ -112,7 +112,7 @@ jobs:
           "
 
   validate-evidence-structure:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Validate Evidence Structure
 
     steps:
@@ -183,7 +183,7 @@ jobs:
             exit 1
 
   validate-deployment-readiness:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Validate Deployment Readiness
 
     steps:
@@ -255,7 +255,7 @@ jobs:
           fi
 
   integration-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Integration Test v0.3.5 Components
     needs:
       [

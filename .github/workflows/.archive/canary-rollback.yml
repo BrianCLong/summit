@@ -11,7 +11,7 @@ on:
 
 jobs:
   deploy-stage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: staging
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
 
   validate-stage:
     needs: deploy-stage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Run K6 Smoke
@@ -34,7 +34,7 @@ jobs:
 
   deploy-prod-canary:
     needs: validate-stage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
 
   monitor-canary:
     needs: deploy-prod-canary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Check SLOs
@@ -66,7 +66,7 @@ jobs:
 
   promote-full:
     needs: monitor-canary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     steps:
       - uses: actions/checkout@v4
@@ -81,7 +81,7 @@ jobs:
   rollback:
     if: failure()
     needs: [deploy-prod-canary, monitor-canary]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Rollback

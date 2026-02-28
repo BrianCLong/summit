@@ -38,7 +38,7 @@ jobs:
       (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'failure') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') ||
       (github.event_name == 'repository_dispatch' && (github.event.action == 'slo-breach' || github.event.action == 'alert-webhook'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
       should_rollback: ${{ steps.analyze.outputs.should_rollback }}
@@ -150,7 +150,7 @@ jobs:
 
   health-monitor:
     name: 🏥 Health Monitor
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     outputs:
       health_status: ${{ steps.check.outputs.health_status }}
@@ -231,7 +231,7 @@ jobs:
         (needs.detect-deployment-failure.outputs.should_rollback == 'true') ||
         (needs.health-monitor.outputs.critical_failure == 'true')
       )
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment:
       name: production-rollback
@@ -426,7 +426,7 @@ jobs:
   post-rollback-analysis:
     name: 📊 Post-Rollback Analysis
     needs: [execute-rollback]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

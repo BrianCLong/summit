@@ -12,7 +12,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -49,7 +49,7 @@ jobs:
   deploy-staging:
     needs: build-and-push
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up Helm
@@ -73,7 +73,7 @@ jobs:
   deploy-prod:
     needs: build-and-push
     if: github.event_name == 'release'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up Helm

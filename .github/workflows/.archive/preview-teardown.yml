@@ -5,7 +5,7 @@ on:
 
 jobs:
   destroy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Login cloud
         run: |
@@ -35,7 +35,7 @@ env:
 
 jobs:
   teardown:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: preview
     steps:
       - name: Setup kubectl
@@ -107,7 +107,7 @@ permissions:
 jobs:
   destroy:
     name: destroy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Set up Terraform
         if: (hashFiles('infra/preview/*.tf') != '') && (env.CLOUD_AUTH != '')

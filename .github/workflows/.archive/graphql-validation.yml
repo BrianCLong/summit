@@ -15,7 +15,7 @@ on:
 jobs:
   validate-schema:
     name: Validate GraphQL Schema
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
 
     steps:
@@ -262,7 +262,7 @@ jobs:
 
   test-queries:
     name: Test Query Complexity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: validate-schema
 
     steps:

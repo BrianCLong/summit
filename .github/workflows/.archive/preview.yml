@@ -4,7 +4,7 @@ on:
     types: [opened, synchronize, reopened]
 jobs:
   build-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -40,7 +40,7 @@ jobs:
     name: Deploy Preview (Helm)
     needs: build-push
     if: ${{ secrets.KUBE_CONFIG != '' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: read

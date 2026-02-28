@@ -39,7 +39,7 @@ permissions:
 jobs:
   validate-policies:
     name: Validate Governance Policies
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
@@ -53,7 +53,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install pyyaml
-          # jq is pre-installed on ubuntu-latest
+          # jq is pre-installed on ubuntu-24.04
 
       - name: Make Scripts Executable
         run: chmod +x scripts/release/*.sh

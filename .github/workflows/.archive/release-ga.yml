@@ -5,7 +5,7 @@ on:
     tags: ['v*']
 jobs:
   build_sign_provenance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       id-token: write
       contents: write

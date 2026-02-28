@@ -7,7 +7,7 @@ on:
 jobs:
   changes:
     name: Detect changes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       server: ${{ steps.filter.outputs.server }}
     steps:
@@ -26,7 +26,7 @@ jobs:
 
   test-golden-path:
     name: test:golden-path
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: changes
     if: (((github.event_name == 'workflow_dispatch' || needs.changes.outputs.server == 'true') && (always())) && (always())) && (github.event_name == 'pull_request')
     timeout-minutes: 20
@@ -128,7 +128,7 @@ jobs:
             });
 
   e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [changes, test-golden-path] # Golden Path must pass first
     if: (((((((needs.changes.outputs.server == 'true') && (failure())) && (always())) && (|)) && (failure())) && (failure())) && (failure())) && (always())
     strategy:
@@ -170,7 +170,7 @@ jobs:
 
   e2e-analytics-bridge:
     name: E2E (Analytics Bridge)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: changes
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'pull_request' &&

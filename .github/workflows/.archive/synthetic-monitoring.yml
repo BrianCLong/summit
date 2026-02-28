@@ -27,7 +27,7 @@ jobs:
   # =========================
   uptime-checks:
     name: Uptime Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
 
     strategy:
@@ -238,7 +238,7 @@ jobs:
   # =========================
   api-functional-tests:
     name: API Functional Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     # Run every 5 minutes (skip 4 out of 5 runs)
 
@@ -277,7 +277,7 @@ jobs:
   # =========================
   user-journey-tests:
     name: Critical User Journey Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     # Run every 10 minutes
 
@@ -411,7 +411,7 @@ jobs:
   # =========================
   performance-benchmarks:
     name: Performance Benchmarks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     # Run once per hour
 
@@ -457,7 +457,7 @@ jobs:
   # =========================
   ssl-certificate-check:
     name: SSL Certificate Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Run once per day
 
     steps:

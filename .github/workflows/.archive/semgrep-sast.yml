@@ -23,7 +23,7 @@ permissions:
 jobs:
   semgrep:
     name: Semgrep Static Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     
     container:
@@ -62,7 +62,7 @@ jobs:
   
   semgrep-supply-chain:
     name: Semgrep Supply Chain Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     
     steps:
@@ -100,7 +100,7 @@ jobs:
   
   semgrep-summary:
     name: Semgrep Results Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [semgrep, semgrep-supply-chain]
     
     steps:

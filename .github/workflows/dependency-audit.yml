@@ -62,7 +62,7 @@ jobs:
   audit:
     name: Security Audit
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       critical: ${{ steps.audit.outputs.critical }}
       high: ${{ steps.audit.outputs.high }}
@@ -240,7 +240,7 @@ jobs:
 
   auto-fix:
     name: Auto-Fix Vulnerabilities
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: audit
     if: ${{ (vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule') && github.event_name == 'workflow_dispatch' && inputs.fix == true && needs.audit.outputs.failed == 'true' }}
 

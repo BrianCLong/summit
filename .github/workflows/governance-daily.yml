@@ -6,7 +6,7 @@ on:
 
 jobs:
   drift:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: node scripts/ci/verify_branch_protection.mjs

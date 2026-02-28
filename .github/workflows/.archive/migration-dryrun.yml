@@ -10,7 +10,7 @@ on:
 
 jobs:
   migrate-dry-run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       pg:
         image: postgres:16

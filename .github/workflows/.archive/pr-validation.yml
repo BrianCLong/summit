@@ -25,7 +25,7 @@ jobs:
   # Quick validation for basic requirements
   validate-pr:
     name: 🚦 Basic Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     outputs:
       should_run_full_validation: ${{ steps.check.outputs.should_run_full_validation }}
@@ -152,7 +152,7 @@ jobs:
   build-and-typecheck:
     name: 🔨 Build & TypeCheck
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -192,7 +192,7 @@ jobs:
   test-validation:
     name: 🧪 Test Suite
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
@@ -250,7 +250,7 @@ jobs:
   security-validation:
     name: 🔒 Security Scan
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -448,7 +448,7 @@ jobs:
   lint-validation:
     name: 🎯 Code Quality
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -510,7 +510,7 @@ jobs:
   helm-lint:
     name: ⛵ Helm Lint
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -540,7 +540,7 @@ jobs:
   migration-validation:
     name: 🗄️ Migration Gate
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -565,7 +565,7 @@ jobs:
       - helm-lint
       - migration-validation
       - e2e-validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -652,7 +652,7 @@ jobs:
   e2e-validation:
     name: 🎬 E2E Validation
     needs: validate-pr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -689,7 +689,7 @@ jobs:
       - migration-validation
       - e2e-validation
       - policy-validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check validation results
         run: |

@@ -17,7 +17,7 @@ env:
 jobs:
   add_issue_to_project:
     if: github.event_name == 'issues'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Add issue to project
         uses: actions/github-script@v7
@@ -52,7 +52,7 @@ jobs:
 
   audit_project:
     if: github.event_name != 'issues'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Audit SLA and archive done items
         uses: actions/github-script@v7

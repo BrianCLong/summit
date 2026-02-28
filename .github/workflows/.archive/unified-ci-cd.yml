@@ -39,7 +39,7 @@ env:
 jobs:
   context:
     name: Derive deployment context
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       deployment_environment: ${{ steps.env.outputs.environment }}
       image_tag: ${{ steps.tag.outputs.tag }}
@@ -66,7 +66,7 @@ jobs:
 
   test-and-coverage:
     name: Lint, typecheck, test & coverage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: context
     permissions:
       contents: read
@@ -110,7 +110,7 @@ jobs:
 
   security:
     name: Security scanning (Snyk & Trivy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: context
     permissions:
       contents: read
@@ -163,7 +163,7 @@ jobs:
 
   build-image:
     name: Build and publish container image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test-and-coverage, security, context]
     permissions:
       contents: read
@@ -197,7 +197,7 @@ jobs:
 
   deploy:
     name: Deploy to ${{ needs.context.outputs.deployment_environment }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-image, context]
     if: github.event_name != 'pull_request'
     environment:
@@ -216,7 +216,7 @@ jobs:
 
   rollback:
     name: Automated rollback
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [deploy, build-image, context]
     if: needs.deploy.result == 'failure'
     steps:

@@ -16,7 +16,7 @@ env:
 jobs:
   detect-failing-prs:
     name: Detect Failing PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       failing_prs: ${{ steps.find-failing.outputs.prs }}
     steps:
@@ -40,7 +40,7 @@ jobs:
 
   pr-systematic-fix:
     name: PR Systematic Fix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: (((((github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch') && (steps.changes.outputs.has_changes == 'true')) && (steps.changes.outputs.has_changes == 'true')) && (github.event_name == 'pull_request')) && (always())) && (github.event_name == 'pull_request')
     steps:
       - name: Checkout PR
@@ -114,7 +114,7 @@ jobs:
 
   auto-rebase-strategy:
     name: Auto-Rebase Strategy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -177,7 +177,7 @@ jobs:
 
   validation-gate:
     name: Validation Gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [pr-systematic-fix]
     steps:
       - name: Checkout
@@ -212,7 +212,7 @@ jobs:
 
   green-status-report:
     name: Green Status Report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [pr-systematic-fix, auto-rebase-strategy, validation-gate]
     steps:
       - name: Generate status report

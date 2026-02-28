@@ -15,7 +15,7 @@ permissions:
 jobs:
   revive-prs:
     name: Extract and Revive Closed PR Work
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout main
         uses: actions/checkout@v4

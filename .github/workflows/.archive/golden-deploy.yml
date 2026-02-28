@@ -11,7 +11,7 @@ on:
 
 jobs:
   deploy-stage:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: staging
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
 
   deploy-prod:
     needs: deploy-stage
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production # Requires Approval in GitHub Settings
     steps:
       - uses: actions/checkout@v4

@@ -38,7 +38,7 @@ env:
 
 jobs:
   create-deployment-record:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       deployment_id: ${{ steps.create.outputs.deployment_id }}
       release_name: ${{ steps.canary-config.outputs.release }}
@@ -113,7 +113,7 @@ PY
 
   blue-green:
     name: Blue-Green rollout
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: create-deployment-record
     environment: ${{ inputs.environment }}
     outputs:
@@ -180,7 +180,7 @@ PY
 
   canary-progressive:
     name: Progressive canary (10% → 100%)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [create-deployment-record, blue-green]
     environment: ${{ inputs.environment }}
     steps:
@@ -239,7 +239,7 @@ PY
 
   finalize-status:
     name: Finalize deployment status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [create-deployment-record, blue-green, canary-progressive]
     steps:
       - name: Mark deployment result

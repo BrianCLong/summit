@@ -40,7 +40,7 @@ env:
 jobs:
   reconcile:
     name: Reconcile Branch Protection
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     # For apply mode, require environment approval
     environment: ${{ github.event.inputs.mode == 'apply' && 'production-admin' || '' }}

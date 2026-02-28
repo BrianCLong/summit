@@ -18,7 +18,7 @@ env:
 jobs:
   generate-evidence-bundle:
     name: Generate Compliance Evidence Bundle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       packages: read
@@ -373,7 +373,7 @@ jobs:
 
   validate-evidence-bundle:
     name: Validate Evidence Bundle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: generate-evidence-bundle
     steps:
       - name: Checkout repository

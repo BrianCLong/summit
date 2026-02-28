@@ -19,7 +19,7 @@ permissions:
 jobs:
   # Add label to dependabot PRs for easy filtering
   label-dependabot:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ((((((${{ github.actor == 'dependabot[bot]' }}) && (${{ github.actor == 'dependabot[bot]' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }})) && (${{ github.actor == 'dependabot[bot]' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' }})) && (${{ steps.metadata.outputs.update-type == 'version-update:semver-major' }})
     permissions:
       pull-requests: write
@@ -37,7 +37,7 @@ jobs:
 
   # Auto-approve dependabot PRs (patch and minor updates)
   auto-approve:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pull-requests: write
     steps:
@@ -55,7 +55,7 @@ jobs:
 
   # Wait for CI checks and auto-merge when ready
   auto-merge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [label-dependabot, auto-approve]
     permissions:
       pull-requests: write

@@ -27,7 +27,7 @@ on:
 jobs:
   safety-tests:
     name: Run Safety Harness Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     strategy:
@@ -162,7 +162,7 @@ jobs:
   aggregate-results:
     name: Aggregate Safety Results
     needs: safety-tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Download all artifacts

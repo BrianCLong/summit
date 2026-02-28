@@ -584,7 +584,7 @@ jobs:
 
   sigstore-verify:
     name: Sigstore bundle verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
     permissions:
       contents: read

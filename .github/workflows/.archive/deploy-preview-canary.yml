@@ -10,7 +10,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -67,7 +67,7 @@ jobs:
 
   deploy-preview:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: preview-${{ github.event.pull_request.number }}
       url: https://pr-${{ github.event.pull_request.number }}.dev.intelgraph.io

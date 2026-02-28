@@ -38,7 +38,7 @@ env:
 jobs:
   pre-rotation-checks:
     name: Pre-Rotation Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       keys_to_rotate: ${{ steps.check.outputs.keys }}
       rotation_required: ${{ steps.check.outputs.required }}
@@ -102,7 +102,7 @@ jobs:
   rotate-keys:
     name: Rotate KMS Keys
     needs: pre-rotation-checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     strategy:
       matrix:
@@ -289,7 +289,7 @@ jobs:
   finalize-rotation:
     name: Finalize Rotation
     needs: [pre-rotation-checks, rotate-keys]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     steps:
       - name: Download all rotation logs
@@ -341,7 +341,7 @@ jobs:
     name: Monitor Post-Rotation
     needs: rotate-keys
     if: github.event.inputs.dry_run != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     steps:
       - name: Monitor error rates

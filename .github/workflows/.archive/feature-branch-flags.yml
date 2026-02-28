@@ -24,7 +24,7 @@ env:
 jobs:
   context:
     name: Derive feature metadata
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       flag: ${{ steps.map.outputs.flag }}
       shortname: ${{ steps.map.outputs.shortname }}
@@ -55,7 +55,7 @@ jobs:
   lint:
     name: Lint & Typecheck
     needs: context
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,7 +80,7 @@ jobs:
   unit:
     name: Unit Tests
     needs: context
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -103,7 +103,7 @@ jobs:
   contract:
     name: Contract Tests
     needs: context
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -126,7 +126,7 @@ jobs:
   e2e:
     name: Playwright Smoke
     needs: context
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
@@ -150,7 +150,7 @@ jobs:
   feature-flags:
     name: Feature Flag Gate
     needs: [context, lint, unit, contract, e2e]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -161,7 +161,7 @@ jobs:
   preview:
     name: Preview & Rollback Hooks
     needs: [context, feature-flags]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: ${{ env.PREVIEW_ENVIRONMENT }}
     steps:

@@ -23,7 +23,7 @@ permissions:
 jobs:
   actionlint:
     name: Lint GitHub Actions Workflows
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
 
     steps:

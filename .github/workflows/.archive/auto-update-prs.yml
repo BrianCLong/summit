@@ -18,7 +18,7 @@ permissions:
 jobs:
   guard:
     if: ((github.event_name == 'schedule') && (steps.guard.outputs.saturated == 'true')) && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       saturated: ${{ steps.guard.outputs.saturated }}
     steps:
@@ -40,7 +40,7 @@ jobs:
 
   triage-prs:
     needs: [guard]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -124,7 +124,7 @@ jobs:
   update:
     if: ((github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') && (github.event_name == 'schedule')) && (steps.list.outputs.prs != '')
     needs: [guard, triage-prs] # Ensure triage runs first
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       max-parallel: 2
     steps:

@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +38,7 @@ jobs:
         run: echo "Running integration tests..." # Placeholder for actual DB-backed tests
 
   security-scan:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -54,7 +54,7 @@ jobs:
           severity: 'CRITICAL,HIGH'
 
   sbom-generation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

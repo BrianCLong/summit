@@ -11,7 +11,7 @@ concurrency:
 jobs:
   validate-release-policy:
     name: Validate Release Policy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
@@ -32,7 +32,7 @@ jobs:
 
   lint-reason-codes:
     name: Lint Release Reason Codes
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
@@ -53,7 +53,7 @@ jobs:
 
   longrun-job-validation:
     name: LongRunJob Spec Advisory Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
@@ -84,7 +84,7 @@ jobs:
 
   sbom:
     name: SBOM (warn-only policy)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4 # v6
 

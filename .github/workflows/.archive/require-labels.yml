@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   require-labels:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Ensure governance labels exist
         uses: actions/github-script@v7

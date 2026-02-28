@@ -13,7 +13,7 @@ env:
 jobs:
   lint-and-test:
     name: Lint & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -56,7 +56,7 @@ jobs:
 
   build-services:
     name: Build Services
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint-and-test
     strategy:
       matrix:
@@ -106,7 +106,7 @@ jobs:
 
   build-apps:
     name: Build Apps
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint-and-test
     strategy:
       matrix:
@@ -149,7 +149,7 @@ jobs:
 
   helm-lint:
     name: Helm Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -177,7 +177,7 @@ jobs:
 
   integration-test:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-services, build-apps]
     if: (((github.event_name == 'pull_request') && (always())) && (github.event_name == 'pull_request')) && (always())
     steps:
@@ -210,7 +210,7 @@ jobs:
 
   policy-check:
     name: Policy Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -233,7 +233,7 @@ jobs:
 
   security-scan:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

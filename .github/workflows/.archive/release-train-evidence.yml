@@ -20,7 +20,7 @@ permissions:
 jobs:
   build-evidence:
     name: Build Evidence Bundle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       RELEASE_TAG: ${{ github.event.release.tag_name || github.event.inputs.release_tag || github.ref_name }}
       RELEASE_NAME: ${{ github.event.release.name || github.event.inputs.release_name || github.ref_name }}

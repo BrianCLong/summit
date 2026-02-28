@@ -25,7 +25,7 @@ env:
 jobs:
   build-provenance:
     name: Build with Provenance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       artifact-digest: ${{ steps.build.outputs.digest }}
       artifact-path: ${{ steps.build.outputs.path }}
@@ -79,7 +79,7 @@ jobs:
 
   generate-slsa3-provenance:
     name: Generate SLSA-3 Provenance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-provenance
     outputs:
       provenance-path: ${{ steps.provenance.outputs.path }}
@@ -268,7 +268,7 @@ jobs:
 
   attest-container:
     name: Attest Container Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-provenance, generate-slsa3-provenance]
     if: github.event.inputs.image_ref != ''
 
@@ -318,7 +318,7 @@ jobs:
 
   verify-slsa-level:
     name: Verify SLSA Level
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: generate-slsa3-provenance
 
     steps:

@@ -21,7 +21,7 @@ env:
 jobs:
   quantum-ready-validation:
     name: Quantum-Ready Validation Suite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     outputs:
       pqa-status: ${{ steps.pqa-gate.outputs.status }}
@@ -435,7 +435,7 @@ jobs:
 
   deployment-readiness:
     name: Deployment Readiness Assessment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: quantum-ready-validation
     if: ((always()) && (steps.assessment.outputs.ready == 'true')) && (steps.assessment.outputs.ready == 'true')
 
@@ -569,7 +569,7 @@ jobs:
 
   notification:
     name: Quantum-Ready Notification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [quantum-ready-validation, deployment-readiness]
     if: always()
 

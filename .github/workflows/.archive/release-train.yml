@@ -40,7 +40,7 @@ jobs:
   # ==========================================================================
   preflight:
     name: Pre-flight Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       eligible: ${{ steps.eligibility.outputs.eligible }}
       commit_sha: ${{ steps.eligibility.outputs.commit_sha }}
@@ -139,7 +139,7 @@ jobs:
     name: Calculate Version
     needs: preflight
     if: ((((((((((needs.preflight.outputs.eligible == 'true') && (needs.preflight.outputs.eligible == 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       version: ${{ steps.semver.outputs.version }}
       rc_version: ${{ steps.semver.outputs.rc_version }}
@@ -177,7 +177,7 @@ jobs:
   validate-whitepaper:
     name: Validate GA Whitepaper
     needs: preflight
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -192,7 +192,7 @@ jobs:
   create-release-branch:
     name: Create Release Branch
     needs: [preflight, version, validate-whitepaper]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       branch_name: ${{ steps.branch.outputs.branch_name }}
       release_url: ${{ steps.release.outputs.release_url }}
@@ -297,7 +297,7 @@ jobs:
   build-images:
     name: Build Release Images
     needs: [preflight, version, create-release-branch]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       api_digest: ${{ steps.build-api.outputs.digest }}
       web_digest: ${{ steps.build-web.outputs.digest }}
@@ -366,7 +366,7 @@ jobs:
   deploy-stage:
     name: Deploy to Stage
     needs: [preflight, version, create-release-branch, build-images]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: stage
     steps:
       - uses: actions/checkout@v4
@@ -431,7 +431,7 @@ jobs:
   stage-validation:
     name: Stage Validation
     needs: [version, deploy-stage]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -482,7 +482,7 @@ jobs:
   package-evidence:
     name: Package Evidence Bundle
     needs: [version, create-release-branch, build-images, stage-validation]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
@@ -556,7 +556,7 @@ jobs:
   notify:
     name: Notify Channels
     needs: [version, create-release-branch, stage-validation]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: inputs.dry_run != 'true'
     steps:
       - uses: actions/checkout@v4

@@ -11,7 +11,7 @@ env:
 jobs:
   merge-queue-validation:
     name: Merge Queue Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: (((github.event_name == 'merge_group') && (github.event_name == 'pull_request')) && (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'auto-rebase'))) && (github.event_name == 'pull_request')
     steps:
       - name: Checkout
@@ -41,7 +41,7 @@ jobs:
 
   pr-ready-check:
     name: PR Ready for Merge
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
 
   auto-rebase:
     name: Auto-rebase PR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -101,7 +101,7 @@ jobs:
 
   conflict-detection:
     name: Conflict Detection
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

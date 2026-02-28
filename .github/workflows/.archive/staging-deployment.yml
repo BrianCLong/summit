@@ -23,7 +23,7 @@ concurrency:
 jobs:
   metadata:
     name: Prepare release metadata
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       image-tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -36,7 +36,7 @@ jobs:
 
   deploy-staging:
     name: Deploy to staging and run synthetic checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: metadata
     environment:
       name: staging
@@ -90,7 +90,7 @@ jobs:
 
   promote-production:
     name: Promote artefacts to production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: deploy-staging
     if: ${{ needs.deploy-staging.result == 'success' }}
     environment:

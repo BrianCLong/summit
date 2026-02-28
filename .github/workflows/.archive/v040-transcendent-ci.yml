@@ -39,7 +39,7 @@ jobs:
   # Validate v0.4.0 GraphQL Schema
   validate-graphql-schema:
     name: Validate GraphQL Schema v0.4.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,7 +67,7 @@ jobs:
   # Validate OPA Policies
   validate-opa-policies:
     name: Validate OPA Policies v0.4.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -99,7 +99,7 @@ jobs:
   # Test Evolution Sandbox
   test-evolution-sandbox:
     name: Test Evolution Sandbox
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -136,7 +136,7 @@ jobs:
   # Test Quantum Cognition Framework
   test-quantum-cognition:
     name: Test Quantum Cognition Framework
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -166,7 +166,7 @@ jobs:
   # Test Transcendent Resolvers
   test-transcendent-resolvers:
     name: Test Transcendent Resolvers
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:15
@@ -217,7 +217,7 @@ jobs:
   # Security Scanning
   security-scan:
     name: Security Scan v0.4.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -250,7 +250,7 @@ jobs:
   # Policy Simulation Tests
   policy-simulation:
     name: Policy Simulation Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -287,7 +287,7 @@ jobs:
   # Build and Test Container
   build-container:
     name: Build Container Image
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       [
         validate-graphql-schema,
@@ -337,7 +337,7 @@ jobs:
   # Helm Chart Validation
   validate-helm-chart:
     name: Validate Helm Chart v0.4.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -372,7 +372,7 @@ jobs:
   # End-to-End Tests
   e2e-tests:
     name: End-to-End Tests v0.4.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-container]
     steps:
       - name: Checkout code
@@ -413,7 +413,7 @@ jobs:
   # Performance Benchmarks
   performance-benchmarks:
     name: Performance Benchmarks v0.4.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-container]
     steps:
       - name: Checkout code
@@ -449,7 +449,7 @@ jobs:
   # Deployment to Staging
   deploy-staging:
     name: Deploy to Staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [e2e-tests, performance-benchmarks]
     environment: staging
     steps:
@@ -491,7 +491,7 @@ jobs:
   # Monitoring and Alerting Setup
   setup-monitoring:
     name: Setup v0.4.0 Monitoring
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [deploy-staging]
     steps:
       - name: Checkout code

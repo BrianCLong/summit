@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     services:
       neo4j:

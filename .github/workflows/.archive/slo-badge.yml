@@ -9,7 +9,7 @@ on:
 jobs:
   slo-check:
     name: Check SLOs & Generate Badge
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout

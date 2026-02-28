@@ -32,7 +32,7 @@ env:
 
 jobs:
   er-precision-gate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         entity_type: [PERSON, ORG]
@@ -201,7 +201,7 @@ jobs:
 
   # Aggregate job that requires all entity types to pass
   er-precision-summary:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: er-precision-gate
     steps:
       - name: Check all precision gates

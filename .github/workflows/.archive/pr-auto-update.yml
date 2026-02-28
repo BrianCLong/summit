@@ -15,7 +15,7 @@ permissions:
 jobs:
   update-prs:
     name: Update PR Branches with Latest Workflows
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -88,7 +88,7 @@ Auto-updated by merge train to fix CI issues.
 
   merge-ready-prs:
     name: Auto-merge Ready PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: update-prs
     steps:
       - name: Checkout

@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-unit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -23,7 +23,7 @@ jobs:
 
   test-e2e:
     needs: test-unit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: mcr.microsoft.com/playwright:v1.45.0-jammy # Includes browsers for Playwright & Cypress deps
     steps:
@@ -61,7 +61,7 @@ jobs:
 
   performance-baseline:
     needs: test-unit
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node.js
@@ -117,7 +117,7 @@ on:
 jobs:
   lint:
     name: Lint Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -136,7 +136,7 @@ jobs:
 
   test:
     name: Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
       - name: Checkout
@@ -156,7 +156,7 @@ jobs:
 
   security:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -179,7 +179,7 @@ jobs:
 
   build:
     name: Build Artifacts
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test, security]
     steps:
       - name: Checkout
@@ -194,7 +194,7 @@ jobs:
 
   canary-deploy:
     name: Canary Deployment
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build
     if: github.ref == 'refs/heads/main'
     steps:
@@ -223,7 +223,7 @@ jobs:
 
   notify:
     name: Notify
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [canary-deploy]
     if: (always()) && (always())
     steps:

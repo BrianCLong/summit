@@ -51,7 +51,7 @@ env:
 jobs:
   build_and_sign:
     name: Build + SBOM + Sign
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       id-token: write
@@ -111,7 +111,7 @@ jobs:
 
   policy_gate:
     name: OPA policy gate
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build_and_sign
     continue-on-error: ${{ env.OPA_ENFORCE != 'true' }}
     steps:
@@ -131,7 +131,7 @@ jobs:
 
   verify_stage:
     name: Verify signed artifact
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs:
       - build_and_sign
       - policy_gate
@@ -172,7 +172,7 @@ jobs:
 
   deploy_stage:
     name: Stage deploy (OIDC only)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: verify_stage
     if: env.DEPLOY_ENABLED == 'true' && (env.OPA_ENFORCE != 'true' || needs.policy_gate.result == 'success')
     permissions:

@@ -31,7 +31,7 @@ permissions:
 jobs:
   verify:
     name: Verify Green for Promotion
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout

@@ -38,7 +38,7 @@ permissions:
 jobs:
   supply-chain-integrity:
     if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       release-version: ${{ steps.vars.outputs.release_version }}
 
@@ -243,7 +243,7 @@ jobs:
   # CI Gate: Final verification of all supply chain integrity
   ci-gate:
     needs: supply-chain-integrity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
@@ -277,7 +277,7 @@ jobs:
   # Create GitHub Release (only for tags)
   release:
     needs: [supply-chain-integrity, ci-gate]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name == 'push' && github.ref_type == 'tag'
     permissions:
       contents: write

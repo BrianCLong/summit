@@ -58,7 +58,7 @@ env:
 jobs:
   analyze:
     name: Regulatory Stance Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       has_critical_findings: ${{ steps.check_findings.outputs.has_critical }}
       has_high_findings: ${{ steps.check_findings.outputs.has_high }}
@@ -195,7 +195,7 @@ jobs:
 
   notify:
     name: Notify on Critical Findings
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: analyze
     if: (|) && (github.event_name == 'pull_request')
       (github.event.inputs.notify_on_findings == 'true' || github.event_name == 'schedule') &&
@@ -278,7 +278,7 @@ jobs:
 
   pr-comment:
     name: Comment on PR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: analyze
 
     steps:

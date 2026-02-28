@@ -51,7 +51,7 @@ jobs:
   # Check if we should publish
   check-trigger:
     name: Check Trigger
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       should_publish: ${{ steps.check.outputs.should_publish }}
       artifact_run_id: ${{ steps.check.outputs.artifact_run_id }}
@@ -104,7 +104,7 @@ jobs:
   # Build and publish the site
   publish:
     name: Build & Publish
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: check-trigger
     if: needs.check-trigger.outputs.should_publish == 'true'
 

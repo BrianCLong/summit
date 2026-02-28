@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   label:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/labeler@v5
@@ -17,7 +17,7 @@ jobs:
           repo-token: '${{ secrets.GITHUB_TOKEN }}'
 
   dependency-review:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
           deny-licenses: 'GPL-2.0,GPL-3.0'
 
   quick-checks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 

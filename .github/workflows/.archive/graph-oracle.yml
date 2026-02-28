@@ -54,7 +54,7 @@ permissions:
 jobs:
   oracle:
     name: Graph Query Correctness Oracle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     services:
@@ -254,7 +254,7 @@ jobs:
 
   performance-tracking:
     name: Track Performance Metrics
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: oracle
 
     steps:

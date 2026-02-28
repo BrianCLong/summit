@@ -52,7 +52,7 @@ jobs:
 
   prepare:
     name: 📋 Prepare Build Matrix
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
       should-push: ${{ steps.config.outputs.push }}
@@ -107,7 +107,7 @@ jobs:
 
   build-push:
     name: 🏗️ Build ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare]
     timeout-minutes: 60
     strategy:
@@ -279,7 +279,7 @@ jobs:
 
   security-report:
     name: 📊 Security Report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [build-push]
     steps:
       - name: Download all SBOMs

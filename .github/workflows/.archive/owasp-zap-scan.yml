@@ -34,7 +34,7 @@ permissions:
 jobs:
   zap-baseline-scan:
     name: ZAP Baseline Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: ((((((((github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'baseline')) && (always())) && (github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'api'))) && (always())) && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scan_type == 'full'))) && (always())) && (failure())) && (github.event_name == 'push' || github.event_name == 'schedule')) && (always())
 
     steps:
@@ -85,7 +85,7 @@ jobs:
 
   zap-api-scan:
     name: ZAP API Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -137,7 +137,7 @@ jobs:
 
   zap-full-scan:
     name: ZAP Full Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -205,7 +205,7 @@ jobs:
 
   graphql-security-scan:
     name: GraphQL Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -268,7 +268,7 @@ jobs:
 
   security-headers-check:
     name: Security Headers Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code

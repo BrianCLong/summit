@@ -26,7 +26,7 @@ concurrency:
 jobs:
   validate:
     if: (((((((((((((${{ (github.event.pull_request.head.repo.fork == false || github.event_name != 'pull_request') && github.actor != 'github-actions[bot]' }}) && (matrix.node == '20.x')) && (matrix.node == '20.x')) && (steps.changes.outputs.code == 'true')) && (steps.changes.outputs.code == 'true')) && (steps.changes.outputs.code == 'true')) && (steps.changes.outputs.code == 'true')) && (steps.changes.outputs.code == 'true')) && (steps.changes.outputs.code == 'true')) && (steps.changes.outputs.code == 'true')) && (env.RUN_GRAFANA_RENDER == 'true')) && (always() && steps.changes.outputs.code == 'true')) && (always())) && (always())
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     env:
       COMPOSE_PROFILES: dev

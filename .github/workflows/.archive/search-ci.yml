@@ -9,7 +9,7 @@ on:
 
 jobs:
   lint-schemas:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Validate JSON Schemas
@@ -20,7 +20,7 @@ jobs:
           done
 
   test-indexer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: services/search-indexer
@@ -34,7 +34,7 @@ jobs:
       - run: npm test
 
   policy-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup OPA

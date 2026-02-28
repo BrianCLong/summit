@@ -44,7 +44,7 @@ env:
 jobs:
   cost-analysis:
     name: Cost Analysis & Budget Monitoring
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     outputs:
@@ -223,7 +223,7 @@ jobs:
 
   slack-notification:
     name: Slack Notification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: cost-analysis
 
     steps:
@@ -292,7 +292,7 @@ jobs:
 
   cost-trend-analysis:
     name: Cost Trend Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: cost-analysis
 
     steps:

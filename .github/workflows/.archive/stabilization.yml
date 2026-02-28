@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -28,7 +28,7 @@ jobs:
         run: |
           npm run -ws --if-present build:smoke || true
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [prepare]
     timeout-minutes: 20
     steps:

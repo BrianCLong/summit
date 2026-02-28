@@ -9,7 +9,7 @@ on:
 jobs:
   compliance-check:
     name: Dependency Compliance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v4.1.1

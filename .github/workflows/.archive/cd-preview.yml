@@ -7,7 +7,7 @@ on:
 jobs:
   deploy-preview:
     if: (github.event.action != 'closed') && (github.event.action == 'closed')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: preview-${{ github.event.pull_request.number }}
       url: ${{ steps.deploy.outputs.url }}
@@ -102,7 +102,7 @@ jobs:
             });
 
   teardown-preview:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

@@ -30,7 +30,7 @@ jobs:
   drift:
     name: Drift – plan & risk
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix: ${{ steps.mx.outputs.matrix }}
     defaults:
@@ -71,7 +71,7 @@ jobs:
   plan:
     name: Plan (${{ matrix.ws }})
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [drift]
     strategy:
       fail-fast: false

@@ -16,7 +16,7 @@ permissions:
 jobs:
   dependency-check:
     name: Dependency Vulnerabilities
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
 
   code-analysis:
     name: Semgrep & Code Security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container:
       image: returntocorp/semgrep
     steps:
@@ -59,7 +59,7 @@ jobs:
 
   secret-detection:
     name: Secret Detection
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4

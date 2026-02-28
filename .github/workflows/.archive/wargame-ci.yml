@@ -14,7 +14,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -94,7 +94,7 @@ jobs:
           # The client's `npm run dev` will connect to localhost:4000 for GraphQL.
           # The server's `axios` calls will connect to http://api:8000 (internal docker network)
           # or localhost:8000 if server is also on host.
-          # For this CI, the server and client are run on the host (ubuntu-latest runner)
+          # For this CI, the server and client are run on the host (ubuntu-24.04 runner)
           # and connect to the docker-compose services.
           # So, the server needs to know the exposed port of the API.
           # And the client needs to know the exposed port of the server.
@@ -126,7 +126,7 @@ jobs:
 
   deploy-staging:
     needs: build-and-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: staging # Define a staging environment in GitHub
     timeout-minutes: 10
 

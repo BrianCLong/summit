@@ -55,7 +55,7 @@ jobs:
 
   sovereign-safeguards-validation:
     name: Sovereign Safeguards Validation
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     steps:
@@ -118,7 +118,7 @@ jobs:
 
   sovereign-compliance-check:
     name: Sovereign Compliance Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: sovereign-safeguards-validation
     timeout-minutes: 20
     if: (((((github.event.inputs.sovereign_compliance_check == 'true' || github.event_name != 'workflow_dispatch') && (github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging')) && (github.ref == 'refs/heads/main' && github.event.inputs.environment == 'production')) && (always())) && (needs.deploy-staging.result == 'success' && needs.setup-v041-monitoring.result == 'success')) && (needs.deploy-staging.result == 'failure' || needs.setup-v041-monitoring.result == 'failure')
@@ -225,7 +225,7 @@ jobs:
 
   build-sovereign-services:
     name: Build Sovereign Services
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: sovereign-compliance-check
     timeout-minutes: 25
 
@@ -279,7 +279,7 @@ jobs:
 
   deploy-staging:
     name: Deploy to Staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [sovereign-compliance-check, build-sovereign-services]
     environment:
       name: staging
@@ -377,7 +377,7 @@ jobs:
 
   deploy-production:
     name: Deploy to Production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [deploy-staging, sovereign-compliance-check]
     environment:
       name: production
@@ -458,7 +458,7 @@ jobs:
 
   setup-v041-monitoring:
     name: Setup v0.4.1 Monitoring
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [deploy-staging]
     timeout-minutes: 15
 
@@ -510,7 +510,7 @@ jobs:
 
   notify-deployment:
     name: Notify Deployment Status
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [deploy-staging, setup-v041-monitoring]
 
     steps:

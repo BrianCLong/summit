@@ -22,7 +22,7 @@ on:
 jobs:
   scenario-tests:
     name: Run Scenario Evaluations
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     steps:
@@ -216,7 +216,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:

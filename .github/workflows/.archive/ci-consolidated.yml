@@ -72,7 +72,7 @@ jobs:
   # Summary job
   ci-summary:
     name: CI Summary
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [yaml-lint, unit-tests, integration-tests, lint-tests, security]
     steps:
       - name: Check results

@@ -22,7 +22,7 @@ jobs:
 
   ga-gates:
     needs: graph-sync
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -49,7 +49,7 @@ jobs:
 
   deploy:
     needs: ga-gates
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     permissions:
       id-token: write

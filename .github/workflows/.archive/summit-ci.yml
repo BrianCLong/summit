@@ -8,7 +8,7 @@ on:
 
 jobs:
   test-server:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +40,7 @@ jobs:
           CI: true
 
   test-client:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -65,7 +65,7 @@ jobs:
           CI: true
 
   test-e2e:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [test-server, test-client]
     steps:
       - uses: actions/checkout@v4

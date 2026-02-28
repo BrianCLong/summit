@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   automerge:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: |
       contains(github.event.pull_request.labels.*.name, 'ready-to-merge') &&
       github.event.pull_request.draft == false
