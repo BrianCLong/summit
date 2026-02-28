@@ -14,6 +14,18 @@ MAN1="$TMPDIR/${ENV1}.json"
 MAN2="$TMPDIR/${ENV2}.json"
 
 echo "==> [1] Validate OIDC trust for $CLOUD"
+if [ "$CLOUD" = "aws" ] && [ -z "${AWS_ROLE_ARN:-}" ]; then
+  echo "Missing AWS secrets, skipping parity check"
+  exit 0
+fi
+if [ "$CLOUD" = "gcp" ] && [ -z "${GCP_WORKLOAD_POOL:-}" ]; then
+  echo "Missing GCP secrets, skipping parity check"
+  exit 0
+fi
+if [ "$CLOUD" = "azure" ] && [ -z "${AZURE_FEDERATED_ID:-}" ]; then
+  echo "Missing Azure secrets, skipping parity check"
+  exit 0
+fi
 case "$CLOUD" in
   aws)
     : "${AWS_ROLE_ARN:?missing}"
