@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-VQUEUE-GOV-001",
+  "item_slug": "vercel-queues-beta",
+  "metrics": {
+    "docs_count": 4,
+    "fixtures_checked": 2,
+    "schemas_checked": 3
+  }
+}
