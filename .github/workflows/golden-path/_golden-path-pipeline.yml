@@ -248,7 +248,7 @@ jobs:
     name: Security
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: (${{ !inputs.skip-security }}) && (always())
+    if: (!inputs.skip-security) && always()
     permissions:
       security-events: write
       contents: read
@@ -300,7 +300,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [lint, test, security]
-    if: ((((always() && !contains(needs.*.result, 'failure')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')
+    if: always() && !contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
     permissions:
       contents: read
       packages: write
@@ -409,7 +409,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: deploy
-    if: (${{ !inputs.skip-deploy && github.event_name != 'pull_request' }}) && (${{ inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name != 'pull_request' }})
+    if: (!inputs.skip-deploy && github.event_name != 'pull_request') && (inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name != 'pull_request')
 
     outputs:
       success: ${{ steps.verify.outputs.healthy }}
