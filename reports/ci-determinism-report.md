@@ -1,0 +1,225 @@
+# CI Determinism & Saturation Guardrails Report
+
+## Analyzed Workflows
+- ⚠️ .github/workflows/pre-release-health-check.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-post-merge.yml missing concurrency group
+- ⚠️ .github/workflows/ci-post-merge.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/summit-ci.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ai-copilot-canary.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/governance-evidence-contracts.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/golden-path-e2e.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/docs-lint.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-promote-guard.yml missing concurrency group
+- ⚠️ .github/workflows/mcp-drift.yml missing concurrency group
+- ⚠️ .github/workflows/mcp-drift.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/security-regressions.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/redaction-trend-alerts.yml missing concurrency group
+- ⚠️ .github/workflows/agentic-policy-drift.yml missing concurrency group
+- ⚠️ .github/workflows/agentic-policy-drift.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-reliability.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/deploy-multi-region.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-build.yml missing concurrency group
+- ⚠️ .github/workflows/promotion-bundle.yml missing concurrency group
+- ⚠️ .github/workflows/provenance-verify.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/verify-claims.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ga-evidence.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ga-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/policy-drift.yml missing concurrency group
+- ⚠️ .github/workflows/policy-drift.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/_reusable-ci-fast.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ci-fast.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/prod-simulation.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/comprehensive-test.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/comprehensive-test-suite.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/repro-build-check.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/subsumption-verify.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/_reusable-test-suite.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ci-perf.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ci-perf.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-security.yml missing concurrency group
+- ⚠️ .github/workflows/supplychain-drift.yml missing concurrency group
+- ⚠️ .github/workflows/supplychain-drift.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/slsa-provenance.yml missing concurrency group
+- ⚠️ .github/workflows/slsa-provenance.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-rc.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/evidence-id-consistency.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/cogsec_evidence.yml missing concurrency group
+- ⚠️ .github/workflows/ci-legacy.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/repro-docker.yml missing concurrency group
+- ⚠️ .github/workflows/repro-docker.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/security-playbook-automation.yml missing concurrency group
+- ⚠️ .github/workflows/release-ops-slo-issue.yml missing concurrency group
+- ⚠️ .github/workflows/auto-remediation.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/mvp4-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/error-budget-alerts.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-toolchain-setup.yml missing concurrency group
+- ⚠️ .github/workflows/ci-runner-drift.yml missing concurrency group
+- ⚠️ .github/workflows/ci-runner-drift.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-pr.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/weekly-assurance.yml missing concurrency group
+- ⚠️ .github/workflows/issue-backfill.yml missing concurrency group
+- ⚠️ .github/workflows/ga-evidence-attest.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/fresh-evidence-rate.yml missing concurrency group
+- ⚠️ .github/workflows/redaction-tests.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/_reusable-governance-gate.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-node-pnpm-setup.yml missing concurrency group
+- ⚠️ .github/workflows/copilot-golden-path.yml missing concurrency group
+- ⚠️ .github/workflows/intelgraph-ci.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/_reusable-ci.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ci.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/rc-preparation.yml missing concurrency group
+- ⚠️ .github/workflows/rc-preparation.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/build.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/go-live-release.yml missing concurrency group
+- ⚠️ .github/workflows/e2e-tests.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/narrative-ci.yml missing concurrency group
+- ⚠️ .github/workflows/narrative-ci.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/governance-daily.yml missing concurrency group
+- ⚠️ .github/workflows/mirror-to-personal.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ci-metrics.yml missing concurrency group
+- ⚠️ .github/workflows/post-release-canary.yml missing concurrency group
+- ⚠️ .github/workflows/post-release-canary.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/schema-diff.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-train.yml missing concurrency group
+- ⚠️ .github/workflows/subsumption-bundle-verifier.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/security-tests.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/experiment-aware-release.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/reusable-golden-path.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/schema-compat.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/compliance-governance.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/policy-validate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/evidence-collection.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-override.yml missing concurrency group
+- ⚠️ .github/workflows/nightly.yml missing concurrency group
+- ⚠️ .github/workflows/nightly.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/client-typecheck.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/evidence-validate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/pr-quality-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/deploy-preview.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-ga-pipeline.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-sgf.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-workflow-diff.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/policy-auto-tuning-ci.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/kev-alert.yml missing concurrency group
+- ⚠️ .github/workflows/hotfix-postmortem-enforcer.yml missing concurrency group
+- ⚠️ .github/workflows/hotfix-release.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/pr-gates.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/cicd-observer.yml missing concurrency group
+- ⚠️ .github/workflows/gates.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/subsumption-bundle.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/doc-link-check.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ga-evidence-pack.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/procedure-lint.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-cut.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/extortion-gates.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-health-monitor.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ga-readiness.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-ga-readiness.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/branch-protection-reconcile.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-test.yml missing concurrency group
+- ⚠️ .github/workflows/api-determinism-check.yml missing concurrency group
+- ⚠️ .github/workflows/api-determinism-check.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/azure-turin-v7-drift.yml missing concurrency group
+- ⚠️ .github/workflows/azure-turin-v7-drift.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/issue-stale-guard.yml missing concurrency group
+- ⚠️ .github/workflows/agent-guardrails.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/unit-test-coverage.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-preflight.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/solid-gate-drift.yml missing concurrency group
+- ⚠️ .github/workflows/generate-ops-evidence-pack.yml missing concurrency group
+- ⚠️ .github/workflows/generate-ops-evidence-pack.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/soc-controls.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/memalign-ci.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ci-governance.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/pr-conflict-forecast.yml missing concurrency group
+- ⚠️ .github/workflows/pr-conflict-forecast.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/agentic-plan-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/graph-sync.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/semver-label.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/tag-verification.yml missing concurrency group
+- ⚠️ .github/workflows/jetrl-ci.yml missing concurrency group
+- ⚠️ .github/workflows/_deploy.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-slsa-build.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-setup.yml missing concurrency group
+- ⚠️ .github/workflows/release-readiness.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/gate.yml missing concurrency group
+- ⚠️ .github/workflows/weekly-ops-evidence.yml missing concurrency group
+- ⚠️ .github/workflows/ux-governance.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/integration-tests.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/backup-dr.yml missing concurrency group
+- ⚠️ .github/workflows/golden-main.yml missing concurrency group
+- ⚠️ .github/workflows/graph-guardrail-fuzz.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/graph-sync-gate.yml missing concurrency group
+- ⚠️ .github/workflows/graph-sync-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/disinfo.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/summit_skill_gates.yml missing concurrency group
+- ⚠️ .github/workflows/publish-release-ops-internal.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/ai-governance.yml missing concurrency group
+- ⚠️ .github/workflows/codeql.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/_reusable-security-compliance.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-security-compliance.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/mega-pr-containment.yml missing concurrency group
+- ⚠️ .github/workflows/mega-pr-containment.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/api-lint.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/export-ops-evidence.yml missing concurrency group
+- ⚠️ .github/workflows/_auth-oidc.yml missing concurrency group
+- ⚠️ .github/workflows/dependency-monitor.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/type-safety-audit.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/branch-lifecycle.yml missing concurrency group
+- ⚠️ .github/workflows/post-deploy-gate.yml missing concurrency group
+- ⚠️ .github/workflows/post-deploy-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/_reusable-aws.yml missing concurrency group
+- ⚠️ .github/workflows/_reusable-release.yml missing concurrency group
+- ⚠️ .github/workflows/security-observability.yml missing concurrency group
+- ⚠️ .github/workflows/test-runners.yml missing concurrency group
+- ⚠️ .github/workflows/governance-engine.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/release-integrity.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/governance-meta-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/slo-smoke-gate.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/pr-triage.yml missing concurrency group
+- ⚠️ .github/workflows/pr-triage.yml cache key may not be content-addressed
+- ⚠️ .github/workflows/issue-triage.yml missing concurrency group
+- ⚠️ .github/workflows/release-rollback.yml missing concurrency group
+- ⚠️ .github/workflows/regulatory-drift.yml missing concurrency group
+- ⚠️ .github/workflows/regulatory-drift.yml cache key may not be content-addressed
+
+## Duplicate Trigger Analysis
+The following workflows might trigger duplicate runs (e.g. on PR merge push + PR sync):
+- .github/workflows/golden-path-e2e.yml
+- .github/workflows/ga-gate.yml
+- .github/workflows/workflow-lint.yml
+- .github/workflows/opa-policy-test.yml
+- .github/workflows/repro-build-check.yml
+- .github/workflows/docker-build.yml
+- .github/workflows/evidence-id-consistency.yml
+- .github/workflows/ci-legacy.yml
+- .github/workflows/server-typecheck.yml
+- .github/workflows/ci-pr.yml
+- .github/workflows/governance-lockfile-verify.yml
+- .github/workflows/a11y-keyboard-smoke.yml
+- .github/workflows/ci-intelgraph-server.yml
+- .github/workflows/security_gates.yml
+- .github/workflows/governance-policy-validation.yml
+- .github/workflows/codedata.yml
+- .github/workflows/dependency-audit.yml
+- .github/workflows/client-typecheck.yml
+- .github/workflows/evidence-validate.yml
+- .github/workflows/governance.yml
+- .github/workflows/doc-link-check.yml
+- .github/workflows/extortion-gates.yml
+- .github/workflows/supply-chain-integrity.yml
+- .github/workflows/security-supplychain.yml
+- .github/workflows/audit-exception-expiry.yml
+- .github/workflows/ci-preflight.yml
+- .github/workflows/compliance.yml
+- .github/workflows/release-readiness.yml
+- .github/workflows/ux-governance.yml
+- .github/workflows/disinfo.yml
+- .github/workflows/type-safety-audit.yml
+- .github/workflows/sbom-scan.yml
+- .github/workflows/workflow-validity.yml
+- .github/workflows/governance-engine.yml
+- .github/workflows/release-integrity.yml
+- .github/workflows/ci-core.yml
+- .github/workflows/governance-meta-gate.yml
+- .github/workflows/slo-smoke-gate.yml
