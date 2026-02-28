@@ -21,7 +21,9 @@ function scanFile(filepath: string): boolean {
   let clean = true;
 
   for (const pattern of forbiddenPatterns) {
-    if (pattern.regex.test(content)) {
+    // Reset regex state or use local copy for reliable testing in loop
+    const localRegex = new RegExp(pattern.regex.source, pattern.regex.flags.replace('g', ''));
+    if (localRegex.test(content)) {
       console.error(`❌ Forbidden pattern found in ${filepath}: ${pattern.name}`);
       clean = false;
     }

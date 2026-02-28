@@ -1,0 +1,21 @@
+name: GA Milestone - InfoWar SITREP
+id: infowar-sitrep-ga
+
+acceptance_criteria:
+  - id: schema-validation
+    description: "All SITREP and Evidence artifacts pass JSON schema validation"
+    status: pending
+  - id: evidence-generation
+    description: "Unit tests must produce at least one valid evidence bundle fixture"
+    status: pending
+  - id: policy-gates
+    description: "All INFOWAR-specific policy gates (never-log, attribution) pass"
+    status: pending
+  - id: guardrails-doc
+    description: "Guardrails and threat model documentation complete and reviewed"
+    status: pending
+
+governance_gates:
+  - gate/evidence_contract
+  - gate/never_log
+  - gate/infowar_verify

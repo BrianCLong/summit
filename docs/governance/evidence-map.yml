@@ -1,0 +1,12 @@
+item_slugs:
+  - id: "INFOWAR"
+    description: "Information Warfare Situational Picture"
+    evidence_prefix: "EVD-INFOWAR"
+
+mappings:
+  - id: "EVD-INFOWAR-NARR-001"
+    item_slug: "INFOWAR"
+    category: "narrative"
+  - id: "EVD-INFOWAR-REG-001"
+    item_slug: "INFOWAR"
+    category: "regulation"

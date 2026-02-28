@@ -40,11 +40,14 @@ export function buildUpsertEdgeQuery(edge: GraphEdge): { query: string; params: 
 /**
  * Builds a query to retrieve a narrative and its associated claims and evidence.
  */
-export function buildNarrativeQuery(narrativeId: string): string {
-  return `
-    MATCH (n:Narrative { id: '${narrativeId}' })
-    OPTIONAL MATCH (n)<-[:PART_OF]-(c:Claim)
-    OPTIONAL MATCH (c)-[:EVIDENCED_BY]->(e)
-    RETURN n, collect(c) as claims, collect(e) as evidence
-  `;
+export function buildNarrativeQuery(narrativeId: string): { query: string; params: any } {
+  return {
+    query: `
+      MATCH (n:Narrative { id: $narrativeId })
+      OPTIONAL MATCH (n)<-[:PART_OF]-(c:Claim)
+      OPTIONAL MATCH (c)-[:EVIDENCED_BY]->(e)
+      RETURN n, collect(c) as claims, collect(e) as evidence
+    `,
+    params: { narrativeId }
+  };
 }
