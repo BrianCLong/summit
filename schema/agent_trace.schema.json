@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentTrace",
+  "type": "object",
+  "properties": {
+    "autonomy_level": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "claims_logging_uri": {
+      "type": "string"
+    },
+    "mcp_sdk": {
+      "type": "string"
+    },
+    "regulator_classification": {
+      "type": "string"
+    },
+    "sdk": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "autonomy_level",
+    "claims_logging_uri",
+    "mcp_sdk",
+    "regulator_classification",
+    "sdk",
+    "timestamp"
+  ],
+  "additionalProperties": false
+}
