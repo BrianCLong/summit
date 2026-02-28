@@ -86,7 +86,9 @@ export function SearchBar({
           )}
           {showShortcut && !internalValue && (
             <Kbd>
-              <span className="text-xs">{MODIFIER_KEY}</span>K
+              <span className="text-xs">{MODIFIER_KEY}</span>
+              {MODIFIER_KEY === 'Ctrl' && <span className="mx-0.5">+</span>}
+              <span>K</span>
             </Kbd>
           )}
         </div>
