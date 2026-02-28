@@ -14,6 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Git Integrity Audit
+        run: |
+          if [[ -f scripts/ci/git-audit.sh ]]; then
+            chmod +x scripts/ci/git-audit.sh
+            ./scripts/ci/git-audit.sh
+          fi
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
