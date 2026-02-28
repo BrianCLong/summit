@@ -27,6 +27,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Git Integrity Audit
+        run: |
+          if [[ -f scripts/ci/git-audit.sh ]]; then
+            chmod +x scripts/ci/git-audit.sh
+            ./scripts/ci/git-audit.sh
+          fi
+
       - name: Install actionlint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
