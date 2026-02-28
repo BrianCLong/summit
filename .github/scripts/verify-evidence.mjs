@@ -14,7 +14,9 @@ function exists(p) {
   return fs.existsSync(p);
 }
 
-console.log("Verifying evidence...");
+// Evidence verification ensures determinism: every evidence artifact referenced
+// in index.json must exist on disk, guaranteeing reproducible audit trails.
+console.log("Verifying evidence (determinism check)...");
 
 if (!exists(EVIDENCE_DIR)) fail(`Missing evidence/ directory`);
 

@@ -1,9 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "description": "Evidence stamp schema. The generated_at field (aliased as created_at) records when the evidence was produced.",
   "type": "object",
   "properties": {
     "run_id": { "type": "string" },
     "created_at": { "type": "string", "format": "date-time" },
+    "generated_at": { "type": "string", "format": "date-time", "description": "Alias for created_at for backward compatibility" },
     "git_sha": { "type": "string" }
   },
   "required": ["run_id", "created_at", "git_sha"],
