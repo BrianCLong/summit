@@ -32,9 +32,8 @@ on:
 
 # Cancel in-progress runs for the same PR
 concurrency:
-  group: governance-guard-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write

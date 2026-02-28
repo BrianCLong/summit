@@ -22,8 +22,8 @@ on:
       - ".github/workflows/ci-preflight.yml"
 
 concurrency:
-  group: ci-preflight-${{ github.ref }}
-
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 env:
   POSTGRES_PASSWORD: ci-postgres-password
   NEO4J_PASSWORD: ci-neo4j-password

@@ -24,9 +24,8 @@ on:
         default: '120'
 
 concurrency:
-  group: smoke-gate-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 env:
   SMOKE_TIMEOUT: ${{ github.event.inputs.smoke_timeout || '120' }}
   POSTGRES_DB: intelgraph

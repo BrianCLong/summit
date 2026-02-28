@@ -5,9 +5,8 @@ on:
     types: [opened, reopened, synchronize]
 
 concurrency:
-  group: preview-pr-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 permissions:
   id-token: write
   contents: read

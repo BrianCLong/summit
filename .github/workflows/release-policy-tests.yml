@@ -38,9 +38,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-policy-tests-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 jobs:
   policy-tests:
     name: Policy Engine Tests
