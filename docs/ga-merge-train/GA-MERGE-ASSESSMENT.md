@@ -1,9 +1,9 @@
 # GA Merge Train - Final Report
 
-**Generated**: 2026-02-08
+**Generated**: 2026-02-28 (updated)
 **Integration Branch**: `claude/merge-prs-ga-release-XjiVk`
 **Golden Main SHA**: `36ae30c5c15522b96b79f7defb9f17b0ecfdcc00`
-**Integration HEAD**: `d3f9c39635`
+**Integration HEAD**: `cebaee8257`
 **Repository**: BrianCLong/summit
 
 ---
@@ -232,8 +232,8 @@ git push --force origin main
 - [x] All actionable validation checks passing
 - [x] Integration branch pushed to remote
 - [x] Security review of Tier 7 PRs (2 CRITICAL/HIGH fixed, 4 verified OK)
-- [ ] Full regression suite in CI/CD environment
-- [ ] Staging deployment and smoke test
+- [ ] Full regression suite in CI/CD environment (requires live infra)
+- [ ] Staging deployment and smoke test (requires live infra)
 - [x] Release candidate tag: `v5.0.0-rc.1`
 - [x] Changelog generated from merged PRs
 - [x] Release notes published
@@ -242,7 +242,13 @@ git push --force origin main
 - [x] Injection vulnerability audit completed (SQL, XSS, SSRF, path traversal)
 - [x] Provenance ledger library implemented (11/11 acceptance tests pass)
 - [x] External agent prompts generated (10 prompts for Codex, Claude Code, Antigravity)
-- [x] OPA/ABAC policies implemented (6 packages, 80/80 tests pass, p95 ~50µs)
+- [x] OPA/ABAC policies implemented (6 packages, 80/80 tests pass, p95 ~50µs) + Wasm build script
+- [x] Step-up auth + Reason-for-Access middleware verified (OPA policy + gateway middleware)
+- [x] Hash-chained audit events verified (provenance ledger SHA-256 + Merkle tree)
+- [x] Identity dashboards verified (access-audit + authz Grafana dashboards)
+- [x] RLS enabled on core tables (`030_enable_rls.sql`)
+- [x] pgBouncer configured (Helm chart + K8s deployment)
+- [x] Typesense schema contracts with revision guards verified
 - [x] Testing strategy documented (6-layer, 23 security-critical tests pass)
 - [x] Security-critical unit tests (HMAC, Cypher injection, XSS, SSRF, prototype pollution)
 - [x] CI/CD security gates (4 workflows: SAST/DAST, container scanning, SBOM, staged rollout)

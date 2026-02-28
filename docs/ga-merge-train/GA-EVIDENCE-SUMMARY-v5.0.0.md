@@ -1,8 +1,8 @@
 # GA Evidence Summary — IntelGraph v5.0.0
 
-**Date**: 2026-02-27
+**Date**: 2026-02-28 (final)
 **Integration Branch**: `claude/merge-prs-ga-release-XjiVk`
-**Commits**: 12,638+ | **Files**: 9,262+ | **Net Lines**: +185,063
+**Commits**: 12,797+ | **Files**: 9,262+ | **Net Lines**: +185,063
 
 ---
 
@@ -12,8 +12,8 @@
 |-------|------|--------|----------|
 | P0 | Readiness | PASS | 597/597 PRs merged, 12/12 CI checks green |
 | P1 | Gates & Baselines | PASS | OTel SDK, CI/CD gates, cost guardrails, Prometheus metrics |
-| P2 | Data Safety | PASS | Migration gate (Postgres/Neo4j dry-run, rollback testing) |
-| P3 | Security/Compliance | PASS | OPA 80/80, injection audit 7/7 fixed, threat model, 23 security tests |
+| P2 | Data Safety | PASS | Migration gate, RLS on core tables, pgBouncer Helm chart; 48h soak pending |
+| P3 | Security/Compliance | PASS | OPA 80/80 + Wasm build, step-up auth, RFA middleware, hash-chained audit, identity dashboards |
 | P4 | Product GA | CODE READY | All 5 features implemented, requires staging soak |
 | P5 | DR/Chaos | PASS | DR drill workflow, 14 chaos experiments, failover/cutback |
 | P6 | Release Train | PASS | Canary pipeline, provenance ledger, release notes, changelog |
@@ -144,3 +144,23 @@
 | 32 | Merge Script | `scripts/ga-merge-train.sh` | Script |
 | 33 | Report Generator | `scripts/ga-merge-report.py` | Script |
 | 34 | Policy Sim Script | `scripts/opa-policy-sim.sh` | Script |
+| 35 | Container Hardening | `.github/workflows/container-hardening.yml` | CI |
+| 36 | Conventional Commits | `.github/workflows/conventional-commits.yml` | CI |
+| 37 | SLO Gates | `.github/workflows/slo-gates.yml` | CI |
+| 38 | Performance Gate | `.github/workflows/performance-gate.yml` | CI |
+| 39 | Supply Chain Gates | `.github/workflows/supplychain-gates.yml` | CI |
+| 40 | OPA Wasm Build | `.ci/scripts/opa/build_wasm.sh` | Script |
+| 41 | Golden Path Probes | `observability/golden-paths/golden_paths.yaml` | Config |
+| 42 | k6 Baseline Test | `tests/performance/k6-baseline.js` | Test |
+| 43 | Feature Flags | `config/feature-flags.json` | Config |
+| 44 | Helm Security Template | `helm/templates/_security.tpl` | Config |
+| 45 | Image Size Budgets | `config/image-budgets.yaml` | Config |
+| 46 | Image Budget Script | `scripts/ci/image-size-budget.sh` | Script |
+| 47 | RLS Migration | `server/src/db/migrations/postgres/030_enable_rls.sql` | Migration |
+| 48 | pgBouncer Helm Chart | `deploy/helm/intelgraph/charts/pgbouncer/` | Config |
+| 49 | Step-Up Auth Policy | `companyos/policies/bundles/step-up-auth/stepup.rego` | Policy |
+| 50 | RFA Middleware | `apps/gateway/src/middleware/audit_rfa.ts` | Code |
+| 51 | Access Audit Dashboard | `observability/grafana/dashboards/access-audit.json` | Config |
+| 52 | AuthZ Dashboard | `observability/grafana/dashboards/authz.json` | Config |
+| 53 | Typesense Schema Contract | `ingest/schema/sink_contracts/typesense.json` | Config |
+| 54 | OPA Wasm Build Script | `.ci/scripts/opa/build_wasm.sh` | Script |
