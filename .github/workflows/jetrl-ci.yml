@@ -8,9 +8,9 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install pytest jsonschema torch requests
+      - run: pytest tests/test_precision_flow_policy.py tests/test_detectors_deny_by_default.py
       - name: Verify Offline Network Guard
         run: python ci/offline_network_guard.py
-      - run: pytest tests/test_precision_flow_policy.py tests/test_detectors_deny_by_default.py
   evidence:
     runs-on: ubuntu-latest
     steps:

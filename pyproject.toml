@@ -17,7 +17,7 @@ dependencies = [
     "prometheus-fastapi-instrumentator",
     "python-json-logger",
     "structlog",
-    "requests~=2.32",
+    "requests",
 ]
 
 [project.optional-dependencies]
