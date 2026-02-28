@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -7,30 +7,25 @@ from summit.models.qwen.qwen3_5_medium import Qwen35MediumAdapter
 
 
 @pytest.fixture
-def mock_httpx_client():
-    with patch("httpx.Client") as mock:
-        yield mock
-
-@pytest.fixture
-def mock_httpx_async_client():
-    with patch("httpx.AsyncClient") as mock:
-        yield mock
+def adapter():
+    with patch("httpx.Client"), patch("httpx.AsyncClient"):
+        return Qwen35MediumAdapter(api_key="test-key")
 
 def test_qwen_adapter_init():
-    adapter = Qwen35MediumAdapter(api_key="test-key")
-    assert adapter.api_key == "test-key"
-    assert adapter.MODEL_ID == "qwen3.5-medium"
+    with patch("httpx.Client"), patch("httpx.AsyncClient"):
+        adapter = Qwen35MediumAdapter(api_key="test-key")
+        assert adapter.api_key == "test-key"
+        assert adapter.MODEL_ID == "qwen3.5-medium"
 
-def test_qwen_adapter_generate(mock_httpx_client):
+def test_qwen_adapter_generate(adapter):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
         "choices": [{"message": {"content": "Hello from Qwen!"}}],
         "usage": {"total_tokens": 10}
     }
-    mock_httpx_client.return_value.__enter__.return_value.post.return_value = mock_response
+    adapter._client.post = MagicMock(return_value=mock_response)
 
-    adapter = Qwen35MediumAdapter(api_key="test-key")
     output = adapter.generate("Hello")
 
     assert isinstance(output, ModelOutput)
@@ -39,7 +34,7 @@ def test_qwen_adapter_generate(mock_httpx_client):
     assert output.metadata["model"] == "qwen3.5-medium"
 
 @pytest.mark.asyncio
-async def test_qwen_adapter_generate_async(mock_httpx_async_client):
+async def test_qwen_adapter_generate_async(adapter):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
@@ -47,10 +42,8 @@ async def test_qwen_adapter_generate_async(mock_httpx_async_client):
         "usage": {"total_tokens": 5}
     }
 
-    # Mocking the async post call
-    mock_httpx_async_client.return_value.__aenter__.return_value.post.return_value = mock_response
+    adapter._async_client.post = AsyncMock(return_value=mock_response)
 
-    adapter = Qwen35MediumAdapter(api_key="test-key")
     output = await adapter.generate_async("Hello")
 
     assert output.text == "Async hello!"

@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Integrated Alibaba Qwen3.5 Medium model with standardized `BaseModelAdapter`.
+- Added cost-performance scoring and drift monitoring for Qwen3.5.
+- Implemented automated license verification CI gate for Qwen models.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

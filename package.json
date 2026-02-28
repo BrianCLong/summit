@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.15",
+  "version": "4.2.3",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -91,6 +91,7 @@
     "release": "changeset version && changeset publish",
     "release:cut": "node scripts/release/release.mjs",
     "release:cut-branch": "node scripts/release/cut-release-branch.mjs",
+    "lint:release-policy": "pnpm test:release-scripts",
     "release:bundle": "node scripts/release/release-bundle.mjs",
     "release:schema:validate": "node scripts/release/validate-bundle-schemas.mjs --dir dist/release --strict",
     "release:verify": "node scripts/release/verify-release-bundle.mjs",

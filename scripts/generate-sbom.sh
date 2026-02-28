@@ -107,7 +107,9 @@ EOF
 for sbom in "$OUTPUT_DIR"/*.json; do
   if [ -f "$sbom" ]; then
     sbom_name=$(basename "$sbom")
-    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+    if [[ "$sbom_name" != SBOM_SUMMARY* ]]; then
+      echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+    fi
   fi
 done
 

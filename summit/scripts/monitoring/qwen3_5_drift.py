@@ -1,5 +1,6 @@
 import argparse
 import json
+import sys
 from pathlib import Path
 
 
@@ -42,9 +43,10 @@ def main():
         print("Drift detected!")
         for d in drifts:
             print(f"  - {d}")
-        # In a real CI job, we might exit with 1 here.
+        sys.exit(1)
     else:
         print("No significant drift detected.")
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()
