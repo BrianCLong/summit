@@ -1,4 +1,4 @@
-import json, pathlib
+import json, pathlib, hashlib
 import pytest
 from jsonschema import validate
 from prov.model import ProvDocument, Namespace
@@ -27,7 +27,7 @@ def to_prov(doc):
     # Agent (optional)
     agent_uri = (doc.get("producer") or doc.get("owner"))
     if agent_uri:
-        ag = p.agent(f"ex:agent/{hash(agent_uri)}", other_attributes={"ex:uri": agent_uri})
+        ag = p.agent(f"ex:agent/{hashlib.sha256(agent_uri.encode()).hexdigest()[:8]}", other_attributes={"ex:uri": agent_uri})
         p.wasAssociatedWith(a, ag)
     return p
 
