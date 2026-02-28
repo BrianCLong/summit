@@ -23,6 +23,10 @@ on:
         description: "Whether all security and compliance gates passed"
         value: ${{ jobs.security-compliance.outputs.passed }}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   security-compliance:
     name: Security & Compliance Gate

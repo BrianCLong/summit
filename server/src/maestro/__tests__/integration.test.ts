@@ -10,6 +10,7 @@ describe('Maestro Integration Tests', () => {
   let app: any;
 
   beforeAll(async () => {
+    process.env.ZERO_FOOTPRINT = 'false';
     // Create app
     app = await createApp();
 
