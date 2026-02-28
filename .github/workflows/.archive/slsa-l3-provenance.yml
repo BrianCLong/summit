@@ -57,7 +57,7 @@ jobs:
   # ===========================================================================
   pre-build-checks:
     name: Pre-Build Security Validation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       commit-verified: ${{ steps.commit-check.outputs.verified }}
       source-hash: ${{ steps.source-hash.outputs.hash }}
@@ -169,7 +169,7 @@ jobs:
   build-server:
     name: Build Server
     needs: pre-build-checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.meta.outputs.tags }}
@@ -370,7 +370,7 @@ jobs:
   build-web:
     name: Build Web
     needs: pre-build-checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.build-image-uri.outputs.uri }}
@@ -478,7 +478,7 @@ jobs:
   sign-images:
     name: Sign Images (Cosign)
     needs: [build-server, build-web]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -642,7 +642,7 @@ jobs:
   slsa-verify:
     name: Verify SLSA L3 Compliance
     needs: [hermetic-build, cosign-sign, slsa-provenance]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: read
@@ -754,7 +754,7 @@ jobs:
   vulnerability-scan:
     name: Security Vulnerability Scan
     needs: hermetic-build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
@@ -827,7 +827,7 @@ jobs:
   compliance-summary:
     name: Generate Compliance Summary
     needs: [pre-build-checks, hermetic-build, cosign-sign, slsa-verify, vulnerability-scan]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Generate comprehensive compliance report
         run: |
@@ -905,7 +905,7 @@ jobs:
   scan:
     name: Vulnerability Scan
     needs: [build-server, build-web]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
     steps:
@@ -937,7 +937,7 @@ jobs:
     name: SLSA Compliance Summary
     needs: [provenance-server, provenance-web, sign-images, scan]
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Generate Summary
         run: |

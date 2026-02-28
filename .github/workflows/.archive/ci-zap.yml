@@ -16,7 +16,7 @@ permissions:
 jobs:
   prepare-matrix:
     name: Build ZAP target matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.targets.outputs.matrix }}
     steps:
@@ -58,7 +58,7 @@ jobs:
   zap-baseline:
     name: Run ZAP baseline
     needs: prepare-matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
       fail-fast: false

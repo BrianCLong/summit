@@ -7,7 +7,7 @@ on:
 
 jobs:
   osint-nightly:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4

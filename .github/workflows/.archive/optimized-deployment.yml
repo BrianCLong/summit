@@ -39,7 +39,7 @@ jobs:
   # Build optimized Docker image with caching
   build-image:
     name: Build Optimized Docker Image
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
@@ -130,7 +130,7 @@ jobs:
   # Determine deployment environment
   determine-environment:
     name: Determine Deployment Environment
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       environment: ${{ steps.determine.outputs.environment }}
       deployment-strategy: ${{ steps.determine.outputs.deployment-strategy }}
@@ -161,7 +161,7 @@ jobs:
   # Deploy to Kubernetes
   deploy:
     name: Deploy to Kubernetes
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [build-image, determine-environment]
     environment:
       name: ${{ needs.determine-environment.outputs.environment }}
@@ -241,7 +241,7 @@ jobs:
   # Monitor canary deployment (production only)
   monitor-canary:
     name: Monitor Canary Deployment
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [deploy, determine-environment]
     if: ((needs.determine-environment.outputs.deployment-strategy == 'canary') && (always())) && (always())
     permissions:
@@ -292,7 +292,7 @@ jobs:
   # Post-deployment verification
   post-deployment:
     name: Post-Deployment Verification
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [deploy, determine-environment]
 
     steps:
@@ -339,7 +339,7 @@ jobs:
   # Rollback on failure
   rollback:
     name: Rollback on Failure
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [deploy, determine-environment, post-deployment]
     if: failure() && needs.determine-environment.outputs.environment == 'production'
     permissions:

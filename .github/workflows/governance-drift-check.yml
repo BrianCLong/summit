@@ -38,7 +38,7 @@ permissions:
 jobs:
   check-drift:
     name: Check Governance Drift
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout

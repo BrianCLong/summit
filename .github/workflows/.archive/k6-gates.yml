@@ -11,7 +11,7 @@ on:
 
 jobs:
   k6-smoke:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       PNPM_CACHE_FOLDER: ~/.pnpm-store
       NODE_VERSION: '20.x'
@@ -74,7 +74,7 @@ jobs:
         run: make down || true
 
   k6-strict:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 

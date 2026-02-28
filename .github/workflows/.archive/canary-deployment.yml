@@ -56,7 +56,7 @@ concurrency:
 
 jobs:
   validate-inputs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       version-valid: ${{ steps.validate.outputs.version-valid }}
       namespace: ${{ steps.validate.outputs.namespace }}
@@ -125,7 +125,7 @@ PY
   pre-flight-checks:
     if: ((((((inputs.action == 'deploy') && (inputs.action == 'deploy')) && (failure())) && (inputs.action == 'promote')) && (inputs.action == 'abort')) && (always())) && (always())
     needs: validate-inputs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
@@ -171,7 +171,7 @@ PY
 
   deploy-canary:
     needs: [validate-inputs, pre-flight-checks]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
@@ -294,7 +294,7 @@ PY
 
   promote-canary:
     needs: validate-inputs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
@@ -418,7 +418,7 @@ PY
 
   abort-canary:
     needs: validate-inputs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
       - name: Checkout
@@ -473,7 +473,7 @@ PY
 
   notify-teams:
     needs: [deploy-canary, promote-canary, abort-canary]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Determine status
         id: status

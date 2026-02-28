@@ -32,7 +32,7 @@ jobs:
   # ============================================================
   setup-observability:
     name: 🔭 Setup Observability Stack
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       run_id: ${{ steps.meta.outputs.run_id }}
       timestamp: ${{ steps.meta.outputs.timestamp }}
@@ -58,7 +58,7 @@ jobs:
   # ============================================================
   e2e-with-metrics:
     name: 📊 E2E Tests with Metrics
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: setup-observability
     strategy:
       fail-fast: false
@@ -233,7 +233,7 @@ jobs:
   # ============================================================
   aggregate-metrics:
     name: 📈 Aggregate Metrics
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [setup-observability, e2e-with-metrics]
     steps:
       - uses: actions/checkout@v4
@@ -339,7 +339,7 @@ jobs:
   # ============================================================
   update-dashboards:
     name: 📊 Update Dashboards
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: aggregate-metrics
     steps:
       - uses: actions/checkout@v4
@@ -393,7 +393,7 @@ jobs:
   # ============================================================
   alert-on-failures:
     name: 🚨 Alert on Failures
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [aggregate-metrics]
     steps:
       - name: Download metrics

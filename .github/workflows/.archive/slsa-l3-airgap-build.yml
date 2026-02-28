@@ -64,7 +64,7 @@ jobs:
 jobs:
   preflight:
     name: Air-Gap Pre-flight Validation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       bundle-id: ${{ steps.bundle-info.outputs.bundle-id }}
       manifest-hash: ${{ steps.bundle-info.outputs.manifest-hash }}
@@ -140,7 +140,7 @@ jobs:
 
   build-server:
     needs: preflight
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.build.outputs.image-uri }}
@@ -222,7 +222,7 @@ jobs:
   sbom-generation:
     name: Generate SBOM and Attestations
     needs: [preflight, hermetic-build]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -265,7 +265,7 @@ jobs:
 
   build-web:
     needs: preflight
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -361,7 +361,7 @@ jobs:
   create-bundle:
     name: Create Air-Gap Transfer Bundle
     needs: [preflight, hermetic-build, sbom-generation]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       bundle-hash: ${{ steps.bundle.outputs.hash }}
     steps:
@@ -612,7 +612,7 @@ jobs:
   compliance-report:
     name: Generate Compliance Report
     needs: [preflight, hermetic-build, sbom-generation, create-bundle]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Generate compliance summary
         run: |
@@ -690,7 +690,7 @@ jobs:
 
   create-bundle:
     needs: [preflight, build-server, build-web]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4

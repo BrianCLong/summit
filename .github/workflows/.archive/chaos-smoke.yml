@@ -3,7 +3,7 @@ on:
   workflow_dispatch: {}
 jobs:
   kill-one-pod:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: azure/setup-kubectl@v4
       - run: |

@@ -26,7 +26,7 @@ env:
 jobs:
   error-budget-check:
     name: 📉 Detect SLO Breaches
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     outputs:
       alert-needed: ${{ steps.report.outputs.alert-needed }}

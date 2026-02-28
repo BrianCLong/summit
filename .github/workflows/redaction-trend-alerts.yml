@@ -35,7 +35,7 @@ env:
 jobs:
   check-trends:
     name: Check Redaction Trends
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     outputs:
       alert_level: ${{ steps.analyze.outputs.alert_level }}
@@ -157,7 +157,7 @@ jobs:
 
   create-alert-issue:
     name: Create/Update Alert Issue
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: check-trends
     if: |
       needs.check-trends.outputs.alert_level != 'OK' &&
@@ -334,7 +334,7 @@ jobs:
 
   auto-close-resolved:
     name: Auto-Close Resolved Alerts
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: check-trends
     if: needs.check-trends.outputs.alert_level == 'OK'
 
@@ -431,7 +431,7 @@ jobs:
 
   summary:
     name: Alert Summary
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [check-trends, create-alert-issue]
     if: always()
 

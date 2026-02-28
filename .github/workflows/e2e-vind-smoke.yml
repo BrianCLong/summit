@@ -15,7 +15,7 @@ jobs:
   smoke-test:
     name: create->kubectl->delete
     if: false && (vars.SUMMIT_VIND_CI == '1')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
 
     steps:

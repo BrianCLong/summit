@@ -19,7 +19,7 @@ concurrency:
 jobs:
   security-regressions:
     name: "🛡️ Security Regressions"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout

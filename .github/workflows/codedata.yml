@@ -27,7 +27,7 @@ concurrency:
 jobs:
   codegen-drift:
     name: Codegen Drift Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -42,7 +42,7 @@ jobs:
 
   determinism-smoke:
     name: Determinism Smoke Test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -57,7 +57,7 @@ jobs:
 
   dependency-delta:
     name: Dependency Delta Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }

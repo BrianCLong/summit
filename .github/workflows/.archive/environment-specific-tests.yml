@@ -19,7 +19,7 @@ on:
 jobs:
   environment-tests:
     name: ${{ matrix.service }} service - ${{ matrix.environment }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       fail-fast: false

@@ -41,7 +41,7 @@ jobs:
   # Fast unit tests - run first for quick feedback
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ((((((((${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == '' }}) && (always())) && (${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'integration' || github.event.inputs.test_type == '' }})) && (always())) && (${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'graphql' || github.event.inputs.test_type == '' }})) && (always())) && (${{ github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'error-scenarios' || github.event.inputs.test_type == '' }})) && (always())) && (always())
 
     steps:
@@ -78,7 +78,7 @@ jobs:
   # Integration tests - require services
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: unit-tests
 
     services:
@@ -170,7 +170,7 @@ jobs:
   # GraphQL resolver tests
   graphql-tests:
     name: GraphQL Resolver Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: unit-tests
 
     steps:
@@ -207,7 +207,7 @@ jobs:
   # Error scenario tests
   error-scenario-tests:
     name: Error Scenario Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: unit-tests
 
     steps:
@@ -244,7 +244,7 @@ jobs:
   # Test coverage aggregation
   coverage-report:
     name: Coverage Report
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [unit-tests, integration-tests, graphql-tests, error-scenario-tests]
 
     steps:

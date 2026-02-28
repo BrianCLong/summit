@@ -13,7 +13,7 @@ env:
 jobs:
   infrastructure-health:
     name: Infrastructure Health Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,7 +58,7 @@ jobs:
 
   security-posture:
     name: Security Posture Verification
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -104,7 +104,7 @@ jobs:
 
   performance-baseline:
     name: Performance Baseline Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -143,7 +143,7 @@ jobs:
 
   ci-cd-health:
     name: CI/CD Pipeline Health
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -181,7 +181,7 @@ jobs:
 
   feature-flag-health:
     name: Feature Flag Health Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -207,7 +207,7 @@ jobs:
 
   monitoring-observability:
     name: Monitoring & Observability Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -236,7 +236,7 @@ jobs:
 
   compliance-audit:
     name: Compliance Audit
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -278,7 +278,7 @@ jobs:
 
   operational-summary:
     name: Operational Summary
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs:
       [
         infrastructure-health,

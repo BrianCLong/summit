@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   auto-assign:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     # Don't assign for draft PRs or dependabot PRs
     if: |
       github.event.pull_request.draft == false &&

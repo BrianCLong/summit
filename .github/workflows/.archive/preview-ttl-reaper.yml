@@ -14,7 +14,7 @@ env:
 
 jobs:
   cleanup:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: preview
     steps:
       - name: Setup kubectl

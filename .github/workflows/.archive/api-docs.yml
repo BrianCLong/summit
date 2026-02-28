@@ -29,7 +29,7 @@ concurrency:
 jobs:
   # Validate OpenAPI specifications
   validate:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Validate OpenAPI Specs
     steps:
       - name: Checkout code
@@ -52,7 +52,7 @@ jobs:
 
   # Generate SDKs
   generate-sdks:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Generate Client SDKs
     needs: validate
     if: ((((github.event_name == 'push' && github.ref == 'refs/heads/main') && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-sdk]'))) && (secrets.NPM_TOKEN != '')) && (secrets.PYPI_TOKEN != '')
@@ -89,7 +89,7 @@ jobs:
 
   # Build and deploy documentation to GitHub Pages
   deploy-docs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Deploy API Documentation
     needs: validate
     environment:
@@ -140,7 +140,7 @@ jobs:
 
   # Publish SDK packages (optional, requires npm/PyPI tokens)
   publish-sdks:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Publish SDKs
     needs: generate-sdks
     steps:
@@ -181,7 +181,7 @@ jobs:
 
   # Notification on completion
   notify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Notify Completion
     needs: [validate, deploy-docs]
     if: always()

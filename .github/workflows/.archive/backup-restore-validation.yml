@@ -33,7 +33,7 @@ env:
 jobs:
   create-backup:
     name: Create Test Backup
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     services:
@@ -191,7 +191,7 @@ jobs:
   restore-validation:
     name: Validate Backup Restore
     needs: create-backup
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     services:
@@ -416,7 +416,7 @@ jobs:
   compliance-check:
     name: RTO/RPO Compliance Check
     needs: [create-backup, restore-validation]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check RTO compliance

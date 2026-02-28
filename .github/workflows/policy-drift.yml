@@ -7,7 +7,7 @@ on:
 
 jobs:
   check-drift:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ${{ vars.POLICY_DRIFT_MONITOR_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@v4

@@ -38,7 +38,7 @@ env:
 jobs:
   smoke-gate:
     name: Full-Stack Smoke Test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     services:

@@ -36,6 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
+
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
@@ -43,6 +49,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -62,6 +74,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Build Gateway Docker Image
         run: docker compose -f docker-compose.dev.yaml build gateway

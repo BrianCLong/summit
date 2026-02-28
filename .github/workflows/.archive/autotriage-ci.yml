@@ -15,7 +15,7 @@ on:
 jobs:
   test:
     name: Test Autotriage Engine
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -75,7 +75,7 @@ jobs:
 
   weekly-triage:
     name: Weekly Triage Report
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code

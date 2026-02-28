@@ -27,7 +27,7 @@ concurrency:
 jobs:
   setup:
     name: Setup batch matrix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       batches: ${{ steps.generate.outputs.batches }}
     steps:
@@ -42,7 +42,7 @@ jobs:
   bulk-import:
     name: Import batch ${{ matrix.batch }}
     needs: setup
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: ${{ fromJson(github.event.inputs.max_parallel) }}
       fail-fast: false
@@ -92,7 +92,7 @@ jobs:
   summary:
     name: Import summary
     needs: bulk-import
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: always()
     steps:
       - name: Generate summary

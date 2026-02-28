@@ -21,7 +21,7 @@ permissions:
 jobs:
   solid-gate:
     name: Solid Gate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,6 +53,6 @@ jobs:
         run: |
           if [ -f artifacts/solid-gate/report.json ]; then
             echo "## Solid Gate Findings" >> $GITHUB_STEP_SUMMARY
-            # Simple parsing for summary (jq is available on ubuntu-24.04)
+            # Simple parsing for summary (jq is available on ubuntu-latest)
             jq -r '.findings[] | "- [" + (.severity | ascii_upcase) + "] " + .rule_id + ": " + .message + " (" + (.path // "global") + ")"' artifacts/solid-gate/report.json >> $GITHUB_STEP_SUMMARY
           fi

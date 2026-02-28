@@ -21,7 +21,7 @@ jobs:
   # Parse and route ChatOps commands
   chatops-router:
     if: ((github.event.issue.pull_request) && (|)) && (|)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       issues: read
       pull-requests: read
@@ -90,7 +90,7 @@ jobs:
     needs: chatops-router
       needs.chatops-router.outputs.command == 'merge-pr' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Acknowledge command
         shell: bash
@@ -122,7 +122,7 @@ jobs:
     needs: chatops-router
       needs.chatops-router.outputs.command == 'rerun-tests' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Trigger test rerun
         shell: bash
@@ -146,7 +146,7 @@ jobs:
     if: |
       needs.chatops-router.outputs.command == 'deploy' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -232,7 +232,7 @@ jobs:
     if: |
       needs.chatops-router.outputs.command == 'rollback' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -304,7 +304,7 @@ jobs:
     if: (|) && (|)
       needs.chatops-router.outputs.command == 'status' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -351,7 +351,7 @@ jobs:
     needs: chatops-router
       needs.chatops-router.outputs.command == 'health-check' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check service health
         shell: bash
@@ -396,7 +396,7 @@ jobs:
   help:
     needs: chatops-router
     if: needs.chatops-router.outputs.command == 'help'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
@@ -442,7 +442,7 @@ jobs:
     if: (|) && (|)
       needs.chatops-router.outputs.command != '' &&
       needs.chatops-router.outputs.authorized != 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:
@@ -476,7 +476,7 @@ jobs:
       needs.chatops-router.outputs.command != 'health-check' &&
       needs.chatops-router.outputs.command != 'help' &&
       needs.chatops-router.outputs.authorized == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       issues: write
     steps:

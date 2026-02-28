@@ -39,7 +39,7 @@ env:
 jobs:
   prepare:
     name: Prepare Deployment
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
       image-tag: ${{ steps.version.outputs.image-tag }}
@@ -82,7 +82,7 @@ jobs:
   build-images:
     name: Build & Push Docker Images
     needs: prepare
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         service:
@@ -149,7 +149,7 @@ jobs:
   deploy:
     name: Deploy to Staging
     needs: [prepare, build-images]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: staging
       url: https://staging.intelgraph.io
@@ -215,7 +215,7 @@ jobs:
   health-check:
     name: Health Checks
     needs: [prepare, deploy]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -245,7 +245,7 @@ jobs:
   update-status:
     name: Update Deployment Status
     needs: [prepare, deploy, health-check]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Update deployment status (success)

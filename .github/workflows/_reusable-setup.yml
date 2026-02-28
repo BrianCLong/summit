@@ -60,7 +60,7 @@ jobs:
     timeout-minutes: 10
     strategy:
       matrix:
-        os: [ubuntu-24.04]
+        os: [ubuntu-latest]
     outputs:
       node: ${{ steps.versions.outputs.node }}
       pnpm: ${{ steps.versions.outputs.pnpm }}

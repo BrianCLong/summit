@@ -50,7 +50,7 @@ permissions:
 jobs:
   check-compatibility:
     name: Verify Schema Compatibility
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     outputs:
       status: ${{ steps.check.outputs.status }}

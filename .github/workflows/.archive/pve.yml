@@ -20,7 +20,7 @@ permissions:
 jobs:
   validate:
     name: Policy Validation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
 
   schema-drift:
     name: Schema Drift Detection
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,7 +90,7 @@ jobs:
 
   security-scan:
     name: Security Scan
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

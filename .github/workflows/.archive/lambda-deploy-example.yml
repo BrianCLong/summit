@@ -23,7 +23,7 @@ env:
 jobs:
   terraform:
     name: Terraform
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout

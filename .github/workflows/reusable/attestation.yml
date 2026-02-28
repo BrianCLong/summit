@@ -4,7 +4,7 @@ on:
 
 jobs:
   run:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Placeholder Attestation
         run: echo "Generating attestations..."

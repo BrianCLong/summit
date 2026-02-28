@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Install tooling
         run: |
           sudo apt-get update
@@ -34,6 +40,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Check provider status
         id: gate
         run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
@@ -154,6 +166,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Step up 25% → 50% → 100%
         run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
 
@@ -163,6 +181,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Post-deploy probes (latency/error rates/log SLOs)
         run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
       - name: Enforce rollback on SLO breach

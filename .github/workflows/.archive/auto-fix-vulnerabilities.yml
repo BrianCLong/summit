@@ -35,7 +35,7 @@ permissions:
 jobs:
   scan-and-fix:
     name: Scan and Auto-Fix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       fixes-applied: ${{ steps.fix.outputs.count }}
       pr-url: ${{ steps.pr.outputs.url }}
@@ -265,7 +265,7 @@ This fix was automatically applied by the security auto-fix workflow."
 
   notify:
     name: Notify Results
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: scan-and-fix
     if: always()
 

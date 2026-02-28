@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   monitor-ci-health:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Monitor CI Pipeline Health
 
     steps:

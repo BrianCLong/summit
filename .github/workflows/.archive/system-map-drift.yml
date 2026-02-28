@@ -49,7 +49,7 @@ concurrency:
 jobs:
   detect-drift:
     name: Detect System Map Drift
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
@@ -246,7 +246,7 @@ jobs:
   notify-on-drift:
     name: Notify on Significant Drift
     needs: detect-drift
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Send Slack notification (optional)

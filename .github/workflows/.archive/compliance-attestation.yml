@@ -23,7 +23,7 @@ env:
 
 jobs:
   build-and-attest:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
       attestation-id: ${{ steps.attest.outputs.attestation-id }}
@@ -166,7 +166,7 @@ jobs:
   
   compliance-export:
     needs: build-and-attest
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     
     steps:
       - name: Checkout repository

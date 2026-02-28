@@ -15,7 +15,7 @@ env:
 jobs:
   dependency-scan:
     name: Dependency Vulnerability Scan
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -78,7 +78,7 @@ jobs:
 
   secret-scan:
     name: Secret Scanning
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -93,7 +93,7 @@ jobs:
 
   security-linting:
     name: Security Linting
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -118,7 +118,7 @@ jobs:
 
   snyk-scan:
     name: Snyk Security Scan
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -148,7 +148,7 @@ jobs:
   security-report:
     name: Generate Security Report
     needs: [dependency-scan, secret-scan, security-linting]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code

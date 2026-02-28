@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   k6-perf:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       K6_BASE_URL: ${{ secrets.PERF_BASE_URL }}
       PROM_REMOTE_URL: ${{ secrets.PERF_PROM_REMOTE_URL }}

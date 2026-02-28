@@ -17,7 +17,7 @@ permissions:
 jobs:
   trivy-scan:
     name: Trivy security scan and SBOM
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -48,7 +48,7 @@ jobs:
 
   slsa-attestation-verify:
     name: Verify SLSA attestations
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: trivy-scan
     steps:
       - name: Checkout repository

@@ -53,7 +53,7 @@ env:
 jobs:
   aws-operation:
     name: AWS ${{ inputs.operation }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ${{ inputs.has_aws }}
     permissions:
       id-token: write

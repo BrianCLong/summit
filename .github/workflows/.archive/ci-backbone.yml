@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   queue-guard:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 2
     outputs:
       proceed: ${{ steps.check.outputs.proceed }}
@@ -45,7 +45,7 @@ jobs:
   lint-type-unit:
     needs: [queue-guard]
     if: needs.queue-guard.outputs.proceed == 'true'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

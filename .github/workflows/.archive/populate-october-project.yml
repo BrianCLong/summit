@@ -38,7 +38,7 @@ on:
 jobs:
   import:
     name: Bulk import October issues
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write

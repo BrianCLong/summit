@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   weekly-report:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL || vars.PROMETHEUS_URL }}
       EXCEPTION_SOURCE_URL: ${{ secrets.EXCEPTION_SOURCE_URL || vars.EXCEPTION_SOURCE_URL }}

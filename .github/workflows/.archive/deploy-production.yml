@@ -37,7 +37,7 @@ env:
 jobs:
   validate:
     name: Validate Production Deployment
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.validate.outputs.version }}
       image-tag: ${{ steps.validate.outputs.image-tag }}
@@ -109,7 +109,7 @@ jobs:
   approval:
     name: Manual Approval Required
     needs: validate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: production-approval
       url: https://intelgraph.io
@@ -160,7 +160,7 @@ jobs:
   schema-safety:
     name: Schema pre-flight & post-migration verification
     needs: [validate, approval]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       report-path: ${{ steps.schema-report.outputs.path }}
       preflight-status: ${{ steps.schema-report.outputs.preflight-status }}
@@ -252,7 +252,7 @@ jobs:
   pre-deployment-checks:
     name: Pre-deployment Checks
     needs: [validate, approval, schema-safety]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -292,7 +292,7 @@ jobs:
   deploy:
     name: Deploy to Production
     needs: [validate, approval, pre-deployment-checks]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: production
       url: https://intelgraph.io
@@ -378,7 +378,7 @@ jobs:
   health-check:
     name: Production Health Checks
     needs: [validate, deploy]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -440,7 +440,7 @@ jobs:
   post-deployment:
     name: Post-deployment Tasks
     needs: [validate, deploy, health-check]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Update deployment status (success)

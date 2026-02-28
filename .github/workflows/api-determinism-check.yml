@@ -42,7 +42,7 @@ permissions:
 jobs:
   determinism-check:
     name: Check API Determinism
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       total: ${{ steps.check.outputs.total }}
       passed: ${{ steps.check.outputs.passed }}
@@ -173,7 +173,7 @@ jobs:
 
   notify-on-failure:
     name: Notify on Failure
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: determinism-check
     if: needs.determinism-check.outputs.status == 'failed'
 

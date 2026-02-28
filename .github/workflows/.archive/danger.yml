@@ -3,7 +3,7 @@ on: [pull_request]
 
 jobs:
   danger:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

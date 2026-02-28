@@ -19,7 +19,7 @@ jobs:
   # Fast feedback lane: Static Analysis & Security
   static-checks:
     name: Static Checks & Security
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
   # Unit Testing Lane
   unit-tests:
     name: Unit Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -115,7 +115,7 @@ jobs:
   # Smoke Test Lane: The Golden Path
   smoke-tests:
     name: Smoke Tests (Golden Path)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -177,7 +177,7 @@ jobs:
   sonarqube-sast:
     name: SonarQube SAST Scan
     needs: [static-checks, unit-tests]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout repository
@@ -199,7 +199,7 @@ jobs:
 
   compliance-drift-check:
     name: Compliance Drift Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -218,7 +218,7 @@ jobs:
 
   threat-model-drift-check:
     name: Threat Model Drift Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -241,7 +241,7 @@ jobs:
 
   agent-governance-check:
     name: Agent Governance Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -269,7 +269,7 @@ jobs:
 
   ownership-check:
     name: Ownership Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
@@ -291,7 +291,7 @@ jobs:
 
   pr-quality-gate-status:
     name: PR Quality Gate Status
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [static-checks, unit-tests, smoke-tests, sonarqube-sast, compliance-drift-check, threat-model-drift-check, agent-governance-check, ownership-check]
     steps:
       - name: Check Status of All Jobs

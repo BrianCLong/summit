@@ -40,7 +40,7 @@ env:
 jobs:
   sync:
     name: Sync Branch Protection
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: production-admin
 
     steps:

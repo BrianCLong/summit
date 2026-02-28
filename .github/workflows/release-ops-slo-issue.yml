@@ -37,7 +37,7 @@ env:
 jobs:
   create-slo-issue:
     name: Create Monthly SLO Issue
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout

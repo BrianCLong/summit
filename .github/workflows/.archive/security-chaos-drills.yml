@@ -55,7 +55,7 @@ jobs:
   # Safety gate - ensure we never hit production
   safety-check:
     name: Safety Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       environment: ${{ steps.validate.outputs.environment }}
       drills: ${{ steps.validate.outputs.drills }}
@@ -91,7 +91,7 @@ jobs:
   run-drills:
     name: Run Security Drills
     needs: safety-check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: ${{ needs.safety-check.outputs.environment }}
     steps:
       - name: Checkout repository
@@ -222,7 +222,7 @@ jobs:
   #   name: Notify on Failure
   #   needs: run-drills
   #   if: failure() && github.event_name == 'schedule'
-  #   runs-on: ubuntu-24.04
+  #   runs-on: ubuntu-latest
   #   steps:
   #     - name: Send Slack notification
   #       uses: slackapi/slack-github-action@v1

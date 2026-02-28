@@ -20,7 +20,7 @@ env:
 jobs:
   guard:
     if: (github.event_name == 'schedule') && (steps.guard.outputs.saturated == 'true')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       saturated: ${{ steps.guard.outputs.saturated }}
     steps:
@@ -43,7 +43,7 @@ jobs:
   k6:
     if: (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') && (github.event_name == 'schedule')
     needs: [guard]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     strategy:
       max-parallel: 2

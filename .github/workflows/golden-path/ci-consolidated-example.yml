@@ -42,6 +42,12 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
@@ -87,7 +93,7 @@ jobs:
           - accessibility
         # Optionally test on multiple OS
         os:
-          - ubuntu-24.04
+          - ubuntu-latest
         # Can add node versions if needed
         # node-version: [18, 20]
         
@@ -99,6 +105,12 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
@@ -172,6 +184,12 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
@@ -205,6 +223,12 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - name: Build Docker image
         run: docker build -t summit-example:${{ github.sha }} .

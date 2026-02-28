@@ -42,7 +42,7 @@ permissions:
 jobs:
   prepare-rc:
     name: Prepare Release Candidate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     outputs:
       tag: ${{ steps.prepare.outputs.tag }}

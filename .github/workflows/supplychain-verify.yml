@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout (shallow ok)
         uses: actions/checkout@v4

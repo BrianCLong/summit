@@ -19,7 +19,7 @@ env:
 jobs:
   test-sgf:
     name: Test SGF
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4

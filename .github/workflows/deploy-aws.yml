@@ -48,6 +48,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -94,6 +100,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -108,6 +120,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

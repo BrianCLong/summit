@@ -8,7 +8,7 @@ env:
 
 jobs:
   run:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
       - uses: actions/setup-node@v4 # v4
@@ -72,7 +72,7 @@ permissions:
 jobs:
   unit:
     name: unit
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       NODE_VERSION: '20.x'
       PNPM_CACHE_FOLDER: ~/.pnpm-store

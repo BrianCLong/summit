@@ -30,7 +30,7 @@ env:
 jobs:
   backup-databases:
     name: Backup Neo4j & Postgres
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     
     services:
@@ -226,7 +226,7 @@ jobs:
   
   cleanup-old-backups:
     name: Cleanup Old Backup Artifacts
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: backup-databases
     
     steps:

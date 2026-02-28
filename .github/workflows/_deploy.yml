@@ -24,7 +24,7 @@ on:
 jobs:
   slo-gate:
     name: Pre-Deploy SLO Gate (${{ inputs.environment }})
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       status: ${{ steps.check.outcome }}
     if: ${{ inputs.environment == 'prod' && !inputs.skip-slo }}

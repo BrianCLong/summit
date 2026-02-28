@@ -40,7 +40,7 @@ jobs:
   context:
     name: Gather preview context
     if: (((github.event_name == 'pull_request' && github.event.action != 'closed') && (needs.context.result == 'success')) && (needs.context.result == 'success')) && (needs.deploy-preview.result == 'success')
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       ttl-hours: ${{ steps.ttl.outputs.ttl_hours }}
       budget-override: ${{ steps.labels.outputs.override }}
@@ -117,7 +117,7 @@ JSON
 
   build-images:
     needs: context
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       server-image: ${{ steps.meta.outputs.server-image }}
       client-image: ${{ steps.meta.outputs.client-image }}
@@ -164,7 +164,7 @@ JSON
 
   deploy-preview:
     needs: [context, build-images]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: preview
     steps:
       - name: Checkout
@@ -225,7 +225,7 @@ JSON
 
   update-pr:
     needs: [context, deploy-preview]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -261,7 +261,7 @@ JSON
 
   teardown:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: preview
     steps:
       - name: Setup kubectl
@@ -295,7 +295,7 @@ JSON
 
   dispatch:
     if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3

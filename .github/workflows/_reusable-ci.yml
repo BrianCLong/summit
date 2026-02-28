@@ -48,7 +48,7 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         task: [lint, typecheck, test]

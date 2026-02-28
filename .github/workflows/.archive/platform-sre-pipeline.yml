@@ -23,7 +23,7 @@ env:
 jobs:
   version:
     name: Verify semantic version tag
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -47,7 +47,7 @@ jobs:
 
   build:
     name: Build and unit test
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: version
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
 
   security_scans:
     name: Lint, scan & SBOM
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - uses: actions/checkout@v4
@@ -86,7 +86,7 @@ jobs:
 
   integration_tests:
     name: Integration tests & smoke
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: security_scans
     steps:
       - uses: actions/checkout@v4
@@ -111,7 +111,7 @@ jobs:
 
   canary_deploy:
     name: Canary deploy
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: integration_tests
     environment:
       name: canary
@@ -143,7 +143,7 @@ jobs:
 
   slo_enforcement:
     name: Error budget & cost enforcement
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: canary_deploy
     steps:
       - uses: actions/checkout@v4
@@ -167,7 +167,7 @@ jobs:
 
   progressive_delivery:
     name: Promote to production
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: slo_enforcement
     environment:
       name: production
@@ -199,7 +199,7 @@ jobs:
 
   rollback:
     name: Auto rollback
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: canary_deploy
     if: failure()
     steps:

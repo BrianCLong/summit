@@ -40,7 +40,7 @@ jobs:
   # ==========================================================================
   validate:
     name: Validate Hotfix
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       hotfix_version: ${{ steps.version.outputs.hotfix_version }}
       branch_name: ${{ steps.version.outputs.branch_name }}
@@ -118,7 +118,7 @@ jobs:
   create-branch:
     name: Create Hotfix Branch
     needs: validate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       branch_created: ${{ steps.branch.outputs.created }}
     steps:
@@ -197,7 +197,7 @@ jobs:
   build:
     name: Build Hotfix Images
     needs: [validate, create-branch]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       api_digest: ${{ steps.build-api.outputs.digest }}
       web_digest: ${{ steps.build-web.outputs.digest }}
@@ -287,7 +287,7 @@ jobs:
   deploy-stage:
     name: Deploy Hotfix to Stage
     needs: [validate, build]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: stage
     steps:
       - uses: actions/checkout@v4
@@ -366,7 +366,7 @@ jobs:
   deploy-prod:
     name: Deploy Hotfix to Production
     needs: [validate, build, deploy-stage]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment: production
     outputs:
       deployed: ${{ steps.deploy.outputs.deployed }}
@@ -442,7 +442,7 @@ jobs:
   finalize:
     name: Finalize Hotfix Release
     needs: [validate, build, deploy-prod]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:

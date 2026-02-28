@@ -14,7 +14,7 @@ on:
 
 jobs:
   validate-canary-config:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     name: Validate Canary Configuration
 
     steps:

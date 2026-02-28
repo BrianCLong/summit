@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   detect:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.decide.outputs.run }}
     steps:
@@ -35,7 +35,7 @@ jobs:
   smoke:
     needs: detect
     if: (needs.detect.outputs.run == 'true') && (failure())
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4

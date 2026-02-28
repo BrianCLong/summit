@@ -11,7 +11,7 @@ permissions:
 jobs:
   helm-lint:
     name: Helm Lint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: azure/setup-helm@v4
@@ -26,7 +26,7 @@ jobs:
           done
   helm-template:
     name: Template Validation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: helm-lint
     steps:
       - uses: actions/checkout@v4

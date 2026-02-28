@@ -23,7 +23,7 @@ concurrency:
 jobs:
   gate:
     name: gate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read

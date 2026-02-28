@@ -11,7 +11,7 @@ on:
 jobs:
   license-scan:
     name: License Compliance Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code

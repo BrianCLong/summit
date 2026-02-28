@@ -11,7 +11,7 @@ permissions:
 jobs:
   # Apply labels based on file patterns
   label-by-files:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Apply labels based on changed files
         uses: actions/labeler@v5
@@ -22,7 +22,7 @@ jobs:
 
   # Apply semantic labels based on PR title
   label-by-title:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Label by PR title
         uses: actions/github-script@v7
@@ -83,7 +83,7 @@ jobs:
 
   # Check and label based on PR body content
   label-by-content:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Label by PR body content
         uses: actions/github-script@v7

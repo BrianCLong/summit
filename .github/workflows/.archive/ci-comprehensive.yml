@@ -23,7 +23,7 @@ env:
 jobs:
   setup:
     name: Setup & Pre-checks
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       node: ${{ steps.versions.outputs.node }}
       pnpm: ${{ steps.versions.outputs.pnpm }}
@@ -76,7 +76,7 @@ jobs:
 
   lint-and-typecheck:
     name: Lint & TypeCheck
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: setup
     steps:
       - name: Checkout
@@ -122,7 +122,7 @@ jobs:
 
   unit-integration-tests:
     name: Unit & Integration Tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: setup
     services:
       postgres:
@@ -213,7 +213,7 @@ jobs:
 
   schema-api-validation:
     name: Schema & API Validation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [setup, lint-and-typecheck]
     steps:
       - name: Checkout
@@ -257,7 +257,7 @@ jobs:
 
   security-gates:
     name: Security Gates
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: setup
     steps:
       - name: Checkout
@@ -317,7 +317,7 @@ jobs:
 
   build-and-attestation:
     name: Build & Attestation
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [lint-and-typecheck, unit-integration-tests, security-gates]
     steps:
       - name: Checkout
@@ -366,7 +366,7 @@ jobs:
 
   otel-sanity:
     name: OTEL Sanity Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [build-and-attestation]
     steps:
       - name: Checkout
@@ -413,7 +413,7 @@ jobs:
 
   merge-readiness:
     name: Merge Readiness Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs:
       [
         setup,

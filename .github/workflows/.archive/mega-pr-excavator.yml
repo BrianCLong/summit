@@ -27,7 +27,7 @@ jobs:
   # Parallel excavation workers
   excavate-batch-1:
     name: Recovery Batch 1 (0-100)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
@@ -52,7 +52,7 @@ jobs:
 
   excavate-batch-2:
     name: Recovery Batch 2 (100-200)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
@@ -75,7 +75,7 @@ jobs:
 
   excavate-batch-3:
     name: Recovery Batch 3 (200-300)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
@@ -98,7 +98,7 @@ jobs:
 
   excavate-batch-4:
     name: Recovery Batch 4 (300-415)
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
@@ -123,7 +123,7 @@ jobs:
     name: Recovery Report
     needs: [excavate-batch-1, excavate-batch-2, excavate-batch-3, excavate-batch-4]
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Generate recovery report

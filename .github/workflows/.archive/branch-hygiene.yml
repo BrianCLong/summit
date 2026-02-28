@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   stale-prs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Close stale PRs
         uses: actions/stale@v9

@@ -26,7 +26,7 @@ jobs:
   # Build and Push Docker Images
   build-push:
     name: Build & Push Images
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up QEMU
@@ -70,7 +70,7 @@ jobs:
   deploy:
     name: Deploy to ${{ inputs.environment || 'staging' }}
     needs: [build-push]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: ${{ inputs.environment || 'staging' }}
       url: https://${{ inputs.environment || 'staging' }}.summit.intelgraph.io

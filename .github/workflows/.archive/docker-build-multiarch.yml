@@ -24,7 +24,7 @@ env:
 jobs:
   prepare:
     name: Prepare Build Metadata
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.meta.outputs.version }}
       tags: ${{ steps.meta.outputs.tags }}
@@ -78,7 +78,7 @@ jobs:
   build-api:
     name: Build API Service
     needs: prepare
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         platform:
@@ -146,7 +146,7 @@ jobs:
   build-web:
     name: Build Web Service
     needs: prepare
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         platform:
@@ -210,7 +210,7 @@ jobs:
 
   merge-api:
     name: Merge API Manifests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [prepare, build-api]
 
     steps:
@@ -264,7 +264,7 @@ jobs:
 
   merge-web:
     name: Merge Web Manifests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: [prepare, build-web]
 
     steps:
@@ -316,7 +316,7 @@ jobs:
   security-scan:
     name: Security Scan
     needs: [merge-api, merge-web, prepare]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -339,7 +339,7 @@ jobs:
   sign-images:
     name: Sign Container Images
     needs: [merge-api, merge-web, prepare, security-scan]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
 
     strategy:

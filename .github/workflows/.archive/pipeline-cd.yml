@@ -17,7 +17,7 @@ on:
 jobs:
   # CD only runs if CI passed
   check-ci:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     steps:
       - run: echo "CI passed, proceeding to deployment."
@@ -26,7 +26,7 @@ jobs:
   deploy-staging:
     name: 🚀 Deploy Staging
     needs: check-ci
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: staging
       url: https://staging.summit.internal
@@ -60,7 +60,7 @@ jobs:
   deploy-prod:
     name: 🚀 Deploy Production
     needs: deploy-staging
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     environment:
       name: production
       url: https://app.summit.internal

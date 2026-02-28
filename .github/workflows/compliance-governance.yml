@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   governance-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
 
@@ -43,7 +43,7 @@ jobs:
         run: pnpm verify:governance
 
   compliance-drift-check:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
 

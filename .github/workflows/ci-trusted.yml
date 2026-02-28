@@ -16,7 +16,7 @@ concurrency:
 jobs:
   deploy:
     name: Deploy to Staging
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write # Required for OIDC

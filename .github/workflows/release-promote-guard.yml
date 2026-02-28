@@ -49,7 +49,7 @@ permissions:
 jobs:
   verify-promotion-readiness:
     name: Verify RC Promotion Readiness
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     outputs:

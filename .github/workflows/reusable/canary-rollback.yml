@@ -38,7 +38,7 @@ on:
 jobs:
   canary:
     name: Canary + rollback
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       canary-status: ${{ steps.canary.outcome }}
       rollback-status: ${{ steps.rollback.outcome || 'skipped' }}

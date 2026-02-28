@@ -20,7 +20,7 @@ on:
 jobs:
   rollback:
     name: ⏪ Rollback
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: (github.event_name == 'workflow_dispatch') && (github.event_name == 'repository_dispatch' && github.event.action == 'alert-webhook')
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
   alert-webhook-rollback:
     name: 🚨 Alert Webhook Rollback
     needs: []
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 

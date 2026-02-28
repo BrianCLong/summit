@@ -39,7 +39,7 @@ concurrency:
 jobs:
   generate-dashboard:
     name: Generate Governance Dashboard
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -113,7 +113,7 @@ jobs:
   deploy-dashboard:
     name: Deploy to Pages
     needs: generate-dashboard
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
 
     environment:

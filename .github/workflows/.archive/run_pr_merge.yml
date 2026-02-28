@@ -6,7 +6,7 @@ on:
 
 jobs:
   get-prs:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       pr_numbers: ${{ steps.get_prs.outputs.pr_numbers }}
     steps:
@@ -34,7 +34,7 @@ jobs:
   trigger-batch-merge:
     needs: get-prs
     if: needs.get-prs.outputs.pr_numbers != '[]'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

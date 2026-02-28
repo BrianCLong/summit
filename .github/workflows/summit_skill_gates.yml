@@ -3,7 +3,7 @@ on: [pull_request]
 
 jobs:
   evidence-schemas:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Validate evidence schemas exist
@@ -13,7 +13,7 @@ jobs:
           test -f evidence/schemas/stamp.schema.json
 
   policy-fixtures:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Deny-by-default policy fixture

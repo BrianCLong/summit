@@ -5,7 +5,7 @@ on:
 
 jobs:
   check-sla:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Check PR review SLAs
         env:

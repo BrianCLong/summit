@@ -30,7 +30,7 @@ jobs:
   queue-performance-check:
     name: Queue Performance Analysis
     if: ((((((false # Belt-and-suspenders guard during stabilization) && (steps.monitor.outputs.report_generated == 'true')) && (steps.results.outputs.critical_violations != '0')) && (always())) && (always())) && (github.event_name == 'schedule' || github.event.inputs.immediate_analysis == 'true')) && (github.event_name == 'schedule' && contains(github.event.schedule, '0 8 * * 1'))
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -241,7 +241,7 @@ jobs:
 
   performance-trend-analysis:
     name: Performance Trend Analysis
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: queue-performance-check
     steps:
       - name: Checkout

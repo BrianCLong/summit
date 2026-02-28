@@ -37,7 +37,7 @@ jobs:
   # ============================================================================
   validate-doc-links:
     name: Validate Doc-to-Issue Links
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: ((((github.event_name == 'pull_request') && (steps.changed-docs.outputs.files != '')) && (steps.changed-docs.outputs.files != '' && github.event_name == 'pull_request')) && (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.action == 'health'))) && (always())
 
     steps:
@@ -164,7 +164,7 @@ jobs:
   # ============================================================================
   health-check:
     name: Backlog Health Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -263,7 +263,7 @@ jobs:
   # ============================================================================
   extract:
     name: Extract Promises
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.action == 'extract'
 
     steps:
@@ -313,7 +313,7 @@ jobs:
   # ============================================================================
   report:
     name: Generate Report
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.action == 'report'
 
     steps:

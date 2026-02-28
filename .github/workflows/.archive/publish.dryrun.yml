@@ -6,7 +6,7 @@ on:
 
 jobs:
   detect:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set.outputs.matrix }}
     steps:
@@ -46,7 +46,7 @@ jobs:
   pack:
     needs: detect
     if: needs.detect.outputs.matrix != '{"include":[]}'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix: ${{ fromJson(needs.detect.outputs.matrix) }}

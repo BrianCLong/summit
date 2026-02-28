@@ -38,7 +38,7 @@ env:
 jobs:
   guard:
     if: (((((((((((((((((((github.event_name == 'schedule') && (steps.guard.outputs.saturated == 'true')) && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true')) && (github.event_name == 'schedule')) && (always())) && (always())) && (always())) && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true')) && (github.event_name == 'schedule')) && (always())) && (always())) && (always())) && (${{ !inputs.skip_soak && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') }})) && (github.event_name == 'schedule')) && (always())) && (always())) && (always())) && (always())) && (always())) && (${{ failure() }})
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       saturated: ${{ steps.guard.outputs.saturated }}
     steps:

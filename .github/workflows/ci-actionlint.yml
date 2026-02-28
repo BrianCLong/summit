@@ -17,7 +17,7 @@ concurrency:
 jobs:
   ci-actionlint:
     name: ci-actionlint
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:

@@ -9,7 +9,7 @@ on:
 
 jobs:
   mirror:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     # Prevent infinite loop by checking if the push came from GitHub Actions
     if: ((((github.event.head_commit.author.name != 'TopicalityLLC Mirror Bot') && (success())) && (success())) && (success())) && (failure())
     

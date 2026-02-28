@@ -24,7 +24,7 @@ env:
 jobs:
   detect-schema-drift:
     name: Detect Schema Drift
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     services:
       postgres:
@@ -293,7 +293,7 @@ jobs:
 
   performance-impact-analysis:
     name: Performance Impact Analysis
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     services:
       postgres:

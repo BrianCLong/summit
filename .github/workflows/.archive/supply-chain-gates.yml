@@ -23,7 +23,7 @@ env:
 jobs:
   supply-chain-gates:
     name: supply-chain-gates
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

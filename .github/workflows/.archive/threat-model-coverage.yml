@@ -12,7 +12,7 @@ permissions:
 jobs:
   check-coverage:
     name: Check Threat Model Coverage
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
@@ -104,7 +104,7 @@ jobs:
   # Staleness check runs on schedule
   staleness-report:
     name: Weekly Staleness Report
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: (github.event_name == 'schedule') && (failure())
 
     steps:

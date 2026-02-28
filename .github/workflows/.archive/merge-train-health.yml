@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   backlog-probe:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       saturated: ${{ steps.detect.outputs.saturated }}
     steps:
@@ -69,7 +69,7 @@ jobs:
   health-check:
     if: (((needs.backlog-probe.outputs.saturated == 'false') && (steps.metrics.outputs.health_score < 60)) && (always())) && (steps.metrics.outputs.health_score < 70)
     needs: [backlog-probe]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository

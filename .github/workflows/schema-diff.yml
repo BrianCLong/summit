@@ -40,7 +40,7 @@ permissions:
 jobs:
   schema-diff:
     name: Schema Diff Check
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -225,7 +225,7 @@ jobs:
   # SOC 2 audit trail
   record-audit:
     name: Record Audit Trail
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: schema-diff
     if: always()
 
