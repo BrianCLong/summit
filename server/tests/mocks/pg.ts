@@ -18,7 +18,7 @@ const mockUser = {
 };
 
 export const mockClient = {
-  query: jest.fn().mockImplementation((text: string, _params: any[]) => {
+  query: jest.fn().mockImplementation((text: string, _params: any[]) => Promise.resolve({ rowCount: 0, rows: [] })); //
     try { fs.appendFileSync(logFile, `QUERY: ${text}\n`); } catch (_) { }
     const normalizedText = text.trim().toUpperCase();
 
@@ -76,9 +76,9 @@ export const mockClient = {
 };
 
 export const mockPool = {
-  query: jest.fn().mockImplementation((text: string, params: any[]) => mockClient.query(text, params)),
-  read: jest.fn().mockImplementation((text: string, params: any[]) => mockClient.query(text, params)),
-  write: jest.fn().mockImplementation((text: string, params: any[]) => mockClient.query(text, params)),
+  query: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+  read: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
+  write: jest.fn().mockResolvedValue({ rows: [], rowCount: 0 }),
   connect: jest.fn().mockResolvedValue(mockClient),
   on: jest.fn(),
   end: jest.fn().mockResolvedValue(undefined),
