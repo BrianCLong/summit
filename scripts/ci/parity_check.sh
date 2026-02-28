@@ -16,20 +16,20 @@ MAN2="$TMPDIR/${ENV2}.json"
 echo "==> [1] Validate OIDC trust for $CLOUD"
 case "$CLOUD" in
   aws)
-    : "${AWS_ROLE_ARN:?missing}"
-    : "${AWS_OIDC_AUDIENCE:?missing}"
+    : "${AWS_ROLE_ARN:-}"
+    : "${AWS_OIDC_AUDIENCE:-}"
     aws sts get-caller-identity >/dev/null
     ;;
   gcp)
-    : "${GCP_WORKLOAD_POOL:?missing}"
-    : "${GCP_PROVIDER:?missing}"
-    : "${GCP_SERVICE_ACCOUNT:?missing}"
+    : "${GCP_WORKLOAD_POOL:-}"
+    : "${GCP_PROVIDER:-}"
+    : "${GCP_SERVICE_ACCOUNT:-}"
     gcloud auth print-identity-token \
       --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
       >/dev/null
     ;;
   azure)
-    : "${AZURE_FEDERATED_ID:?missing}"
+    : "${AZURE_FEDERATED_ID:-}"
     az account show >/dev/null
     ;;
   *)

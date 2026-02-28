@@ -1,0 +1,5 @@
+# Evidence Map Stub
+version: 1.0
+evidence:
+  dummy:
+    description: "Dummy evidence"

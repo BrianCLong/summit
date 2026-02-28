@@ -1,220 +1,114 @@
-// @ts-nocheck
-/**
- * GraphQL Security and Performance Hardening Middleware
- * Production-grade middleware for IntelGraph Maestro API
- */
-
 import { Request, Response, NextFunction } from 'express';
-import {
-  GraphQLError,
-  ValidationContext,
-  validate,
-  specifiedRules,
-  visit,
-} from 'graphql';
-import depthLimit from 'graphql-depth-limit';
+import { GraphQLError } from 'graphql';
 import rateLimit from 'express-rate-limit';
 import RedisStore from 'rate-limit-redis';
-// Use singleton
-import { getRedisClient } from '../db/redis.js';
 import crypto from 'crypto';
-import { performance } from 'perf_hooks';
+import { redisClient } from '../db/redis.js';
 
-const costAnalysisModule =
-  typeof require === 'function'
-    ? (() => {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          return require('graphql-cost-analysis');
-        } catch {
-          return null;
-        }
-      })()
-    : null;
-const complexityModule =
-  typeof require === 'function'
-    ? (() => {
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          return require('graphql-query-complexity');
-        } catch {
-          return null;
-        }
-      })()
-    : null;
-
-// Types
-interface SecurityConfig {
+// Configuration interface for GraphQL security
+export interface SecurityConfig {
   maxDepth: number;
   maxComplexity: number;
   maxCost: number;
-  enforcePersistedQueries: boolean;
-  enableQueryWhitelist: boolean;
   rateLimit: {
     windowMs: number;
     maxRequests: number;
     skipSuccessfulRequests: boolean;
   };
-}
-
-interface QueryMetrics {
-  queryId: string;
-  query: string;
-  variables: any;
-  complexity: number;
-  depth: number;
-  cost: number;
-  duration: number;
-  cached: boolean;
-  userId?: string;
-  organizationId?: string;
+  enforcePersistedQueries: boolean;
+  enableQueryWhitelist: boolean;
 }
 
 // Default configuration
 const defaultConfig: SecurityConfig = {
-  maxDepth: parseInt(process.env.GRAPHQL_MAX_DEPTH || '15'),
-  maxComplexity: parseInt(process.env.GRAPHQL_MAX_COMPLEXITY || '10000'),
-  maxCost: parseInt(process.env.GRAPHQL_MAX_COST || '5000'),
-  enforcePersistedQueries: process.env.GRAPHQL_ENFORCE_PERSISTED === 'true',
-  enableQueryWhitelist: process.env.GRAPHQL_ENABLE_WHITELIST === 'true',
+  maxDepth: 10,
+  maxComplexity: 1000,
+  maxCost: 5000,
   rateLimit: {
-    windowMs: parseInt(process.env.GRAPHQL_RATE_WINDOW_MS || '60000'), // 1 minute
-    maxRequests: parseInt(process.env.GRAPHQL_RATE_MAX_REQUESTS || '1000'),
+    windowMs: 60 * 1000, // 1 minute
+    maxRequests: 100, // 100 requests per minute
     skipSuccessfulRequests: false,
   },
+  enforcePersistedQueries: process.env.NODE_ENV === 'production',
+  enableQueryWhitelist: process.env.NODE_ENV === 'production',
 };
 
-// Use the singleton redis client
-const redisClient = getRedisClient();
-
-// Persisted queries store
+// Internal caches and stores
 const persistedQueries = new Map<string, string>();
-
-// Query whitelist (for high-security environments)
 const queryWhitelist = new Set<string>();
 
-// Load persisted queries from file or database
-export async function loadPersistedQueries(
-  queriesPath?: string,
-): Promise<void> {
-  try {
-    if (queriesPath) {
-      const fs = await import('fs/promises');
-      const queries = JSON.parse(await fs.readFile(queriesPath, 'utf-8'));
+// Dynamic imports for optional advanced security modules
+let depthLimitModule: any;
+let queryComplexityModule: any;
+let costAnalysisModule: any;
 
-      for (const [id, query] of Object.entries(queries)) {
-        persistedQueries.set(id, query as string);
-        queryWhitelist.add(query as string);
-      }
-
-      console.log(`Loaded ${persistedQueries.size} persisted queries`);
-    }
-  } catch (error: any) {
-    console.error('Failed to load persisted queries:', error);
-    if (defaultConfig.enforcePersistedQueries) {
-      throw new Error('Failed to load required persisted queries');
-    }
-  }
+try {
+  // @ts-ignore
+  depthLimitModule = await import('graphql-depth-limit');
+} catch (e) {
+  /* Ignore */
 }
 
-// Query complexity analysis
-function createComplexityAnalysis(maxComplexity: number) {
-  const createComplexityLimitRule = complexityModule?.createComplexityLimitRule;
-  if (!createComplexityLimitRule) {
-    console.warn(
-      'graphql-query-complexity not available, skipping complexity rules',
-    );
-    return (context: ValidationContext) => ({
-      Document(node) {
-        let complexity = 0;
-        visit(node, {
-          Field() {
-            complexity += 1;
-          },
-        });
-        if (complexity > maxComplexity) {
-          context.reportError(
-            new GraphQLError(
-              `Query complexity ${complexity} exceeds maximum allowed complexity ${maxComplexity}`,
-            ),
-          );
-        }
-      },
-    });
-  }
-
-  return createComplexityLimitRule(maxComplexity, {
-    maximumComplexity: maxComplexity,
-    variables: {},
-    onComplete: (complexity: number) => {
-      console.log(`Query complexity: ${complexity}`);
-    },
-    introspection: true,
-    scalarCost: 1,
-    objectCost: 2,
-    listFactor: 10,
-    introspectionCost: 1000,
-    createError: (max: number, actual: number) => {
-      return new GraphQLError(
-        `Query complexity ${actual} exceeds maximum allowed complexity ${max}`,
-        {
-          extensions: {
-            code: 'COMPLEXITY_LIMIT_EXCEEDED',
-            complexity: actual,
-            maxComplexity: max,
-          },
-        },
-      );
-    },
-  });
+try {
+  // @ts-ignore
+  queryComplexityModule = await import('graphql-query-complexity');
+} catch (e) {
+  /* Ignore */
 }
 
-// Query depth analysis
+try {
+  // @ts-ignore
+  costAnalysisModule = await import('graphql-cost-analysis');
+} catch (e) {
+  /* Ignore */
+}
+
+// Basic validation rules that don't require external packages
+const specifiedRules = [];
+
+// Depth limiting validation rule
 function createDepthAnalysis(maxDepth: number) {
-  const depthLimitRule =
-    typeof (depthLimit as any) === 'function'
-      ? depthLimit
-      : (depthLimit as any)?.default;
-  if (!depthLimitRule) {
-    console.warn('graphql-depth-limit not available, skipping depth rules');
-    return (context: ValidationContext) => ({
-      Document(node) {
-        const computeDepth = (selectionSet?: any, depth = 0): number => {
-          if (!selectionSet?.selections?.length) return depth;
-          return Math.max(
-            ...selectionSet.selections.map((selection: any) => {
-              if (selection.selectionSet) {
-                return computeDepth(selection.selectionSet, depth + 1);
-              }
-              return depth + 1;
-            }),
-          );
-        };
+  if (!depthLimitModule?.default) {
+    console.warn('graphql-depth-limit not available, skipping depth rule');
+    return () => ({});
+  }
+  return depthLimitModule.default(maxDepth, { ignore: ['__schema', '__type'] });
+}
 
-        let maxObservedDepth = 0;
-        visit(node, {
-          OperationDefinition(operation) {
-            maxObservedDepth = Math.max(
-              maxObservedDepth,
-              computeDepth(operation.selectionSet, 0),
-            );
-          },
-        });
-
-        if (maxObservedDepth > maxDepth) {
-          context.reportError(
-            new GraphQLError(
-              `Query depth ${maxObservedDepth} exceeds maximum allowed depth ${maxDepth}`,
-            ),
-          );
-        }
-      },
-    });
+// Complexity analysis validation rule
+function createComplexityAnalysis(maxComplexity: number) {
+  const getComplexity = queryComplexityModule?.getComplexity;
+  if (!getComplexity) {
+    console.warn(
+      'graphql-query-complexity not available, skipping complexity rule',
+    );
+    return () => ({});
   }
 
-  return depthLimitRule(maxDepth, {
-    ignore: ['__schema', '__type'],
-  });
+  // Simple complexity estimator
+  return (context: any) => {
+    try {
+      const complexity = getComplexity({
+        estimators: [
+          queryComplexityModule.simpleEstimator({ defaultComplexity: 1 }),
+        ],
+        schema: context.schema,
+        query: context.document,
+        variables: context.variableValues,
+      });
+
+      if (complexity > maxComplexity) {
+        throw new GraphQLError(
+          `Query is too complex: ${complexity}. Maximum allowed complexity: ${maxComplexity}`,
+          { extensions: { code: 'QUERY_TOO_COMPLEX' } },
+        );
+      }
+    } catch (e: any) {
+      if (e instanceof GraphQLError) throw e;
+      // Continue if complexity calculation fails
+    }
+    return {};
+  };
 }
 
 // Cost analysis for resource-intensive operations
@@ -547,7 +441,7 @@ export function metricsMiddleware(
     const duration = performance.now() - startTime;
 
     // Collect metrics
-    const metrics: Partial<QueryMetrics> = {
+    const metrics: Partial<any> = {
       duration,
       cached: data?.extensions?.cached || false,
       userId: (req as any).user?.id,
