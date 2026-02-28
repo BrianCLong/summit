@@ -3,7 +3,7 @@
 **Generated**: 2026-02-28 (updated)
 **Integration Branch**: `claude/merge-prs-ga-release-XjiVk`
 **Golden Main SHA**: `36ae30c5c15522b96b79f7defb9f17b0ecfdcc00`
-**Integration HEAD**: `cebaee8257`
+**Integration HEAD**: `3668a25d89`
 **Repository**: BrianCLong/summit
 
 ---

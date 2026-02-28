@@ -98,7 +98,7 @@ P5 DR/Chaos ──→ P6 Release Train ──→ P7 Alert Hygiene ──→ P8 G
 ### P6 Gate: Release
 - [x] RC tag signed — `v5.0.0-rc.1`
 - [x] Canary promoted 10 → 50 → 100% — `ga-canary-promote.yml` pipeline
-- [x] Evidence bundle attached to release — GA evidence summary + 34 artifacts
+- [x] Evidence bundle attached to release — GA evidence summary + 53 artifacts
 - [ ] GA flags flipped per plan — requires production deployment
 
 ## Promotion Criteria
@@ -181,7 +181,7 @@ Rollback procedure:
 - [x] P6: Canary promotion pipeline — progressive delivery 10→50→100% with SLO gates, image signing, SBOM verification, evidence bundle (`ga-canary-promote.yml`)
 - [x] P6: Provenance ledger library (11/11 tests pass)
 - [x] P6: Release notes and changelog generated
-- [x] P6: RC tag `v5.0.0-rc.1` + evidence bundle (46 artifacts)
+- [x] P6: RC tag `v5.0.0-rc.1` + evidence bundle (53 artifacts)
 - [x] P7: Alert-to-runbook mapping — 23 Sev1/Sev2 alerts mapped to owners + runbooks + escalation chains (`ops/runbooks/alert-runbook-mapping.yaml`)
 - [x] P7: Alert hygiene CI gate — validates coverage, schema, and runbook path existence (`alert-hygiene.yml`)
 - [x] P7: Testing strategy documented (6-layer, 23 security-critical tests)

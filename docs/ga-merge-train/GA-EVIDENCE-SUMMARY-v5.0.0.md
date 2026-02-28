@@ -163,4 +163,3 @@
 | 51 | Access Audit Dashboard | `observability/grafana/dashboards/access-audit.json` | Config |
 | 52 | AuthZ Dashboard | `observability/grafana/dashboards/authz.json` | Config |
 | 53 | Typesense Schema Contract | `ingest/schema/sink_contracts/typesense.json` | Config |
-| 54 | OPA Wasm Build Script | `.ci/scripts/opa/build_wasm.sh` | Script |
