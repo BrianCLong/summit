@@ -383,6 +383,12 @@ has_rest_api_changes if {
     contains(file.path, "api")
 }
 
+removes_endpoints if {
+    some file in input.changed_files
+    contains(file.path, "routes")
+    contains(file.patch, "- router.")
+}
+
 unauthorized_protected_changes if {
     touches_critical_infrastructure
     not codeowners_approved

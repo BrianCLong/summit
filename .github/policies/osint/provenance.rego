@@ -1,5 +1,7 @@
 package osint.provenance
 
+import future.keywords.if
+
 default allow = false
 
 deny["missing_artifacts"] if {

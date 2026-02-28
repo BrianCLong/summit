@@ -1,5 +1,7 @@
 package osint.tos_test
 
+import future.keywords.if
+
 test_deny_unregistered_source if {
   denies := data.osint.tos.deny with input as data.osint.fixtures.tos_deny_unregistered
   count(denies) > 0

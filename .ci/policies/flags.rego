@@ -1,5 +1,6 @@
-import future.keywords
 package policy.flags
+
+import future.keywords
 
 deny[msg] {
   some k

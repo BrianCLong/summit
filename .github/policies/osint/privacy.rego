@@ -1,5 +1,7 @@
 package osint.privacy
 
+import future.keywords.if
+
 default allow = false
 
 deny["pii_not_redacted"] if {

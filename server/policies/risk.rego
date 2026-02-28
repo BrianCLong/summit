@@ -1,5 +1,6 @@
-import future.keywords
 package intelgraph.risk
+
+import future.keywords
 
 default allow_auto = false
 

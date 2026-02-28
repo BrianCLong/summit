@@ -1,5 +1,6 @@
-import future.keywords
 package search
+
+import future.keywords
 import future.keywords.if
 import future.keywords.in
 

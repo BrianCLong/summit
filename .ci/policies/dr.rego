@@ -1,5 +1,6 @@
-import future.keywords
 package dr
+
+import future.keywords
 
 default allow = false
 

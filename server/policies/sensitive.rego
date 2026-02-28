@@ -29,18 +29,18 @@ valid_purpose if {
 
 valid_justification if {
   input.context.justification
-  count(trim(input.context.justification)) > 0
+  count(trim_space(input.context.justification)) > 0
 }
 
 valid_case_id if {
   input.context.case_id
-  count(trim(input.context.case_id)) > 0
+  count(trim_space(input.context.case_id)) > 0
 }
 
 permitted_roles := {"admin", "analyst", "security_admin", "compliance_officer"}
 
 context_complete if {
-  not missing_fields[_]
+  count(missing_fields) == 0
 }
 
 allow = true if {

@@ -1,5 +1,6 @@
-import future.keywords
 package fcr.alerts
+
+import future.keywords
 
 severity := "critical" {
   input.confidence >= 0.85
@@ -16,6 +17,4 @@ severity := "medium" {
   input.growth >= 3
 }
 
-severity := "low" {
-  not severity
-}
+default severity := "low"

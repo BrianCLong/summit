@@ -1,5 +1,6 @@
-import future.keywords
 package license.policy
+
+import future.keywords
 
 # Example: block GPL-3.0 unless waived
 warn[msg] {

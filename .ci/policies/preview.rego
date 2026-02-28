@@ -1,5 +1,6 @@
-import future.keywords
 package preview
+
+import future.keywords
 import future.keywords.in
 
 default allow = false

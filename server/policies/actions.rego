@@ -83,9 +83,7 @@ decision_reason := "dual_control_required" {
 }
 
 # Default expiry of 15 minutes for a preflight decision
-expires_at := time.format_rfc3339_ns(
-  time.now_ns() + 900 * 1000000000,
-)
+expires_at := time.format([time.now_ns() + (900 * 1000000000), "RFC3339Nano", "UTC"])
 
 decision := {
   "allow": allow_action,

@@ -1,5 +1,6 @@
-import future.keywords
 package reports
+
+import future.keywords
 
 default allow = false
 

@@ -1,5 +1,7 @@
 package osint.privacy_test
 
+import future.keywords.if
+
 test_deny_missing_redaction if {
   denies := data.osint.privacy.deny with input as data.osint.fixtures.privacy_deny_pii
   count(denies) > 0

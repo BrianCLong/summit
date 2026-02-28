@@ -1,5 +1,6 @@
-import future.keywords
 package maestro.integrations.n8n.trigger
+
+import future.keywords
 
 default allow = false
 
@@ -15,21 +16,17 @@ permitted_roles := {"ADMIN", "OPERATOR"}
 flow_key := input.resource
 
 deny_prefix {
-  some p
-  p := denied_prefixes[_]
+  some p in denied_prefixes
   startswith(flow_key, p)
 }
 
 role_ok {
   input.role != null
-  input.role == r
-  r := upper(input.role)
-  permitted_roles[r]
+  permitted_roles[upper(input.role)]
 }
 
 prefix_ok {
-  some p
-  p := allowed_prefixes[_]
+  some p in allowed_prefixes
   startswith(flow_key, p)
 }
 
@@ -41,7 +38,13 @@ explicit_ok {
 allow {
   not deny_prefix
   role_ok
-  (prefix_ok or explicit_ok)
+  prefix_ok
+}
+
+allow {
+  not deny_prefix
+  role_ok
+  explicit_ok
 }
 
 reason := msg {
@@ -51,7 +54,8 @@ reason := msg {
   not role_ok
   msg := "insufficient role"
 } else := msg {
-  not (prefix_ok or explicit_ok)
+  not prefix_ok
+  not explicit_ok
   msg := "flow not allowed"
 } else := msg {
   allow

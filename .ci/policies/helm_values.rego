@@ -1,5 +1,6 @@
-import future.keywords
 package helm.values
+
+import future.keywords
 
 deny[msg] {
   input.resources[_].kind == "Deployment"

@@ -1,5 +1,7 @@
 package osint.provenance_test
 
+import future.keywords.if
+
 test_deny_missing_artifacts if {
   denies := data.osint.provenance.deny with input as data.osint.fixtures.provenance_deny_missing_artifacts
   count(denies) > 0

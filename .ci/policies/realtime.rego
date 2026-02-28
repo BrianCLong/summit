@@ -1,5 +1,6 @@
-import future.keywords
 package realtime
+
+import future.keywords
 import future.keywords.if
 
 default allow = false

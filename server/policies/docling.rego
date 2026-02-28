@@ -1,5 +1,6 @@
-import future.keywords
 package docling
+
+import future.keywords
 import future.keywords.in
 
 import data.intelgraph.tenants

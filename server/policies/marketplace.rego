@@ -1,5 +1,6 @@
-import future.keywords
 package intelgraph.marketplace
+
+import future.keywords
 
 default allow = false
 

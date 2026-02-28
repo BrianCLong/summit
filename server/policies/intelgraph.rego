@@ -107,8 +107,16 @@ compartment_isolation_check if {
     not input.context.orgId
 } else = result if {
     input.context.orgId == input.user.orgId
-    (not input.context.teamId) or input.context.teamId == input.user.teamId
+    _team_boundary_ok
     result := true
+}
+
+_team_boundary_ok if {
+    not input.context.teamId
+}
+
+_team_boundary_ok if {
+    input.context.teamId == input.user.teamId
 }
 
 #------------------------------------------------------------------------------
@@ -326,10 +334,16 @@ denied_reasons := [reason |
     reason := sprintf("Denied by check: %s", [check])
 ]
 
-deny_checks := {
-    "requires_approval": requires_approval,
-    "tenant_isolation_failed": not tenant_isolation_check,
-    "no_valid_role": not input.user.role
+deny_checks["requires_approval"] if {
+    requires_approval
+}
+
+deny_checks["tenant_isolation_failed"] if {
+    not tenant_isolation_check
+}
+
+deny_checks["no_valid_role"] if {
+    not input.user.role
 }
 
 # Final decision (deny takes precedence over allow)

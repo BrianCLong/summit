@@ -1,5 +1,7 @@
 package osint.alert_budget
 
+import future.keywords.if
+
 default allow = false
 
 envelope_limits := {

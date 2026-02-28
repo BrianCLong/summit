@@ -1,5 +1,6 @@
-import future.keywords
 package docling_test
+
+import future.keywords
 
 import data.docling
 

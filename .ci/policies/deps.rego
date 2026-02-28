@@ -45,7 +45,7 @@ allow_override(pkg, rule) {
   some override
   override := policy.allow_overrides[_]
   override_metadata_valid(override)
-  override.package == pkg.name
+  override["package"] == pkg.name
   version_matches(pkg.versionInfo, override.version_regex)
   rule_is_covered(rule, override)
 }
@@ -81,7 +81,7 @@ not_expired(ts) {
 violation[msg] {
   override := policy.allow_overrides[_]
   not override_metadata_valid(override)
-  msg := sprintf("override for %s missing required metadata (ticket/justification) or expired", [override.package])
+  msg := sprintf("override for %s missing required metadata (ticket/justification) or expired", [override["package"]])
 }
 
 violation[msg] {
@@ -105,7 +105,7 @@ violation[msg] {
 violation[msg] {
   pkg := input.packages[_]
   entry := policy.denylist.cves[_]
-  pkg.name == entry.package
+  pkg.name == entry["package"]
   version_matches(pkg.versionInfo, entry.version_regex)
   not allow_override(pkg, entry)
   msg := sprintf("dependency %s@%s blocked for %s: %s", [pkg.name, pkg.versionInfo, entry.id, entry.reason])

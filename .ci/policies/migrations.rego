@@ -1,5 +1,6 @@
-import future.keywords
 package migrations
+
+import future.keywords
 import future.keywords.in
 import future.keywords.contains
 
@@ -14,7 +15,7 @@ forbidden_destructive {
   some file
   input.review.files[file]
   glob.match("migrations/**", [], file.path)
-  file.additions[_].contains("DROP TABLE")
+  contains(file.additions[_], "DROP TABLE")
   not input.params.gate_destructive
 }
 

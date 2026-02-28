@@ -1,5 +1,6 @@
-import future.keywords
 package terraform.policy
+
+import future.keywords
 
 deny[msg] {
   some rc

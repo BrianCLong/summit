@@ -1,5 +1,7 @@
 package osint.tos
 
+import future.keywords.if
+
 default allow = false
 
 deny["source_not_registered"] if {

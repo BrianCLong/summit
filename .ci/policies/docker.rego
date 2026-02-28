@@ -1,5 +1,6 @@
-import future.keywords
 package policy.container
+
+import future.keywords
 import future.keywords.in
 import future.keywords.contains
 
@@ -52,7 +53,20 @@ uses_package_manager(stage) {
   inst := stage.instructions[_]
   lower(inst.name) == "run"
   pm := lower(inst.cmd)
-  contains(pm, "apt-get") or contains(pm, "yum") or contains(pm, "dnf") or contains(pm, "apk add")
+  _is_pkg_manager(pm)
+}
+
+_is_pkg_manager(pm) {
+  contains(pm, "apt-get")
+}
+_is_pkg_manager(pm) {
+  contains(pm, "yum")
+}
+_is_pkg_manager(pm) {
+  contains(pm, "dnf")
+}
+_is_pkg_manager(pm) {
+  contains(pm, "apk add")
 }
 
 builder_stages[stage] {

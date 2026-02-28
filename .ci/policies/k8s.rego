@@ -1,5 +1,6 @@
-import future.keywords
 package ci.kubernetes
+
+import future.keywords
 
 default deny := []
 

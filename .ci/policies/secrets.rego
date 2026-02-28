@@ -1,5 +1,6 @@
-import future.keywords
 package secrets
+
+import future.keywords
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
@@ -9,7 +10,7 @@ import data.inventory
 # Fail if potential plaintext secret keywords are found
 violation[msg] {
   inventory.files[f]
-  f.content =~ /(?i)(password|secret|token|apikey)[:=]\s*["']?[A-Za-z0-9_\-]{12,}/
+  regex.match(`(?i)(password|secret|token|apikey)[:=]\s*["']?[A-Za-z0-9_\-]{12,}`, f.content)
   msg := sprintf("potential plaintext secret in %s", [f.path])
 }
 
@@ -42,6 +43,6 @@ violation[msg] {
 violation[msg] {
   inventory.files[f]
   contains(f.path, "values.yaml")
-  f.content =~ /(?i)(password|secret|token)[:=]\s*["']?[A-Za-z0-9_\-]{12,}/
+  regex.match(`(?i)(password|secret|token)[:=]\s*["']?[A-Za-z0-9_\-]{12,}`, f.content)
   msg := sprintf("inline secret literal in Helm values: %s", [f.path])
 }

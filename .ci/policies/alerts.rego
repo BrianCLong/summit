@@ -1,5 +1,6 @@
-import future.keywords
 package policy.alerts
+
+import future.keywords
 
 deny[msg] {
   a := input.catalog[_]

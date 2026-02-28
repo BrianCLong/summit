@@ -1,5 +1,6 @@
-import future.keywords
 package feature_flags
+
+import future.keywords
 
 default decision = {
   "enabled": false,
@@ -27,7 +28,7 @@ kill_switch_active {
 decision = {
   "enabled": enabled,
   "reason": reason,
-  "kill_switch_active": kill_switch_active,
+  "kill_switch_active": ks_active,
   "audit": {
     "user": input.context.userId,
     "tenant": input.context.tenantId,
@@ -43,11 +44,11 @@ decision = {
   allowed_flag[flag]
   enabled := true
   reason := "flag-enabled"
-  kill_switch_active := kill_switch_active
+  ks_active := kill_switch_active
 }
 
 kill_switch = {
-  "active": active,
+  "active": ks_flag,
   "reason": reason,
   "audit": {
     "module": input.context.module,
@@ -55,6 +56,6 @@ kill_switch = {
     "evaluation_id": input.evaluation_id,
   },
 } {
-  active := kill_switch_active
+  ks_flag := kill_switch_active
   reason := "opa-kill-switch"
 }

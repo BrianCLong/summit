@@ -1,5 +1,6 @@
-import future.keywords
 package ci.audit
+
+import future.keywords
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains

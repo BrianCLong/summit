@@ -2,11 +2,14 @@ package narrative_ci.determinism
 
 import rego.v1
 
-# Disallowed timestamp keys
+# Disallowed timestamp keys — walk all nested keys and flag any timestamp fields
 deny contains msg if {
-    some path, value in walk(input)
-    is_timestamp_key(path[count(path)-1])
-    msg := sprintf("Path %v contains a timestamp key '%v'", [path, path[count(path)-1]])
+    [path, _] = walk(input)
+    some i
+    k := path[i]
+    is_string(k)
+    is_timestamp_key(k)
+    msg := sprintf("Path %v contains a timestamp key '%v'", [path, k])
 }
 
 # Helper to check keys

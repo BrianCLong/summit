@@ -5,7 +5,9 @@ import future.keywords.in
 
 allowed_systems := {"maestro", "intelgraph", "companyos"}
 
-required_prefix[system] := sprintf("/v1/data/%s/", [system])
+required_prefix[system] := sprintf("/v1/data/%s/", [system]) {
+  some system in allowed_systems
+}
 
 violations[msg] {
   dp := input.dataPaths[_]
@@ -32,13 +34,15 @@ violations[msg] {
   msg := sprintf("%s path %s must start with %s", [dp.id, dp.path, required_prefix[dp.system]])
 }
 
+_has_system_tag(dp) {
+  tag := dp.tags[_]
+  lower(tag) == lower(dp.system)
+}
+
 violations[msg] {
   dp := input.dataPaths[_]
   allowed_systems[dp.system]
-  not some { tag |
-    dp.tags[_] == tag
-    lower(tag) == lower(dp.system)
-  }
+  not _has_system_tag(dp)
   msg := sprintf("%s must include the system tag %s", [dp.id, dp.system])
 }
 

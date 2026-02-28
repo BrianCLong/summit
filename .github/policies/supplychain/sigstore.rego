@@ -36,8 +36,12 @@ semver_parts(version) = parts {
   parts := [to_number(p) | p := raw_parts[_]]
 }
 
-all_prior_equal(left_parts, right_parts, idx) {
-  not some j
+_has_prior_diff(left_parts, right_parts, idx) {
+  some j
   j < idx
   left_parts[j] != right_parts[j]
+}
+
+all_prior_equal(left_parts, right_parts, idx) {
+  not _has_prior_diff(left_parts, right_parts, idx)
 }

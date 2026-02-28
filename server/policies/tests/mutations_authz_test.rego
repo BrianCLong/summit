@@ -1,14 +1,14 @@
 package intelgraph.mutations
 
 import future.keywords.if
+import future.keywords.in
 
-allowed_roles := data.intelgraph.mutations.allowed_roles
+# allowed_roles is defined in mutations_authz.rego (same package), accessed directly
 
 test_allow_listed_roles if {
   some id
   entry := allowed_roles[id]
-  some role
-  role := entry.roles[_]
+  some role in entry.roles
   decision := data.intelgraph.mutations.decision with input as {
     "action": entry.action,
     "resource": {"type": "mutation", "id": id, "tenantId": "tenant-1"},

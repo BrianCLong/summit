@@ -54,8 +54,7 @@ allow {
   not tenant_mismatch
   entry := allowed_roles[input.resource.id]
   entry.action == input.action
-  some role
-  role := input.actor.roles[_]
+  some role in input.actor.roles
   role in entry.roles
 }
 
