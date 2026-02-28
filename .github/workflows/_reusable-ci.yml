@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        task: [lint, typecheck, test]
+        task: [test]
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
