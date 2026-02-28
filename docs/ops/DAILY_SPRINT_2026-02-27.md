@@ -84,6 +84,7 @@ All deviations are treated as governed exceptions and documented below.
 - Impact: issue-labeled prioritization data is incomplete for this run.
 - Constraint decision: continue with PR/workflow-driven prioritization and document blocker for next run retry.
 - `pre-commit` could not acquire cache lock under sandbox constraints; hook execution was not possible in this run context.
+- `gh pr create` failed twice with `error connecting to api.github.com`; merge-ready branch was pushed but PR opening remains blocked.
 
 ## End-of-Day Sprint Report
 ### Planned vs Completed
@@ -92,7 +93,8 @@ All deviations are treated as governed exceptions and documented below.
 - Blocked: 1 task (issue intake API connectivity).
 
 ### PRs Touched
-- New PR (this run): to be created from branch `codex/daily-sprint-2026-02-27` after commit.
+- Branch pushed: `codex/daily-sprint-2026-02-27-run2` (https://github.com/BrianCLong/summit/tree/codex/daily-sprint-2026-02-27-run2).
+- PR creation remains blocked by intermittent GitHub API connectivity.
 - Referenced high-priority PRs: #18827, #18825, #18824, #18823, #18821.
 
 ### Validation Summary
