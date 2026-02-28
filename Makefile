@@ -408,4 +408,22 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot task $(ARGS) $(PROMPT)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
+
+# --- Skill Evaluations ---
+eval-skills-changed: ## Run evals for changed skills
+	@echo "Running evals for changed skills..."
+	@scripts/eval/run_changed_skills.sh
+
+eval-skills-all: ## Run full skill eval suite
+	@echo "Running full skill eval suite..."
+	@scripts/eval/run_all_skills.sh
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+# --- Skill Evaluations ---
+eval-skills-changed: ## Run evals for changed skills
+	@echo "Running evals for changed skills..."
+	@scripts/eval/run_changed_skills.sh
+
+eval-skills-all: ## Run full skill eval suite
+	@echo "Running full skill eval suite..."
+	@scripts/eval/run_all_skills.sh

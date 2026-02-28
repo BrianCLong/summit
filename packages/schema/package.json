@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/schema",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "description": "JSON Schemas for IntelGraph domain models",
   "main": "src/index.js",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/moonshot-kimi",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "description": "Kimi K2.5 provider adapter for Summit",
   "type": "module",
   "main": "dist/index.js",

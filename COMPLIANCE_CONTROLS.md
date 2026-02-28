@@ -4,7 +4,7 @@ This document serves as the single source of truth for all enforced controls wit
 
 ## 1. Governance Controls
 
-| Control ID | Description                  | Enforcement Mechanism                                                                                                                                                         | Evidence | Owner                                                                    |
+| Control ID | Description                  | Enforcement Mechanism                                                                                                                                                         | Evidence | Owner | Alignment |
 | :--------- | :--------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------- | :----------------------------------------------------------------------- | -------------------- |
 | GOV-001    | **System Purpose & Limits**  | The system's purpose is explicitly defined and its limits, particularly regarding prohibited actions (e.g., autonomous lethal decisions, mass persuasion), are non-revocable. | Policy   | [docs/governance/CONSTITUTION.md](docs/governance/CONSTITUTION.md)       | Governance           |
 | GOV-002    | **Human Primacy**            | All consequential actions require human authorization and must be traceable to a human's intent.                                                                              | Policy   | [docs/governance/CONSTITUTION.md](docs/governance/CONSTITUTION.md)       | Governance           |

@@ -1,6 +1,6 @@
 {
   "name": "@summit/skillpacks",
-  "version": "0.0.1",
+  "version": "4.2.3",
   "description": "Summit Skillpacks Runtime Subsystem",
   "type": "module",
   "main": "src/index.ts",

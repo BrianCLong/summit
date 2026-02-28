@@ -1,6 +1,6 @@
 {
   "name": "@summit/narrative-ops-analyzer",
-  "version": "0.1.0",
+  "version": "4.2.3",
   "main": "src/index.ts",
   "private": true
 }

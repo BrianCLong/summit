@@ -1,6 +1,6 @@
 {
   "name": "@summit/sgf-evals",
-  "version": "1.0.0",
+  "version": "4.2.3",
   "type": "module",
   "description": "Evaluation and testing suites for Summit Governance Fabric",
   "scripts": {
