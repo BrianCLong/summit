@@ -1,13 +1,35 @@
 {
-  "timestamp": "2025-12-30T06:13:48.952Z",
-  "actor": "Jules",
+  "timestamp": "2026-02-28T07:04:44.580Z",
+  "actor": "unknown",
   "context": {
-    "baseRef": "HEAD~1",
+    "baseRef": "origin/main",
     "headRef": "HEAD",
     "ciJob": "local"
   },
-  "changedFilesCount": 0,
-  "changedFiles": [],
+  "changedFilesCount": 21,
+  "changedFiles": [
+    ".github/compose/pg_neo.yml",
+    ".github/workflows/ci-preflight.yml",
+    ".github/workflows/experiment-aware-release.yml",
+    ".github/workflows/jetrl-ci.yml.disabled",
+    ".github/workflows/repetition-check.yml",
+    ".github/workflows/repro-docker.yml",
+    ".github/workflows/summit-ci.yml",
+    "dependency_delta.md",
+    "deps/dependency_delta.md",
+    "docs/governance/evidence-map.yml",
+    "docs/standards/prompt-repetition.md",
+    "pnpm-lock.yaml",
+    "scripts/bench_repetition.py",
+    "scripts/verify_evidence.py",
+    "server/package.json",
+    "server/src/maestro/__tests__/integration.test.ts",
+    "summit/evals/repetition_eval.py",
+    "summit/policy/repetition_detector.py",
+    "summit/policy/repetition_transform.py",
+    "summit/policy/tests/test_repetition_detector.py",
+    "summit/policy/tests/test_repetition_transform.py"
+  ],
   "violations": [],
   "status": "VERIFIED"
 }
