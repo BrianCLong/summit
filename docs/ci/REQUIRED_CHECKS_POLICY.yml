@@ -43,6 +43,10 @@ branch_protection:
 # These checks MUST pass for every commit, regardless of what changed.
 # They are blocking for both RC and GA promotion.
 always_required:
+  - name: "AI Governance Gates"
+    workflow: "ci-ai-governance.yml"
+    rationale: "Ensures AI Governance documentation and policy mechanisms are intact"
+
   - name: "meta-gate"
     workflow: "governance-meta-gate.yml"
     rationale: "Unified governance verification (drift, determinism, policy)"
