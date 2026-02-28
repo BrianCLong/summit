@@ -84,6 +84,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       CI: true
+      PLAYWRIGHT_USE_WEBSERVER: 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -102,10 +103,4 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-      - name: Start Application
-        run: |
-          npm run build
-          npm run start &
-          # Wait for server to be ready
-          npx wait-on http://localhost:3000
         run: npx playwright test e2e/summit-smoke.spec.ts
