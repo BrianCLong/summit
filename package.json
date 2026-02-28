@@ -155,6 +155,7 @@
     "@semantic-release/git": "10.0.1",
     "@semantic-release/github": "^11.0.4",
     "@semantic-release/npm": "^12.0.2",
+    "@types/express-serve-static-core": "^5.1.1",
     "@types/hapi__catbox": "^12.1.0",
     "@types/hapi__shot": "^6.0.0",
     "@types/jest": "^29.5.14",
