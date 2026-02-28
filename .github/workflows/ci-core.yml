@@ -7,15 +7,6 @@ name: CI Core (Primary Gate)
 on:
   pull_request:
     branches: [main]
-    # SAFETY: Conservative paths-ignore to prevent skipping required checks
-    # This is the PRIMARY CI GATE - it MUST run on any code/config/dependency changes
-    paths-ignore:
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".github/PULL_REQUEST_TEMPLATE/**"
-      # NOTE: We do NOT ignore:
-      # - .github/workflows/** (workflow changes must trigger this)
-      # - package.json, pnpm-lock.yaml, .pnpmfile.cjs (dependency changes must trigger this)
-      # - scripts/**, tools/**, Dockerfile (build/test/infra changes must trigger this)
   push:
     branches: [main]
   merge_group:
