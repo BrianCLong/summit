@@ -30,6 +30,7 @@ import { useControlTowerData } from '../../hooks/useControlTowerData';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { DataIntegrityNotice } from '../../components/common/DataIntegrityNotice';
 import { useDemoMode } from '../../components/common/DemoIndicator';
+import { isMac } from '../../lib/utils';
 
 export interface ControlTowerDashboardProps {
   /** Initial filter state */
@@ -156,7 +157,7 @@ export const ControlTowerDashboard: React.FC<ControlTowerDashboardProps> = ({
 
         <Box display="flex" alignItems="center" gap={1}>
           {/* Search Button */}
-          <Tooltip title="Search (⌘K)">
+          <Tooltip title={`Search (${isMac ? '⌘' : 'Ctrl'}K)`}>
             <IconButton onClick={() => setCommandPaletteOpen(true)}>
               <SearchIcon />
             </IconButton>

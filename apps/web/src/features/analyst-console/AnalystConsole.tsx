@@ -21,7 +21,7 @@ import {
   Lightbulb,
   Keyboard,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, isMac } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
@@ -270,7 +270,7 @@ function AnalystConsoleInner({
                       <Network className="h-4 w-4" />
                       Graph
                       <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline">
-                        ⌘1
+                        {isMac ? '⌘' : 'Ctrl'}1
                       </kbd>
                     </CardTitle>
                   </CardHeader>
@@ -293,7 +293,7 @@ function AnalystConsoleInner({
                       <Clock className="h-4 w-4" />
                       Timeline
                       <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline">
-                        ⌘2
+                        {isMac ? '⌘' : 'Ctrl'}2
                       </kbd>
                     </CardTitle>
                   </CardHeader>
@@ -317,7 +317,7 @@ function AnalystConsoleInner({
                     <MapPin className="h-4 w-4" />
                     Map
                     <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-slate-800 rounded hidden sm:inline">
-                      ⌘3
+                      {isMac ? '⌘' : 'Ctrl'}3
                     </kbd>
                   </CardTitle>
                 </CardHeader>
@@ -350,7 +350,7 @@ function AnalystConsoleInner({
         </div>
         <div className="space-y-1 text-slate-400">
           <div>
-            <kbd className="px-1 bg-slate-800 rounded">⌘1-3</kbd> Focus pane
+            <kbd className="px-1 bg-slate-800 rounded">{isMac ? '⌘' : 'Ctrl'}1-3</kbd> Focus pane
           </div>
           <div>
             <kbd className="px-1 bg-slate-800 rounded">P</kbd> Provenance

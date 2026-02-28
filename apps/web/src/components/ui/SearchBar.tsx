@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Search, X, Command } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, isMac } from '@/lib/utils'
 
 interface SearchBarProps {
   placeholder?: string
@@ -85,7 +85,9 @@ export function SearchBar({
           )}
           {showShortcut && !internalValue && (
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Command className="h-3 w-3" />
+              <span className="font-sans text-[10px] opacity-60">
+                {isMac ? '⌘' : 'Ctrl'}
+              </span>
               <span>K</span>
             </div>
           )}
