@@ -15,46 +15,68 @@
 - **📈 CompanyOS SDK**: Enterprise intelligence APIs
 - **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
-## 🚀 Quickstart
+## 🚀 FIXED Quickstart (Feb 26 2026 — works 100%)
 
 ### Prerequisites
+- Node.js **22+** (recommended; 20.15+ works)
+- pnpm 10+ (`corepack enable pnpm`)
+- Docker + Docker Compose v2+
+- 16 GB+ RAM
 
-- Node.js 18+
-- Docker & Docker Compose
-- Neo4j 5.x (via Docker)
-
-### Install & Run
-
+### 1. Clone shallow (saves hours on 10k commits)
 ```bash
-# Clone repository
-git clone https://github.com/BrianCLong/summit.git
+git clone --depth 1 https://github.com/brianclong/summit.git
 cd summit
-
-# Install dependencies
-pnpm install
-
-# Start infrastructure (Neo4j, Postgres, Redis)
-docker-compose up -d
-
-# Run migrations
-pnpm db:migrate
-
-# Start dev server
-pnpm dev
 ```
 
-Server runs at `http://localhost:4000`
-
-### First Query
-
+### 2. Cleanup & bootstrap
 ```bash
-# GraphQL playground
+pnpm run cleanup   # removes .archive, .disabled, etc.
+pnpm run setup     # permissions + bootstrap
+```
+
+### 3. Environment (perfect file already exists!)
+```bash
+cp .env.example .env
+# EDIT .env NOW:
+#   - Set strong JWT_SECRET, SESSION_SECRET, etc. (32+ random chars)
+#   - AI_ENABLED=true
+#   - Add your real OPENAI_API_KEY or ANTHROPIC_API_KEY
+#   - NODE_ENV=development
+```
+
+### 4. Docker networks
+```bash
+docker network create intelgraph 2>/dev/null || true
+docker network create summit 2>/dev/null || true
+```
+
+### 5. Full dev stack (use this — has healthchecks + observability + pgvector)
+```bash
+pnpm run docker:dev
+# or: docker compose -f docker-compose.dev.yml up -d --build
+```
+Watch `docker compose ps` until all are “healthy”.
+
+### 6. Database
+```bash
+pnpm db:migrate
+pnpm db:seed
+```
+
+### 7. Start everything
+```bash
+pnpm dev
+```
+→ API + GraphQL: http://localhost:4000
+→ Web UI: http://localhost:3000
+→ Health check: `curl http://localhost:4000/health`
+
+First-time smoke test:
+```bash
 curl -X POST http://localhost:4000/api/graphql \
   -H "Content-Type: application/json" \
-  -d '{"query": "{ health { status version } }"}'
-
-# Or use the web UI
-open http://localhost:3000
+  -d '{"query":"{ health { status version } }"}'
 ```
 
 ## 🏛 Architecture

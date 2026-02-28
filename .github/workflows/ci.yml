@@ -29,6 +29,9 @@ jobs:
         uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
+      - name: Verify no bloat tracked
+        run: bash scripts/ci/check_no_bloat_tracked.sh
+
 
   lint:
     runs-on: ubuntu-latest
