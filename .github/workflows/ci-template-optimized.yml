@@ -41,35 +41,28 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js ${{ inputs.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ inputs.node-version }}
-          cache: ${{ inputs.cache-enabled && 'npm' || 'npm' }}
-          cache-dependency-path: '**/package-lock.json'
-
-      - name: Restore npm cache (if enabled)
-        if: inputs.cache-enabled
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
+          cache: ${{ inputs.cache-enabled && 'pnpm' || 'pnpm' }}
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+        run: pnpm install --frozen-lockfile --prefer-offline
 
       - name: Run linting
-        run: npm run lint --if-present
+        run: pnpm run lint --if-present
         continue-on-error: false
 
       - name: Run type checking
-        run: npm run typecheck --if-present
+        run: pnpm run typecheck --if-present
         continue-on-error: false
 
       - name: Run tests
-        run: npm test --if-present -- --coverage --maxWorkers=2
+        run: pnpm test --if-present -- --coverage --maxWorkers=2
         continue-on-error: false
 
       - name: Upload coverage

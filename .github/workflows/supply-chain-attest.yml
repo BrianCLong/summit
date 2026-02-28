@@ -38,10 +38,8 @@ jobs:
         run: |
           if [ -f pnpm-lock.yaml ]; then
             pnpm install --frozen-lockfile
-          elif [ -f package-lock.json ]; then
-            npm ci
           else
-            echo "No lockfile; skipping install."
+            echo "No pnpm lockfile; skipping install."
           fi
 
       - name: Build (optional)
