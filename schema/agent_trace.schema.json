@@ -1,23 +1,35 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentTrace",
   "type": "object",
   "properties": {
-    "trace_id": { "type": "string" },
-    "autonomy_level": { "type": "integer" },
-    "token_usage": {
-      "type": "object",
-      "properties": {
-        "prompt": { "type": "integer" },
-        "completion": { "type": "integer" },
-        "total": { "type": "integer" }
-      }
+    "autonomy_level": {
+      "type": "integer",
+      "minimum": 0
     },
-    "token_detail": {
-      "type": "object",
-      "properties": {
-        "model": { "type": "string" }
-      }
+    "claims_logging_uri": {
+      "type": "string"
+    },
+    "mcp_sdk": {
+      "type": "string"
+    },
+    "regulator_classification": {
+      "type": "string"
+    },
+    "sdk": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "string"
     }
   },
-  "required": ["trace_id", "autonomy_level"]
+  "required": [
+    "autonomy_level",
+    "claims_logging_uri",
+    "mcp_sdk",
+    "regulator_classification",
+    "sdk",
+    "timestamp"
+  ],
+  "additionalProperties": false
 }
