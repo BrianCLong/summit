@@ -67,7 +67,7 @@ jobs:
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests (CI)
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
