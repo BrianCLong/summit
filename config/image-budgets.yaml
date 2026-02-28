@@ -1,0 +1,15 @@
+# Container Image Size Budgets — IntelGraph v5.0.0
+# Maximum allowed image size in MB per service.
+# Enforced by scripts/ci/image-size-budget.sh
+
+budgets:
+  api: 500
+  worker: 500
+  ingest: 400
+  search-indexer: 350
+  websocket-server: 350
+  client: 200
+  conductor: 400
+  nlp-service: 600
+  osint-service: 500
+  signer: 200

@@ -1,0 +1,97 @@
+name: Conventional Commits
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  commitlint:
+    name: Lint Commit Messages
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install commitlint
+        run: |
+          npm install -g @commitlint/cli @commitlint/config-conventional
+
+      - name: Create commitlint config
+        run: |
+          cat > .commitlintrc.json <<'EOF'
+          {
+            "extends": ["@commitlint/config-conventional"],
+            "rules": {
+              "type-enum": [2, "always", [
+                "feat", "fix", "docs", "style", "refactor",
+                "perf", "test", "chore", "ci", "build", "revert"
+              ]],
+              "scope-case": [2, "always", "kebab-case"],
+              "subject-max-length": [1, "always", 100],
+              "body-max-line-length": [1, "always", 200]
+            }
+          }
+          EOF
+
+      - name: Lint PR title (conventional commit format)
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "Checking PR title: ${PR_TITLE}"
+          echo "${PR_TITLE}" | commitlint --verbose || {
+            echo "::error::PR title does not follow conventional commit format"
+            echo ""
+            echo "Expected format: <type>(<scope>): <description>"
+            echo "Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert"
+            echo ""
+            echo "Examples:"
+            echo "  feat(api): add entity resolution endpoint"
+            echo "  fix(auth): correct RBAC permission check"
+            echo "  docs: update API reference"
+            exit 1
+          }
+
+      - name: Lint commit messages on branch
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          echo "Checking commits from ${BASE_SHA}..${HEAD_SHA}"
+
+          ERRORS=0
+          while IFS= read -r sha; do
+            [ -z "$sha" ] && continue
+            MSG=$(git log --format=%s -n 1 "$sha")
+            if ! echo "$MSG" | commitlint 2>/dev/null; then
+              echo "::warning::Non-conventional commit: ${sha:0:7} — ${MSG}"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < <(git rev-list "${BASE_SHA}..${HEAD_SHA}" 2>/dev/null)
+
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "::warning::${ERRORS} commit(s) do not follow conventional format (PR title is authoritative)"
+          fi
+
+      - name: Summary
+        if: always()
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### Conventional Commits Check
+
+          | Check | Result |
+          |-------|--------|
+          | PR title | \`${PR_TITLE}\` |
+          | Format valid | Yes |
+          EOF

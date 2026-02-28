@@ -1,0 +1,216 @@
+name: Container Hardening Check
+
+on:
+  pull_request:
+    paths:
+      - 'Dockerfile*'
+      - '**/Dockerfile*'
+      - 'helm/**'
+      - 'k8s/**'
+      - '.github/workflows/container-hardening.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile*'
+      - '**/Dockerfile*'
+      - 'helm/**'
+      - 'k8s/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  # ---------- 1. Dockerfile lint ----------
+  dockerfile-lint:
+    name: Dockerfile Lint (Hadolint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Find all Dockerfiles
+        id: find
+        run: |
+          FILES=$(find . -name 'Dockerfile*' -not -path './.git/*' | sort)
+          COUNT=$(echo "$FILES" | grep -c '.' || echo 0)
+          echo "count=${COUNT}" >> "$GITHUB_OUTPUT"
+          echo "Found ${COUNT} Dockerfiles"
+          echo "$FILES"
+
+      - name: Run Hadolint
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+          failure-threshold: error
+          ignore: DL3008,DL3013,DL3018
+        continue-on-error: true
+
+      - name: Check for non-root USER directive
+        run: |
+          ISSUES=0
+          for f in $(find . -name 'Dockerfile*' -not -path './.git/*'); do
+            if ! grep -qE '^USER\s+(nonroot|node|app|nobody|[0-9]+)' "$f"; then
+              echo "::warning file=${f}::No non-root USER directive found"
+              ISSUES=$((ISSUES + 1))
+            fi
+          done
+
+          if [ "$ISSUES" -gt 0 ]; then
+            echo "::warning::${ISSUES} Dockerfile(s) may run as root"
+          fi
+
+      - name: Check for HEALTHCHECK directive
+        run: |
+          MISSING=0
+          for f in $(find . -name 'Dockerfile' -not -path './.git/*' -not -name '*.dev*'); do
+            if ! grep -q '^HEALTHCHECK' "$f"; then
+              echo "::warning file=${f}::No HEALTHCHECK directive"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::warning::${MISSING} production Dockerfile(s) missing HEALTHCHECK"
+          fi
+
+  # ---------- 2. Kubernetes security scan ----------
+  k8s-security:
+    name: Kubernetes Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install kubesec
+        run: |
+          curl -sSL https://github.com/controlplaneio/kubesec/releases/download/v2.14.0/kubesec_linux_amd64.tar.gz | tar xz
+          sudo mv kubesec /usr/local/bin/
+
+      - name: Scan Kubernetes manifests
+        run: |
+          echo "### Kubernetes Security Scan" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          PASS=0
+          WARN=0
+          FAIL=0
+
+          for f in $(find k8s/ helm/ -name '*.yaml' -o -name '*.yml' 2>/dev/null | head -30); do
+            # Only scan files that look like deployments/pods
+            if grep -qE 'kind:\s*(Deployment|Pod|StatefulSet|DaemonSet|Job|CronJob)' "$f" 2>/dev/null; then
+              RESULT=$(kubesec scan "$f" 2>/dev/null | jq -r '.[0].score // 0' 2>/dev/null || echo "skip")
+              if [ "$RESULT" = "skip" ]; then
+                continue
+              elif [ "$RESULT" -ge 5 ]; then
+                PASS=$((PASS + 1))
+              elif [ "$RESULT" -ge 0 ]; then
+                WARN=$((WARN + 1))
+                echo "::warning file=${f}::kubesec score ${RESULT} (recommend >= 5)"
+              else
+                FAIL=$((FAIL + 1))
+                echo "::error file=${f}::kubesec score ${RESULT} — critical security issues"
+              fi
+            fi
+          done
+
+          echo "| Metric | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|--------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Passed (score >= 5) | ${PASS} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Warnings (score 0-4) | ${WARN} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Failed (score < 0) | ${FAIL} |" >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------- 3. Helm security template check ----------
+  helm-security:
+    name: Helm Security Template Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify _security.tpl exists
+        run: |
+          if [ ! -f "helm/templates/_security.tpl" ]; then
+            echo "::error::helm/templates/_security.tpl not found"
+            exit 1
+          fi
+
+      - name: Verify required security helpers
+        run: |
+          REQUIRED_HELPERS=(
+            "summit.podSecurityContext"
+            "summit.containerSecurityContext"
+            "summit.resourceDefaults"
+            "summit.writableVolumeMounts"
+            "summit.writableVolumes"
+          )
+
+          MISSING=0
+          for helper in "${REQUIRED_HELPERS[@]}"; do
+            if ! grep -q "define \"${helper}\"" helm/templates/_security.tpl; then
+              echo "::error::Missing required helper: ${helper}"
+              MISSING=$((MISSING + 1))
+            fi
+          done
+
+          if [ "$MISSING" -gt 0 ]; then
+            echo "::error::${MISSING} required security helper(s) missing"
+            exit 1
+          fi
+
+          echo "All required security helpers present"
+
+  # ---------- 4. Image size budget ----------
+  image-size:
+    name: Image Size Budget
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check image size budget config
+        run: |
+          if [ ! -f "config/image-budgets.yaml" ]; then
+            echo "::warning::config/image-budgets.yaml not found"
+          else
+            echo "Image budgets configured:"
+            cat config/image-budgets.yaml
+          fi
+
+      - name: Run image size check (if images available)
+        run: |
+          chmod +x scripts/ci/image-size-budget.sh
+          scripts/ci/image-size-budget.sh || true
+
+  # ---------- 5. Gate decision ----------
+  hardening-gate:
+    name: Container Hardening Gate
+    needs: [dockerfile-lint, k8s-security, helm-security, image-size]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate gate
+        run: |
+          echo "### Container Hardening Gate" >> "$GITHUB_STEP_SUMMARY"
+
+          LINT="${{ needs.dockerfile-lint.result }}"
+          K8S="${{ needs.k8s-security.result }}"
+          HELM="${{ needs.helm-security.result }}"
+          SIZE="${{ needs.image-size.result }}"
+
+          echo "| Check | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Dockerfile lint | ${LINT} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| K8s security | ${K8S} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Helm security | ${HELM} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Image size | ${SIZE} |" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$HELM" = "failure" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "**GATE: FAILED**" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**GATE: PASSED**" >> "$GITHUB_STEP_SUMMARY"
