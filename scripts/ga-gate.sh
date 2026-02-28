@@ -122,6 +122,12 @@ generate_report() {
 
 echo "Starting GA Gate..."
 
+# 0. Ensure venv is bootstrapped (lint/test depend on .venv/bin/ruff and pytest)
+if [ ! -x ".venv/bin/ruff" ] || [ ! -x ".venv/bin/pytest" ]; then
+    echo "⚠️  venv tools missing — running bootstrap..."
+    make bootstrap
+fi
+
 # 1. Lint and Unit
 record_check "Lint and Test" "NODE_ENV=test make lint test" || { generate_report; exit 1; }
 

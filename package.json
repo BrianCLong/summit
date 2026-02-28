@@ -107,6 +107,7 @@
     "ci:branch-protection:ruleset": "node scripts/ci/generate_ruleset_payload.mjs",
     "ci:branch-protection:payload": "node scripts/ci/generate_branch_protection_payload.mjs",
     "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs",
+    "ci:parity": "npx tsx scripts/ci/ci-parity.ts",
     "verify:living-documents": "node scripts/governance/verify-living-documents.cjs",
     "check:debt": "node scripts/ci/check_debt_regression.cjs",
     "check:jest-config": "node scripts/ci/validate-jest-config.cjs",
