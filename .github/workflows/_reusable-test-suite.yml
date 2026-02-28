@@ -12,11 +12,6 @@ on:
         required: false
         type: string
         default: "20"
-      pnpm-version:
-        description: "pnpm version to use"
-        required: false
-        type: string
-        default: "9"
       test-command:
         description: "Custom test command to run"
         required: false
@@ -54,7 +49,6 @@ jobs:
         uses: ./.github/actions/setup-toolchain
         with:
           node-version: ${{ inputs.node-version }}
-          pnpm-version: ${{ inputs.pnpm-version }}
           working-directory: ${{ inputs.working-directory }}
 
       - name: Unit tests

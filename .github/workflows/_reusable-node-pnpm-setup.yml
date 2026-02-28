@@ -8,11 +8,6 @@ on:
         required: false
         default: "20.x"
         type: string
-      pnpm-version:
-        description: "pnpm version to use"
-        required: false
-        # Removed default to respect package.json "packageManager"
-        type: string
       install-deps:
         description: "Whether to install dependencies"
         required: false
@@ -55,7 +50,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
-          version: ${{ inputs.pnpm-version }}
           run_install: false
 
       - name: Setup Node.js
