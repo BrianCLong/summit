@@ -5,7 +5,7 @@ on:
         description: "Node.js version to use"
         required: false
         type: string
-        default: "20"
+        default: "18"
       package-manager:
         description: "Package manager (pnpm)"
         required: false

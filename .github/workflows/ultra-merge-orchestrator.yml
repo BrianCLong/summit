@@ -8,7 +8,7 @@ on:
       batch_size:
         description: 'Number of PRs to process'
         required: false
-        default: '20'
+        default: '18'
       aggressive_mode:
         description: 'Enable aggressive merge mode'
         required: false
@@ -50,7 +50,7 @@ jobs:
           echo "=== PR BACKLOG ANALYSIS ==="
 
           # Get all open PRs with detailed status
-          gh pr list --limit 200 --json number,title,headRefName,mergeable,statusCheckRollup \
+          gh pr list --limit 180 --json number,title,headRefName,mergeable,statusCheckRollup \
             --jq '.[] | {number, title, branch: .headRefName, mergeable,
                          checks: (.statusCheckRollup | length),
                          passing: ([.statusCheckRollup[]? | select(.conclusion == "SUCCESS" or .conclusion == "SKIPPED")] | length),
@@ -73,12 +73,12 @@ jobs:
         id: update
         env:
           GH_TOKEN: ${{ github.token }}
-          BATCH_SIZE: ${{ inputs.batch_size || '20' }}
+          BATCH_SIZE: ${{ inputs.batch_size || '18' }}
         run: |
           echo "=== SMART PR UPDATE ==="
 
           # Get PRs that need workflow updates (prioritize by age)
-          gh pr list --limit 200 --json number,headRefName,createdAt,mergeable \
+          gh pr list --limit 180 --json number,headRefName,createdAt,mergeable \
             --jq '.[] | select(.mergeable == "MERGEABLE") | "\(.number):\(.headRefName):\(.createdAt)"' \
             | sort -t: -k3 | head -n "$BATCH_SIZE" > update_queue.txt
 
@@ -120,7 +120,7 @@ jobs:
           echo "=== INTELLIGENT MERGE EXECUTION ==="
 
           # Find PRs ready to merge (all checks passed)
-          gh pr list --limit 200 --json number,title,mergeable,statusCheckRollup \
+          gh pr list --limit 180 --json number,title,mergeable,statusCheckRollup \
             --jq '.[] | select(.mergeable == "MERGEABLE") |
                   select(all(.statusCheckRollup[]?; .conclusion == "SUCCESS" or .conclusion == "SKIPPED" or .conclusion == "NEUTRAL")) |
                   .number' > ready_to_merge.txt

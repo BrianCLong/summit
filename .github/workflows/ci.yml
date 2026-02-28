@@ -51,7 +51,7 @@ jobs:
     name: Typecheck
     needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node

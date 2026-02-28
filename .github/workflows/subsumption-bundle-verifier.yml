@@ -21,6 +21,6 @@ jobs:
       - name: Use Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "18"
       - name: Verify subsumption bundle (azure-turin-v7)
         run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/azure-turin-v7/manifest.yaml

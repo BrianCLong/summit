@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "18"
       - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/ingress-nginx-retirement/manifest.yaml
 
   deny:
@@ -32,5 +32,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "18"
       - run: node scripts/ci/deny_ingress_nginx.mjs

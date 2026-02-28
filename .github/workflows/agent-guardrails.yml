@@ -100,7 +100,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "18"
 
       - name: Verify S-AOS Compliance
         run: node scripts/ga/verify-saos.mjs

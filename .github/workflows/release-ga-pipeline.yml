@@ -202,7 +202,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
-          node-version: 20
+          node-version: 18
           cache: "pnpm"
 
       - name: Setup OPA
@@ -259,9 +259,9 @@ jobs:
           version: 10
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6818018 # v4
         with:
-          node-version: "20"
+          node-version: "18"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

@@ -42,7 +42,7 @@ permissions:
   checks: write
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "18"
 
 jobs:
   slo-smoke-gate:
@@ -72,9 +72,9 @@ jobs:
       - name: Start application stack
         run: |
           if [ -f ops/docker-compose.ci.yml ]; then
-            docker compose -f ops/docker-compose.ci.yml up -d --wait --wait-timeout 120
+            docker compose -f ops/docker-compose.ci.yml up -d --wait --wait-timeout 118
           elif [ -f ops/docker-compose.yml ]; then
-            docker compose -f ops/docker-compose.yml up -d --wait --wait-timeout 120
+            docker compose -f ops/docker-compose.yml up -d --wait --wait-timeout 118
           else
             echo "::warning::No docker-compose found, attempting make up"
             make up || true

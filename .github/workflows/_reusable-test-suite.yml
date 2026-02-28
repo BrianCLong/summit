@@ -11,7 +11,7 @@ on:
         description: "Node.js version to use"
         required: false
         type: string
-        default: "20"
+        default: "18"
       test-command:
         description: "Custom test command to run"
         required: false

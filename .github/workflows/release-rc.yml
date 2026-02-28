@@ -103,7 +103,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -395,7 +395,7 @@ jobs:
           retention-days: 90
 
       - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
+        uses: geekyeggo/delete-artifact@f275313e70c08f6118db482d7a6b98377786765b # v5
         with:
           name: verification-output
           failOnError: false

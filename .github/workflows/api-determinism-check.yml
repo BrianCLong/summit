@@ -52,7 +52,7 @@ jobs:
     services:
       # Start test server if running scheduled check
       server:
-        image: node:20
+        image: node:18
         options: --workdir /app
         ports:
           - 3000:3000
@@ -67,7 +67,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
           cache: "pnpm"
 
       - name: Install Dependencies

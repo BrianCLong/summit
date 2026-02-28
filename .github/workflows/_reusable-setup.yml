@@ -6,10 +6,10 @@ on:
   workflow_call:
     inputs:
       node-version:
-        description: 'Node.js version (e.g., "20.x", "18.x", "20")'
+        description: 'Node.js version (e.g., "18.x", "18.x", "18")'
         required: false
         type: string
-        default: "20.x"
+        default: "18.x"
       pnpm-version:
         description: "pnpm version"
         required: false

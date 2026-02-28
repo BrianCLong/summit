@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate evidence directory exists
-        run: test -f evidence/forbes-2026-trends/evidence/index.json
+        run: test -f evidence/forbes-1826-trends/evidence/index.json
       - name: Basic JSON parse and Schema Validation (Ajv)
         run: |
           node -e "
@@ -29,7 +29,7 @@ jobs:
             console.warn('Ajv not found, falling back to basic JSON parse');
           }
 
-          const evidenceDir = 'evidence/forbes-2026-trends';
+          const evidenceDir = 'evidence/forbes-1826-trends';
           const schemasDir = path.join(evidenceDir, 'schemas');
 
           const files = [

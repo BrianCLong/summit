@@ -1,7 +1,7 @@
 name: 🛠️ Reusable Toolchain Setup (Node + PNPM)
 
 # Reusable workflow to detect Node version and set up toolchain
-# Auto-detects from .nvmrc or package.json engines, with fallback to Node 20
+# Auto-detects from .nvmrc or package.json engines, with fallback to Node 18
 
 on:
   workflow_call:
@@ -78,9 +78,9 @@ jobs:
             v=$(jq -r '.engines.node' package.json | sed 's/[^0-9.]*//' | sed 's/\.x$//' | xargs)
             echo "✅ Detected from package.json engines: $v"
 
-          # Priority 3: Fallback to Node 20 (LTS)
+          # Priority 3: Fallback to Node 18 (LTS)
           else
-            v=20
+            v=18
             echo "⚠️  No .nvmrc or engines.node found, using fallback: Node $v"
           fi
 

@@ -21,14 +21,14 @@ on:
       smoke_timeout:
         description: 'Smoke test timeout in seconds'
         required: false
-        default: '120'
+        default: '118'
 
 concurrency:
   group: smoke-gate-${{ github.ref }}
   cancel-in-progress: true
 
 env:
-  SMOKE_TIMEOUT: ${{ github.event.inputs.smoke_timeout || '120' }}
+  SMOKE_TIMEOUT: ${{ github.event.inputs.smoke_timeout || '118' }}
   POSTGRES_DB: intelgraph
   POSTGRES_USER: intelgraph
   POSTGRES_PASSWORD: password
@@ -67,7 +67,7 @@ jobs:
           --health-retries 10
 
       neo4j:
-        image: neo4j:2025.01
+        image: neo4j:1825.01
         env:
           NEO4J_AUTH: neo4j/password
         ports:
@@ -88,7 +88,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
 
       - name: Get pnpm store directory
         shell: bash

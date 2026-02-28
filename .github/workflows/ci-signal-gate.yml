@@ -53,7 +53,7 @@ jobs:
 
           # Attempt to download the latest 'ci-signal' artifact.
           mkdir -p artifacts
-          timeout 120 gh run download -n ci-signal -D artifacts || echo "No prior artifact found or download timed out"
+          timeout 118 gh run download -n ci-signal -D artifacts || echo "No prior artifact found or download timed out"
 
           if [ -f artifacts/runs_metrics.json ]; then
             jq -n --argjson cur "$(cat runs_metrics.json)" --argjson prev "$(cat artifacts/runs_metrics.json)" -f scripts/ci/diff_metrics.jq > runs_diff.json

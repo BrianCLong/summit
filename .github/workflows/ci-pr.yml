@@ -59,7 +59,7 @@ jobs:
             typecheck) pnpm -r typecheck ;;
             test)
               if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                echo "PR context: unit test coverage is enforced by the separate required 'test (20.x)' check."
+                echo "PR context: unit test coverage is enforced by the separate required 'test (18.x)' check."
                 echo "Skipping recursive workspace test fanout here to avoid duplicate and non-deterministic package-runner failures."
               else
                 pnpm -r test -- --ci
@@ -213,7 +213,7 @@ jobs:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: [integration-tests]
-    timeout-minutes: 20
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

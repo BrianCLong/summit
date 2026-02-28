@@ -9,7 +9,7 @@ on:
         description: 'Node.js version'
         required: false
         type: string
-        default: '20.x'
+        default: '18.x'
       cache-enabled:
         description: 'Enable dependency caching'
         required: false

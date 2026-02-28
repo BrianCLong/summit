@@ -59,7 +59,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
-          node-version: "20"
+          node-version: "18"
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -128,7 +128,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
-          node-version: "20"
+          node-version: "18"
 
       - name: Generate Evidence Bundle (Provenance)
         run: |
@@ -164,6 +164,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Post-deploy probes (latency/error rates/log SLOs)
-        run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
+        run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=18m
       - name: Enforce rollback on SLO breach
         run: scripts/ci/release-train/rollback_if_needed.sh --env=${{ inputs.target_env }}

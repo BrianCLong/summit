@@ -40,7 +40,7 @@ jobs:
         run: |
           # Run actionlint on top-level workflow files only
           # Exclude archived workflows and disable shellcheck integration
-          # (shellcheck SC2086 info warnings are false positives for GitHub context vars)
+          # (shellcheck SC1886 info warnings are false positives for GitHub context vars)
           find .github/workflows -maxdepth 1 -name '*.yml' -o -name '*.yaml' | xargs actionlint -shellcheck= -color -verbose
 
       - name: Validate workflow syntax
@@ -69,7 +69,7 @@ jobs:
           for workflow in .github/workflows/ga-gate.yml .github/workflows/unit-test-coverage.yml .github/workflows/ci-core.yml; do
             if grep -q "paths-ignore:" "$workflow" 2>/dev/null; then
               # Verify it doesn't ignore workflow changes, package changes, or script changes
-              if ! grep -A20 "paths-ignore:" "$workflow" | grep -E "\.github/workflows/\*\*|package\.json|pnpm-lock\.yaml|scripts/\*\*" >/dev/null 2>&1; then
+              if ! grep -A18 "paths-ignore:" "$workflow" | grep -E "\.github/workflows/\*\*|package\.json|pnpm-lock\.yaml|scripts/\*\*" >/dev/null 2>&1; then
                 echo "⚠️  Warning: $workflow uses paths-ignore but may still skip on critical changes"
               fi
             fi

@@ -14,7 +14,7 @@ on:
         description: "Node.js version"
         required: false
         type: string
-        default: "20.x"
+        default: "18.x"
       coverage-threshold:
         description: "Minimum coverage threshold (%)"
         required: false
@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: ["20.x"]
+        node: ["18.x"]
     outputs:
       coverage: ${{ steps.coverage-check.outputs.percentage }}
       passed: ${{ steps.test-run.outcome == 'success' }}

@@ -24,7 +24,7 @@ jobs:
   #   with:
   #     service: copilot
   #     working-directory: services/copilot
-  #     node-version: "20"
+  #     node-version: "18"
   #     coverage-threshold: 80
   #   secrets: inherit
 
