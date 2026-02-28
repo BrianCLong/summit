@@ -1,5 +1,7 @@
 import json, hashlib
 from pathlib import Path
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from tools.plan_heatmap import summarize
 
 OUT_DIR = Path("artifacts/plan")

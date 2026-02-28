@@ -25,6 +25,28 @@ jobs:
         run: python tools/plan_heatmap.py
       - name: Enforce gate
         run: python tools/plan_gate.py
+
+      - name: Build deterministic plan report
+        run: |
+          mkdir -p artifacts/plan
+          python tools/plan_report.py
+          python tools/plan_attest.py
+
+      - name: Sign attestation
+        run: |
+          curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v2.2.3/cosign-linux-amd64
+          chmod +x cosign
+          sudo mv cosign /usr/local/bin/
+          cosign sign-blob \
+            --yes \
+            --output-signature artifacts/plan/plan-attestation.sig \
+            artifacts/plan/plan-attestation.intoto.jsonl
+        env:
+          COSIGN_EXPERIMENTAL: "1"
+
+      - name: Emit metrics artifact
+        run: python telemetry/plan_metrics.py
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -32,3 +54,4 @@ jobs:
           path: |
             plan-heatmap.html
             .plan-samples/*.jsonl
+            artifacts/plan/*

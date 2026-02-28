@@ -1,4 +1,6 @@
 from pathlib import Path
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from tools.plan_heatmap import summarize
 
 OUT = Path("artifacts/plan/plan_metrics.prom")

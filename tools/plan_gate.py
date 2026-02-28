@@ -1,5 +1,7 @@
 import json, os, sys, math
 from pathlib import Path
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from tools.plan_heatmap import summarize
 
 BASELINE_PATH = Path(os.getenv("PLAN_BASELINE_PATH", "docs/ga/baselines/plan_baseline.json"))

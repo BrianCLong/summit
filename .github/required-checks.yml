@@ -12,6 +12,7 @@ required_checks:
   - Unit Tests
   - SOC Controls
   - test (20.x)
+  - plan-stability-gate
 
 notes:
   owner: summit-ga

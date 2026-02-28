@@ -33,6 +33,9 @@
 | `system_inventory` | `artifacts/evidence/governance/ai-inventory.json` | Complete AI system list. | NIST AI RMF (MAP) |
 | `provenance_trace` | `.evidence/provenance.json` | SLSA-compliant build/data provenance. | EU AI Act (Art 10) |
 | `model_cards` | `docs/models/*.md` | Transparency disclosures. | EU AI Act (Art 13) |
+| `PLAN_STABILITY_GATE` | `artifacts/plan/plan-report.json` | Deterministic summary of plan stability. | SLSA-compliant build/data provenance |
+| `PLAN_STABILITY_ATTESTATION` | `artifacts/plan/plan-attestation.intoto.jsonl` | Attested statement linking plan drift outputs to a specific commit. | SLSA-compliant build/data provenance |
+| `PLAN_STABILITY_OBSERVABILITY` | `artifacts/plan/plan_metrics.prom` | Prometheus exposition for plan stability metrics. | SLSA-compliant build/data provenance |
 
 ## Validation Policy
 *   All artifacts must be present in the **Release Evidence Bundle**.
