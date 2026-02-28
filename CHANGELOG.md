@@ -16,6 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
+
+### Changed
+- **Performance Optimization**: Optimized database retrieval in `StrategicPlanRepo.ts` by replacing N+1 query patterns with batch-loading for milestones, key results, deliverables, and risks.
 - Added evidence system for Forbes 2026 trends analysis.
 
 ### Added
