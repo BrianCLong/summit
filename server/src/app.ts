@@ -221,6 +221,19 @@ export const createApp = async () => {
     req.log = appLogger;
     next();
   });
+
+  // Enable structured HTTP logging for OpenTelemetry correlation
+  app.use(pinoHttp({
+    logger: appLogger,
+    autoLogging: {
+      ignore: (req) => {
+        if (req.url === '/health' || req.url === '/metrics') {
+          return true;
+        }
+        return false;
+      }
+    }
+  }));
   app.use(requestProfilingMiddleware);
 
   app.use(

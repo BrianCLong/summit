@@ -41,7 +41,7 @@ const checks = parseRequiredChecks(
   fs.readFileSync(".github/required-checks.yml", "utf8")
 );
 assert(checks.length > 0, "No required checks defined");
-const MAX_ATTEMPTS = Number(process.env.REQUIRED_CHECKS_MAX_ATTEMPTS || 60);
+const MAX_ATTEMPTS = Number(process.env.REQUIRED_CHECKS_MAX_ATTEMPTS || 12);
 const POLL_MS = Number(process.env.REQUIRED_CHECKS_POLL_MS || 5000);
 
 async function getCheckRuns() {

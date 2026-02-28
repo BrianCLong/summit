@@ -23,6 +23,14 @@ if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
 }
 
 // Cleanup function to stop metrics collection
+// Health check metric
+export const summitHealthChecksTotal = new client.Counter({
+  name: 'summit_health_checks_total',
+  help: 'Total number of health checks performed',
+  labelNames: ['status'],
+  registers: [register],
+});
+
 export function stopMetricsCollection() {
   if (defaultMetricsInterval && typeof defaultMetricsInterval.clear === 'function') {
     defaultMetricsInterval.clear();
