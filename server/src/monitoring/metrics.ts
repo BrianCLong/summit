@@ -1108,6 +1108,13 @@ export const maestroSynthesisOperations = createCounter({
   help: 'Data synthesis operations',
 });
 
+export const summitHealthChecksTotal = createCounter({
+  registers: [],
+  name: 'summit_health_checks_total',
+  help: 'Total health checks performed',
+  labelNames: ['status', 'component'],
+});
+
 // Register new metrics
 try {
   register.registerMetric(maestroOrchestrationRequests);
@@ -1136,6 +1143,7 @@ try {
   register.registerMetric(maestroDataSourcesActive);
   register.registerMetric(maestroWebScrapingRequests);
   register.registerMetric(maestroSynthesisOperations);
+  register.registerMetric(summitHealthChecksTotal);
 } catch (e) { }
 
 // Debug log to verify metrics loading
@@ -1226,6 +1234,7 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
+  summitHealthChecksTotal,
 };
 
 export default metrics;
