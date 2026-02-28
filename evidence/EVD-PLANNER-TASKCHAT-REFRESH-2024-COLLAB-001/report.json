@@ -1,7 +1,6 @@
 {
   "evidence": {
     "version": "1.0",
-    "timestamp": "2026-02-10T00:00:00Z",
     "id": "EVD-PLANNER-TASKCHAT-REFRESH-2024-COLLAB-001",
     "description": "Evidence bundle for Task Chat schema and integrations",
     "components": [
