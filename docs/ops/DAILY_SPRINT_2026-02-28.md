@@ -64,7 +64,10 @@
 3. Produced this sprint artifact with plan/execution/blockers.
 
 ### In progress
-1. PR publishing path for this delta (branch/commit/PR) deferred pending API stability in this run window.
+1. PR publishing path for this delta:
+   - branch pushed: `chore/daily-sprint-required-checks-core-20260228`
+   - commit: `d8b90aa60c`
+   - PR creation remains blocked by intermittent GitHub API connectivity in this run window.
 
 ### Blocked
 1. `node scripts/ci/validate_policy_references.mjs ...` failed: `ERR_MODULE_NOT_FOUND` for `js-yaml` (dependency not installed in local environment).
@@ -72,6 +75,7 @@
 3. `pre-commit run --files ...` blocked in sandbox:
    - default cache path denied (`/Users/brianlong/.cache/pre-commit/.lock`)
    - fallback cache (`PRE_COMMIT_HOME=/tmp/pre-commit-cache`) then failed to fetch hooks due `Could not resolve host: github.com`.
+4. `gh pr create ...` failed twice with `error connecting to api.github.com` after successful branch push.
 
 ## Commands Run
 
@@ -93,10 +97,12 @@
   - Error: `PermissionError: ... /Users/brianlong/.cache/pre-commit/.lock`
 - `PRE_COMMIT_HOME=/tmp/pre-commit-cache pre-commit run --files ...`
   - Error: `fatal: unable to access 'https://github.com/pre-commit/pre-commit-hooks/': Could not resolve host: github.com`
+- `gh pr create --repo BrianCLong/summit --base main --head chore/daily-sprint-required-checks-core-20260228 ...`
+  - Error: `error connecting to api.github.com`
 
 ## PRs touched
 - Reviewed: #18844, #18841, #18829
-- Local changes prepared in this worktree; publication to GitHub remains pending due run-time API instability.
+- Pushed branch: `chore/daily-sprint-required-checks-core-20260228` (ready for PR creation when API connectivity stabilizes).
 
 ## Tomorrow follow-up
 1. Install repo dependencies (`pnpm install`) to unblock policy validator (`js-yaml`).
