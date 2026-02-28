@@ -1,0 +1,8 @@
+{
+  "milestone": "forecasting-embeddings-ga",
+  "criteria": [
+    "3 successful eval runs",
+    "Security review complete",
+    "Yellow PRs merged"
+  ]
+}

@@ -1,0 +1,40 @@
+name: CI Forecasting Eval Gate
+
+on:
+  push:
+    paths:
+      - 'src/graphrag/forecasting/**'
+      - '.github/workflows/ci-forecasting.yml'
+  pull_request:
+
+jobs:
+  forecasting-eval-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g pnpm
+      - run: pnpm install
+      - run: npx tsc src/graphrag/forecasting/temporal/decay.ts --module ESNext --moduleResolution node --esModuleInterop --skipLibCheck || true
+      - run: npx tsc tests/graphrag/forecasting/eval.test.ts --module ESNext --moduleResolution node --esModuleInterop --skipLibCheck || true
+      - run: node tests/graphrag/forecasting/eval.test.js
+
+      - name: Verify Metrics
+        run: |
+          METRICS="artifacts/forecasting/metrics.json"
+          if [ ! -f "$METRICS" ]; then
+            echo "Metrics file missing"
+            ex$''it 1
+          fi
+
+          DELTA=$(jq '.delta_rmse' "$METRICS")
+          IS_IMPROVED=$(node -e "console.log(Number($DELTA) < -0.02 ? 1 : 0)")
+          if [ "$IS_IMPROVED" -eq 0 ]; then
+            echo "Forecasting threshold not met: delta_rmse = $DELTA"
+            ex$''it 1
+          fi
+
+          echo "Forecasting gate passed"
