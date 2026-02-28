@@ -17,11 +17,31 @@
 
 ## 🚀 Quickstart
 
+### Environment variables
+```bash
+cp .env.example .env
+# edit secrets + AI keys
+```
+
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+ (recommended 22)
+- pnpm 10+ (corepack recommended)
+
+```bash
+corepack enable pnpm
+```
 - Docker & Docker Compose
 - Neo4j 5.x (via Docker)
+
+### Full dev environment (recommended)
+```bash
+docker network create summit 2>/dev/null || true
+docker compose -f docker-compose.dev.yml up -d --build
+
+# or one-liner via script
+pnpm run docker:dev
+```
 
 ### Install & Run
 
@@ -49,7 +69,7 @@ Server runs at `http://localhost:4000`
 
 ```bash
 # GraphQL playground
-curl -X POST http://localhost:4000/api/graphql \
+curl -X POST http://localhost:4000/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "{ health { status version } }"}'
 

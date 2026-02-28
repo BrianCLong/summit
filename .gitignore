@@ -383,3 +383,23 @@ evidence/skills/
 *.js.map
 .worktrees/
 _worktrees/
+
+# AI tool / agent bloat
+.claude/
+.grok/
+.gemini/
+.jules/
+.qwen/
+.qwen-cache/
+.maestro/
+.windsurf/
+.cursor/
+.vale/
+.zap/
+.agent-guidance/
+.agentic-prompts/
+.disabled/
+.quarantine/
+.venv*/
+.venv_*/
+.archive/
