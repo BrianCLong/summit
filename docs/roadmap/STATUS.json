@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-28T06:04:00Z",
+  "revision_note": "Aligned required-check naming to Unit Tests (Core) for branch-protection drift remediation and recorded daily sprint execution evidence.",
   "initiatives": [
+    {
+      "id": "daily-sprint-2026-02-28-required-checks-core",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Daily sprint remediation to align required-check policy and branch-protection contexts on Unit Tests (Core); evidence captured in docs/ops/DAILY_SPRINT_2026-02-28.md."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",

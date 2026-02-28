@@ -31,7 +31,7 @@ branch_protection:
     contexts:
       - "meta-gate"
       - "CI Core Gate ✅"
-      - "Unit Tests"
+      - "Unit Tests (Core)"
       - "gate"
       - "Release Readiness Gate"
       - "SOC Controls"
@@ -51,9 +51,9 @@ always_required:
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
-  - name: "Unit Tests"
-    workflow: "ci-pr.yml"
-    rationale: "Primary PR test gate status required by branch protection"
+  - name: "Unit Tests (Core)"
+    workflow: "ci-core.yml"
+    rationale: "Primary core CI unit-test check required by branch protection"
 
   - name: "gate"
     workflow: "ga-gate.yml"
