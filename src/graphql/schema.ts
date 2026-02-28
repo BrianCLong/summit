@@ -1,6 +1,8 @@
+import { typeDefs as taskThreadTypeDefs } from '../api/graphql/taskThread/typeDefs';
 import { gql } from 'apollo-server';
 
 export const schema = gql`
+  ${taskThreadTypeDefs}
   input ConfigInput {
     collaborationIntensity: Float = 1.0
     engagementAmplification: Float = 50.0
