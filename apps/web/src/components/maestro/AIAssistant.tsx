@@ -209,6 +209,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
         <button
           onClick={() => setIsOpen(false)}
           className="text-gray-400 hover:text-gray-600"
+          aria-label="Close Assistant"
         >
           <XMarkIcon className="h-5 w-5" />
         </button>
@@ -296,6 +297,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
               <button
                 onClick={() => copyToClipboard(message.content)}
                 className="mt-2 text-xs opacity-50 hover:opacity-100 flex items-center space-x-1"
+                aria-label="Copy to clipboard"
               >
                 <ClipboardDocumentIcon className="h-3 w-3" />
                 <span>Copy</span>
@@ -365,6 +367,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
             onClick={sendMessage}
             disabled={!inputValue.trim() || isLoading}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg p-2 transition-colors"
+            aria-label="Send message"
           >
             <PaperAirplaneIcon className="h-4 w-4" />
           </button>
