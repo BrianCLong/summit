@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
     paths-ignore:
       - "**/*.md"
   merge_group:
@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Run drift check
+        run: bash scripts/monitoring/final-audit-feb-26-2026-drift.sh
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
@@ -35,12 +37,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Run drift check
+        run: bash scripts/monitoring/final-audit-feb-26-2026-drift.sh
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
@@ -52,13 +56,15 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Run drift check
+        run: bash scripts/monitoring/final-audit-feb-26-2026-drift.sh
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
@@ -71,6 +77,8 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+      - name: Run drift check
+        run: bash scripts/monitoring/final-audit-feb-26-2026-drift.sh
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -105,12 +113,14 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - name: Run drift check
+        run: bash scripts/monitoring/final-audit-feb-26-2026-drift.sh
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
+          cache: "pnpm"
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -155,6 +165,8 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
+      - name: Run drift check
+        run: bash scripts/monitoring/final-audit-feb-26-2026-drift.sh
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
