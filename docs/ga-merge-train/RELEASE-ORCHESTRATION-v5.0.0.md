@@ -146,11 +146,15 @@ Rollback procedure:
 | `reports.renderer.v2.enabled` | All tenants | After P6 promote |
 | `copilot.v2.enabled` | All tenants | After P6 promote |
 
-## Current Status (2026-02-27)
+## Current Status (2026-02-28)
 
 ### Completed
 - [x] P0: 597 PRs merged, CI checks stabilized
 - [x] P0: Container hardening — Helm security template (`helm/templates/_security.tpl`) with non-root, read-only FS, seccomp, network policies
+- [x] P0: Container hardening CI — Hadolint, kubesec, Helm helper validation, image size budget (`container-hardening.yml`)
+- [x] P0: Conventional commits — PR title and commit message lint (`conventional-commits.yml`)
+- [x] P0: CODEOWNERS enforced (pre-existing)
+- [x] P0: Supply chain gates (pre-existing `supplychain-gates.yml`)
 - [x] P1: Golden path probes — 10 synthetic probes + composite SLO (`observability/golden-paths/golden_paths.yaml`)
 - [x] P1: SLO gates workflow — validates golden paths against Prometheus (`slo-gates.yml`)
 - [x] P1: Performance gate — k6 baseline with 3x spike test, headroom analysis (`performance-gate.yml`)

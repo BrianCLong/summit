@@ -208,6 +208,10 @@ all feature content was included.
 | Helm security template | `helm/templates/_security.tpl` |
 | GA feature flags (4 flags) | `config/feature-flags.json` |
 | GA evidence summary | `docs/ga-merge-train/GA-EVIDENCE-SUMMARY-v5.0.0.md` |
+| Conventional commits workflow | `.github/workflows/conventional-commits.yml` |
+| Container hardening workflow | `.github/workflows/container-hardening.yml` |
+| Image size budget script | `scripts/ci/image-size-budget.sh` |
+| Image size budgets config | `config/image-budgets.yaml` |
 | Integration branch | `claude/merge-prs-ga-release-XjiVk` |
 
 ## Emergency Procedures
@@ -256,3 +260,6 @@ git push --force origin main
 - [x] Helm security template (non-root, read-only FS, seccomp, network policies, PDB)
 - [x] GA feature flags defined (search-ga, realtime, reports-v2, copilot-v2 with flip order)
 - [x] GA evidence summary (phase matrix, 34+ artifact index)
+- [x] Conventional commits enforcement (PR title + commit message lint)
+- [x] Container hardening CI (Hadolint, kubesec, Helm helpers, image size budget)
+- [x] Image size budgets (config/image-budgets.yaml — 8 services)
