@@ -2,7 +2,7 @@
  * Centralized logging configuration
  * Exports a typed logger instance compatible with the Logger interface
  */
-import pino from 'pino';
+import { pino } from 'pino';
 import type { Logger } from './Logger.js';
 
 const pinoLogger = pino({
