@@ -53,6 +53,18 @@ export const typeDefs = gql`
     createdAt: DateTime!
   }
 
+  type FeatureContribution {
+    name: String!
+    contribution: Float!
+  }
+
+  type AnomalyExplanation {
+    id: ID!
+    score: Float!
+    explanation: String!
+    features: [FeatureContribution!]!
+  }
+
   # Provenance Types
   type Claim {
     id: ID!
@@ -215,6 +227,7 @@ export const typeDefs = gql`
       model: String!
       version: String!
     ): Explanation!
+    explainAnomaly(id: ID!): AnomalyExplanation!
 
     # Provenance Queries
     claim(id: ID!): Claim
