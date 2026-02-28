@@ -63,30 +63,8 @@ jobs:
             "https://api.github.com/repos/$OWNER/$REPO/commits/$SHA/check-runs?per_page=100" \
             > checkruns.json
 
-          # Extract non-success conclusions via python script
-          cat > analyze_checks.py << 'PY'
-import json
-try:
-    with open("checkruns.json", "r") as f:
-        d = json.load(f)
-    bad = []
-    for cr in d.get("check_runs", []):
-        concl = cr.get("conclusion")
-        status = cr.get("status")
-        name = cr.get("name")
-        # Filter for completed runs that failed
-        if status == "completed" and concl not in (None, "success", "neutral", "skipped"):
-            bad.append((name, concl))
-
-    print(f"bad_count={len(bad)}")
-    for n, c in bad:
-        print(f"bad::{n}::{c}")
-except Exception as e:
-    print(f"Error parsing check runs: {e}")
-    print("bad_count=0")
-PY
-
-          python3 analyze_checks.py > bad_checks.txt
+          # Extract non-success conclusions via python one-liner
+          python3 -c "import json; d=json.load(open('checkruns.json')); bad=[(c['name'], c['conclusion']) for c in d.get('check_runs', []) if c.get('status') == 'completed' and c.get('conclusion') not in (None, 'success', 'neutral', 'skipped')]; print(f'bad_count={len(bad)}'); [print(f'bad::{n}::{c}') for n, c in bad]" > bad_checks.txt || echo "bad_count=0" > bad_checks.txt
 
           BAD_COUNT="$(grep -E '^bad_count=' bad_checks.txt | cut -d= -f2)"
           echo "bad_count=$BAD_COUNT" >> "$GITHUB_OUTPUT"
