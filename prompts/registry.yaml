@@ -922,3 +922,36 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: qwen3_5_medium_integration
+    version: v1
+    path: prompts/models/qwen3_5_medium@v1.md
+    sha256: a920d5fdde9e213628ee015fd1a63c06f570396b925e5c42436cf7366b00b881
+    description: Integrate Qwen3.5 Medium model claims and evaluation stack.
+    scope:
+      paths:
+        - summit/models/adapter.py
+        - summit/models/qwen/
+        - summit/tests/models/
+        - summit/benchmarks/profiles/
+        - summit/evals/cost_efficiency.py
+        - summit/scripts/license_check_qwen.py
+        - summit/scripts/monitoring/qwen3_5_drift.py
+        - summit/docs/monitoring/qwen3_5_medium.md
+        - .github/workflows/license.yml
+        - requirements.in
+        - docs/compliance/CONTROL_REGISTRY.md
+        - .github/workflows/jetrl-ci.yml
+      domains:
+        - models
+        - evaluation
+        - governance
+        - monitoring
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
