@@ -1,12 +1,8 @@
-import https from 'https';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const EXPECTED_CONFIG_PATH = path.join(__dirname, '../../governance/branch-protection.json');
-const DRIFT_REPORT_PATH = process.env.DRIFT_REPORT_PATH || 'drift-report.md';
 
 function request(url, options, data) {
   return new Promise((resolve, reject) => {
@@ -29,14 +25,6 @@ function request(url, options, data) {
     if (data) req.write(data);
     req.end();
   });
-}
-
-async function writeDriftReport(drift) {
-    const title = "Golden Path: Governance Drift detected";
-    const body = `# ${title}\n\nGovernance drift detected on branch protection settings for this repository:\n\n${drift.map(d => `- ${d}`).join('\n')}\n\nPlease review the governance/branch-protection.json file and reconcile.`;
-
-    fs.writeFileSync(DRIFT_REPORT_PATH, body, 'utf8');
-    console.log(`Drift report written to ${DRIFT_REPORT_PATH}`);
 }
 
 async function main() {
@@ -73,18 +61,8 @@ async function main() {
   if (actualConfig.error) {
     if (actualConfig.status === 404) {
       console.log("::warning::Branch protection not found or not enabled.");
-      const drift = ["Branch protection not enabled on " + branch];
-      await reportDrift(repo, token, drift);
-      await writeDriftReport(drift);
+      await reportDrift(repo, token, ["Branch protection not enabled on " + branch]);
       process.exit(0); // Exit 0 to not fail the job, just warn
-    }
-    if (actualConfig.status === 403) {
-      console.log("::error::Missing permissions to read branch protection rules.");
-      console.log("::notice::Action required: Ensure the GITHUB_TOKEN has 'administration: read' permission or run with a Personal Access Token (PAT) that has admin rights.");
-      const drift = ["Governance check failed: Missing permissions to read branch protection rules. Ensure GITHUB_TOKEN has 'administration: read'."];
-      await reportDrift(repo, token, drift);
-      await writeDriftReport(drift);
-      process.exit(1);
     }
     console.error(`Failed to fetch branch protection: ${actualConfig.status}`);
     process.exit(1);
@@ -95,7 +73,6 @@ async function main() {
   if (drift.length > 0) {
     console.log("::warning::Governance drift detected:");
     drift.forEach(d => console.log(`- ${d}`));
-    await writeDriftReport(drift);
     if (process.env.CI) {
       await reportDrift(repo, token, drift);
     }

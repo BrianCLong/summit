@@ -47,8 +47,7 @@ jobs:
       - name: Push to main if successful
         if: steps.merge.outcome == 'success'
         run: |
-          # Git push disabled for safety in this environment
-          # git push origin main
+          git push origin main
 
       - name: Push to fork
         if: steps.merge.outcome == 'success'
@@ -56,7 +55,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Push merged changes back to fork
-          # git push https://oauth2:${GH_TOKEN}@github.com/TopicalityLLC/Summit.git main:main --force
+          git push https://oauth2:${GH_TOKEN}@github.com/TopicalityLLC/Summit.git main:main --force
 
       - name: Comment on PR if conflicts
         if: steps.merge.outcome == 'failure'

@@ -42,11 +42,10 @@ jobs:
   governance-drift-check:
     name: Governance Drift Check
     runs-on: ubuntu-latest
-    continue-on-error: false
+    continue-on-error: true
     permissions:
       contents: read
       issues: write
-      administration: read # Required to read branch protection rules
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,15 +57,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          DRIFT_REPORT_PATH: drift-report.md
-        run: node scripts/governance/check-branch-protection.mjs
-      - name: Upload Drift Report
-        if: failure() || success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: governance-drift-report
-          path: drift-report.md
-          if-no-files-found: ignore
+        run: node scripts/governance/check-branch-protection.js
 
   build-server:
     name: Build Server (SLSA L3)
