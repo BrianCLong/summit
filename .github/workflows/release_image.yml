@@ -115,7 +115,7 @@ jobs:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
-          cosign verify \
+          cosign verify --use-signed-timestamps \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "^https://github.com/${{ github.repository }}/.+" \
             "${IMAGE}@${DIGEST}"
@@ -126,13 +126,13 @@ jobs:
           IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         run: |
           echo "Verifying SBOM..."
-          cosign verify-attestation --type https://spdx.dev/Document \
+          cosign verify-attestation --use-signed-timestamps --type https://spdx.dev/Document \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "^https://github.com/${{ github.repository }}/.+" \
             "${IMAGE}@${DIGEST}"
 
           echo "Verifying Provenance..."
-          cosign verify-attestation --type https://slsa.dev/provenance/v0.2 \
+          cosign verify-attestation --use-signed-timestamps --type https://slsa.dev/provenance/v0.2 \
             --certificate-oidc-issuer https://token.actions.githubusercontent.com \
             --certificate-identity-regexp "^https://github.com/${{ github.repository }}/.+" \
             "${IMAGE}@${DIGEST}"

@@ -195,7 +195,7 @@ jobs:
             fi
 
             # Verify the signature
-            cosign verify $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
+            cosign verify --use-signed-timestamps $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
           fi
 
           # Sign SBOMs (Sign the artifacts themselves as well)
