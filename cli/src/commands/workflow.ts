@@ -1,57 +1,56 @@
 import { Command } from 'commander';
 import { spawnSync } from 'child_process';
 import path from 'path';
-import { existsSync } from 'fs';
+import chalk from 'chalk';
+import fs from 'fs';
 
+/**
+ * Validates a workflow project using the Python-based validator.
+ */
+export async function validateWorkflow(projectPath: string, options: { adapter: string, runId?: string }) {
+  console.log(chalk.blue(`\n🔍 Validating ${options.adapter} workflow at ${projectPath}...`));
+
+  const pythonPath = process.env.PYTHON_PATH || 'python3';
+  const scriptPath = path.resolve(process.cwd(), 'summit/workflow/cli.py');
+
+  if (!fs.existsSync(scriptPath)) {
+    console.error(chalk.red(`❌ Workflow CLI script not found at ${scriptPath}`));
+    process.exit(1);
+  }
+
+  const args = [scriptPath, 'validate', projectPath, '--adapter', options.adapter];
+  if (options.runId) {
+    args.push('--run-id', options.runId);
+  }
+
+  const result = spawnSync(pythonPath, args, {
+    stdio: 'inherit',
+    env: { ...process.env, PYTHONPATH: process.cwd() }
+  });
+
+  if (result.status !== 0) {
+    console.error(chalk.red(`\n❌ Validation failed for ${projectPath}`));
+    process.exit(1);
+  }
+
+  console.log(chalk.green('✅ Artifacts generated in artifacts/workflow/'));
+}
+
+/**
+ * Registers the workflow command group.
+ */
 export function registerWorkflowCommands(program: Command) {
-    const workflow = program.command('workflow')
-        .description('Workflow orchestration and validation (dbt, Airflow)');
+  const workflow = program
+    .command('workflow')
+    .description('Manage and validate dbt and Airflow workflows');
 
-    workflow.command('validate')
-        .description('Validate a workflow project (dbt or Airflow)')
-        .argument('<path>', 'Path to the project or DAG')
-        .option('--output <path>', 'Output directory for evidence', 'artifacts/workflow')
-        .action(async (targetPath, options) => {
-            console.log(`Validating workflow at ${targetPath}...`);
-            try {
-                // Find repo root to locate the python module
-                let repoRoot: string;
-                const gitRootResult = spawnSync('git', ['rev-parse', '--show-toplevel'], { encoding: 'utf-8' });
-                if (gitRootResult.status === 0) {
-                    repoRoot = gitRootResult.stdout.trim();
-                } else {
-                    repoRoot = process.cwd();
-                }
-
-                // Find Python interpreter
-                let pythonPath = 'python3';
-                const venvPython = path.join(repoRoot, '.venv', 'bin', 'python');
-                const venvPythonWin = path.join(repoRoot, '.venv', 'Scripts', 'python.exe');
-
-                if (existsSync(venvPython)) {
-                    pythonPath = venvPython;
-                } else if (existsSync(venvPythonWin)) {
-                    pythonPath = venvPythonWin;
-                }
-
-                const cliPath = path.join(repoRoot, 'summit', 'workflow', 'cli.py');
-
-                // Ensure we use the right PYTHONPATH
-                const env = { ...process.env, PYTHONPATH: repoRoot };
-
-                const args = [cliPath, 'validate', targetPath, '--output', options.output];
-
-                const result = spawnSync(pythonPath, args, { env, encoding: 'utf-8' });
-
-                if (result.stdout) process.stdout.write(result.stdout);
-                if (result.stderr) process.stderr.write(result.stderr);
-
-                if (result.status !== 0) {
-                    process.exit(result.status || 1);
-                }
-            } catch (error: any) {
-                console.error(`Validation failed: ${error.message}`);
-                process.exit(1);
-            }
-        });
+  workflow
+    .command('validate')
+    .description('Validate a dbt or Airflow project and produce evidence')
+    .argument('<path>', 'Path to the project directory')
+    .requiredOption('--adapter <type>', 'Adapter type (dbt, airflow)')
+    .option('--run-id <id>', 'Unique run identifier')
+    .action(async (projectPath, options) => {
+      await validateWorkflow(projectPath, options);
+    });
 }

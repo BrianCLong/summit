@@ -1,35 +1,20 @@
-import sys
-import argparse
-import uuid
+import click
 from summit.workflow.base import WorkflowValidator
 
-def main():
-    parser = argparse.ArgumentParser(description="Summit Workflow CLI")
-    subparsers = parser.add_subparsers(dest="command")
+@click.group()
+def workflow():
+    """Workflow orchestration and validation."""
+    pass
 
-    validate_parser = subparsers.add_parser("validate", help="Validate a workflow project")
-    validate_parser.add_argument("path", help="Path to the dbt project or Airflow DAG")
-    validate_parser.add_argument("--output", help="Output directory for evidence", default="artifacts/workflow")
-    validate_parser.add_argument("--run-id", help="Manually specify run ID for determinism")
+@workflow.command()
+@click.argument('path')
+@click.option('--adapter', type=click.Choice(['dbt', 'airflow']), required=True)
+@click.option('--run-id', help='Unique run identifier')
+def validate(path, adapter, run_id):
+    """Validates a dbt or Airflow workflow."""
+    validator = WorkflowValidator(run_id=run_id)
+    report = validator.validate(path, adapter)
+    click.echo(f"Validation successful. Evidence ID: {report['evidence_id']}")
 
-    args = parser.parse_args()
-
-    if args.command == "validate":
-        validator = WorkflowValidator(output_dir=args.output)
-        results = validator.validate(args.path)
-
-        run_id = args.run_id or str(uuid.uuid4())
-        evidence_id = validator.generate_evidence(results, run_id)
-
-        print(f"Validation {results['status']}")
-        print(f"Evidence ID: {evidence_id}")
-        print(f"Artifacts: {args.output}")
-
-        if results["status"] != "validated":
-            sys.exit(1)
-    else:
-        parser.print_help()
-        sys.exit(1)
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    workflow()

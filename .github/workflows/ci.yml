@@ -37,6 +37,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -54,6 +56,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -73,6 +77,8 @@ jobs:
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -107,6 +113,8 @@ jobs:
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -157,6 +165,8 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node

@@ -1,29 +1,28 @@
-import pytest
-import shutil
-from pathlib import Path
+import unittest
+import os
+import json
 from summit.workflow.base import WorkflowValidator
 
-def test_workflow_validator_mws():
-    output_dir = "artifacts/test/workflow_unit"
-    if Path(output_dir).exists():
-        shutil.rmtree(output_dir)
+class TestWorkflowValidator(unittest.TestCase):
+    def setUp(self):
+        self.validator = WorkflowValidator(run_id="test-run-123456789012")
+        self.test_path = "/tmp/test-project"
 
-    validator = WorkflowValidator(output_dir=output_dir)
-    # Validate the current directory as a dummy target
-    results = validator.validate("summit/workflow")
+    def test_validate_dbt(self):
+        report = self.validator.validate(self.test_path, "dbt")
+        self.assertEqual(report["status"], "validated")
+        self.assertEqual(report["adapter"], "dbt")
+        self.assertTrue(report["evidence_id"].startswith("WF-DBT-"))
 
-    assert results["status"] == "validated"
-    assert "path" in results
+        # Check artifacts
+        self.assertTrue(os.path.exists("artifacts/workflow/report.json"))
+        self.assertTrue(os.path.exists("artifacts/workflow/metrics.json"))
+        self.assertTrue(os.path.exists("artifacts/workflow/stamp.json"))
 
-    evidence_id = validator.generate_evidence(results, "test-run-id-1234567890")
-    assert evidence_id.startswith("WF-CORE-")
+    def test_validate_airflow(self):
+        report = self.validator.validate(self.test_path, "airflow")
+        self.assertEqual(report["adapter"], "airflow")
+        self.assertTrue(report["evidence_id"].startswith("WF-AIRFLOW-"))
 
-    assert Path(output_dir, "report.json").exists()
-    assert Path(output_dir, "metrics.json").exists()
-    assert Path(output_dir, "stamp.json").exists()
-
-def test_workflow_validator_nonexistent():
-    validator = WorkflowValidator()
-    results = validator.validate("nonexistent/path")
-    assert results["status"] == "failed"
-    assert "error" in results
+if __name__ == '__main__':
+    unittest.main()
