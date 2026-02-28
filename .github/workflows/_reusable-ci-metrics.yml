@@ -163,9 +163,7 @@ jobs:
 
       - name: Upload Metrics Artifact
         id: upload
-        uses: actions/upload-artifact@v4 # v4
-        with:
-          name: ci-metrics-${{ github.run_id }}-${{ github.run_attempt }}
+        uses: actions/upload-artifact@v4 # v4          name: ci-metrics-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/ci-metrics/
           retention-days: 30
 

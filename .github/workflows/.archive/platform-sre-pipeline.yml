@@ -104,9 +104,7 @@ jobs:
         run: npm run test:smoke
       - name: Archive logs
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: smoke-logs
+        uses: actions/upload-artifact@v4          name: smoke-logs
           path: logs/**/*.log
 
   canary_deploy:

@@ -78,10 +78,7 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-
-      - name: Get pnpm store directory
+        uses: pnpm/action-setup@v2      - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: |
@@ -175,9 +172,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report-${{ matrix.node-version }}
+        uses: actions/upload-artifact@v4          name: coverage-report-${{ matrix.node-version }}
           path: |
             coverage/
             test-results/
@@ -244,10 +239,7 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
@@ -259,9 +251,7 @@ jobs:
           CI: true
 
       - name: Upload E2E test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-results
+        uses: actions/upload-artifact@v4          name: e2e-results
           path: |
             reports/playwright/
             test-results/

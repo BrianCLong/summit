@@ -119,9 +119,7 @@ jobs:
           echo "✅ Post-deployment validation completed"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: v041-go-live-logs-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: v041-go-live-logs-${{ github.run_number }}
           path: |
             out/*v041*.log
             out/v041-post-cutover.json

@@ -24,7 +24,5 @@ jobs:
 
       - name: Upload Evidence
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: supplychain-drift-evidence
+        uses: actions/upload-artifact@v4          name: supplychain-drift-evidence
           path: artifacts/supplychain/drift/

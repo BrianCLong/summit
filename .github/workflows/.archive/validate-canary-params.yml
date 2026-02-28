@@ -164,9 +164,7 @@ jobs:
           EOF
 
       - name: Upload gate consistency report
-        uses: actions/upload-artifact@v3
-        with:
-          name: gate-consistency-report
+        uses: actions/upload-artifact@v3          name: gate-consistency-report
           path: gate-consistency-report.json
 
       - name: Final validation summary

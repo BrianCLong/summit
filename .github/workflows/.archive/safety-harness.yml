@@ -46,11 +46,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: |
           cd safety-harness
           pnpm install --frozen-lockfile
@@ -99,9 +95,7 @@ jobs:
             --format html
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: safety-reports-${{ matrix.component }}
+        uses: actions/upload-artifact@v4          name: safety-reports-${{ matrix.component }}
           path: safety-reports/
           retention-days: 30
 
@@ -191,8 +185,6 @@ jobs:
           done
 
       - name: Upload aggregate report
-        uses: actions/upload-artifact@v4
-        with:
-          name: safety-aggregate-report
+        uses: actions/upload-artifact@v4          name: safety-aggregate-report
           path: all-reports/
           retention-days: 90

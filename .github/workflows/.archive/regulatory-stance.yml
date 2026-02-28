@@ -77,11 +77,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-
-
-      - name: Get pnpm store directory
+        uses: pnpm/action-setup@v4      - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
         run: |
@@ -155,9 +151,7 @@ jobs:
           echo "EOF" >> "$GITHUB_OUTPUT"
 
       - name: Upload reports as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: regulatory-stance-reports
+        uses: actions/upload-artifact@v4          name: regulatory-stance-reports
           path: ${{ env.REPORTS_DIR }}/regulatory-stance-*.md
           retention-days: 90
 
@@ -203,9 +197,7 @@ jobs:
 
     steps:
       - name: Download reports
-        uses: actions/download-artifact@v4
-        with:
-          name: regulatory-stance-reports
+        uses: actions/download-artifact@v4          name: regulatory-stance-reports
           path: reports
 
       - name: Create compliance issue
@@ -283,9 +275,7 @@ jobs:
 
     steps:
       - name: Download reports
-        uses: actions/download-artifact@v4
-        with:
-          name: regulatory-stance-reports
+        uses: actions/download-artifact@v4          name: regulatory-stance-reports
           path: reports
 
       - name: Comment on PR with analysis results

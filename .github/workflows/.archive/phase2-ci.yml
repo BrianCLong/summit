@@ -47,7 +47,5 @@ jobs:
         echo "Policy check passed."
 
     - name: Upload SBOM
-      uses: actions/upload-artifact@v3
-      with:
-        name: sbom
+      uses: actions/upload-artifact@v3        name: sbom
         path: artifacts/

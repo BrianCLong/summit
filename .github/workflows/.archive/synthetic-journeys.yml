@@ -33,9 +33,7 @@ jobs:
 
       - name: Upload Results
         if: (always()) && (failure())
-        uses: actions/upload-artifact@v4
-        with:
-          name: synthetic-results
+        uses: actions/upload-artifact@v4          name: synthetic-results
           path: |
             synthetic-results.json
             synthetic-latency-histogram.json

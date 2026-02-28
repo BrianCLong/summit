@@ -113,25 +113,19 @@ jobs:
           PLAYWRIGHT_HTML_REPORT: playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}/html-report
 
       - name: Upload E2E test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-results-${{ matrix.browser }}-shard${{ matrix.shard }}
+        uses: actions/upload-artifact@v4          name: e2e-results-${{ matrix.browser }}-shard${{ matrix.shard }}
           path: |
             tests/e2e/playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}/
             tests/e2e/test-results/
           retention-days: 30
 
       - name: Upload E2E test videos
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-videos-${{ matrix.browser }}-shard${{ matrix.shard }}
+        uses: actions/upload-artifact@v4          name: e2e-videos-${{ matrix.browser }}-shard${{ matrix.shard }}
           path: tests/e2e/test-results/**/video.webm
           retention-days: 7
 
       - name: Publish E2E test results
-        uses: dorny/test-reporter@v1
-        with:
-          name: E2E Tests (${{ matrix.browser }} - shard ${{ matrix.shard }})
+        uses: dorny/test-reporter@v1          name: E2E Tests (${{ matrix.browser }} - shard ${{ matrix.shard }})
           path: tests/e2e/playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}/junit.xml
           reporter: java-junit
 
@@ -171,9 +165,7 @@ jobs:
           node scripts/coverage-aggregate.js
 
       - name: Upload integration test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-results
+        uses: actions/upload-artifact@v4          name: integration-test-results
           path: |
             coverage/**
             test-results/**
@@ -181,9 +173,7 @@ jobs:
           retention-days: 30
 
       - name: Publish integration test results
-        uses: dorny/test-reporter@v1
-        with:
-          name: Integration Tests
+        uses: dorny/test-reporter@v1          name: Integration Tests
           path: '**/*junit*.xml'
           reporter: java-junit
 
@@ -235,9 +225,7 @@ jobs:
           node scripts/performance-analysis.js soak-test-results.json > performance-report.md
 
       - name: Upload performance test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: performance-test-results
+        uses: actions/upload-artifact@v4          name: performance-test-results
           path: |
             tests/load/soak-test-results.json
             tests/load/soak-test-junit.xml
@@ -245,9 +233,7 @@ jobs:
           retention-days: 90
 
       - name: Publish performance test results
-        uses: dorny/test-reporter@v1
-        with:
-          name: Performance Soak Tests
+        uses: dorny/test-reporter@v1          name: Performance Soak Tests
           path: tests/load/soak-test-junit.xml
           reporter: java-junit
 

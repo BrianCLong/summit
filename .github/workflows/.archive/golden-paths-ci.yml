@@ -33,8 +33,6 @@ jobs:
           python -m probe run --journey GP-001 --base "$BASE_URL" --tenant preview --samples 1 --timeout 15 --export prometheus | tee gp_results.json
       - name: Upload results
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: synth-probe-results
+        uses: actions/upload-artifact@v4          name: synth-probe-results
           path: gp_results.json
         continue-on-error: true

@@ -124,9 +124,7 @@ jobs:
 
       - name: Upload Report
         if: steps.action.outputs.action == 'report'
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: quarantine-report-${{ github.run_id }}
+        uses: actions/upload-artifact@v4 # v6          name: quarantine-report-${{ github.run_id }}
           path: artifacts/quarantine-report.md
           retention-days: 30
           if-no-files-found: ignore

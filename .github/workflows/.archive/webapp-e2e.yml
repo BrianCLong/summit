@@ -30,9 +30,7 @@ jobs:
           pnpm exec playwright test --config=playwright.config.ts --reporter=line
       - name: Upload Playwright traces (on failure)
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp-playwright-results
+        uses: actions/upload-artifact@v4          name: webapp-playwright-results
           path: |
             apps/webapp/playwright-report
             apps/webapp/test-results
@@ -76,9 +74,7 @@ jobs:
           pnpm run test:cypress
       - name: Upload Cypress artifacts (on failure)
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapp-cypress-artifacts
+        uses: actions/upload-artifact@v4          name: webapp-cypress-artifacts
           path: |
             /tmp/webapp-dev.log
             apps/webapp/cypress/screenshots

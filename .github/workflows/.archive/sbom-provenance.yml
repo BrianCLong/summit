@@ -199,9 +199,7 @@ jobs:
           echo "log-payload=$log_payload" >>"$GITHUB_OUTPUT"
 
       - name: Upload signing artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-provenance-${{ github.run_id }}
+        uses: actions/upload-artifact@v4          name: sbom-provenance-${{ github.run_id }}
           path: |
             sbom.spdx.json
             cosign.bundle.json
@@ -225,9 +223,7 @@ jobs:
             -o dependency-track-response.json
 
       - name: Upload Dependency-Track response
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-track-${{ github.run_id }}
+        uses: actions/upload-artifact@v4          name: dependency-track-${{ github.run_id }}
           path: dependency-track-response.json
           if-no-files-found: warn
 

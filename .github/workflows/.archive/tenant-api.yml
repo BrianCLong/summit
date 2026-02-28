@@ -18,11 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v2      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -42,11 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v2      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -64,11 +56,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v2      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -85,11 +73,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v2      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -118,11 +102,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v2      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -138,7 +118,5 @@ jobs:
           output-file: tenant-api-sbom.spdx.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: tenant-api-sbom
+        uses: actions/upload-artifact@v4          name: tenant-api-sbom
           path: tenant-api-sbom.spdx.json

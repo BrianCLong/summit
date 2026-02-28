@@ -66,7 +66,5 @@ jobs:
           output-file: server-sbom.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
+        uses: actions/upload-artifact@v4          name: sbom
           path: server-sbom.json

@@ -34,7 +34,5 @@ jobs:
           python main.py --iterations 20 --enable-synonym-dodges --enable-field-aliasing
 
       - name: Archive Fuzzing Reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: fuzzing-reports
+        uses: actions/upload-artifact@v4          name: fuzzing-reports
           path: policy-fuzzer/reports/

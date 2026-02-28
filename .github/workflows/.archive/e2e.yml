@@ -89,9 +89,7 @@ jobs:
 
       - name: Upload Golden Path artifacts
         id: upload-golden-path
-        uses: actions/upload-artifact@v4
-        with:
-          name: golden-path-recording
+        uses: actions/upload-artifact@v4          name: golden-path-recording
           path: |
             e2e/client/test-results/**/*.webm
             e2e/client/playwright-report/**
@@ -204,9 +202,7 @@ jobs:
           E2E_REDIS_URL: redis://localhost:6379/1
         run: cd client && pnpm run test:e2e -- tests/e2e/analytics-bridge.spec.ts -- --trace on
       - name: Upload Playwright traces (on failure)
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-traces-analytics-bridge
+        uses: actions/upload-artifact@v4          name: playwright-traces-analytics-bridge
           path: |
             client/test-results/**
             client/playwright-report/**

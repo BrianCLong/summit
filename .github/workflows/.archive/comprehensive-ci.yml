@@ -268,9 +268,7 @@ jobs:
 
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
+        uses: actions/upload-artifact@v4          name: playwright-report
           path: playwright-report/
           retention-days: 30
 
@@ -312,9 +310,7 @@ jobs:
         run: pnpm build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
+        uses: actions/upload-artifact@v4          name: build-artifacts
           path: |
             packages/*/dist
             services/*/dist

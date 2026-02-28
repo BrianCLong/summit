@@ -31,7 +31,5 @@ jobs:
           scpe receipt-verify --receipt scpe-receipt.json
 
       - name: Upload SCPE receipt artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: scpe-receipt
+        uses: actions/upload-artifact@v4          name: scpe-receipt
           path: scpe-receipt.json

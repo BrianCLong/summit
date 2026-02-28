@@ -267,9 +267,7 @@ jobs:
         id: synthetic-tests
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: synthetic-test-results
+        uses: actions/upload-artifact@v4          name: synthetic-test-results
           path: monitoring/synthetic/results/
 
   # =========================
@@ -380,9 +378,7 @@ jobs:
         id: journey-test
 
       - name: Upload failure screenshot
-        uses: actions/upload-artifact@v4
-        with:
-          name: journey-failure-${{ matrix.journey.name }}
+        uses: actions/upload-artifact@v4          name: journey-failure-${{ matrix.journey.name }}
           path: |
             failure-screenshot.png
             videos/
@@ -447,9 +443,7 @@ jobs:
           cat results.json | jq '.metrics'
 
       - name: Upload results
-        uses: actions/upload-artifact@v4
-        with:
-          name: performance-results
+        uses: actions/upload-artifact@v4          name: performance-results
           path: results.json
 
   # =========================

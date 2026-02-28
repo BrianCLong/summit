@@ -126,18 +126,14 @@ jobs:
           ./.ci/scripts/signing/cosign_sign_verify.sh "${{ steps.sbom.outputs.sbom_path }}" "$SIGN_DIR" "${{ steps.attest.outputs.attestation }}"
 
       - name: Upload SBOM and signatures
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-and-signatures
+        uses: actions/upload-artifact@v4          name: sbom-and-signatures
           path: |
             ${{ steps.sbom.outputs.sbom_path }}
             ${{ env.SIGN_DIR }}/*
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
       - name: Upload scan results
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-reports
+        uses: actions/upload-artifact@v4          name: vulnerability-reports
           path: |
             ${{ steps.grype.outputs.json }}
             ${{ steps.grype.outputs.sarif }}
@@ -148,9 +144,7 @@ jobs:
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
 
       - name: Upload attestations
-        uses: actions/upload-artifact@v4
-        with:
-          name: attestations
+        uses: actions/upload-artifact@v4          name: attestations
           path: |
             ${{ steps.attest.outputs.attestation }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}

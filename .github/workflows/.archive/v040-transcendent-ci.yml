@@ -400,9 +400,7 @@ jobs:
           echo "✅ E2E tests passed"
 
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v3
-        with:
-          name: playwright-report-v040
+        uses: actions/upload-artifact@v3          name: playwright-report-v040
           path: playwright-report/
           retention-days: 7
 
@@ -440,9 +438,7 @@ jobs:
           echo "✅ Performance benchmarks completed"
 
       - name: Upload performance results
-        uses: actions/upload-artifact@v3
-        with:
-          name: performance-results-v040
+        uses: actions/upload-artifact@v3          name: performance-results-v040
           path: performance-results/
           retention-days: 30
 

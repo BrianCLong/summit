@@ -48,10 +48,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v3      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Install Vale
@@ -306,9 +303,7 @@ jobs:
           fi
 
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation-artifacts
+        uses: actions/upload-artifact@v4          name: documentation-artifacts
           path: |
             docs-report.md
             vale-report.txt

@@ -96,9 +96,7 @@ jobs:
             $ARGS
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4 # v4
-        with:
-          name: sync-report
+        uses: actions/upload-artifact@v4 # v4          name: sync-report
           path: |
             ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.md
             ${{ env.OUT_DIR }}/branch_protection_reconcile_plan.json

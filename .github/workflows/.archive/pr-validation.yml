@@ -168,7 +168,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack
@@ -208,7 +207,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack
@@ -266,7 +264,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack
@@ -372,9 +369,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload SBOM Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: sbom-artifacts
+        uses: actions/upload-artifact@v3          name: sbom-artifacts
           path: |
             cyclonedx-node.json
             cyclonedx-python.json
@@ -464,7 +459,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack

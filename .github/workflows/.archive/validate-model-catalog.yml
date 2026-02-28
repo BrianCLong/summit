@@ -53,7 +53,5 @@ jobs:
           fs.mkdirSync("model-catalog/generated",{recursive:true});
           fs.writeFileSync("model-catalog/generated/catalog.md",out);
           '
-      - uses: actions/upload-artifact@v4
-        with:
-          name: catalog-md
+      - uses: actions/upload-artifact@v4          name: catalog-md
           path: model-catalog/generated/catalog.md

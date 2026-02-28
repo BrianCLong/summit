@@ -42,9 +42,7 @@ jobs:
 
       - name: Upload Artifacts
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: solid-gate-evidence
+        uses: actions/upload-artifact@v4          name: solid-gate-evidence
           path: artifacts/solid-gate/
           retention-days: 7
 

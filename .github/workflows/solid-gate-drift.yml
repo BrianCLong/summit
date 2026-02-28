@@ -26,8 +26,6 @@ jobs:
         run: python scripts/monitoring/solid-skills-drift.py
 
       - name: Upload Drift Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: solid-gate-drift
+        uses: actions/upload-artifact@v4          name: solid-gate-drift
           path: artifacts/solid-gate-drift/
           retention-days: 30

@@ -43,9 +43,7 @@ jobs:
 
       - name: Upload validation report
         uses: actions/upload-artifact@v3
-        if: ((always()) && (always())) && (github.event_name == 'pull_request')
-        with:
-          name: canary-config-validation-report
+        if: ((always()) && (always())) && (github.event_name == 'pull_request')          name: canary-config-validation-report
           path: out/canary-config-validation.json
 
       - name: Check for configuration drift
@@ -106,9 +104,7 @@ jobs:
           EOF
 
       - name: Upload drift detection report
-        uses: actions/upload-artifact@v3
-        with:
-          name: drift-detection-report
+        uses: actions/upload-artifact@v3          name: drift-detection-report
           path: out/drift-detection-report.json
 
       - name: Comment on PR with validation results

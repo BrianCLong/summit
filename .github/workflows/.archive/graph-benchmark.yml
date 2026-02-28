@@ -99,9 +99,7 @@ jobs:
         working-directory: benchmarks/graph
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
-        with:
-          name: graph-benchmark-results
+        uses: actions/upload-artifact@v4          name: graph-benchmark-results
           path: |
             benchmarks/graph/reports/*.json
             benchmarks/graph/reports/*.md
@@ -173,9 +171,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download benchmark results
-        uses: actions/download-artifact@v4
-        with:
-          name: graph-benchmark-results
+        uses: actions/download-artifact@v4          name: graph-benchmark-results
           path: benchmarks/graph/reports
 
       - name: Update baseline

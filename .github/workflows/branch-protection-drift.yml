@@ -145,9 +145,7 @@ jobs:
           exit $EXIT_CODE
 
       - name: Upload Drift Report
-        uses: actions/upload-artifact@v4 # v4
-        with:
-          name: branch-protection-drift-report
+        uses: actions/upload-artifact@v4 # v4          name: branch-protection-drift-report
           path: |
             ${{ env.OUT_DIR }}/branch_protection_drift_report.md
             ${{ env.OUT_DIR }}/branch_protection_drift_report.json

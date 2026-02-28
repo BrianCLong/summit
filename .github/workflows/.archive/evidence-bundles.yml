@@ -54,9 +54,7 @@ jobs:
           jq -e '.status=="pass"' ga-gate-report.json >/dev/null
 
       - name: Upload evidence bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence-bundle-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: evidence-bundle-${{ github.sha }}
           path: ${{ steps.bundle.outputs.bundle-path }}
           retention-days: 14
 

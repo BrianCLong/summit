@@ -50,11 +50,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-
-      - name: Cache pnpm dependencies
+        uses: pnpm/action-setup@v2      - name: Cache pnpm dependencies
         uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
@@ -463,9 +459,7 @@ jobs:
           echo "✅ Verification attestation created"
 
       - name: Upload verification artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: pq-dual-signature-verification-${{ github.sha }}-${{ matrix.signature_type }}
+        uses: actions/upload-artifact@v3          name: pq-dual-signature-verification-${{ github.sha }}-${{ matrix.signature_type }}
           path: |
             ${{ env.PQ_SIGNATURE_DIR }}/
           retention-days: 90

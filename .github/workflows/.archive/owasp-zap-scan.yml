@@ -74,9 +74,7 @@ jobs:
           artifact_name: 'zap-baseline-report'
 
       - name: Upload ZAP Baseline Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-baseline-report
+        uses: actions/upload-artifact@v4          name: zap-baseline-report
           path: |
             report_html.html
             report_json.json
@@ -126,9 +124,7 @@ jobs:
           artifact_name: 'zap-api-report'
 
       - name: Upload ZAP API Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-api-report
+        uses: actions/upload-artifact@v4          name: zap-api-report
           path: |
             report_html.html
             report_json.json
@@ -172,9 +168,7 @@ jobs:
           artifact_name: 'zap-full-report'
 
       - name: Upload ZAP Full Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-full-report
+        uses: actions/upload-artifact@v4          name: zap-full-report
           path: |
             report_html.html
             report_json.json
@@ -259,9 +253,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload GraphQL test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: graphql-security-tests
+        uses: actions/upload-artifact@v4          name: graphql-security-tests
           path: |
             graphql-*.json
           retention-days: 30

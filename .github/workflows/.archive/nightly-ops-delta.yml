@@ -101,9 +101,7 @@ jobs:
       S3_BUCKET: ${{ secrets.S3_EVIDENCE_BUCKET }}
 
       # Upload artifacts for GitHub retention
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mc-nightly-ops-${{ github.run_id }}
+      - uses: actions/upload-artifact@v4          name: mc-nightly-ops-${{ github.run_id }}
           path: |
             out/daily-ops-delta-*.json
             dist/daily-ops-delta-*.md

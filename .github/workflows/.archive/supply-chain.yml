@@ -94,9 +94,7 @@ jobs:
             mv "$file".attestation manifests/
           done
       - name: Upload Compliance Center manifests
-        uses: actions/upload-artifact@v4
-        with:
-          name: sca-manifests-${{ matrix.image.id }}
+        uses: actions/upload-artifact@v4          name: sca-manifests-${{ matrix.image.id }}
           path: manifests/
 
   dashboards:
@@ -107,9 +105,7 @@ jobs:
         run: |
           node security/supply-chain/node/index.js burn-down --vulns security/supply-chain/policy/sample-vulns.json
       - name: Upload dashboards
-        uses: actions/upload-artifact@v4
-        with:
-          name: sca-dashboards
+        uses: actions/upload-artifact@v4          name: sca-dashboards
           path: |
             security/supply-chain/dashboards/
             security/supply-chain/manifests/vuln-burn-down.json

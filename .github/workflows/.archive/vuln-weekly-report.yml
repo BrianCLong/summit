@@ -123,9 +123,7 @@ jobs:
           PY
 
       - name: Upload weekly report
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-weekly-report
+        uses: actions/upload-artifact@v4          name: vulnerability-weekly-report
           path: vulnerability-weekly-report.md
 
       - name: Add summary

@@ -27,11 +27,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Get changed files
@@ -118,11 +114,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Check all threat models for staleness

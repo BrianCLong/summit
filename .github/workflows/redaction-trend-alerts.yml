@@ -50,9 +50,7 @@ jobs:
 
       - name: Download Site Artifact
         id: download
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
-          name: release-ops-site
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4          name: release-ops-site
           path: ${{ env.SITE_DIR }}
         continue-on-error: true
 
@@ -106,9 +104,7 @@ jobs:
           echo "**Triggers:** ${ALERT_TRIGGERS:-none}" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Alert Report
-        uses: actions/upload-artifact@v4 # v4
-        with:
-          name: redaction-trend-alert-report
+        uses: actions/upload-artifact@v4 # v4          name: redaction-trend-alert-report
           path: artifacts/release-train/redaction_trend_alert*
           retention-days: 30
 
@@ -169,9 +165,7 @@ jobs:
         uses: actions/checkout@v4 # v4
 
       - name: Download Alert Report
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
-          name: redaction-trend-alert-report
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4          name: redaction-trend-alert-report
           path: artifacts
 
       - name: Determine Issue Details

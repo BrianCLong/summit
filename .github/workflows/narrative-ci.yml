@@ -60,9 +60,7 @@ jobs:
           fi
 
       - name: Upload evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: narrative-ci-evidence
+        uses: actions/upload-artifact@v4          name: narrative-ci-evidence
           path: |
             evidence/**
             out/**

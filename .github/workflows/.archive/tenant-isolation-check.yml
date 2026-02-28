@@ -30,9 +30,7 @@ jobs:
 
       - name: Upload Scan Report
         uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: tenant-scan-report
+        if: always()          name: tenant-scan-report
           path: reports/tenant-scan-static.json
 
   dynamic-verification:

@@ -186,9 +186,7 @@ PY
           BUNDLE_SHA: ${{ steps.archive.outputs.bundle_sha }}
 
       - name: Upload evidence artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence-${{ env.RELEASE_TAG }}
+        uses: actions/upload-artifact@v4          name: release-evidence-${{ env.RELEASE_TAG }}
           path: |
             release-evidence-${{ env.RELEASE_TAG }}.tar.gz
             release-evidence-${{ env.RELEASE_TAG }}.tar.gz.sha256

@@ -52,7 +52,5 @@ jobs:
 
       - name: Upload Evidence
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: graph-shape-evidence
+        uses: actions/upload-artifact@v4          name: graph-shape-evidence
           path: artifacts/graph-shape-guardrail/

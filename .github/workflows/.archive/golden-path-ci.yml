@@ -54,9 +54,7 @@ jobs:
 
       - name: Upload Cypress Screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots
+        uses: actions/upload-artifact@v4          name: cypress-screenshots
           path: cypress/screenshots
 
   performance-baseline:
@@ -101,9 +99,7 @@ jobs:
           fi
 
       - name: Upload Metrics
-        uses: actions/upload-artifact@v4
-        with:
-          name: performance-metrics
+        uses: actions/upload-artifact@v4          name: performance-metrics
           path: metrics.json
 name: Golden Path CI/CD
 

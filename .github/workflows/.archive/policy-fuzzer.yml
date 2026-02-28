@@ -17,9 +17,7 @@ jobs:
           cd policy-fuzzer
           python main.py
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: policy-fuzzer-reports
+        uses: actions/upload-artifact@v3          name: policy-fuzzer-reports
           path: |
             policy-fuzzer/failing_cases.txt
             policy-fuzzer/reproducer_*.py

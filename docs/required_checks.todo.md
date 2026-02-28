@@ -5,5 +5,4 @@
     * `summit-policy-gates`
     * `summit-schema-validate`
     * `summit-eval-fixtures`
-    * `subsumption-bundle-verify` (UnityShield specific)
 * [ ] Update CI configurations with correct names.

@@ -31,11 +31,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-
-      - name: Install dependencies (root)
+        uses: pnpm/action-setup@v2      - name: Install dependencies (root)
         run: pnpm install --frozen-lockfile
 
       # Running tests to generate coverage report

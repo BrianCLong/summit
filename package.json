@@ -89,6 +89,7 @@
     "db:neo4j:migrate": "node scripts/neo4j-migrate.js",
     "changeset": "changeset",
     "release": "changeset version && changeset publish",
+    "lint:release-policy": "node scripts/release/validate-release-policy.mjs",
     "release:cut": "node scripts/release/release.mjs",
     "release:cut-branch": "node scripts/release/cut-release-branch.mjs",
     "release:bundle": "node scripts/release/release-bundle.mjs",

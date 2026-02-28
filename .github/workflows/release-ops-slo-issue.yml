@@ -63,9 +63,7 @@ jobs:
 
       - name: Download Site Artifact
         id: download
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4
-        with:
-          name: release-ops-site
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4          name: release-ops-site
           path: ${{ env.SITE_DIR }}
         continue-on-error: true
 

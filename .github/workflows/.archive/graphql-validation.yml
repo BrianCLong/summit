@@ -31,10 +31,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v3      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build schema validation tools
@@ -276,10 +273,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v3      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Test sample queries

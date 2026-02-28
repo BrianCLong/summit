@@ -41,7 +41,5 @@ for fixture in Path('policy/fixtures').glob('*.json'):
     validate(data, schema)
 PY
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: opa-coverage
+        uses: actions/upload-artifact@v4          name: opa-coverage
           path: opa-coverage.json

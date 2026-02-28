@@ -236,9 +236,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: summit-validation-${{ matrix.node }}
+        uses: actions/upload-artifact@v4          name: summit-validation-${{ matrix.node }}
           path: artifacts
           if-no-files-found: warn
           retention-days: 7

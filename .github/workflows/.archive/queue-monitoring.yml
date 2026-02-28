@@ -211,9 +211,7 @@ jobs:
             }
 
       - name: Upload Performance Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: queue-performance-report-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: queue-performance-report-${{ github.run_number }}
           path: queue-performance-report.json
           retention-days: 30
 

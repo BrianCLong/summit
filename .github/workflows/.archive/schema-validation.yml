@@ -67,11 +67,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v3      - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
           sleep 10  # Wait for services
@@ -264,9 +260,7 @@ jobs:
           cat snapshots/drift_report.md
 
       - name: Upload drift artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: schema-drift-report-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: schema-drift-report-${{ github.run_number }}
           path: |
             snapshots/
           retention-days: 30
@@ -372,8 +366,6 @@ jobs:
           cat perf_report.md
 
       - name: Upload performance report
-        uses: actions/upload-artifact@v4
-        with:
-          name: performance-report-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: performance-report-${{ github.run_number }}
           path: perf_report.md
           retention-days: 30

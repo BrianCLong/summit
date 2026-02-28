@@ -102,9 +102,7 @@ jobs:
           ./scripts/merge-train-health-dashboard.sh
 
       - name: Upload health report
-        uses: actions/upload-artifact@v4
-        with:
-          name: merge-train-health-report-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: merge-train-health-report-${{ github.run_number }}
           path: /tmp/merge-train-health-*.md
           retention-days: 30
 

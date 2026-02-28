@@ -76,15 +76,11 @@ jobs:
         run: pnpm exec ts-node scripts/ops/generate-evidence-bundle.ts
 
       - name: Upload release artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: summit-bundle
+        uses: actions/upload-artifact@v4          name: summit-bundle
           path: summit-bundle.tgz
 
       - name: Upload release evidence bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-evidence-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: release-evidence-${{ github.sha }}
           path: |
             evidence-bundles/evidence-${{ github.sha }}.json
             evidence-bundles/evidence-${{ github.sha }}.json.sig

@@ -81,9 +81,7 @@ jobs:
 
       - name: Upload batch results
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: batch-${{ matrix.batch }}-results
+        uses: actions/upload-artifact@v4          name: batch-${{ matrix.batch }}-results
           path: |
             logs/
             results/

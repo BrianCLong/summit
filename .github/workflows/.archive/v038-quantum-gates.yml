@@ -427,9 +427,7 @@ jobs:
           echo "score=$SCORE" >> $GITHUB_OUTPUT
 
       - name: Upload Equilibrium Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: quantum-ready-equilibrium-report
+        uses: actions/upload-artifact@v4          name: quantum-ready-equilibrium-report
           path: equilibrium_score.json
           retention-days: 30
 
@@ -561,9 +559,7 @@ jobs:
           EOF
 
       - name: Upload Certification
-        uses: actions/upload-artifact@v4
-        with:
-          name: quantum-ready-certification
+        uses: actions/upload-artifact@v4          name: quantum-ready-certification
           path: QUANTUM_READY_CERTIFICATION.md
           retention-days: 365 # Keep certification for 1 year
 

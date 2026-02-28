@@ -83,9 +83,7 @@ jobs:
           " | tee complexity-report.md
 
       - name: Upload ESLint report
-        uses: actions/upload-artifact@v4
-        with:
-          name: eslint-complexity-report
+        uses: actions/upload-artifact@v4          name: eslint-complexity-report
           path: |
             eslint-report.json
             complexity-report.md
@@ -176,9 +174,7 @@ jobs:
           echo "- **Total debt markers:** $((TODO_COUNT + FIXME_COUNT))" >> metrics-report.md
 
       - name: Upload metrics reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-metrics-report
+        uses: actions/upload-artifact@v4          name: code-metrics-report
           path: |
             metrics-report.md
             cloc-report.json
@@ -290,9 +286,7 @@ jobs:
           echo "5. **Reduce technical debt** - Address TODO/FIXME comments systematically" >> "$REPORT_FILE"
 
       - name: Upload weekly report
-        uses: actions/upload-artifact@v4
-        with:
-          name: weekly-maintainability-report
+        uses: actions/upload-artifact@v4          name: weekly-maintainability-report
           path: reports/maintainability-report-*.md
           retention-days: 90
 

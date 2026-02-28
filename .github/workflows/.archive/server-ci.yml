@@ -101,17 +101,13 @@ jobs:
           ARTIFACTS_DIR: artifacts
 
       - name: Upload Supply Chain Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-supply-chain-artifacts
+        uses: actions/upload-artifact@v4          name: server-supply-chain-artifacts
           path: |
             server/sbom.json
             artifacts/build-manifest.*.json
 
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: server-coverage-report
+        uses: actions/upload-artifact@v4          name: server-coverage-report
           path: server/coverage
 
       - name: Upload coverage to Codecov

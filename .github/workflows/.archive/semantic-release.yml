@@ -154,9 +154,7 @@ jobs:
           tar -tzf summit-${VERSION}.tgz
 
       - name: Upload release artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-bundle-${{ steps.semantic.outputs.new-release-version }}
+        uses: actions/upload-artifact@v4          name: release-bundle-${{ steps.semantic.outputs.new-release-version }}
           path: summit-${{ steps.semantic.outputs.new-release-version }}.tgz
           retention-days: 90
 

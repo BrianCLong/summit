@@ -133,9 +133,7 @@ jobs:
           TYPESENSE_HOST: ${{ secrets.MIGRATION_TYPESENSE_HOST || '' }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: migration-gate-artifacts
+        uses: actions/upload-artifact@v4          name: migration-gate-artifacts
           path: |
             shadow-report.json
             migration-plans/**
@@ -183,7 +181,5 @@ jobs:
           echo "{\"stage\":\"synthetic\",\"shadow_read_fraction\":0.05}" | tee synthetic-shadow.json
           python ./.ci/scripts/migrations/shadow_compare.py --shadow-input synthetic-shadow.json --output synthetic-shadow-report.json
       - name: Upload synthetic results
-        uses: actions/upload-artifact@v4
-        with:
-          name: synthetic-shadow-results
+        uses: actions/upload-artifact@v4          name: synthetic-shadow-results
           path: synthetic-shadow-report.json

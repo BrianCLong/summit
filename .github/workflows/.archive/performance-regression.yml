@@ -42,7 +42,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack
@@ -164,7 +163,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack
@@ -232,9 +230,7 @@ jobs:
           EOF
 
       - name: Upload performance metrics
-        uses: actions/upload-artifact@v4
-        with:
-          name: performance-metrics
+        uses: actions/upload-artifact@v4          name: performance-metrics
           path: performance-metrics.json
 
   runtime-performance:
@@ -253,7 +249,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
           run_install: false
 
       - name: Enable corepack
@@ -358,9 +353,7 @@ jobs:
           echo "  P99: ${P99}ms"
 
       - name: Upload k6 results
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-results
+        uses: actions/upload-artifact@v4          name: k6-results
           path: perf-results.json
 
       - name: Cleanup

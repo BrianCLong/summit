@@ -49,7 +49,5 @@ jobs:
           opa eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
           rm server/config/data-paths.json
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: opa-abac-coverage
+        uses: actions/upload-artifact@v4          name: opa-abac-coverage
           path: opa-coverage.json

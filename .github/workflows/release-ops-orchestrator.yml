@@ -626,9 +626,7 @@ jobs:
           echo "::endgroup::"
 
       - name: "Upload Artifact Bundle"
-        uses: actions/upload-artifact@v4 # v4
-        with:
-          name: release-ops-cycle-${{ github.run_id }}
+        uses: actions/upload-artifact@v4 # v4          name: release-ops-cycle-${{ github.run_id }}
           path: artifacts/release-train/
           retention-days: 30
           if-no-files-found: warn

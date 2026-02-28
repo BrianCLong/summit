@@ -39,9 +39,7 @@ jobs:
           k6 run k6/golden-stress.js --summary-export perf/results/k6-stress-summary.json --out json=perf/results/k6-stress.json
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-results
+        uses: actions/upload-artifact@v4          name: k6-results
           path: perf/results
 
       - name: Summarize and comment

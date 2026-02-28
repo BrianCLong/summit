@@ -117,9 +117,7 @@ jobs:
 
       - name: Upload precision metrics
         uses: actions/upload-artifact@v4
-        if: ((((always()) && (github.event_name == 'pull_request')) && (always())) && (always())) && (always())
-        with:
-          name: er-metrics-${{ matrix.entity_type }}-${{ github.sha }}
+        if: ((((always()) && (github.event_name == 'pull_request')) && (always())) && (always())) && (always())          name: er-metrics-${{ matrix.entity_type }}-${{ github.sha }}
           path: reports/er-metrics-*.json
 
       - name: Comment PR with results

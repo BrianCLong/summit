@@ -177,11 +177,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
 
       - name: Run health check
@@ -277,11 +273,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
 
       - name: Run extraction
@@ -290,9 +282,7 @@ jobs:
           pnpm run extract
 
       - name: Upload staging data
-        uses: actions/upload-artifact@v4
-        with:
-          name: promise-tracker-staging
+        uses: actions/upload-artifact@v4          name: promise-tracker-staging
           path: .promise-tracker/staging.json
           retention-days: 30
 
@@ -327,11 +317,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: cd tools/promise-tracker && pnpm install
 
       - name: Generate report
@@ -340,9 +326,7 @@ jobs:
           pnpm run report --format markdown > ../../PROMISE_TRACKER_REPORT.md
 
       - name: Upload report
-        uses: actions/upload-artifact@v4
-        with:
-          name: promise-tracker-report
+        uses: actions/upload-artifact@v4          name: promise-tracker-report
           path: PROMISE_TRACKER_REPORT.md
           retention-days: 30
 

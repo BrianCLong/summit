@@ -317,9 +317,7 @@ jobs:
           echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
+        uses: actions/upload-artifact@v4          name: build-artifacts
           path: |
             sbom.cdx.json
             sbom.spdx.json
@@ -488,9 +486,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
+        uses: actions/download-artifact@v4          name: build-artifacts
           path: ./artifacts
 
       - name: Install Cosign
@@ -763,9 +759,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download SBOM artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
+        uses: actions/download-artifact@v4          name: build-artifacts
           path: ./artifacts
 
       - name: Install Grype
@@ -815,9 +809,7 @@ jobs:
           category: grype-sbom-scan
 
       - name: Upload vulnerability report
-        uses: actions/upload-artifact@v4
-        with:
-          name: vulnerability-report
+        uses: actions/upload-artifact@v4          name: vulnerability-report
           path: vulnerability-report.json
           retention-days: 90
 

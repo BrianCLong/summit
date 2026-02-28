@@ -103,9 +103,7 @@ jobs:
           output-file: sbom-${{ matrix.component }}.json
       
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-${{ matrix.component }}
+        uses: actions/upload-artifact@v4          name: sbom-${{ matrix.component }}
           path: sbom-${{ matrix.component }}.json
 
   package-helm:
@@ -139,9 +137,7 @@ jobs:
           done
       
       - name: Upload charts
-        uses: actions/upload-artifact@v4
-        with:
-          name: helm-charts
+        uses: actions/upload-artifact@v4          name: helm-charts
           path: /tmp/charts/*.tgz
 
   create-release:

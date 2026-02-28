@@ -65,3 +65,33 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+maestro_validation:
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Added for compliance
+  - code: SCHEMA_VERSION_INVALID
+    description: Added for compliance
+  - code: JSON_PARSE_ERROR
+    description: Added for compliance
+  - code: MISSING_FIELD
+    description: Added for compliance
+  - code: INVALID_ENUM
+    description: Added for compliance
+  - code: DRIFT_DETECTED
+    description: Added for compliance
+  - code: DRIFT_ERROR
+    description: Added for compliance
+  - code: SIG_ORPHAN
+    description: Added for compliance
+  - code: SIG_INVALID
+    description: Added for compliance
+  - code: COSIGN_MISSING
+    description: Added for compliance
+  - code: SIG_MISSING
+    description: Added for compliance
+  - code: ATTESTATION_MISSING
+    description: Added for compliance
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Added for compliance
+  - code: INVALID_JSON
+    description: Added for compliance

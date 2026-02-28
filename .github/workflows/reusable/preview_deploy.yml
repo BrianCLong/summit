@@ -34,9 +34,7 @@ jobs:
           ls -la preview
 
       - name: Publish preview manifest
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: preview-manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4          name: preview-manifest
           path: preview/manifest.yaml
           retention-days: 3
 

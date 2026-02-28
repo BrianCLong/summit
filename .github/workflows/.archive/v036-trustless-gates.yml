@@ -139,9 +139,7 @@ jobs:
           fi
 
       - name: Upload Proof Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: policy-proofs
+        uses: actions/upload-artifact@v3          name: policy-proofs
           path: |
             ops/policy/proof_results.json
             evidence/v0.3.6/policy/*.smt2
@@ -201,9 +199,7 @@ jobs:
           fi
 
       - name: Upload Remediation Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: remediation-proposals
+        uses: actions/upload-artifact@v3          name: remediation-proposals
           path: |
             ops/remediator/remediation_proposal.json
 
@@ -355,7 +351,5 @@ jobs:
           cat evidence/v0.3.6/ci-validation/gate-summary.json
 
       - name: Upload Evidence Bundle
-        uses: actions/upload-artifact@v3
-        with:
-          name: v036-evidence-bundle
+        uses: actions/upload-artifact@v3          name: v036-evidence-bundle
           path: evidence/v0.3.6/ci-validation/

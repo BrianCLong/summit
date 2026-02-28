@@ -38,7 +38,5 @@ jobs:
         run: |
           tar -czf soc2-evidence-${{ github.run_number }}.tar.gz evidence
       - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: soc2-evidence
+        uses: actions/upload-artifact@v4          name: soc2-evidence
           path: soc2-evidence-*.tar.gz

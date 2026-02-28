@@ -34,9 +34,7 @@ jobs:
         run: npx tsx scripts/ops/compute-health-score.ts
 
       - name: Archive Health Score
-        uses: actions/upload-artifact@v4
-        with:
-          name: health-score
+        uses: actions/upload-artifact@v4          name: health-score
           path: |
             health-score.json
             docs/ops/dashboard-health.md

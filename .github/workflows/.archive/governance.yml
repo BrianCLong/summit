@@ -123,7 +123,5 @@ jobs:
           cat governance-decision.json
 
       - name: Upload governance decision artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: governance-decision
+        uses: actions/upload-artifact@v4          name: governance-decision
           path: governance-decision.json

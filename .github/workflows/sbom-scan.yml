@@ -75,9 +75,7 @@ jobs:
 
       - name: Upload SBOM artifact
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-scan-results
+        uses: actions/upload-artifact@v4          name: sbom-scan-results
           path: |
             sbom.json
             results.sarif

@@ -210,9 +210,7 @@ jobs:
           echo "image-uri=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}" >> "$GITHUB_OUTPUT"
 
       - name: Upload image archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: container-images
+        uses: actions/upload-artifact@v4          name: container-images
           path: bundle/images/
           retention-days: 30
 
@@ -258,9 +256,7 @@ jobs:
           mkdir -p images
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:airgap-${{ inputs.bundle_version }}
           docker save ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:airgap-${{ inputs.bundle_version }} -o images/server.tar
-      - uses: actions/upload-artifact@v4
-        with:
-          name: server-image
+      - uses: actions/upload-artifact@v4          name: server-image
           path: images/server.tar
 
   build-web:
@@ -349,9 +345,7 @@ jobs:
           cosign download attestation "$IMAGE" > bundle/signatures/attestations.json 2>/dev/null || true
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-artifacts
+        uses: actions/upload-artifact@v4          name: sbom-artifacts
           path: bundle/
           retention-days: 30
 
@@ -596,9 +590,7 @@ jobs:
           ls -la
 
       - name: Upload bundle archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: airgap-bundle-${{ inputs.bundle_version || github.ref_name }}
+        uses: actions/upload-artifact@v4          name: airgap-bundle-${{ inputs.bundle_version || github.ref_name }}
           path: |
             ${{ env.BUNDLE_NAME }}-*.tar.gz
             ${{ env.BUNDLE_NAME }}-*.sha256
@@ -683,9 +675,7 @@ jobs:
           mkdir -p images
           docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:airgap-${{ inputs.bundle_version }}
           docker save ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:airgap-${{ inputs.bundle_version }} -o images/web.tar
-      - uses: actions/upload-artifact@v4
-        with:
-          name: web-image
+      - uses: actions/upload-artifact@v4          name: web-image
           path: images/web.tar
 
   create-bundle:
@@ -714,7 +704,5 @@ jobs:
           EOF
 
           tar -czvf airgap-bundle.tar.gz bundle/
-      - uses: actions/upload-artifact@v4
-        with:
-          name: airgap-bundle
+      - uses: actions/upload-artifact@v4          name: airgap-bundle
           path: airgap-bundle.tar.gz

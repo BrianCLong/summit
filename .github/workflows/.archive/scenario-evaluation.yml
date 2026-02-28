@@ -163,16 +163,12 @@ jobs:
 
       - name: Upload scenario reports
         uses: actions/upload-artifact@v3
-        if: ((((always()) && (always())) && (github.event_name == 'pull_request')) && (always())) && (always())
-        with:
-          name: scenario-evaluation-reports
+        if: ((((always()) && (always())) && (github.event_name == 'pull_request')) && (always())) && (always())          name: scenario-evaluation-reports
           path: packages/sim-harness/reports/
           retention-days: 30
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage
+        uses: actions/upload-artifact@v3          name: coverage
           path: packages/sim-harness/coverage/
 
       - name: Comment PR with results

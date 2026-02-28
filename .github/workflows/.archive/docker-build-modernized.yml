@@ -244,9 +244,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }}@${{ steps.build.outputs.digest }}
 
       - name: Upload SBOM artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-${{ matrix.name }}-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: sbom-${{ matrix.name }}-${{ github.run_number }}
           path: |
             sbom-${{ matrix.name }}.*.json
           retention-days: 90

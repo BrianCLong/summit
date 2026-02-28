@@ -118,9 +118,7 @@ jobs:
           git push
 
       - name: Upload Handoff Artifact
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: oncall-handoff-${{ github.run_id }}
+        uses: actions/upload-artifact@v4 # v6          name: oncall-handoff-${{ github.run_id }}
           path: |
             artifacts/release-train/oncall_handoff.md
             artifacts/release-train/oncall_handoff_slack.txt

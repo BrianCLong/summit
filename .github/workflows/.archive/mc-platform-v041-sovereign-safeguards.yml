@@ -71,11 +71,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Validate GraphQL v0.4.1 Schema
@@ -215,9 +211,7 @@ jobs:
           echo "✅ Compliance evidence generated"
 
       - name: Upload Compliance Evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: sovereign-compliance-evidence-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: sovereign-compliance-evidence-${{ github.sha }}
           path: compliance-evidence/
           retention-days: 90
 

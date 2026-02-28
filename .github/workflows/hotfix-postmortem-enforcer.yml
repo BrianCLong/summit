@@ -257,9 +257,7 @@ jobs:
           fi
 
       - name: Upload Report
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: postmortem-enforcement-report
+        uses: actions/upload-artifact@v4 # v6          name: postmortem-enforcement-report
           path: artifacts/postmortem-check/
           retention-days: 30
 

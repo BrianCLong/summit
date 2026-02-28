@@ -36,7 +36,5 @@ jobs:
           python eval/runner.py --suite eval/suites/core_evals.yaml --mock
 
       - name: Upload Evidence
-        uses: actions/upload-artifact@v3
-        with:
-          name: eval-results
+        uses: actions/upload-artifact@v3          name: eval-results
           path: .evidence/eval_results/

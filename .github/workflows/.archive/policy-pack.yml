@@ -66,9 +66,7 @@ jobs:
           cosign verify-blob --bundle "$BUNDLE_JSON" "$PACK_TAR"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: policy-pack-v0
+        uses: actions/upload-artifact@v4          name: policy-pack-v0
           path: |
             ${{ env.PACK_TAR }}
             ${{ env.BUNDLE_JSON }}

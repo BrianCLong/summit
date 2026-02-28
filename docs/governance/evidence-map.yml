@@ -1,4 +1,0 @@
-ga_version: MVP-4
-required:
-  - id: sbom
-    artifact: artifacts/sbom.json

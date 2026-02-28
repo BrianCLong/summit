@@ -50,7 +50,6 @@ jobs:
     - name: Setup pnpm
       uses: pnpm/action-setup@v2
       with:
-        version: ${{ env.PNPM_VERSION }}
         run_install: false
 
     - name: Enable corepack
@@ -107,9 +106,7 @@ EOF
         GITHUB_REPOSITORY: ${{ github.repository }}
 
     - name: Upload metrics artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-captain-metrics-${{ github.run_number }}
+      uses: actions/upload-artifact@v4        name: release-captain-metrics-${{ github.run_number }}
         path: /tmp/release-captain-metrics.prom
         retention-days: 7
 
@@ -261,9 +258,7 @@ EOF
     needs: export-metrics
     steps:
     - name: Download metrics artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: release-captain-metrics-${{ github.run_number }}
+      uses: actions/download-artifact@v4        name: release-captain-metrics-${{ github.run_number }}
         path: ./metrics
 
     - name: Validate Prometheus format

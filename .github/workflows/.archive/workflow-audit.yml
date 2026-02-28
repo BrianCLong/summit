@@ -121,9 +121,7 @@ jobs:
             automated
       
       - name: Upload inventory report
-        uses: actions/upload-artifact@v4
-        with:
-          name: workflow-inventory-report
+        uses: actions/upload-artifact@v4          name: workflow-inventory-report
           path: docs/workflows/workflow-inventory.md
           retention-days: 90
       

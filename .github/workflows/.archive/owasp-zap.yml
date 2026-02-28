@@ -39,11 +39,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: '9.12.0'
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v4      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build web application
@@ -78,9 +74,7 @@ jobs:
           fi
 
       - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-web-report-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: zap-web-report-${{ github.sha }}
           path: |
             zap-web-baseline-report.html
             zap-web-baseline-report.json
@@ -101,11 +95,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: '9.12.0'
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v4      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build mobile interface
@@ -138,9 +128,7 @@ jobs:
           fi
 
       - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-mobile-report-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: zap-mobile-report-${{ github.sha }}
           path: |
             zap-mobile-baseline-report.html
             zap-mobile-baseline-report.json
@@ -183,11 +171,7 @@ jobs:
           node-version: '20'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: '9.12.0'
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v4      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Start API server
@@ -220,9 +204,7 @@ jobs:
           fi
 
       - name: Upload ZAP API Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: zap-api-report-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: zap-api-report-${{ github.sha }}
           path: |
             zap-api-scan-report.html
             zap-api-scan-report.json

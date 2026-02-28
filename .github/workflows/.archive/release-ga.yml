@@ -99,7 +99,5 @@ jobs:
           cosign verify "${IMAGE_PINNED}" --output-certificate rekor-cert.pem --output-signature rekor.sig
           echo "Certificate and signature artifacts emitted for transparency." >> release-notes.md
       - name: Upload release notes
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-notes
+        uses: actions/upload-artifact@v4          name: release-notes
           path: release-notes.md

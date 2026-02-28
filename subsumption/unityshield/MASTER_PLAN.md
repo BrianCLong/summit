@@ -1,31 +1,37 @@
-# UnityShield Master Plan (1.0–1.29)
+# MASTER PLAN: UnityShield Subsumption (1.0–1.29)
 
-This plan outlines the subsumption of the UnityShield Platform into the Summit ecosystem.
+## Phase 1: Foundation & High-Inertia Pipes (Steps 1.0–1.9)
+1.0. Initialize Subsumption Manifest & Verifier.
+1.1. Create `src/connectors/unityshield` for 14TB/h ingestion logic.
+1.2. Implement Zero-Copy Buffer in `src/graphrag` for ingestion lane.
+1.3. Configure Neo4j Horizontal Scaling Policy.
+1.4. Map UnityShield Schema to IntelGraph Canonical.
+1.5. Deploy Redis Cluster for <40ms ingestion caching.
+1.6. Implement `UnifiedAuthGate` in `src/api/graphql`.
+1.7. Establish Ingestion Telemetry (p95 latency monitoring).
+1.8. Load Test Baseline (500 VUs).
+1.9. Security Audit: Data Sovereignty & Encryption at Rest.
 
-## Phase 1: Foundation (1.0–1.9)
-- 1.0 Initialize Subsumption Bundle (Scaffold, Manifest, Claims). [COMPLETE]
-- 1.1 Establish `docs/standards/unityshield.md` data schema alignment.
-- 1.2 Implement `src/connectors/unityshield/` ingestion adapter skeleton.
-- 1.3 Add UnityShield-specific OPA policies for sensitive data handling (`policy/opa/unityshield/`).
-- 1.4 Configure CI/CD `subsumption-bundle-verify` gate for UnityShield.
-- 1.5 Produce Foundation Evidence ID `EVD-UNITYSHIELD-FND-001`.
+## Phase 2: Agent Orchestration & Logic Subsumption (Steps 1.10–1.19)
+1.10. Subsume UnityShield Anomaly Detection into Maestro.
+1.11. Integrate UnityShield Entity Resolution into IntelGraph.
+1.12. Deploy Switchboard Normalization for UnityShield streams.
+1.13. Implement `Aegis` Data Governance for ingestion lanes.
+1.14. Orchestrate Multi-Region Failover (99.999% uptime).
+1.15. Automate Evidence Collection for `governance-evidence` gate.
+1.16. Integrate UnityShield Search into GraphRAG.
+1.17. Implement Proactive Scaling for concurrent user spikes.
+1.18. Cross-Service Dependency Review.
+1.19. Performance Optimization (Ingestion Bottlenecks).
 
-## Phase 2: Ingestion & Enrichment (1.10–1.19)
-- 1.10 Wire `unityshield` adapter to Kafka ingestion bus.
-- 1.11 Implement deterministic NLP enrichment for UnityShield data streams.
-- 1.12 Map UnityShield entities to Summit's Graph Schema (Neo4j).
-- 1.13 Validate ingestion throughput vs performance budget (14TB/h target).
-- 1.14 Implement `src/agents/unityshield/sensing_agent.py` for real-time anomaly detection.
-- 1.15 Produce Innovation Evidence ID `EVD-UNITYSHIELD-FND-002`.
-
-## Phase 3: Analytics & Convergence (1.20–1.29)
-- 1.20 Integrate UnityShield GraphRAG vectors into retrieval hub.
-- 1.21 Deploy UnityShield-specific dashboards in `client/src/pages/unityshield/`.
-- 1.22 Conduct 500 VU load test for converged stack.
-- 1.23 Verify 99.999% HA failover logic for UnityShield services.
-- 1.24 Run full Governance Evidence suite (`governance-evidence`).
-- 1.25 Final PR Convergence (Innovation -> Foundation merge).
-- 1.26 Produce Security Evidence ID `EVD-UNITYSHIELD-SEC-001`.
-- 1.27 Register UnityShield artifacts in Evidence Index.
-- 1.28 Summit GA Readiness Assertion Update.
-- 1.29 Final Subsumption Approval.
+## Phase 3: Final Convergence & GA Readiness (Steps 1.20–1.29)
+1.20. Final Convergence Protocol Review.
+1.21. Full Regression Suite Execution.
+1.22. Chaos Engineering: UnityShield Failover Scenarios.
+1.23. Document GA Readiness in `docs/ga/`.
+1.24. User Acceptance Testing (Simulated for 15k users).
+1.25. Final Governance Verdict (Summit Policy).
+1.26. Evidence Bundle Finalization.
+1.27. Release Candidate Tagging (v4.3.0).
+1.28. Blue/Green Deployment to Production.
+1.29. Subsumption Completion Post-Mortem.

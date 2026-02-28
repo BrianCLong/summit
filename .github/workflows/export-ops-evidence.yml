@@ -48,9 +48,7 @@ jobs:
           role-session-name: EvidenceExport
 
       - name: Download artifact
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: ${{ github.event.inputs.artifact_name }}
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7          name: ${{ github.event.inputs.artifact_name }}
           path: ./artifact
           run-id: ${{ github.event.inputs.run_id }}
 

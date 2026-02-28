@@ -50,11 +50,7 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
+        uses: pnpm/action-setup@v4      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -163,9 +159,7 @@ jobs:
           fi
 
       - name: Upload benchmark results
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-results-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: benchmark-results-${{ github.run_number }}
           path: |
             benchmark-*.json
             autocannon-*.json
@@ -203,9 +197,7 @@ jobs:
         continue-on-error: true
 
       - name: Upload K6 results
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-results-${{ github.run_number }}
+        uses: actions/upload-artifact@v4          name: k6-results-${{ github.run_number }}
           path: k6-results.json
           retention-days: 30
 
