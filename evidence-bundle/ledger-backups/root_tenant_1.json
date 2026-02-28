@@ -1,0 +1,12 @@
+{
+    "id": "root_1700000000_abcd",
+    "tenantId": "tenant_123",
+    "rootHash": "62f8...d2e1",
+    "startSequence": 1,
+    "endSequence": 100,
+    "entryCount": 100,
+    "timestamp": "2024-05-20T10:00:00Z",
+    "signature": "dummy-sig",
+    "signedAt": "2024-05-20T10:00:00Z",
+    "signedBy": "governance-agent@summit"
+}
