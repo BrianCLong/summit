@@ -115,6 +115,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_CACHE_HOST: redis-cache
+      REDIS_DIST_HOST: redis-dist
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_USERNAME: elastic
       ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-devpassword}
@@ -133,6 +135,10 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      redis-dist:
         condition: service_healthy
       neo4j:
         condition: service_healthy
@@ -242,6 +248,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_CACHE_HOST: redis-cache
+      REDIS_DIST_HOST: redis-dist
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
       JWT_ALGORITHM: HS256
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
@@ -448,6 +456,8 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  redis_cache_data:
+  redis_dist_data:
   neo4j_data:
   neo4j_logs:
   elasticsearch_data:
