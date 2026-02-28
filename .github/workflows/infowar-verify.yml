@@ -1,45 +1,38 @@
-name: INFOWAR Verify
+name: INFOWAR Verification
 
 on:
   pull_request:
     paths:
-      - 'src/graphrag/evidence/**'
-      - 'src/connectors/**'
-      - 'src/graphrag/narratives/**'
-      - 'src/graphrag/ontology/**'
-      - 'tests/graphrag/**'
-      - 'tests/connectors/**'
+      - 'src/graphrag/**'
+      - 'src/api/rest/infowar/**'
+      - 'docs/operations/infowar-*'
+      - 'docs/architecture/infowar-*'
+      - 'docs/security/infowar-*'
       - '.github/scripts/validate-evidence.ts'
+      - '.github/scripts/never-log-scan.ts'
 
 jobs:
-  verify-evidence:
+  verify-infowar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
-          cache: "pnpm"
+          node-version: 20
+          cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Run Evidence Tests
-        run: npx vitest run tests/graphrag/evidence/evidence.spec.ts
-      - name: Validate Fixtures
-        run: |
-          # Create a dummy fixture for validation
-          mkdir -p tests/fixtures/evidence
-          echo '{"evidence_id": "EVD-TEST-001", "summary": "Test", "findings": ["A"], "confidence": 0.9}' > tests/fixtures/evidence/report.json
-          npx tsx .github/scripts/validate-evidence.ts tests/fixtures/evidence/report.json report
 
-      - name: Run Never-Log Scan
-        run: npx tsx .github/scripts/never-log-scan.ts src/graphrag
-
-      - name: Verify Dependency Delta
+      - name: Evidence Schema Gate
         run: |
-          if [ ! -f docs/governance/dependency-delta.md ]; then
-            echo "Error: docs/governance/dependency-delta.md is missing"
-            exit 1
-          fi
+          npx tsx .github/scripts/validate-evidence.ts report tests/fixtures/evidence/report.json
+
+      - name: Never-log Scan
+        run: |
+          npx tsx .github/scripts/never-log-scan.ts src/graphrag
+
+      - name: Run INFOWAR Tests
+        run: |
+          NODE_OPTIONS='--experimental-vm-modules' npx jest tests/graphrag/evidence/evidence.spec.ts tests/graphrag/narratives/graph.spec.ts

@@ -1,30 +1,13 @@
-import { describe, it, expect } from 'vitest';
-import { parseRSSItems, RSSItem } from "../../src/connectors/rss/index";
+import { describe, it, expect } from '@jest/globals';
+import { RSSConnector } from '../../src/connectors/rss/index.js';
 
-describe("RSS Ingestion Connector", () => {
-  it("should parse RSS items into Summit-compatible documents", () => {
-    const items: RSSItem[] = [
-      {
-        id: "1",
-        title: "Test Item",
-        link: "https://example.com/test",
-        pubDate: "2026-01-01T00:00:00Z",
-        author: "Author 1",
-        contentSnippet: "Test content",
-        sourceId: "source-1"
-      }
-    ];
+describe('RSSConnector', () => {
+  it('should return ingested documents for provided sources', async () => {
+    const connector = new RSSConnector();
+    const sources = [{ url: 'https://example.com/rss', category: 'intel' }];
+    const docs = await connector.ingest(sources);
 
-    const parsed = parseRSSItems(items);
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0].type).toBe("DOCUMENT");
-    expect(parsed[0].id).toBe("1");
-    expect(parsed[0].url).toBe("https://example.com/test");
-    expect(parsed[0].metadata.author).toBe("Author 1");
-  });
-
-  it("should handle empty items", () => {
-    const parsed = parseRSSItems([]);
-    expect(parsed).toHaveLength(0);
+    expect(docs).toHaveLength(1);
+    expect(docs[0].source_url).toBe('https://example.com/rss');
   });
 });

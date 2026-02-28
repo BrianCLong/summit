@@ -1,24 +1,25 @@
 {
+  "$id": "https://summit.local/schemas/infowar/index.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Evidence Index Schema",
   "type": "object",
+  "required": ["version", "item_slug", "entries"],
   "properties": {
-    "version": { "type": "string", "enum": ["1.0"] },
-    "item_slug": { "type": "string", "enum": ["INFOWAR"] },
+    "version": { "type": "string", "const": "1.0" },
+    "item_slug": { "type": "string", "const": "INFOWAR" },
     "entries": {
       "type": "array",
       "items": {
         "type": "object",
+        "required": ["evidence_id", "files"],
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
             "type": "array",
             "items": { "type": "string" }
           }
-        },
-        "required": ["evidence_id", "files"]
+        }
       }
     }
   },
-  "required": ["version", "item_slug", "entries"]
+  "additionalProperties": false
 }

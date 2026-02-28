@@ -1,39 +1,29 @@
-# Info Warfare Monthly SITREP Template
+# Info Warfare SITREP Template
 
-## Executive Summary
-*High-level overview of the most critical developments.*
+## 1. Notable Ops (Espionage/IO)
+- [Summary of operation]
+- Actors: [Actor IDs]
+- Platforms: [Platform IDs]
+- Impact Score: [0-10]
 
-## 1. Notable Operations (Espionage/IO)
-- **Op Name/ID**: [Op ID]
-- **Target**: [Target Organization/Entity]
-- **Attribution**: [Attributed Actor]
-- **Status**: [Ongoing/Active/Concluded]
-- **Evidence IDs**: `EVD-INFOWAR-OPS-001`, ...
+## 2. Doctrine/Research Shifts
+- [Summary of research or doctrine change]
+- Sources: [References]
 
-## 2. Doctrine & Research Shifts
-- **Concept**: [e.g., Cognitive Warfare]
-- **Source**: [e.g., NATO STO Report]
-- **Implications**: [Summit model impact]
-- **Evidence IDs**: `EVD-INFOWAR-REG-001`, ...
+## 3. Regulatory Changes
+- [Summary of regulation (e.g., DSA compliance updates)]
 
-## 3. Regulatory & Legal Changes
-- **Regulation**: [e.g., EU DSA Disinformation Code]
-- **Status**: [Proposed/Active/Enforcement]
-- **Impact on Summit**: [Audit requirements, disclosure rules]
-- **Evidence IDs**: `EVD-INFOWAR-REG-002`, ...
+## 4. Tools/Market Developments
+- [New tools or techniques observed]
 
-## 4. Tools & Market Developments
-- **Tech/Tool**: [e.g., Deepfake as a Service]
-- **Vendor**: [Actor/Company]
-- **Capabilities**: [Specific capabilities]
-- **Evidence IDs**: `EVD-INFOWAR-ACTMEAS-001`, ...
+## 5. What Changed Since Last SITREP
+- [Diff pointers]
 
-## 5. What Changed (Diff Pointers)
-*Links to previous SITREP diffs and state updates.*
+## 6. Evidence IDs Referenced
+- [List of EVD-INFOWAR-* IDs]
 
-## 6. Evidence Repository References
-*Full list of evidence IDs and confidence scores referenced in this SITREP.*
-
-| Evidence ID | Description | Confidence |
-| ----------- | ----------- | ---------- |
-| EVD-INFOWAR-OPS-XXX | ... | 0.9 |
+---
+**Confidence Labeling Rules:**
+- HIGH: Direct evidence, multiple sources.
+- MEDIUM: Strong indicators, single source.
+- LOW: Hypothesis, emerging signals.

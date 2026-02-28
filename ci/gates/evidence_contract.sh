@@ -55,11 +55,6 @@ def process_evidence(report_path):
     print(f"Checking evidence: {report_path}")
     report = load_json(report_path)
 
-    # Handle legacy reports that might be lists
-    if isinstance(report, list):
-        print(f"Skipping list-based legacy report: {report_path}")
-        return True
-
     # Identify schema - for Moltbook Relay we use specific one
     if "moltbook-relay" in report.get("evidence_id", ""):
         schema = "evidence/schemas/moltbook-relay-report.schema.json"

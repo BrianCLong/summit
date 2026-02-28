@@ -24,7 +24,7 @@ describe('Maestro Integration Tests', () => {
        RETURNING id`,
     );
     if (!result.rows || result.rows.length === 0) {
-      throw new Error('Failed to create test run: no rows returned');
+      throw new Error('Failed to create test run: no rows returned from query');
     }
     testRunId = result.rows[0].id;
 

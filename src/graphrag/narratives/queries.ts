@@ -1,13 +1,20 @@
 /**
- * Neo4j Query Builder Stubs for INFOWAR Narrative Graph.
+ * Secure Neo4j Query Builder for INFOWAR Narrative Graph.
  */
 
-import { GraphNode, GraphEdge } from "../ontology/types";
+import { GraphNode, GraphEdge } from "../ontology/types.js";
 
 /**
- * Builds a Cypher query to upsert a node.
+ * Builds a Cypher query to upsert a node using parameters.
  */
 export function buildUpsertNodeQuery(node: GraphNode): { query: string; params: any } {
+  // We use string interpolation for labels because Cypher doesn't support parameterizing them,
+  // but we strictly validate the label against allowed NodeType to prevent injection.
+  const allowedLabels = ['Narrative', 'Claim', 'Actor', 'Platform', 'Event', 'Artifact', 'Regulation'];
+  if (!allowedLabels.includes(node.label)) {
+    throw new Error(`Invalid node label: ${node.label}`);
+  }
+
   return {
     query: `MERGE (n:${node.label} { id: $id }) SET n += $properties RETURN n`,
     params: {
@@ -18,9 +25,14 @@ export function buildUpsertNodeQuery(node: GraphNode): { query: string; params: 
 }
 
 /**
- * Builds a Cypher query to upsert an edge.
+ * Builds a Cypher query to upsert an edge using parameters.
  */
 export function buildUpsertEdgeQuery(edge: GraphEdge): { query: string; params: any } {
+  const allowedLabels = ['AMPLIFIES', 'REFERENCES', 'TARGETS', 'COUPLED_WITH', 'EVIDENCED_BY', 'PART_OF'];
+  if (!allowedLabels.includes(edge.label)) {
+    throw new Error(`Invalid edge label: ${edge.label}`);
+  }
+
   return {
     query: `
       MATCH (a { id: $from })

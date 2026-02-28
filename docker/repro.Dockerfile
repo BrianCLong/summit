@@ -7,7 +7,7 @@ ARG SOURCE_DATE_EPOCH
 ENV TZ=UTC
 LABEL org.opencontainers.image.created=$SOURCE_DATE_EPOCH
 
-ENV PNPM_VERSION=10.0.0
+ENV PNPM_VERSION=9.12.0
 RUN npm install -g pnpm@${PNPM_VERSION}
 
 FROM base AS builder

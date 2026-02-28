@@ -1,49 +1,28 @@
 /**
- * RSS Ingestion Stub for INFOWAR subsumption.
+ * Ingestion stub for RSS and URL lists.
  */
 
-export interface RSSFeedSource {
-  id: string;
+export interface RSSSource {
   url: string;
-  category: "news" | "blog" | "government";
-  lastFetched?: Date;
+  category: string;
 }
 
-export interface RSSItem {
-  id: string;
+export interface IngestedDocument {
+  source_url: string;
   title: string;
-  link: string;
-  pubDate: string;
-  author: string;
-  contentSnippet: string;
-  sourceId: string;
+  content: string;
+  ingested_at: string;
 }
 
-/**
- * Mocks an RSS fetch for a given source.
- * No external network calls are made in this stub.
- */
-export async function fetchRSSItems(source: RSSFeedSource): Promise<RSSItem[]> {
-  // Stub implementation for now
-  console.log(`Stub: Fetching RSS items from ${source.url}`);
-  return [];
-}
-
-/**
- * Parses raw RSS items into Summit-compatible source documents.
- */
-export function parseRSSItems(items: RSSItem[]): any[] {
-  return items.map(item => ({
-    type: "DOCUMENT",
-    source: "RSS",
-    id: item.id,
-    title: item.title,
-    url: item.link,
-    timestamp: item.pubDate,
-    content: item.contentSnippet,
-    metadata: {
-      author: item.author,
-      source_id: item.sourceId
-    }
-  }));
+export class RSSConnector {
+  async ingest(sources: RSSSource[]): Promise<IngestedDocument[]> {
+    console.log(`Ingesting ${sources.length} RSS sources...`);
+    // Stub implementation
+    return sources.map(s => ({
+      source_url: s.url,
+      title: "Stub Title",
+      content: "Stub Content",
+      ingested_at: new Date().toISOString()
+    }));
+  }
 }

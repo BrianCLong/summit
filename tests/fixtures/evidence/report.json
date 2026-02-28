@@ -1,1 +1,9 @@
-{"evidence_id": "EVD-TEST-001", "summary": "Test", "findings": ["A"], "confidence": 0.9}
+{
+  "evidence_id": "EVD-INFOWAR-NARR-001",
+  "item_slug": "INFOWAR",
+  "summary": "Verified NATO STO Research Report on Cognitive Warfare.",
+  "findings": [
+    "Cognitive warfare defined as a new domain of competition.",
+    "Doctrine shift towards narrative dominance."
+  ]
+}

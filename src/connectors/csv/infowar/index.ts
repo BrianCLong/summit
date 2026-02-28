@@ -1,64 +1,55 @@
 /**
- * CSV Ingestion Stub for INFOWAR Incident Ledger.
+ * Ingestion stub for CSV incident ledgers.
  */
 
-export interface IncidentLedgerEntry {
-  incident_id: string;
+export interface CSVIncident {
   date: string;
-  narrative_id: string;
-  claim_id: string;
-  actor_id: string;
+  actor: string;
   platform: string;
-  event_id?: string;
-  evidence_id: string;
-  confidence: number;
+  narrative: string;
   description: string;
 }
 
-/**
- * Parses a CSV string into an array of IncidentLedgerEntries.
- */
-export function parseIncidentLedger(csvContent: string): IncidentLedgerEntry[] {
-  const lines = csvContent.trim().split("\n");
-  if (lines.length < 2) return [];
+export class CSVInfowarConnector {
+  /**
+   * Simple but robust CSV parser that handles quotes and commas in fields.
+   */
+  parse(csvContent: string): CSVIncident[] {
+    const lines = csvContent.split(/\r?\n/);
+    const results: CSVIncident[] = [];
 
-  const headers = lines[0].split(",");
-  return lines.slice(1).map(line => {
-    const values = line.split(",");
-    const entry: any = {};
-    headers.forEach((header, index) => {
-      const value = values[index];
-      if (header === "confidence") {
-        entry[header] = parseFloat(value);
-      } else {
-        entry[header] = value;
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+
+      const fields: string[] = [];
+      let currentField = '';
+      let inQuotes = false;
+
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          fields.push(currentField.trim());
+          currentField = '';
+        } else {
+          currentField += char;
+        }
       }
-    });
-    return entry as IncidentLedgerEntry;
-  });
-}
+      fields.push(currentField.trim());
 
-/**
- * Maps an IncidentLedgerEntry to Summit graph primitives (Nodes/Edges).
- */
-export function mapIncidentToGraph(entry: IncidentLedgerEntry): any {
-  return {
-    nodes: [
-      { id: entry.narrative_id, label: "Narrative" },
-      { id: entry.claim_id, label: "Claim" },
-      { id: entry.actor_id, label: "Actor" },
-      { id: entry.event_id, label: "Event", optional: !entry.event_id }
-    ],
-    edges: [
-      { from: entry.actor_id, to: entry.claim_id, label: "AMPLIFIES" },
-      { from: entry.claim_id, to: entry.narrative_id, label: "PART_OF" },
-      { from: entry.claim_id, to: entry.evidence_id, label: "EVIDENCED_BY" }
-    ],
-    metadata: {
-      incident_id: entry.incident_id,
-      description: entry.description,
-      confidence: entry.confidence,
-      timestamp: entry.date
+      if (fields.length >= 5) {
+        results.push({
+          date: fields[0],
+          actor: fields[1],
+          platform: fields[2],
+          narrative: fields[3],
+          description: fields[4],
+        });
+      }
     }
-  };
+
+    return results;
+  }
 }

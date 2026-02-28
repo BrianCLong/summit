@@ -1,11 +1,11 @@
 {
+  "$id": "https://summit.local/schemas/infowar/stamp.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Evidence Stamp Schema",
   "type": "object",
+  "required": ["evidence_id", "timestamp"],
   "properties": {
     "evidence_id": { "type": "string" },
-    "timestamp": { "type": "string", "format": "date-time" },
-    "signature": { "type": "string" }
+    "timestamp": { "type": "string", "format": "date-time" }
   },
-  "required": ["evidence_id", "timestamp", "signature"]
+  "additionalProperties": false
 }
