@@ -1,0 +1,15 @@
+{
+  "boundaryViolations": [],
+  "cacheViolations": [
+    {
+      "file": "tests/fixtures/react-best-practices/cache_regression/route.tsx",
+      "ruleId": "RBP-002",
+      "message": "Route missing explicit cache directive (revalidate or dynamic)"
+    },
+    {
+      "file": "tests/fixtures/react-best-practices/cache_regression/route.tsx",
+      "ruleId": "RBP-003",
+      "message": "Async route missing <Suspense> streaming boundary"
+    }
+  ]
+}
