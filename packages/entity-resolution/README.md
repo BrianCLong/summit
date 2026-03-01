@@ -36,3 +36,7 @@ console.log(scorecard);
 ```
 
 Each merge decision is tied to lineage hashes for audit trail.
+
+## Entity Resolution Engine
+
+Handles executing versioned ER policies and emitting `MERGE_EVENT` lineage nodes.
