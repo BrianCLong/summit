@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-AEGS-GOV-001",
+  "item_slug": "aegs",
+  "timestamp": "2026-03-01T23:52:27.841Z",
+  "tool_versions": {
+    "node": "v22.22.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-AEGS-GOV-001",
+  "item_slug": "aegs",
+  "metrics": {
+    "docs_count": 4,
+    "fixtures_checked": 2,
+    "schemas_checked": 3
+  }
+}
