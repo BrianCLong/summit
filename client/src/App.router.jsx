@@ -1,3 +1,4 @@
+import TrustDashboard from "./pages/trust/TrustDashboard";
 import React, { useEffect, useMemo, useRef } from 'react';
 import {
   BrowserRouter as Router,
@@ -832,6 +833,7 @@ function MainLayout() {
                 <Route path="/compliance" element={<ComplianceCenter />} />
                 <Route path="/sandbox" element={<SandboxDashboard />} />
                 <Route path="/ops/release-readiness" element={<ReleaseReadinessRoute />} />
+                <Route path="/ops/trust" element={<TrustDashboard />} />
               </Route>
               <Route path="*" element={<NotFoundPage />} />
             </Route>
