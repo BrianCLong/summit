@@ -40,34 +40,58 @@ export class RiskRepository {
         for (let i = 0; i < input.signals.length; i += CHUNK_SIZE) {
           const chunk = input.signals.slice(i, i + CHUNK_SIZE);
 
-          const valuePlaceholders = chunk.map((_, index) => {
-            const offset = index * 8;
-            return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
-          }).join(', ');
+          try {
+            const valuePlaceholders = chunk.map((_, index) => {
+              const offset = index * 8;
+              return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
+            }).join(', ');
 
-          const params: any[] = [];
-          for (const sig of chunk) {
-            params.push(
-              savedScore.id,
-              sig.type,
-              sig.source,
-              sig.value,
-              sig.weight,
-              sig.contributionScore,
-              sig.description,
-              sig.detectedAt || new Date()
+            const params: any[] = [];
+            for (const sig of chunk) {
+              params.push(
+                savedScore.id,
+                sig.type,
+                sig.source,
+                sig.value,
+                sig.weight,
+                sig.contributionScore,
+                sig.description,
+                sig.detectedAt || new Date()
+              );
+            }
+
+            const sigRows = await tx.query(
+              `INSERT INTO risk_signals (
+                risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+              ) VALUES ${valuePlaceholders}
+              RETURNING *`,
+              params
             );
+
+            savedSignals.push(...sigRows.map((row: any) => this.mapSignal(row)));
+          } catch (batchError) {
+            // BOLT RELIABILITY: Fallback to individual inserts if batch fails
+            for (const sig of chunk) {
+              const row = await tx.query(
+                `INSERT INTO risk_signals (
+                  risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING *`,
+                [
+                  savedScore.id,
+                  sig.type,
+                  sig.source,
+                  sig.value,
+                  sig.weight,
+                  sig.contributionScore,
+                  sig.description,
+                  sig.detectedAt || new Date()
+                ]
+              );
+              savedSignals.push(this.mapSignal(row[0]));
+            }
           }
 
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ${valuePlaceholders}
-            RETURNING *`,
-            params
-          );
-
-          savedSignals.push(...sigRows.map((row: any) => this.mapSignal(row)));
         }
       }
 

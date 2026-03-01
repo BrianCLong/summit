@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Optimized `RiskRepository.saveRiskScore` to use batched multi-row inserts for risk signals, reducing database round-trips from O(N) to O(N/100).
+
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
