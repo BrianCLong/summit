@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-03-01 - [Batch Hydration for Nested Entities]
+**Learning:** Hydrating nested child entities (like milestones, deliverables, or key results) using `Promise.all(rows.map(async row => ...))` is a performance anti-pattern that results in N database round-trips. While it appears "parallel" in JS, it saturates the connection pool and increases latency linearly with the number of parent records.
+**Action:** Always use batch-loading helpers with the PostgreSQL `ANY($1)` operator to fetch all children for all parents in a single query. Map results back to parents in-memory using a `Map` keyed by the parent ID to maintain O(1) lookup during hydration.

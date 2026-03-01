@@ -503,7 +503,22 @@ export class StrategicPlanRepo {
     );
     const rows = (queryRes as any)?.rows || [];
 
-    return rows.map((row: any) => this.mapObjectiveRow(row));
+    const objectives = rows.map((row: any) => this.mapObjectiveRow(row));
+    const objectiveIds = objectives.map((o) => o.id);
+
+    if (objectiveIds.length > 0) {
+      const [milestoneMap, keyResultMap] = await Promise.all([
+        this.getMilestonesByParents(objectiveIds, 'objective'),
+        this.getKeyResultsByObjectives(objectiveIds),
+      ]);
+
+      for (const objective of objectives) {
+        objective.milestones = milestoneMap.get(objective.id) || [];
+        objective.keyResults = keyResultMap.get(objective.id) || [];
+      }
+    }
+
+    return objectives;
   }
 
   async deleteObjective(id: string, userId: string): Promise<boolean> {
@@ -710,14 +725,22 @@ export class StrategicPlanRepo {
       [planId],
     );
 
-    return Promise.all(
-      rows.map(async (row: any) => {
-        const initiative = this.mapInitiativeRow(row);
-        initiative.milestones = await this.getMilestones(initiative.id, 'initiative');
-        initiative.deliverables = await this.getDeliverables(initiative.id);
-        return initiative;
-      }),
-    );
+    const initiatives = rows.map((row: any) => this.mapInitiativeRow(row));
+    const initiativeIds = initiatives.map((i) => i.id);
+
+    if (initiativeIds.length > 0) {
+      const [milestoneMap, deliverableMap] = await Promise.all([
+        this.getMilestonesByParents(initiativeIds, 'initiative'),
+        this.getDeliverablesByInitiatives(initiativeIds),
+      ]);
+
+      for (const initiative of initiatives) {
+        initiative.milestones = milestoneMap.get(initiative.id) || [];
+        initiative.deliverables = deliverableMap.get(initiative.id) || [];
+      }
+    }
+
+    return initiatives;
   }
 
   async deleteInitiative(id: string, userId: string): Promise<boolean> {
@@ -972,13 +995,18 @@ export class StrategicPlanRepo {
       [planId],
     );
 
-    return Promise.all(
-      rows.map(async (row: any) => {
-        const risk = this.mapRiskRow(row);
-        risk.mitigationStrategies = await this.getMitigationStrategies(risk.id);
-        return risk;
-      }),
-    );
+    const risks = rows.map((row: any) => this.mapRiskRow(row));
+    const riskIds = risks.map((r) => r.id);
+
+    if (riskIds.length > 0) {
+      const mitigationMap = await this.getMitigationStrategiesByRisks(riskIds);
+
+      for (const risk of risks) {
+        risk.mitigationStrategies = mitigationMap.get(risk.id) || [];
+      }
+    }
+
+    return risks;
   }
 
   async createMitigationStrategy(
@@ -1182,6 +1210,87 @@ export class StrategicPlanRepo {
     );
 
     return rows[0] ? this.mapKPIRow(rows[0]) : null;
+  }
+
+  // ============================================================================
+  // BATCH HELPERS
+  // ============================================================================
+
+  private async getMilestonesByParents(
+    parentIds: string[],
+    parentType: 'objective' | 'initiative',
+  ): Promise<Map<string, Milestone[]>> {
+    if (parentIds.length === 0) return new Map();
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_milestones
+       WHERE parent_id = ANY($1) AND parent_type = $2
+       ORDER BY due_date ASC`,
+      [parentIds, parentType],
+    );
+
+    const milestoneMap = new Map<string, Milestone[]>();
+    for (const row of rows) {
+      const milestone = this.mapMilestoneRow(row);
+      const list = milestoneMap.get(milestone.parentId) || [];
+      list.push(milestone);
+      milestoneMap.set(milestone.parentId, list);
+    }
+    return milestoneMap;
+  }
+
+  private async getDeliverablesByInitiatives(initiativeIds: string[]): Promise<Map<string, Deliverable[]>> {
+    if (initiativeIds.length === 0) return new Map();
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_deliverables WHERE initiative_id = ANY($1) ORDER BY due_date ASC`,
+      [initiativeIds],
+    );
+
+    const deliverableMap = new Map<string, Deliverable[]>();
+    for (const row of rows) {
+      const deliverable = this.mapDeliverableRow(row);
+      const list = deliverableMap.get(deliverable.initiativeId) || [];
+      list.push(deliverable);
+      deliverableMap.set(deliverable.initiativeId, list);
+    }
+    return deliverableMap;
+  }
+
+  private async getKeyResultsByObjectives(objectiveIds: string[]): Promise<Map<string, KeyResult[]>> {
+    if (objectiveIds.length === 0) return new Map();
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_key_results WHERE objective_id = ANY($1) ORDER BY due_date ASC`,
+      [objectiveIds],
+    );
+
+    const keyResultMap = new Map<string, KeyResult[]>();
+    for (const row of rows) {
+      const keyResult = this.mapKeyResultRow(row);
+      const list = keyResultMap.get(keyResult.objectiveId) || [];
+      list.push(keyResult);
+      keyResultMap.set(keyResult.objectiveId, list);
+    }
+    return keyResultMap;
+  }
+
+  private async getMitigationStrategiesByRisks(riskIds: string[]): Promise<Map<string, MitigationStrategy[]>> {
+    if (riskIds.length === 0) return new Map();
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_mitigations WHERE risk_id = ANY($1) ORDER BY deadline ASC`,
+      [riskIds],
+    );
+
+    const mitigationMap = new Map<string, MitigationStrategy[]>();
+    for (const row of rows) {
+      const mitigation = this.mapMitigationRow(row);
+      const list = mitigationMap.get(mitigation.riskId) || [];
+      list.push(mitigation);
+      mitigationMap.set(mitigation.riskId, list);
+    }
+    return mitigationMap;
   }
 
   // ============================================================================
