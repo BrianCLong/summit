@@ -41,19 +41,19 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Configure AWS Credentials
-        if: matrix.cloud == 'aws'
+        if: ${{ matrix.cloud == 'aws' && secrets.AWS_OIDC_ROLE_ARN != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
           aws-region: us-east-1
       - name: Setup gcloud
-        if: matrix.cloud == 'gcp'
+        if: ${{ matrix.cloud == 'gcp' && secrets.GCP_PROJECT_ID != '' }}
         uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
-        if: matrix.cloud == 'azure'
+        if: ${{ matrix.cloud == 'azure' && secrets.AZURE_CLIENT_ID != '' }}
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -73,7 +73,11 @@ jobs:
           AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID }}
           PARITY_ENV1: prodlike
           PARITY_ENV2: canary
-        run: bash scripts/ci/parity_check.sh
+        run: |
+          if [ "${{ secrets.AWS_OIDC_ROLE_ARN }}" == "" ] && [ "${{ matrix.cloud }}" == "aws" ]; then echo "Skipping AWS parity check (no secrets)"; exit 0; fi
+          if [ "${{ secrets.GCP_PROJECT_ID }}" == "" ] && [ "${{ matrix.cloud }}" == "gcp" ]; then echo "Skipping GCP parity check (no secrets)"; exit 0; fi
+          if [ "${{ secrets.AZURE_CLIENT_ID }}" == "" ] && [ "${{ matrix.cloud }}" == "azure" ]; then echo "Skipping Azure parity check (no secrets)"; exit 0; fi
+          bash scripts/ci/parity_check.sh
 
       - name: Upload parity artifact
         uses: actions/upload-artifact@v4
