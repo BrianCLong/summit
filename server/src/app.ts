@@ -475,7 +475,11 @@ export const createApp = async () => {
 
   // Phase 4: AIA Initialization
   try {
-    initializeAIA(async (insight: AgentInsight) => {
+    let isHandlingAIA = false;
+  initializeAIA(async (insight: AgentInsight) => {
+    if (isHandlingAIA) return null;
+    isHandlingAIA = true;
+    try {
       const db = getPostgresPool();
       const workflowResult = await db.query(
         'INSERT INTO aia_insights (id, agent_id, type, severity, severity_score, confidence, rationale, evidence, is_actionable) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
@@ -491,7 +495,10 @@ export const createApp = async () => {
         return triggerResult.rows[0]?.id || null;
       }
       return null;
-    });
+    } finally {
+      isHandlingAIA = false;
+    }
+  });
     logger.info('AIA Engine initialized and bridged to DAL');
   } catch (error) {
     logger.error({ error }, 'Failed to initialize AIA Engine');
