@@ -25,9 +25,9 @@ jobs:
 
             // Auto-infer from title if no labels
             if (labels.length === 0) {
-              if (/^feat(?:\([^)]+\))?:/.test(title)) labels.push('minor');
-              else if (/^fix(?:\([^)]+\))?:/.test(title)) labels.push('patch');
-              else if (/^(docs|ci|test|chore|refactor|perf|style)(?:\([^)]+\))?:/.test(title)) labels.push('patch');
+              if (title.startsWith('feat:')) labels.push('minor');
+              else if (title.startsWith('fix:')) labels.push('patch');
+              else if (title.startsWith('docs:')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 

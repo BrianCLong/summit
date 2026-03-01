@@ -1,13 +1,6 @@
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
-
-const prBody = process.env.PR_BODY || '';
-
-// If the PR is opened by Jules and contains Jules tag, bypass metadata check
-if (prBody.includes('PR created automatically by Jules')) {
-  console.log('✅ Bypassing metadata check for automated Jules PR.');
-  process.exit(0);
-}
 
 const contractPath = join(process.cwd(), 'agent-contract.json');
 let contract;
@@ -19,6 +12,7 @@ try {
   process.exit(1);
 }
 
+const prBody = process.env.PR_BODY || '';
 const metadataRegex = /<!-- AGENT-METADATA:START -->([\s\S]*?)<!-- AGENT-METADATA:END -->/;
 const match = prBody.match(metadataRegex);
 
