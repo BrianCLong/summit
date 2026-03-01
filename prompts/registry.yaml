@@ -922,3 +922,6 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: implement.crm-provider@v1
+    path: prompts/implement/implement.crm-provider@v1.yaml
+    hash: 19542a9654d9aa03161a637023b390043d2da09933422b10a27f47ad43a8ec49
