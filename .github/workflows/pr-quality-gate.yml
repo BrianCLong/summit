@@ -91,6 +91,13 @@ jobs:
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0
 
+
+      - name: Cache SBOM outputs
+        uses: actions/cache@v4
+        with:
+          path: artifacts/sbom
+          key: sbom-${{ runner.os }}-${{ github.sha }}
+
       - name: Generate SBOM artifact
         run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
 

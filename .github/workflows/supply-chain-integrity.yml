@@ -105,6 +105,13 @@ jobs:
           ./scripts/check-reproducibility.sh summit-platform "npm ci && npm run build" production 2 /tmp/build-test
 
       # Generate SBOM
+
+      - name: Cache SBOM outputs
+        uses: actions/cache@v4
+        with:
+          path: ./sboms
+          key: sbom-${{ runner.os }}-${{ env.VERSION }}
+
       - name: Generate SBOM
         run: |
           chmod +x scripts/generate-sbom.sh

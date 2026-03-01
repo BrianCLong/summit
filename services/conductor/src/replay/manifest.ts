@@ -3,6 +3,11 @@ import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export async function buildManifest(runId: string) {
+
+  if (!runId || typeof runId !== "string" || runId.trim() === "") {
+    throw new Error("run_id is required to write run manifest (deny-by-default)");
+  }
+
   // Pull from run_ledger + materialized tables
   const { rows: steps } = await pg.query(
     `
