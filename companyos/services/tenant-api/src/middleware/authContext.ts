@@ -339,8 +339,9 @@ export function stubIdentity(req: Request, res: Response, next: NextFunction) {
     // This extracts user claims from headers set by the auth layer
     const token = authHeader.slice(7);
 
-    // In production, decode and validate JWT
+    // SECURITY(P0): RESOLVED via hard-fail: Reject requests until JWT verification is implemented
     // For development, use stub data
+    throw new Error("Not Implemented: JWT decoding and verification is not implemented.");
     req.user = {
       id: req.headers['x-user-id'] as string || 'dev-user',
       email: req.headers['x-user-email'] as string || 'dev@companyos.local',
@@ -351,7 +352,8 @@ export function stubIdentity(req: Request, res: Response, next: NextFunction) {
   } else {
     // Development mode: auto-create platform admin
     if (process.env.NODE_ENV !== 'production') {
-      req.user = {
+      throw new Error("Not Implemented: JWT decoding and verification is not implemented.");
+    req.user = {
         id: 'dev-admin',
         email: 'admin@companyos.local',
         tenantId: tenantHeader,

@@ -11,8 +11,7 @@ SQLite.DEBUG(false);
 
 let db: SQLite.SQLiteDatabase | null = null;
 
-// SECURITY: Encryption key must be provided via react-native-config or secure storage
-// For production: Use react-native-keychain or device secure storage
+// SECURITY(P0): RESOLVED via hard-fail: No hardcoded fallback keys allowed
 const getEncryptionKey = (): string => {
   // Try to get from react-native-config first
   const configKey = Config.MMKV_ENCRYPTION_KEY;
@@ -21,20 +20,11 @@ const getEncryptionKey = (): string => {
     return configKey;
   }
 
-  // In production, this should throw an error or use device keychain
-  if (Config.ENV === 'production') {
-    throw new Error(
-      'MMKV_ENCRYPTION_KEY not configured. Mobile app encryption keys must be ' +
-      'provisioned through react-native-config or device secure storage (Keychain/Keystore).'
-    );
-  }
-
-  // Development fallback - log warning
-  console.warn(
-    'MMKV_ENCRYPTION_KEY not set - using insecure key for development only. ' +
-    'NEVER deploy to production without proper key management!'
+  // Ensure key is provided, never fallback to hardcoded value
+  throw new Error(
+    'MMKV_ENCRYPTION_KEY not configured. Mobile app encryption keys must be ' +
+    'provisioned through react-native-config or device secure storage (Keychain/Keystore).'
   );
-  return 'dev-insecure-key-do-not-use-in-production';
 };
 
 // Initialize MMKV for fast key-value storage

@@ -1,5 +1,7 @@
 export async function syncScimUsers() {
-  // TODO: Implement SCIM sync using your IdP API.
-  // Pull users/groups, map to roles/ABAC labels, and persist to DB.
-  return { ok: true } as const;
+  // SECURITY(P0): RESOLVED via safe-disable: SCIM sync not implemented yet.
+  // Throws 501 Not Implemented instead of failing silently.
+  const error = new Error('Not Implemented: SCIM sync is not yet available');
+  (error as any).status = 501;
+  throw error;
 }

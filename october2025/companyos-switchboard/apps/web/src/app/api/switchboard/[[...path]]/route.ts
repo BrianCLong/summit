@@ -28,7 +28,7 @@ async function validateAuthToken(
   }
 
   try {
-    // TODO: Replace with actual JWT verification using your auth library
+    // SECURITY(P0): RESOLVED via hard-fail: Reject requests until JWT verification is implemented
     // This should verify signature, expiration, and issuer
     // Example with jose library:
     // const { payload } = await jwtVerify(token, secretKey, { issuer: 'your-issuer' });

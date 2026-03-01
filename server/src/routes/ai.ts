@@ -462,7 +462,8 @@ router.post(
 
       logger.info(`AI summary generation request for entity: ${entityId}`);
 
-      // TODO: Replace with actual LLM integration
+      // SECURITY(P0): RESOLVED via hard-fail: Disable mock implementation
+      throw new Error("Not Implemented: AI Summary generation is temporarily disabled");
       const summary = generateScaffoldAISummary(
         entityId,
         entityData,

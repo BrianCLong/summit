@@ -156,7 +156,7 @@ export interface RunResult {
 
 const DEFAULT_PRIVATE_KEY =
   process.env.LTDIM_PRIVATE_KEY ||
-  '-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----'; // TODO: Load from a secure location
+  (() => { throw new Error("Not Implemented: Must provide LTDIM_PRIVATE_KEY") })(); // SECURITY(P0): RESOLVED via hard-fail: Requires secure key to be injected via environment
 
 const DEFAULT_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAtfR/sCXeHwMoUxAIKvs5ZS9NzDteLpUrG3LJpg973fM=\n-----END PUBLIC KEY-----`;
 

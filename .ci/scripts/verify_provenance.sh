@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# TODO: implement checks against your metrics endpoint / health dashboard
+# SECURITY(P0): RESOLVED via hard-fail - pipeline fails if provenance check is called but not implemented
 # Placeholder: fail if error rate metric > threshold
-exit 0
+exit 1

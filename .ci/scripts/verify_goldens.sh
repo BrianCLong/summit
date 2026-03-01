@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# TODO: call metrics endpoint(s) and enforce thresholds from .ci/config/slo.yml
-exit 0
+# SECURITY(P0): RESOLVED via hard-fail - pipeline fails if goldens check is called but not implemented
+exit 1

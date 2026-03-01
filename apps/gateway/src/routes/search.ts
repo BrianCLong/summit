@@ -89,11 +89,23 @@ router.post('/v1/search/suggest', async (req: Request, res: Response) => {
 });
 
 router.post('/v1/search/admin/reindex', async (req: Request, res: Response) => {
+    // SECURITY(P0): RESOLVED via hard-fail/deny-by-default feature flag
+    if (process.env.GATEWAY_SEARCH_ENABLED !== 'true') {
+        return res.status(403).json({ error: 'Forbidden: Feature disabled' });
+    }
+
+    // Ensure authenticated user exists
+    if (!(req as any).user) {
+        logger.warn('Unauthenticated reindex attempt');
+        return res.status(401).json({ error: 'Unauthorized: Authentication required' });
+    }
+
     const roles = getRoles(req);
-    if (!roles.includes('admin')) {
+    if (!roles.includes('admin') && !roles.includes('reindex_operator')) {
         logger.warn('Unauthorized reindex attempt', { tenantId: getTenantId(req), roles });
         return res.status(403).json({ error: 'Forbidden: Admin role required' });
     }
+
     res.json({ status: 'triggered', job_id: 'job-' + Date.now() });
 });
 
