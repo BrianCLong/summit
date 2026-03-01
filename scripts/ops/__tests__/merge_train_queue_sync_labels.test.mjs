@@ -8,6 +8,7 @@ import {
   buildLabelOperations,
   normalizeLabels,
   parseArgs,
+  selectOperations,
 } from '../merge_train_queue_sync_labels.mjs';
 
 const now = new Date('2026-03-01T00:00:00Z');
@@ -114,8 +115,38 @@ test('parseArgs defaults to dry-run and parses apply mode', () => {
   const dryRun = parseArgs(['--input', 'open-prs.json']);
   assert.equal(dryRun.apply, false);
   assert.equal(dryRun.input, 'open-prs.json');
+  assert.equal(dryRun.limit, 0);
+  assert.deepEqual(dryRun.onlyTargets, []);
 
-  const apply = parseArgs(['--input', 'open-prs.json', '--apply', '--repo', 'BrianCLong/summit']);
+  const apply = parseArgs([
+    '--input',
+    'open-prs.json',
+    '--apply',
+    '--repo',
+    'BrianCLong/summit',
+    '--limit',
+    '10',
+    '--only-targets',
+    'queue:conflict,queue:needs-rebase',
+  ]);
   assert.equal(apply.apply, true);
   assert.equal(apply.repo, 'BrianCLong/summit');
+  assert.equal(apply.limit, 10);
+  assert.deepEqual(apply.onlyTargets, ['queue:conflict', 'queue:needs-rebase']);
+});
+
+test('selectOperations filters by target labels and limit deterministically', () => {
+  const operations = [
+    { number: 1, targetQueueLabel: 'queue:blocked' },
+    { number: 2, targetQueueLabel: 'queue:conflict' },
+    { number: 3, targetQueueLabel: 'queue:needs-rebase' },
+    { number: 4, targetQueueLabel: 'queue:conflict' },
+  ];
+
+  const selected = selectOperations(operations, {
+    limit: 1,
+    onlyTargets: ['queue:conflict'],
+  });
+
+  assert.deepEqual(selected, [{ number: 2, targetQueueLabel: 'queue:conflict' }]);
 });

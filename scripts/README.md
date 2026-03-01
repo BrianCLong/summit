@@ -207,6 +207,14 @@ node scripts/ops/merge_train_queue_sync_labels.mjs \
   --input artifacts/open-prs.json \
   --repo BrianCLong/summit \
   --apply
+
+# Apply only first 200 conflict/rebase labels (safe wave)
+node scripts/ops/merge_train_queue_sync_labels.mjs \
+  --input artifacts/open-prs.json \
+  --repo BrianCLong/summit \
+  --only-targets queue:conflict,queue:needs-rebase \
+  --limit 200 \
+  --apply
 ```
 
 ### 6. ops/export_open_prs_snapshot.mjs

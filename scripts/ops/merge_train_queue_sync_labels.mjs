@@ -15,6 +15,8 @@ function parseArgs(argv) {
     now: new Date(),
     apply: false,
     repo: '',
+    limit: 0,
+    onlyTargets: [],
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -24,11 +26,27 @@ function parseArgs(argv) {
     if (arg === '--stale-days') args.staleDays = Number(argv[i + 1] ?? '45');
     if (arg === '--now') args.now = new Date(argv[i + 1] ?? '');
     if (arg === '--repo') args.repo = argv[i + 1] ?? '';
+    if (arg === '--limit') args.limit = Number(argv[i + 1] ?? '0');
+    if (arg === '--only-targets') {
+      args.onlyTargets = (argv[i + 1] ?? '')
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+    }
     if (arg === '--apply') args.apply = true;
   }
 
   if (!args.input) {
     throw new Error('Missing --input <path-to-open-prs.json>');
+  }
+  if (!Number.isInteger(args.limit) || args.limit < 0) {
+    throw new Error('--limit must be an integer >= 0');
+  }
+  if (
+    args.onlyTargets.length > 0 &&
+    args.onlyTargets.some((target) => !ALL_QUEUE_LABELS.includes(target))
+  ) {
+    throw new Error(`--only-targets must use known queue labels: ${ALL_QUEUE_LABELS.join(', ')}`);
   }
 
   return args;
@@ -108,6 +126,19 @@ function applyOperations(operations, repo) {
   }
 }
 
+function selectOperations(operations, options) {
+  const filtered =
+    options.onlyTargets.length > 0
+      ? operations.filter((operation) => options.onlyTargets.includes(operation.targetQueueLabel))
+      : operations;
+
+  if (options.limit > 0) {
+    return filtered.slice(0, options.limit);
+  }
+
+  return filtered;
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
   const raw = fs.readFileSync(args.input, 'utf8');
@@ -118,9 +149,10 @@ function main() {
   }
 
   const { plan, operations } = buildLabelOperations(openPrs, args);
+  const selectedOperations = selectOperations(operations, args);
 
   if (args.apply) {
-    applyOperations(operations, args.repo);
+    applyOperations(selectedOperations, args.repo);
   }
 
   process.stdout.write(
@@ -129,8 +161,11 @@ function main() {
         mode: args.apply ? 'apply' : 'dry-run',
         queueCounts: plan.queueCounts,
         nextBatch: plan.nextBatch,
-        operationCount: operations.length,
-        operations,
+        totalOperationCount: operations.length,
+        selectedOperationCount: selectedOperations.length,
+        skippedOperationCount: operations.length - selectedOperations.length,
+        operationCount: selectedOperations.length,
+        operations: selectedOperations,
       },
       null,
       2,
@@ -142,4 +177,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { buildGhArgs, buildLabelOperation, buildLabelOperations, normalizeLabels, parseArgs };
+export {
+  buildGhArgs,
+  buildLabelOperation,
+  buildLabelOperations,
+  normalizeLabels,
+  parseArgs,
+  selectOperations,
+};

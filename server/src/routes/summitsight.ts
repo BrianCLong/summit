@@ -28,7 +28,7 @@ router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
 router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId; // Assuming auth middleware attaches user
-    const status = await kpiEngine.getKPIStatus(req.params.id, tenantId);
+    const status = await kpiEngine.getKPIStatus(req.params.id as string as string, tenantId);
     res.json(status);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -38,7 +38,7 @@ router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Res
 router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     const tenantId = (req as any).user?.tenantId;
-    const values = await dataService.getKPIValues(req.params.id, tenantId, 'daily', 30);
+    const values = await dataService.getKPIValues(req.params.id as string as string, tenantId, 'daily', 30);
     res.json(values);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });

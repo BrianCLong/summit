@@ -74,16 +74,16 @@ export function createMaestroOPAEnforcer(
 
     const resourceId =
       options.resolveResourceId?.(req) ||
-      req.params.runId ||
-      req.params.taskId ||
+      req.params.runId as string ||
+      req.params.taskId as string ||
       req.body?.pipeline_id;
 
     const resourceAttributes = {
       method: req.method.toLowerCase(),
       path: req.path,
-      runId: req.params.runId,
+      runId: req.params.runId as string,
       pipelineId: req.body?.pipeline_id,
-      taskId: req.params.taskId,
+      taskId: req.params.taskId as string,
       ...(options.buildResourceAttributes ? options.buildResourceAttributes(req) : {}),
     };
 
@@ -178,15 +178,15 @@ export function buildMaestroRouter(
   const enforceRunReadPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
     action: 'maestro.run.read',
     resourceType: 'maestro/run',
-    resolveResourceId: (req) => req.params.runId,
+    resolveResourceId: (req) => req.params.runId as string,
   });
   const enforceTaskReadPolicy = createMaestroOPAEnforcer(opa, DEFAULT_POLICY_PATH, {
     action: 'maestro.task.read',
     resourceType: 'maestro/task',
-    resolveResourceId: (req) => req.params.taskId || req.params.runId,
+    resolveResourceId: (req) => req.params.taskId as string || req.params.runId as string,
     buildResourceAttributes: (req) => ({
-      taskId: req.params.taskId,
-      runId: req.params.runId,
+      taskId: req.params.taskId as string,
+      runId: req.params.runId as string,
     }),
   });
 

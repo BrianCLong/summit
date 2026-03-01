@@ -332,13 +332,13 @@ router.get(
   requirePermission('ai:suggestions:read'),
   async (req: Request, res: Response) => {
     try {
-      const suggestion = await policySuggestionService!.getSuggestion(req.params.id);
+      const suggestion = await policySuggestionService!.getSuggestion(req.params.id as string as string);
 
       if (!suggestion) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Suggestion not found: ${req.params.id}`,
+            message: `Suggestion not found: ${req.params.id as string as string}`,
           },
         });
       }
@@ -398,12 +398,12 @@ router.post(
       };
 
       const suggestion = await policySuggestionService!.reviewSuggestion(
-        req.params.id,
+        req.params.id as string as string,
         feedback
       );
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId: req.params.id as string as string,
         decision: feedback.decision,
         reviewedBy: feedback.reviewedBy,
       }, 'Suggestion reviewed');
@@ -438,10 +438,10 @@ router.post(
   requirePermission('ai:suggestions:implement'),
   async (req: Request, res: Response) => {
     try {
-      const result = await policySuggestionService!.implementSuggestion(req.params.id);
+      const result = await policySuggestionService!.implementSuggestion(req.params.id as string as string);
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId: req.params.id as string as string,
         policyId: result.policyId,
         implementedBy: getUserId(req),
       }, 'Suggestion implemented');
@@ -787,13 +787,13 @@ router.get(
   requirePermission('ai:anomalies:read'),
   async (req: Request, res: Response) => {
     try {
-      const anomaly = await anomalyService!.getAnomaly(req.params.id);
+      const anomaly = await anomalyService!.getAnomaly(req.params.id as string as string);
 
       if (!anomaly) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Anomaly not found: ${req.params.id}`,
+            message: `Anomaly not found: ${req.params.id as string as string}`,
           },
         });
       }
@@ -846,13 +846,13 @@ router.patch(
       const notes: string = req.body.notes;
 
       const anomaly = await anomalyService!.updateAnomalyStatus(
-        req.params.id,
+        req.params.id as string as string,
         status,
         notes
       );
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId: req.params.id as string as string,
         newStatus: status,
         updatedBy: getUserId(req),
       }, 'Anomaly status updated');
@@ -913,10 +913,10 @@ router.post(
         actionsTaken: req.body.actionsTaken || [],
       };
 
-      const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
+      const anomaly = await anomalyService!.resolveAnomaly(req.params.id as string as string, resolution);
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId: req.params.id as string as string,
         resolution: resolution.resolution,
         resolvedBy: resolution.resolvedBy,
       }, 'Anomaly resolved');

@@ -95,6 +95,17 @@ node scripts/ops/merge_train_queue_sync_labels.mjs \
   --apply
 ```
 
+Apply in controlled waves:
+
+```bash
+node scripts/ops/merge_train_queue_sync_labels.mjs \
+  --input artifacts/open-prs.json \
+  --repo BrianCLong/summit \
+  --only-targets queue:conflict,queue:needs-rebase \
+  --limit 200 \
+  --apply
+```
+
 ## Hourly Merge Loop
 
 1. Generate PR snapshot (`scripts/ops/export_open_prs_snapshot.mjs`).
