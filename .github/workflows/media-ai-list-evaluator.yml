@@ -1,0 +1,29 @@
+name: Media AI List Evaluator Gate
+
+on:
+  pull_request:
+    paths:
+      - 'data/media_ai_list_evaluator/**'
+      - 'scripts/media_ai_list_evaluator/**'
+  workflow_dispatch:
+
+jobs:
+  validate-media-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install pyyaml
+      - name: Verify All Media Sources are Verified and Conformant
+        run: |
+          for file in data/media_ai_list_evaluator/*.yaml; do
+            echo "Validating $file"
+            if ! python3 scripts/media_ai_list_evaluator/ingest.py "$file"; then
+              echo "Validation failed for $file. Deny-by-default applied."
+              e""xit 1
+            fi
+          done
