@@ -12,24 +12,21 @@ required_labels := {"owner", "repo", "branch", "ttl_hours", "budget_usd"}
 
 # deny privileged pod or hostPath
 violation[msg] {
-  some pod
-  pod := input.pods[pod]
-  pod.securityContext.privileged == true
-  msg := sprintf("privileged pod %s is not allowed", [pod.name])
+  some p in input.pods
+  p.securityContext.privileged == true
+  msg := sprintf("privileged pod %s is not allowed", [p.name])
 }
 
 violation[msg] {
-  some pod
-  pod := input.pods[pod]
-  pod.spec.volumes[_].hostPath
-  msg := sprintf("hostPath volume on %s not allowed in preview", [pod.name])
+  some p in input.pods
+  p.spec.volumes[_].hostPath
+  msg := sprintf("hostPath volume on %s not allowed in preview", [p.name])
 }
 
 violation[msg] {
-  some svc
-  svc := input.services[svc]
-  svc.spec.type == "NodePort"
-  msg := sprintf("NodePort service %s is disallowed", [svc.metadata.name])
+  some s in input.services
+  s.spec.type == "NodePort"
+  msg := sprintf("NodePort service %s is disallowed", [s.metadata.name])
 }
 
 violation[msg] {

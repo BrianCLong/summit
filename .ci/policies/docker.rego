@@ -28,10 +28,10 @@ is_dockerfile {
   input.stages
 }
 
-final_stage(stage) {
+final_stage(s) {
   is_dockerfile
   count(input.stages) > 0
-  stage := input.stages[count(input.stages)-1]
+  s = input.stages[count(input.stages)-1]
 }
 
 runtime_base_disallowed(base) {
@@ -43,14 +43,12 @@ builder_base_disallowed(base) {
 }
 
 has_user_instruction(stage) {
-  some inst
-  inst := stage.instructions[_]
+  some inst in stage.instructions
   lower(inst.name) == "user"
 }
 
 uses_package_manager(stage) {
-  some inst
-  inst := stage.instructions[_]
+  some inst in stage.instructions
   lower(inst.name) == "run"
   pm := lower(inst.cmd)
   _is_pkg_manager(pm)
@@ -75,93 +73,80 @@ builder_stages[stage] {
 }
 
 # Require a non-root user in the final stage
-deny[msg] {
+deny["runtime image must set non-root USER"] {
   is_dockerfile
-  final_stage(stage)
-  not has_user_instruction(stage)
-  msg := "runtime image must set non-root USER"
+  count(input.stages) > 0
+  fs := input.stages[count(input.stages)-1]
+  not has_user_instruction(fs)
 }
 
 # Runtime base must be in the approved allowlist
 deny[msg] {
   is_dockerfile
-  final_stage(stage)
-  runtime_base_disallowed(stage.base.image)
-  msg := sprintf("runtime base %s is not approved (use distroless/wolfi)", [stage.base.image])
+  count(input.stages) > 0
+  fs := input.stages[count(input.stages)-1]
+  runtime_base_disallowed(fs.base.image)
+  msg := sprintf("runtime base %s is not approved (use distroless/wolfi)", [fs.base.image])
 }
 
 # Package managers must not exist in the runtime image layers
-deny[msg] {
+deny["runtime stage must not invoke package managers"] {
   is_dockerfile
-  final_stage(stage)
-  uses_package_manager(stage)
-  msg := "runtime stage must not invoke package managers"
+  count(input.stages) > 0
+  fs := input.stages[count(input.stages)-1]
+  uses_package_manager(fs)
 }
 
 # Builder stages must also use approved builder bases
 deny[msg] {
   is_dockerfile
-  stage := builder_stages[_]
-  builder_base_disallowed(stage.base.image)
-  msg := sprintf("builder base %s is not approved", [stage.base.image])
+  bs := builder_stages[_]
+  builder_base_disallowed(bs.base.image)
+  msg := sprintf("builder base %s is not approved", [bs.base.image])
 }
 
 ############################################
 # Helm/Kubernetes policies
 ############################################
 
-is_k8s_resource(resource) {
-  resource.kind
-  resource.metadata
+_is_deployment {
+  input.kind
+  input.metadata
+  input.kind == "Deployment"
 }
 
-pod_containers(container) {
-  resource := input
-  is_k8s_resource(resource)
-  resource.kind == "Deployment"
-  container := resource.spec.template.spec.containers[_]
+deny["containers must use readOnlyRootFilesystem"] {
+  _is_deployment
+  ct := input.spec.template.spec.containers[_]
+  not ct.securityContext.readOnlyRootFilesystem
 }
 
-pod_security(resource) {
-  resource := input
-  is_k8s_resource(resource)
-  resource.kind == "Deployment"
+deny["capabilities must drop ALL"] {
+  _is_deployment
+  ct := input.spec.template.spec.containers[_]
+  not ct.securityContext.capabilities.drop
 }
 
-deny[msg] {
-  pod_containers(container)
-  not container.securityContext.readOnlyRootFilesystem
-  msg := "containers must use readOnlyRootFilesystem"
+deny["capabilities must explicitly drop ALL"] {
+  _is_deployment
+  ct := input.spec.template.spec.containers[_]
+  ct.securityContext.capabilities.drop
+  not contains(ct.securityContext.capabilities.drop, "ALL")
 }
 
-deny[msg] {
-  pod_containers(container)
-  not container.securityContext.capabilities.drop
-  msg := "capabilities must drop ALL"
+deny["allowPrivilegeEscalation must be false"] {
+  _is_deployment
+  ct := input.spec.template.spec.containers[_]
+  not ct.securityContext.allowPrivilegeEscalation == false
 }
 
-deny[msg] {
-  pod_containers(container)
-  container.securityContext.capabilities.drop
-  not contains(container.securityContext.capabilities.drop, "ALL")
-  msg := "capabilities must explicitly drop ALL"
+deny["runAsNonRoot required at pod securityContext"] {
+  _is_deployment
+  not input.spec.template.spec.securityContext.runAsNonRoot
 }
 
-deny[msg] {
-  pod_containers(container)
-  not container.securityContext.allowPrivilegeEscalation == false
-  msg := "allowPrivilegeEscalation must be false"
-}
-
-deny[msg] {
-  pod_security(resource)
-  not resource.spec.template.spec.securityContext.runAsNonRoot
-  msg := "runAsNonRoot required at pod securityContext"
-}
-
-deny[msg] {
-  pod_security(resource)
-  not resource.spec.template.spec.securityContext.seccompProfile
-  msg := "seccompProfile must be set to RuntimeDefault"
+deny["seccompProfile must be set to RuntimeDefault"] {
+  _is_deployment
+  not input.spec.template.spec.securityContext.seccompProfile
 }
 

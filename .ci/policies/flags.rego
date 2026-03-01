@@ -3,8 +3,7 @@ package policy.flags
 import future.keywords
 
 deny[msg] {
-  some k
-  k := input.code_flags[_]
+  some k in input.code_flags
   not input.catalog[k]
   msg := sprintf("flag %q missing from catalog.yaml", [k])
 }

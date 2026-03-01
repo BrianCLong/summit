@@ -35,12 +35,11 @@ violation[{
 }
 
 metadata_contains_required(file) {
-  some line
-  line := file.additions[_]
-  contains(line, "owner:")
-  contains(line, "risk:")
-  contains(line, "estimated_runtime:")
-  contains(line, "reversible:")
+  some ln in file.additions
+  contains(ln, "owner:")
+  contains(ln, "risk:")
+  contains(ln, "estimated_runtime:")
+  contains(ln, "reversible:")
 }
 
 violation[{
@@ -52,7 +51,6 @@ violation[{
 }
 
 metadata_flags(file) {
-  some line
-  line := file.additions[_]
-  contains(line, "dual_write")
+  some ln in file.additions
+  contains(ln, "dual_write")
 }

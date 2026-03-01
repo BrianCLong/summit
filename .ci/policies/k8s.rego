@@ -2,8 +2,6 @@ package ci.kubernetes
 
 import future.keywords
 
-default deny := []
-
 deny[msg] {
   input.kind == "Pod"
   input.spec.containers[_].securityContext.privileged == true
@@ -29,6 +27,7 @@ deny[msg] {
 
 deny[msg] {
   input.kind == "Deployment"
-  not input.spec.template.spec.containers[_].securityContext.runAsNonRoot
+  ct := input.spec.template.spec.containers[_]
+  not ct.securityContext.runAsNonRoot
   msg := "containers_must_run_as_non_root"
 }

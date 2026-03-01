@@ -1,6 +1,7 @@
 package deps.policy
 
 import future.keywords.if
+import future.keywords.in
 
 policy := data.policy
 
@@ -9,9 +10,9 @@ licenses(pkg) = result {
   raw != null
   raw != ""
   lowered := lower(raw)
-  cleaned := re_replace("[()]", "", lowered)
+  cleaned := regex.replace(lowered, "[()]", "")
   tokens := split(replace(replace(cleaned, " and ", " | "), " or ", " | "), "|")
-  result := {trim(token) | token := tokens[_]; trim(token) != ""}
+  result := {trim_space(token) | token := tokens[_]; trim_space(token) != ""}
 }
 
 licenses(pkg) = {} {
@@ -30,20 +31,19 @@ version_matches(version, regex) {
 version_matches(version, regex) {
   regex != ""
   version != null
-  re_match(regex, tostring(version))
+  re_match(regex, sprintf("%v", [version]))
 }
 
 override_metadata_valid(override) {
   override.ticket
-  trim(override.ticket) != ""
+  trim_space(override.ticket) != ""
   override.justification
-  trim(override.justification) != ""
+  trim_space(override.justification) != ""
   not expired(override.expires)
 }
 
 allow_override(pkg, rule) {
-  some override
-  override := policy.allow_overrides[_]
+  some override in policy.allow_overrides
   override_metadata_valid(override)
   override["package"] == pkg.name
   version_matches(pkg.versionInfo, override.version_regex)
@@ -69,7 +69,7 @@ expired(ts) {
 }
 
 expired(ts) {
-  parsed := time.parse_rfc3339(ts)
+  parsed := time.parse_rfc3339_ns(ts)
   now := time.now_ns()
   parsed <= now
 }

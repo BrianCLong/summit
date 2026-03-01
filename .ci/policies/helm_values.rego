@@ -3,13 +3,16 @@ package helm.values
 import future.keywords
 
 deny[msg] {
-  input.resources[_].kind == "Deployment"
-  not input.resources[_].spec.template.spec.securityContext.runAsNonRoot
+  r := input.resources[_]
+  r.kind == "Deployment"
+  not r.spec.template.spec.securityContext.runAsNonRoot
   msg := "runAsNonRoot required"
 }
 
 deny[msg] {
-  input.resources[_].kind == "Deployment"
-  not input.resources[_].spec.template.spec.containers[_].resources.limits
+  r := input.resources[_]
+  r.kind == "Deployment"
+  ct := r.spec.template.spec.containers[_]
+  not ct.resources.limits
   msg := "resource limits required"
 }

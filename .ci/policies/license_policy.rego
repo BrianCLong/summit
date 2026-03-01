@@ -4,8 +4,7 @@ import future.keywords
 
 # Example: block GPL-3.0 unless waived
 warn[msg] {
-  some d
-  d := input.dependencies[_]
+  some d in input.dependencies
   d.license == "GPL-3.0"
   msg := sprintf("GPL detected: %s", [d.name])
 }
