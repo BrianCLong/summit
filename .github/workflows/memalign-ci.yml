@@ -7,6 +7,11 @@ on:
       - 'src/evals/memalign/**'
       - 'src/cli/judge_align.ts'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'src/evals/memalign/**'
       - 'src/cli/judge_align.ts'

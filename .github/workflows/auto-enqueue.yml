@@ -2,6 +2,11 @@ name: Auto Enqueue Merge Queue
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [labeled, synchronize, reopened, ready_for_review]
   pull_request_review:
     types: [submitted]

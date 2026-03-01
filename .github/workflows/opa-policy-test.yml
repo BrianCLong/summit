@@ -11,6 +11,11 @@ name: OPA Policy Tests
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "policy/**/*.rego"
       - "policy/**/*.json"

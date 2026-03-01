@@ -2,6 +2,11 @@ name: Agentic Plan Gate
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [opened, synchronize, reopened, labeled, unlabeled]
 
 concurrency:

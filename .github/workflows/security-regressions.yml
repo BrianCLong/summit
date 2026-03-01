@@ -3,6 +3,11 @@ name: Security Regression Harness
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "server/src/security/**"
       - "src/agents/archetypes/**"
