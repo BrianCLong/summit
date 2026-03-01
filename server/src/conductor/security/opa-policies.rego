@@ -1,5 +1,6 @@
-import future.keywords
 package conductor.security
+
+import future.keywords
 import future.keywords.if
 import future.keywords.in
 import future.keywords.contains
@@ -139,7 +140,12 @@ allow if {
     geographic_access_allowed
     
     # PII protection - deny if PII detected and user lacks clearance
-    not (contains_pii; not allow_sensitive_data)
+    not _pii_blocked
+}
+
+_pii_blocked {
+    contains_pii
+    not allow_sensitive_data
 }
 
 # Cost estimation helper
@@ -161,14 +167,24 @@ estimate_task_cost(task, expert) := cost if {
     cost := base_cost * complexity_multiplier
 }
 
-task_complexity_multiplier(task) := multiplier if {
-    word_count := count(split(task, " "))
-    
-    # Simple heuristic for complexity
-    multiplier := 1.0 if word_count <= 10
-    multiplier := 1.5 if word_count > 10; word_count <= 50
-    multiplier := 2.0 if word_count > 50; word_count <= 100
-    multiplier := 3.0 if word_count > 100
+task_complexity_multiplier(task) := 1.0 if {
+    count(split(task, " ")) <= 10
+}
+
+task_complexity_multiplier(task) := 1.5 if {
+    wc := count(split(task, " "))
+    wc > 10
+    wc <= 50
+}
+
+task_complexity_multiplier(task) := 2.0 if {
+    wc := count(split(task, " "))
+    wc > 50
+    wc <= 100
+}
+
+task_complexity_multiplier(task) := 3.0 if {
+    count(split(task, " ")) > 100
 }
 
 # Audit logging requirements
