@@ -43,6 +43,8 @@ overrides:
   hono: '>=4.11.7'
   multer: '>=2.0.2'
   busboy: '>=1.6.0'
+  '@types/hapi__catbox': npm:typescript@^5.3.3
+  '@types/hapi__shot': npm:typescript@^5.3.3
 
 pnpmfileChecksum: sha256-a6bZRKVps8e/vFm+ZHjptEhSt2AMVrBBZPNF7tFCrHw=
 
@@ -10168,6 +10170,12 @@ importers:
         specifier: ^15.1.3
         version: 15.1.3
     devDependencies:
+      '@types/hapi__catbox':
+        specifier: npm:typescript@^5.3.3
+        version: typescript@5.9.3
+      '@types/hapi__shot':
+        specifier: npm:typescript@^5.3.3
+        version: typescript@5.9.3
       '@types/node':
         specifier: ^20.10.0
         version: 20.19.27
@@ -28062,17 +28070,11 @@ packages:
   '@hapi/b64@5.0.0':
     resolution: {integrity: sha512-ngu0tSEmrezoiIaNGG6rRvKOUkUuDdf4XTPnONHGYfSGRmDqPZX5oJL6HAdKTo1UQHECbdB4OzhWrfgVppjHUw==}
 
-  '@hapi/boom@10.0.1':
-    resolution: {integrity: sha512-ERcCZaEjdH3OgSJlyjVk8pHIFeus91CjKP3v+MpgBNp5IvGzP2l/bRiD78nqYcKPaZdbKkK5vDBVPd2ohHBlsA==}
-
   '@hapi/boom@9.1.4':
     resolution: {integrity: sha512-Ls1oH8jaN1vNsqcaHVYJrKmgMcKsC1wcp8bujvXrHaAqD2iDYq3HoOwsxwo09Cuda5R5nC0o0IxlrlTuvPuzSw==}
 
   '@hapi/bourne@2.1.0':
     resolution: {integrity: sha512-i1BpaNDVLJdRBEKeJWkVO6tYX6DMFBuwMhSuWqLsY4ufeTKGVuV5rBsUhxPayXqnnWHgXUAmWK16H/ykO5Wj4Q==}
-
-  '@hapi/catbox@12.1.1':
-    resolution: {integrity: sha512-hDqYB1J+R0HtZg4iPH3LEnldoaBsar6bYp0EonBmNQ9t5CO+1CqgCul2ZtFveW1ReA5SQuze9GPSU7/aecERhw==}
 
   '@hapi/cryptiles@5.1.0':
     resolution: {integrity: sha512-fo9+d1Ba5/FIoMySfMqPBR/7Pa29J2RsiPrl7bkwo5W5o+AN1dAYQRi4SPrPwwVxVGKjgLOEWrsvt1BonJSfLA==}
@@ -28096,19 +28098,9 @@ packages:
   '@hapi/podium@4.1.3':
     resolution: {integrity: sha512-ljsKGQzLkFqnQxE7qeanvgGj4dejnciErYd30dbrYzUOF/FyS/DOF97qcrT3bhoVwCYmxa6PEMhxfCPlnUcD2g==}
 
-  '@hapi/podium@5.0.2':
-    resolution: {integrity: sha512-T7gf2JYHQQfEfewTQFbsaXoZxSvuXO/QBIGljucUQ/lmPnTTNAepoIKOakWNVWvo2fMEDjycu77r8k6dhreqHA==}
-
-  '@hapi/shot@6.0.2':
-    resolution: {integrity: sha512-WKK1ShfJTrL1oXC0skoIZQYzvLsyMDEF8lfcWuQBjpjCN29qivr9U36ld1z0nt6edvzv28etNMOqUF4klnHryw==}
-
   '@hapi/teamwork@5.1.1':
     resolution: {integrity: sha512-1oPx9AE5TIv+V6Ih54RP9lTZBso3rP8j4Xhb6iSVwPXtAM+sDopl5TFMv5Paw73UnpZJ9gjcrTE1BXrWt9eQrg==}
     engines: {node: '>=12.0.0'}
-
-  '@hapi/teamwork@6.0.1':
-    resolution: {integrity: sha512-52OXRslUfYwXAOG8k58f2h2ngXYQGP0x5RPOo+eWA/FtyLgHjGMrE3+e9LSXP/0q2YfHAK5wj9aA9DTy1K+kyQ==}
-    engines: {node: '>=14.0.0'}
 
   '@hapi/tlds@1.1.4':
     resolution: {integrity: sha512-Fq+20dxsxLaUn5jSSWrdtSRcIUba2JquuorF9UW1wIJS5cSUwxIsO2GIhaWynPRflvxSzFN+gxKte2HEW1OuoA==}
@@ -28122,9 +28114,6 @@ packages:
 
   '@hapi/validate@1.1.3':
     resolution: {integrity: sha512-/XMR0N0wjw0Twzq2pQOzPBZlDzkekGcoCtzO314BpIEsbXdYGthQUbxgkGDf4nhk1+IPDAsXqWjMohRQYO06UA==}
-
-  '@hapi/validate@2.0.1':
-    resolution: {integrity: sha512-NZmXRnrSLK8MQ9y/CMqE9WSspgB9xA41/LlYR0k967aSZebWr4yNrpxIbov12ICwKy4APSlWXZga9jN5p6puPA==}
 
   '@headlessui/react@2.2.0':
     resolution: {integrity: sha512-RzCEg+LXsuI7mHiSomsu/gBJSjpupm6A1qIZ5sWjd7JhARNlMiSA4kKfJpCKwU9tE+zMRterhhrP74PvfJrpXQ==}
@@ -37141,19 +37130,11 @@ packages:
     resolution: {integrity: sha512-gq9YweFKNNB1uFK71eRqsd4niVkXrxHugqWFQkeLRJvGjnxsLr16bYtcsG4tOFwmYi0Bax+wCkbf1reUfdl4kA==}
     deprecated: This is a stub types definition. handlebars provides its own type definitions, so you do not need this installed.
 
-  '@types/hapi__catbox@12.1.0':
-    resolution: {integrity: sha512-v4XNUu6w9LmGgDZ4+OT1dSuvme5qNxFFyMVpqYPNugw4zN5xpWsNCsN7/0jG7wCKx39EQctW9iTT1O55UnH6/Q==}
-    deprecated: This is a stub types definition. @hapi/catbox provides its own type definitions, so you do not need this installed.
-
   '@types/hapi__hapi@20.0.13':
     resolution: {integrity: sha512-LP4IPfhIO5ZPVOrJo7H8c8Slc0WYTFAUNQX1U0LBPKyXioXhH5H2TawIgxKujIyOhbwoBbpvOsBf6o5+ToJIrQ==}
 
   '@types/hapi__mimos@4.1.4':
     resolution: {integrity: sha512-i9hvJpFYTT/qzB5xKWvDYaSXrIiNqi4ephi+5Lo6+DoQdwqPXQgmVVOZR+s3MBiHoFqsCZCX9TmVWG3HczmTEQ==}
-
-  '@types/hapi__shot@6.0.0':
-    resolution: {integrity: sha512-CUxk0AEQRpIT2cx7EYXkqaXm60LP46ZyEhr/7uov7D/ZLysA5DKkfBtPIYnoWvn8qfcFV/7YHLd3U9gThuhb0A==}
-    deprecated: This is a stub types definition. @hapi/shot provides its own type definitions, so you do not need this installed.
 
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
@@ -62182,22 +62163,11 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
 
-  '@hapi/boom@10.0.1':
-    dependencies:
-      '@hapi/hoek': 11.0.7
-
   '@hapi/boom@9.1.4':
     dependencies:
       '@hapi/hoek': 9.3.0
 
   '@hapi/bourne@2.1.0': {}
-
-  '@hapi/catbox@12.1.1':
-    dependencies:
-      '@hapi/boom': 10.0.1
-      '@hapi/hoek': 11.0.7
-      '@hapi/podium': 5.0.2
-      '@hapi/validate': 2.0.1
 
   '@hapi/cryptiles@5.1.0':
     dependencies:
@@ -62225,20 +62195,7 @@ snapshots:
       '@hapi/teamwork': 5.1.1
       '@hapi/validate': 1.1.3
 
-  '@hapi/podium@5.0.2':
-    dependencies:
-      '@hapi/hoek': 11.0.7
-      '@hapi/teamwork': 6.0.1
-      '@hapi/validate': 2.0.1
-
-  '@hapi/shot@6.0.2':
-    dependencies:
-      '@hapi/hoek': 11.0.7
-      '@hapi/validate': 2.0.1
-
   '@hapi/teamwork@5.1.1': {}
-
-  '@hapi/teamwork@6.0.1': {}
 
   '@hapi/tlds@1.1.4': {}
 
@@ -62254,11 +62211,6 @@ snapshots:
     dependencies:
       '@hapi/hoek': 9.3.0
       '@hapi/topo': 5.1.0
-
-  '@hapi/validate@2.0.1':
-    dependencies:
-      '@hapi/hoek': 11.0.7
-      '@hapi/topo': 6.0.2
 
   '@headlessui/react@2.2.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
@@ -76773,28 +76725,20 @@ snapshots:
     dependencies:
       handlebars: 4.7.8
 
-  '@types/hapi__catbox@12.1.0':
-    dependencies:
-      '@hapi/catbox': 12.1.1
-
   '@types/hapi__hapi@20.0.13':
     dependencies:
       '@hapi/boom': 9.1.4
       '@hapi/iron': 6.0.0
       '@hapi/podium': 4.1.3
-      '@types/hapi__catbox': 12.1.0
+      '@types/hapi__catbox': typescript@5.9.3
       '@types/hapi__mimos': 4.1.4
-      '@types/hapi__shot': 6.0.0
+      '@types/hapi__shot': typescript@5.9.3
       '@types/node': 20.19.27
       joi: 17.13.3
 
   '@types/hapi__mimos@4.1.4':
     dependencies:
       '@types/mime-db': 1.43.6
-
-  '@types/hapi__shot@6.0.0':
-    dependencies:
-      '@hapi/shot': 6.0.2
 
   '@types/hast@3.0.4':
     dependencies:
