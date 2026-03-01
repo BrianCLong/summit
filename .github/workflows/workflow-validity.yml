@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   validate:
-    name: Workflow Validity Gate
+    name: Workflow Validity Check
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
