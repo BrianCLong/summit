@@ -64,4 +64,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Gateway Docker Image
-        run: docker compose -f docker-compose.dev.yaml build gateway
+        run: docker compose -f docker-compose.dev.yaml build api-gateway
