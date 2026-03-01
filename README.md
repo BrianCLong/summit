@@ -2,7 +2,12 @@
 
 > Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
 
-[![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
+[![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
+[![Rust CI](https://github.com/BrianCLong/summit/actions/workflows/ci-rust.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci-rust.yml)
+[![Python CI](https://github.com/BrianCLong/summit/actions/workflows/ci-python.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci-python.yml)
+[![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
+[![CodeQL](https://github.com/BrianCLong/summit/actions/workflows/codeql.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/codeql.yml)
+[![OSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/BrianCLong/summit/badge)](https://securityscorecards.dev/viewer/?uri=github.com/BrianCLong/summit)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
