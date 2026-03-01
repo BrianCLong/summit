@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- scripts/deterministic-merge-train.sh script to handle deterministic PR merging as a train.
+- scripts/observer.sh telemetry script for tracking merge train queues.
+### Fixed
+- Division-by-zero bug when running scripts/merge-train-health-dashboard.sh without bc utility.
+
+### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
