@@ -107,7 +107,7 @@ jobs:
             --project=${{ matrix.browser }}-desktop \
             --shard=${{ matrix.shard }}/4 \
             --reporter=html,junit \
-            --output-dir=playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}
+            --output=playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}
         env:
           BASE_URL: ${{ env.BASE_URL }}
           PLAYWRIGHT_HTML_REPORT: playwright-results-${{ matrix.browser }}-shard${{ matrix.shard }}/html-report

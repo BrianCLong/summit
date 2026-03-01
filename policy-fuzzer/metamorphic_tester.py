@@ -265,7 +265,10 @@ class MetamorphicTester:
     def _shift_time_within_window(self, policy, query):
         transformed_query = deepcopy(query)
         if "access_date" in transformed_query:
-            access_date = datetime.fromisoformat(transformed_query["access_date"])
+            try:
+                access_date = datetime.fromisoformat(transformed_query["access_date"])
+            except ValueError:
+                return transformed_query
             # Shift by a small random amount within a day
             shift_hours = random.randint(-6, 6)
             transformed_query["access_date"] = (
@@ -276,7 +279,10 @@ class MetamorphicTester:
     def _shift_time_outside_window(self, policy, query):
         transformed_query = deepcopy(query)
         if "access_date" in transformed_query:
-            access_date = datetime.fromisoformat(transformed_query["access_date"])
+            try:
+                access_date = datetime.fromisoformat(transformed_query["access_date"])
+            except ValueError:
+                return transformed_query
             # Shift significantly outside the window (e.g., a year)
             shift_years = random.choice([-1, 1])
             transformed_query["access_date"] = (
@@ -287,7 +293,10 @@ class MetamorphicTester:
     def _shift_time_by_unit(self, policy, query, unit, offset):
         transformed_query = deepcopy(query)
         if "access_date" in transformed_query:
-            access_date = datetime.fromisoformat(transformed_query["access_date"])
+            try:
+                access_date = datetime.fromisoformat(transformed_query["access_date"])
+            except ValueError:
+                return transformed_query
             if unit == "week":
                 access_date += timedelta(weeks=offset)
             elif unit == "month":
@@ -300,7 +309,10 @@ class MetamorphicTester:
     def _fuzzy_date_comparison(self, policy, query):
         transformed_query = deepcopy(query)
         if "access_date" in transformed_query:
-            access_date = datetime.fromisoformat(transformed_query["access_date"])
+            try:
+                access_date = datetime.fromisoformat(transformed_query["access_date"])
+            except ValueError:
+                return transformed_query
             # Introduce a small random offset (e.g., +/- a few minutes)
             fuzzy_minutes = random.randint(-5, 5)
             transformed_query["access_date"] = (

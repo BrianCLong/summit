@@ -1,3 +1,4 @@
+import copy
 """Generates policies for the policy-fuzzer."""
 
 import os
@@ -7,7 +8,7 @@ from datetime import datetime, timedelta
 import yaml
 from policy_parser import parse_policy_definition
 
-POLICY_TEMPLATES_DIR = "policy-fuzzer/policy_templates"
+POLICY_TEMPLATES_DIR = "policy_templates"
 
 # Define lists of possible values for policy fields
 CONSENT_TYPES = ["user_data", "marketing", "analytics"]
@@ -70,7 +71,7 @@ def _generate_random_condition():
 
 def mutate_policy(policy_definition):
     """Applies a random mutation to a policy definition."""
-    mutated_policy = deepcopy(policy_definition)
+    mutated_policy = copy.deepcopy(policy_definition)
     rules = mutated_policy.get("rules", [])
 
     if not rules:
@@ -102,9 +103,14 @@ def mutate_policy(policy_definition):
             if isinstance(rule_to_mutate["condition"], dict):
                 key_to_modify = random.choice(list(rule_to_mutate["condition"].keys()))
                 if key_to_modify not in ["AND", "OR", "NOT"]:
-                    rule_to_mutate["condition"][key_to_modify] = _generate_random_condition()[
-                        key_to_modify
-                    ]
+                    random_cond = _generate_random_condition()
+                    if key_to_modify in random_cond:
+                        rule_to_mutate["condition"][key_to_modify] = random_cond[key_to_modify]
+                    else:
+                        # If the key isn't in the random condition, just pick a new condition entirely
+                        if rule_to_mutate["condition"].get(key_to_modify) is not None:
+                            del rule_to_mutate["condition"][key_to_modify]
+                        rule_to_mutate["condition"].update(random_cond)
 
     mutated_policy["rules"] = rules
     return mutated_policy
