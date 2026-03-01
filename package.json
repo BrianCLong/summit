@@ -1,7 +1,7 @@
 {
   "name": "intelgraph-platform",
   "version": "4.1.15",
-  "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
+  "description": "Summit — governance and orchestration platform for secure enterprise AI systems.",
   "main": "server/server.js",
   "type": "module",
   "packageManager": "pnpm@10.0.0",
