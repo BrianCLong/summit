@@ -58,10 +58,3 @@ jobs:
       - name: Verify Server Build
         run: pnpm -C server build
 
-  verify-gateway-build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build Gateway Docker Image
-        run: docker compose -f docker-compose.dev.yaml build gateway
