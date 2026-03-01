@@ -33,12 +33,12 @@ jobs:
           if [ ! -f tools/neo4j/seed_queries.txt ]; then
             mkdir -p tools/neo4j
             cat > tools/neo4j/seed_queries.txt <<'SEED_EOF'
-MATCH (q:QuerySeed) RETURN q.id LIMIT 5
-// --- Add critical upserts / GraphRAG seeds below ---
-//
-// Example:
-// MERGE (p:Person {id:$id}) ON CREATE SET p.name = $name RETURN p
-SEED_EOF
+          MATCH (q:QuerySeed) RETURN q.id LIMIT 5
+          // --- Add critical upserts / GraphRAG seeds below ---
+          //
+          // Example:
+          // MERGE (p:Person {id:$id}) ON CREATE SET p.name = $name RETURN p
+          SEED_EOF
           fi
 
       - name: Run plan sampler
