@@ -36,7 +36,7 @@ branch_protection:
       - "Release Readiness Gate"
       - "SOC Controls"
       - "test (20.x)"
-      - "Workflow Validity Check"
+      - "Workflow Validity Gate"
 
 # Always Required Checks
 # ----------------------
@@ -71,7 +71,7 @@ always_required:
     workflow: "soc-controls.yml"
     rationale: "SOC control verification is required for audit readiness"
 
-  - name: "Workflow Validity Check"
+  - name: "Workflow Validity Gate"
     workflow: "workflow-validity.yml"
     rationale: "Workflow syntax validity is required by protected-branch checks"
 
