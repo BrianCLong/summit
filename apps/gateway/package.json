@@ -18,6 +18,7 @@
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "bullmq": "^5.8.2",
+    "dotenv": "^16.3.1",
     "express": "^4.19.2",
     "graphql-subscriptions": "^2.0.0",
     "helmet": "^7.1.0",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.11.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3",
     "vitest": "^4.0.16"

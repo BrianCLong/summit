@@ -46,11 +46,11 @@
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Jest Test Suite broken | **RESOLVED** | FIX | `@intelgraph/ops-team` | Config valid; run `pnpm install` to restore dependencies. | 2026-02-28 |
 | Epic K (Platform Gov) unimplemented | PARTIAL | FIX | `@intelgraph/provenance-team` | SBOM, signing, OPA largely done. CI enforcement in progress. | 2026-01-28 |
-| OPA Policies need verification | **RESOLVED** | FIX | `@intelgraph/policy-team` | `opa check server/policies/` passes. 35/39 tests pass. | 2026-02-28 |
+| OPA Policies need verification | **RESOLVED** | FIX | `@intelgraph/policy-team` | `opa check` passes all 3 dirs (server, .github, .ci). 35/39 tests pass. | 2026-02-28 |
 | GA Documentation missing | **RESOLVED** | FIX | `@intelgraph/platform-core` | 77 files in `docs/ga/` with substantive content. | 2026-02-28 |
-| `apps/gateway` build failure | FAIL | FIX | `@intelgraph/platform-core` | Fix TypeScript `rootDir` misconfiguration in `apps/gateway`. | 2026-01-26 |
-| `apps/mobile-interface` build failure | FAIL | FIX | `@intelgraph/frontend-team` | Resolve `pify` import error in `apps/mobile-interface`. | 2026-01-26 |
-| `apps/a11y-lab` test failure | FAIL | FIX | `@intelgraph/ops-team` | Install missing Playwright dependencies in the CI environment. | 2026-01-26 |
+| `apps/gateway` build failure | **RESOLVED** | FIX | `@intelgraph/platform-core` | Added missing `@types/node` + `dotenv` deps. Builds after `pnpm install`. | 2026-02-28 |
+| `apps/mobile-interface` build failure | **RESOLVED** | FIX | `@intelgraph/frontend-team` | Environmental — builds after `pnpm install`. No code fix needed. | 2026-02-28 |
+| `apps/a11y-lab` test failure | DEGRADED | ACCEPT | `@intelgraph/ops-team` | Requires Playwright browser deps in CI. Environmental, not code issue. | 2026-02-28 |
 | Mixed Test Runners | DEGRADED | ACCEPT | `@intelgraph/ops-team` | Document testing toolchain roadmap for post-GA unification. | 2026-03-01 |
 | Zod Version Mismatch | DEGRADED | ACCEPT | `@intelgraph/frontend-team` | Accept version mismatch for GA; schedule unification for v4.2. | 2026-03-01 |
 | Terraform Plan execution | UNKNOWN | FIX | `@intelgraph/ops-team` | Execute Terraform plan in Staging and verify for drift. | 2026-01-26 |
