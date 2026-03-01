@@ -23,13 +23,7 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
-    // Defensive check to avoid crash if INSERT fails silently or returns empty
-    if (result.rows && result.rows.length > 0) {
-      testRunId = result.rows[0].id;
-    } else {
-      // Fallback for mock environments if RETURNING isn't supported as expected
-      testRunId = 'test-run-id-fallback';
-    }
+    testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';

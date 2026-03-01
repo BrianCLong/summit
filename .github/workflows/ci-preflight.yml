@@ -37,10 +37,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate Docker Compose Config
-      - run: touch .env
-
-      - run: touch .env
-
         run: docker compose -f docker-compose.dev.yaml config
 
   verify-server-build:

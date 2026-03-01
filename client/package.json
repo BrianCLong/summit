@@ -1,11 +1,11 @@
 {
   "name": "intelgraph-client",
   "private": true,
-  "version": "4.1.15",
+  "version": "4.2.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "NODE_ENV=production vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.strict.json --noEmit",
     "test": "node node_modules/jest/bin/jest.js --config jest.config.cjs",
@@ -21,7 +21,7 @@
     "format": "prettier --write .",
     "persist:queries": "graphql-codegen --config codegen.ts",
     "generate:persisted": "node scripts/generate-persisted-operations.js",
-    "analyze:bundle": "NODE_ENV=production vite build && echo 'Bundle analysis available at dist/stats.html'"
+    "analyze:bundle": "vite build && echo 'Bundle analysis available at dist/stats.html'"
   },
   "dependencies": {
     "@apollo/client": "3.13.9",

@@ -1,3 +1,4 @@
+import re
 #!/usr/bin/env python3
 """
 Summit Evidence Verifier (CI gate)
@@ -26,7 +27,6 @@ def load(p: Path) -> object:
 
 EVIDENCE_ID_RE = re.compile(r"^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$")
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
-ISO_RE = re.compile(r"202\d-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
 def _require(cond: bool, msg: str) -> None:
     if not cond:
@@ -133,13 +133,10 @@ def main() -> int:
             continue
         if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
             continue
-        # Exclude fixtures from timestamp checks as they are expected to fail or contain test data
-        if "fixtures" in p.parts:
-            continue
-
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if ISO_RE.search(txt):
+            ISO_RE = re.compile(r"202\d-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
+        if ISO_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
