@@ -105,7 +105,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
         return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const schemaId = req.params.id as string;
+    const schemaId = req.params.id as string as string;
     const schema = registryService.getSchemaById(schemaId);
 
     if (!schema) {

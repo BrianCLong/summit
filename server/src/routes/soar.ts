@@ -50,7 +50,7 @@ router.get('/playbooks', ensureAuthenticated, async (req, res) => {
 router.get('/playbooks/:id', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
-        const playbook = await service.getPlaybook(req.params.id as string as string, user!.tenantId);
+        const playbook = await service.getPlaybook(req.params.id as string as string as string, user!.tenantId);
         if (!playbook) return res.status(404).json({ error: 'Not found' });
         res.json(playbook);
     } catch (err: any) {
@@ -63,7 +63,7 @@ router.post('/playbooks/:id/run', ensureAuthenticated, async (req, res) => {
     try {
         const user = (req as any).user;
         const run = await service.runPlaybook(
-            req.params.id as string as string,
+            req.params.id as string as string as string,
             user!.tenantId,
             req.body.context || {},
             user!.id,
@@ -95,7 +95,7 @@ router.get('/runs/:id/bundle', ensureAuthenticated, async (req, res) => {
         const user = (req as any).user;
         const { filename, buffer } = await bundleExporter.createBundle(
             user!.tenantId,
-            req.params.id as string as string
+            req.params.id as string as string as string
         );
         res.setHeader('Content-Type', 'application/zip');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
