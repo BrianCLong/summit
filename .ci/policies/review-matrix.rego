@@ -10,7 +10,6 @@ critical_paths = ["deploy/", ".security/", ".maestro/", ".ci/", "migrations/"]
 required_labels[f] {
   f := input.pull_request.changed_files[_]
   startswith(f, "migrations/")
-  result := "needs-migration-gate"
 }
 
 # Evaluate approval requirements per path

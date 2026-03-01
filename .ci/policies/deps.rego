@@ -20,18 +20,18 @@ licenses(pkg) = {} {
   not pkg.licenseDeclared
 }
 
-version_matches(version, regex) {
-  not regex
+version_matches(_, pat) {
+  not pat
 }
 
-version_matches(version, regex) {
-  regex == ""
+version_matches(_, pat) {
+  pat == ""
 }
 
-version_matches(version, regex) {
-  regex != ""
+version_matches(version, pat) {
+  pat != ""
   version != null
-  re_match(regex, sprintf("%v", [version]))
+  regex.match(pat, sprintf("%v", [version]))
 }
 
 override_metadata_valid(override) {
