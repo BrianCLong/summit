@@ -1,0 +1,74 @@
+name: lineage-smoke
+on:
+  pull_request:
+jobs:
+  validate-openlineage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Start stub OpenLineage server
+        run: |
+          mkdir -p events
+          cat << 'STUB_SERVER_EOF' > stub_server.py
+          import http.server
+          import socketserver
+          import json
+          import os
+          import uuid
+
+          class RequestHandler(http.server.BaseHTTPRequestHandler):
+              def do_POST(self):
+                  content_length = int(self.headers['Content-Length'])
+                  post_data = self.rfile.read(content_length)
+                  try:
+                      event = json.loads(post_data.decode('utf-8'))
+                      filename = f"events/{uuid.uuid4()}.json"
+                      with open(filename, 'w') as fh:
+                          json.dump(event, fh)
+                      self.send_response(200)
+                      self.send_header('Content-type', 'application/json')
+                      self.end_headers()
+                      self.wfile.write(json.dumps({"status": "ok"}).encode('utf-8'))
+                  except Exception as e:
+                      self.send_response(500)
+                      self.end_headers()
+                      self.wfile.write(str(e).encode('utf-8'))
+
+          if __name__ == '__main__':
+              PORT = 8080
+              socketserver.TCPServer.allow_reuse_address = True
+              with socketserver.TCPServer(("", PORT), RequestHandler) as httpd:
+                  print("serving at port", PORT)
+                  httpd.serve_forever()
+          STUB_SERVER_EOF
+          python3 stub_server.py &
+          echo $! > stub.pid
+          sleep 2
+        shell: bash
+
+      - name: Run instrumented smoke job
+        env:
+          OPENLINEAGE_URL: http://localhost:8080
+        run: |
+          python3 scripts/smoke_job.py
+        shell: bash
+
+      - name: Validate events
+        run: |
+          cd packages/lineage/openlineage
+          pnpm install
+          pnpm build
+          cd ../../../
+
+          python3 scripts/ci/validate_openlineage.py
+        shell: bash
