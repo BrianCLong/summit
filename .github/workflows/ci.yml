@@ -9,8 +9,8 @@ on:
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 # Global environment for all jobs - prevents V8 heap exhaustion
 env:
@@ -24,9 +24,9 @@ jobs:
       contents: read
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -34,11 +34,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
@@ -51,11 +51,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
@@ -70,11 +70,11 @@ jobs:
     timeout-minutes: 15
     needs: [typecheck]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -94,21 +94,32 @@ jobs:
         shell: bash
       - name: Generate Metrics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4
         with:
           name: coverage-report
           path: server/coverage/
+
+
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4
+        with:
+          name: test-logs-${{ github.job }}
+          path: |
+            ~/.npm/_logs/
+            coverage/
+          retention-days: 5
 
   integration-test:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs: [config-guard]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
@@ -116,6 +127,17 @@ jobs:
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
+
+
+      - name: Upload Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4
+        with:
+          name: test-logs-${{ github.job }}
+          path: |
+            ~/.npm/_logs/
+            coverage/
+          retention-days: 5
 
   security-compliance:
     name: Security & Compliance
@@ -154,11 +176,11 @@ jobs:
         ports:
           - 7687:7687
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
@@ -168,7 +190,7 @@ jobs:
         run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
       - name: Upload SOC compliance reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4
         with:
           name: soc-compliance-report
           path: soc-compliance-reports
@@ -178,7 +200,7 @@ jobs:
     name: Verify Workflow Versions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4
       - name: Verify Versions
         uses: ./.github/actions/verify-workflow-versions
       - name: Attach evidence
@@ -193,7 +215,7 @@ jobs:
         shell: bash
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4
         with:
           name: verification-artifacts
           path: artifacts/**

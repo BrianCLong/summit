@@ -62,16 +62,16 @@ jobs:
       artifact: ${{ inputs.artifact-name }}-${{ github.run_number }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@1d96c772d19495a3b5c517cd2bc0cb401ea0529f # v4 # v6
 
       - name: Enable Corepack
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
         with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
@@ -82,16 +82,18 @@ jobs:
         run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
 
       - name: Cache pnpm store
-        uses: actions/cache@v4 # v5
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4 # v5
         with:
+          save-always: true
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: Cache Turbo
-        uses: actions/cache@v4 # v5
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4 # v5
         with:
+          save-always: true
           path: .turbo
           key: ${{ runner.os }}-turbo-build-${{ github.sha }}
           restore-keys: |
@@ -137,7 +139,7 @@ jobs:
 
       - name: Upload build artifacts
         if: inputs.upload-artifacts
-        uses: actions/upload-artifact@v4 # v6
+        uses: actions/upload-artifact@1eb3cb2b3e0f29609092a73eb033bb759a334595 # v4 # v6
         with:
           name: ${{ inputs.artifact-name }}-${{ github.run_number }}
           path: ${{ inputs.artifact-path }}

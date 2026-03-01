@@ -18,8 +18,9 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7 # v4
       with:
+        cache: 'pnpm'
         node-version: ${{ inputs.node-version }}
         # setup-node v4 has built-in pnpm caching if pnpm is enabled, but we need to enable it first or use pnpm/action-setup
 
@@ -27,7 +28,7 @@ runs:
       shell: bash
       run: corepack enable
 
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v4
       with:
         run_install: false
 
@@ -38,8 +39,9 @@ runs:
         echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
 
     - name: Cache pnpm store
-      uses: actions/cache@v4
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
       with:
+        save-always: true
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
@@ -47,8 +49,9 @@ runs:
 
     - name: Cache Turbo
       if: inputs.turbo-cache == 'true'
-      uses: actions/cache@v4
+      uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
       with:
+        save-always: true
         path: .turbo
         key: ${{ runner.os }}-turbo-${{ github.sha }}
         restore-keys: |
