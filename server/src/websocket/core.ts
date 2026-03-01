@@ -83,7 +83,7 @@ export class WebSocketCore {
 
   private verifyJWT(token: string): WebSocketClaims | null {
     try {
-      const decoded = jwt.verify(token, this.JWT_SECRET) as jwt.JwtPayload & {
+      const decoded = jwt.verify(token, this.JWT_SECRET, { algorithms: ['HS256'] }) as jwt.JwtPayload & {
         tenantId?: string;
         userId?: string;
         roles?: string[];

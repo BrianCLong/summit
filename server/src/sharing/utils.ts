@@ -19,7 +19,7 @@ export const signShareToken = (payload: Omit<ShareTokenPayload, 'exp'>, expiresA
 };
 
 export const verifyShareToken = (token: string): ShareTokenPayload => {
-  return jwt.verify(token, SHARE_SECRET) as ShareTokenPayload;
+  return jwt.verify(token, SHARE_SECRET, { algorithms: ['HS256'] }) as ShareTokenPayload;
 };
 
 export const planHash = (input: unknown): string => {

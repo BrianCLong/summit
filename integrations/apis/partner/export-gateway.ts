@@ -274,7 +274,7 @@ export class ExportGateway extends EventEmitter {
         throw new Error('Partner not found');
       }
 
-      const decoded = jwt.verify(token, partner.secretKey) as any;
+      const decoded = jwt.verify(token, partner.secretKey, { algorithms: ['HS256'] }) as any;
 
       if (decoded.partnerId !== partnerId) {
         throw new Error('Invalid partner ID in token');

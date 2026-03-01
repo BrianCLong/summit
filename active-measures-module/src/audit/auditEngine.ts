@@ -767,6 +767,7 @@ export class AuditEngine {
       const decoded = jwt.verify(
         entry.integrity.digitalSignature,
         this.signingKey,
+        { algorithms: ['HS256'] },
       ) as any;
       return JSON.stringify(decoded) === JSON.stringify(entryData);
     } catch {

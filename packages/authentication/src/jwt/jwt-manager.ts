@@ -114,7 +114,7 @@ export class JWTManager {
 
   verifyRefreshToken(token: string): { sub: string } {
     try {
-      const decoded = jwt.verify(token, this.config.secret) as { sub: string; type: string };
+      const decoded = jwt.verify(token, this.config.secret, { algorithms: ['HS256'] }) as { sub: string; type: string };
 
       if (decoded.type !== 'refresh') {
         throw new Error('Invalid refresh token');

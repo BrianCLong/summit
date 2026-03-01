@@ -580,7 +580,7 @@ export class SecurityService extends EventEmitter {
     token: string,
   ): Promise<{ user: User; session: Session } | null> {
     try {
-      const decoded = jwt.verify(token, this.jwtSecret) as any;
+      const decoded = jwt.verify(token, this.jwtSecret, { algorithms: ['HS256'] }) as any;
       const user = this.users.get(decoded.userId);
       const session = this.sessions.get(decoded.sessionId);
 
@@ -702,7 +702,7 @@ export class SecurityService extends EventEmitter {
   public async verifyDbToken(token: string, pool: Pool): Promise<any> {
     try {
       if (!token) return null;
-      const decoded = jwt.verify(token, this.jwtSecret) as any;
+      const decoded = jwt.verify(token, this.jwtSecret, { algorithms: ['HS256'] }) as any;
 
       // Check if token is blacklisted
       const tokenHash = this.hashToken(token);

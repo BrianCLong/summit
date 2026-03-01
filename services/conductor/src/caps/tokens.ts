@@ -22,5 +22,5 @@ export function mintCapToken({
   );
 }
 export function verifyCapToken(token: string) {
-  return jwt.verify(token, process.env.CAPS_SIGNING_KEY!);
+  return jwt.verify(token, process.env.CAPS_SIGNING_KEY!, { algorithms: ['HS256'] });
 }

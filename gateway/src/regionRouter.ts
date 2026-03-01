@@ -283,6 +283,7 @@ class RegionRouter {
       const decoded = jwt.verify(
         exportToken,
         process.env.EXPORT_TOKEN_SECRET!,
+        { algorithms: ['HS256'] },
       ) as any;
       return (
         decoded.purpose === 'cross-region-export' &&
