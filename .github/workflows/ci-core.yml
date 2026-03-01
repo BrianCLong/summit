@@ -240,7 +240,7 @@ jobs:
 
           echo "=== First Build ==="
           pnpm run build
-          
+
           # Verify artifacts created
           if [[ ! -d "client/dist" || ! -d "server/dist" ]]; then
             echo "::error::Build artifacts missing after first build"
