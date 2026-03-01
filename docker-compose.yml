@@ -22,29 +22,6 @@ services:
       - observability
       - intelgraph
 
-  redis-cache:
-    image: redis:7-alpine
-    ports: [ "6380:6379" ]
-    volumes:
-      - redis_cache_data:/data
-    command: redis-server --appendonly yes
-    networks:
-      - default
-      - observability
-      - intelgraph
-
-  redis-dist:
-    image: redis:7-alpine
-    ports: [ "6381:6379" ]
-    volumes:
-      - redis_dist_data:/data
-    command: redis-server --appendonly yes
-    networks:
-      - default
-      - observability
-      - intelgraph
-
-
   postgres:
     image: postgres:16-alpine
     environment:
@@ -94,8 +71,6 @@ services:
       - NEO4J_PASSWORD=test1234
       - REDIS_URL=redis://redis:6379
       - REDIS_HOST=redis
-      - REDIS_CACHE_HOST=redis-cache
-      - REDIS_DIST_HOST=redis-dist
       - JWT_SECRET=dev-secret-do-not-use-in-prod-and-longer
       - JWT_REFRESH_SECRET=another-dev-secret-refresh-key-32-chars
       - SESSION_SECRET=dev-secret-do-not-use-in-prod
@@ -111,8 +86,6 @@ services:
       - postgres
       - neo4j
       - redis
-      - redis-cache
-      - redis-dist
     networks:
       - default
       - observability
@@ -153,8 +126,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - REDIS_HOST=redis
-      - REDIS_CACHE_HOST=redis-cache
-      - REDIS_DIST_HOST=redis-dist
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - S3_BUCKET
@@ -184,8 +155,6 @@ volumes:
   neo4j_data: {}
   pg_data: {}
   redis_data: {}
-  redis_cache_data: {}
-  redis_dist_data: {}
 
 networks:
   observability:

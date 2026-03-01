@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.15",
+  "version": "4.2.3",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -52,6 +52,7 @@
     "lint": "eslint . && (ruff check . || true)",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
     "security:check": "node scripts/security-check.js",
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",
     "security:evidence-pack:offline": "npx tsx scripts/security/evidence-pack.ts --mode=offline --fixturesDir=scripts/security/fixtures",

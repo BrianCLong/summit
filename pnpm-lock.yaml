@@ -307,6 +307,9 @@ importers:
       '@types/pg':
         specifier: ^8.x
         version: 8.16.0
+      '@vitest/coverage-v8':
+        specifier: ^1.2.2
+        version: 1.6.1(vitest@1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1))
       jest:
         specifier: ^29.x
         version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
@@ -316,6 +319,9 @@ importers:
       typescript:
         specifier: ^5.x
         version: 5.9.3
+      vitest:
+        specifier: ^1.2.2
+        version: 1.6.1(@types/node@20.19.27)(happy-dom@20.0.11)(jsdom@27.4.0)(lightningcss@1.30.2)(terser@5.44.1)
 
   agents/orchestrator:
     dependencies:
@@ -62884,7 +62890,7 @@ snapshots:
       '@opentelemetry/exporter-prometheus': 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-node': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.39.0
+      '@opentelemetry/semantic-conventions': 1.40.0
       axios: 1.13.4
       cheerio: 1.2.0
       crypto: 1.0.1
@@ -67156,7 +67162,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.39.0
+      '@opentelemetry/semantic-conventions': 1.40.0
       forwarded-parse: 2.1.2
     transitivePeerDependencies:
       - supports-color
@@ -67717,7 +67723,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.39.0
+      '@opentelemetry/semantic-conventions': 1.40.0
       '@opentelemetry/sql-common': 0.41.2(@opentelemetry/api@1.9.0)
       '@types/pg': 8.15.6
       '@types/pg-pool': 2.0.6
@@ -71363,7 +71369,9 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
