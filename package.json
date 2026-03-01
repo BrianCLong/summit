@@ -35,6 +35,8 @@
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "cd server && npm run test:unit",
     "test:integration": "cd server && npm run test:integration",
+    "test:security": "cd server && npm run test:security",
+    "test:security:regressions": "cd server && npm run test:security",
     "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
     "coverage:collect": "pnpm --filter server run test:coverage -- --coverageReporters=json-summary --passWithNoTests",
     "coverage:gate": "node scripts/coverage-aggregate.js --scope=${COVERAGE_SCOPE:-all} --base=${COVERAGE_BASE_REF:-origin/main}",
@@ -127,8 +129,7 @@
     "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
-    "ga:evidence": "pnpm compliance:evidence",
-    "compliance:antigravity": "echo '✅ Compliance Anti-Gravity check passed (placeholder)'"
+    "ga:evidence": "pnpm compliance:evidence"
   },
   "keywords": [
     "intelligence-analysis",

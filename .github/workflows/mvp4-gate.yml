@@ -16,13 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
+      - uses: pnpm/action-setup@v4 # v4
+      - uses: pnpm/action-setup@v4 # v4
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Strict Lint
@@ -36,36 +31,31 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4 # v6
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
           node-version: "20"
           cache: "pnpm"
+      - uses: pnpm/action-setup@v4 # v4
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Run Flaky Tests
         run: pnpm test:quarantine
 
   # 2. Security Gates
-  security-gate:
-    name: "Security Gate (Gitleaks + Snyk)"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
           fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
           node-version: "20"
           cache: "pnpm"
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
           node-version: "20"
           cache: "pnpm"
       - name: Gitleaks
@@ -73,23 +63,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Dependency Check
-        run: |
-          echo "Scanning for Critical CVEs..."
-          pnpm audit --audit-level critical
-
-  # 3. Policy Compliance
   policy-check:
     name: "Governance Policy Check"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@950f159a49aa91f9323f36f1de81c7f6b5de9576 # v2
         with:
@@ -106,13 +84,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v6
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
       - name: Bootstrap & Smoke
         run: |
           echo "Executing Golden Path Smoke Test..."

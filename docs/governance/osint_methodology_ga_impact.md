@@ -1,8 +1,3 @@
-Owner: Governance
-Last-Reviewed: 2026-02-25
-Evidence-IDs: none
-Status: active
-
 # OSINT Methodology GA Impact Assessment
 
 **Methodology Source:** Automation Turn #5 (2026-01-26)

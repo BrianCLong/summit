@@ -1,8 +1,3 @@
-Owner: Governance
-Last-Reviewed: 2026-02-25
-Evidence-IDs: none
-Status: active
-
 # Lineage Durability & Recovery Standards
 
 **Effective Date:** 2026-01-25

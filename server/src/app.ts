@@ -611,8 +611,8 @@ export const createApp = async () => {
   app.get('/search/evidence', authenticateToken, ensureRole(['admin', 'analyst']), async (req, res) => {
     const { q } = req.query;
     // SEC-DoS: Enforce pagination and offset limits
-    const limit = Math.min(Math.max(Number((req.query.limit as string)) || 10, 1), 100);
-    const skip = Math.max(Number((req.query.skip as string)) || 0, 0);
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+    const skip = Math.max(Number(req.query.skip) || 0, 0);
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });

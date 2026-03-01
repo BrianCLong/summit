@@ -54,7 +54,7 @@ router.get('/certificates', ensureAuthenticated, async (req, res) => {
 });
 
 router.get('/coaching', ensureAuthenticated, (req, res) => {
-    const tripwire = (req.query.tripwire as string) as string;
+    const tripwire = req.query.tripwire as string;
     if (tripwire) {
         res.json(masteryService.getSuggestedLabs(tripwire));
     } else {

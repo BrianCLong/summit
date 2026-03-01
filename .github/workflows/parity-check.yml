@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         cloud: [aws, gcp, azure]
-    if: ${{ secrets.GCP_WORKLOAD_POOL != '' }}
+    if: ${{ env.GCP_WORKLOAD_POOL != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

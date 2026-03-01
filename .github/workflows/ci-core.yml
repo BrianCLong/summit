@@ -158,12 +158,8 @@ jobs:
       - name: Run database migrations
         run: cd server && npm run migrate
         env:
-          ALLOW_BREAKING_MIGRATIONS: 'true'
-          CI: true
-        env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
-      - name: Run integration tests (attempt 1)
         run: pnpm test:integration || echo "retry" > .retry
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
