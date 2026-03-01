@@ -120,6 +120,7 @@ jobs:
 
           [skip ci]"
 
+          git pull --rebase origin main
           git push
 
       - name: Upload Report
