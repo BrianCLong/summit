@@ -110,7 +110,7 @@ jobs:
           EOF
 
           # Evaluate policy
-          opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
+          opa-bin eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
 
           echo "✅ OPA policies validated"
 
@@ -211,7 +211,7 @@ jobs:
 
           # Benchmark OPA policy evaluation
           echo "Testing OPA performance..."
-          time opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
+          time opa-bin eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
 
           # Benchmark safety circuit
           echo "Testing safety circuit performance..."

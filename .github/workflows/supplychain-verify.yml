@@ -64,7 +64,7 @@ jobs:
 
       - name: Verify policy (deny must fail the job)
         run: |
-          opa eval --format=json \
+          opa-bin eval --format=json \
             --data policy/opa/supplychain.rego \
             --input policy_input.json \
             'data.supplychain' | tee policy_eval.json
@@ -75,14 +75,14 @@ jobs:
         continue-on-error: true
         run: |
           jq '.subject.digest.sha256="deadbeef"' policy_input.json > bad.json
-          opa eval --format=json --data policy/opa/supplychain.rego --input bad.json 'data.supplychain' | \
+          opa-bin eval --format=json --data policy/opa/supplychain.rego --input bad.json 'data.supplychain' | \
             jq -e '(.result[0].expressions[0].value.allow) == false'
 
       - name: Negative test - missing subject must fail
         continue-on-error: true
         run: |
           jq 'del(.subject.digest)' policy_input.json > bad2.json
-          opa eval --format=json --data policy/opa/supplychain.rego --input bad2.json 'data.supplychain' | \
+          opa-bin eval --format=json --data policy/opa/supplychain.rego --input bad2.json 'data.supplychain' | \
             jq -e '(.result[0].expressions[0].value.allow) == false'
 
     # Policy: optional on feature branches; required on main/release/*

@@ -150,7 +150,7 @@ jobs:
             count(deny) == 0
           }
           REGO
-          opa eval -f json -d policy.rego -i risk.json 'data.drift' > eval.json
+          opa-bin eval -f json -d policy.rego -i risk.json 'data.drift' > eval.json
           allowed=$(jq -r '.result[0].expressions[0].value.allow' eval.json)
           score=$(jq -r '.result[0].expressions[0].value.score' eval.json)
           echo "allowed=$allowed" >> $GITHUB_OUTPUT

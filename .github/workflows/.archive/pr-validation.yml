@@ -607,7 +607,7 @@ jobs:
           EOF
 
           # Run policy evaluation
-          opa eval -d .github/policies/ -i policy-input.json "data.summit.quality.decision" > policy-result.json
+          opa-bin eval -d .github/policies/ -i policy-input.json "data.summit.quality.decision" > policy-result.json
 
           # Extract results
           APPROVED=$(jq -r '.result.approved' policy-result.json)

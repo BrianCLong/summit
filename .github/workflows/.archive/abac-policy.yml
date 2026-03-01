@@ -46,7 +46,7 @@ jobs:
           data = yaml.safe_load(Path("server/config/data-paths.yaml").read_text())
           Path("server/config/data-paths.json").write_text(json.dumps(data))
           PY
-          opa eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
+          opa-bin eval --fail-defined --data .github/policies --input server/config/data-paths.json "data.summit.datapaths.violations[_]"
           rm server/config/data-paths.json
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4

@@ -1,5 +1,2 @@
 version: 1.0
-controls:
-  - id: SOC2-CC1.1
-    description: Security controls
-    evidence: []
+controls: []

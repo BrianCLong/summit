@@ -247,7 +247,7 @@ jobs:
           # Evaluate ingest policies against sample input
           if [ -f .ci/policies/ingest.rego ]; then
             echo '{"tenant_id": "test", "replay_requested": true}' | \
-              opa eval -d .ci/policies/ingest.rego 'data.ingest.policy.allow' || true
+              opa-bin eval -d .ci/policies/ingest.rego 'data.ingest.policy.allow' || true
           fi
 
   # =========================================================================
