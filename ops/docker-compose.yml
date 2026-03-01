@@ -38,7 +38,7 @@ services:
       retries: 10
 
   opa:
-    image: openpolicyagent/opa:0.69.0-rootless
+    image: openpolicyagent/opa:0.68.0-rootless
     command:
       [
         'run',
