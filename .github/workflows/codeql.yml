@@ -2,130 +2,34 @@ name: CodeQL
 
 on:
   push:
-    branches: [ main, master ]
-    paths:
-      - "**/*.js"
-      - "**/*.jsx"
-      - "**/*.ts"
-      - "**/*.tsx"
-      - "**/*.py"
-      - "**/*.go"
-      - "**/go.mod"
-      - "**/go.sum"
-      - "**/package.json"
-      - "**/pnpm-lock.yaml"
-      - "**/package-lock.json"
-      - "**/yarn.lock"
-      - "**/requirements*.txt"
-      - "**/pyproject.toml"
-      - "**/poetry.lock"
-      - ".github/workflows/codeql.yml"
+    branches: [main, master]
   pull_request:
-    branches: [ main, master ]
-    paths:
-      - "**/*.js"
-      - "**/*.jsx"
-      - "**/*.ts"
-      - "**/*.tsx"
-      - "**/package.json"
-      - "**/pnpm-lock.yaml"
-      - "**/package-lock.json"
-      - "**/yarn.lock"
-      - ".github/workflows/codeql.yml"
+    branches: [main, master]
   schedule:
-    - cron: "30 1 * * 0" # Sunday 01:30
+    - cron: '30 1 * * 0'
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  analyze-pr:
-    if: github.event_name == 'pull_request'
-    name: Analyze (${{ matrix.language }})
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      actions: read
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ javascript-typescript ]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install JS dependencies
-        if: matrix.language == 'javascript-typescript'
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-extended
-          cache: true
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
-
   analyze:
-    if: github.event_name != 'pull_request'
-    name: Analyze (${{ matrix.language }})
+    name: Analyze
     runs-on: ubuntu-latest
     permissions:
       contents: read
       security-events: write
-      actions: read
+
     strategy:
       fail-fast: false
       matrix:
-        language: [ javascript-typescript, python, go ]
+        language: [javascript-typescript, python, go]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install JS dependencies
-        if: matrix.language == 'javascript-typescript'
-        run: |
-          corepack enable
-          pnpm install --frozen-lockfile
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          queries: security-extended
-          cache: true
 
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
