@@ -463,6 +463,27 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --name mc-platform-staging --region us-east-1
@@ -503,6 +524,27 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
 
       - name: Update kubeconfig
         run: |

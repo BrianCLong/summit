@@ -84,6 +84,27 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Deploy via Helm/Manifests (Blueprint)
         run: |
           echo "Deploying version ${{ github.sha }} to ${{ inputs.environment || 'staging' }}"

@@ -53,6 +53,27 @@ jobs:
           role-to-assume: ${{ secrets.AWS_KMS_ROTATION_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Check key ages
         id: check
         run: |
@@ -120,6 +141,27 @@ jobs:
           role-to-assume: ${{ secrets.AWS_KMS_ROTATION_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
       
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Create new key version
         id: new_key
         run: |

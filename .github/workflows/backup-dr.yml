@@ -44,6 +44,27 @@ jobs:
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Run Backup Script
         env:
           BACKUP_SET: ${{ inputs.backup_set || 'full' }}

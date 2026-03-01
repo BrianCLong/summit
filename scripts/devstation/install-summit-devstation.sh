@@ -471,6 +471,7 @@ if [ "$INSTALL_CLOUD" = "1" ]; then
   esac
   curl -fsSL "https://awscli.amazonaws.com/${AWS_ZIP}" -o /tmp/awscliv2.zip
   unzip -qo /tmp/awscliv2.zip -d /tmp
+  if command -v aws >/dev/null 2>&1; then aws configure set cli_history disabled || true; fi
   as_root /tmp/aws/install --update
   rm -rf /tmp/aws /tmp/awscliv2.zip
 

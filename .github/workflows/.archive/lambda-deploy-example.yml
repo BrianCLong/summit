@@ -35,6 +35,27 @@ jobs:
         role-to-assume: arn:aws:iam::123456789012:role/GitHubActionsRole # Replace with actual role
         aws-region: ${{ env.AWS_REGION }}
 
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled || true
+
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled || true
+
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled || true
+
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled || true
+
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled
+
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled
+
+    - name: Disable AWS CLI History
+      run: aws configure set cli_history disabled
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
       with:

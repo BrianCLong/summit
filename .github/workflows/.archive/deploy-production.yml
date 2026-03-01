@@ -307,6 +307,27 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_PRODUCTION }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Update kubeconfig
         run: |
           aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
@@ -389,6 +410,27 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN_PRODUCTION }}
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
 
       - name: Update kubeconfig
         run: |

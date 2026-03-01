@@ -49,6 +49,7 @@ check_prerequisites() {
     if [[ ${#missing[@]} -gt 0 ]]; then
         echo -e "${RED}❌ Missing required tools: ${missing[*]}${NC}"
         echo "Install with: brew install awscli jq kubernetes-cli helm"
+  if command -v aws >/dev/null 2>&1; then aws configure set cli_history disabled || true; fi
         exit 1
     fi
     

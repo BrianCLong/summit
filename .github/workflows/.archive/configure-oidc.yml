@@ -39,6 +39,27 @@ jobs:
           role-session-name: GitHubActions-OIDC-Setup
           aws-region: ${{ vars.AWS_REGION || 'us-west-2' }}
 
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled || true
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
+      - name: Disable AWS CLI History
+        run: aws configure set cli_history disabled
+
       - name: Verify AWS OIDC Configuration
         run: |
           echo "🔐 Verifying AWS OIDC setup..."

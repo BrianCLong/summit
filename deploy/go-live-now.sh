@@ -53,7 +53,9 @@ check_prerequisites() {
         echo -e "${RED}❌ Missing required tools: ${missing[*]}${NC}"
         echo -e "${YELLOW}Install with:${NC}"
         echo "  macOS: brew install awscli kubernetes-cli helm docker git jq"
+  if command -v aws >/dev/null 2>&1; then aws configure set cli_history disabled || true; fi
         echo "  Ubuntu: apt-get install awscli kubectl helm docker git jq curl"
+  if command -v aws >/dev/null 2>&1; then aws configure set cli_history disabled || true; fi
         exit 1
     fi
     

@@ -8,3 +8,23 @@ steps:
     with:
       role-to-assume: arn:aws:iam::123456789012:role/summit-gha-deploy
       aws-region: us-east-1
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled || true
+
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled || true
+
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled || true
+
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled || true
+
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled
+
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled
+
+  - name: Disable AWS CLI History
+    run: aws configure set cli_history disabled

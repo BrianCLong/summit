@@ -314,6 +314,7 @@ if ! has aws; then
   TMP="$(mktemp -d)"
   curl -fsSLo "$TMP/awscliv2.zip" "https://awscli.amazonaws.com/awscli-exe-$( [ "$OS" = "Darwin" ] && echo mac || echo linux )-x86_64.zip"
   unzip -q "$TMP/awscliv2.zip" -d "$TMP"
+  if command -v aws >/dev/null 2>&1; then aws configure set cli_history disabled || true; fi
   ${SUDO:-} "$TMP/aws/install" || true
   rm -rf "$TMP"
 fi
