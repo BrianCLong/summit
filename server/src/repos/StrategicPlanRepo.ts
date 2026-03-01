@@ -6,7 +6,7 @@
  * Uses PostgreSQL for persistent storage with proper transaction support.
  */
 
-import { Pool, PoolClient } from 'pg';
+import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import loggerModule from '../config/logger.js'; const logger = (loggerModule as any).default || loggerModule;
 import { provenanceLedger } from '../provenance/ledger.js';
@@ -497,16 +497,17 @@ export class StrategicPlanRepo {
   }
 
   async getObjectivesByPlan(planId: string): Promise<StrategicObjective[]> {
-    const { rows: objectives } = await this.pg.query(
+    const queryRes = await this.pg.query(
       `SELECT * FROM strategic_objectives WHERE plan_id = $1 ORDER BY created_at ASC`,
       [planId],
     );
+    const objectives = (queryRes as any)?.rows || [];
 
     if (objectives.length === 0) return [];
 
-    const objectiveIds = objectives.map((row: any) => row.id);
+    const objectiveIds = objectives.map((o: any) => o.id);
 
-    // BOLT: Optimize by fetching all milestones and key results in bulk to avoid N+1 queries
+    // BOLT: Optimize by fetching milestones and key results in bulk to avoid N+1 queries
     const [milestonesRes, keyResultsRes] = await Promise.all([
       this.pg.query(
         `SELECT * FROM strategic_milestones WHERE parent_id = ANY($1) AND parent_type = 'objective' ORDER BY due_date ASC`,
@@ -744,9 +745,9 @@ export class StrategicPlanRepo {
 
     if (initiatives.length === 0) return [];
 
-    const initiativeIds = initiatives.map((row: any) => row.id);
+    const initiativeIds = initiatives.map((i: any) => i.id);
 
-    // BOLT: Optimize by fetching all milestones and deliverables in bulk to avoid N+1 queries
+    // BOLT: Optimize by fetching milestones and deliverables in bulk to avoid N+1 queries
     const [milestonesRes, deliverablesRes] = await Promise.all([
       this.pg.query(
         `SELECT * FROM strategic_milestones WHERE parent_id = ANY($1) AND parent_type = 'initiative' ORDER BY due_date ASC`,
@@ -1032,9 +1033,9 @@ export class StrategicPlanRepo {
 
     if (risks.length === 0) return [];
 
-    const riskIds = risks.map((row: any) => row.id);
+    const riskIds = risks.map((r: any) => r.id);
 
-    // BOLT: Optimize by fetching all mitigation strategies in bulk to avoid N+1 queries
+    // BOLT: Optimize by fetching mitigation strategies in bulk to avoid N+1 queries
     const { rows: mitigations } = await this.pg.query(
       `SELECT * FROM strategic_mitigations WHERE risk_id = ANY($1) ORDER BY deadline ASC`,
       [riskIds],

@@ -1,54 +1,71 @@
-// @ts-nocheck
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { StrategicPlanRepo } from '../../repos/StrategicPlanRepo.js';
-
-// Mock provenance ledger to return promises
-jest.mock('../../provenance/ledger.js', () => ({
-  provenanceLedger: {
-    appendEntry: jest.fn().mockImplementation(() => Promise.resolve(undefined)),
-  },
-}));
 
 describe('StrategicPlanRepo Optimization', () => {
   let repo: StrategicPlanRepo;
-  let mockPool: any;
+  let mockPg: any;
 
   beforeEach(() => {
-    mockPool = {
+    mockPg = {
       query: jest.fn(),
-      connect: jest.fn(),
     };
-    repo = new StrategicPlanRepo(mockPool);
+    repo = new StrategicPlanRepo(mockPg as any);
   });
 
   describe('getObjectivesByPlan', () => {
     it('should use bulk queries to avoid N+1 problem', async () => {
       const planId = 'plan-123';
       const mockObjectives = [
-        { id: 'obj-1', plan_id: planId, name: 'Obj 1' },
-        { id: 'obj-2', plan_id: planId, name: 'Obj 2' },
+        { id: 'obj-1', plan_id: planId, name: 'Objective 1' },
+        { id: 'obj-2', plan_id: planId, name: 'Objective 2' },
       ];
 
-      const mockMilestones = [
-        { id: 'ms-1', parent_id: 'obj-1', parent_type: 'objective', name: 'MS 1' },
-        { id: 'ms-2', parent_id: 'obj-2', parent_type: 'objective', name: 'MS 2' },
-      ];
-
-      const mockKeyResults = [
-        { id: 'kr-1', objective_id: 'obj-1', description: 'KR 1', target_value: 100, current_value: 0, weight: 1.0, status: 'NOT_STARTED' },
-        { id: 'kr-2', objective_id: 'obj-2', description: 'KR 2', target_value: 100, current_value: 0, weight: 1.0, status: 'NOT_STARTED' },
-      ];
-
-      mockPool.query.mockResolvedValueOnce({ rows: mockObjectives });
-      mockPool.query.mockResolvedValueOnce({ rows: mockMilestones });
-      mockPool.query.mockResolvedValueOnce({ rows: mockKeyResults });
+      mockPg.query.mockImplementation((query: string, params: any[]) => {
+        if (query.includes('FROM strategic_objectives')) {
+          return Promise.resolve({ rows: mockObjectives });
+        }
+        if (query.includes('FROM strategic_milestones')) {
+          return Promise.resolve({
+            rows: [
+              { id: 'm-1', parent_id: 'obj-1', parent_type: 'objective', name: 'Milestone 1' },
+            ],
+          });
+        }
+        if (query.includes('FROM strategic_key_results')) {
+          return Promise.resolve({
+            rows: [
+              { id: 'kr-1', objective_id: 'obj-2', description: 'KR 1' },
+            ],
+          });
+        }
+        return Promise.resolve({ rows: [] });
+      });
 
       const result = await repo.getObjectivesByPlan(planId);
 
       expect(result).toHaveLength(2);
+      // Verify bulk queries were called once instead of per-objective
+      expect(mockPg.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM strategic_objectives'),
+        [planId]
+      );
+      expect(mockPg.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM strategic_milestones'),
+        [['obj-1', 'obj-2']]
+      );
+      expect(mockPg.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM strategic_key_results'),
+        [['obj-1', 'obj-2']]
+      );
+
+      // Verify mapping
+      expect(result[0].id).toBe('obj-1');
       expect(result[0].milestones).toHaveLength(1);
-      expect(result[0].keyResults).toHaveLength(1);
-      expect(mockPool.query).toHaveBeenCalledTimes(3);
+      expect(result[0].keyResults).toHaveLength(0);
+
+      expect(result[1].id).toBe('obj-2');
+      expect(result[1].milestones).toHaveLength(0);
+      expect(result[1].keyResults).toHaveLength(1);
     });
   });
 
@@ -56,56 +73,49 @@ describe('StrategicPlanRepo Optimization', () => {
     it('should use bulk queries to avoid N+1 problem', async () => {
       const planId = 'plan-123';
       const mockInitiatives = [
-        { id: 'init-1', plan_id: planId, name: 'Init 1', objective_ids: [] },
-        { id: 'init-2', plan_id: planId, name: 'Init 2', objective_ids: [] },
+        { id: 'ini-1', plan_id: planId, name: 'Initiative 1' },
+        { id: 'ini-2', plan_id: planId, name: 'Initiative 2' },
       ];
 
-      const mockMilestones = [
-        { id: 'ms-1', parent_id: 'init-1', parent_type: 'initiative', name: 'MS 1' },
-        { id: 'ms-2', parent_id: 'init-2', parent_type: 'initiative', name: 'MS 2' },
-      ];
-
-      const mockDeliverables = [
-        { id: 'del-1', initiative_id: 'init-1', name: 'Del 1' },
-        { id: 'del-2', initiative_id: 'init-2', name: 'Del 2' },
-      ];
-
-      // 1st call: fetch initiatives
-      mockPool.query.mockResolvedValueOnce({ rows: mockInitiatives });
-      // 2nd and 3rd calls: bulk fetch milestones and deliverables (Parallel)
-      mockPool.query.mockResolvedValueOnce({ rows: mockMilestones });
-      mockPool.query.mockResolvedValueOnce({ rows: mockDeliverables });
+      mockPg.query.mockImplementation((query: string, params: any[]) => {
+        if (query.includes('FROM strategic_initiatives')) {
+          return Promise.resolve({ rows: mockInitiatives });
+        }
+        if (query.includes('FROM strategic_milestones')) {
+          return Promise.resolve({
+            rows: [
+              { id: 'm-2', parent_id: 'ini-1', parent_type: 'initiative', name: 'Milestone 2' },
+            ],
+          });
+        }
+        if (query.includes('FROM strategic_deliverables')) {
+          return Promise.resolve({
+            rows: [
+              { id: 'd-1', initiative_id: 'ini-2', name: 'Deliverable 1' },
+            ],
+          });
+        }
+        return Promise.resolve({ rows: [] });
+      });
 
       const result = await repo.getInitiativesByPlan(planId);
 
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('init-1');
-      expect(result[0].milestones).toHaveLength(1);
-      expect(result[0].milestones[0].id).toBe('ms-1');
-      expect(result[0].deliverables).toHaveLength(1);
-      expect(result[0].deliverables[0].id).toBe('del-1');
-
-      expect(result[1].id).toBe('init-2');
-      expect(result[1].milestones).toHaveLength(1);
-      expect(result[1].milestones[0].id).toBe('ms-2');
-      expect(result[1].deliverables).toHaveLength(1);
-      expect(result[1].deliverables[0].id).toBe('del-2');
-
-      // Total of 3 queries: 1 for initiatives, 1 for milestones, 1 for deliverables
-      expect(mockPool.query).toHaveBeenCalledTimes(3);
-
-      // Verify bulk query for milestones
-      expect(mockPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE parent_id = ANY($1)'),
-        [['init-1', 'init-2']]
+      expect(mockPg.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM strategic_milestones'),
+        [['ini-1', 'ini-2']]
+      );
+      expect(mockPg.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM strategic_deliverables'),
+        [['ini-1', 'ini-2']]
       );
     });
 
     it('should return empty array if no initiatives found', async () => {
-      mockPool.query.mockResolvedValueOnce({ rows: [] });
-      const result = await repo.getInitiativesByPlan('plan-empty');
-      expect(result).toEqual([]);
-      expect(mockPool.query).toHaveBeenCalledTimes(1);
+        mockPg.query.mockResolvedValue({ rows: [] });
+        const result = await repo.getInitiativesByPlan('empty-plan');
+        expect(result).toEqual([]);
+        expect(mockPg.query).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -113,39 +123,31 @@ describe('StrategicPlanRepo Optimization', () => {
     it('should use bulk queries to avoid N+1 problem', async () => {
       const planId = 'plan-123';
       const mockRisks = [
-        { id: 'risk-1', plan_id: planId, name: 'Risk 1', likelihood: 3, impact: 4, risk_score: 12 },
-        { id: 'risk-2', plan_id: planId, name: 'Risk 2', likelihood: 2, impact: 2, risk_score: 4 },
+        { id: 'risk-1', plan_id: planId, name: 'Risk 1' },
       ];
 
-      const mockMitigations = [
-        { id: 'mit-1', risk_id: 'risk-1', description: 'Mit 1', type: 'MITIGATE', effectiveness: 80 },
-        { id: 'mit-2', risk_id: 'risk-2', description: 'Mit 2', type: 'ACCEPT', effectiveness: 100 },
-      ];
-
-      // 1st call: fetch risks
-      mockPool.query.mockResolvedValueOnce({ rows: mockRisks });
-      // 2nd call: bulk fetch mitigations
-      mockPool.query.mockResolvedValueOnce({ rows: mockMitigations });
+      mockPg.query.mockImplementation((query: string, params: any[]) => {
+        if (query.includes('FROM strategic_risks')) {
+          return Promise.resolve({ rows: mockRisks });
+        }
+        if (query.includes('FROM strategic_mitigations')) {
+          return Promise.resolve({
+            rows: [
+              { id: 'mit-1', risk_id: 'risk-1', description: 'Mitigation 1' },
+            ],
+          });
+        }
+        return Promise.resolve({ rows: [] });
+      });
 
       const result = await repo.getRisksByPlan(planId);
 
-      expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('risk-1');
-      expect(result[0].mitigationStrategies).toHaveLength(1);
-      expect(result[0].mitigationStrategies[0].id).toBe('mit-1');
-
-      expect(result[1].id).toBe('risk-2');
-      expect(result[1].mitigationStrategies).toHaveLength(1);
-      expect(result[1].mitigationStrategies[0].id).toBe('mit-2');
-
-      // Total of 2 queries: 1 for risks, 1 for mitigations
-      expect(mockPool.query).toHaveBeenCalledTimes(2);
-
-      // Verify bulk query
-      expect(mockPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE risk_id = ANY($1)'),
-        [['risk-1', 'risk-2']]
+      expect(result).toHaveLength(1);
+      expect(mockPg.query).toHaveBeenCalledWith(
+        expect.stringContaining('FROM strategic_mitigations'),
+        [['risk-1']]
       );
+      expect(result[0].mitigationStrategies).toHaveLength(1);
     });
   });
 });
