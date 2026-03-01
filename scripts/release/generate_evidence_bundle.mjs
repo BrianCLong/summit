@@ -7,30 +7,37 @@ import path from 'path';
  * Mandatory for GA bitwise reproducibility verification.
  */
 function main() {
-  const files = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  let files = [];
+
+  if (args.length === 0) {
+    console.log('No files provided to generate evidence bundle. Searching in artifacts/ directory...');
+    const artifactsDir = 'artifacts';
+    if (fs.existsSync(artifactsDir)) {
+      const findFiles = (dir) => {
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const res = path.resolve(dir, entry.name);
+          if (entry.isDirectory()) {
+            findFiles(res);
+          } else if (entry.name.endsWith('.json') || entry.name.endsWith('.txt') || entry.name.endsWith('.log')) {
+            files.push(path.relative(process.cwd(), res));
+          }
+        }
+      };
+      findFiles(artifactsDir);
+    }
+  } else {
+    files = args;
+  }
 
   if (files.length === 0) {
-    console.warn('No files provided to generate evidence bundle. Searching in artifacts/ directory...');
-
-    const supplyChainDir = path.join('artifacts', 'supplychain');
-    if (fs.existsSync(supplyChainDir)) {
-      const walkSync = (dir, filelist = []) => {
-        fs.readdirSync(dir).forEach(file => {
-          const filepath = path.join(dir, file);
-          if (fs.statSync(filepath).isDirectory()) {
-            filelist = walkSync(filepath, filelist);
-          } else {
-            filelist.push(filepath);
-          }
-        });
-        return filelist;
-      };
-
-      const foundFiles = walkSync(supplyChainDir);
-      console.log(`Found ${foundFiles.length} supply chain artifacts.`);
-      files.push(...foundFiles);
-    }
+    console.error('Error: No supply chain artifacts found to bundle.');
+    process.exit(1);
   }
+
+  // Sort files for deterministic processing order
+  files.sort();
 
   const bundle = files.map(f => {
     if (!fs.existsSync(f)) {
@@ -44,7 +51,7 @@ function main() {
   });
 
   const output = {
-    generatedAt: new Date().toISOString(),
+    // timestamp removed for determinism; use evidence-stamp.json if needed
     bundle
   };
 
@@ -56,7 +63,12 @@ function main() {
   const outputPath = path.join(artifactsDir, 'evidence-bundle.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
 
+  // Write a separate stamp file with runtime metadata (not part of the deterministic bundle)
+  const stampPath = path.join(artifactsDir, 'evidence-stamp.json');
+  fs.writeFileSync(stampPath, JSON.stringify({ generatedAt: new Date().toISOString() }, null, 2));
+
   console.log(`Evidence bundle generated at ${outputPath} with ${bundle.length} entries.`);
+  console.log(`Runtime stamp generated at ${stampPath}.`);
 }
 
 main();
