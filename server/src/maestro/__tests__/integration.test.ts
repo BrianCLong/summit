@@ -23,9 +23,6 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
-    if (!result || !result.rows || result.rows.length === 0) {
-      throw new Error("Failed to insert run in test setup");
-    }
     testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)
