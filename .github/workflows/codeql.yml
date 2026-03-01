@@ -1,52 +1,49 @@
-name: CodeQL
+name: "CodeQL"
 
 on:
   push:
     branches: ["main", "master"]
     paths:
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.py'
-      - '**/*.go'
-      - '**/go.mod'
-      - '**/go.sum'
-      - '**/package.json'
-      - '**/pnpm-lock.yaml'
-      - '**/package-lock.json'
-      - '**/yarn.lock'
-      - '**/requirements*.txt'
-      - '**/pyproject.toml'
-      - '**/poetry.lock'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/workflows/*.md'
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.py"
+      - "**/*.go"
+      - "**/go.mod"
+      - "**/go.sum"
+      - "**/package.json"
+      - "**/pnpm-lock.yaml"
+      - "**/package-lock.json"
+      - "**/yarn.lock"
+      - "**/requirements*.txt"
+      - "**/pyproject.toml"
+      - "**/poetry.lock"
+      - ".github/workflows/codeql.yml"
+
   pull_request:
     branches: ["main", "master"]
     paths:
-      - '**/*.js'
-      - '**/*.jsx'
-      - '**/*.ts'
-      - '**/*.tsx'
-      - '**/*.py'
-      - '**/*.go'
-      - '**/go.mod'
-      - '**/go.sum'
-      - '**/package.json'
-      - '**/pnpm-lock.yaml'
-      - '**/package-lock.json'
-      - '**/yarn.lock'
-      - '**/requirements*.txt'
-      - '**/pyproject.toml'
-      - '**/poetry.lock'
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.github/workflows/*.md'
+      - "**/*.js"
+      - "**/*.jsx"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "**/*.py"
+      - "**/*.go"
+      - "**/go.mod"
+      - "**/go.sum"
+      - "**/package.json"
+      - "**/pnpm-lock.yaml"
+      - "**/package-lock.json"
+      - "**/yarn.lock"
+      - "**/requirements*.txt"
+      - "**/pyproject.toml"
+      - "**/poetry.lock"
+      - ".github/workflows/codeql.yml"
+
   schedule:
     - cron: '30 1 * * 0'
+
   workflow_dispatch:
 
 concurrency:
@@ -54,58 +51,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  codeql-pr:
-    if: github.event_name == 'pull_request'
-    name: CodeQL PR (${{ matrix.language }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
-    permissions:
-      contents: read
-      security-events: write
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [javascript-typescript]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        if: matrix.language == 'javascript-typescript'
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Setup Node
-        if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - name: Install dependencies (pnpm)
-        if: matrix.language == 'javascript-typescript'
-        run: pnpm install --frozen-lockfile
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          queries: security-extended
-          cache: true
-
-      - name: Autobuild
-        if: matrix.language != 'javascript-typescript'
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
-
-  codeql:
-    if: github.event_name != 'pull_request'
-    name: CodeQL (${{ matrix.language }})
+  analyze:
+    if: github.event_name != 'pull_request' || matrix.language == 'javascript-typescript'
+    name: "CodeQL (${{ matrix.language }})"
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -114,37 +62,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript-typescript, python, go]
+        language: ["javascript-typescript", "python", "go"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        if: matrix.language == 'javascript-typescript'
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
-      - name: Setup Node
-        if: matrix.language == 'javascript-typescript'
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-
-      - name: Install dependencies (pnpm)
-        if: matrix.language == 'javascript-typescript'
-        run: pnpm install --frozen-lockfile
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          queries: security-extended
           cache: true
+          queries: security-extended
 
       - name: Autobuild
-        if: matrix.language != 'javascript-typescript'
         uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
