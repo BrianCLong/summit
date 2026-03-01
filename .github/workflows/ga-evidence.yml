@@ -11,7 +11,6 @@ on:
       - "docs/release/**"
   workflow_dispatch:
     inputs:
-      version:
         description: "Release version (default: 5.3.1)"
         required: false
         default: "5.3.1"
@@ -36,6 +35,7 @@ jobs:
           fetch-depth: 0
 
       - name: Install pnpm
+        uses: pnpm/action-setup@v4
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js

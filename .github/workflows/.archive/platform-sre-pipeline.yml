@@ -6,7 +6,6 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      release_version:
         description: "Semantic version to release (vX.Y.Z)"
         required: false
 
@@ -21,7 +20,6 @@ env:
   RELEASE_ENV: production
 
 jobs:
-  version:
     name: Verify semantic version tag
     runs-on: ubuntu-latest
     outputs:

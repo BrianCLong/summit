@@ -22,7 +22,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
+        uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Setup Node

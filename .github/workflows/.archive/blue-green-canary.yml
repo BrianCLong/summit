@@ -3,7 +3,6 @@ name: Blue-Green with Progressive Canary
 on:
   workflow_dispatch:
     inputs:
-      version:
         description: 'Container image tag/version to deploy'
         required: true
         type: string

@@ -3,7 +3,6 @@ name: promote
 on:
   workflow_dispatch:
     inputs:
-      version:
         description: 'Version to promote'
         required: true
         type: string

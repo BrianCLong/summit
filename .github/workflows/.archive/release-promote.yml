@@ -3,7 +3,6 @@ name: Release Promote (Production Canary)
 on:
   workflow_dispatch:
     inputs:
-      version:
         description: 'Release candidate version to promote (e.g., 1.2.3-rc.1)'
         required: true
         type: string

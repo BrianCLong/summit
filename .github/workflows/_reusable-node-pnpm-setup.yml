@@ -3,15 +3,13 @@ name: Reusable Node.js & pnpm Setup
 on:
   workflow_call:
     inputs:
-      node-version:
         description: "Node.js version to use"
         required: false
         default: "20.x"
         type: string
-      pnpm-version:
         description: "pnpm version to use"
         required: false
-        default: "9.12.0"
+        default: "10.0.0"
         type: string
       install-deps:
         description: "Whether to install dependencies"
@@ -53,8 +51,8 @@ jobs:
           fi
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-        with:
+        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Setup Node.js

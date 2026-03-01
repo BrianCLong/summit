@@ -3,7 +3,6 @@ name: SLSA L3 Air-Gapped Build Pipeline
 on:
   workflow_dispatch:
     inputs:
-      bundle_version:
         description: 'Bundle version (e.g., v1.0.0)'
         required: true
         type: string

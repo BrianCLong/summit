@@ -14,7 +14,6 @@ name: RC Preparation
 on:
   workflow_dispatch:
     inputs:
-      base_version:
         description: "Base version (e.g., 4.1.2)"
         required: false
         default: ""
@@ -81,6 +80,7 @@ jobs:
           echo "Base Version: ${VERSION}"
 
       - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4
         uses: pnpm/action-setup@v4 # v4
 
       - name: Setup Node.js

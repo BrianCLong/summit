@@ -24,7 +24,6 @@ name: Release Promotion Guard
 on:
   workflow_dispatch:
     inputs:
-      version:
         description: "Target GA version (e.g., 4.1.2)"
         required: true
         type: string

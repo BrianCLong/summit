@@ -5,7 +5,6 @@ name: Reusable - Optimized CI Template
 on:
   workflow_call:
     inputs:
-      node-version:
         description: 'Node.js version'
         required: false
         type: string

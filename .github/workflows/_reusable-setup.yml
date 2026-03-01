@@ -5,17 +5,14 @@ name: 🔧 Reusable - Environment Setup
 on:
   workflow_call:
     inputs:
-      node-version:
         description: 'Node.js version (e.g., "20.x", "18.x", "20")'
         required: false
         type: string
         default: "20.x"
-      pnpm-version:
         description: "pnpm version"
         required: false
         type: string
-        default: "9.12.0"
-      python-version:
+        default: "10.0.0"
         description: "Python version (optional)"
         required: false
         type: string
@@ -36,10 +33,8 @@ on:
         type: string
         default: "."
     outputs:
-      node-version:
         description: "Resolved Node.js version"
         value: ${{ jobs.setup.outputs.node }}
-      pnpm-version:
         description: "Resolved pnpm version"
         value: ${{ jobs.setup.outputs.pnpm }}
       cache-hit:
@@ -96,8 +91,8 @@ jobs:
           echo "pnpm=${{ inputs.pnpm-version }}" >> "$GITHUB_OUTPUT"
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-        with:
+        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4
           run_install: false
 
       - name: Setup Node.js

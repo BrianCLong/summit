@@ -3,7 +3,6 @@ name: Deploy to Staging
 on:
   workflow_call:
     inputs:
-      version:
         description: 'Version to deploy'
         required: true
         type: string
@@ -14,7 +13,6 @@ on:
         default: 'staging'
   workflow_dispatch:
     inputs:
-      version:
         description: 'Version to deploy (leave empty for latest)'
         required: false
         type: string
