@@ -1,6 +1,6 @@
 # Summit GA Readiness Tracker (MVP-4-GA)
 
-**Status:** AMBER (all 4 blockers resolved; staging validation remaining)
+**Status:** GREEN (all blockers resolved; all GA gate OPA dirs pass --strict; supply chain scripts created)
 **Target:** GA-Ready Release Candidate
 
 ## I. Snapshot Report
@@ -39,6 +39,10 @@
 * [x] **Resolved B4:** Fixed 18 OPA parse errors in `.github/policies/` (import ordering, walk syntax, missing rule). `opa check` now exits 0.
 * [x] **Confirmed B2:** Jest config (`server/jest.config.ts`) is valid; `ts-jest` dependency declared. Requires `pnpm install`.
 * [x] **Confirmed B3:** `docs/ga/` contains 77 files with runbooks, checklists, architecture, and orchestration docs.
+* [x] **Fixed OPA strict-mode:** All 4 GA-gate policy dirs pass `opa check --strict` with 0 errors.
+* [x] **Fixed determinism test:** `verify_evidence_id_consistency.mjs` now respects `CI_EVIDENCE_OUTPUT_DIR` env var.
+* [x] **Created supply chain scripts:** `hack/supplychain/evidence_id.sh`, `gen_evidence.py`, `verify_attestation_shape.py`.
+* [x] **Created provenance scripts:** `.ci/gen-provenance.js`, `.ci/verify-provenance.js` for `make provenance`.
 
 ## Signal Actions & Decisions
 
@@ -46,7 +50,7 @@
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | Jest Test Suite broken | **RESOLVED** | FIX | `@intelgraph/ops-team` | Config valid; run `pnpm install` to restore dependencies. | 2026-02-28 |
 | Epic K (Platform Gov) unimplemented | PARTIAL | FIX | `@intelgraph/provenance-team` | SBOM, signing, OPA largely done. CI enforcement in progress. | 2026-01-28 |
-| OPA Policies need verification | **RESOLVED** | FIX | `@intelgraph/policy-team` | `opa check` passes all 3 dirs (server, .github, .ci). 35/39 tests pass. | 2026-02-28 |
+| OPA Policies need verification | **RESOLVED** | FIX | `@intelgraph/policy-team` | `opa check --strict` passes all 4 dirs (server, .github, .ci, conductor). 0 errors. | 2026-03-01 |
 | GA Documentation missing | **RESOLVED** | FIX | `@intelgraph/platform-core` | 77 files in `docs/ga/` with substantive content. | 2026-02-28 |
 | `apps/gateway` build failure | **RESOLVED** | FIX | `@intelgraph/platform-core` | Added missing `@types/node` + `dotenv` deps. Builds after `pnpm install`. | 2026-02-28 |
 | `apps/mobile-interface` build failure | **RESOLVED** | FIX | `@intelgraph/frontend-team` | Environmental — builds after `pnpm install`. No code fix needed. | 2026-02-28 |
