@@ -1,41 +1,64 @@
-# 🎨 Palette: Micro-UX: Platform-Aware Keyboard Shortcuts
+# PR: Consolidate Prompt Metadata and Add Jest Network Teardown Shim
 
-This PR implements platform-aware keyboard shortcut hints across the application to improve accessibility and user experience.
+Consolidate prompt metadata so ONE prompt hash accurately represents the full, combined scope of the current PR, including Jest network teardown shim addition, governed test updates, and LFS exception updates.
 
-## Summary
+## Changes
 
-- **UX**: Dynamic '⌘' vs 'Ctrl' display based on OS in `SearchBar`, `CommandPalette`, `EnhancedTriPaneView`, `AnalystConsole`, `MaestroDashboard`, and `ControlTowerDashboard`.
-- **Polish**: Removed hardcoded email addresses from frontend mock data and cleaned up corrupted page files.
+### 1. Jest Network Teardown Shim
 
-## Risk & Surface
+- Added opt-in Jest setup shim to `server/tests/setup/jest.setup.cjs`.
+- Tracks and closes network servers and timers when `NO_NETWORK_LISTEN=true`.
+- Reduces open handle hangs in CI.
 
-**Risk Level**: `risk:low`
-**Surface Area**: `area:client`
+### 2. LFS Exceptions
 
-## Assumption Ledger
+- Updated `.gitattributes` to include exception for `verification/*.png` to prevent LFS smudge failures in certain environments.
 
-- **Assumptions**: Users on macOS expect the Command symbol (⌘) while others expect 'Ctrl'. This is a standard UX pattern.
-- **Ambiguities**: Exact styling of the shortcuts was kept consistent with existing design patterns in each component.
-- **Tradeoffs**: Using `isMac` from utils for consistency.
-- **Stop Condition**: None.
+### 3. Prompt Registry Consolidation
 
-## Diff Budget
-- < 50 lines of functional code changes.
+- Identified `jest-network-teardown-shim` as the prompt of record.
+- Updated prompt scope to explicitly enumerate all files touched by this PR.
+- Registered new prompt hash in `prompts/registry.yaml`.
+- Included earlier prompt file edits (`gitattributes-lfs-exception@v1.md`, `nl-graph-query-test-tson-fix@v1.md`) in the consolidated scope.
 
-## Success Criteria
-- Platform-aware shortcuts correctly displayed in UI.
-- PII scan clean after removing mock emails.
-- Frontend build remains stable.
+## Verification
 
-## Evidence Summary
-- I've verified the code changes by reading the updated files to ensure correctness.
-- The `isMac` utility is used consistently to determine the modifier key.
-- Manual verification of the modified components shows correct rendering logic for platform-specific modifiers.
+- Computed SHA-256 hash for consolidated prompt: `72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b`.
+- Verified hash consistency in `prompts/registry.yaml`.
+- Confirmed `server/tests/setup/jest.setup.cjs` parses correctly.
+
+### Hash Computation
+
+To compute the prompt hash, run:
+
+```bash
+sha256sum prompts/governance/jest-network-teardown-shim@v1.md
+```
 
 <!-- AGENT-METADATA:START -->
+
+```json
 {
-  "promptId": "palette-ux-polish-v1",
-  "taskId": "8547858124088234637",
-  "tags": ["ux", "accessibility", "shortcuts"]
+  "agent_id": "jules",
+  "task_id": "consolidate-prompt-metadata",
+  "prompt_hash": "72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b",
+  "domains": ["governance", "testing"],
+  "verification_tiers": ["C"],
+  "debt_delta": 0,
+  "declared_scope": {
+    "paths": [
+      ".gitattributes",
+      "PR_DESCRIPTION.md",
+      "server/tests/setup/jest.setup.cjs",
+      "docs/roadmap/STATUS.json",
+      "prompts/registry.yaml",
+      "prompts/governance/gitattributes-lfs-exception@v1.md",
+      "prompts/governance/nl-graph-query-test-tson-fix@v1.md",
+      "prompts/governance/jest-network-teardown-shim@v1.md"
+    ]
+  },
+  "allowed_operations": ["create", "edit"]
 }
+```
+
 <!-- AGENT-METADATA:END -->

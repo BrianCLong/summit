@@ -10,6 +10,12 @@ const chartdata = [
   { date: 'Jun 22', SemiAnalysis: 3129, 'The Pragmatic Engineer': 1726 },
 ];
 
+const categories = [
+  { title: 'Sales', metric: '$ 12,699', metricPrev: '$ 9,456', delta: '34.3%', deltaType: 'moderateIncrease' },
+  { title: 'Profit', metric: '$ 40,598', metricPrev: '$ 45,564', delta: '10.9%', deltaType: 'moderateDecrease' },
+  { title: 'Customers', metric: '1,072', metricPrev: '856', delta: '25.3%', deltaType: 'moderateIncrease' },
+];
+
 const data = [
   { name: '/api/v1/approvals', value: 456 },
   { name: '/api/v1/preflight', value: 351 },

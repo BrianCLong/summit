@@ -267,7 +267,7 @@
     {
       "id": "analyst-001",
       "name": "Sarah Chen",
-      "email": "sarah.chen@intelgraph.com",
+      "email": "sarah.chen@internal.local",
       "role": "analyst",
       "permissions": [
         { "resource": "investigations", "action": "read", "effect": "allow" },
@@ -280,7 +280,7 @@
     {
       "id": "analyst-002",
       "name": "Mike Rodriguez",
-      "email": "mike.rodriguez@intelgraph.com",
+      "email": "mike.rodriguez@internal.local",
       "role": "analyst",
       "permissions": [
         { "resource": "investigations", "action": "read", "effect": "allow" },
