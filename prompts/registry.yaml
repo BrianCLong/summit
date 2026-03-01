@@ -922,3 +922,6 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+- id: antigravity-predictive-risk-dashboard
+  path: prompts/architecture/antigravity-predictive-risk-dashboard.md
+  hash: 3bad278a4a4127ebbc29021301bf6bc6408b9b0a7d6d37cf1ee6280a2cab853e
