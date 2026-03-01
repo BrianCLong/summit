@@ -25,13 +25,10 @@ jobs:
 
             // Auto-infer from title if no labels
             if (labels.length === 0) {
-              const scopeRegex = /^(feat|fix|docs)(?:\([^)]+\))?:/;
-              if (title.startsWith('feat:') || scopeRegex.test(title)) {
-                if (title.startsWith('feat:')) labels.push('minor');
-                else labels.push('patch');
-              } else if (title.includes('BREAKING CHANGE')) {
-                labels.push('major');
-              }
+              if (title.startsWith('feat:')) labels.push('minor');
+              else if (title.startsWith('fix:')) labels.push('patch');
+              else if (title.startsWith('docs:')) labels.push('patch');
+              else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
