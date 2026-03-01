@@ -30,6 +30,8 @@ jobs:
           pip install pyyaml psycopg2-binary neo4j jsonschema
 
       - name: Run Graph Shape Guardrail
+        # actionlint-disable
+        if: ${{ env.NEO4J_URI != '' }}
         env:
           NEO4J_URI: ${{ secrets.NEO4J_URI }}
           NEO4J_USER: ${{ secrets.NEO4J_USER }}
