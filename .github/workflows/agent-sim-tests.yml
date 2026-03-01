@@ -3,38 +3,25 @@ on:
   pull_request:
     paths:
       - "policy/opa/**"
-      - "agent-runner/**"
+      - "services/agent-runtime/**"
       - "tests/agent_simulator/**"
       - ".github/workflows/agent-sim-tests.yml"
 jobs:
   simulate:
     runs-on: ubuntu-latest
-    services:
-      s3:
-        image: minio/minio
-        ports: ["9000:9000"]
-        env:
-          MINIO_ROOT_USER: minio
-          MINIO_ROOT_PASSWORD: minio123
-        options: >-
-          --health-cmd "curl -f http://localhost:9000/minio/health/ready"
-          --health-interval 5s --health-timeout 5s --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.11' }
       - name: Start runner + OPA
         run: |
-          # Use docker compose up -d to run in background
-          # docker compose -f services/agent-runtime/docker-compose.canary.yml up -d
-          echo "Starting runner..."
+          docker compose -f services/agent-runtime/docker-compose.canary.yml up -d
       - name: Install deps
         run: pip install pyjwt requests
       - name: Generate HITL keys
         run: |
           openssl genrsa -out hitl.key 2048
           openssl rsa -in hitl.key -pubout -out hitl.pub
-          # Use awk to format the key as a single string with real newlines for github env
           echo "HITL_PRIVKEY_PEM<<EOF" >> $GITHUB_ENV
           cat hitl.key >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -48,5 +35,4 @@ jobs:
           HITL_PRIVKEY_PEM: ${{ env.HITL_PRIVKEY_PEM }}
           HITL_PUBKEY_PEM: ${{ env.HITL_PUBKEY_PEM }}
         run: |
-          # python -u tests/agent_simulator/simulate_approval.py
-          echo "Simulate tests skipped until docker-compose is fixed"
+          python -u tests/agent_simulator/simulate_approval.py

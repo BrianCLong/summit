@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  runner:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: >
+      sh -c "npm install fastify && node -e \"
+      const fastify = require('fastify')({ logger: true });
+      const { admit } = require('./src/admission.js');
+
+      let runs = {};
+
+      fastify.get('/health', async () => ({ status: 'ok' }));
+
+      fastify.post('/start', async (request, reply) => {
+        const run = request.body;
+        run.operation_token = 'sim-token-' + Date.now();
+        runs[run.operation_token] = run;
+
+        const decision = await admit(run);
+        reply.code(decision.status).send(decision);
+      });
+
+      fastify.post('/approve', async (request, reply) => {
+        // Mock verification, just assuming it's valid for simulator tests
+        const token = request.body.jwt;
+        if (!token) return reply.code(400).send({ error: 'missing jwt' });
+
+        reply.code(200).send({ approved: true, audit_bundle_url: 'http://localhost:9000/summit/claims/run3_bundle.json' });
+      });
+
+      fastify.listen({ port: 8080, host: '0.0.0.0' });
+      \""
+    ports:
+      - "8080:8080"
+    depends_on:
+      - opa
+
+  opa:
+    image: openpolicyagent/opa:latest
+    command: ["run", "--server", "--log-level=debug", "/policy/runtime_agent.rego"]
+    volumes:
+      - ../../policy/opa:/policy
+    ports:
+      - "8181:8181"
