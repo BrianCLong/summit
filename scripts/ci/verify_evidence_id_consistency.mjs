@@ -27,7 +27,10 @@ for (const raw of process.argv.slice(2)) {
 const repoRoot = process.cwd();
 const sha = args.get('sha') ?? 'UNKNOWN_SHA';
 const runId = args.get('run-id') ?? 'UNKNOWN_RUN_ID';
-const outDir = args.get('out-dir') ?? 'artifacts/evidence-id-consistency';
+const outDirDefault = process.env.CI_EVIDENCE_OUTPUT_DIR
+  ? path.join(process.env.CI_EVIDENCE_OUTPUT_DIR, sha)
+  : 'artifacts/evidence-id-consistency';
+const outDir = args.get('out-dir') ?? outDirDefault;
 const evidenceRootInput = args.get('evidence-root') ?? 'evidence';
 const evidenceRoot = path.isAbsolute(evidenceRootInput)
   ? evidenceRootInput
