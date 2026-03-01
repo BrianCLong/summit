@@ -6,6 +6,11 @@ on:
       - "v*"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   workflow_dispatch:
 
 concurrency:

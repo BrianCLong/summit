@@ -8,6 +8,11 @@ on:
       - 'fixtures/disinfo/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'packages/disinfo-news-ecosystem/**'
       - 'fixtures/disinfo/**'

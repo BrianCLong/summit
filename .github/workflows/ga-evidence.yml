@@ -3,6 +3,11 @@ name: GA Evidence Collection
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "server/**"
       - "apps/**"
