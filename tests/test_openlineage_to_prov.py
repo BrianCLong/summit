@@ -1,7 +1,7 @@
 import json, pathlib, hashlib
 import pytest
 from jsonschema import validate
-from prov.model import ProvDocument, Namespace
+from prov.model import ProvDocument, Namespace, ProvActivity, ProvEntity
 
 SCHEMA = json.loads(pathlib.Path("schemas/openlineage-1.44-event.schema.json").read_text())
 MAP = json.loads(pathlib.Path("mapping/openlineage_1.44_to_prov.json").read_text())
@@ -15,8 +15,8 @@ def to_prov(doc):
     act_id = f"ex:run/{run['runId']}"
     # Activity
     a = p.activity(act_id,
-                   startTime=run.get("facets",{}).get("nominalStartTime"),
-                   endTime=run.get("facets",{}).get("nominalEndTime"))
+                   startTime=run.get("facets",{}).get("nominalTime", {}).get("nominalStartTime"),
+                   endTime=run.get("facets",{}).get("nominalTime", {}).get("nominalEndTime"))
     # Entities (inputs/outputs)
     for d in doc.get("inputs", []):
         e = p.entity(f"ex:ds/{d['namespace']}/{d['name']}")
@@ -45,5 +45,5 @@ def test_event_is_mappable_to_prov():
 
     prov_doc = to_prov(ev)
 
-    assert prov_doc.get_records("activity"), "No PROV Activity created"
-    assert prov_doc.get_records("entity"),   "No PROV Entity created"
+    assert prov_doc.get_records(ProvActivity), "No PROV Activity created"
+    assert prov_doc.get_records(ProvEntity),   "No PROV Entity created"
