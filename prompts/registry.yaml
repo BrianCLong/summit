@@ -922,3 +922,25 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: agent-control-plane
+    version: v1
+    path: prompts/architecture/agent-control-plane@v1.md
+    sha256: 9dd4d065182fd48291624cec50306d13d0dc2c1892e16fb3aeb3f6c555f15bf1
+    description: Design and implement Summit's Agent Control Plane (ACP) for multi-agent orchestration.
+    scope:
+      paths:
+        - prompts/architecture/agent-control-plane@v1.md
+        - prompts/registry.yaml
+      domains:
+        - architecture
+        - orchestration
+        - agentic-os
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
