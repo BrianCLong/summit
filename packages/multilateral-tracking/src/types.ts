@@ -84,7 +84,7 @@ export interface MultilateralOrganization {
   effectiveness: number; // 0-100
   influence: number; // 0-100
   cohesion: number; // 0-100
-  activity Level: 'VERY_HIGH' | 'HIGH' | 'MODERATE' | 'LOW' | 'DORMANT';
+  activityLevel: 'VERY_HIGH' | 'HIGH' | 'MODERATE' | 'LOW' | 'DORMANT';
 
   // Analysis
   keyIssues: string[];

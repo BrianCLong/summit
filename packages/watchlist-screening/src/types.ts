@@ -64,7 +64,7 @@ export const WatchlistEntrySchema = z.object({
     })),
     dateOfBirth: z.array(z.object({
       date: z.string(),
-      type: z.enum(['EXACT', 'APPROXIMATE', 'YEAR_ONLY']
+      type: z.enum(['EXACT', 'APPROXIMATE', 'YEAR_ONLY'])
     })).optional(),
     placeOfBirth: z.array(z.string()).optional(),
     nationality: z.array(z.string()).optional(),

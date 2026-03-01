@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src",
+    "rootDir": "node",
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -13,6 +13,6 @@
     "types": ["node"],
     "lib": ["ES2022"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["dist", "tests", "test-data"]
+  "include": ["node/**/*"],
+  "exclude": ["dist"]
 }

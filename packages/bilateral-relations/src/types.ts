@@ -129,7 +129,7 @@ export interface Conflict {
   casualties?: number;
   economicCost?: number;
   politicalImpact: string;
-  lingering Effects: string[];
+  lingeringEffects: string[];
 }
 
 export interface CooperationArea {

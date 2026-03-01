@@ -34,12 +34,19 @@ jobs:
 
           labels=$(gh pr view $pr -R ${{ github.repository }} --json labels --jq '.labels[].name')
           approvals=$(gh pr view $pr -R ${{ github.repository }} --json reviews --jq '[.reviews[] | select(.state=="APPROVED")] | length')
+          merge_state=$(gh pr view $pr -R ${{ github.repository }} --json mergeStateStatus --jq '.mergeStateStatus')
+
+          if [ "$merge_state" = "DIRTY" ]; then
+            echo "PR has merge conflicts; skipping enqueue."
+            exit 0
+          fi
+
           if ! gh pr checks $pr -R ${{ github.repository }} --required >/dev/null; then
             echo "Required checks are not green yet; skipping enqueue."
             exit 0
           fi
 
-          if echo "$labels" | grep -q "queue:ready" && [ "$approvals" -ge 1 ]; then
+          if (echo "$labels" | grep -q "queue:ready" || echo "$labels" | grep -q "queue:merge-now") && [ "$approvals" -ge 1 ]; then
             gh api repos/${{ github.repository }}/pulls/$pr/merge-queue/enqueue \
               -f merge_method=squash || true
           fi

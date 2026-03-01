@@ -151,8 +151,7 @@ export class SpectralAnalyzer {
     for (let tau = 0; tau < this.config.fftSize; tau++) {
       let sum = 0;
       for (let n = 0; n < N - tau; n++) {
-        const x1 = i[n] + 1j * q[n];
-        const x2 = i[n + tau] - 1j * q[n + tau];
+        // Simplified complex correlation (real part)
         const phase = 2 * Math.PI * alpha * n / this.config.sampleRate;
         sum += (i[n] * i[n + tau] + q[n] * q[n + tau]) * Math.cos(phase);
       }

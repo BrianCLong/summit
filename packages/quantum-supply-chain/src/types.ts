@@ -98,7 +98,7 @@ export const QuantumOptimizationResultSchema = z.object({
 
   // Solution quality metrics
   metrics: z.object({
-    optimality Gap: z.number(), // % from theoretical optimum
+    optimalityGap: z.number(), // % from theoretical optimum
     constraintViolations: z.number(),
     robustness: z.number(), // Sensitivity to parameter changes
     stability: z.number(), // Solution stability
