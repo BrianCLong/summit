@@ -1,34 +1,52 @@
-# Merge Policy
+# Merge Policy: Golden Main Merge Engine
 
-## Golden Main
-*   **No direct pushes** to `main`.
-*   **No direct merges** of PRs.
-*   All changes must pass through the **Merge Queue**.
+## Purpose
 
-## Merge Queue (Merge Train)
-The merge queue serializes merges and tests them on top of the current `main` (stacked commits) before merging. This ensures a linear history and prevents "green PR / red main" drift.
+This policy defines deterministic pull request triage, ordering, and stop conditions that keep `main` green at all times while preserving all contributor work.
 
-### How to Merge
-1.  **Open a PR**.
-2.  **Pass all CI Checks**:
-    *   `ci/build`
-    *   `ci/test`
-    *   `lint`
-    *   `security`
-3.  **Get Approval**: At least one approving review is required.
-4.  **Label `queue:ready`**: Once approved and green, apply the `queue:ready` label.
+## Lane Model
 
-### Automation
-*   An automated workflow monitors PRs.
-*   When a PR is `Approved`, `CI-Green`, and labeled `queue:ready`, it is **automatically enqueued**.
-*   The queue will run checks again on the merge commit.
-*   If successful, the PR merges automatically.
-*   If failed, the PR is removed from the queue.
+- **auto-merge**: CI green, conflict-free, non-large, non-quarantine PRs.
+- **fix-forward**: CI red but otherwise mergeable; author/owner remediation required.
+- **conflicts**: conflict resolution required before queue admission.
+- **quarantine**: risk-path touching PRs with non-green CI or explicit quarantine signal.
+- **capture-close**: large or persistently blocked work that must be sliced into tracked issues.
 
-### Troubleshooting
-*   **Flaky Tests**: CI workflows are configured to retry known flaky tests once. If a test fails persistently, investigate the root cause.
-*   **Merge Conflicts**: If a conflict arises in the queue, the PR will be dequeued. Resolve conflicts locally and re-enqueue.
+## Deterministic Queue Algorithm
 
-### Emergency Bypass
-*   Bypassing the queue is restricted to **Admins** and strictly for **Emergency Hotfixes** (e.g., stopping a live incident).
-*   Any bypass must be documented in a post-mortem.
+Queue order is generated from `artifacts/pr_inventory.json` by stable keys:
+
+1. CI status (`green` first),
+2. conflict state (conflict-free first),
+3. risk classification (low-risk first),
+4. recency (`updatedAt` newest first),
+5. PR number ascending as final tie-break.
+
+Same input inventory produces identical queue output.
+
+## Stop Conditions (Merge Train)
+
+Merge train halts immediately when any of the following occurs:
+
+- post-merge required checks on `main` are red,
+- merge conflict emerges at merge-time,
+- required checks for the PR lane are missing or failing,
+- governance/security quarantine conditions are triggered.
+
+## Capture Rules (No Work Lost)
+
+Unmergeable work is not discarded. For `quarantine` and `capture-close` lanes:
+
+- convert blocked PR intent into issues,
+- include scope slices with acceptance criteria,
+- preserve file-level context and risk/test checklist,
+- label for prioritization (`capture-needed`, `needs-triage`).
+
+## Atomic PR Requirement
+
+Merge Engine changes must ship as atomic roadmap increments:
+
+- one roadmap prompt per PR,
+- deterministic artifacts attached,
+- no speculative merge actions in scaffolding PRs,
+- explicit rollback path for execution-phase PRs.
