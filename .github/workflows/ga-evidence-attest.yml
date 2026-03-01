@@ -69,7 +69,7 @@ jobs:
 
       - name: Install syft (SBOM generator)
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.42.1
 
       - name: Install gitleaks (secret scanner)
         run: |

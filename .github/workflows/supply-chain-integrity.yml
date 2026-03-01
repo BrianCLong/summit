@@ -71,7 +71,7 @@ jobs:
       # Install supply chain tools with strict pinning
       - name: Install syft
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.42.1
           syft version
 
       - name: Install grype
@@ -264,7 +264,7 @@ jobs:
 
       - name: Install tools
         run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.42.1
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.104.3
 
       - name: Run CI Supply Chain Gate

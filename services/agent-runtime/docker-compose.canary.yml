@@ -41,7 +41,7 @@ services:
 
   opa:
     image: openpolicyagent/opa:latest
-    command: ["run", "--server", "--log-level=debug", "/policy/runtime_agent.rego"]
+    command: ["run", "--server", "--log-level=debug", "/policy"]
     volumes:
       - ../../policy/opa:/policy
     ports:
