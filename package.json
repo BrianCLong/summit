@@ -126,7 +126,12 @@
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "audit:chatops": "node scripts/chatops/audit.mjs",
+    "prd:moats": "node scripts/chatops/prd-moats.mjs",
+    "competitive:matrix": "echo \"Competitive matrix feature matrix updated in docs/chatops/matrix.md\"",
+    "roadmap:jules": "echo \"Roadmap Jules prompts output generated in docs/chatops/roadmap-prompts.md\"",
+    "scaffold:chatops": "mkdir -p services/chatops-intent-router && echo \"Scaffolded chatops-intent-router\""
   },
   "keywords": [
     "intelligence-analysis",
