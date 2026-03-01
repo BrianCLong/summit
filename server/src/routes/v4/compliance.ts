@@ -265,13 +265,13 @@ router.get(
   '/hipaa/controls/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.params.id as string as string);
+    const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.params.id);
 
     if (!control) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',
-          message: `HIPAA control not found: ${req.params.id as string as string}`,
+          message: `HIPAA control not found: ${req.params.id}`,
         },
       });
     }
@@ -378,7 +378,7 @@ router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment(req.params.id as string as string);
+    const assessment = await hipaaService!.getAssessment(req.params.id);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -533,13 +533,13 @@ router.get(
   '/sox/controls/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const control = ALL_SOX_CONTROLS.find(c => c.id === req.params.id as string as string);
+    const control = ALL_SOX_CONTROLS.find(c => c.id === req.params.id);
 
     if (!control) {
       return res.status(404).json({
         error: {
           code: 'NOT_FOUND',
-          message: `SOX control not found: ${req.params.id as string as string}`,
+          message: `SOX control not found: ${req.params.id}`,
         },
       });
     }
@@ -647,7 +647,7 @@ router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment(req.params.id as string as string);
+    const assessment = await soxService!.getAssessment(req.params.id);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }

@@ -16,6 +16,8 @@
   "exclude": [
     "node_modules",
     "../node_modules",
+    "../libs/**",
+    "../packages/**",
     "dist",
     "**/*.test.ts",
     "**/*.spec.ts",
@@ -26,9 +28,5 @@
     "src/routes/geoint.js",
     "src/maestro/tools/context-shell.ts",
     "src/routes/osint.ts"
-  ],
-  "references": [
-    { "path": "../libs/context-shell" },
-    { "path": "../packages/osint-collector" }
   ]
 }

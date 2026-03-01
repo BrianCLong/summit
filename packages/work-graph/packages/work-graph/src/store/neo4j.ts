@@ -70,7 +70,7 @@ export class Neo4jGraphStore {
     const session = this.getSession();
     try {
       const result = await session.run(
-        `CREATE (n:Node:${node.type.charAt(0).toUpperCase() + node.type.slice(1)} $props) RETURN n`,
+        \`CREATE (n:Node:\${node.type.charAt(0).toUpperCase() + node.type.slice(1)} \$props) RETURN n\`,
         { props: this.serializeNode(node) }
       );
       const created = this.deserializeNode<T>(result.records[0].get('n').properties);
@@ -100,16 +100,16 @@ export class Neo4jGraphStore {
 
       if (filter && Object.keys(filter).length > 0) {
         const conditions = Object.entries(filter).map(([key, value], i) => {
-          params[`p${i}`] = value;
-          return `n.${key} = $p${i}`;
+          params[\`p\${i}\`] = value;
+          return \`n.\${key} = \$p\${i}\`;
         }).join(' AND ');
-        query += ` WHERE ${conditions}`;
+        query += \` WHERE \${conditions}\`;
       }
 
       query += ' RETURN n';
-      if (options?.orderBy) query += ` ORDER BY n.${options.orderBy} ${options.orderDirection || 'ASC'}`;
-      if (options?.limit) query += ` LIMIT ${options.limit}`;
-      if (options?.offset) query += ` SKIP ${options.offset}`;
+      if (options?.orderBy) query += \` ORDER BY n.\${options.orderBy} \${options.orderDirection || 'ASC'}\`;
+      if (options?.limit) query += \` LIMIT \${options.limit}\`;
+      if (options?.offset) query += \` SKIP \${options.offset}\`;
 
       const result = await session.run(query, params);
       return result.records.map((r) => this.deserializeNode<T>(r.get('n').properties));
@@ -152,8 +152,8 @@ export class Neo4jGraphStore {
     const session = this.getSession();
     try {
       await session.run(
-        `MATCH (s:Node {id: $sourceId}) MATCH (t:Node {id: $targetId})
-         CREATE (s)-[r:${edge.type.toUpperCase()} $props]->(t) RETURN r`,
+        \`MATCH (s:Node {id: \$sourceId}) MATCH (t:Node {id: \$targetId})
+         CREATE (s)-[r:\${edge.type.toUpperCase()} \$props]->(t) RETURN r\`,
         { sourceId: edge.sourceId, targetId: edge.targetId, props: this.serializeEdge(edge) }
       );
       await this.notifyChange({ type: 'edge_created', edgeType: edge.type, id: edge.id, data: edge });
@@ -174,7 +174,7 @@ export class Neo4jGraphStore {
       if (filter?.targetId) { conditions.push('t.id = \$targetId'); params.targetId = filter.targetId; }
       if (filter?.type) { conditions.push('type(r) = \$edgeType'); params.edgeType = filter.type.toUpperCase(); }
 
-      if (conditions.length > 0) query += ` WHERE ${conditions.join(' AND ')}`;
+      if (conditions.length > 0) query += \` WHERE \${conditions.join(' AND ')}\`;
       query += ' RETURN r, s.id as sourceId, t.id as targetId';
 
       const result = await session.run(query, params);

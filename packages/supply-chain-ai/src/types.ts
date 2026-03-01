@@ -542,7 +542,7 @@ export const CausalAnalysisSchema = z.object({
     scenario: z.string(),
     predictedOutcome: z.number(),
     actualOutcome: z.number(),
-    treatmentEffect: z.number(),
+    treatment Effect: z.number(),
   }).optional(),
 
   // Recommendations

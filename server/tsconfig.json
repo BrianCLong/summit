@@ -5,12 +5,8 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "rootDir": "..",
+    "rootDir": ".",
     "outDir": "./dist",
-    "baseUrl": ".",
-    "paths": {
-      "@intelgraph/*": ["../packages/*", "../libs/*"]
-    },
     "esModuleInterop": true,
     "downlevelIteration": true,
     "allowSyntheticDefaultImports": true,

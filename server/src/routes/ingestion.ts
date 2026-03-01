@@ -75,7 +75,7 @@ router.post('/start', ensureAuthenticated, async (req, res) => {
 // Admin API: Check Job Status (New Endpoint)
 router.get('/status/:jobId', ensureAuthenticated, async (req, res) => {
   try {
-    const status = await queueService.getJobStatus(req.params.jobId as string);
+    const status = await queueService.getJobStatus(req.params.jobId);
     if (!status) {
         return res.status(404).json({ error: 'Job not found' });
     }

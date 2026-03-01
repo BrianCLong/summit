@@ -4,14 +4,15 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "composite": true,
+    "emitDeclarationOnly": false,
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "Bundler",
+    "declarationMap": true,
+    "sourceMap": true,
     "types": ["node"],
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
+    "allowImportingTsExtensions": false
   },
   "include": ["src/**/*"],
   "exclude": ["dist", "tests", "test-data"]

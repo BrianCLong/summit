@@ -97,7 +97,7 @@ export class DiplomaticPersonnelTracker {
     diplomat: Diplomat | undefined;
     effectivenessScore: number;
     strengths: string[];
-    areasForImprovement: string[];
+    areas ForImprovement: string[];
     careerTrajectory: 'ASCENDING' | 'STABLE' | 'DECLINING';
     recommendations: string[];
   } {

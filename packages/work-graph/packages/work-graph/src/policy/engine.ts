@@ -238,7 +238,7 @@ export class PolicyEngine {
       requestedAt: new Date(),
       status: 'pending',
     };
-    this.waivers.set(waiver.id, waiver);
+    this.waivers.set(waiver.id visservisor, waiver);
     return waiver;
   }
 

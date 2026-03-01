@@ -80,7 +80,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
 
   router.get('/:id', async (req, res, next) => {
     try {
-      const approval = await getApprovalById(req.params.id as string as string);
+      const approval = await getApprovalById(req.params.id);
       if (!approval) {
         return res.status(404).json({ error: 'Approval not found' });
       }
@@ -98,7 +98,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await approveApproval(
-        req.params.id as string as string,
+        req.params.id,
         approverId,
         req.body?.reason,
       );
@@ -156,7 +156,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await rejectApproval(
-        req.params.id as string as string,
+        req.params.id,
         approverId,
         req.body?.reason,
       );

@@ -1,32 +1,7 @@
 {
-  "last_updated": "2026-03-01T00:00:00Z",
-<<<<<<< ours
-<<<<<<< ours
-  "revision_note": "Extended deterministic PR backlog zero tooling with live PR snapshot export, queue planner, label sync operations, and backlog runbook.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
   "initiatives": [
-    {
-      "id": "pr-backlog-zero-merge-train",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Deterministic queue label taxonomy, live snapshot export, merge batch planner script, queue label sync script, and backlog-to-zero playbook for large live PR streams."
-=======
-  "revision_note": "Hardened deterministic merge-train controls: CI concurrency, auto-enqueue gating, queue label taxonomy.",
-  "initiatives": [
-    {
-=======
-  "revision_note": "Hardened deterministic merge-train controls: CI concurrency, auto-enqueue gating, queue label taxonomy.",
-  "initiatives": [
-    {
->>>>>>> theirs
-      "id": "merge-train-deterministic-queue-hardening",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added deterministic queue labels and automation gates for conflict/stale triage compatibility with merge queue."
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -49,7 +24,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -58,7 +36,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -67,7 +47,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]
