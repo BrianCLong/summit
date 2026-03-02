@@ -11,25 +11,31 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Compete vs complement:** **Compete** when buyer wants “single OSINT platform.” **Complement** when ShadowDragon is a data/capability layer you can orchestrate.
 
 ### Their strengths
+
 * Enterprise trust posture (SOC 2 Type II) and “ethical intelligence” messaging. ([ShadowDragon][1])
 * Credible leadership bench shown publicly (CEO Jonathan Couch, CTO Jason Herren, SVP Eng Nico Dekens; founder Daniel Clemens). ([ShadowDragon][1])
 
 ### Their weaknesses vs Summit (the wedge)
+
 * Tool/platform-first; not naturally framed as **playbooks-as-code** with **evidence bundles**, **replay + diff**, and **CI-governed investigative procedures**.
 
 ### What they’ll say (and your counter)
+
 * “We do OSINT end-to-end with OPSEC + compliance.” → “Great. Show reproducibility and provenance: can you replay an investigation run and prove every claim with captured artifacts and a deterministic bundle?”
 
 ### Trap questions (ask early)
+
 1. “Show a run that is reproducible: evidence capture, replay, and change-diff.”
 2. “How do you version and approve investigative procedures?”
 3. “How do you fuse OSINT outputs with internal systems into a single entity model?”
 
 ### Demo path (10–12 minutes)
+
 * Run **one investigation playbook** → show **evidence bundle** (captured sources + hashes + citations).
 * Re-run the same playbook → show **diff** (what changed, why, and what policy gate fired).
 
 ### Win conditions / lose conditions
+
 * **Win** if buyer cares about auditability, standardization, repeatability, SOC2/ISO style governance.
 * **Lose** if buyer only wants “OSINT searches + monitoring UI” and already standardized on ShadowDragon’s workflow.
 
@@ -42,24 +48,30 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Investigation teams; orgs already anchored in Maltego/i2.
 
 ### Their strengths
+
 * Strong “investigation workspace” story: case management + multi-view analysis + report export (PDF/CSV). ([Social Links][2])
 * API is explicitly priced (rare in this market). ([Social Links][13])
 
 ### Their weaknesses vs Summit
+
 * They sell **data access + UI + automation features**, but they are not natively positioned as a **governed investigation runtime** where playbooks are treated like software (versioned, gated, drift-checked).
 
 ### What they’ll say (and your counter)
+
 * “We have automation + AI + 500+ sources.” → “Perfect. Now: can you **standardize** and **govern** investigations like software? Versioned playbooks, approvals, evidence bundles, replay + diff.”
 
 ### Trap questions
+
 1. “Can you export an audit-ready evidence bundle with reproducible replay instructions?”
 2. “How do you handle policy: who can run which automated searches, with what logs?”
 3. “How do you fuse repeated investigations into a persistent intelligence graph?”
 
 ### Demo path
+
 * Show: **playbook orchestration** calling Social Links as a tool → normalizing results into Summit graph → generating an evidence bundle and a case report.
 
 ### Best posture in real deals
+
 * If they’re entrenched: **don’t displace**. Treat Social Links as a **connector/data source**; sell Summit as the **governed automation + evidence graph** above it.
 
 ---
@@ -70,21 +82,26 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Analysts, small teams, sometimes enterprise as a “workbench layer.”
 
 ### Their strengths
+
 * Ubiquitous analyst familiarity; fast pivots; huge ecosystem effect.
 * Low entry price makes it easy for teams to standardize on it early. ([Maltego][3])
 
 ### Weaknesses vs Summit
+
 * It’s a **tool**, not a **platform runtime**. Scaling standardized investigations across teams becomes “people process,” not “governed execution.”
 
 ### What they’ll say (and your counter)
+
 * “We already have Maltego.” → “Keep it. Summit is what you add when you need repeatable playbooks, provenance, approvals, and cross-domain fusion.”
 
 ### Trap questions
+
 1. “How do you ensure two analysts get the same result following the same SOP?”
 2. “Where is your evidence bundle + reproducibility standard?”
 3. “What’s your governance story when audits/regulators ask ‘why this claim’?”
 
 ### Demo path
+
 * “Maltego is the microscope.” Show Summit as the “lab”: run playbook → evidence bundle → replay + diff → policy gate.
 
 ---
@@ -95,18 +112,22 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Large gov and enterprise fraud/crime units.
 
 ### Their strengths
+
 * Deep enterprise adoption, procurement trust, strong visual charting. ([i2 Group][4])
 * Flexible licensing options. ([i2 Group][4])
 
 ### Weaknesses vs Summit
+
 * i2 is a **visual analysis endpoint**; autonomy and governance are usually *external* (custom integration + process discipline).
 
 ### Trap questions
+
 1. “Where is the investigation runtime—automated playbooks, provenance, replay?”
 2. “How quickly can you ship new investigative methods without heavy services work?”
 3. “How do you unify OSINT + internal systems into a durable graph model?”
 
 ### Demo posture
+
 * If i2 is entrenched: Summit is **upstream**: ingestion + normalization + evidence + automation; i2 remains a charting tool.
 
 ---
@@ -118,18 +139,22 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Gov/LE and regulated enterprise investigations.
 
 ### Strengths
+
 * Direct “OSINT investigations platform” fit; strong casework framing. ([Blackdot Solutions][5])
 * “AI automation” narrative now credible in market coverage. ([Help Net Security][14])
 
 ### Weaknesses vs Summit
+
 * Typically judged on “platform features.” Summit should reframe the evaluation around **governance**, **provenance**, **repeatability**, and **playbooks-as-code**.
 
 ### Trap questions
+
 1. “Can you replay an investigation run end-to-end and generate a deterministic evidence bundle?”
 2. “How do you version and gate investigative procedures (approvals, drift checks)?”
 3. “How do you fuse OSINT and internal data into a persistent graph model?” (They claim OSINT can be combined with internal data in at least one procurement listing; you still want to probe depth.) ([Apply to Supply][15])
 
 ### Demo path
+
 * Use a buyer-relevant scenario (fraud ring / insider / impersonation). Run playbook → evidence → replay/diff → policy gate.
 
 ---
@@ -140,18 +165,22 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Corporate security, fraud units, investigations teams.
 
 ### Strengths
+
 * Clear story: models + situational awareness + link analysis. ([Skopenow][6])
 * Good for “dashboard + alerts + rapid context” motion.
 
 ### Weaknesses vs Summit
+
 * Often evaluated as an **insights platform**; weaker on “defensible casework outputs” and repeatable investigative method governance.
 
 ### Trap questions
+
 1. “Show audit-ready evidence packs and reproducibility.”
 2. “How do you standardize investigations across teams and time?”
 3. “Can your system run a governed playbook across OSINT + internal systems?”
 
 ### Demo path
+
 * Show Summit as the “casework and governance layer” that can ingest Skopenow outputs and turn them into repeatable investigative runs.
 
 ---
@@ -162,12 +191,15 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Individual investigators, journalists, small teams; sometimes enterprise for quick lookups.
 
 ### Strengths
+
 * Clear value: fast identity-linking lookups; transparent pricing. ([OSINT Industries][7])
 
 ### Weaknesses vs Summit
+
 * Narrow scope; not a full investigations platform; no deep governance runtime.
 
 ### How to position
+
 * Treat as a **connector** inside Summit playbooks. Don’t “compete” unless a buyer thinks it’s a full platform (then reframe quickly).
 
 ---
@@ -178,17 +210,21 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** Public sector, comms, security teams.
 
 ### Strengths
+
 * Strong “coordinated manipulation + narrative intelligence” story.
 
 ### Weaknesses vs Summit
+
 * Often campaign/narrative-focused; doesn’t naturally extend to cross-domain corporate espionage investigations unless fused with other evidence sources.
 
 ### Trap questions
+
 1. “Can you fuse non-social OSINT + internal data into the same case model?”
 2. “Can you produce an evidence bundle that survives adversarial scrutiny?”
 3. “Can you run playbooks (not just alerts) with approvals and audit trails?”
 
 ### Best posture
+
 * **Complement**: ingest Cyabra signals → Summit runs the broader investigation playbook (attribution hypotheses, corroboration, evidence capture, reporting).
 
 ---
@@ -199,17 +235,21 @@ Each battlecard includes: **positioning hook**, **when you win/lose**, **trap qu
 **Who buys:** CTI, SecOps leadership, risk teams.
 
 ### Strengths
+
 * Massive external intelligence + operationalization in security workflows. ([Recorded Future][16])
 
 ### Weaknesses vs Summit
+
 * Threat-intel-first: investigations outside CTI (exec impersonation, insider narrative ops, cross-domain fraud) can be awkward if the buyer expects full casework + provenance + playbook governance.
 
 ### Trap questions
+
 1. “Can you run non-cyber investigations end-to-end with case lifecycle and evidence packs?”
 2. “Where is replayability + deterministic output?”
 3. “How do you manage approvals/policy for autonomous actions?”
 
 ### Sales posture
+
 * Often **coexist**: RF as intelligence feed; Summit as **governed investigation runtime** that fuses RF with internal + OSINT + other tools.
 
 ---
@@ -221,18 +261,22 @@ They also claim CVE exploit-likelihood scoring with “94% accuracy” in that c
 **Who buys:** Cyber insurers/brokers, TPRM leaders.
 
 ### Strengths
+
 * Clear “underwriting workflow” narrative (prospects + portfolio monitoring). ([Orpheus][10])
 * External validation exists via Gallagher Re study (47,000 companies, 1,000+ claims). ([Gallagher][17])
 
 ### Weaknesses vs Summit
+
 * Ratings/reporting orientation; limited in true investigative casework beyond cyber-risk scoring.
 
 ### Trap questions
+
 1. “Do you support investigative case lifecycle (who/what/why) or primarily scoring/monitoring?”
 2. “Can you fuse narrative/disinfo and corporate intel into the same evidence graph?”
 3. “Can you run governed playbooks beyond cyber ratings?”
 
 ### Best posture
+
 * **Complement** for insurance deals: Summit handles investigations + evidence; Orpheus can remain a rating/monitoring signal source.
 
 ---
@@ -243,13 +287,16 @@ They also claim CVE exploit-likelihood scoring with “94% accuracy” in that c
 **Who buys:** Security/data teams who already have graph-shaped data and want exploration.
 
 ### Strengths
+
 * Powerful exploratory visualization and investigation acceleration.
 * Strong investor signal for credibility in investigations markets. ([Graphistry][11])
 
 ### Weaknesses vs Summit
+
 * Viz-first: needs an upstream data plane (entity model, provenance, ingestion, governance, playbooks).
 
 ### Best posture
+
 * **Integrate**: Summit graph + evidence → Graphistry UI for specific analyst personas.
 
 ---
@@ -257,6 +304,7 @@ They also claim CVE exploit-likelihood scoring with “94% accuracy” in that c
 ## 12) Palantir (Gotham/Foundry/AIP) — battlecard (enterprise fusion heavyweight)
 
 **What they are:** Enterprise platforms for operations and decision-making:
+
 * Gotham: “make informed decisions… in dynamic operational environments.” ([Palantir][12])
 * Foundry: integration tools “extend far beyond typical ETL/ELT.” ([Palantir][18])
 * AIP Agent Studio: build “AIP Agents” with enterprise info/tools and deploy via APIs/SDKs. ([Palantir][19])
@@ -264,19 +312,23 @@ They also claim CVE exploit-likelihood scoring with “94% accuracy” in that c
 **Who buys:** Large gov + enterprise ops with big budgets and long deployment cycles.
 
 ### Strengths
+
 * Scale + procurement footprint + platform breadth. ([Palantir][12])
 * Agent tooling exists in-platform. ([Palantir][19])
 
 ### Weaknesses vs Summit
+
 * General-purpose + heavyweight; long time-to-value; often services-intensive.
 * You can out-focus them on **investigations + OSINT + evidence governance**, and out-ship.
 
 ### Trap questions
+
 1. “How fast can you deploy a new investigative playbook with approvals and evidence capture?”
 2. “Can you guarantee reproducibility and drift detection across environments?”
 3. “What does a ‘case’ look like in your ontology—how is evidence preserved?”
 
 ### Win conditions / lose conditions
+
 * **Win** when buyer wants a sharp investigation runtime and faster adoption.
 * **Lose** when buyer has already committed to Palantir as the enterprise substrate and is only “adding an app.”
 
