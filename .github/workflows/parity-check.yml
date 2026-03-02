@@ -73,6 +73,7 @@ jobs:
           AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID }}
           PARITY_ENV1: prodlike
           PARITY_ENV2: canary
+        if: ${{ (matrix.cloud == 'aws' && secrets.AWS_OIDC_ROLE_ARN != '') || (matrix.cloud == 'gcp' && secrets.GCP_PROJECT_ID != '') || (matrix.cloud == 'azure' && secrets.AZURE_CLIENT_ID != '') }}
         run: bash scripts/ci/parity_check.sh
 
       - name: Upload parity artifact
