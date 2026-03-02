@@ -28,7 +28,7 @@ describe('DeceptionService', () => {
 
       const tenantId = 'test-tenant';
 
-      (neo.run as jest.Mock).mockResolvedValue({
+      (neo.run as unknown as jest.Mock).mockResolvedValue({
         records: [],
       });
 
@@ -56,7 +56,7 @@ describe('DeceptionService', () => {
         timestamp: new Date(),
       };
 
-      (neo.run as jest.Mock).mockResolvedValue({
+      (neo.run as unknown as jest.Mock).mockResolvedValue({
         records: [{
             get: (key: string) => ({
                 properties: {
@@ -90,7 +90,7 @@ describe('DeceptionService', () => {
     it('should return a report based on interactions', async () => {
       const tenantId = 'test-tenant';
 
-      (neo.run as jest.Mock).mockResolvedValue({
+      (neo.run as unknown as jest.Mock).mockResolvedValue({
         records: [{
           get: (key: string) => {
             const values: Record<string, any> = {
@@ -117,7 +117,7 @@ describe('DeceptionService', () => {
     it('should return a low severity report if no interactions', async () => {
       const tenantId = 'test-tenant';
 
-      (neo.run as jest.Mock).mockResolvedValue({
+      (neo.run as unknown as jest.Mock).mockResolvedValue({
         records: []
       });
 

@@ -20,7 +20,7 @@ describe('PredictiveService Integration (Mocked Driver)', () => {
             close: jest.fn(),
         };
 
-        (getNeo4jDriver as jest.Mock).mockReturnValue({
+        (getNeo4jDriver as unknown as jest.Mock).mockReturnValue({
             session: jest.fn().mockReturnValue(mockSession)
         });
 

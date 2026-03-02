@@ -1,5 +1,6 @@
 #!/bin/bash
 # DR Drill script for IntelGraph
+# Updated to use Enhanced Backup/Restore System
 
 set -euo pipefail
 
@@ -38,94 +39,87 @@ main() {
 
     # 1. Stop all IntelGraph services
     log_info "Stopping all IntelGraph services..."
-    docker-compose -f docker-compose.dev.yml down --volumes --remove-orphans
+    if [ -f "docker-compose.dev.yml" ]; then
+        docker compose -f docker-compose.dev.yml down --volumes --remove-orphans || true
+    fi
+    # Also try stopping if running via other means
+    docker stop neo4j postgres redis 2>/dev/null || true
 
-    # 2. Perform backups
-    log_header "Performing backups..."
+    # 2. Perform comprehensive backup
+    log_header "Performing comprehensive backup..."
     BACKUP_START_TIME=$(date +%s)
 
-    ./scripts/backup/redis_backup.sh
-    ./scripts/backup/neo4j_backup.sh
-    ./scripts/backup/postgres_backup.sh
+    # Use the enhanced backup script
+    ./scripts/backup-enhanced.sh --set=full
 
     BACKUP_END_TIME=$(date +%s)
     BACKUP_DURATION=$((BACKUP_END_TIME - BACKUP_START_TIME))
-    log_success "All backups completed in ${BACKUP_DURATION} seconds."
+    log_success "Backup completed in ${BACKUP_DURATION} seconds."
 
-    # Get the latest backup files for restore
-    LATEST_REDIS_BACKUP=$(ls -t ./backups/redis/*.rdb | head -1)
-    LATEST_NEO4J_BACKUP=$(ls -t ./backups/neo4j/*.dump | head -1)
-    LATEST_POSTGRES_BACKUP=$(ls -t ./backups/postgres/*.sql | head -1)
+    # Get the latest backup ID
+    # Assuming backups are in ./backups/ and start with summit-backup-full-
+    LATEST_BACKUP_DIR=$(ls -td ./backups/summit-backup-full-* | head -1)
 
-    log_info "Latest Redis backup: ${LATEST_REDIS_BACKUP}"
-    log_info "Latest Neo4j backup: ${LATEST_NEO4J_BACKUP}"
-    log_info "Latest Postgres backup: ${LATEST_POSTGRES_BACKUP}"
+    if [ -z "$LATEST_BACKUP_DIR" ]; then
+        log_error "No backup directory found!"
+        exit 1
+    fi
+
+    LATEST_BACKUP_ID=$(basename "$LATEST_BACKUP_DIR")
+    log_info "Latest Backup ID: ${LATEST_BACKUP_ID}"
 
     # 3. Simulate data loss (remove volumes)
     log_header "Simulating data loss by removing Docker volumes..."
-    # Use `docker volume ls -q -f "name=intelgraph_neo4j_dev_data"` to get exact volume names
-    # and then remove them. This is safer than hardcoding.
-    # Also, ensure the volumes are actually removed.
     
     # Get volume names dynamically
-    NEO4J_DATA_VOLUME=$(docker volume ls -q -f "name=intelgraph_neo4j_dev_data")
-    NEO4J_LOGS_VOLUME=$(docker volume ls -q -f "name=intelgraph_neo4j_dev_logs")
-    POSTGRES_DATA_VOLUME=$(docker volume ls -q -f "name=intelgraph_postgres_dev_data")
-    REDIS_DATA_VOLUME=$(docker volume ls -q -f "name=intelgraph_redis_dev_data")
+    NEO4J_DATA_VOLUME=$(docker volume ls -q -f "name=intelgraph_neo4j_dev_data" -f "name=summit_neo4j_data")
+    POSTGRES_DATA_VOLUME=$(docker volume ls -q -f "name=intelgraph_postgres_dev_data" -f "name=summit_postgres_data")
+    REDIS_DATA_VOLUME=$(docker volume ls -q -f "name=intelgraph_redis_dev_data" -f "name=summit_redis_data")
 
-    if [ -n "$NEO4J_DATA_VOLUME" ]; then
-        log_info "Removing Neo4j data volume: $NEO4J_DATA_VOLUME"
-        docker volume rm "$NEO4J_DATA_VOLUME" || true
-    fi
-    if [ -n "$NEO4J_LOGS_VOLUME" ]; then
-        log_info "Removing Neo4j logs volume: $NEO4J_LOGS_VOLUME"
-        docker volume rm "$NEO4J_LOGS_VOLUME" || true
-    fi
-    if [ -n "$POSTGRES_DATA_VOLUME" ]; then
-        log_info "Removing Postgres data volume: $POSTGRES_DATA_VOLUME"
-        docker volume rm "$POSTGRES_DATA_VOLUME" || true
-    fi
-    if [ -n "$REDIS_DATA_VOLUME" ]; then
-        log_info "Removing Redis data volume: $REDIS_DATA_VOLUME"
-        docker volume rm "$REDIS_DATA_VOLUME" || true
-    fi
+    for vol in $NEO4J_DATA_VOLUME $POSTGRES_DATA_VOLUME $REDIS_DATA_VOLUME; do
+        if [ -n "$vol" ]; then
+            log_info "Removing volume: $vol"
+            docker volume rm "$vol" || true
+        fi
+    done
+
     log_success "Docker volumes removed (if they existed)."
 
-    # 4. Perform restores
-    log_header "Performing restores..."
+    # 4. Perform comprehensive restore
+    log_header "Performing comprehensive restore..."
     RESTORE_START_TIME=$(date +%s)
 
-    ./scripts/restore/redis_restore.sh "${LATEST_REDIS_BACKUP}"
-    ./scripts/restore/neo4j_restore.sh "${LATEST_NEO4J_BACKUP}"
-    ./scripts/restore/postgres_restore.sh "${LATEST_POSTGRES_BACKUP}"
+    # Use the enhanced restore script
+    # Run in verification mode first? No, we want actual restore.
+    # We use env=dr_rehearsal to signal this is a drill
+    ./scripts/restore-enhanced.sh "$LATEST_BACKUP_ID" --env=dr_rehearsal --mode=full
 
     RESTORE_END_TIME=$(date +%s)
     RESTORE_DURATION=$((RESTORE_END_TIME - RESTORE_START_TIME))
-    log_success "All restores completed in ${RESTORE_DURATION} seconds."
+    log_success "Restore completed in ${RESTORE_DURATION} seconds."
 
     # 5. Restart all IntelGraph services
     log_header "Restarting IntelGraph services..."
     # The start.sh script handles starting all services and waiting for them to be healthy
-    ./start.sh
+    if [ -f "./start.sh" ]; then
+        ./start.sh
+    else
+        log_warning "start.sh not found, attempting docker-compose up"
+        docker compose -f docker-compose.dev.yml up -d
+    fi
 
-    # 6. Perform basic validation (check service status)
-    log_header "Performing basic service validation..."
-    # The start.sh script already includes show_service_status, which performs health checks.
-    # We can add more specific validation here if needed, e.g., querying a known data point.
-    log_info "Please check the output of the 'start.sh' script above for service health."
-    log_info "You can also manually verify by accessing the application at http://localhost:3000"
-
-    # 7. Report RPO and RTO
+    # 6. Report RPO and RTO
     log_header "DR Drill Summary:"
     log_info "Backup Duration: ${BACKUP_DURATION} seconds"
     log_info "Restore Duration: ${RESTORE_DURATION} seconds"
-    log_info "RPO (Recovery Point Objective): This is determined by the frequency of your backups. For this drill, it's the point in time the backup was taken."
-    log_info "RTO (Recovery Time Objective): ${RESTORE_DURATION} seconds (This should be compared against your target of 30 minutes)."
+    log_info "RPO: Point in time of backup ($LATEST_BACKUP_ID)"
+    log_info "RTO: ${RESTORE_DURATION} seconds"
 
-    if (( RESTORE_DURATION <= 1800 )); then # 30 minutes = 1800 seconds
-        log_success "RTO of ${RESTORE_DURATION} seconds meets the target of 30 minutes."
+    TARGET_RTO=1800 # 30 minutes
+    if (( RESTORE_DURATION <= TARGET_RTO )); then
+        log_success "RTO of ${RESTORE_DURATION} seconds meets the target of ${TARGET_RTO} seconds."
     else
-        log_warning "RTO of ${RESTORE_DURATION} seconds exceeds the target of 30 minutes."
+        log_warning "RTO of ${RESTORE_DURATION} seconds exceeds the target of ${TARGET_RTO} seconds."
     fi
 
     log_success "IntelGraph DR Drill complete!"

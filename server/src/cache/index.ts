@@ -1,17 +1,6 @@
 // @ts-nocheck
-import { createClient } from 'redis';
+import { RedisService } from './redis.js';
 import { safeJsonParse, safeJsonStringify } from '../utils/safe-json.js';
-
-// Lazy init
-let redisClient: ReturnType<typeof createClient> | null = null;
-
-function getRedis(): ReturnType<typeof createClient> {
-  if (!redisClient) {
-    redisClient = createClient({ url: process.env.REDIS_URL || 'redis://localhost:6379' });
-    redisClient.connect().catch(console.error);
-  }
-  return redisClient;
-}
 
 const inflight = new Map<string, Promise<unknown>>();
 
@@ -20,7 +9,7 @@ export async function cached<T>(
   ttlSec: number,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const r = getRedis();
+  const r = RedisService.getInstance();
   const cachedVal = await r.get(key);
   if (cachedVal) return safeJsonParse<T>(cachedVal);
 
@@ -29,7 +18,7 @@ export async function cached<T>(
 
   const p = (async (): Promise<T> => {
     const v = await fn();
-    await r.setEx(key, ttlSec, safeJsonStringify(v));
+    await r.set(key, safeJsonStringify(v), ttlSec);
     return v;
   })();
 
@@ -48,7 +37,7 @@ export async function cachedSWR<T>(
   swr: number,
   fn: () => Promise<T>,
 ): Promise<T> {
-  const r = getRedis();
+  const r = RedisService.getInstance();
   const v = await r.get(key);
 
   if (v) {
@@ -56,7 +45,7 @@ export async function cachedSWR<T>(
     // If within stale window (ttl < swr remaining), refresh in background
     if (t > 0 && t < swr) {
        fn()
-        .then((n) => r.setEx(key, ttl, JSON.stringify(n)))
+        .then((n) => r.set(key, JSON.stringify(n), ttl))
         .catch(() => {});
     }
     return JSON.parse(v) as T;

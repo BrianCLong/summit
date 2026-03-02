@@ -148,4 +148,8 @@ export class RedisService {
   async getKeysByPattern(pattern: string): Promise<string[]> {
     return this.client.keys(pattern);
   }
+
+  async ttl(key: string): Promise<number> {
+    return this.client.ttl(key);
+  }
 }

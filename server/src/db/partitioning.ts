@@ -125,7 +125,49 @@ export class PartitionManager {
         await this.createMonthlyPartition(table, monthAfterNext);
     }
 
-    // Future: Logic to detach old partitions and move to cold storage (e.g. S3 parquet)
+    // Detach partitions older than 12 months and move to cold storage
+    await this.detachOldPartitions(tables, 12);
+  }
+
+  /**
+   * Creates a hash partition for a table.
+   * Useful for load balancing large tables without natural range keys.
+   */
+  async createHashPartition(tableName: string, partitionIndex: number, modulus: number): Promise<void> {
+    const partitionName = `${tableName}_h${partitionIndex}`;
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Check if partition exists
+      const checkRes = await client.query(
+        `SELECT to_regclass($1::text)`,
+        [partitionName]
+      );
+
+      if (checkRes.rows[0].to_regclass) {
+        logger.info(`Partition ${partitionName} already exists.`);
+        await client.query('COMMIT');
+        return;
+      }
+
+      const query = `
+        CREATE TABLE ${partitionName}
+        PARTITION OF ${tableName}
+        FOR VALUES WITH (MODULUS ${modulus}, REMAINDER ${partitionIndex})
+      `;
+
+      await client.query(query);
+      logger.info(`Created hash partition ${partitionName} (modulus ${modulus}, remainder ${partitionIndex})`);
+
+      await client.query('COMMIT');
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error(`Failed to create hash partition ${partitionName}`, error);
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async detachOldPartitions(
