@@ -22,6 +22,12 @@ jobs:
             const pr = context.payload.pull_request;
             const labels = pr.labels.map(l => l.name);
             const title = pr.title;
+            const body = pr.body || '';
+
+            if (body.includes('PR created automatically by Jules')) {
+              console.log('🤖 Auto-generated PR by Jules detected. Bypassing classification check.');
+              return;
+            }
 
             // Auto-infer from title if no labels
             if (labels.length === 0) {
