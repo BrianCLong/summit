@@ -11,6 +11,7 @@ import { ExplainViewSidebar } from '@/features/explain/ExplainViewSidebar'
 import { MapView } from '@/features/geospatial/MapView'
 import { useAppSelector } from '@/store/hooks'
 import { selectExplain } from '@/features/explain/explainSlice'
+import { MODIFIER_KEY } from '@/lib/utils'
 import {
   Layers,
   Eye,
@@ -26,7 +27,6 @@ import {
   Maximize2,
   Calendar,
 } from 'lucide-react'
-import { MODIFIER_KEY } from '@/lib/utils'
 import type {
   Entity,
   Relationship,
