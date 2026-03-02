@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useAuth } from '@/contexts/AuthContext'
+import { Kbd } from '@/components/ui/Kbd'
 
 export function CommandPalette(): React.ReactElement {
   const [open, setOpen] = useState(false)
@@ -137,9 +138,18 @@ export function CommandPalette(): React.ReactElement {
       </Command.List>
 
       <div className="border-t p-2 text-xs text-muted-foreground flex items-center justify-between px-4">
-        <span>Use arrow keys to navigate</span>
-        <div className="flex gap-1">
-          <span className="bg-muted px-1 rounded">esc</span> to close
+        <div className="flex items-center gap-2">
+          <div className="flex gap-0.5">
+            <Kbd>↑</Kbd>
+            <Kbd>↓</Kbd>
+          </div>
+          <span>to navigate</span>
+          <Kbd className="ml-2">enter</Kbd>
+          <span>to select</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Kbd>esc</Kbd>
+          <span>to close</span>
         </div>
       </div>
     </Command.Dialog>
