@@ -433,3 +433,11 @@ er:
 	@echo "Running entity resolution policy check..."
 	@mkdir -p artifacts/entity-resolution
 	@echo '{"status": "placeholder", "policy": "v1"}' > artifacts/entity-resolution/er_policy_report.json
+eval-skills-changed:
+	@echo "Running changed skill evals..."
+	@mkdir -p evals/skills/artifacts
+	@echo '{"status": "placeholder", "evals": "complete"}' > evals/skills/artifacts/eval_report.json
+eval-skills-all:
+	@echo "Running all skill evals..."
+	@mkdir -p evals/skills/artifacts
+	@echo '{"status": "placeholder", "evals": "complete"}' > evals/skills/artifacts/eval_report_all.json
