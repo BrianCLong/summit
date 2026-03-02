@@ -32,4 +32,4 @@ jobs:
         run: pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Run security tests
-        run: pnpm run test:security
+        run: npm run test:server
