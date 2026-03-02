@@ -15,9 +15,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Added `evidence_to_dot.py` and GitHub workflow `render-evidence-graph.yml` to automatically convert and upload visual DOT/SVG graphs of `evidence.json`.
-
-### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

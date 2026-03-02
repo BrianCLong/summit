@@ -409,6 +409,3 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
-eval-skills-changed:
-	@echo "Evaluating changed skills..."
-	@exit 0
