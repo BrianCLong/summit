@@ -96,7 +96,7 @@ export class APISurfaceValidator {
       } else {
         results.push(
           warn('pve.api.breaking_change', `Found ${breakingChanges.length} breaking changes`, {
-            details: { changes: breakingChanges },
+            details: { context: { changes: breakingChanges } },
           }),
         );
       }
