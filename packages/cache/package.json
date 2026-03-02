@@ -15,8 +15,6 @@
     "prom-client": "^15.1.3"
   },
   "devDependencies": {
-    "@types/hapi__catbox": "^12.1.0",
-    "@types/hapi__shot": "^6.0.0",
     "@types/node": "^20.11.0",
     "typescript": "^5.7.2",
     "vitest": "^1.6.0"
