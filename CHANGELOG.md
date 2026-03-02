@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fix CI Failures for PR #18918.
+
+### Added
+- Added `Required-Check Drift Sentinel` to monitor required-check context parity across GitHub API and local workflows.
+
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
