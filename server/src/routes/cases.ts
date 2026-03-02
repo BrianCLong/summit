@@ -564,15 +564,14 @@ caseRouter.post('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comment = await service.addComment(
-      {
-        caseId: id,
-        userId,
-        content,
-        metadata,
-      },
+    const comment = await service.addComment({
+      targetType: 'CASE',
+      targetId: id,
+      authorId: userId,
+      content,
+      metadata,
       tenantId,
-    );
+    });
 
     await emitAuditEvent(
       {
