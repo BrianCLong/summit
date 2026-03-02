@@ -90,10 +90,6 @@ while [[ $# -gt 0 ]]; do
             DRY_RUN="true"
             shift
             ;;
-        --fail-on-drift)
-            FAIL_ON_DRIFT="true"
-            shift
-            ;;
         --policy)
             POLICY_FILE="$2"
             shift 2
