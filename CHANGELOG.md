@@ -1,3 +1,7 @@
+## [Unreleased]
+- Added AgentPlace Risk Evaluator module and enforce governance.
+- Fixed missing mock script for ux-governance.
+
 # Changelog
 
 <!--
