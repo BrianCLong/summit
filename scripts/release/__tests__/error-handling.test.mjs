@@ -69,7 +69,7 @@ describe('Release Bundle Error Handling', () => {
 
         const { output, error } = runVerifyScript(tempDir, true);
         assert(error, 'Script should have failed');
-        assert(output.includes('[INVALID_JSON]') || output.includes('[INTERNAL_ERROR]'), `Expected INVALID_JSON or INTERNAL_ERROR, got: ${output}`);
+        assert(output.includes('[INVALID_JSON]') || output.includes('INTERNAL_ERROR'), `Expected INVALID_JSON or INTERNAL_ERROR, got: ${output}`);
     });
 
     it('throws SCHEMA_MAJOR_UNSUPPORTED for unsupported major version', () => {

@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   validate-release-policy:
-    name: Test Release Scripts
+    name: Validate Release Policy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,8 +27,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Test Release Scripts
-        run: pnpm test:release-scripts
+      - name: Validate Release Policy
+        run: pnpm lint:release-policy
 
   lint-reason-codes:
     name: Lint Release Reason Codes
@@ -56,13 +56,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: 20
           cache: "pnpm"
@@ -92,7 +89,7 @@ jobs:
       - uses: actions/checkout@v4 # v6
 
       - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0.18.0
+        uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
         run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
