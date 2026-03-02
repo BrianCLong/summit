@@ -72,8 +72,8 @@ class ComprehensiveTelemetry {
               metrics.dbQueryDuration.labels('unknown', 'query').observe(value);
             }
             // Also update legacy metric
-            if (metrics.summitDatabaseQueryDuration) {
-               metrics.summitDatabaseQueryDuration.labels('unknown', 'query').observe(value);
+            if (metrics.intelgraphDatabaseQueryDuration) {
+               metrics.intelgraphDatabaseQueryDuration.labels('unknown', 'query').observe(value);
             }
           }
         },
@@ -81,13 +81,13 @@ class ComprehensiveTelemetry {
       cache: {
         hits: {
           add: (value: number = 1) => {
-            if (metrics.summitCacheHits) metrics.summitCacheHits.labels('redis').inc(value);
+            if (metrics.intelgraphCacheHits) metrics.intelgraphCacheHits.labels('redis').inc(value);
             if (metrics.cacheHits) metrics.cacheHits.inc(value);
           }
         },
         misses: {
           add: (value: number = 1) => {
-            if (metrics.summitCacheMisses) metrics.summitCacheMisses.inc(value);
+            if (metrics.intelgraphCacheMisses) metrics.intelgraphCacheMisses.inc(value);
             if (metrics.cacheMisses) metrics.cacheMisses.inc(value);
           }
         },
@@ -154,8 +154,8 @@ class ComprehensiveTelemetry {
       metrics.websocketConnections.inc();
     }
     // Also update legacy metric if possible, assuming single tenant or unknown
-    if (metrics.summitActiveConnections) {
-      metrics.summitActiveConnections.set({ tenant: 'unknown' }, this.activeConnectionsCount);
+    if (metrics.intelgraphActiveConnections) {
+      metrics.intelgraphActiveConnections.set({ tenant: 'unknown' }, this.activeConnectionsCount);
     }
   }
 
@@ -164,8 +164,8 @@ class ComprehensiveTelemetry {
     if (metrics.websocketConnections) {
       metrics.websocketConnections.dec();
     }
-    if (metrics.summitActiveConnections) {
-      metrics.summitActiveConnections.set({ tenant: 'unknown' }, this.activeConnectionsCount);
+    if (metrics.intelgraphActiveConnections) {
+      metrics.intelgraphActiveConnections.set({ tenant: 'unknown' }, this.activeConnectionsCount);
     }
   }
 
