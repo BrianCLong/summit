@@ -1,16 +1,15 @@
-# Repo Assumptions & Verification
+# Repo Assumptions
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+**Verified**
+* None (inspection unavailable initially, basic checks done now)
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+**Assumed**
+* pipelines/ contains stage definitions
+* schemas/ contains JSON schemas
+* CI uses GitHub Actions
+* Evidence format: report.json, metrics.json, stamp.json
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+**Must-Not-Touch**
+* Core scoring engine
+* Existing compliance attestations
+* Historical evidence logs
