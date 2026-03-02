@@ -6,8 +6,8 @@ import { osintQueue } from '../services/OSINTQueueService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { osintRateLimiter } from '../middleware/osintRateLimiter.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { SimpleFeedCollector } from '../../../packages/osint-collector/src/collectors/SimpleFeedCollector.js';
-import { CollectionType, TaskStatus } from '../../../packages/osint-collector/src/types/index.js';
+import { SimpleFeedCollector } from '../../tests/mocks/osint-collector.js';
+import { CollectionType, TaskStatus } from '../../tests/mocks/osint-collector-types.js';
 import { securityAudit } from '../audit/security-audit-logger.js';
 
 interface AuthenticatedRequest extends Request {
