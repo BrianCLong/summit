@@ -154,7 +154,8 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=4000
-      - POLICY_DRY_RUN=true
+      - POLICY_DRY_RUN=false
+      - OPA_DECISION_URL=http://opa:8181/v1/data/policy/authz/abac/decision
       - PROV_LEDGER_URL=http://prov-ledger:4010
       - GRAPH_SERVICE_URL=http://api:4000
       - GRAPH_XAI_URL=http://graph-xai:4011
@@ -194,6 +195,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  gateway:
+    build:
+      context: .
+      dockerfile: apps/gateway/Dockerfile
+    container_name: summit-gateway
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    environment:
+      - PORT=8080
+      - NODE_ENV=development
+      - OPA_DECISION_URL=http://opa:8181/v1/data/policy/authz/abac/decision
+      - TYPESENSE_HOST=typesense
+      - TYPESENSE_PORT=8108
+      - TYPESENSE_PROTOCOL=http
+      - TYPESENSE_API_KEY=xyz
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      opa:
+        condition: service_started
+      typesense:
+        condition: service_healthy
+    networks:
+      - summit
 
   prov-ledger:
     build: ./services/prov-ledger
@@ -368,8 +395,8 @@ services:
     container_name: summit-web
     restart: unless-stopped
     environment:
-      VITE_API_URL: http://api:4000/graphql
-      VITE_WS_URL: ws://api:4000/graphql
+      VITE_API_URL: http://api-gateway:4000/graphql
+      VITE_WS_URL: ws://api-gateway:4000/graphql
       VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:

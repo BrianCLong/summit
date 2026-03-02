@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger.js';
+import { randomUUID } from 'crypto';
 
 export interface PolicyOptions {
   dryRun?: boolean;
@@ -9,56 +10,147 @@ export interface PolicyDenial {
   error: string;
   reason: string;
   appealPath: string;
+  traceId?: string;
+}
+
+interface AuthzInput {
+  subject: {
+    id: string;
+    roles: string[];
+    tenant?: string;
+    clearance: string;
+  };
+  resource: {
+    type: string;
+    id: string;
+    tenant: string;
+    classification: string;
+  };
+  action: string;
+  context: {
+    env: string;
+    request_ip: string;
+    time: string;
+    reason?: string;
+  };
+}
+
+interface OPAResult {
+  allow: boolean;
+  deny?: string[];
+}
+
+const DEFAULT_DECISION_URL =
+  process.env.OPA_DECISION_URL ||
+  'http://opa:8181/v1/data/policy/authz/abac/decision';
+
+function buildAuthzInput(req: Request): AuthzInput {
+  const roles = (req.headers['x-roles'] as string | undefined)?.split(',') || [];
+  const tenant = (req.headers['x-tenant-id'] as string | undefined) || 'unknown';
+
+  return {
+    subject: {
+      id: (req.headers['x-subject-id'] as string | undefined) || 'anonymous',
+      roles,
+      tenant,
+      clearance: (req.headers['x-clearance'] as string | undefined) || 'internal',
+    },
+    resource: {
+      type: req.headers['x-resource-type']?.toString() || 'graphql',
+      id: req.headers['x-resource-id']?.toString() || 'na',
+      tenant,
+      classification: (req.headers['x-resource-classification'] as string | undefined) || 'internal',
+    },
+    action: (req.headers['x-action'] as string | undefined) || `graphql:${req.method.toLowerCase()}`,
+    context: {
+      env: process.env.NODE_ENV || 'dev',
+      request_ip: req.ip || 'unknown',
+      time: new Date().toISOString(),
+      reason: (req.headers['x-reason-for-access'] as string | undefined) || (req.headers['x-reason'] as string | undefined),
+    },
+  };
 }
 
 /**
- * Enforces warrant/authority binding and reason-for-access.
- * In dry-run mode, annotates response warnings instead of blocking.
+ * Enforces OPA-backed policy authorization.
+ * In dry-run mode, logs warnings instead of blocking.
  */
-export function policyGuard({ dryRun = false }: PolicyOptions = {}) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const auth = req.headers['x-authority-id'] as string;
-    const reason = req.headers['x-reason-for-access'] as string;
-
-    if (!auth || !reason) {
-      const denial: PolicyDenial = {
-        error: 'Policy denial',
-        reason: 'Missing authority binding or reason-for-access headers',
-        appealPath: '/ombudsman/appeals',
-      };
-
-      logger.warn('Policy violation', {
-        path: req.path,
-        method: req.method,
-        missingAuth: !auth,
-        missingReason: !reason,
-        userAgent: req.headers['user-agent'],
-        ip: req.ip,
-      });
-
-      if (dryRun) {
-        // Annotate request with policy warnings
-        (req as any).__policyWarnings = [
-          (req as any).__policyWarnings || [],
-          denial,
-        ].flat();
-        logger.warn('Policy dry-run: would have blocked request', denial);
-        return next();
-      }
-
-      return res.status(403).json(denial);
+export function policyGuard({ dryRun = process.env.POLICY_DRY_RUN === 'true' }: PolicyOptions = {}) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (req.path === '/healthz' || req.path === '/.well-known/apollo/server-health') {
+      return next();
     }
 
-    // Store policy context
-    (req as any).authorityId = auth;
-    (req as any).reasonForAccess = reason;
+    const traceId = (req.headers['x-trace-id'] as string | undefined) || randomUUID();
+    const input = buildAuthzInput(req);
 
-    logger.info('Policy check passed', {
-      authorityId: auth,
-      reasonForAccess: reason,
-      path: req.path,
-    });
+    try {
+      const opaResponse = await fetch(DEFAULT_DECISION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input }),
+      });
 
-    next();
+      if (!opaResponse.ok) {
+        logger.error('OPA decision request failed', {
+          status: opaResponse.status,
+          traceId,
+        });
+        if (dryRun) return next();
+        return res.status(503).json({ error: 'Authorization service unavailable', traceId });
+      }
+
+      const body = (await opaResponse.json()) as { result?: OPAResult };
+      const result = body.result;
+
+      if (!result) {
+        logger.error('OPA returned empty result', { traceId });
+        if (dryRun) return next();
+        return res.status(503).json({ error: 'Authorization error', traceId });
+      }
+
+      if (!result.allow) {
+        const denial: PolicyDenial = {
+          error: 'Policy denial',
+          reason: result.deny?.join(', ') || 'Access policy violation',
+          appealPath: '/ombudsman/appeals',
+          traceId,
+        };
+
+        logger.warn('Policy violation detected', {
+          traceId,
+          input: {
+            subject: input.subject.id,
+            action: input.action,
+            tenant: input.resource.tenant,
+          },
+          denial,
+        });
+
+        if (dryRun) {
+          logger.warn('Policy dry-run: would have blocked request', { traceId, denial });
+          return next();
+        }
+
+        return res.status(403).json(denial);
+      }
+
+      // Access granted
+      (req as any).policyContext = {
+        traceId,
+        input,
+        allowed: true,
+      };
+
+      next();
+    } catch (error: any) {
+      logger.error('Policy enforcement exception', {
+        error: error.message,
+        traceId,
+      });
+
+      if (dryRun) return next();
+      return res.status(500).json({ error: 'Internal policy enforcement error', traceId });
+    }
   };
 }

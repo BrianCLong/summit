@@ -9,6 +9,7 @@ export const typeDefs = gql`
     id: ID!
     type: String!
     properties: JSON!
+    props: JSON
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -33,8 +34,11 @@ export const typeDefs = gql`
     id: ID!
     source: Entity!
     target: Entity!
+    from: ID!
+    to: ID!
     type: String!
     properties: JSON!
+    props: JSON
     confidence: Float
     createdAt: DateTime!
   }
@@ -113,6 +117,16 @@ export const typeDefs = gql`
     COMPLETED
     FAILED
     SKIPPED
+  }
+
+  type Investigation {
+    id: ID!
+    name: String!
+    description: String
+    createdAt: DateTime!
+    updatedAt: DateTime
+    entities: [Entity!]
+    relationships: [Relationship!]
   }
 
   # Prediction Types
@@ -215,7 +229,7 @@ export const typeDefs = gql`
   type Query {
     # Graph Queries
     entity(id: ID!): Entity
-    entities(filter: JSON, limit: Int = 10): [Entity!]!
+    entities(filter: JSON, q: String, limit: Int = 10): [Entity!]!
     relationship(id: ID!): Relationship
     relationships(filter: JSON, limit: Int = 10): [Relationship!]!
 
@@ -244,6 +258,10 @@ export const typeDefs = gql`
     case(id: ID!, reason: String!, legalBasis: String!): Case
     cases(status: String, compartment: String, limit: Int, offset: Int): [Case!]
     comments(targetType: String!, targetId: String!, limit: Int, offset: Int): [Comment!]
+
+    # Investigation Queries
+    investigation(id: ID!): Investigation
+    investigations(limit: Int = 25, offset: Int = 0): [Investigation!]!
 
     # Health Check
     health: Health!

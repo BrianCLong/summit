@@ -289,7 +289,7 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 
 .PHONY: ga ga-verify
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
-	@mkdir -p artifacts/ga
+	@mkdir -p /tmp/ga-reports 2>/dev/null || true
 	@./scripts/ga-gate.sh
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)

@@ -14,27 +14,45 @@ const workspacePlugin = {
     // Intercept @intelgraph/* imports
     build.onResolve({ filter: /^@intelgraph\// }, (args) => {
       const packageName = args.path.split('/')[1];
-      const packagePath = path.resolve(__dirname, '..', 'packages', packageName);
 
-      if (fs.existsSync(packagePath)) {
-        // Try src/index.ts first
-        const srcIndex = path.join(packagePath, 'src', 'index.ts');
-        if (fs.existsSync(srcIndex)) {
-          return { path: srcIndex, namespace: 'file' };
-        }
+      // Possible search paths based on pnpm-workspace.yaml
+      const searchPaths = [
+        path.resolve(__dirname, '..', 'packages', packageName),
+        path.resolve(__dirname, '..', 'libs', packageName, 'node'),
+        path.resolve(__dirname, '..', 'services', packageName),
+        path.resolve(__dirname, '..', 'services', packageName, 'node'),
+        path.resolve(__dirname, '..', 'agents', packageName), // Added agents/
+        path.resolve(__dirname, 'packages_tmp', packageName), // Added packages_tmp/
+      ];
 
-        // Fallback to what package.json says
-        try {
-          const pkgJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf8'));
-          const mainFile = pkgJson.main || 'index.js';
-          const resolvedPath = path.join(packagePath, mainFile);
-          if (fs.existsSync(resolvedPath)) {
-            return { path: resolvedPath, namespace: 'file' };
+      for (const packagePath of searchPaths) {
+        if (fs.existsSync(packagePath)) {
+          // Try src/index.ts first
+          const srcIndex = path.join(packagePath, 'src', 'index.ts');
+          if (fs.existsSync(srcIndex)) {
+            return { path: srcIndex, namespace: 'file' };
           }
-        } catch (e) {
-          // ignore
+
+          // Then try index.ts in the root of the package directory
+          const rootIndex = path.join(packagePath, 'index.ts');
+          if (fs.existsSync(rootIndex)) {
+            return { path: rootIndex, namespace: 'file' };
+          }
+
+          // Fallback to what package.json says
+          try {
+            const pkgJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf8'));
+            const mainFile = pkgJson.main || 'index.js';
+            const resolvedPath = path.join(packagePath, mainFile);
+            if (fs.existsSync(resolvedPath)) {
+              return { path: resolvedPath, namespace: 'file' };
+            }
+          } catch (e) {
+            // ignore
+          }
         }
       }
+      console.warn(`⚠️ Could not resolve workspace package: ${args.path}`);
       return null;
     });
   },
