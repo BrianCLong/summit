@@ -1,5 +1,5 @@
 meta:
-  id: implement.dal-scoring@v1
+  id: implement.dal-scoring-v1
   owner: 'intelgraph-advisory-committee'
   purpose: 'Implement DAL Impact Scoring Formulas'
   tags: ['dal', 'scoring', 'impact', 'roi']

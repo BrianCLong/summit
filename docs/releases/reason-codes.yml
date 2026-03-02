@@ -65,3 +65,73 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+  - code: "SCHEMA_MAJOR_UNSUPPORTED"
+    description: "The major schema version is not supported by the current tooling."
+    severity: "error"
+    action: "Upgrade tooling or use an older compatible schema."
+
+  - code: "SCHEMA_VERSION_INVALID"
+    description: "The schema version provided is invalid or malformed."
+    severity: "error"
+    action: "Correct the schema version format."
+
+  - code: "JSON_PARSE_ERROR"
+    description: "Failed to parse JSON file."
+    severity: "error"
+    action: "Ensure the file contains valid JSON."
+
+  - code: "MISSING_FIELD"
+    description: "A required field is missing from the payload."
+    severity: "error"
+    action: "Supply the missing field."
+
+  - code: "INVALID_ENUM"
+    description: "The provided value is not a valid enum member."
+    severity: "error"
+    action: "Use one of the allowed enum values."
+
+  - code: "DRIFT_DETECTED"
+    description: "Configuration drift detected between environments."
+    severity: "error"
+    action: "Reconcile drift before proceeding."
+
+  - code: "DRIFT_ERROR"
+    description: "An error occurred while checking for drift."
+    severity: "error"
+    action: "Investigate drift checker logs."
+
+  - code: "SIG_ORPHAN"
+    description: "A signature was found without a corresponding payload."
+    severity: "error"
+    action: "Ensure signatures are accompanied by their payloads."
+
+  - code: "SIG_INVALID"
+    description: "The provided signature is invalid."
+    severity: "error"
+    action: "Resign the payload with correct key."
+
+  - code: "COSIGN_MISSING"
+    description: "Cosign signature is missing."
+    severity: "error"
+    action: "Provide a valid cosign signature."
+
+  - code: "SIG_MISSING"
+    description: "A required signature is missing."
+    severity: "error"
+    action: "Ensure all required artifacts are signed."
+
+  - code: "ATTESTATION_MISSING"
+    description: "Required attestation is missing."
+    severity: "error"
+    action: "Generate and provide required SLSA attestation."
+
+  - code: "SHA256SUMS_INVALID_FORMAT"
+    description: "The sha256sums file is improperly formatted."
+    severity: "error"
+    action: "Regenerate sha256sums file in standard format."
+
+  - code: "INVALID_JSON"
+    description: "Invalid JSON encountered in strict mode."
+    severity: "error"
+    action: "Fix JSON syntax errors."

@@ -1,5 +1,5 @@
 meta:
-  id: implement.predictive-risk-posture-engine@v1
+  id: implement.predictive-risk-posture-engine-v1
   owner: 'intelgraph-advisory-committee'
   purpose: 'Implement Summit Predictive Risk Posture Engine (PRPE)'
   tags: ['prpe', 'risk', 'predictive', 'forecasting']

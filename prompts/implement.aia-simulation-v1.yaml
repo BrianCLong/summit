@@ -1,5 +1,5 @@
 meta:
-  id: implement.aia-simulation@v1
+  id: implement.aia-simulation-v1
   owner: 'intelgraph-advisory-committee'
   purpose: 'Implement AIA Simulation Environment'
   tags: ['aia', 'simulation', 'testing', 'harness']

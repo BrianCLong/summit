@@ -1,5 +1,5 @@
 meta:
-  id: implement.ftx-protocol@v1
+  id: implement.ftx-protocol-v1
   owner: 'intelgraph-advisory-committee'
   purpose: 'Implement FTX Protocol Spec for Wire Format & Crypto'
   tags: ['ftx', 'protocol', 'crypto', 'wire-format']
