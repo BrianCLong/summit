@@ -3,7 +3,7 @@ import json, os, sys, hashlib, datetime, re
 from typing import Dict, Any, List
 from neo4j import GraphDatabase
 
-NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687")
+NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687") or "bolt://localhost:7687"
 NEO4J_USER = os.environ.get("NEO4J_USER", "neo4j")
 NEO4J_PASS = os.environ.get("NEO4J_PASS", "password")
 OUTPUT = os.environ.get("PLAN_FINGERPRINT_OUT", "plan-fingerprints.jsonl")
