@@ -34,14 +34,24 @@ export class RiskRepository {
       const savedSignals: RiskSignal[] = [];
 
       // 2. Insert Risk Signals
+      // ⚡ Bolt Optimization: Batched Inserts
+      // What: Replaced row-by-row inserts with multi-row batched inserts chunked by 100.
+      // Why: Row-by-row inserts in a loop cause an N+1 query problem, severely blocking the
+      //      database connection pool and increasing latency due to multiple network round-trips.
+      // Impact: Reduces DB round-trips from N (where N = number of signals) to ceil(N / 100),
+      //         drastically improving insertion speed and reducing transaction duration.
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < input.signals.length; i += CHUNK_SIZE) {
+          const chunk = input.signals.slice(i, i + CHUNK_SIZE);
+
+          const values = [];
+          const params = [];
+          let paramIndex = 1;
+
+          for (const sig of chunk) {
+            values.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+            params.push(
               savedScore.id,
               sig.type,
               sig.source,
@@ -49,10 +59,22 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
+              sig.detectedAt || new Date()
+            );
+          }
+
+          // Execute the batched insert
+          const sigRows = await tx.query(
+            `INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${values.join(', ')}
+            RETURNING *`,
+            params
           );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+
+          for (const row of sigRows) {
+            savedSignals.push(this.mapSignal(row));
+          }
         }
       }
 
