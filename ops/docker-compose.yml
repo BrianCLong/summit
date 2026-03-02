@@ -71,6 +71,20 @@ services:
       - COLLECTOR_OTLP_ENABLED=true
     ports: ['16686:16686']
 
+  redis-shard-0:
+    image: redis:7.2.4-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports: ['6379:6379']
+    volumes:
+      - redis-data-0:/data
+
+  redis-shard-1:
+    image: redis:7.2.4-alpine
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports: ['6380:6379']
+    volumes:
+      - redis-data-1:/data
+
   prometheus:
     image: prom/prometheus:v2.53.1
     volumes:
@@ -123,3 +137,5 @@ services:
 volumes:
   neo4j-data: {}
   neo4j-logs: {}
+  redis-data-0: {}
+  redis-data-1: {}

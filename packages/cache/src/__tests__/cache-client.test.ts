@@ -77,4 +77,44 @@ describe('CacheClient', () => {
 
     expect(await metricValue(registry, 'cache_misses_total', 'disabled')).toBe(1);
   });
+
+  it('supports hash-based sharding with multiple redis clients', async () => {
+    const mockClients = [
+      { set: vi.fn(), get: vi.fn(), setex: vi.fn() },
+      { set: vi.fn(), get: vi.fn(), setex: vi.fn() },
+    ];
+
+    const registry = new Registry();
+    const client = new CacheClient({
+      namespace: 'shard-test',
+      registry,
+      cacheClass: 'best_effort',
+      // @ts-expect-error Mocking Redis clients for testing
+      redisClients: mockClients,
+    });
+
+    // We can't easily predict the exact hash without reproducing the hash logic,
+    // but we can assert that set() routes to one of the clients.
+    // Let's set a few keys and verify both clients receive calls.
+    mockClients[0].get.mockResolvedValue(null);
+    mockClients[1].get.mockResolvedValue(null);
+    mockClients[0].set.mockResolvedValue('OK');
+    mockClients[1].set.mockResolvedValue('OK');
+
+    // We will try several keys to ensure we hit different shards
+    const keys = ['key1', 'key2', 'key3', 'test', 'another-key', 'foo', 'bar'];
+    for (const key of keys) {
+      await client.set(key, 'value');
+      await client.get(key);
+    }
+
+    // Since we are hashing keys, both clients should have been invoked at least once
+    // given a sufficient number of distinct keys.
+    const client1Calls = mockClients[0].set.mock.calls.length + mockClients[0].setex.mock.calls.length;
+    const client2Calls = mockClients[1].set.mock.calls.length + mockClients[1].setex.mock.calls.length;
+
+    expect(client1Calls).toBeGreaterThan(0);
+    expect(client2Calls).toBeGreaterThan(0);
+    expect(client1Calls + client2Calls).toBe(keys.length);
+  });
 });
