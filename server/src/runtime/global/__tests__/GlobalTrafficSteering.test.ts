@@ -31,15 +31,15 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
 // Set default resolveTargetRegion to avoid undefined during module initialization if it were used there
 resolveTargetRegionMock.mockReturnValue('us-east-1');
 
-const { GlobalTrafficSteering } = await import('../GlobalTrafficSteering.js');
+const { any } = await import('../any.js');
 
-describe('GlobalTrafficSteering', () => {
-    let steering: GlobalTrafficSteering;
+describe('any', () => {
+    let steering: any;
 
     beforeEach(() => {
         jest.clearAllMocks();
         // Reset singleton if possible, or just use the existing one
-        steering = GlobalTrafficSteering.getInstance();
+        steering = any.getInstance();
     });
 
     it('should ALLOW traffic if current region matches primary region', async () => {
