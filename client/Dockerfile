@@ -1,4 +1,4 @@
-FROM node:20-bookworm AS build
+FROM docker.io/node:20-bookworm AS build
 WORKDIR /app
 ENV CI=1
 RUN corepack enable
@@ -9,7 +9,7 @@ RUN if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate && pn
 COPY . .
 RUN npm run build || pnpm build || yarn build
 
-FROM nginx:1.27-alpine
+FROM docker.io/nginx:1.27-alpine
 ARG GIT_COMMIT=unknown
 ARG BUILD_DATE=unknown
 LABEL org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph" \

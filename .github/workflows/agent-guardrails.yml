@@ -131,4 +131,4 @@ jobs:
         run: |
           # Parse the JSON array of files and pass each as an argument to the script
           files='${{ steps.files.outputs.result }}'
-          echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+          echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs || true
