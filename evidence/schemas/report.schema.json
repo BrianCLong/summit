@@ -5,20 +5,56 @@
     {
       "type": "object",
       "properties": {
-        "evidence_id": { "type": "string" },
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^EVD-[A-Za-z0-9_-]+$"
+        },
         "summary": { "type": "string" },
         "scenarios": { "type": "integer" },
         "status": { "type": "string" },
         "item": { "type": "string" },
-        "sources": { "type": "array", "items": { "type": "string" } }
+        "sources": { "type": "array", "items": { "type": "string" } },
+        "claim_ref": { "type": "string" },
+        "source_nodes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "contradiction_nodes": { "type": "array", "items": { "type": "string" } },
+        "confidence_level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "uncertainty_flag": { "type": "boolean" },
+        "reasoning_steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "artifacts": { "type": "array", "items": { "type": "string" } },
+        "determinism": { "type": "object" },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "backing": { "type": "string" },
+              "claim_id": { "type": "string" }
+            },
+            "required": ["backing", "claim_id"]
+          }
+        },
+        "decisions": { "type": "array", "items": { "type": "string" } },
+        "generated_by": { "type": "string" },
+        "item_slug": { "type": "string" },
+        "notes": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["summary"],
+      "required": ["summary", "evidence_id"],
       "additionalProperties": true
     },
     {
       "type": "object",
-      "required": ["version", "classification", "summary"],
+      "required": ["version", "classification", "summary", "evidence_id", "claim_ref", "source_nodes", "confidence_level", "reasoning_steps"],
       "properties": {
+        "evidence_id": {
+          "type": "string",
+          "pattern": "^EVD-[A-Za-z0-9_-]+$"
+        },
+        "claim_ref": { "type": "string" },
+        "source_nodes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "contradiction_nodes": { "type": "array", "items": { "type": "string" } },
+        "confidence_level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "uncertainty_flag": { "type": "boolean" },
+        "reasoning_steps": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
         "version": { "type": "integer" },
         "classification": {
           "type": "string",
