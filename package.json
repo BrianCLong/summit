@@ -262,6 +262,7 @@
     "vitest": "^4.0.16",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "yaml": "^2.8.2",
     "zustand": "^5.0.9"
   },
   "private": true,

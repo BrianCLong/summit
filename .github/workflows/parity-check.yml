@@ -41,19 +41,19 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Configure AWS Credentials
-        if: matrix.cloud == 'aws' && secrets.AWS_OIDC_ROLE_ARN != ''
+        if: ${{ matrix.cloud == 'aws' && secrets.AWS_OIDC_ROLE_ARN != '' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
           aws-region: us-east-1
       - name: Setup gcloud
-        if: matrix.cloud == 'gcp' && secrets.GCP_PROJECT_ID != ''
+        if: ${{ matrix.cloud == 'gcp' && secrets.GCP_PROJECT_ID != '' }}
         uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
-        if: matrix.cloud == 'azure' && secrets.AZURE_CLIENT_ID != ''
+        if: ${{ matrix.cloud == 'azure' && secrets.AZURE_CLIENT_ID != '' }}
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
