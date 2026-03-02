@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-n### Added
+### Added
 - P0 Labeling Policy to ensure deterministic visibility into GA blockers (`docs/governance/p0-labeling-policy.md`).
 - Live GA Readiness Scorecard based on current merge signals (`docs/ops/ga-readiness-scorecard.md`).
 - CISO Demo Narrative and Proof Moat Product Narrative detailing the 4 core minimal capabilities (`sales/ciso-demo-narrative.md`, `docs/product/proof-moat-narrative.md`).
