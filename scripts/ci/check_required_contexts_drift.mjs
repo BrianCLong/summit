@@ -46,6 +46,7 @@ if (!protection) {
 const legacyContexts = protection.contexts || [];
 const modernChecks = (protection.checks || []).map(c => c.context);
 REQUIRED_CONTEXTS = [...new Set([...legacyContexts, ...modernChecks])].sort();
+
 if (REQUIRED_CONTEXTS.length === 0) {
   console.log("No required contexts found for branch 'main'.");
   process.exit(0);
