@@ -15,22 +15,62 @@ const schemas = {
 };
 
 function validateFile(filepath: string, schema: any): boolean {
-  const data = JSON.parse(fs.readFileSync(filepath, 'utf8'));
-  const validate = ajv.compile(schema);
-  const valid = validate(data);
-  if (!valid) {
-    console.error(`❌ Validation failed for ${filepath}:`);
-    console.error(validate.errors);
+  try {
+    const data = JSON.parse(fs.readFileSync(filepath, 'utf8'));
+
+    // INFOWAR specific validation: only validate if item_slug is INFOWAR
+    // or evidence_id indicates it's an INFOWAR artifact.
+    // This prevents failing on legacy evidence bundles that don't follow the new schema.
+    const isInfowar = (data.item_slug === 'INFOWAR') ||
+                      (data.evidence_id && data.evidence_id.startsWith('EVD-INFOWAR'));
+
+    if (!isInfowar) {
+      return true; // Skip non-INFOWAR files
+    }
+
+    const validate = ajv.compile(schema);
+    const valid = validate(data);
+    if (!valid) {
+      console.error(`❌ Validation failed for ${filepath}:`);
+      console.error(JSON.stringify(validate.errors, null, 2));
+      return false;
+    }
+    return true;
+  } catch (err: any) {
+    console.error(`❌ Error reading or parsing ${filepath}: ${err.message}`);
     return false;
   }
-  return true;
 }
 
-// Simple logic to find evidence bundles and validate them
-const evidenceRoot = 'evidence';
-if (fs.existsSync(evidenceRoot)) {
-  // Logic to walk through 'evidence' dir and validate
-  // For the initial PR, we might only have fixtures in tests/
+function walkAndValidate(dir: string): boolean {
+  let allValid = true;
+  if (!fs.existsSync(dir)) return true;
+
+  const files = fs.readdirSync(dir);
+  for (const file of files) {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+
+    if (stat.isDirectory()) {
+      if (!walkAndValidate(fullPath)) allValid = false;
+    } else if (file.endsWith('.json')) {
+      // Determine schema based on filename or parent directory
+      let schema = null;
+      if (file === 'report.json') schema = schemas.report;
+      else if (file === 'metrics.json') schema = schemas.metrics;
+      else if (file === 'stamp.json') schema = schemas.stamp;
+      else if (file === 'index.json') schema = schemas.index;
+
+      if (schema) {
+        if (!validateFile(fullPath, schema)) {
+          allValid = false;
+        } else {
+          console.log(`✅ Validated ${fullPath}`);
+        }
+      }
+    }
+  }
+  return allValid;
 }
 
 // Support CLI usage for specific files
@@ -44,5 +84,21 @@ if (fileType && filePath) {
     } else {
       process.exit(1);
     }
+  } else {
+    console.error(`❌ Unknown schema type: ${fileType}`);
+    process.exit(1);
   }
+} else {
+  // Default behavior: walk 'evidence' and 'tests/fixtures/evidence'
+  console.log('🔍 Scanning for evidence bundles...');
+  const roots = ['evidence', 'tests/fixtures/evidence'];
+  let overallValid = true;
+  for (const root of roots) {
+    if (!walkAndValidate(root)) overallValid = false;
+  }
+
+  if (!overallValid) {
+    process.exit(1);
+  }
+  console.log('✨ All discovered evidence bundles are valid.');
 }

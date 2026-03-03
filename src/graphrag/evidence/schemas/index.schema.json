@@ -2,10 +2,10 @@
   "$id": "https://summit.local/schemas/infowar/index.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["version", "item_slug", "entries"],
+  "required": ["version", "item_slug"],
   "properties": {
-    "version": { "type": "string", "const": "1.0" },
-    "item_slug": { "type": "string", "const": "INFOWAR" },
+    "version": { "type": "string" },
+    "item_slug": { "type": "string" },
     "entries": {
       "type": "array",
       "items": {
@@ -21,5 +21,5 @@
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

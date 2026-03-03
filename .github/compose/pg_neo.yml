@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+  neo4j:
+    image: neo4j:2025.01

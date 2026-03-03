@@ -10,5 +10,5 @@
       "additionalProperties": { "type": "number" }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": true
 }

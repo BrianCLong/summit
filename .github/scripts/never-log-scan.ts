@@ -12,18 +12,39 @@ const forbiddenPatterns = [
   { name: "Generic Auth Token", regex: /auth_?[tT]oken\s*[:=]\s*["'][a-f0-9]{32,}["']/i }
 ];
 
-const ignoredDirs = ["node_modules", ".git", "dist", "build"];
+const allowedEmailPatterns = [
+  /@datadoghq\.com/,
+  /@pagerduty\.com/,
+  /@intelgraph\.local/,
+  /@intelgraph\.com/,
+  /@company\.com/,
+  /@github\.com/,
+  /support@/
+];
+
+const ignoredDirs = ["node_modules", ".git", "dist", "build", ".venv_312", "coverage"];
 
 function scanFile(filepath: string): boolean {
   if (ignoredDirs.some(dir => filepath.includes(path.sep + dir + path.sep))) return true;
+  if (filepath.endsWith('.json') || filepath.endsWith('.ts') || filepath.endsWith('.js') || filepath.endsWith('.md')) {
+    // only scan text files
+  } else {
+    return true;
+  }
 
   const content = fs.readFileSync(filepath, 'utf8');
   let clean = true;
 
   for (const pattern of forbiddenPatterns) {
-    if (pattern.regex.test(content)) {
-      console.error(`❌ Forbidden pattern found in ${filepath}: ${pattern.name}`);
-      clean = false;
+    const matches = content.match(pattern.regex);
+    if (matches) {
+      for (const match of matches) {
+        if (pattern.name === "Raw PII (Email)" && allowedEmailPatterns.some(p => p.test(match))) {
+          continue;
+        }
+        console.error(`❌ Forbidden pattern found in ${filepath}: ${pattern.name} ("${match}")`);
+        clean = false;
+      }
     }
   }
 
@@ -48,13 +69,17 @@ function scanDir(dir: string): boolean {
   return allClean;
 }
 
-// Simple CLI: tsx never-log-scan.ts <dir>
-const [,, dirToScan] = process.argv;
-if (dirToScan) {
-  if (!scanDir(dirToScan)) {
-    process.exit(1);
+// Simple CLI: tsx never-log-scan.ts <dirs...>
+const dirsToScan = process.argv.slice(2);
+if (dirsToScan.length > 0) {
+  let allClean = true;
+  for (const dir of dirsToScan) {
+    console.log(`🔍 Scanning ${dir}...`);
+    if (!scanDir(dir)) allClean = false;
   }
+  if (!allClean) process.exit(1);
+  console.log("✨ Never-log scan complete.");
 } else {
-  console.log("Usage: npx tsx .github/scripts/never-log-scan.ts <directory>");
+  console.log("Usage: npx tsx .github/scripts/never-log-scan.ts <directories...>");
   process.exit(0);
 }

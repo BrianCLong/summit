@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **INFOWAR Module**: Foundation for Info Warfare situational awareness and narrative tracking.
+  - Evidence system with JSON schemas and TypeScript helpers in `src/graphrag/evidence/`.
+  - RSS and CSV ingestion scaffolding for intelligence feeds.
+  - Narrative graph ontology and secure query builders in `src/graphrag/narratives/`.
+  - Monthly SITREP template and operational governance documentation.
+  - Read-only REST API for situational reports.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 

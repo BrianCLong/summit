@@ -16,9 +16,9 @@ Use this page as the fast path to the docs you need. The golden path details liv
 
 ## Runbooks & Operations
 
-- **[RUNBOOKS/INDEX.md](../RUNBOOKS/INDEX.md)** – Operational guides and incident playbooks.
-- **[RUNBOOKS/dev-bootstrap.md](../RUNBOOKS/dev-bootstrap.md)** – Local stack bring-up with verification steps.
-- **[RUNBOOKS/schema-migration-playbook.md](../RUNBOOKS/schema-migration-playbook.md)** – Safe database migration procedures.
+- **[RUNBOOKS/README.md](../RUNBOOKS/README.md)** – Operational guides and incident playbooks.
+- **[ops/steady-state-operations.md](operations/steady-state-operations.md)** – Local stack bring-up with verification steps.
+- **[ops/runbooks/schema-migration.md](operations/runbooks/DB_MIGRATIONS_AND_ROLLBACK.md)** – Safe database migration procedures.
 - **[ops/INCIDENT_SEVERITY.md](ops/INCIDENT_SEVERITY.md)** – SEV0–SEV3 rubric with response timing and comms expectations.
 - **[ops/INCIDENT_TEMPLATE.md](ops/INCIDENT_TEMPLATE.md)** – Copy/paste incident report shell for channels or tracker issues.
 - **[ops/DRILL_CHECKLIST.md](ops/DRILL_CHECKLIST.md)** – Tabletop drill flow to rehearse detection, comms, and recovery.
@@ -41,7 +41,7 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** – Core components, data flows, and dependencies.
 - **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
-- **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
+- **[ROADMAP.md](../ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
 - **[suite_unification_architecture.md](suite_unification_architecture.md)** – Blueprint for unifying modules, contracts, identity, billing, UX shell, and governance into a cohesive suite.
 
 ## Research & Labs

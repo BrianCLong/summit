@@ -1,9 +1,9 @@
 {
-  "evidence_id": "EVD-INFOWAR-NARR-001",
+  "evidence_id": "EVD-INFOWAR-ACTMEAS-001",
   "item_slug": "INFOWAR",
-  "summary": "Verified NATO STO Research Report on Cognitive Warfare.",
-  "findings": [
-    "Cognitive warfare defined as a new domain of competition.",
-    "Doctrine shift towards narrative dominance."
-  ]
+  "title": "Synthetic Media Campaign Alpha",
+  "summary": "Observation of coordinated deepfake distribution across major social platforms.",
+  "classification": "PUBLIC",
+  "confidence": "HIGH",
+  "timestamp": "2026-03-03T00:00:00Z"
 }

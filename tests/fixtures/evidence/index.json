@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "item_slug": "INFOWAR",
+  "entries": [
+    {
+      "evidence_id": "EVD-INFOWAR-ACTMEAS-001",
+      "files": ["report.json", "metrics.json", "stamp.json"]
+    }
+  ]
+}

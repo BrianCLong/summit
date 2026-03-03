@@ -1,0 +1,21 @@
+{
+  "testTimestamp": "2026-03-03T01:42:16Z",
+  "artifactName": "infowar-final",
+  "buildCommand": "echo 'final' > dist/final",
+  "environment": "production",
+  "numBuilds": 2,
+  "allChecksumsMatch": true,
+  "builds": [
+    {
+      "buildNumber": 1,
+      "checksumCount": 6,
+      "checksumFile": "/app/build-test/build-1/checksums.txt"
+    },
+    {
+      "buildNumber": 2,
+      "checksumCount": 6,
+      "checksumFile": "/app/build-test/build-2/checksums.txt"
+    }
+  ],
+  "failureDetails": null
+}

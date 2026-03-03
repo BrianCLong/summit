@@ -27,11 +27,11 @@ jobs:
 
       - name: Evidence Schema Gate
         run: |
-          npx tsx .github/scripts/validate-evidence.ts report tests/fixtures/evidence/report.json
+          npx tsx .github/scripts/validate-evidence.ts
 
       - name: Never-log Scan
         run: |
-          npx tsx .github/scripts/never-log-scan.ts src/graphrag
+          npx tsx .github/scripts/never-log-scan.ts src/graphrag docs
 
       - name: Run INFOWAR Tests
         run: |

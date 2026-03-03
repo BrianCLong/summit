@@ -1,17 +1,13 @@
-# INFOWAR Narrative Graph Architecture
+# Info Warfare Narrative Graph Architecture
 
-The INFOWAR Narrative Graph uses Neo4j to track the propagation and impact of information operations.
+This document defines the ontology and secure query patterns for narrative graph analysis within the Summit platform.
 
 ## Ontology
+
 - **Nodes:** Narrative, Claim, Actor, Platform, Event, Artifact, Regulation
 - **Edges:** AMPLIFIES, REFERENCES, TARGETS, COUPLED_WITH, EVIDENCED_BY
 
 ## Secure Query Patterns
-All Cypher queries must be parameterized to prevent injection. Narrative IDs and other user-provided strings must NEVER be interpolated directly.
 
-```typescript
-// Good
-MATCH (n:Narrative { id: $narrativeId })
-// Bad
-MATCH (n:Narrative { id: '${narrativeId}' })
-```
+All queries MUST include `tenantId` or `organizationId` filters to ensure strict multi-tenant isolation.
+Queries that touch raw narrative data must be audited via the `INFOWAR_QUERY_EXECUTED` event.
