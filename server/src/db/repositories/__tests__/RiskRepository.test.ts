@@ -1,77 +1,35 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-
-const mockTx = {
-  query: jest.fn()
-};
-
-const mockClient = {
-  query: jest.fn().mockImplementation(async (sql, params) => {
-    if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') return { rows: [] };
-    return { rows: await mockTx.query(sql, params) };
-  }),
-  release: jest.fn()
-};
-
-const mockPool = {
-  connect: jest.fn().mockResolvedValue(mockClient),
-  query: jest.fn(),
-  on: jest.fn(),
-  end: jest.fn()
-};
-
-jest.unstable_mockModule('pg', () => ({
-  default: {
-    Pool: jest.fn(() => mockPool)
-  },
-  Pool: jest.fn(() => mockPool)
-}));
-
-jest.unstable_mockModule('@opentelemetry/api', () => ({
-  trace: {
-    getTracer: () => ({
-      startActiveSpan: (name, cb) => cb({
-        setAttributes: jest.fn(),
-        recordException: jest.fn(),
-        setStatus: jest.fn(),
-        end: jest.fn()
-      })
-    })
-  }
-}));
-
-jest.unstable_mockModule('prom-client', () => ({
-  Counter: jest.fn(() => ({ inc: jest.fn(), labels: jest.fn().mockReturnThis() })),
-  Histogram: jest.fn(() => ({ observe: jest.fn(), labels: jest.fn().mockReturnThis() })),
-  register: { getSingleMetric: jest.fn() }
-}));
-
-const { pg } = await import('../../pg.js');
-const { RiskRepository } = await import('../RiskRepository.js');
+import { RiskRepository } from '../RiskRepository.js';
+import { pg } from '../../pg.js';
 
 describe('RiskRepository', () => {
   let repo: RiskRepository;
+  const mockTx = {
+    query: jest.fn() as any
+  };
 
   beforeEach(() => {
     repo = new RiskRepository();
     jest.clearAllMocks();
-    mockTx.query.mockClear();
-    mockClient.query.mockClear();
+
+    // Mock the transaction method on the pg object
+    jest.spyOn(pg, 'transaction').mockImplementation(async (callback: any) => {
+      return await callback(mockTx);
+    });
 
     mockTx.query.mockImplementation(async (sql: string, params: any[]) => {
       if (sql.includes('INSERT INTO risk_scores')) {
         return [{ id: 'score-123', tenant_id: params[0], entity_id: params[1], score: params[3], level: params[4], window: params[5], model_version: params[6], rationale: params[7], created_at: new Date() }];
       }
       if (sql.includes('INSERT INTO risk_signals')) {
-        // Multi-row insert mock: check for 'VALUES (, ' (matching the placeholders we generate)
+        // Multi-row insert mock
         if (sql.includes('VALUES (, ')) {
            const numSignals = (params.length / 8);
            return Array.from({ length: numSignals }, (_, i) => ({
              id: `sig-${i}`,
              risk_score_id: 'score-123',
              type: params[i * 8 + 1],
-             value: params[i * 8 + 3],
-             weight: params[i * 8 + 4],
-             contribution_score: params[i * 8 + 5]
+             value: params[i * 8 + 3]
            }));
         }
       }
@@ -80,10 +38,6 @@ describe('RiskRepository', () => {
   });
 
   it('should save risk score and signals in batches', async () => {
-    jest.spyOn(pg, 'transaction').mockImplementation(async (callback: any) => {
-        return await callback(mockTx);
-    });
-
     const input = {
       tenantId: 't1',
       entityId: 'e1',
@@ -115,16 +69,12 @@ describe('RiskRepository', () => {
   });
 
   it('should fall back to individual inserts if batch fails', async () => {
-    jest.spyOn(pg, 'transaction').mockImplementation(async (callback: any) => {
-        return await callback(mockTx);
-    });
-
     mockTx.query.mockImplementationOnce(async (sql, params) => {
        return [{ id: 'score-123', tenant_id: params[0], entity_id: params[1], score: params[3], level: params[4], window: params[5], model_version: params[6], rationale: params[7], created_at: new Date() }];
     }).mockImplementationOnce(async () => {
        throw new Error('Batch failure');
     }).mockImplementation(async (sql, params) => {
-       return [{ id: 'sig-fallback', risk_score_id: 'score-123', type: params[1], value: params[3], weight: params[4], contribution_score: params[5] }];
+       return [{ id: 'sig-fallback', risk_score_id: 'score-123', type: params[1] }];
     });
 
     const input = {
