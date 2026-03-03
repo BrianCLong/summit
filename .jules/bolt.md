@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-03-03 - [PostgreSQL N+1 Query Fix with ANY($1)]
+**Learning:** Hydrating complex objects (e.g., Strategic Plans with Objectives, Initiatives, and Risks) using individual queries for each child record in a loop (the N+1 problem) causes severe performance degradation as the number of records grows. Using the PostgreSQL `ANY($1)` operator allows for batch-fetching all related child records in a single round-trip, which can then be associated in-memory using a Map.
+**Action:** Always use `ANY($1)` with array parameters to batch-load related entities in repository classes to reduce database round-trips from O(N) to O(1).

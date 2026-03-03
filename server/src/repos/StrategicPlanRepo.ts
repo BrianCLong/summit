@@ -1230,46 +1230,8 @@ export class StrategicPlanRepo {
       `SELECT * FROM strategic_kpis WHERE plan_id = $1 ORDER BY name ASC`,
       [planId],
     );
-    if (rows.length === 0) return [];
 
-    const initiatives = rows.map((row: any) => this.mapInitiativeRow(row));
-    const initiativeIds = initiatives.map((i) => i.id);
-
-    // BATCH OPTIMIZATION: Fetch all milestones and deliverables for all initiatives in one go
-    // Reduces database round-trips from O(2N) to O(1)
-    const [milestonesRes, deliverablesRes] = await Promise.all([
-      this.pg.query(
-        `SELECT * FROM strategic_milestones WHERE parent_id = ANY($1) AND parent_type = 'initiative' ORDER BY due_date ASC`,
-        [initiativeIds],
-      ),
-      this.pg.query(
-        `SELECT * FROM strategic_deliverables WHERE initiative_id = ANY($1) ORDER BY due_date ASC`,
-        [initiativeIds],
-      ),
-    ]);
-
-    const milestonesMap = new Map<string, Milestone[]>();
-    for (const row of milestonesRes.rows) {
-      const ms = this.mapMilestoneRow(row);
-      const list = milestonesMap.get(ms.parentId) || [];
-      list.push(ms);
-      milestonesMap.set(ms.parentId, list);
-    }
-
-    const deliverablesMap = new Map<string, Deliverable[]>();
-    for (const row of deliverablesRes.rows) {
-      const del = this.mapDeliverableRow(row);
-      const list = deliverablesMap.get(del.initiativeId) || [];
-      list.push(del);
-      deliverablesMap.set(del.initiativeId, list);
-    }
-
-    for (const init of initiatives) {
-      init.milestones = milestonesMap.get(init.id) || [];
-      init.deliverables = deliverablesMap.get(init.id) || [];
-    }
-
-    return initiatives;
+    return rows.map((row: any) => this.mapKPIRow(row));
   }
 
   async updateKPIValue(
