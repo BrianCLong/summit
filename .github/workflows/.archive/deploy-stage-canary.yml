@@ -45,7 +45,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
           provenance: true
-          sbom: true
+          sbom: false
 
       - name: Generate SBOM
         env:

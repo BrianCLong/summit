@@ -126,7 +126,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9.12.0
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -202,7 +201,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9.12.0
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -276,7 +274,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9.12.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -358,7 +355,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           provenance: true
-          sbom: true
+          sbom: false
 
       - name: Generate SBOM
         uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0

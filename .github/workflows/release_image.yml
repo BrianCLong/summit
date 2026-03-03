@@ -61,7 +61,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           # Enable SBOM and Provenance
-          sbom: true
+          sbom: false
           provenance: mode=min
           # Cache
           cache-from: type=gha

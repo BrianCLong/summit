@@ -186,7 +186,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
-          sbom: true
+          sbom: false
           provenance: mode=max
           build-args: |
             FIPS_MODE=${{ inputs.fips_mode }}
@@ -252,7 +252,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:airgap-${{ inputs.bundle_version }}
           provenance: mode=max
-          sbom: true
+          sbom: false
       - name: Export Server Image
         run: |
           mkdir -p images
@@ -677,7 +677,7 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:airgap-${{ inputs.bundle_version }}
           provenance: mode=max
-          sbom: true
+          sbom: false
       - name: Export Web Image
         run: |
           mkdir -p images

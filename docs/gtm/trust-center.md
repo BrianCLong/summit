@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Trust Center
 
 **Last Updated:** November 20, 2025

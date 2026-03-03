@@ -182,7 +182,7 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
           provenance: true
-          sbom: true
+          sbom: false
           outputs: type=image,name=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.name }},push-by-digest=false
 
       - name: Generate SBOM with Syft

@@ -254,7 +254,7 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.type=hotfix
           provenance: true
-          sbom: true
+          sbom: false
 
       - name: Build and push Web image
         id: build-web
@@ -270,7 +270,7 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.type=hotfix
           provenance: true
-          sbom: true
+          sbom: false
 
       - name: Sign images
         env:

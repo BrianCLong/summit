@@ -49,7 +49,7 @@ jobs:
           cache-from: type=registry,ref=ghcr.io/${{ github.repository }}/summit:cache
           cache-to: type=registry,ref=ghcr.io/${{ github.repository }}/summit:cache,mode=max
           provenance: true
-          sbom: true
+          sbom: false
 
       - name: Generate SBOM
         env:
