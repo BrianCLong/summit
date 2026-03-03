@@ -72,6 +72,7 @@ jobs:
           - actionlint: ${{ job.status }}
           EOF
 
+  # Shim job added to align with branch protection rules per governance acceptance record ADR-052.
   validity-gate:
     name: Workflow Validity Gate
     runs-on: ubuntu-latest

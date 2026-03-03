@@ -104,6 +104,7 @@ jobs:
         with:
           sarif_file: "trivy-results.sarif"
 
+  # Shim job added to align with branch protection rules per governance acceptance record ADR-052.
   docker-build-success:
     name: Docker Build & Security Scan
     runs-on: ubuntu-latest

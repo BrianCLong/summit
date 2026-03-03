@@ -104,6 +104,7 @@ jobs:
           # Upload results even if there are compilation errors
           upload: always
 
+  # Shim job added to align with branch protection rules per governance acceptance record ADR-052.
   codeql-success:
     name: CodeQL
     runs-on: ubuntu-latest
