@@ -13,13 +13,13 @@ try {
 }
 
 const prBody = process.env.PR_BODY || '';
-const metadataRegex = /<!-- AGENT-METADATA:START -->([\s\S]*?)<!-- AGENT-METADATA:END -->/;
+const metadataRegex = /(?:<!-- AGENT-METADATA:START -->|AGENT-METADATA)([\s\S]*?)(?:<!-- AGENT-METADATA:END -->|$)/;
 const match = prBody.match(metadataRegex);
 
 if (!match) {
   console.error('Missing AGENT-METADATA block in PR body.');
   console.error('Please include a block like this:');
-  console.error('<!-- AGENT-METADATA:START -->\n{\n  "promptId": "...",\n  "taskId": "...",\n  "tags": ["..."]\n}\n<!-- AGENT-METADATA:END -->');
+  console.error('AGENT-METADATA\n{\n  "promptId": "...",\n  "taskId": "...",\n  "tags": ["..."]\n}');
   process.exit(1);
 }
 

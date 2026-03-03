@@ -38,7 +38,7 @@ jobs:
           if [ -f docs/governance/evidence-map.yml ] || [ -f docs/governance/evidence-map.yaml ] || [ -f docs/governance/evidence-map.md ]; then
             echo "Evidence map present."
           else
-            echo "Missing Evidence Map (docs/governance/evidence-map.yml|yaml)"
+            echo "Missing Evidence Map (docs/governance/evidence-map.yml|yaml|md)"
             exit 1
           fi
 
