@@ -1,0 +1,1 @@
+sed -i 's/testRunId = result.rows\[0\].id;/if (result.rows \&\& result.rows.length > 0) { testRunId = result.rows[0].id; } else { throw new Error("Failed to insert run and get id"); }/' server/src/maestro/__tests__/integration.test.ts
