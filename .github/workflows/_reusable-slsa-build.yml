@@ -90,15 +90,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
-          fetch-depth: 0
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-        with:
-          driver-opts: |
-            network=none
-            image=moby/buildkit:v0.12.4
 
       - name: Log in to Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
@@ -154,8 +148,6 @@ jobs:
       - name: Install Cosign
         if: inputs.sign
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
-        with:
-          cosign-release: v2.2.4
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
@@ -187,8 +179,6 @@ jobs:
         if: inputs.sbom
         id: sbom
         uses: anchore/sbom-action@v0.16.0
-        with:
-          image: ${{ steps.image-uri.outputs.uri }}
           format: spdx-json, cyclonedx-json
 
       - name: Rename SBOMs
@@ -200,16 +190,12 @@ jobs:
       - name: Attest Build Provenance
         if: inputs.push && inputs.sign
         uses: actions/attest-build-provenance@v3
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
 
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
         uses: actions/attest-sbom@v2
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
           subject-digest: ${{ steps.build.outputs.digest }}
           sbom-path: sbom.spdx.json
           push-to-registry: true
@@ -233,8 +219,6 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4 # v6
-        with:
-          name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |
             sbom.cyclonedx.json
             sbom.spdx.json
