@@ -33,9 +33,6 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      - name: Validate Playwright flags
-        run: npx playwright test --browser=chromium --list > /dev/null
-
       - name: Run Playwright tests
         run: npx playwright test
         env:
