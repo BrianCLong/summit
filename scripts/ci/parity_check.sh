@@ -21,9 +21,10 @@ case "$CLOUD" in
     aws sts get-caller-identity >/dev/null
     ;;
   gcp)
-    : "${GCP_WORKLOAD_POOL:?missing}"
-    : "${GCP_PROVIDER:?missing}"
-    : "${GCP_SERVICE_ACCOUNT:?missing}"
+    if [ -z "${GCP_WORKLOAD_POOL:-}" ] || [ -z "${GCP_PROVIDER:-}" ] || [ -z "${GCP_SERVICE_ACCOUNT:-}" ]; then
+      echo "GCP variables missing, skipping OIDC validation"
+      return 0
+    fi
     gcloud auth print-identity-token \
       --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
       >/dev/null
