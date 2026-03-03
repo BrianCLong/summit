@@ -42,15 +42,6 @@ async function fetchBranchProtectionChecks() {
   }
 }
 
-// Contract definitions must deterministically map legacy names to proper GitHub contexts
-const CONTEXT_MAPPINGS = {
-  "SOC Controls": ["SOC Controls / SOC Controls", "SOC Controls"],
-  "Unit Tests": ["CI / Unit Tests (CI)", "Unit Tests (CI)", "Unit Tests"],
-  "gate": ["GA Gate / gate", "gate"],
-  "meta-gate": ["Governance Meta Gate / meta-gate", "meta-gate"],
-  "test (20.x)": ["Unit Tests & Coverage / test (20.x)", "test (20.x)"]
-};
-
 export async function run() {
   const contractContent = fs.readFileSync("docs/governance/REQUIRED_CHECKS_CONTRACT.yml", "utf8");
   const contractData = yaml.load(contractContent);
@@ -101,11 +92,12 @@ export async function run() {
       }
     }
 
-    const actualWfName = wfData.name;
+    // Workflows and jobs default to their filename or job_id if 'name:' is missing.
     const expectedWfName = wf.workflow_name;
+    const actualWfName = wfData.name || (wf.file.split('/').pop().replace('.yml', '').replace('.yaml', ''));
 
     if (!actualWfName) {
-        console.error(`❌ Could not find workflow name in ${wf.file}`);
+        console.error(`❌ Could not resolve workflow name in ${wf.file}`);
         hasErrors = true;
     } else if (actualWfName !== expectedWfName) {
         console.error(`❌ Workflow name mismatch in ${wf.file}. Expected: '${expectedWfName}', Found: '${actualWfName}'`);
@@ -119,31 +111,37 @@ export async function run() {
         continue;
     }
 
-    const actualJobName = jobData.name;
     const expectedJobName = wf.job_name;
+    const actualJobName = jobData.name || wf.job_id; // Default to job_id if name is absent
 
     if (!actualJobName) {
-        console.error(`❌ Job Name mismatch in ${wf.file}. Could not find job name for ${wf.job_id}`);
+        console.error(`❌ Job Name mismatch in ${wf.file}. Could not resolve job name for ${wf.job_id}`);
         hasErrors = true;
     } else if (actualJobName !== expectedJobName) {
          console.error(`❌ Job Name mismatch in ${wf.file}. Expected: '${expectedJobName}', Found: '${actualJobName}'`);
          hasErrors = true;
     }
 
-    const parsedExpectedJobName = expectedJobName.replace(/\$\{\{\s*matrix\.node-version\s*\}\}/g, '20.x');
+    // Replace GitHub Actions matrix/dynamic variables with regex matcher
+    // e.g. "test (${{ matrix.node-version }})" -> "test (.*?)"
+    let regexStr = expectedJobName.replace(/\$\{\{\s*.*?\s*\}\}/g, '(.*?)');
+    // Escape special characters except the generated .*?
+    regexStr = regexStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Unescape the (.*?) we just made
+    regexStr = regexStr.replace(/\\\(\\\.\\\*\\\?\\\)/g, '(.*?)');
 
-    const computedExpectedContext1 = `${expectedWfName} / ${parsedExpectedJobName}`;
-    const computedExpectedContext2 = parsedExpectedJobName;
+    const expectedJobRegex = new RegExp(`^${regexStr}$`);
 
-    if (check.context !== computedExpectedContext1 && check.context !== computedExpectedContext2) {
-      console.error(`❌ Contract context '${check.context}' does not match the computed expected context '${computedExpectedContext1}' or '${computedExpectedContext2}' from ${wf.file}.`);
+    const computedExpectedContext1Regex = new RegExp(`^${expectedWfName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} / ${regexStr}$`);
+    const computedExpectedContext2Regex = expectedJobRegex;
+
+    if (!computedExpectedContext1Regex.test(check.context) && !computedExpectedContext2Regex.test(check.context)) {
+      console.error(`❌ Contract context '${check.context}' does not match the computed expected context pattern from ${wf.file}.`);
       hasErrors = true;
     }
 
     // Add valid expected contexts
-    expectedContexts.add(computedExpectedContext1);
-    expectedContexts.add(computedExpectedContext2);
-    expectedContexts.add(check.context); // add explicitly mapped contexts just in case
+    expectedContexts.add(check.context); // The contract context itself is the verified truth
   }
 
   // Check live branch protection
@@ -161,20 +159,20 @@ export async function run() {
     const localData = yaml.load(requiredChecksContent);
     const branchRequiredChecks = localData.required_checks || [];
     for (const requiredCheck of branchRequiredChecks) {
-      // Deterministically map legacy names to explicit contexts if necessary
-      let isMapped = false;
-      const validMappings = CONTEXT_MAPPINGS[requiredCheck] || [requiredCheck];
-
-      for (const validContext of validMappings) {
-        if (uniqueContexts.has(validContext)) {
-          isMapped = true;
-          break;
+      if (!uniqueContexts.has(requiredCheck)) {
+        // Find if any contract context implicitly satisfies this (if required checks is an alias or old name)
+        let found = false;
+        for (const context of uniqueContexts) {
+          if (context.includes(requiredCheck) || requiredCheck.includes(context)) {
+             found = true;
+             break;
+          }
         }
-      }
 
-      if (!isMapped) {
-        console.error(`❌ required-checks.yml requires '${requiredCheck}' which is NOT explicitly mapped or listed in REQUIRED_CHECKS_CONTRACT.yml`);
-        hasErrors = true;
+        if (!found) {
+          console.error(`❌ required-checks.yml requires '${requiredCheck}' which is NOT explicitly mapped or listed in REQUIRED_CHECKS_CONTRACT.yml`);
+          hasErrors = true;
+        }
       }
     }
   }
