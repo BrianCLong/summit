@@ -225,7 +225,7 @@ const config: Config = {
   coverageThreshold,
   coverageReporters: ['text', 'lcov', 'cobertura', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
-  testTimeout: 60000,
+  testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
   testResultsProcessor: 'jest-junit',

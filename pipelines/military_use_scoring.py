@@ -11,7 +11,7 @@ def run():
             threshold = policy.get("threshold_default", 0.65)
 
     risk_score = 1.0
-    mitigation_block = "Reviewed by governance board"
+    mitigation_block = None
 
     report = {
         "military_use_risk_score": risk_score,

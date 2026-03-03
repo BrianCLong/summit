@@ -46,7 +46,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build Packages
-        run: pnpm build && pnpm --filter @intelgraph/feature-flags build
+        run: pnpm build
 
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps chromium

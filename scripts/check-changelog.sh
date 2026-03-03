@@ -38,7 +38,7 @@ CHANGED_FILES=$(git diff --name-only "$TARGET_BRANCH"...HEAD)
 if echo "$CHANGED_FILES" | grep -q "CHANGELOG.md"; then
     echo -e "${GREEN}✓ CHANGELOG.md has been modified${NC}"
 else
-  echo "Skipping CHANGELOG.md check."
+    echo -e "${RED}Error: CHANGELOG.md was not modified in this PR.${NC}"
     echo "Please add a note to the [Unreleased] section."
     echo "If this PR does not require a changelog entry, add the 'skip-changelog' label to the PR."
     exit 1

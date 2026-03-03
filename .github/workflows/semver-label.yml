@@ -33,7 +33,7 @@ jobs:
         env:
           GITHUB_EVENT_PATH: ${{ github.event_path }}
         run: |
-          npx tsx scripts/check-semver-label.ts || true
+          npx tsx scripts/check-semver-label.ts
 
       - name: Run SemVer Tests
         run: |

@@ -139,7 +139,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: ${{ inputs.platforms }}
-          sbom: false
+          sbom: ${{ inputs.sbom }}
           provenance: mode=max
           build-args: |
             SOURCE_DATE_EPOCH=${{ env.SOURCE_DATE_EPOCH }}

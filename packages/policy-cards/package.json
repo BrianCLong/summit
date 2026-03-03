@@ -9,11 +9,10 @@
     "build": "tsc",
     "test": "npx tsx test/schema.test.ts"
   },
+  "dependencies": {},
   "devDependencies": {
-    "@types/hapi__catbox": "^12.1.0",
-    "@types/hapi__shot": "^6.0.0",
-    "@types/node": "^18.0.0",
+    "typescript": "^5.0.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "@types/node": "^18.0.0"
   }
 }

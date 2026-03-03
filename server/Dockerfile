@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Dependencies
 # -----------------------------------------------------------------------------
-FROM docker.io/node:20-alpine AS deps
+FROM node:20-alpine AS deps
 
 # Install system dependencies for native modules
 RUN apk add --no-cache \
@@ -50,7 +50,7 @@ RUN pnpm install --no-frozen-lockfile
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
 # -----------------------------------------------------------------------------
-FROM docker.io/node:20-alpine AS builder
+FROM node:20-alpine AS builder
 
 # Install pnpm
 RUN corepack enable && corepack prepare pnpm@10 --activate
@@ -89,7 +89,7 @@ RUN pnpm build
 # -----------------------------------------------------------------------------
 # Stage 3: Production Runner
 # -----------------------------------------------------------------------------
-FROM docker.io/node:20-alpine AS runner
+FROM node:20-alpine AS runner
 
 # Install runtime dependencies only
 RUN apk add --no-cache \
