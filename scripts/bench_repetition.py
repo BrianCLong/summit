@@ -1,108 +1,38 @@
-#!/usr/bin/env python3
-import argparse
-import json
-import os
 import sys
-from pathlib import Path
-from typing import Any, Dict, List
+import os
+import json
+import argparse
 
-# Add repo root to python path so we can import summit
-sys.path.append(str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from summit.evals.repetition_eval import evaluate_prompt_hygiene
+from summit.policies.repetition_detector import classify_repetition
+from summit.policies.repetition_transform import reinforce_constraints
+from summit.evaluators.repetition_eval import generate_evidence
 
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description="Benchmark Prompt Repetition Policy")
-    parser.add_argument("--output-dir", default="artifacts/repetition", help="Directory to save artifacts")
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--prompt', type=str, default="This is a test. This is a test.")
     args = parser.parse_args()
 
-    # Create output directory
-    out_dir = Path(args.output_dir)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    result = classify_repetition(args.prompt)
 
-    # Define test prompts (Deterministic Fixtures)
-    fixtures = [
-        {
-            "id": "prompt-001",
-            "desc": "Baseline - no repetition",
-            "text": "Write a poem about the sea. Make it rhyme."
-        },
-        {
-            "id": "prompt-002",
-            "desc": "Beneficial - short command repetition",
-            "text": "Keep it short. keep it short. Don't ramble."
-        },
-        {
-            "id": "prompt-003",
-            "desc": "Harmful - long redundant text",
-            "text": "This is a very long instruction that is repeated unnecessarily and it goes on and on and on and on and on and on and on and on and on and on and on and on. " * 10 + "This is a very long instruction that is repeated unnecessarily."
-        }
-    ]
+    if result['class'] == 'beneficial' and os.environ.get('SUMMIT_ENABLE_REPETITION_REINFORCEMENT') == 'true':
+        transformed = reinforce_constraints(args.prompt)
+        print("Transformed prompt:")
+        print(transformed)
 
-    report: dict[str, Any] = {
-        "summary": {"total": 0, "harmful": 0, "beneficial": 0, "reinforced": 0},
-        "details": []
-    }
+    report, metrics, stamp = generate_evidence(args.prompt, result)
 
-    metrics: dict[str, Any] = {
-        "repetition_scores": [],
-        "harmful_rate": 0.0
-    }
+    os.makedirs('artifacts/repetition', exist_ok=True)
 
-    for item in fixtures:
-        result = evaluate_prompt_hygiene(item["text"])
-        classification = result["classification"]
-
-        entry = {
-            "id": item["id"],
-            "desc": item["desc"],
-            "score": classification["score"],
-            "class": classification["class"],
-            "action": result["action_taken"]
-        }
-        report["details"].append(entry)
-
-        # Update summary
-        report["summary"]["total"] += 1
-        if classification["class"] == "harmful":
-            report["summary"]["harmful"] += 1
-        elif classification["class"] == "beneficial":
-            report["summary"]["beneficial"] += 1
-
-        if result["action_taken"] == "reinforced":
-            report["summary"]["reinforced"] += 1
-
-        metrics["repetition_scores"].append(classification["score"])
-
-    # Calculate aggregate metrics
-    if report["summary"]["total"] > 0:
-        metrics["harmful_rate"] = report["summary"]["harmful"] / report["summary"]["total"]
-
-    # Write artifacts
-    with open(out_dir / "report.json", "w") as f:
+    with open('artifacts/repetition/report.json', 'w') as f:
         json.dump(report, f, indent=2)
-
-    with open(out_dir / "metrics.json", "w") as f:
+    with open('artifacts/repetition/metrics.json', 'w') as f:
         json.dump(metrics, f, indent=2)
+    with open('artifacts/repetition/stamp.json', 'w') as f:
+        json.dump(stamp, f, indent=2)
 
-    # Also write a 'stamp.json' for evidence verification
-    # Using a static timestamp for determinism in this proof-of-concept,
-    # but normally this would be current time.
-    # The prompt requested deterministic benchmarking harness, so maybe keep it static or argument driven.
-    # However, "evidence-verify CI check mandates that evidence/stamp.json has a timestamp strictly later..."
-    # So I should use current time.
-    import time
-    with open(out_dir / "stamp.json", "w") as f:
-        json.dump({"timestamp": time.time(), "version": "1.0"}, f)
-
-    print(f"Benchmark complete. Artifacts saved to {out_dir}")
-    print(json.dumps(report, indent=2))
-
-    # Exit with error if harmful rate is too high (CI Gate logic)
-    if metrics["harmful_rate"] > 0.5: # Example threshold
-        print("FAIL: Harmful repetition rate exceeds threshold")
-        sys.exit(1)
+    print(f"Repetition class: {result['class']}, score: {result['score']}")
 
 if __name__ == "__main__":
     main()

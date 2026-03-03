@@ -18,22 +18,12 @@ describe('Maestro Integration Tests', () => {
     await pool.query('BEGIN');
 
     // Create test run
-    try {
-      // Direct insert with logging
-      const result = await pool.query(
-        `INSERT INTO run (id, runbook, status, started_at)
-         VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now())
-         RETURNING id`
-      );
-      console.log('Insert Result:', JSON.stringify(result));
-      if (!result.rows || result.rows.length === 0) {
-        throw new Error('No rows returned from INSERT');
-      }
-      testRunId = result.rows[0].id;
-    } catch (e) {
-      console.error('FAILED TO CREATE TEST RUN:', e);
-      throw e;
-    }
+    const result = await pool.query(
+      `INSERT INTO run (id, runbook, status, started_at)
+       VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now())
+       RETURNING id`,
+    );
+    testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';

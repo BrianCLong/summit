@@ -31,7 +31,7 @@ const workspacePlugin = {
           if (fs.existsSync(resolvedPath)) {
             return { path: resolvedPath, namespace: 'file' };
           }
-        } catch (_e) {
+        } catch (e) {
           // ignore
         }
       }
@@ -70,7 +70,7 @@ const externalAndExtensionPlugin = {
   },
 };
 
-console.info('🚀 Starting isolated build for server (target: dist-isolated)...');
+console.log('🚀 Starting isolated build for server (target: dist-isolated)...');
 
 async function runBuild() {
   const outputDir = 'dist-isolated';
@@ -98,7 +98,7 @@ async function runBuild() {
       },
     });
 
-    console.info(`✅ Build completed successfully in ${outputDir}`);
+    console.log(`✅ Build completed successfully in ${outputDir}`);
   } catch (error) {
     console.error('❌ Build failed:', error);
     process.exit(1);
