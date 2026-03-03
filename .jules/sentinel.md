@@ -75,3 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-03-05 - [HIGH] Bypassing Global Auth via Application-Root Routing
+**Vulnerability:** Administrative and operational routes (`/airgap`, `/analytics`, `/dr`) were mounted at the application root in `server/src/app.ts` instead of under the protected `/api` prefix, effectively bypassing global authentication middleware while lacking internal checks.
+**Learning:** Relying on global middleware applied to specific path prefixes (like `/api`) is insufficient for a defense-in-depth strategy. New routes mounted at the root are "open-by-default" if they don't implement their own checks.
+**Prevention:** Sensitive routers must implement internal authentication and authorization checks (`ensureAuthenticated`, `ensureRole`) directly within their own logic. This "self-protecting" router pattern ensures security regardless of where the router is mounted in the application.
