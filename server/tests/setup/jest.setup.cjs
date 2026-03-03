@@ -101,17 +101,17 @@ jest.mock('pg', () => {
   const { EventEmitter } = require('events');
   class MockClient extends EventEmitter {
     connect() { return Promise.resolve(); }
-    query() { return Promise.resolve({ rows: [], rowCount: 0 }); }
+    query() { return Promise.resolve({ rows: [{ id: 'test-run-id' }], rowCount: 1 }); }
     end() { return Promise.resolve(); }
   }
   class MockPool extends EventEmitter {
     connect() {
       return Promise.resolve({
-        query: jest.fn().mockResolvedValue({ rows: [] }),
+        query: jest.fn().mockResolvedValue({ rows: [{ id: 'test-run-id' }] }),
         release: jest.fn(),
       });
     }
-    query() { return Promise.resolve({ rows: [] }); }
+    query() { return Promise.resolve({ rows: [{ id: 'test-run-id' }] }); }
     end() { return Promise.resolve(); }
     on() { return this; }
   }
