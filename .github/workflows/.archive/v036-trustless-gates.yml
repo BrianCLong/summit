@@ -117,7 +117,7 @@ jobs:
       - name: Run Policy Proofs
         run: |
           cd ops/policy
-          python prove.py --rules ../../opa --out proof_results.json
+          python prove.py --rules ../../opa-bin --out proof_results.json
 
           # Check for counterexamples
           COUNTEREXAMPLES=$(jq -r '.counterexamples' proof_results.json)

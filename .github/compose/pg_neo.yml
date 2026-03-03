@@ -1,0 +1,5 @@
+version: '3.8'
+
+services:
+  opa:
+    image: openpolicyagent/opa:0.68.0-rootless

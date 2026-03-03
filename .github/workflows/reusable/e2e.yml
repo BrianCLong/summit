@@ -74,7 +74,7 @@ jobs:
       - name: Bring up stack (make up)
         run: make up
       - name: Golden path smoke tests
-        run: make smoke || true
+        run: make smoke
       - name: Compose logs on failure
         if: (failure()) && (always())
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
@@ -181,7 +181,7 @@ jobs:
         run: make up
 
       - name: Golden path smoke tests
-        run: make smoke || true
+        run: make smoke
 
       - name: Compose logs on failure
         if: (failure()) && (always())
