@@ -5,12 +5,13 @@ export const isMac =
   typeof window !== 'undefined' &&
   /Mac|iPod|iPhone|iPad/.test(navigator.platform)
 
-export const MODIFIER_KEY = isMac ? '⌘' : 'Ctrl'
-export const SHIFT_KEY = isMac ? '⇧' : 'Shift'
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export const isMac = typeof window !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform)
+export const MODIFIER_KEY = isMac ? '⌘' : 'Ctrl'
+export const SHIFT_KEY = isMac ? '⇧' : 'Shift'
 
 export function formatDate(date: Date | string): string {
   return new Intl.DateTimeFormat('en-US', {

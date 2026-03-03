@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 import React, { useEffect, useState } from 'react'
 import { Command } from 'cmdk'
 import { useNavigate } from 'react-router-dom'
@@ -138,18 +136,9 @@ export function CommandPalette(): React.ReactElement {
       </Command.List>
 
       <div className="border-t p-2 text-xs text-muted-foreground flex items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-0.5">
-            <Kbd>↑</Kbd>
-            <Kbd>↓</Kbd>
-          </div>
-          <span>to navigate</span>
-          <Kbd className="ml-2">enter</Kbd>
-          <span>to select</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Kbd>esc</Kbd>
-          <span>to close</span>
+        <span>Use arrow keys to navigate</span>
+        <div className="flex gap-1 items-center">
+          <Kbd>esc</Kbd> to close
         </div>
       </div>
     </Command.Dialog>

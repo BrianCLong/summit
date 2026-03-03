@@ -6,8 +6,9 @@ import {
   DialogTitle,
 } from '@/components/ui/Dialog'
 import { useKeyboardShortcuts, Shortcut } from '@/contexts/KeyboardShortcutsContext'
-import { Kbd } from '@/components/ui/Kbd'
+import { Badge } from '@/components/ui/Badge'
 import { Command } from 'lucide-react'
+import { Kbd } from '@/components/ui/Kbd'
 
 export function KeyboardShortcutsHelp(): React.ReactElement {
   const { isHelpOpen, closeHelp, shortcuts } = useKeyboardShortcuts()
@@ -50,11 +51,7 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
                       {shortcut.keys.map((keyGroup, idx) => (
                         <div key={idx} className="flex gap-1">
                           {idx > 0 && <span className="text-muted-foreground text-xs mx-1">or</span>}
-                          {keyGroup.split('+').map((key) => (
-                            <Kbd key={key} className="capitalize">
-                              {key}
-                            </Kbd>
-                          ))}
+                          <Kbd>{keyGroup}</Kbd>
                         </div>
                       ))}
                     </div>
@@ -75,10 +72,7 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm">Command Palette</span>
-                <div className="flex gap-1">
-                  <Kbd>mod</Kbd>
-                  <Kbd>K</Kbd>
-                </div>
+                <Kbd>mod+K</Kbd>
               </div>
             </div>
           </div>
