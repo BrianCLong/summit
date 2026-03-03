@@ -69,3 +69,6 @@ Each track should propose at least one forward-leaning enhancement (e.g., strong
 
 ## Trust Infrastructure
 - **Agent Identity & Authorization:** [`docs/architecture/trust-infrastructure.md`](./trust-infrastructure.md)
+
+## Trust Infrastructure
+- **Agent Identity & Authorization:** [`docs/architecture/trust-infrastructure.md`](./trust-infrastructure.md)
