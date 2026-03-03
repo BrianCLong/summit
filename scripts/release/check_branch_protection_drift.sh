@@ -23,8 +23,6 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo ".")"
 # Defaults
 REPO=""
 BRANCH="main"
-DRY_RUN="false"
-FAIL_ON_DRIFT="false"
 POLICY_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_POLICY.yml"
 EXCEPTIONS_FILE="${REPO_ROOT}/docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml"
 OUT_DIR="artifacts/release-train"
@@ -85,10 +83,6 @@ while [[ $# -gt 0 ]]; do
         --branch)
             BRANCH="$2"
             shift 2
-            ;;
-        --dry-run)
-            DRY_RUN="true"
-            shift
             ;;
         --policy)
             POLICY_FILE="$2"
@@ -226,13 +220,6 @@ set -e
 
 if [[ $API_EXIT_CODE -ne 0 ]]; then
     API_ACCESSIBLE=false
-
-    if echo "$API_RESPONSE" |if [[ "$API_EXIT_CODE" -ne 0 ]]; then
-    API_ACCESSIBLE=false
-    if [[ "$FAIL_ON_DRIFT" == "true" ]]; then
-        log_error "Failing due to API access error and --fail-on-drift flag active."
-        exit 1
-    fi
 
     if echo "$API_RESPONSE" | grep -q "404"; then
         API_ERROR="Branch protection not configured for $BRANCH"
