@@ -5,6 +5,10 @@ on:
   push:
     branches: [ main ]
     paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
       - "**/*.md"
   merge_group:
 
