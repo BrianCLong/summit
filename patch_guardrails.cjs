@@ -1,11 +1,13 @@
-name: agent-guardrails
+const fs = require('fs');
+
+let yml = `name: agent-guardrails
 
 on:
   pull_request:
     types: [opened, reopened, synchronize, edited, labeled]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: \${{ github.workflow }}-\${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
@@ -63,8 +65,8 @@ jobs:
               .filter(name => restrictedPrefixes.some(prefix => name.startsWith(prefix)));
 
             if (violations.length > 0) {
-              const message = `Restricted paths modified without override: ${violations.join(', ')}. ` +
-                `Add a relevant override label or include ${overrideToken} in the AGENT-METADATA block with justification.`;
+              const message = \`Restricted paths modified without override: \${violations.join(', ')}. \` +
+                \`Add a relevant override label or include \${overrideToken} in the AGENT-METADATA block with justification.\`;
               core.setFailed(message);
             } else {
               core.info('No restricted path changes detected.');
@@ -82,7 +84,7 @@ jobs:
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs
         env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BODY: \${{ github.event.pull_request.body }}
 
   saos-enforcement:
     name: S-AOS Enforcement
@@ -99,7 +101,7 @@ jobs:
       - name: Verify S-AOS Compliance
         run: node scripts/ga/verify-saos.mjs
         env:
-          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_BODY: \${{ github.event.pull_request.body }}
 
   pii-scan:
     runs-on: ubuntu-latest
@@ -124,6 +126,7 @@ jobs:
       - name: Scan for PII
         run: |
           # Parse the JSON array of files and pass each as an argument to the script
-          files='${{ steps.files.outputs.result }}'
-          echo "$files" | jq -r '.[]' | xargs -d '
-' node scripts/ga/scan-pii.mjs
+          files='\${{ steps.files.outputs.result }}'
+          echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+`;
+fs.writeFileSync('.github/workflows/agent-guardrails.yml', yml);
