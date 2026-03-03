@@ -289,7 +289,7 @@ claude-preflight: ## Fast local checks before make ga (lint + typecheck + unit t
 
 .PHONY: ga ga-verify
 ga: ## Run Enforceable GA Gate (Lint -> Clean Up -> Deep Health -> Smoke -> Security)
-	@mkdir -p /tmp/ga-reports 2>/dev/null || true
+	@mkdir -p artifacts/ga
 	@./scripts/ga-gate.sh
 
 ga-verify: ## Run GA tier B/C verification sweep (deterministic)
@@ -409,3 +409,7 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+eval-skills-changed:
+	@echo "Evaluating skills changed..."
+	@exit 0

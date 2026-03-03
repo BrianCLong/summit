@@ -79,11 +79,11 @@ const initializeServices = async () => {
 // =============================================================================
 
 const getTenantId = (req: Request): string => {
-  return req.principal?.tenantId || (req as any).tenantId || (req as any).user?.tenantId || '';
+  return req.tenantId || req.user?.tenantId || 'default';
 };
 
 const getUserId = (req: Request): string => {
-  return req.principal?.id || (req as any).user?.id || 'anonymous';
+  return req.user?.id || req.user?.id || 'anonymous';
 };
 
 const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {

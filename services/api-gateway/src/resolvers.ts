@@ -73,73 +73,63 @@ export const resolvers = {
 
     // Entity resolvers (delegated to graph service)
     entity: async (parent: any, args: any, context: any) => {
-      const result = await delegateToBackend(
-        `query($id: ID!) { entity(id: $id) { id type props createdAt updatedAt } }`,
-        args,
-        context,
+      const response = await fetch(
+        `${process.env.GRAPH_SERVICE_URL}/graphql`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': context.token || 'Bearer dev-token',
+            'x-tenant-id': context.tenantId || 'tenant_1',
+          },
+          body: JSON.stringify({
+            query: `query($id: ID!) { entity(id: $id) { id type properties createdAt updatedAt } }`,
+            variables: { id: args.id },
+          }),
+        },
       );
-      if (!result) return null;
-      return {
-        ...result,
-        properties: result.props || {},
-        props: result.props || {},
-      };
+      const result = await response.json();
+      return result.data?.entity;
     },
 
     entities: async (parent: any, args: any, context: any) => {
-      const result = await delegateToBackend(
-        `query($type: String, $q: String, $limit: Int) { entities(type: $type, q: $q, limit: $limit) { id type props createdAt updatedAt } }`,
-        args,
-        context,
-      );
-      return (result || []).map((e: any) => ({
-        ...e,
-        properties: e.props || {},
-        props: e.props || {},
-      }));
-    },
-
-    relationship: async (parent: any, args: any, context: any) => {
-      const result = await delegateToBackend(
-        `query($id: ID!) { relationship(id: $id) { id from to type props createdAt } }`,
-        args,
-        context,
-      );
-      if (!result) return null;
-      return {
-        ...result,
-        properties: result.props || {},
-        props: result.props || {},
-      };
-    },
-
-    relationships: async (parent: any, args: any, context: any) => {
-      const result = await delegateToBackend(
-        `query($limit: Int) { relationships(limit: $limit) { id from to type props createdAt } }`,
-        args,
-        context,
-      );
-      return (result || []).map((r: any) => ({
-        ...r,
-        properties: r.props || {},
-        props: r.props || {},
-      }));
-    },
-
-    investigation: async (parent: any, args: any, context: any) => {
-      return delegateToBackend(
-        `query($id: ID!) { investigation(id: $id) { id name description createdAt updatedAt } }`,
-        args,
-        context,
-      );
-    },
-
-    investigations: async (parent: any, args: any, context: any) => {
-      return delegateToBackend(
-        `query($limit: Int, $offset: Int) { investigations(limit: $limit, offset: $offset) { id name description createdAt updatedAt } }`,
-        args,
-        context,
-      );
+      console.log('Delegating entities query to:', `${process.env.GRAPH_SERVICE_URL}/graphql`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      try {
+        const response = await fetch(
+          `${process.env.GRAPH_SERVICE_URL}/graphql`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': context.token || 'Bearer dev-token',
+              'x-tenant-id': context.tenantId || 'tenant_1',
+            },
+            body: JSON.stringify({
+              query: `query($type: String, $limit: Int, $offset: Int) { entities(type: $type, limit: $limit, offset: $offset) { id type props createdAt updatedAt } }`,
+              variables: { type: args.type, limit: args.limit, offset: args.offset },
+            }),
+            signal: controller.signal,
+          },
+        );
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Backend delegation failed:', response.status, errorText);
+          throw new Error(`Backend service error: ${response.status}`);
+        }
+        const result = await response.json();
+        console.log('Backend response result:', JSON.stringify(result));
+        return (result.data?.entities || []).map((e: any) => ({
+          ...e,
+          properties: e.props,
+        }));
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        console.error('Fetch to backend failed:', err.message);
+        throw err;
+      }
     },
 
     // XAI resolvers (delegated to graph-xai service)
@@ -165,31 +155,6 @@ export const resolvers = {
       }
 
       return response.json();
-    },
-
-    explainAnomaly: async (parent: any, args: any, context: any) => {
-      const response = await fetch(
-        `${process.env.XAI_EXPLAIN_ANOMALY_URL}/graphql`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': context.token || 'Bearer dev-token',
-            'x-tenant-id': context.tenantId || 'tenant_1',
-          },
-          body: JSON.stringify({
-            query: `query($id: ID!) { explainAnomaly(id: $id) { id score explanation features { name contribution } } }`,
-            variables: { id: args.id },
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`XAI Anomaly service error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result.data?.explainAnomaly;
     },
 
     // Provenance resolvers (delegated to prov-ledger service)

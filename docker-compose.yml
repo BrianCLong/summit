@@ -59,18 +59,6 @@ services:
       - default
       - observability
 
-  license-registry:
-    build: ./services/license-registry
-    command: node dist/index.js
-    ports: [ "4030:4030" ]
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres?sslmode=disable
-      - NODE_ENV=development
-    depends_on: [ postgres ]
-    networks:
-      - default
-      - observability
-
   server:
     build:
       context: .
@@ -110,7 +98,6 @@ services:
       - POLICY_DRY_RUN=true
       - ENABLE_INSECURE_DEV_AUTH=true
       - GRAPH_SERVICE_URL=http://server:4000
-      - LICENSE_REGISTRY_URL=http://license-registry:4030
     depends_on: [ redis ]
     networks:
       - default
