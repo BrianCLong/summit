@@ -350,7 +350,9 @@ if (existsSync(sumsPath)) {
                 addCheck('bundle-index.json pointers validated');
             }
         } catch (e) {
-            if (e instanceof ReleaseBundleError) {
+            if (e instanceof SyntaxError) {
+                addError('INVALID_JSON', `Failed to parse bundle-index.json: ${e.message}`);
+            } else if (e instanceof ReleaseBundleError) {
                 addError(e.code, e.message);
             } else {
                 addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);

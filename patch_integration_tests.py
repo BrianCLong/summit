@@ -1,6 +1,6 @@
 import re
 
-with open("server/src/maestro/__tests__/integration.test.ts", "r") as f:
+with open("server/src/maestro/__tests__/integration.test.ts") as f:
     content = f.read()
 
 # Fix the testRunId assignment

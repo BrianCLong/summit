@@ -1,6 +1,8 @@
 # summit/posture/wireless/tests/test_bluetooth_policy.py
 import pytest
+
 from summit.posture.wireless.policy_to_controls import WirelessPostureExporter
+
 
 def test_bluetooth_advisory_translation():
     exporter = WirelessPostureExporter()
