@@ -353,7 +353,7 @@ if (existsSync(sumsPath)) {
             if (e instanceof ReleaseBundleError) {
                 addError(e.code, e.message);
             } else {
-                addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
+                addError('INVALID_JSON', `Error processing bundle-index.json: ${e.message}`);
             }
         }
     }
@@ -387,7 +387,7 @@ if (existsSync(sumsPath)) {
                 }
             }
         } catch (e) {
-            addError('INVALID_JSON', `Failed to parse provenance.json: ${e.message}`);
+            addError('JSON_PARSE_ERROR', `Failed to parse provenance.json: ${e.message}`);
         }
     }
 
