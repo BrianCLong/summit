@@ -5,6 +5,7 @@
 **Pilot Duration:** [X Weeks]
 
 ## Executive Summary
+
 [Brief 2-3 sentence summary of the pilot's objective and primary outcome.]
 
 ## 1. Before/After Metrics
@@ -27,8 +28,9 @@
 > "[Company Name] was struggling with misrouted leads due to missing geo-tags. After Summit enriched the data in the sandbox and we applied the fixes, we surfaced a $500k opportunity that had been invisible in our primary dashboard."
 
 **Impact:**
-*   [e.g., Improved Forecast Accuracy by X%]
-*   [e.g., Reduced lead routing errors by Y%]
+
+* [e.g., Improved Forecast Accuracy by X%]
+* [e.g., Reduced lead routing errors by Y%]
 
 ## 4. Qualitative Quotes
 
@@ -41,11 +43,13 @@
 ## 5. Next Recommended Automations
 
 Based on the pilot success, we recommend:
-1.  **Enable Safe Writes:** Transition from sandbox review to automated, limited safe writes in production for [Specific Field/Record Type].
-2.  **Expand Scope:** Implement Summit forecasting agents to analyze the newly cleaned pipeline data.
-3.  **Scale:** Roll out similar hygiene workflows to the [Other Regional/Segment] RevOps team.
+
+1. **Enable Safe Writes:** Transition from sandbox review to automated, limited safe writes in production for [Specific Field/Record Type].
+2. **Expand Scope:** Implement Summit forecasting agents to analyze the newly cleaned pipeline data.
+3. **Scale:** Roll out similar hygiene workflows to the [Other Regional/Segment] RevOps team.
 
 ## Readiness Assessment
-- [x] Readiness to enable limited safe writes in production.
-- [ ] Readiness to expand from hygiene into forecasting agents.
-- [ ] Readiness to scale to additional similar RevOps teams.
+
+* [x] Readiness to enable limited safe writes in production.
+* [ ] Readiness to expand from hygiene into forecasting agents.
+* [ ] Readiness to scale to additional similar RevOps teams.
