@@ -940,7 +940,7 @@ prompts:
   - id: implement.ftx-protocol-v1
     version: v1
     path: prompts/implement.ftx-protocol-v1.yaml
-    sha256: 740bd18a2d9c5c499fd56570875991313043e08a2e40fe5904924c87bc0aafe6
+    sha256: c2a550c5987e5a3f1f31400b95880302bc896471b30eae6bb45488adac45a8ee
     description: Implement FTX Protocol Spec for Wire Format & Crypto
     scope:
       paths:
