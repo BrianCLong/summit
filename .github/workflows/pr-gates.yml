@@ -74,7 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            ./scripts/security/trivy-scan.sh
+            ./scripts/security/trivy-scan.sh summit-app:latest security-reports/trivy-report.json
           else
             echo "Trivy scan script not found, skipping."
           fi
