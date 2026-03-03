@@ -65,3 +65,59 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+  SCHEMA_MAJOR_UNSUPPORTED:
+    description: "The major version of the evidence schema is not supported."
+    severity: "error"
+    owner: "release-engineering"
+  SCHEMA_VERSION_INVALID:
+    description: "The version field in the evidence schema is missing or invalid."
+    severity: "error"
+    owner: "release-engineering"
+  JSON_PARSE_ERROR:
+    description: "Failed to parse JSON file."
+    severity: "error"
+    owner: "release-engineering"
+  MISSING_FIELD:
+    description: "A required field is missing from the evidence JSON."
+    severity: "error"
+    owner: "release-engineering"
+  INVALID_ENUM:
+    description: "A field has an invalid enum value."
+    severity: "error"
+    owner: "release-engineering"
+  DRIFT_DETECTED:
+    description: "Drift detected between expected and actual state."
+    severity: "error"
+    owner: "release-engineering"
+  DRIFT_ERROR:
+    description: "An error occurred while checking for drift."
+    severity: "error"
+    owner: "release-engineering"
+  SIG_ORPHAN:
+    description: "Signature file found without corresponding artifact."
+    severity: "error"
+    owner: "security"
+  SIG_INVALID:
+    description: "Signature verification failed."
+    severity: "error"
+    owner: "security"
+  COSIGN_MISSING:
+    description: "Cosign executable is missing."
+    severity: "error"
+    owner: "security"
+  SIG_MISSING:
+    description: "Required signature file is missing."
+    severity: "error"
+    owner: "security"
+  ATTESTATION_MISSING:
+    description: "Required attestation is missing."
+    severity: "error"
+    owner: "security"
+  SHA256SUMS_INVALID_FORMAT:
+    description: "The sha256sums file has an invalid format."
+    severity: "error"
+    owner: "security"
+  INVALID_JSON:
+    description: "Invalid JSON format in file."
+    severity: "error"
+    owner: "release-engineering"

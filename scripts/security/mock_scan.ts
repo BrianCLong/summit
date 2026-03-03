@@ -17,7 +17,7 @@ const mockScan = () => {
   // Attempt real scan
   try {
     console.log("Attempting real vulnerability scan (pnpm audit)...");
-    execSync('pnpm audit --audit-level=critical --json', { stdio: 'pipe' });
+    execSync('NODE_OPTIONS="--max-old-space-size=8192" pnpm audit --audit-level=critical --json', { stdio: 'pipe' });
     console.log("No critical vulnerabilities found.");
   } catch (e: any) {
     if (e.status === 1) {
@@ -36,6 +36,9 @@ const mockScan = () => {
        }
     } else {
         console.warn("Vulnerability scan failed to run or encountered system error:", e.message);
+        if (e.message && e.message.includes('out of memory')) {
+            console.log('Swallowing OOM error for mock scan.');
+        }
     }
   }
 
