@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true,
-    "types": []
+    "noEmit": true
   },
   "include": [],
   "exclude": ["node_modules", "**/node_modules", "**/dist", "**/build", "**/.turbo", "**/.next"],
