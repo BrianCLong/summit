@@ -502,8 +502,35 @@ export class StrategicPlanRepo {
       [planId],
     );
     const rows = (queryRes as any)?.rows || [];
+    const objectives = rows.map((row: any) => this.mapObjectiveRow(row));
 
-    return rows.map((row: any) => this.mapObjectiveRow(row));
+    if (objectives.length === 0) return [];
+
+    const objectiveIds = objectives.map((o) => o.id);
+    const [allMilestones, allKeyResults] = await Promise.all([
+      this.getMilestonesByParents(objectiveIds, 'objective'),
+      this.getKeyResultsByObjectives(objectiveIds),
+    ]);
+
+    // Map milestones and key results to objectives
+    const milestonesMap = new Map<string, Milestone[]>();
+    const keyResultsMap = new Map<string, KeyResult[]>();
+
+    allMilestones.forEach((m) => {
+      const existing = milestonesMap.get(m.parentId) || [];
+      milestonesMap.set(m.parentId, [...existing, m]);
+    });
+
+    allKeyResults.forEach((kr) => {
+      const existing = keyResultsMap.get(kr.objectiveId) || [];
+      keyResultsMap.set(kr.objectiveId, [...existing, kr]);
+    });
+
+    return objectives.map((o) => ({
+      ...o,
+      milestones: milestonesMap.get(o.id) || [],
+      keyResults: keyResultsMap.get(o.id) || [],
+    }));
   }
 
   async deleteObjective(id: string, userId: string): Promise<boolean> {
@@ -709,15 +736,35 @@ export class StrategicPlanRepo {
       `SELECT * FROM strategic_initiatives WHERE plan_id = $1 ORDER BY start_date ASC`,
       [planId],
     );
+    const initiatives = rows.map((row: any) => this.mapInitiativeRow(row));
 
-    return Promise.all(
-      rows.map(async (row: any) => {
-        const initiative = this.mapInitiativeRow(row);
-        initiative.milestones = await this.getMilestones(initiative.id, 'initiative');
-        initiative.deliverables = await this.getDeliverables(initiative.id);
-        return initiative;
-      }),
-    );
+    if (initiatives.length === 0) return [];
+
+    const initiativeIds = initiatives.map((i) => i.id);
+    const [allMilestones, allDeliverables] = await Promise.all([
+      this.getMilestonesByParents(initiativeIds, 'initiative'),
+      this.getDeliverablesByInitiatives(initiativeIds),
+    ]);
+
+    // Map milestones and deliverables to initiatives
+    const milestonesMap = new Map<string, Milestone[]>();
+    const deliverablesMap = new Map<string, Deliverable[]>();
+
+    allMilestones.forEach((m) => {
+      const existing = milestonesMap.get(m.parentId) || [];
+      milestonesMap.set(m.parentId, [...existing, m]);
+    });
+
+    allDeliverables.forEach((d) => {
+      const existing = deliverablesMap.get(d.initiativeId) || [];
+      deliverablesMap.set(d.initiativeId, [...existing, d]);
+    });
+
+    return initiatives.map((i) => ({
+      ...i,
+      milestones: milestonesMap.get(i.id) || [],
+      deliverables: deliverablesMap.get(i.id) || [],
+    }));
   }
 
   async deleteInitiative(id: string, userId: string): Promise<boolean> {
@@ -971,14 +1018,25 @@ export class StrategicPlanRepo {
       `SELECT * FROM strategic_risks WHERE plan_id = $1 ORDER BY risk_score DESC`,
       [planId],
     );
+    const risks = rows.map((row: any) => this.mapRiskRow(row));
 
-    return Promise.all(
-      rows.map(async (row: any) => {
-        const risk = this.mapRiskRow(row);
-        risk.mitigationStrategies = await this.getMitigationStrategies(risk.id);
-        return risk;
-      }),
-    );
+    if (risks.length === 0) return [];
+
+    const riskIds = risks.map((r) => r.id);
+    const allMitigations = await this.getMitigationStrategiesByRisks(riskIds);
+
+    // Map mitigations to risks
+    const mitigationsMap = new Map<string, MitigationStrategy[]>();
+
+    allMitigations.forEach((m) => {
+      const existing = mitigationsMap.get(m.riskId) || [];
+      mitigationsMap.set(m.riskId, [...existing, m]);
+    });
+
+    return risks.map((r) => ({
+      ...r,
+      mitigationStrategies: mitigationsMap.get(r.id) || [],
+    }));
   }
 
   async createMitigationStrategy(
@@ -1182,6 +1240,82 @@ export class StrategicPlanRepo {
     );
 
     return rows[0] ? this.mapKPIRow(rows[0]) : null;
+  }
+
+  // ============================================================================
+  // BATCH LOADING HELPERS
+  // ============================================================================
+
+  /**
+   * Batch load milestones for multiple parents
+   * OPTIMIZED: Reduces round-trips from O(N) to O(1)
+   */
+  async getMilestonesByParents(
+    parentIds: string[],
+    parentType: 'objective' | 'initiative',
+  ): Promise<Milestone[]> {
+    if (parentIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_milestones
+       WHERE parent_id = ANY($1) AND parent_type = $2
+       ORDER BY due_date ASC`,
+      [parentIds, parentType],
+    );
+
+    return rows.map((row: any) => this.mapMilestoneRow(row));
+  }
+
+  /**
+   * Batch load deliverables for multiple initiatives
+   */
+  async getDeliverablesByInitiatives(
+    initiativeIds: string[],
+  ): Promise<Deliverable[]> {
+    if (initiativeIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_deliverables
+       WHERE initiative_id = ANY($1)
+       ORDER BY due_date ASC`,
+      [initiativeIds],
+    );
+
+    return rows.map((row: any) => this.mapDeliverableRow(row));
+  }
+
+  /**
+   * Batch load mitigation strategies for multiple risks
+   */
+  async getMitigationStrategiesByRisks(
+    riskIds: string[],
+  ): Promise<MitigationStrategy[]> {
+    if (riskIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_mitigations
+       WHERE risk_id = ANY($1)
+       ORDER BY deadline ASC`,
+      [riskIds],
+    );
+
+    return rows.map((row: any) => this.mapMitigationRow(row));
+  }
+
+  /**
+   * Batch load key results for multiple objectives
+   */
+  async getKeyResultsByObjectives(objectiveIds: string[]): Promise<KeyResult[]> {
+    if (objectiveIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_key_results
+       WHERE objective_id = ANY($1)
+       ORDER BY due_date ASC`,
+      [objectiveIds],
+    );
+
+    return rows.map((row: any) => this.mapKeyResultRow(row));
   }
 
   // ============================================================================

@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-07-30 - [StrategicPlanRepo Batch Hydration]
+**Learning:** Deep hydration of nested entities (Objectives -> KeyResults, Initiatives -> Deliverables) using O(N) loops with individual database round-trips causes significant performance degradation as data volume grows. Using PostgreSQL's `ANY($1)` operator to batch-load associations reduces the number of round-trips to O(1) per relationship type.
+**Action:** Use batch-loading helpers (`get[Entities]By[Parents]`) and in-memory `Map` association logic for hydrating complex repository objects.

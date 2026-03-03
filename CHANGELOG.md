@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **⚡ Bolt Performance Optimization**: Optimized `StrategicPlanRepo` by implementing batch-loading for nested entities (Milestones, Key Results, Deliverables, Mitigation Strategies). Replaced O(N) waterfalls with O(1) batch queries using PostgreSQL `ANY()` operator, significantly reducing database round-trips for complex plan retrievals.
+
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
