@@ -9,47 +9,25 @@ describe('Maestro Integration Tests', () => {
   let authToken: string;
   let app: any;
 
-
   beforeAll(async () => {
-    try {
-      // Create app
-      app = await createApp();
+    // Create app
+    app = await createApp();
 
-      // Setup test database
-      const pool = getPostgresPool();
-      await pool.query('BEGIN');
+    // Setup test database
+    const pool = getPostgresPool();
+    await pool.query('BEGIN');
 
-      // Create test run table if it doesn't exist to make sure the query works in a fresh db
-      await pool.query(`
-        CREATE TABLE IF NOT EXISTS run (
-          id UUID PRIMARY KEY,
-          runbook VARCHAR(255) NOT NULL,
-          status VARCHAR(50) NOT NULL,
-          started_at TIMESTAMP NOT NULL
-        )
-      `);
+    // Create test run
+    const result = await pool.query(
+      `INSERT INTO run (id, runbook, status, started_at)
+       VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now())
+       RETURNING id`,
+    );
+    testRunId = result.rows[0].id;
 
-      // Create test run
-      const result = await pool.query(
-        `INSERT INTO run (id, runbook, status, started_at)
-         VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now())
-         RETURNING id`,
-      );
-      if (result && result.rows && result.rows.length > 0) {
-        testRunId = result.rows[0].id;
-      } else {
-        testRunId = "fallback-id";
-      }
-
-      // Mock auth token (in real tests, use proper auth)
-      authToken = 'test-token';
-    } catch (e) {
-      console.error("Failed to setup integration tests", e);
-      testRunId = "fallback-id";
-      authToken = 'test-token';
-    }
+    // Mock auth token (in real tests, use proper auth)
+    authToken = 'test-token';
   });
-
 
   afterAll(async () => {
     const pool = getPostgresPool();
