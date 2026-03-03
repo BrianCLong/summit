@@ -100,7 +100,7 @@ jobs:
             TURBO_TEAM=${{ secrets.TURBO_TEAM }}
           platforms: linux/amd64,linux/arm64
           provenance: true
-          sbom: false
+          sbom: true
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0

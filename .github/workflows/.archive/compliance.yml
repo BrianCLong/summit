@@ -196,7 +196,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
           provenance: true
-          sbom: false
+          sbom: true
 
       - name: Generate SLSA provenance
         uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0

@@ -25,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: pip install jsonschema
       - name: Run Evidence Contract Gate
-        run: ./ci/gates/evidence_contract.sh || echo "Evidence contract check failed but continuing"
+        run: ./ci/gates/evidence_contract.sh
 
   gate-agent-inventory:
     if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run Relay Policy Check
         run: |
-          echo "python3 security/relay_policy/enforce.py (skipped due to missing script)"
+          python3 security/relay_policy/enforce.py security/relay_policy/policy.json
 
   gate-supplychain-verify:
     if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
@@ -79,4 +79,4 @@ jobs:
       - name: Verify Supply Chain
         run: |
           # In a real scenario, this would check all installed skills
-          echo "python3 security/supply_chain/verify_signatures.py (skipped due to missing script)"
+          python3 security/supply_chain/verify_signatures.py tests/fixtures/sc/signed_skill.json

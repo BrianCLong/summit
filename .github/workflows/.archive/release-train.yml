@@ -332,7 +332,7 @@ jobs:
             org.opencontainers.image.version=${{ needs.version.outputs.rc_version }}
             org.opencontainers.image.revision=${{ needs.preflight.outputs.commit_sha }}
           provenance: true
-          sbom: false
+          sbom: true
 
       - name: Build and push Web image
         id: build-web
@@ -347,7 +347,7 @@ jobs:
             org.opencontainers.image.version=${{ needs.version.outputs.rc_version }}
             org.opencontainers.image.revision=${{ needs.preflight.outputs.commit_sha }}
           provenance: true
-          sbom: false
+          sbom: true
 
       - name: Sign images with cosign
         env:
