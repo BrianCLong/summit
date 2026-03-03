@@ -1,3 +1,4 @@
 # Canary Plan
-Monitor the new sub-agent prompts and ASF python abstractions for a week in the pre-production environment.
-Watch for anomalous evaluation logs emitted by `summit/skillforge/evaluator.py` or new error rates around skill execution from `summit/acp/playbook.py`.
+
+This feature introduces a set of new Agent Skill Factory modules. It should be evaluated closely using regular TMAML metrics and evaluated for side effects across standard agent memory executions.
+If any anomalies are detected or tests fail in standard test suites, roll back immediately using the provided `rollback-plan.md`.
