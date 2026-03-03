@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from typing import Any, Mapping
 
-EVIDENCE_ID_PATTERN = re.compile(r"^EVID-[A-Z0-9]+-[a-fA-F0-9]{8}$")
+EVIDENCE_ID_PATTERN = re.compile(r"^EVD-[A-Z0-9\-]+$")
 
 
 def _require_keys(payload: Mapping[str, Any], required: set[str]) -> None:
@@ -21,7 +21,7 @@ def _enforce_no_additional(payload: Mapping[str, Any], allowed: set[str]) -> Non
 
 def _validate_evidence_id(value: Any) -> None:
     if not isinstance(value, str) or not EVIDENCE_ID_PATTERN.match(value):
-        raise ValueError("evidence_id must match ^EVID-<component>-<hash8>$")
+        raise ValueError("evidence_id must match ^EVD-[A-Z0-9\\-]+$")
 
 
 def _validate_iso8601(value: Any) -> None:
@@ -36,12 +36,9 @@ def _validate_iso8601(value: Any) -> None:
 
 
 def validate_report(payload: Mapping[str, Any]) -> None:
-    _require_keys(payload, {"evidence_id", "summary", "environment", "backend", "artifacts", "claim_ref"})
-    _enforce_no_additional(payload, {"evidence_id", "summary", "environment", "backend", "artifacts", "claim_ref"})
+    _require_keys(payload, {"evidence_id", "summary", "environment", "backend", "artifacts"})
+    _enforce_no_additional(payload, {"evidence_id", "summary", "environment", "backend", "artifacts"})
     _validate_evidence_id(payload["evidence_id"])
-
-    if not isinstance(payload["claim_ref"], str):
-        raise ValueError("claim_ref must be a string")
     if not isinstance(payload["summary"], str):
         raise ValueError("summary must be a string")
     if not isinstance(payload["environment"], str):
@@ -56,12 +53,9 @@ def validate_report(payload: Mapping[str, Any]) -> None:
 
 
 def validate_metrics(payload: Mapping[str, Any]) -> None:
-    _require_keys(payload, {"evidence_id", "metrics", "claim_ref"})
-    _enforce_no_additional(payload, {"evidence_id", "metrics", "claim_ref"})
+    _require_keys(payload, {"evidence_id", "metrics"})
+    _enforce_no_additional(payload, {"evidence_id", "metrics"})
     _validate_evidence_id(payload["evidence_id"])
-
-    if not isinstance(payload["claim_ref"], str):
-        raise ValueError("claim_ref must be a string")
     metrics = payload["metrics"]
     if not isinstance(metrics, dict):
         raise ValueError("metrics must be an object")
