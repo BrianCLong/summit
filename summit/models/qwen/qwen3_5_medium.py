@@ -18,8 +18,18 @@ class Qwen35MediumAdapter(BaseModelAdapter):
     def __init__(self, api_key: Optional[str] = None, base_url: str = "https://api.aliyun.com/v1"):
         self.api_key = api_key or os.environ.get("QWEN_API_KEY")
         self.base_url = base_url.rstrip("/")
-        self._client = httpx.Client(timeout=60.0)
-        self._async_client = httpx.AsyncClient(timeout=60.0)
+        self._client: Optional[httpx.Client] = None
+        self._async_client: Optional[httpx.AsyncClient] = None
+
+    def _get_client(self) -> httpx.Client:
+        if self._client is None:
+            self._client = httpx.Client(timeout=60.0)
+        return self._client
+
+    def _get_async_client(self) -> httpx.AsyncClient:
+        if self._async_client is None:
+            self._async_client = httpx.AsyncClient(timeout=60.0)
+        return self._async_client
 
     def generate(self, prompt: str, **kwargs: Any) -> ModelOutput:
         """
@@ -39,7 +49,7 @@ class Qwen35MediumAdapter(BaseModelAdapter):
             **kwargs
         }
 
-        response = self._client.post(
+        response = self._get_client().post(
             f"{self.base_url}/chat/completions",
             headers=headers,
             json=payload
@@ -70,7 +80,7 @@ class Qwen35MediumAdapter(BaseModelAdapter):
             **kwargs
         }
 
-        response = await self._async_client.post(
+        response = await self._get_async_client().post(
             f"{self.base_url}/chat/completions",
             headers=headers,
             json=payload
@@ -85,11 +95,18 @@ class Qwen35MediumAdapter(BaseModelAdapter):
             metadata={"model": self.MODEL_ID}
         )
 
-    def __del__(self):
-        """Clean up clients on deletion."""
-        try:
+    def close(self):
+        """Explicitly close the clients."""
+        if self._client:
             self._client.close()
-        except:
-            pass
-        # Note: async_client should ideally be closed in an async context
-        # but here we provide a best-effort cleanup for the sync client.
+            self._client = None
+        # Note: async_client close should be awaited, but we provide a sync close for the sync client.
+
+    async def aclose(self):
+        """Asynchronously close the clients."""
+        if self._client:
+            self._client.close()
+            self._client = None
+        if self._async_client:
+            await self._async_client.aclose()
+            self._async_client = None

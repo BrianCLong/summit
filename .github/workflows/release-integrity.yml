@@ -27,6 +27,8 @@ jobs:
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+      - name: Sanitize Types
+        run: find node_modules -name hapi__catbox -o -name hapi__shot | xargs rm -rf
 
       - name: Generate SBOM
         run: npx tsx scripts/compliance/generate_sbom.ts

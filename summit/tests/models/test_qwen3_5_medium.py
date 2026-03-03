@@ -12,10 +12,9 @@ def adapter():
         return Qwen35MediumAdapter(api_key="test-key")
 
 def test_qwen_adapter_init():
-    with patch("httpx.Client"), patch("httpx.AsyncClient"):
-        adapter = Qwen35MediumAdapter(api_key="test-key")
-        assert adapter.api_key == "test-key"
-        assert adapter.MODEL_ID == "qwen3.5-medium"
+    adapter = Qwen35MediumAdapter(api_key="test-key")
+    assert adapter.api_key == "test-key"
+    assert adapter.MODEL_ID == "qwen3.5-medium"
 
 def test_qwen_adapter_generate(adapter):
     mock_response = MagicMock()
@@ -24,7 +23,7 @@ def test_qwen_adapter_generate(adapter):
         "choices": [{"message": {"content": "Hello from Qwen!"}}],
         "usage": {"total_tokens": 10}
     }
-    adapter._client.post = MagicMock(return_value=mock_response)
+    adapter._get_client().post = MagicMock(return_value=mock_response)
 
     output = adapter.generate("Hello")
 
@@ -42,7 +41,7 @@ async def test_qwen_adapter_generate_async(adapter):
         "usage": {"total_tokens": 5}
     }
 
-    adapter._async_client.post = AsyncMock(return_value=mock_response)
+    adapter._get_async_client().post = AsyncMock(return_value=mock_response)
 
     output = await adapter.generate_async("Hello")
 

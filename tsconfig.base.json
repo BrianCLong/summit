@@ -18,6 +18,8 @@
       "@intelgraph/audit/*": ["libs/audit/node/*"],
       "@summit/agent-gym": ["packages/agent-gym/src/index.ts"],
       "@summit/agent-gym-metrics": ["packages/agent-gym-metrics/src/index.ts"]
-    }
-  }
+    },
+    "types": ["node", "jest"]
+  },
+  "exclude": ["node_modules", "**/node_modules"]
 }
