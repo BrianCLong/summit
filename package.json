@@ -127,7 +127,11 @@
     "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
+<<<<<<< HEAD
+    "ga:evidence": "pnpm compliance:evidence"
+=======
     "lint:release-policy": "node scripts/release/lint-reason-codes.mjs"
+>>>>>>> 837360eb8 (fix: resolve CI failures (sbom, reason-codes, pnpm, lint, provenance))
   },
   "keywords": [
     "intelligence-analysis",

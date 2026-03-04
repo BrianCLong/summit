@@ -3,16 +3,23 @@ name: governance
 on:
   pull_request:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  schemas:
-    name: Validate governance schemas
+  required-checks:
+    name: governance / required-checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+<<<<<<< HEAD
+      - run: node scripts/ci/verify_required_checks.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+=======
 
       - uses: pnpm/action-setup@v4
         with:
@@ -133,3 +140,4 @@ jobs:
         with:
           name: governance-decision
           path: governance-decision.json
+>>>>>>> 837360eb8 (fix: resolve CI failures (sbom, reason-codes, pnpm, lint, provenance))
