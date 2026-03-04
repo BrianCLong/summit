@@ -89,9 +89,6 @@ importers:
       jest-extended:
         specifier: ^4.0.2
         version: 4.0.2(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))
-      nanoid:
-        specifier: '>=5.0.9'
-        version: 5.1.6
       neo4j-driver:
         specifier: ^5.28.1
         version: 5.28.2
@@ -312,10 +309,10 @@ importers:
         version: 8.16.0
       jest:
         specifier: ^29.x
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.x
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(esbuild@0.27.2)(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.x
         version: 5.9.3
@@ -470,7 +467,7 @@ importers:
         version: 30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.4.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.28.5)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.28.5))(esbuild@0.27.2)(jest-util@30.2.0)(jest@30.2.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(esbuild-register@3.6.0(esbuild@0.27.2))(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.6.2
         version: 4.21.0
@@ -3025,7 +3022,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       pkg:
         specifier: ^5.8.1
         version: 5.8.1
@@ -3034,7 +3031,7 @@ importers:
         version: 6.1.2
       ts-jest:
         specifier: ^29.2.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
@@ -3137,9 +3134,6 @@ importers:
       lodash:
         specifier: 4.17.23
         version: 4.17.23
-      nanoid:
-        specifier: '>=5.0.9'
-        version: 5.1.6
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -3266,7 +3260,7 @@ importers:
         version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       '@vitejs/plugin-react':
         specifier: 5.1.1
-        version: 5.1.1(vite@5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 5.1.1(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       autoprefixer:
         specifier: 10.4.22
         version: 10.4.22(postcss@8.5.6)
@@ -3316,14 +3310,14 @@ importers:
         specifier: 8.50.0
         version: 8.50.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
       vite:
-        specifier: 5.4.21
-        version: 5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1)
+        specifier: 7.2.6
+        version: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
       vite-plugin-babel:
         specifier: 1.3.2
-        version: 1.3.2(@babel/core@7.28.5)(vite@5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1))
+        version: 1.3.2(@babel/core@7.28.5)(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: 4.0.16
-        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+        version: 4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   companyos/services/api-svc-template:
     dependencies:
@@ -3630,10 +3624,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -3704,7 +3698,7 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       typescript:
         specifier: ^5.6.2
         version: 5.9.3
@@ -3729,7 +3723,7 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       typescript:
         specifier: ^5.6.2
         version: 5.9.3
@@ -3830,7 +3824,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -4142,7 +4136,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -4598,7 +4592,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -5159,7 +5153,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -5779,10 +5773,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -6015,7 +6009,7 @@ importers:
         version: 8.16.0
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -6324,10 +6318,10 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -6739,10 +6733,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -6805,10 +6799,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -7055,7 +7049,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -7324,10 +7318,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.0.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -7551,7 +7545,7 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       typescript:
         specifier: ^5.6.2
         version: 5.9.3
@@ -7582,7 +7576,7 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       typescript:
         specifier: ^5.6.2
         version: 5.9.3
@@ -7993,7 +7987,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -8015,10 +8009,10 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
@@ -8049,13 +8043,13 @@ importers:
         version: 18.3.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       jest-environment-jsdom:
         specifier: ^29.7.0
         version: 29.7.0(canvas@2.11.2)
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -8111,7 +8105,7 @@ importers:
         version: 22.19.7
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       typescript:
         specifier: ^5.6.2
         version: 5.9.3
@@ -8376,10 +8370,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -8479,7 +8473,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
 
   packages/kafka-integration:
     dependencies:
@@ -9427,7 +9421,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.0.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
@@ -9570,7 +9564,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -10459,10 +10453,10 @@ importers:
         version: 10.0.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -10715,7 +10709,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -10737,7 +10731,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -10768,10 +10762,10 @@ importers:
         version: 7.7.1
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -11002,7 +10996,7 @@ importers:
         version: 11.3.3
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       pino:
         specifier: ^10.1.0
         version: 10.1.0
@@ -11011,7 +11005,7 @@ importers:
         version: 3.1.7
       ts-jest:
         specifier: ^29.4.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -11159,7 +11153,7 @@ importers:
         version: 3.0.1(ajv@8.17.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -11355,7 +11349,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -11502,10 +11496,10 @@ importers:
         version: 8.18.1
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -12134,10 +12128,10 @@ importers:
         version: 8.18.1
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -12177,10 +12171,10 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.5.0
-        version: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -12214,10 +12208,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -12564,10 +12558,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.6
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -12669,7 +12663,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -12710,10 +12704,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
@@ -13110,7 +13104,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13306,10 +13300,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13710,10 +13704,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13778,10 +13772,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13797,10 +13791,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13825,10 +13819,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13850,10 +13844,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13875,10 +13869,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -13900,10 +13894,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -14151,7 +14145,7 @@ importers:
         version: link:../packages/provenance
       '@intelgraph/telemetry-config':
         specifier: file:../packages/telemetry-config
-        version: file:packages/telemetry-config
+        version: link:../packages/telemetry-config
       '@node-saml/node-saml':
         specifier: ^5.1.0
         version: 5.1.0
@@ -14942,10 +14936,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -15197,7 +15191,7 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.3.0
         version: 5.9.3
@@ -15296,10 +15290,10 @@ importers:
         version: 10.0.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.0
         version: 4.21.0
@@ -15749,7 +15743,7 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -15792,7 +15786,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: latest
-        version: 0.70.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))
+        version: 0.70.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/core':
         specifier: latest
         version: 2.5.1(@opentelemetry/api@1.9.0)
@@ -15822,7 +15816,7 @@ importers:
         version: 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions':
         specifier: latest
-        version: 1.40.0
+        version: 1.39.0
       axios:
         specifier: ^1.6.7
         version: 1.13.4
@@ -16235,10 +16229,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
@@ -16401,10 +16395,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.6.0
         version: 4.21.0
@@ -16546,10 +16540,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -16660,10 +16654,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -16739,10 +16733,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
@@ -16879,10 +16873,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -16949,7 +16943,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -17274,10 +17268,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.1
         version: 4.21.0
@@ -17577,10 +17571,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -17675,10 +17669,10 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -18207,10 +18201,10 @@ importers:
         version: 10.0.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -18558,10 +18552,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
@@ -18995,10 +18989,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.1.0
         version: 4.21.0
@@ -19056,7 +19050,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       prettier:
         specifier: ^3.2.4
         version: 3.7.4
@@ -19065,7 +19059,7 @@ importers:
         version: 6.3.4
       ts-jest:
         specifier: ^29.1.2
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -19271,13 +19265,13 @@ importers:
         version: 11.0.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       supertest:
         specifier: ^7.1.4
         version: 7.1.4
       ts-jest:
         specifier: ^29.4.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.1
         version: 4.21.0
@@ -19403,10 +19397,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -19437,10 +19431,10 @@ importers:
         version: 11.0.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.5.0
         version: 5.9.3
@@ -19532,7 +19526,7 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -19557,10 +19551,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -19765,10 +19759,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -19925,10 +19919,10 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.3.3
         version: 5.9.3
@@ -20004,13 +19998,13 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       supertest:
         specifier: ^6.3.3
         version: 6.3.4
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -20944,7 +20938,7 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -21149,10 +21143,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -21622,10 +21616,10 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -21662,10 +21656,10 @@ importers:
         version: 20.11.30
       jest:
         specifier: 29.7.0
-        version: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       ts-jest:
         specifier: 29.1.1
-        version: 29.1.1(@babel/core@7.29.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.6.3)
+        version: 29.1.1(@babel/core@7.29.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)))(typescript@5.6.3)
       ts-node-dev:
         specifier: 2.0.0
         version: 2.0.0(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)
@@ -21748,7 +21742,7 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -21838,7 +21832,7 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       typescript:
         specifier: ^5.7.3
         version: 5.9.3
@@ -22010,10 +22004,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.5
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.19.2
         version: 4.21.0
@@ -22467,10 +22461,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -23206,7 +23200,7 @@ importers:
         version: 8.16.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       tsx:
         specifier: ^4.7.1
         version: 4.21.0
@@ -23329,10 +23323,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -23424,13 +23418,13 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       supertest:
         specifier: ^6.3.3
         version: 6.3.4
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -23497,10 +23491,10 @@ importers:
         version: 8.16.0
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.6.2
         version: 4.21.0
@@ -23902,10 +23896,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.1
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -23967,10 +23961,10 @@ importers:
         version: 9.0.8
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -24058,10 +24052,10 @@ importers:
         version: 20.19.27
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -24400,10 +24394,10 @@ importers:
         version: 9.39.2(jiti@2.6.1)
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.1.0
-        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)))(typescript@5.9.3)
       tsx:
         specifier: ^4.7.0
         version: 4.21.0
@@ -28730,9 +28724,6 @@ packages:
   '@intelgraph/synthdata-js@file:packages/sdk/synthdata-js':
     resolution: {directory: packages/sdk/synthdata-js, type: directory}
 
-  '@intelgraph/telemetry-config@file:packages/telemetry-config':
-    resolution: {directory: packages/telemetry-config, type: directory}
-
   '@interactjs/types@1.10.27':
     resolution: {integrity: sha512-BUdv0cvs4H5ODuwft2Xp4eL8Vmi3LcihK42z0Ft/FbVJZoRioBsxH+LlsBdK4tAie7PqlKGy+1oyOncu1nQ6eA==}
 
@@ -29473,7 +29464,6 @@ packages:
   '@mui/lab@6.0.0-dev.240424162023-9968b4889d':
     resolution: {integrity: sha512-iKFAz7/EeWI4PaFsP4jK2FcYJmUYDBkn3XZwpQSAl5806yYq5J2U2mPQLuZBdhrH50gT2O98p95i3vwL4YBwAg==}
     engines: {node: '>=12.0.0'}
-    deprecated: 'This version is deprecated. Please update to the latest v6 version: npm install @mui/lab@latest-v6'
     peerDependencies:
       '@emotion/react': ^11.5.0
       '@emotion/styled': ^11.3.0
@@ -30316,8 +30306,8 @@ packages:
       '@opentelemetry/api': ^1.4.1
       '@opentelemetry/core': ^2.0.0
 
-  '@opentelemetry/auto-instrumentations-node@0.70.1':
-    resolution: {integrity: sha512-r8BKs0rHtBAzZViPIuzSD2eh65fOPau0NqVsca2sACuZ6LFGu6a+QMhqq7skXz+/OqKwFr/7/b6VsaNMS+zZpQ==}
+  '@opentelemetry/auto-instrumentations-node@0.70.0':
+    resolution: {integrity: sha512-gSt1gxQLnGL62Xoh+9A6OZksSeYAKunnzR5VKks6esI+aTTZTLveVO6sq4BoUIMUV2WtsmuEGrcUwynU7cctGw==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.4.1
@@ -30965,8 +30955,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
 
-  '@opentelemetry/instrumentation-cucumber@0.28.0':
-    resolution: {integrity: sha512-kim+bRxu4LZqKEyF2SgO01tgG88W+/iYltyP1XjT31FIXzlBjzQpwtSLLM8byayO85mcZIBha54WSNFDLM/7qQ==}
+  '@opentelemetry/instrumentation-cucumber@0.27.0':
+    resolution: {integrity: sha512-4zQ27TZMsfS7senBXqR6TaBPvfnlvI3ZfJU+RHHttzslWqK3rrSUYkgCWO79MnJpw5GtLz+V4NV2gpt/zRiCCA==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.0.0
@@ -31187,8 +31177,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/instrumentation-graphql@0.60.0':
-    resolution: {integrity: sha512-XPATrmxAd2tFCsYbJ3eVIXt+gyvMKjc36QQuQxjtssMnAbw006Le9b5lKs7WXik7ItOpM1exATi1aDdOcCjRRg==}
+  '@opentelemetry/instrumentation-graphql@0.59.0':
+    resolution: {integrity: sha512-NvoUH1CKqfKVUSwCVq1MnIBI29Zd84EwSoBwdWUqyyWK8oTEqzGcnaUli1obYzzZPHijApvHUtV848p1piPmXg==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -31794,8 +31784,8 @@ packages:
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
 
-  '@opentelemetry/instrumentation-socket.io@0.59.0':
-    resolution: {integrity: sha512-71DnM/FEqH0PjvU2uZvzWJeaGyVIy3rJKk8rZrxg/aS2QT3qLGb+UPL/B+1vOw4pzDPn4papLTSMpLVF9G8uvw==}
+  '@opentelemetry/instrumentation-socket.io@0.58.0':
+    resolution: {integrity: sha512-/xuN5YxixNgB+KQJM67UETwB+3F3OTfI4cqH4z9AbHRfFBlddlMOIIpPr3CdrwQGhMd7rrv3t8NBLxv5/UvF1w==}
     engines: {node: ^18.19.0 || >=20.6.0}
     peerDependencies:
       '@opentelemetry/api': ^1.3.0
@@ -32746,10 +32736,6 @@ packages:
 
   '@opentelemetry/semantic-conventions@1.39.0':
     resolution: {integrity: sha512-R5R9tb2AXs2IRLNKLBJDynhkfmx7mX0vi8NkhZb3gUkPWHn6HXk5J8iQ/dql0U3ApfWym4kXXmBDRGO+oeOfjg==}
-    engines: {node: '>=14'}
-
-  '@opentelemetry/semantic-conventions@1.40.0':
-    resolution: {integrity: sha512-cifvXDhcqMwwTlTK04GBNeIe7yyo28Mfby85QXFe1Yk8nmi36Ab/5UQwptOx84SsoGNRg+EVSjwzfSZMy6pmlw==}
     engines: {node: '>=14'}
 
   '@opentelemetry/sql-common@0.40.1':
@@ -39668,7 +39654,6 @@ packages:
   basic-ftp@5.0.5:
     resolution: {integrity: sha512-4Bcg1P8xhUuqcii/S0Z9wiHIrQVPMermM1any+MX5GeGD7faD3/msQUDGLol9wOcz4/jbg/WJnGqoJF6LiBdtg==}
     engines: {node: '>=10.0.0'}
-    deprecated: Security vulnerability fixed in 5.2.0, please upgrade
 
   batch-cluster@13.0.0:
     resolution: {integrity: sha512-EreW0Vi8TwovhYUHBXXRA5tthuU2ynGsZFlboyMJHCCUXYa2AjgwnE3ubBOJs2xJLcuXFJbi6c/8pH5+FVj8Og==}
@@ -62890,7 +62875,7 @@ snapshots:
       '@opentelemetry/exporter-prometheus': 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-node': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       axios: 1.13.4
       cheerio: 1.2.0
       crypto: 1.0.1
@@ -62912,22 +62897,6 @@ snapshots:
   '@intelgraph/synthdata-js@file:packages/sdk/synthdata-js':
     dependencies:
       seedrandom: 3.0.5
-
-  '@intelgraph/telemetry-config@file:packages/telemetry-config':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/auto-instrumentations-node': 0.40.3(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-grpc': 0.48.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-express': 0.35.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-graphql': 0.37.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-http': 0.48.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-pg': 0.40.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-redis': 0.37.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-node': 0.48.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
-    transitivePeerDependencies:
-      - supports-color
 
   '@interactjs/types@1.10.27': {}
 
@@ -62991,6 +62960,76 @@ snapshots:
       jest-util: 30.2.0
       slash: 3.0.0
 
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.27
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.27
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3))':
     dependencies:
       '@jest/console': 29.7.0
@@ -63026,6 +63065,41 @@ snapshots:
       - supports-color
       - ts-node
 
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.27
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
   '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))':
     dependencies:
       '@jest/console': 29.7.0
@@ -63041,6 +63115,41 @@ snapshots:
       graceful-fs: 4.2.11
       jest-changed-files: 29.7.0
       jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-haste-map: 29.7.0
+      jest-message-util: 29.7.0
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-resolve-dependencies: 29.7.0
+      jest-runner: 29.7.0
+      jest-runtime: 29.7.0
+      jest-snapshot: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      jest-watcher: 29.7.0
+      micromatch: 4.0.8
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-ansi: 6.0.1
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  '@jest/core@29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))':
+    dependencies:
+      '@jest/console': 29.7.0
+      '@jest/reporters': 29.7.0
+      '@jest/test-result': 29.7.0
+      '@jest/transform': 29.7.0
+      '@jest/types': 29.6.3
+      '@types/node': 20.19.27
+      ansi-escapes: 4.3.2
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-changed-files: 29.7.0
+      jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       jest-haste-map: 29.7.0
       jest-message-util: 29.7.0
       jest-regex-util: 29.6.3
@@ -65688,7 +65797,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/auto-instrumentations-node@0.70.1(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))':
+  '@opentelemetry/auto-instrumentations-node@0.70.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0))':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
@@ -65699,14 +65808,14 @@ snapshots:
       '@opentelemetry/instrumentation-bunyan': 0.57.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-cassandra-driver': 0.57.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-connect': 0.55.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-cucumber': 0.28.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-cucumber': 0.27.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-dataloader': 0.29.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-dns': 0.55.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-express': 0.60.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-fastify': 0.56.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-fs': 0.31.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-generic-pool': 0.55.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-graphql': 0.60.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-graphql': 0.59.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-grpc': 0.212.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-hapi': 0.58.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-http': 0.212.0(@opentelemetry/api@1.9.0)
@@ -65730,7 +65839,7 @@ snapshots:
       '@opentelemetry/instrumentation-restify': 0.57.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-router': 0.56.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-runtime-node': 0.25.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/instrumentation-socket.io': 0.59.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/instrumentation-socket.io': 0.58.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-tedious': 0.31.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-undici': 0.22.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-winston': 0.56.0(@opentelemetry/api@1.9.0)
@@ -65864,17 +65973,17 @@ snapshots:
   '@opentelemetry/core@2.2.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/core@2.5.1(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/exporter-jaeger@1.15.2(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -65905,7 +66014,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       jaeger-client: 3.19.0
 
   '@opentelemetry/exporter-logs-otlp-grpc@0.208.0(@opentelemetry/api@1.9.0)':
@@ -66052,7 +66161,7 @@ snapshots:
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/exporter-prometheus@0.44.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -66348,7 +66457,7 @@ snapshots:
       '@opentelemetry/core': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.2.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/exporter-zipkin@2.5.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -66356,14 +66465,14 @@ snapshots:
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/instrumentation-amqplib@0.33.5(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66372,7 +66481,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66381,7 +66490,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66390,7 +66499,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66400,7 +66509,7 @@ snapshots:
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagator-aws-xray': 1.26.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/aws-lambda': 8.10.122
     transitivePeerDependencies:
       - supports-color
@@ -66411,7 +66520,7 @@ snapshots:
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagator-aws-xray': 1.26.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/aws-lambda': 8.10.122
     transitivePeerDependencies:
       - supports-color
@@ -66420,7 +66529,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/aws-lambda': 8.10.160
     transitivePeerDependencies:
       - supports-color
@@ -66429,7 +66538,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/aws-lambda': 8.10.160
     transitivePeerDependencies:
       - supports-color
@@ -66440,7 +66549,7 @@ snapshots:
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagation-utils': 0.30.16(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66450,7 +66559,7 @@ snapshots:
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagation-utils': 0.30.16(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66460,7 +66569,7 @@ snapshots:
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/propagation-utils': 0.30.16(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66469,7 +66578,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66478,7 +66587,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66530,7 +66639,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.44.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66538,7 +66647,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66546,7 +66655,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66561,7 +66670,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66570,7 +66679,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/connect': 3.4.36
     transitivePeerDependencies:
       - supports-color
@@ -66580,7 +66689,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/connect': 3.4.36
     transitivePeerDependencies:
       - supports-color
@@ -66590,7 +66699,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/connect': 3.4.38
     transitivePeerDependencies:
       - supports-color
@@ -66600,7 +66709,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/connect': 3.4.38
     transitivePeerDependencies:
       - supports-color
@@ -66609,7 +66718,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66617,7 +66726,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66625,15 +66734,15 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-cucumber@0.28.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/instrumentation-cucumber@0.27.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66641,7 +66750,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66677,7 +66786,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       semver: 7.7.3
     transitivePeerDependencies:
       - supports-color
@@ -66730,7 +66839,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/express': 4.17.18
     transitivePeerDependencies:
       - supports-color
@@ -66767,7 +66876,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66776,7 +66885,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66785,7 +66894,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66794,7 +66903,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66803,7 +66912,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66812,7 +66921,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66865,7 +66974,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66873,7 +66982,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66933,7 +67042,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-graphql@0.60.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/instrumentation-graphql@0.59.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
@@ -66944,7 +67053,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66952,7 +67061,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -66985,7 +67094,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/hapi__hapi': 20.0.13
     transitivePeerDependencies:
       - supports-color
@@ -66995,7 +67104,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67004,7 +67113,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67013,7 +67122,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67022,7 +67131,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       forwarded-parse: 2.1.2
     transitivePeerDependencies:
       - supports-color
@@ -67032,7 +67141,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       forwarded-parse: 2.1.2
     transitivePeerDependencies:
       - supports-color
@@ -67082,7 +67191,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/ioredis4': '@types/ioredis@4.28.10'
     transitivePeerDependencies:
       - supports-color
@@ -67092,7 +67201,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/ioredis4': '@types/ioredis@4.28.10'
     transitivePeerDependencies:
       - supports-color
@@ -67102,7 +67211,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67111,7 +67220,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.38.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67120,7 +67229,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.38.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67128,7 +67237,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67136,7 +67245,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67144,7 +67253,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67152,7 +67261,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67160,7 +67269,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67168,7 +67277,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67177,7 +67286,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/koa': 2.13.9
       '@types/koa__router': 12.0.3
     transitivePeerDependencies:
@@ -67188,7 +67297,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67197,7 +67306,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67206,7 +67315,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67242,7 +67351,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/memcached': 2.2.10
     transitivePeerDependencies:
       - supports-color
@@ -67251,7 +67360,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/memcached': 2.2.10
     transitivePeerDependencies:
       - supports-color
@@ -67260,7 +67369,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/memcached': 2.2.10
     transitivePeerDependencies:
       - supports-color
@@ -67269,7 +67378,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/memcached': 2.2.10
     transitivePeerDependencies:
       - supports-color
@@ -67279,7 +67388,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.41.2(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67288,7 +67397,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67297,7 +67406,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-metrics': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67312,7 +67421,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67321,7 +67430,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67330,7 +67439,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67339,7 +67448,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67356,7 +67465,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67364,7 +67473,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.40.1(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
@@ -67373,7 +67482,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.40.1(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
@@ -67382,7 +67491,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.41.2(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
@@ -67391,7 +67500,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.41.2(@opentelemetry/api@1.9.0)
     transitivePeerDependencies:
       - supports-color
@@ -67400,7 +67509,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/mysql': 2.15.22
     transitivePeerDependencies:
       - supports-color
@@ -67409,7 +67518,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/mysql': 2.15.22
     transitivePeerDependencies:
       - supports-color
@@ -67418,7 +67527,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/mysql': 2.15.27
     transitivePeerDependencies:
       - supports-color
@@ -67427,7 +67536,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/mysql': 2.15.27
     transitivePeerDependencies:
       - supports-color
@@ -67436,7 +67545,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67444,7 +67553,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67452,7 +67561,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67460,7 +67569,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67468,7 +67577,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67476,7 +67585,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67484,7 +67593,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67492,7 +67601,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67501,7 +67610,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.212.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67510,7 +67619,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/api-logs': 0.208.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67518,7 +67627,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/oracledb': 6.5.2
     transitivePeerDependencies:
       - supports-color
@@ -67527,7 +67636,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/oracledb': 6.5.2
     transitivePeerDependencies:
       - supports-color
@@ -67537,7 +67646,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.44.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.40.1(@opentelemetry/api@1.9.0)
       '@types/pg': 8.6.1
       '@types/pg-pool': 2.0.4
@@ -67583,7 +67692,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.41.2(@opentelemetry/api@1.9.0)
       '@types/pg': 8.15.6
       '@types/pg-pool': 2.0.6
@@ -67595,7 +67704,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@opentelemetry/sql-common': 0.41.2(@opentelemetry/api@1.9.0)
       '@types/pg': 8.15.6
       '@types/pg-pool': 2.0.7
@@ -67641,7 +67750,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67650,7 +67759,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67668,7 +67777,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67686,7 +67795,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.36.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67695,7 +67804,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.38.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67704,7 +67813,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/redis-common': 0.38.2
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67713,7 +67822,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67722,7 +67831,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67731,7 +67840,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67740,7 +67849,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67748,7 +67857,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67756,7 +67865,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67764,7 +67873,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67772,7 +67881,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67794,7 +67903,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.45.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67802,7 +67911,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67810,7 +67919,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67821,7 +67930,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/instrumentation-socket.io@0.59.0(@opentelemetry/api@1.9.0)':
+  '@opentelemetry/instrumentation-socket.io@0.58.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
@@ -67832,7 +67941,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.52.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/tedious': 4.0.14
     transitivePeerDependencies:
       - supports-color
@@ -67841,7 +67950,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/tedious': 4.0.14
     transitivePeerDependencies:
       - supports-color
@@ -67850,7 +67959,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/tedious': 4.0.14
     transitivePeerDependencies:
       - supports-color
@@ -67859,7 +67968,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/instrumentation': 0.46.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       '@types/tedious': 4.0.14
     transitivePeerDependencies:
       - supports-color
@@ -67869,7 +67978,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.208.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -67878,7 +67987,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.212.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -68433,7 +68542,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-alibaba-cloud@0.32.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68452,48 +68561,48 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-aws@2.11.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-aws@2.12.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-azure@0.17.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-azure@0.2.12(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-azure@0.20.0(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-container@0.3.11(@opentelemetry/api@1.9.0)':
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resource-detector-container@0.8.2(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68512,7 +68621,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.18.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 1.30.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
       gcp-metadata: 6.1.1
     transitivePeerDependencies:
       - supports-color
@@ -68605,7 +68714,7 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.2.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/resources@2.5.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68816,7 +68925,7 @@ snapshots:
       '@opentelemetry/sdk-metrics': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-base': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-trace-node': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
     transitivePeerDependencies:
       - supports-color
 
@@ -68984,7 +69093,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.2.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.2.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/sdk-trace-base@2.5.0(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -68998,7 +69107,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 2.5.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/resources': 2.5.1(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.40.0
+      '@opentelemetry/semantic-conventions': 1.39.0
 
   '@opentelemetry/sdk-trace-node@1.15.2(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -69108,8 +69217,6 @@ snapshots:
   '@opentelemetry/semantic-conventions@1.38.0': {}
 
   '@opentelemetry/semantic-conventions@1.39.0': {}
-
-  '@opentelemetry/semantic-conventions@1.40.0': {}
 
   '@opentelemetry/sql-common@0.40.1(@opentelemetry/api@1.9.0)':
     dependencies:
@@ -71229,9 +71336,7 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
-      - bufferutil
       - supports-color
-      - utf-8-validate
 
   '@react-native/normalize-colors@0.76.9': {}
 
@@ -78668,18 +78773,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitejs/plugin-react@5.1.1(vite@5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1))':
-    dependencies:
-      '@babel/core': 7.28.5
-      '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.5)
-      '@babel/plugin-transform-react-jsx-source': 7.27.1(@babel/core@7.28.5)
-      '@rolldown/pluginutils': 1.0.0-beta.47
-      '@types/babel__core': 7.20.5
-      react-refresh: 0.18.0
-      vite: 5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1)
-    transitivePeerDependencies:
-      - supports-color
-
   '@vitejs/plugin-react@5.1.1(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@babel/core': 7.28.5
@@ -78926,23 +79019,23 @@ snapshots:
       msw: 2.12.4(@types/node@20.19.27)(typescript@5.9.3)
       vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@vitest/mocker@4.0.18(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.18(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
       msw: 2.12.4(@types/node@20.19.27)(typescript@5.9.3)
-      vite: 7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
-  '@vitest/mocker@4.0.18(msw@2.12.4(@types/node@22.19.7)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
+  '@vitest/mocker@4.0.18(msw@2.12.4(@types/node@22.19.7)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.7)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
       msw: 2.12.4(@types/node@22.19.7)(typescript@5.9.3)
-      vite: 7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
+      vite: 7.2.6(@types/node@22.19.7)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   '@vitest/mocker@4.0.18(msw@2.12.4(@types/node@25.0.10)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))':
     dependencies:
@@ -82049,13 +82142,13 @@ snapshots:
       safe-buffer: 5.2.1
       sha.js: 2.4.12
 
-  create-jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  create-jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -82064,13 +82157,13 @@ snapshots:
       - supports-color
       - ts-node
 
-  create-jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  create-jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -82094,28 +82187,13 @@ snapshots:
       - supports-color
       - ts-node
 
-  create-jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  create-jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)):
     dependencies:
       '@jest/types': 29.6.3
       chalk: 4.1.2
       exit: 0.1.2
       graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-      jest-util: 29.7.0
-      prompts: 2.4.2
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - supports-color
-      - ts-node
-
-  create-jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
-    dependencies:
-      '@jest/types': 29.6.3
-      chalk: 4.1.2
-      exit: 0.1.2
-      graceful-fs: 4.2.11
-      jest-config: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -82131,6 +82209,21 @@ snapshots:
       exit: 0.1.2
       graceful-fs: 4.2.11
       jest-config: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-util: 29.7.0
+      prompts: 2.4.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  create-jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)):
+    dependencies:
+      '@jest/types': 29.6.3
+      chalk: 4.1.2
+      exit: 0.1.2
+      graceful-fs: 4.2.11
+      jest-config: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       jest-util: 29.7.0
       prompts: 2.4.2
     transitivePeerDependencies:
@@ -87630,16 +87723,16 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-cli@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest-cli@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      create-jest: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -87649,16 +87742,16 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest-cli@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      create-jest: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -87687,35 +87780,16 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-cli@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest-cli@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       '@jest/test-result': 29.7.0
       '@jest/types': 29.6.3
       chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      create-jest: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       exit: 0.1.2
       import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-      jest-util: 29.7.0
-      jest-validate: 29.7.0
-      yargs: 17.7.2
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - supports-color
-      - ts-node
-
-  jest-cli@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
-    dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-      '@jest/test-result': 29.7.0
-      '@jest/types': 29.6.3
-      chalk: 4.1.2
-      create-jest: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-      exit: 0.1.2
-      import-local: 3.2.0
-      jest-config: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-config: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -87735,6 +87809,25 @@ snapshots:
       exit: 0.1.2
       import-local: 3.2.0
       jest-config: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      yargs: 17.7.2
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  jest-cli@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)):
+    dependencies:
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
+      '@jest/test-result': 29.7.0
+      '@jest/types': 29.6.3
+      chalk: 4.1.2
+      create-jest: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
+      exit: 0.1.2
+      import-local: 3.2.0
+      jest-config: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       jest-util: 29.7.0
       jest-validate: 29.7.0
       yargs: 17.7.2
@@ -87858,7 +87951,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest-config@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest-config@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)):
     dependencies:
       '@babel/core': 7.28.5
       '@jest/test-sequencer': 29.7.0
@@ -87884,12 +87977,12 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 18.19.130
-      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest-config@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)):
     dependencies:
       '@babel/core': 7.28.5
       '@jest/test-sequencer': 29.7.0
@@ -87915,7 +88008,69 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 20.11.30
-      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)):
+    dependencies:
+      '@babel/core': 7.28.5
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.28.5)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 13.0.0
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.27
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)):
+    dependencies:
+      '@babel/core': 7.28.5
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.28.5)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 13.0.0
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.27
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -87951,6 +88106,37 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
+  jest-config@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)):
+    dependencies:
+      '@babel/core': 7.28.5
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.28.5)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 13.0.0
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.27
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
   jest-config@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
     dependencies:
       '@babel/core': 7.28.5
@@ -87982,7 +88168,38 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  jest-config@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest-config@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)):
+    dependencies:
+      '@babel/core': 7.28.5
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.28.5)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 13.0.0
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 20.19.27
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)):
     dependencies:
       '@babel/core': 7.28.5
       '@jest/test-sequencer': 29.7.0
@@ -88008,7 +88225,7 @@ snapshots:
       strip-json-comments: 3.1.1
     optionalDependencies:
       '@types/node': 22.19.7
-      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -88040,6 +88257,37 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.0.10
       ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)
+    transitivePeerDependencies:
+      - babel-plugin-macros
+      - supports-color
+
+  jest-config@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)):
+    dependencies:
+      '@babel/core': 7.28.5
+      '@jest/test-sequencer': 29.7.0
+      '@jest/types': 29.6.3
+      babel-jest: 29.7.0(@babel/core@7.28.5)
+      chalk: 4.1.2
+      ci-info: 3.9.0
+      deepmerge: 4.3.1
+      glob: 13.0.0
+      graceful-fs: 4.2.11
+      jest-circus: 29.7.0(babel-plugin-macros@3.1.0)
+      jest-environment-node: 29.7.0
+      jest-get-type: 29.6.3
+      jest-regex-util: 29.6.3
+      jest-resolve: 29.7.0
+      jest-runner: 29.7.0
+      jest-util: 29.7.0
+      jest-validate: 29.7.0
+      micromatch: 4.0.8
+      parse-json: 5.2.0
+      pretty-format: 29.7.0
+      slash: 3.0.0
+      strip-json-comments: 3.1.1
+    optionalDependencies:
+      '@types/node': 25.1.0
+      ts-node: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
@@ -88941,24 +89189,24 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
-  jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       '@jest/types': 29.6.3
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-cli: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
       - supports-color
       - ts-node
 
-  jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       '@jest/types': 29.6.3
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-cli: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -88977,24 +89225,12 @@ snapshots:
       - supports-color
       - ts-node
 
-  jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
+  jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)):
     dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       '@jest/types': 29.6.3
       import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-    transitivePeerDependencies:
-      - '@types/node'
-      - babel-plugin-macros
-      - supports-color
-      - ts-node
-
-  jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)):
-    dependencies:
-      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-      '@jest/types': 29.6.3
-      import-local: 3.2.0
-      jest-cli: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest-cli: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -89007,6 +89243,18 @@ snapshots:
       '@jest/types': 29.6.3
       import-local: 3.2.0
       jest-cli: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+    transitivePeerDependencies:
+      - '@types/node'
+      - babel-plugin-macros
+      - supports-color
+      - ts-node
+
+  jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)):
+    dependencies:
+      '@jest/core': 29.7.0(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
+      '@jest/types': 29.6.3
+      import-local: 3.2.0
+      jest-cli: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
     transitivePeerDependencies:
       - '@types/node'
       - babel-plugin-macros
@@ -97935,11 +98183,11 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  ts-jest@29.1.1(@babel/core@7.29.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.6.3):
+  ts-jest@29.1.1(@babel/core@7.29.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.29.0))(jest@29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3)))(typescript@5.6.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
-      jest: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest: 29.7.0(@types/node@20.11.30)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.11.30)(typescript@5.6.3))
       jest-util: 29.7.0
       json5: 2.2.3
       lodash.memoize: 4.1.2
@@ -98140,12 +98388,12 @@ snapshots:
       esbuild: 0.27.2
       jest-util: 30.2.0
 
-  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3):
+  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3)))(typescript@5.9.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.8
-      jest: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest: 29.7.0(@types/node@18.19.130)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@18.19.130)(typescript@5.9.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
@@ -98180,32 +98428,12 @@ snapshots:
       babel-jest: 30.2.0(@babel/core@7.29.0)
       jest-util: 30.2.0
 
-  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3):
+  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3)))(typescript@5.9.3):
     dependencies:
       bs-logger: 0.2.6
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.8
-      jest: 29.7.0(@types/node@20.19.27)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
-      json5: 2.2.3
-      lodash.memoize: 4.1.2
-      make-error: 1.3.6
-      semver: 7.7.3
-      type-fest: 4.41.0
-      typescript: 5.9.3
-      yargs-parser: 21.1.1
-    optionalDependencies:
-      '@babel/core': 7.29.0
-      '@jest/transform': 30.2.0
-      '@jest/types': 30.2.0
-      babel-jest: 30.2.0(@babel/core@7.29.0)
-      jest-util: 30.2.0
-
-  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3)))(typescript@5.9.3):
-    dependencies:
-      bs-logger: 0.2.6
-      fast-json-stable-stringify: 2.1.0
-      handlebars: 4.7.8
-      jest: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      jest: 29.7.0(@types/node@22.19.7)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@22.19.7)(typescript@5.9.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
@@ -98226,6 +98454,26 @@ snapshots:
       fast-json-stable-stringify: 2.1.0
       handlebars: 4.7.8
       jest: 29.7.0(@types/node@25.0.10)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.0.10)(typescript@5.9.3))
+      json5: 2.2.3
+      lodash.memoize: 4.1.2
+      make-error: 1.3.6
+      semver: 7.7.3
+      type-fest: 4.41.0
+      typescript: 5.9.3
+      yargs-parser: 21.1.1
+    optionalDependencies:
+      '@babel/core': 7.29.0
+      '@jest/transform': 30.2.0
+      '@jest/types': 30.2.0
+      babel-jest: 30.2.0(@babel/core@7.29.0)
+      jest-util: 30.2.0
+
+  ts-jest@29.4.6(@babel/core@7.29.0)(@jest/transform@30.2.0)(@jest/types@30.2.0)(babel-jest@30.2.0(@babel/core@7.29.0))(jest-util@30.2.0)(jest@29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3)))(typescript@5.9.3):
+    dependencies:
+      bs-logger: 0.2.6
+      fast-json-stable-stringify: 2.1.0
+      handlebars: 4.7.8
+      jest: 29.7.0(@types/node@25.1.0)(babel-plugin-macros@3.1.0)(ts-node@10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@25.1.0)(typescript@5.9.3))
       json5: 2.2.3
       lodash.memoize: 4.1.2
       make-error: 1.3.6
@@ -99960,10 +100208,10 @@ snapshots:
       - supports-color
       - terser
 
-  vite-plugin-babel@1.3.2(@babel/core@7.28.5)(vite@5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1)):
+  vite-plugin-babel@1.3.2(@babel/core@7.28.5)(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)):
     dependencies:
       '@babel/core': 7.28.5
-      vite: 5.4.21(@types/node@20.19.27)(lightningcss@1.30.2)(terser@5.44.1)
+      vite: 7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2)
 
   vite-plugin-electron-renderer@0.14.6: {}
 
@@ -100667,7 +100915,7 @@ snapshots:
       - tsx
       - yaml
 
-  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
+  vitest@4.0.16(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.16
       '@vitest/mocker': 4.0.16(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -100693,7 +100941,7 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@types/node': 20.19.27
       happy-dom: 20.0.11
-      jsdom: 26.1.0
+      jsdom: 27.4.0(canvas@2.11.2)
     transitivePeerDependencies:
       - jiti
       - less
@@ -100710,7 +100958,7 @@ snapshots:
   vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@20.19.27)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.18(msw@2.12.4(@types/node@20.19.27)(typescript@5.9.3))(vite@7.2.6(@types/node@20.19.27)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18
@@ -100750,7 +100998,7 @@ snapshots:
   vitest@4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.7)(happy-dom@20.0.11)(jiti@2.6.1)(jsdom@27.4.0)(lightningcss@1.30.2)(msw@2.12.4(@types/node@22.19.7)(typescript@5.9.3))(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(msw@2.12.4(@types/node@22.19.7)(typescript@5.9.3))(vite@7.2.6(@types/node@25.0.10)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
+      '@vitest/mocker': 4.0.18(msw@2.12.4(@types/node@22.19.7)(typescript@5.9.3))(vite@7.2.6(@types/node@22.19.7)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18
