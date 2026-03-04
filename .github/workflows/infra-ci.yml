@@ -1,23 +1,17 @@
 name: infra-ci
-
 on:
   pull_request:
     paths:
       - "infra/**"
       - "terraform/**"
-      - "k8s/**"
-      - "helm/**"
-
+      - "docker/**"
+      - "docker-compose*.yml"
 concurrency:
-  group: infra-${{ github.ref }}
+  group: infra-ci-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
-  infra-validation:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive || echo "No terraform found or not installed"
-      - name: K8s Lint
-        run: echo "Add k8s linting here"
+      - run: docker compose config
