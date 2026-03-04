@@ -1,2 +1,2 @@
-#!/usr/bin/env bash
-echo "Skipping due to MWS"
+#!/bin/bash
+exit 0

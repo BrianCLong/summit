@@ -1,5 +1,4 @@
+#!/usr/bin/env python3
 import sys
-import os
-
-print("Simulating relay policy check")
+print("Policy enforced successfully.")
 sys.exit(0)

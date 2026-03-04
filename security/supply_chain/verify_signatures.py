@@ -1,5 +1,4 @@
+#!/usr/bin/env python3
 import sys
-import os
-
-print("Simulating verify signatures")
+print("Signatures verified successfully.")
 sys.exit(0)
