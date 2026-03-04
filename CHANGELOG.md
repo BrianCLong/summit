@@ -83,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Bug fixes)
 
 ### Security
-- (Security-related changes)
+- **Defense in Depth**: Hardened administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control directly within the routers.
 
 ---
 
