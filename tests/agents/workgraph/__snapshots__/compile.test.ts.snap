@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkGraph Compiler should deterministically compile a spec into a WorkGraph 1`] = `
+{
+  "specHash": "5490b6d8c9affd24e9ae5ffb6c1c28f8c29d228bff274edc0a1d262c694e60f5",
+  "tickets": [
+    {
+      "deps": [],
+      "description": "Initialize the project structure and base files.",
+      "evidence": [
+        "EVID:setup:001",
+      ],
+      "id": "TICKET-001",
+      "owners": [
+        "package.json",
+        "tsconfig.json",
+      ],
+      "title": "Setup Project",
+    },
+    {
+      "deps": [
+        "TICKET-001",
+      ],
+      "description": "Define the database schema for todos.",
+      "evidence": [
+        "EVID:db:001",
+      ],
+      "id": "TICKET-002",
+      "owners": [
+        "src/db/schema.ts",
+      ],
+      "title": "Create Database Schema",
+    },
+    {
+      "deps": [
+        "TICKET-002",
+      ],
+      "description": "Create CRUD endpoints for todos.",
+      "evidence": [
+        "EVID:api:001",
+      ],
+      "id": "TICKET-003",
+      "owners": [
+        "src/api/todos.ts",
+      ],
+      "title": "Implement API Endpoints",
+    },
+    {
+      "deps": [
+        "TICKET-003",
+      ],
+      "description": "Build the React components for the todo list.",
+      "evidence": [
+        "EVID:ui:001",
+      ],
+      "id": "TICKET-004",
+      "owners": [
+        "src/components/TodoList.tsx",
+        "src/components/TodoItem.tsx",
+      ],
+      "title": "Create Frontend Components",
+    },
+  ],
+}
+`;
