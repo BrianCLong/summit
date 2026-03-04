@@ -139,7 +139,7 @@ export class EvidenceProvenanceService {
       // Create provenance chain entry
       await this.createProvenanceEntry(artifactId, sha256Hash, artifact.runId);
 
-      span?.addSpanAttributes({
+      span?.setAttributes({
         'evidence.artifact_id': artifactId,
         'evidence.run_id': artifact.runId,
         'evidence.type': artifact.artifactType,
@@ -285,7 +285,7 @@ export class EvidenceProvenanceService {
         },
       };
 
-      span?.addSpanAttributes({
+      span?.setAttributes({
         'evidence.verification.valid': result.valid,
         'evidence.verification.integrity': result.integrity,
         'evidence.verification.provenance': result.provenance,

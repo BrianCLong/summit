@@ -40,7 +40,7 @@ jobs:
               --owner=0 --group=0 --numeric-owner \
               -C "$PACK_DIR" \
               -cf "$PACK_TAR" \
-              ./opa-bin ./data ./README.md ./signing
+              ./opa ./data ./README.md ./signing
 
       - name: Compute sha256
         id: digest

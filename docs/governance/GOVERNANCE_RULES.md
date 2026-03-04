@@ -11,7 +11,7 @@ This document defines the rules for code changes, releases, and approvals within
 
 We adhere to [Semantic Versioning 2.0.0](https://semver.org/).
 
-| Type | Description | Trigger                               | Version Bump         | Approval Required     |
+| Type      | Description                        | Trigger                               | Version Bump         | Approval Required     |
 | :-------- | :--------------------------------- | :------------------------------------ | :------------------- | :-------------------- |
 | **Patch** | Bug fixes, backward-compatible.    | PR merged to `main`                   | `x.y.Z` -> `x.y.Z+1` | Peer Review (1)       |
 | **Minor** | New features, backward-compatible. | PR merged to `main` (feature flagged) | `x.Y.z` -> `x.Y+1.0` | Maintainer Review (1) |
@@ -49,9 +49,3 @@ The following actions will cause CI failure:
 ## 5. Reporting
 
 - **Weekly GA Ops Snapshot:** A required weekly report capturing the state of governance drift, evidence freshness, and operational health. This snapshot serves as the primary artifact for executive review.
-
-## Release Types
-
-| Type | Description | Trigger | Version Bump | Approval Required |
-| :--- | :--- | :--- | :--- | :--- |
-| Patch | Bug fixes | PR merged | z+1 | Peer |

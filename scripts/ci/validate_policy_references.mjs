@@ -170,7 +170,7 @@ function loadWorkflows(workflowsDir) {
     try {
       const parsed = yaml.load(readFileSync(join(resolved, file), 'utf8'));
       workflows.set(file, extractCheckNames(parsed, file));
-    } catch {}
+    } catch {} // eslint-disable-line no-empty
   }
   return workflows;
 }

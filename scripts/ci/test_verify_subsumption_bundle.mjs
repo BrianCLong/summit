@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-
+/* eslint-disable no-console */
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import process from "node:process";

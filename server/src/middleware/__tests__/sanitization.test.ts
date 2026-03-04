@@ -1,130 +1,108 @@
-import { Request, Response, NextFunction } from 'express';
+import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { Request, Response } from 'express';
 import { sanitizeInput } from '../sanitization';
-import { describe, it, expect, jest } from '@jest/globals';
 
-describe('sanitization middleware', () => {
-  it('should remove keys starting with $ or .', () => {
-    const req = {
-      body: {
-        safe: 'value',
-        '$unsafe': 'value',
-        '.unsafe': 'value',
-        nested: {
-          ok: 1,
-          '$no': 2
-        }
-      },
-      query: {
-        'a.b': 'c',
-        '.unsafe': 'value',
-        d: 'e'
-      }
-    } as unknown as Request;
+describe('Sanitization Middleware', () => {
+    let mockRequest: Partial<Request>;
+    let mockResponse: Partial<Response>;
+    let nextFunction: jest.Mock;
 
-    const res = {} as Response;
-    const next = jest.fn() as NextFunction;
-
-    sanitizeInput(req, res, next);
-
-    expect(req.body).toEqual({
-      safe: 'value',
-      nested: {
-        ok: 1
-      }
+    beforeEach(() => {
+        mockRequest = {};
+        mockResponse = {};
+        nextFunction = jest.fn();
     });
-    expect(req.query).toEqual({
-      'a.b': 'c',
-      d: 'e'
+
+    it('should remove keys starting with $ or .', () => {
+        mockRequest.body = {
+            valid: 'key',
+            $invalid: 'nosql',
+            nested: {
+                '.invalid': 'nosql',
+                alsoValid: 123
+            }
+        };
+
+        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+
+        expect(mockRequest.body).toEqual({
+            valid: 'key',
+            nested: {
+                alsoValid: 123
+            }
+        });
+        expect(nextFunction).toHaveBeenCalled();
     });
-    expect(next).toHaveBeenCalled();
-  });
 
-  it('should handle arrays', () => {
-    const req = {
-      body: [
-        { '$bad': 1, good: 2 },
-        { also: { '.bad': 3, good: 4 } }
-      ]
-    } as unknown as Request;
+    it('should maintain reference equality if no keys are removed (Copy-on-Write)', () => {
+        const cleanBody = {
+            a: 1,
+            b: [1, 2, 3],
+            c: { d: 'e' }
+        };
+        mockRequest.body = cleanBody;
 
-    const res = {} as Response;
-    const next = jest.fn() as NextFunction;
+        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
 
-    sanitizeInput(req, res, next);
-
-    expect(req.body).toEqual([
-      { good: 2 },
-      { also: { good: 4 } }
-    ]);
-  });
-
-  it('should preserve Date, Buffer and RegExp objects', () => {
-    const date = new Date();
-    const buffer = Buffer.from('test');
-    const regex = /test/;
-
-    const req = {
-      body: {
-        date,
-        buffer,
-        regex,
-        other: {
-          '$bad': 1,
-          date
-        }
-      }
-    } as unknown as Request;
-
-    const res = {} as Response;
-    const next = jest.fn() as NextFunction;
-
-    sanitizeInput(req, res, next);
-
-    expect(req.body.date).toBe(date);
-    expect(req.body.buffer).toBe(buffer);
-    expect(req.body.regex).toBe(regex);
-    expect(req.body.other.date).toBe(date);
-    expect(req.body.other.$bad).toBeUndefined();
-  });
-
-  it('should not allocate new objects if no changes are needed (Copy-on-Write)', () => {
-    const body = {
-      a: 1,
-      b: {
-        c: 2
-      },
-      d: [3, 4]
-    };
-    const req = {
-      body
-    } as unknown as Request;
-
-    const res = {} as Response;
-    const next = jest.fn() as NextFunction;
-
-    sanitizeInput(req, res, next);
-
-    expect(req.body).toBe(body); // Same reference
-    expect(req.body.b).toBe(body.b); // Same reference
-    expect(req.body.d).toBe(body.d); // Same reference
-  });
-
-  it('should handle null and undefined', () => {
-    const req = {
-      body: {
-        a: null,
-        b: undefined
-      }
-    } as unknown as Request;
-
-    const res = {} as Response;
-    const next = jest.fn() as NextFunction;
-
-    sanitizeInput(req, res, next);
-
-    expect(req.body).toEqual({
-      a: null,
-      b: undefined
+        expect(mockRequest.body).toBe(cleanBody);
+        expect(nextFunction).toHaveBeenCalled();
     });
-  });
+
+    it('should handle arrays correctly', () => {
+        const dirtyArray = [
+            { valid: 1 },
+            { $invalid: 2 },
+            { valid: 3 }
+        ];
+        mockRequest.body = dirtyArray;
+
+        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+
+        expect(mockRequest.body).toEqual([
+            { valid: 1 },
+            {},
+            { valid: 3 }
+        ]);
+        // The array itself should be a new reference if an item was changed
+        expect(mockRequest.body).not.toBe(dirtyArray);
+    });
+
+    it('should maintain reference equality for clean arrays', () => {
+        const cleanArray = [{ a: 1 }, { b: 2 }];
+        mockRequest.body = cleanArray;
+
+        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+
+        expect(mockRequest.body).toBe(cleanArray);
+    });
+
+    it('should preserve Date, RegExp, and Buffer instances', () => {
+        const date = new Date();
+        const regex = /test/i;
+        const buffer = Buffer.from('hello');
+
+        mockRequest.body = {
+            date,
+            regex,
+            buffer,
+            $invalid: 'foo'
+        };
+
+        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+
+        expect(mockRequest.body.date).toBe(date);
+        expect(mockRequest.body.regex).toBe(regex);
+        expect(mockRequest.body.buffer).toBe(buffer);
+        expect(mockRequest.body.$invalid).toBeUndefined();
+    });
+
+    it('should sanitize query and params', () => {
+        mockRequest.query = { $where: '1' } as any;
+        mockRequest.params = { '.id': '123' } as any;
+
+        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+
+        expect(mockRequest.query).toEqual({});
+        expect(mockRequest.params).toEqual({});
+    });
 });

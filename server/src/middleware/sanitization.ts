@@ -7,7 +7,7 @@ import { Request, Response, NextFunction } from 'express';
  * BOLT OPTIMIZATION:
  * - Implements copy-on-write pattern to avoid unnecessary allocations.
  * - Uses O(1) character checks (key[0]) instead of startsWith.
- * - Preserves Date, RegExp and Buffer instances.
+ * - Preserves Date, RegExp and Buffer instances to skip unnecessary deep cloning.
  * - Uses Object.prototype.hasOwnProperty.call() for safe iteration.
  */
 function sanitize(obj: any): any {

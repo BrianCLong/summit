@@ -14,7 +14,7 @@ type AgentMetadata = {
 };
 
 function usage(): never {
-
+  // eslint-disable-next-line no-console
   console.error('Usage: ts-node scripts/ci/validate-pr-metadata.ts --body <path> [--registry <path>] [--output <artifact>]');
   process.exit(1);
 }
@@ -107,7 +107,7 @@ function writeExecutionRecord(metadata: AgentMetadata, promptId: string, outputP
     recorded_at: new Date().toISOString(),
   };
   fs.writeFileSync(absolute, `${JSON.stringify(record, null, 2)}\n`, 'utf8');
-
+  // eslint-disable-next-line no-console
   console.log(`Execution record written to ${absolute}`);
 }
 
@@ -141,7 +141,7 @@ function main(): void {
   }
 
   writeExecutionRecord(metadata, prompt.id, outputPath);
-
+  // eslint-disable-next-line no-console
   console.log(`PR metadata validated for task ${metadata.task_id}.`);
 }
 
