@@ -97,13 +97,13 @@ while IFS= read -r pr_json; do
   log "  Enqueueing PR #$PR_NUM [$PR_BRANCH]: $PR_TITLE"
 
   if [[ "$DRY_RUN" == "true" ]]; then
-    log "  [DRY RUN] Would run: gh pr merge $PR_NUM --auto --squash"
+    log "  [DRY RUN] Would run: gh pr merge $PR_NUM --auto --merge"
     (( ENQUEUED++ )) || true
     continue
   fi
 
   # Drop 2>&1: keep gh's stderr on stderr so errors are distinguishable
-  if gh pr merge "$PR_NUM" --auto --squash; then
+  if gh pr merge "$PR_NUM" --auto --merge; then
     log "  Queued #$PR_NUM successfully."
     (( ENQUEUED++ )) || true
   else
