@@ -1,16 +1,22 @@
-# Repo Assumptions & Verification
+# Repo Assumptions
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified Paths
+- `summit/`: Python summit namespace code.
+- `src/summit/`: Alternate python path.
+- `docs/`: Exists
+- `tests/`: Exists
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Assumed Paths
+- `cmd/summit/`: Created, previously assumed.
+- `internal/`: Created, previously assumed.
+- `pkg/`: Created, previously assumed.
+- `scripts/`: Exists.
+- `.github/workflows/`: Exists.
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Must-not-touch list
+- `cmd/summit/main.*` (N/A yet)
+- `internal/core/**` (N/A yet)
+- existing evidence schemas (e.g., `summit/evidence/schemas/`)
+
+## CI Gates & Required Checks
+Assumed: Go or Python testing framework exists. Given instructions used `pkg/` and `internal/`, we will write the core Supermux logic in Go, matching the instructions provided.
