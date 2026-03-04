@@ -1,4 +1,3 @@
-import re
 #!/usr/bin/env python3
 """
 Summit Evidence Verifier (CI gate)
@@ -136,7 +135,7 @@ def main() -> int:
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
             ISO_RE = re.compile(r"202\d-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
-        if ISO_RE.search(txt):
+            if ISO_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
