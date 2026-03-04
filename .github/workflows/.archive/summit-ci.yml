@@ -2,113 +2,84 @@ name: Summit CI
 
 on:
   push:
-    paths:
-      - 'summit/**'
-      - 'client/**'
-      - '.github/workflows/summit-ci.yml'
+    branches: [ main ]
   pull_request:
-    paths:
-      - 'summit/**'
-      - 'client/**'
-      - '.github/workflows/summit-ci.yml'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [ main ]
 
 jobs:
-  test-python:
+  test-server:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.12'
+          cache: 'pnpm'
+          node-version: '20'
 
-<<<<<<< HEAD
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: 10.0.0
 
       - name: Install dependencies (Global)
-=======
-      - name: Install dependencies
->>>>>>> origin/main
         run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.in ]; then
-            pip install -r requirements.in
-          else
-            pip install pytest pytest-cov fastapi httpx opentelemetry-api opentelemetry-sdk opentelemetry-exporter-otlp
-          fi
+          npm install -g typescript ts-node
 
-      - name: Run Tests with Coverage
+      - name: Install Server Dependencies (Manual Workaround)
+        working-directory: ./server
+        run: |
+          npm install --legacy-peer-deps --ignore-scripts --no-optional
+          npm install --save-dev ts-jest --legacy-peer-deps --ignore-scripts --no-optional
+
+      - name: Run Server Tests
+        working-directory: ./server
+        run: npm run test
         env:
-          PYTHONPATH: .
-        run: |
-          # Targeting 80% coverage is the goal, but starting with current baseline to prevent regression
-          pytest --cov=summit --cov-report=xml --cov-fail-under=9 summit/tests/
+          CI: true
 
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage.xml
-
-  test-e2e:
-    needs: test-python
+  test-client:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: intelgraph_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7
-        ports:
-          - 6379:6379
-      neo4j:
-        image: neo4j:5.15.0
-        env:
-          NEO4J_AUTH: neo4j/password
-        ports:
-          - 7687:7687
-    env:
-      PLAYWRIGHT_USE_WEBSERVER: 'true'
-      DATABASE_URL: postgresql://postgres:password@localhost:5432/intelgraph_test?sslmode=disable
-      NEO4J_URI: bolt://localhost:7687
-      NEO4J_USER: neo4j
-      NEO4J_PASSWORD: password
-      REDIS_URL: redis://localhost:6379
-      NODE_ENV: test
-      CI: true
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version: '20'
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install Client Dependencies (Manual Workaround)
+        working-directory: ./apps/web
+        run: |
+          npm install --legacy-peer-deps --ignore-scripts --no-optional
+          npm install --save-dev @rollup/rollup-linux-x64-gnu --legacy-peer-deps
+          npm install --save-dev jest-axe @radix-ui/react-popover --legacy-peer-deps
+          npm install --save @mui/material @mui/icons-material @emotion/react @emotion/styled yjs mermaid y-websocket --legacy-peer-deps
 
+      - name: Run Client Tests
+        working-directory: ./apps/web
+        run: npm run test -- run
+        env:
+          CI: true
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    needs: [test-server, test-client]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: '20'
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: Install Deps
+        run: npm install --legacy-peer-deps --ignore-scripts --no-optional
+
       - name: Run Playwright tests
-        run: npx playwright test e2e/summit-smoke.spec.ts
+        run: npx playwright test
+        env:
+          CI: true
