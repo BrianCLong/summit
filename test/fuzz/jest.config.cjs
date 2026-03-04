@@ -9,6 +9,7 @@ module.exports = {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
+        useESM: true,
         tsconfig: path.join(__dirname, '../../tsconfig.test.json'),
       },
     ],
@@ -16,5 +17,6 @@ module.exports = {
   moduleNameMapper: {
     '^(.*)\\.js$': '$1',
   },
+  extensionsToTreatAsEsm: ['.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };
