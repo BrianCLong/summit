@@ -1,0 +1,9 @@
+# Evidence Map for Summit GA
+version: 1.0
+
+evidence:
+  lsn_window_validator:
+    description: "LSN window validator execution output."
+    artifact: "metrics.json"
+    type: "metrics"
+    required: true
