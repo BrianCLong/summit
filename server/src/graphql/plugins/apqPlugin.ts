@@ -71,7 +71,7 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
 
   const cache = createCacheClient({
     redis,
-    redisUrls: process.env.REDIS_URLS ? process.env.REDIS_URLS.split(',') : (process.env.REDIS_URL ? [process.env.REDIS_URL] : undefined),
+    redisUrl: process.env.REDIS_URL,
     namespace: 'graphql-apq',
     cacheClass: 'critical_path',
     defaultTTLSeconds: ttl,

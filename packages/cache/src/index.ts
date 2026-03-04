@@ -22,9 +22,7 @@ export interface CacheSetOptions extends CacheGetOptions {
 
 export interface CacheClientConfig {
   redisUrl?: string;
-  redisUrls?: string[];
   redis?: Redis;
-  redisClients?: Redis[];
   namespace?: string;
   cacheClass?: CacheClass;
   defaultTTLSeconds?: number;
@@ -97,21 +95,10 @@ class MemoryCacheBackend implements CacheBackend {
 }
 
 class RedisCacheBackend implements CacheBackend {
-  constructor(private readonly redisClients: Redis[]) {}
-
-  private getClient(key: string): Redis {
-    if (this.redisClients.length === 1) return this.redisClients[0];
-    let hash = 0;
-    for (let i = 0; i < key.length; i++) {
-      hash = (hash << 5) - hash + key.charCodeAt(i);
-      hash |= 0;
-    }
-    return this.redisClients[Math.abs(hash) % this.redisClients.length];
-  }
+  constructor(private readonly redis: Redis) {}
 
   async get<T>(key: string): Promise<T | null> {
-    const client = this.getClient(key);
-    const value = await client.get(key);
+    const value = await this.redis.get(key);
     if (value === null) return null;
 
     try {
@@ -127,30 +114,28 @@ class RedisCacheBackend implements CacheBackend {
     ttlSeconds?: number,
     _metadata?: { namespace: string; cacheClass: CacheClass },
   ): Promise<void> {
-    const client = this.getClient(key);
     const payload = typeof value === 'string' ? value : JSON.stringify(value);
     if (ttlSeconds) {
-      await client.setex(key, ttlSeconds, payload);
+      await this.redis.setex(key, ttlSeconds, payload);
     } else {
-      await client.set(key, payload);
+      await this.redis.set(key, payload);
     }
   }
 
   async delete(key: string): Promise<void> {
-    const client = this.getClient(key);
-    await client.del(key);
+    await this.redis.del(key);
   }
 
   async close(): Promise<void> {
-    await Promise.all(this.redisClients.map(c => c.quit()));
+    await this.redis.quit();
   }
 
   async ping(): Promise<void> {
-    await Promise.all(this.redisClients.map(c => c.ping()));
+    await this.redis.ping();
   }
 
   isConnected(): boolean {
-    return this.redisClients.some(c => c.status === 'ready');
+    return this.redis.status === 'ready';
   }
 }
 
@@ -230,16 +215,15 @@ export class CacheClient {
       this.evictionsCounter.inc({ namespace: metadata.namespace, class: metadata.cacheClass });
     });
 
-    const urls = config.redisUrls || (config.redisUrl ? [config.redisUrl] : []);
-    const clients = config.redisClients || (config.redis ? [config.redis] : []);
-
-    if (clients.length > 0 || urls.length > 0) {
-      const redisClients = clients.length > 0 ? clients : urls.map(url => new Redis(url, {
-        lazyConnect: true,
-        maxRetriesPerRequest: 2,
-        enableOfflineQueue: false,
-      }));
-      this.redisBackend = new RedisCacheBackend(redisClients);
+    if (config.redis || config.redisUrl) {
+      const redis =
+        config.redis ??
+        new Redis(config.redisUrl as string, {
+          lazyConnect: true,
+          maxRetriesPerRequest: 2,
+          enableOfflineQueue: false,
+        });
+      this.redisBackend = new RedisCacheBackend(redis);
     }
   }
 

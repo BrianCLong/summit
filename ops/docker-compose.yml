@@ -87,35 +87,6 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
 
-
-  redis-shard-1:
-    image: redis:7.2-alpine
-    container_name: redis-shard-1
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "allkeys-lru"]
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data-1:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis-shard-2:
-    image: redis:7.2-alpine
-    container_name: redis-shard-2
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "allkeys-lru"]
-    ports:
-      - "6380:6379"
-    volumes:
-      - redis-data-2:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   prov-ledger:
     build: { context: ../services/prov-ledger, dockerfile: Dockerfile }
     environment:
@@ -126,11 +97,7 @@ services:
       OPA_URL: http://opa:8181/v1/data/intelgraph/exports
       PORT: 4001
       OTEL_SERVICE_NAME: prov-ledger
-      REDIS_URLS: "redis://redis-shard-1:6379,redis://redis-shard-2:6379"
-    depends_on:
-      neo4j: { condition: service_healthy }
-      redis-shard-1: { condition: service_healthy }
-      redis-shard-2: { condition: service_healthy }
+    depends_on: { neo4j: { condition: service_healthy } }
     ports: ['4001:4001']
 
   copilot:
@@ -139,10 +106,6 @@ services:
       <<: *common-env
       PORT: 4002
       OTEL_SERVICE_NAME: copilot
-      REDIS_URLS: "redis://redis-shard-1:6379,redis://redis-shard-2:6379"
-    depends_on:
-      redis-shard-1: { condition: service_healthy }
-      redis-shard-2: { condition: service_healthy }
     ports: ['4002:4002']
 
   sandbox:
@@ -154,15 +117,9 @@ services:
       NEO4J_PASS: ${NEO4J_PASS:-pass}
       PORT: 4003
       OTEL_SERVICE_NAME: sandbox
-      REDIS_URLS: "redis://redis-shard-1:6379,redis://redis-shard-2:6379"
-    depends_on:
-      neo4j: { condition: service_healthy }
-      redis-shard-1: { condition: service_healthy }
-      redis-shard-2: { condition: service_healthy }
+    depends_on: { neo4j: { condition: service_healthy } }
     ports: ['4003:4003']
 
 volumes:
   neo4j-data: {}
   neo4j-logs: {}
-  redis-data-1: {}
-  redis-data-2: {}

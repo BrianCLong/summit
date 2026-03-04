@@ -4,7 +4,7 @@ import { createCacheClient } from '@packages/cache';
 const answersCache = createCacheClient({
   namespace: 'answers',
   cacheClass: 'critical_path',
-  redisUrls: process.env.REDIS_URLS ? process.env.REDIS_URLS.split(',') : (process.env.REDIS_URL ? [process.env.REDIS_URL] : undefined),
+  redisUrl: process.env.REDIS_URL,
   defaultTTLSeconds: 60,
 });
 
