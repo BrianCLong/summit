@@ -27,7 +27,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4
-      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -61,7 +60,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4
-      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -93,7 +91,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
@@ -138,7 +135,6 @@ jobs:
           fetch-depth: 0
 
       - uses: pnpm/action-setup@v4 # v4
-      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -175,7 +171,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4
-      - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
@@ -208,7 +203,6 @@ jobs:
     continue-on-error: true  # NON-BLOCKING
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4 # v4
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:

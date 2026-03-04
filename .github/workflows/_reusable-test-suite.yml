@@ -7,10 +7,12 @@ on:
         description: "Type of tests to run (unit, integration, e2e, perf, lint)"
         required: true
         type: string
+      node-version:
         description: "Node.js version to use"
         required: false
         type: string
         default: "20"
+      pnpm-version:
         description: "pnpm version to use"
         required: false
         type: string

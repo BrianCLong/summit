@@ -5,6 +5,7 @@ on:
     tags: ['v*'] # Deploy on version tag
   workflow_dispatch:
     inputs:
+      version:
         description: 'Version to deploy'
         required: true
 

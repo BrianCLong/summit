@@ -3,6 +3,7 @@ name: Deploy to Production
 on:
   workflow_dispatch:
     inputs:
+      version:
         description: 'Version to deploy (required)'
         required: true
         type: string

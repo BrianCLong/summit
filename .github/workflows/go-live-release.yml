@@ -6,6 +6,7 @@ name: Go-Live Release
 on:
   workflow_dispatch:
     inputs:
+      version:
         description: "Release version (leave empty for auto from package.json)"
         required: false
         type: string
@@ -45,7 +46,6 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js

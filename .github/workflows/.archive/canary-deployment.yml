@@ -8,6 +8,7 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
+      version:
         description: 'Version to deploy as canary'
         required: true
         type: string

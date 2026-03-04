@@ -18,6 +18,7 @@ on:
 
   workflow_dispatch:
     inputs:
+      version:
         description: "Base version to compare against"
         required: false
         default: "v1"

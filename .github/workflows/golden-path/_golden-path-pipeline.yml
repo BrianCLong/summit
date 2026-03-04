@@ -30,6 +30,7 @@ on:
         required: false
         type: string
         default: "staging"
+      node-version:
         description: "Node.js version"
         required: false
         type: string
@@ -123,8 +124,10 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
+        with:
+          version: 9.12.0
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -197,8 +200,10 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
+        with:
+          version: 9.12.0
+
       - name: Get pnpm store directory
         id: pnpm-cache
         shell: bash
@@ -269,8 +274,10 @@ jobs:
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
+        with:
+          version: 9.12.0
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

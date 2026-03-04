@@ -3,6 +3,7 @@ name: Release
 on:
   workflow_call:
     inputs:
+      version:
         description: Version string (without leading v)
         required: true
         type: string

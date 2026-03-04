@@ -3,6 +3,7 @@ name: Release Hotfix
 on:
   workflow_dispatch:
     inputs:
+      base_version:
         description: 'Production version to hotfix (e.g., 1.2.3)'
         required: true
         type: string

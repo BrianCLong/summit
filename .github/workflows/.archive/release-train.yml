@@ -11,6 +11,7 @@ on:
         required: false
         default: 'false'
         type: boolean
+      force_version:
         description: 'Force specific version (e.g., 1.2.3)'
         required: false
         type: string
@@ -134,6 +135,7 @@ jobs:
   # ==========================================================================
   # Job 2: Calculate semantic version from conventional commits
   # ==========================================================================
+  version:
     name: Calculate Version
     needs: preflight
     if: ((((((((((needs.preflight.outputs.eligible == 'true') && (needs.preflight.outputs.eligible == 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')) && (inputs.dry_run != 'true')

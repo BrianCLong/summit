@@ -3,6 +3,7 @@ name: Hardened Release
 on:
   workflow_dispatch:
     inputs:
+      version:
         description: Version to release (without leading v)
         required: true
 
