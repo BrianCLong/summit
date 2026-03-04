@@ -32,10 +32,9 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
 resolveTargetRegionMock.mockReturnValue('us-east-1');
 
 const { GlobalTrafficSteering } = await import('../GlobalTrafficSteering.js');
-import type { GlobalTrafficSteering as GlobalTrafficSteeringType } from '../GlobalTrafficSteering.js';
 
 describe('GlobalTrafficSteering', () => {
-    let steering: GlobalTrafficSteeringType;
+    let steering: GlobalTrafficSteering;
 
     beforeEach(() => {
         jest.clearAllMocks();

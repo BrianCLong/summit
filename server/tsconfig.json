@@ -156,8 +156,6 @@
     "src/middleware/feature-flag-context.ts",
     "src/workers/cacheWarmupWorker.ts",
     "src/dr/**",
-    "src/bootstrap/**",
-    "src/routes/osint.ts",
-    "src/maestro/tools/context-shell.ts"
+    "src/bootstrap/**"
   ]
 }
