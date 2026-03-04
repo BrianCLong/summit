@@ -1,4 +1,5 @@
 import sys
-if __name__ == "__main__":
-    print("MOCK: Signatures verified.")
-    sys.exit(0)
+import os
+
+print("Simulating verify signatures")
+sys.exit(0)

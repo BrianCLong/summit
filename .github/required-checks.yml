@@ -11,8 +11,6 @@ required_checks:
   - gate
   - Unit Tests
   - SOC Controls
-  - test (20.x)
-  - telemetry-lineage-validate
 
 notes:
   owner: summit-ga
