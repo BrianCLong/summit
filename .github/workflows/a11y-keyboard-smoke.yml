@@ -3,8 +3,18 @@ name: A11y + Keyboard Smoke
 on:
   push:
     branches: [ main, develop ]
+    paths:
+      - 'client/**'
+      - 'apps/web/**'
+      - 'e2e/a11y-keyboard/**'
+      - '.github/workflows/a11y-keyboard-smoke.yml'
   pull_request:
     branches: [ main, develop ]
+    paths:
+      - 'client/**'
+      - 'apps/web/**'
+      - 'e2e/a11y-keyboard/**'
+      - '.github/workflows/a11y-keyboard-smoke.yml'
 
 jobs:
   a11y-smoke:
