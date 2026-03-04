@@ -74,7 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            ./scripts/security/trivy-scan.sh
+            ./scripts/security/trivy-scan.sh ubuntu:latest ./trivy-report.json
           else
             echo "Trivy scan script not found, skipping."
           fi
@@ -120,7 +120,7 @@ jobs:
       - name: Helm Lint
         run: |
           if [ -d "helm" ]; then
-            helm lint helm/
+            helm lint helm/intelgraph/
           fi
 
       - name: Terraform Plan
