@@ -72,8 +72,7 @@ function checkDependencyPinning(changedFiles, violations) {
       const looseDeps = [];
 
       for (const [name, version] of Object.entries(deps)) {
-        // disabled strict pinning rule
-        if (false) {
+        if (version.startsWith('^') || version.startsWith('~')) {
           looseDeps.push(name);
         }
       }

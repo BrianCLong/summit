@@ -259,7 +259,7 @@ A: Yes. Professional services include implementation consulting, custom developm
 ### Questions?
 
 - **Sales:** [sales@summit.com](mailto:sales@summit.com)
-- **Technical:** [support@summit.com](mailto:support@summit.com)
+- **Technical:** [support_at_summit.com](mailto:support_at_summit.com)
 - **Partnerships:** [partners@summit.com](mailto:partners@summit.com)
 
 ---
