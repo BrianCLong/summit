@@ -3,8 +3,26 @@ name: Comprehensive Test Suite
 on:
   push:
     branches: [ main ]
+    paths:
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "packages/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/comprehensive-test-suite.yml"
   pull_request:
     branches: [ main ]
+    paths:
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "packages/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/comprehensive-test-suite.yml"
   workflow_dispatch:
 
 concurrency:

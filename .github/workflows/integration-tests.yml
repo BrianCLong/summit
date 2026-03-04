@@ -3,8 +3,28 @@ name: Integration Tests
 on:
   push:
     branches: [main, develop]
+    paths:
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "packages/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docker-compose*.yml"
+      - ".github/workflows/integration-tests.yml"
   pull_request:
     branches: [main, develop]
+    paths:
+      - "server/**"
+      - "client/**"
+      - "apps/**"
+      - "packages/**"
+      - "tests/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "docker-compose*.yml"
+      - ".github/workflows/integration-tests.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
