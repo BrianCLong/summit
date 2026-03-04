@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   merge_group:
 
+concurrency:
+  group: main-validation-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   integration-tests:
     name: "Tier 2: Integration Tests"
