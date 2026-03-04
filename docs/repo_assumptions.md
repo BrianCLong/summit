@@ -1,16 +1,18 @@
-# Repo Assumptions & Verification
+# Repository Assumptions for Autonomous Agent Runtime
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+This note records validated assumptions for the Summit autonomous engineering agent slice.
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Confirmed structure
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+- `agents/` exists and contains runtime-oriented agent assets.
+- `scripts/` exists for operational automation and monitoring utilities.
+- `tests/` exists and supports adding agent-focused tests.
+- `docs/` exists for standards, security, and runbook documentation.
+- CI workflows are present under `.github/workflows/`.
+
+## Validation tasks completed
+
+1. Confirmed agent runtime location under `agents/`.
+2. Defined deterministic artifact files and schema ownership.
+3. Scoped CI verification to unit tests and deterministic artifact checks.
+4. Added a model registry at `agents/models/registry.yaml`.
