@@ -55,7 +55,6 @@ _Version: 2025-11-27_
 **Scenario:** Investigate a foreign influence operation targeting critical infrastructure.
 
 **Entities:**
-
 - 15 Person entities (actors, targets, intermediaries)
 - 8 Organization entities (threat groups, companies, agencies)
 - 12 Location entities (geographic spread)
@@ -63,13 +62,11 @@ _Version: 2025-11-27_
 - 50+ relationships connecting entities
 
 **Data Sources:**
-
 - OSINT feeds (social media, news, domain registrations)
 - Internal reports (analyst assessments)
 - External intel (STIX/TAXII feed)
 
 **Pre-built Views:**
-
 - Overview graph (all entities)
 - Actor network (threat group + associates)
 - Timeline (6-month activity)
@@ -91,11 +88,11 @@ _Version: 2025-11-27_
 
 > "Let me show you what your analysts see every day—and why they're frustrated."
 
-_Show: Diagram or verbal description of current state (multiple tools, swivel-chair, no audit trail)_
+*Show: Diagram or verbal description of current state (multiple tools, swivel-chair, no audit trail)*
 
 > "Now let me show you what it looks like when you bring that together."
 
-_Show: Summit overview graph—the "wow" moment_
+*Show: Summit overview graph—the "wow" moment*
 
 ---
 
@@ -103,11 +100,11 @@ _Show: Summit overview graph—the "wow" moment_
 
 > "This is an investigation into a foreign influence operation. Your analysts started with a single tip—a suspicious social media account."
 
-_Click on seed entity_
+*Click on seed entity*
 
 > "From that single data point, Summit automatically pulled in related accounts, domains, and historical activity from your OSINT feeds."
 
-_Expand graph to show connected entities_
+*Expand graph to show connected entities*
 
 > "In minutes, not hours, they had a map of the network."
 
@@ -117,7 +114,7 @@ _Expand graph to show connected entities_
 
 > "Here's what makes Summit different. Every single data point—every node, every relationship—has full provenance."
 
-_Click on entity → Show provenance panel_
+*Click on entity → Show provenance panel*
 
 > "You can see exactly where this came from, when it was added, and who's touched it. When oversight asks 'how do you know this?', you have an answer."
 
@@ -127,11 +124,11 @@ _Click on entity → Show provenance panel_
 
 > "Your analysts can ask natural-language questions."
 
-_Type: "Who are the key actors connected to [Entity]?"_
+*Type: "Who are the key actors connected to [Entity]?"*
 
 > "Summit's AI generates the query and returns the answer. But notice—it's running through your policy layer. Classification rules, access controls, redaction—all enforced automatically."
 
-_Show: Policy badge or redacted field_
+*Show: Policy badge or redacted field*
 
 > "This isn't a black box. It's AI your compliance team can trust."
 
@@ -141,7 +138,7 @@ _Show: Policy badge or redacted field_
 
 > "What used to take your team days now takes hours. And when they're done, they have an evidence package that stands up to scrutiny."
 
-_Show: Export menu or evidence package_
+*Show: Export menu or evidence package*
 
 > "That's the difference: faster analysis, full audit trail, AI that plays by the rules."
 
@@ -165,7 +162,7 @@ _Show: Export menu or evidence package_
 
 > "I'm going to walk through an actual investigation workflow—the kind of thing your analysts do every day. Feel free to interrupt with questions."
 
-_Open empty workbench_
+*Open empty workbench*
 
 ---
 
@@ -173,11 +170,11 @@ _Open empty workbench_
 
 > "Let's start with raw data. I've got a STIX bundle from a threat intel feed."
 
-_Demonstrate: Import STIX file or connect to feed_
+*Demonstrate: Import STIX file or connect to feed*
 
 > "Summit normalizes this into our graph model, applies your ontology, and tags provenance automatically."
 
-_Show: Ingested entities with source attribution_
+*Show: Ingested entities with source attribution*
 
 > "Notice every entity has a source tag. We didn't lose anything—we gained structure."
 
@@ -187,19 +184,19 @@ _Show: Ingested entities with source attribution_
 
 > "Now let's explore. I'll start with this actor and see what's connected."
 
-_Expand entity → Show relationships_
+*Expand entity → Show relationships*
 
 > "I can filter by relationship type, time range, or confidence level."
 
-_Apply filter_
+*Apply filter*
 
 > "Let me switch to timeline view to see when these connections formed."
 
-_Switch to timeline_
+*Switch to timeline*
 
 > "And map view to see geographic distribution."
 
-_Switch to map_
+*Switch to map*
 
 > "Same data, three perspectives. Your analysts don't have to context-switch to different tools."
 
@@ -209,11 +206,11 @@ _Switch to map_
 
 > "Let's say I want to find something specific. Instead of writing Cypher, I can just ask."
 
-_Type: "Show me all organizations connected to [Actor] through financial relationships"_
+*Type: "Show me all organizations connected to [Actor] through financial relationships"*
 
 > "Summit translates that to a graph query, runs it, and shows results."
 
-_Show: Results with query translation visible_
+*Show: Results with query translation visible*
 
 > "If I want to see the actual Cypher, I can. But most analysts won't need to."
 
@@ -223,15 +220,15 @@ _Show: Results with query translation visible_
 
 > "Let's look at provenance in detail."
 
-_Click entity → Open provenance panel_
+*Click entity → Open provenance panel*
 
 > "Here's the full chain: original source, transformations, who's viewed it, any modifications."
 
-_Show: Provenance graph or timeline_
+*Show: Provenance graph or timeline*
 
 > "If I export this entity or any conclusion built on it, the provenance comes with it."
 
-_Demonstrate: Export to evidence package_
+*Demonstrate: Export to evidence package*
 
 ---
 
@@ -239,11 +236,11 @@ _Demonstrate: Export to evidence package_
 
 > "Let me show how policies work."
 
-_Navigate to policy or show redacted content_
+*Navigate to policy or show redacted content*
 
 > "This entity has classification labels. If I'm an analyst without the right clearance, I see a redacted version."
 
-_Show: Different user view or policy rule_
+*Show: Different user view or policy rule*
 
 > "Policies are code—OPA/Rego. They're version-controlled, auditable, and dynamic."
 
@@ -267,7 +264,7 @@ _Show: Different user view or policy rule_
 
 > "Let me walk through the architecture. This is how Summit works under the hood."
 
-_Show: Architecture diagram_
+*Show: Architecture diagram*
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -298,7 +295,7 @@ _Show: Architecture diagram_
 
 > "Redis for caching and pub/sub."
 
-_Discuss: Why this split, trade-offs, alternatives considered_
+*Discuss: Why this split, trade-offs, alternatives considered*
 
 ---
 
@@ -306,7 +303,7 @@ _Discuss: Why this split, trade-offs, alternatives considered_
 
 > "Access control is ABAC via Open Policy Agent."
 
-_Show: Sample Rego policy_
+*Show: Sample Rego policy*
 
 ```rego
 package summit.authz
@@ -327,7 +324,7 @@ allow {
 
 > "We're API-first. GraphQL for rich queries, REST for simple integrations."
 
-_Show: API documentation or sample calls_
+*Show: API documentation or sample calls*
 
 > "Data ingestion supports: STIX/TAXII, REST webhooks, file import (CSV, JSON, documents), custom connectors."
 
@@ -350,7 +347,6 @@ _Show: API documentation or sample calls_
 **[18:00-20:00] Security & Compliance**
 
 > "Quick hits on security:"
->
 > - "SBOM generated every release (CycloneDX)"
 > - "SLSA Level 2 attestations; Level 3 in progress"
 > - "Encryption at rest (AES-256), in transit (TLS 1.3, mTLS internal)"
@@ -419,7 +415,6 @@ Hi {{Name}},
 Thanks for taking the time to see Summit today. It was great to learn about {{specific thing they mentioned}}.
 
 As promised, here's:
-
 - {{Link to demo recording if applicable}}
 - {{Relevant collateral based on their interests}}
 - {{Answers to questions raised}}
