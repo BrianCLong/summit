@@ -273,6 +273,19 @@ importers:
         specifier: 3.25.76
         version: 3.25.76
 
+  agents/aia:
+    dependencies:
+      axios:
+        specifier: ^1.6.0
+        version: 1.13.4
+      pino:
+        specifier: ^9.0.0
+        version: 9.9.0
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
   agents/governance:
     devDependencies:
       '@types/node':
@@ -14115,9 +14128,6 @@ importers:
       '@apollo/server':
         specifier: 5.2.0
         version: 5.2.0(graphql@16.12.0)
-      '@as-integrations/express4':
-        specifier: 1.1.2
-        version: 1.1.2(@apollo/server@5.2.0(graphql@16.12.0))(express@5.2.1)
       '@aws-sdk/client-s3':
         specifier: ^3.962.0
         version: 3.980.0

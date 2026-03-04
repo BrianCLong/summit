@@ -2,6 +2,11 @@ name: parity-check
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [opened, synchronize, reopened]
   workflow_dispatch:
   merge_group:

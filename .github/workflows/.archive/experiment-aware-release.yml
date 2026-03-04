@@ -2,6 +2,11 @@ name: Experiment Aware Release
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [opened, synchronize]
 
 concurrency:
