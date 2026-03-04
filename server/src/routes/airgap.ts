@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { AirgapService } from '../services/AirgapService.js';
 import { tenantHeader } from '../middleware/tenantHeader.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { getNeo4jDriver } from '../config/database.js';
 import { writeFile, unlink } from 'fs/promises';
 import { createWriteStream } from 'fs';
@@ -10,6 +11,11 @@ import express from 'express';
 
 export const airgapRouter = Router();
 const service = new AirgapService();
+
+// SEC-2026-002: Enforce strict "deny-by-default" posture for airgap operations.
+// Import/Export of sensitive data must be restricted to administrators.
+airgapRouter.use(ensureAuthenticated);
+airgapRouter.use(ensureRole(['ADMIN', 'admin']));
 
 // Middleware to ensure tenant context
 airgapRouter.use(tenantHeader());
