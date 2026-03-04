@@ -96,27 +96,17 @@ class MemoryCacheBackend implements CacheBackend {
   }
 }
 
-function hashKey(key: string, numShards: number): number {
-  let hash = 0;
-  for (let i = 0; i < key.length; i++) {
-    const char = key.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return Math.abs(hash) % numShards;
-}
-
 class RedisCacheBackend implements CacheBackend {
-  private readonly clients: Redis[];
-
-  constructor(redis: Redis | Redis[]) {
-    this.clients = Array.isArray(redis) ? redis : [redis];
-  }
+  constructor(private readonly redisClients: Redis[]) {}
 
   private getClient(key: string): Redis {
-    if (this.clients.length === 1) return this.clients[0];
-    const shardIndex = hashKey(key, this.clients.length);
-    return this.clients[shardIndex];
+    if (this.redisClients.length === 1) return this.redisClients[0];
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) {
+      hash = (hash << 5) - hash + key.charCodeAt(i);
+      hash |= 0;
+    }
+    return this.redisClients[Math.abs(hash) % this.redisClients.length];
   }
 
   async get<T>(key: string): Promise<T | null> {
@@ -152,15 +142,15 @@ class RedisCacheBackend implements CacheBackend {
   }
 
   async close(): Promise<void> {
-    await Promise.all(this.clients.map((c) => c.quit()));
+    await Promise.all(this.redisClients.map(c => c.quit()));
   }
 
   async ping(): Promise<void> {
-    await Promise.all(this.clients.map((c) => c.ping()));
+    await Promise.all(this.redisClients.map(c => c.ping()));
   }
 
   isConnected(): boolean {
-    return this.clients.some((c) => c.status === 'ready');
+    return this.redisClients.some(c => c.status === 'ready');
   }
 }
 
@@ -240,33 +230,16 @@ export class CacheClient {
       this.evictionsCounter.inc({ namespace: metadata.namespace, class: metadata.cacheClass });
     });
 
-    if (config.redisClients || config.redisUrls || config.redis || config.redisUrl) {
-      let clients: Redis[] = [];
+    const urls = config.redisUrls || (config.redisUrl ? [config.redisUrl] : []);
+    const clients = config.redisClients || (config.redis ? [config.redis] : []);
 
-      if (config.redisClients) {
-        clients = config.redisClients;
-      } else if (config.redis) {
-        clients = [config.redis];
-      } else if (config.redisUrls) {
-        clients = config.redisUrls.map(
-          (url) =>
-            new Redis(url, {
-              lazyConnect: true,
-              maxRetriesPerRequest: 2,
-              enableOfflineQueue: false,
-            })
-        );
-      } else if (config.redisUrl) {
-        clients = [
-          new Redis(config.redisUrl as string, {
-            lazyConnect: true,
-            maxRetriesPerRequest: 2,
-            enableOfflineQueue: false,
-          }),
-        ];
-      }
-
-      this.redisBackend = new RedisCacheBackend(clients);
+    if (clients.length > 0 || urls.length > 0) {
+      const redisClients = clients.length > 0 ? clients : urls.map(url => new Redis(url, {
+        lazyConnect: true,
+        maxRetriesPerRequest: 2,
+        enableOfflineQueue: false,
+      }));
+      this.redisBackend = new RedisCacheBackend(redisClients);
     }
   }
 
