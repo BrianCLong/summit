@@ -24,7 +24,7 @@ class QueueBot {
     if (['ci', 'reproducibility', 'security'].some(lbl => issue.labels.includes(lbl))) score += this.rules.scoring.label_ci_repro_sec;
 
     // A very simple heuristic for "referencing failing workflow/check name"
-    if (/(?:workflow|check|gate|failed|error)/i.test(text) && /\\.yml|\\.js/.test(text)) score += this.rules.scoring.text_failing_workflow;
+    if (/(?:workflow|check|gate|failed|error)/i.test(text) && /\.yml|\.js/.test(text)) score += this.rules.scoring.text_failing_workflow;
 
     if (['needs-info', 'blocked'].some(lbl => issue.labels.includes(lbl))) score += this.rules.scoring.label_needs_info_blocked;
 
