@@ -1,0 +1,37 @@
+name: pr-gate
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install deps
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test --run
+
+      - name: Evidence ID validation
+        run: node scripts/verify_evidence_id_consistency.mjs
+
+      - name: Timestamp scan
+        run: node scripts/scan_timestamp_keys.mjs
+
+      - name: Workflow Drift Sentinel
+        run: node scripts/ci/validate_workflows.mjs

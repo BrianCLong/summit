@@ -1,0 +1,52 @@
+name: main-validation
+
+on:
+  push:
+    branches: [main]
+  merge_group:
+
+concurrency:
+  group: main-validation-${{ github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm test:integration
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - run: pnpm install
+      - run: pnpm audit
+
+  graph-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - run: pnpm install
+      - name: Run Consistency Check
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NEO4J_URL: ${{ secrets.NEO4J_URL }}
+          NEO4J_PASSWORD: ${{ secrets.NEO4J_PASSWORD }}
+        run: node scripts/graph_postgres_validator.mjs
