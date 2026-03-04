@@ -260,7 +260,7 @@ describe('Maestro Integration Tests', () => {
 
   describe('Error Handling', () => {
     test('should handle 404 for non-existent run', async () => {
-      const fakeRunId = '00000000-0000-0000-0000-000000000000';
+      const fakeRunId = 'baaaaaad-f00d-4004-baad-f00dcafe0000';
 
       await request(app)
         .get(`/api/maestro/v1/runs/${fakeRunId}/nodes/test-node/routing`)

@@ -122,6 +122,8 @@
     "regulatory:diff": "npx tsx cli/src/cli.ts regulatory diff",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
+    "lint:release-policy": "node scripts/release/validate-release-policy.mjs",
+    "ga:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
     "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",

@@ -28,7 +28,7 @@
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/icons-material": "7.3.6",
-    "@mui/lab": "6.0.0-dev.240424162023-9968b4889d",
+    "@mui/lab": "6.0.0-dev.20240424.1",
     "@mui/material": "7.3.6",
     "@mui/x-data-grid": "8.10.1",
     "@reduxjs/toolkit": "2.11.0",

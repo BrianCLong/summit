@@ -19,7 +19,30 @@ const allowedEmailPatterns = [
   /@intelgraph\.com/,
   /@company\.com/,
   /@github\.com/,
-  /support@/
+  /support@/,
+  /@example\.com/,
+  /@example\.org/,
+  /@agency\.gov/,
+  /@acme\.com/,
+  /@acme-corp\.com/,
+  /@organization\.com/,
+  /@openai\.com/,
+  /@topicality\.summit/,
+  /@intelgraph\.ai/,
+  /@companyos\.io/,
+  /@summit\.com/,
+  /@summit\.example/,
+  /@topicality\.co/,
+  /@topicality\.ai/,
+  /@intelgraph\.internal/,
+  /@summit\.local/,
+  /@summit\.ai/,
+  /@summit\.app/,
+  /@summit\.intel/,
+  /@anthropic\.com/,
+  /@megaeu\.com/,
+  /@acme\.test/,
+  /@alpha\.tld/
 ];
 
 const ignoredDirs = ["node_modules", ".git", "dist", "build", ".venv_312", "coverage"];
