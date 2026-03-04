@@ -27,7 +27,15 @@ jobs:
         with:
           python-version: '3.12'
 
+<<<<<<< HEAD
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Install dependencies (Global)
+=======
       - name: Install dependencies
+>>>>>>> origin/main
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.in ]; then

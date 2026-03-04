@@ -29,7 +29,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -66,7 +69,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -196,7 +202,10 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
           run_install: false
 
       - name: Install dependencies

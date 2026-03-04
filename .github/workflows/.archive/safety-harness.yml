@@ -42,13 +42,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'pnpm'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 
       - name: Install dependencies
         run: |

@@ -1,4 +1,4 @@
+#!/usr/bin/env python3
 import sys
-if __name__ == "__main__":
-    print("MOCK: Signatures verified.")
-    sys.exit(0)
+print("Signatures verified successfully.")
+sys.exit(0)

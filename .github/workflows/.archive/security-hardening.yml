@@ -25,12 +25,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '20'
+          node-version: '18'
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
+<<<<<<< HEAD
+=======
 
+>>>>>>> origin/main
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
