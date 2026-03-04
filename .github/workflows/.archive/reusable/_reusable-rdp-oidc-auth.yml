@@ -1,0 +1,25 @@
+name: RDP OIDC Auth Template
+
+on:
+  workflow_call:
+    inputs:
+      role-to-assume:
+        required: true
+        type: string
+      aws-region:
+        required: true
+        type: string
+        default: us-east-1
+
+jobs:
+  auth:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC
+      contents: read
+    steps:
+      - name: Configure AWS Credentials with OIDC
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d44e03b00a1 # v4.0.2
+        with:
+          role-to-assume: ${{ inputs.role-to-assume }}
+          aws-region: ${{ inputs.aws-region }}
