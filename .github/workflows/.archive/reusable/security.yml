@@ -59,6 +59,10 @@ jobs:
       - uses: actions/setup-node@v4 # v4
         with: { node-version: ${{ inputs.node_version }}, cache: 'pnpm' }
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+<<<<<<< HEAD:.github/workflows/.archive/reusable/security.yml
         with: {  }
+=======
+        with: { }
+>>>>>>> 70fa1e70e (fix: resolve CI failures related to package versions and missing files):.github/workflows/reusable/security.yml
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true
