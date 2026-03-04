@@ -7,11 +7,14 @@ protected_branches:
   - release/*
 
 required_checks:
+  - validate-lsn-window
   - meta-gate
   - gate
   - Unit Tests
   - SOC Controls
   - test (20.x)
+  - docs-validation
+  - guard
 
 notes:
   owner: summit-ga
