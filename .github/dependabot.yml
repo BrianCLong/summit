@@ -8,3 +8,145 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+
+  # Go modules — one entry per go.mod (weekly to reduce noise)
+  - package-ecosystem: "gomod"
+    directory: "/alsp"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/ccs"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/cea"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/drst"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/ico/controller"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/jpr"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/lho"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/orchestration/runtime"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/pbs"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/pcbo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/platform/cce"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/sdnlib"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/acc"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/addn"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/agsm"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/cab"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/crp"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/drift-sentinel"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/escp"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/idtl"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/jitae"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/krpcp"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/q3c"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/qawe"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/qpg"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/rcsi"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/retentiond"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/services/sss"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/streaming/etcwe"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/streaming/sfm"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/tools/c7"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/tools/dmcl"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/tools/rarl"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/tools/rbo"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "gomod"
+    directory: "/tools/scba"
+    schedule:
+      interval: "weekly"
