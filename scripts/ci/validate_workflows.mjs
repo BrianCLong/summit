@@ -25,7 +25,8 @@ if (files.length > MAX_WORKFLOWS) {
 for (const file of files) {
     const content = fs.readFileSync(path.join(workflowsDir, file), "utf8");
 
-    if (!content.includes("concurrency:")) {
+    // Exempt reusable workflows (starting with _) as they are templates
+    if (!file.startsWith('_') && !content.includes("concurrency:")) {
         console.error(`❌ Workflow missing concurrency guard: ${file}`);
         errors++;
     }
