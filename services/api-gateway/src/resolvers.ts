@@ -157,31 +157,6 @@ export const resolvers = {
       return response.json();
     },
 
-    explainAnomaly: async (parent: any, args: any, context: any) => {
-      const response = await fetch(
-        `${process.env.XAI_EXPLAIN_ANOMALY_URL}/graphql`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': context.token || 'Bearer dev-token',
-            'x-tenant-id': context.tenantId || 'tenant_1',
-          },
-          body: JSON.stringify({
-            query: `query($id: ID!) { explainAnomaly(id: $id) { id score explanation features { name contribution } } }`,
-            variables: { id: args.id },
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`XAI Anomaly service error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result.data?.explainAnomaly;
-    },
-
     // Provenance resolvers (delegated to prov-ledger service)
     claim: async (parent: any, args: any, context: any) => {
       const serviceHeaders = await buildServiceHeaders('prov-ledger', [
