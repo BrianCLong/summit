@@ -28,6 +28,8 @@ jobs:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
+        with:
+
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -63,6 +65,8 @@ jobs:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
+        with:
+
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -191,6 +195,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - uses: pnpm/action-setup@v4
+        with:
+
           run_install: false
 
       - name: Install dependencies

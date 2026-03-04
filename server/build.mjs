@@ -13,26 +13,35 @@ const workspacePlugin = {
   setup(build) {
     // Intercept @intelgraph/* imports
     build.onResolve({ filter: /^@intelgraph\// }, (args) => {
-      const packageName = args.path.split('/')[1];
-      const packagePath = path.resolve(__dirname, '..', 'packages', packageName);
+      const parts = args.path.split('/');
+      const packageName = parts[1];
 
-      if (fs.existsSync(packagePath)) {
-        // Try src/index.ts first
-        const srcIndex = path.join(packagePath, 'src', 'index.ts');
-        if (fs.existsSync(srcIndex)) {
-          return { path: srcIndex, namespace: 'file' };
-        }
+      // Potential package locations
+      const candidates = [
+        path.resolve(__dirname, '..', 'packages', packageName),
+        path.resolve(__dirname, '..', 'libs', packageName, 'node'),
+        path.resolve(__dirname, '..', 'services', packageName),
+      ];
 
-        // Fallback to what package.json says
-        try {
-          const pkgJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf8'));
-          const mainFile = pkgJson.main || 'index.js';
-          const resolvedPath = path.join(packagePath, mainFile);
-          if (fs.existsSync(resolvedPath)) {
-            return { path: resolvedPath, namespace: 'file' };
+      for (const packagePath of candidates) {
+        if (fs.existsSync(packagePath)) {
+          // Try src/index.ts first
+          const srcIndex = path.join(packagePath, 'src', 'index.ts');
+          if (fs.existsSync(srcIndex)) {
+            return { path: srcIndex, namespace: 'file' };
           }
-        } catch (e) {
-          // ignore
+
+          // Fallback to what package.json says
+          try {
+            const pkgJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf8'));
+            const mainFile = pkgJson.main || 'index.js';
+            const resolvedPath = path.join(packagePath, mainFile);
+            if (fs.existsSync(resolvedPath)) {
+              return { path: resolvedPath, namespace: 'file' };
+            }
+          } catch (e) {
+            // ignore
+          }
         }
       }
       return null;
