@@ -265,7 +265,7 @@
     "react-monaco-editor": "^0.59.0",
     "redis": "^5.8.1",
     "supertest": "^7.1.4",
-    "vitest": "^4.0.16",
+    "vitest": "^4.0.18",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.9"
