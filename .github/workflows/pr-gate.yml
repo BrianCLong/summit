@@ -1,0 +1,52 @@
+name: pr-gate
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          run_install: false
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - uses: actions/cache@v4
+        name: Setup pnpm cache
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install deps
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Turbo CI (Lint, Typecheck, Test)
+        run: pnpm turbo run lint typecheck test --filter="..." --cache-dir=.turbo
+
+      - name: Validate Evidence IDs
+        run: node scripts/ci/verify_evidence_id_consistency.mjs
+
+      - name: Scan Timestamp Keys
+        run: node scripts/scan_timestamp_keys.mjs
+
+      - name: CI Drift Sentinel
+        run: node scripts/ci/validate_workflows.mjs
