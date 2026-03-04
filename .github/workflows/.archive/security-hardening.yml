@@ -30,6 +30,10 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
