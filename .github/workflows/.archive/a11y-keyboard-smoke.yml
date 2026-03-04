@@ -1,0 +1,40 @@
+name: A11y + Keyboard Smoke
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'client/**'
+      - 'apps/web/**'
+      - 'e2e/a11y-keyboard/**'
+      - '.github/workflows/a11y-keyboard-smoke.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'client/**'
+      - 'apps/web/**'
+      - 'e2e/a11y-keyboard/**'
+      - '.github/workflows/a11y-keyboard-smoke.yml'
+
+jobs:
+  a11y-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run A11y Tests
+        run: pnpm exec playwright test e2e/a11y-keyboard/a11y-gate.spec.ts
+      - name: Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-reports
+          path: reports/a11y-keyboard/
