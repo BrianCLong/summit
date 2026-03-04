@@ -103,6 +103,8 @@ services:
       dockerfile: Dockerfile.dev
     container_name: summit-api
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       PORT: 4000
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
@@ -284,6 +286,8 @@ services:
       dockerfile: Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       VITE_API_URL: http://api:4000/graphql
       VITE_WS_URL: ws://api:4000/graphql
@@ -309,6 +313,8 @@ services:
     command: node dist/index.js
     container_name: summit-websocket-server
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       PORT: 9001
       HOST: 0.0.0.0

@@ -58,6 +58,7 @@ jobs:
         uses: pnpm/action-setup@v3
         with:
 
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
@@ -353,6 +354,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
+
 
       - name: Download scan results
         uses: actions/download-artifact@v4
