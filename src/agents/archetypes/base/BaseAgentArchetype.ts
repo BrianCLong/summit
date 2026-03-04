@@ -22,12 +22,16 @@ import {
 } from './types';
 import { auditSink } from '../../../../server/src/audit/sink.js';
 import { PromptInjectionDetector } from '../../../../server/src/security/llm-guardrails.js';
+import { SkillRegistry } from '../../skills/registry';
+import { BaseSkill } from '../../skills/baseSkill';
 
 export abstract class BaseAgentArchetype {
   protected instanceId: string;
   protected metrics: AgentMetrics;
   protected lastActivity: Date;
   protected injectionDetector: PromptInjectionDetector;
+  public readonly skills: SkillRegistry;
+
 
   constructor(
     public readonly name: string,
@@ -38,6 +42,8 @@ export abstract class BaseAgentArchetype {
     this.metrics = this.initializeMetrics();
     this.lastActivity = new Date();
     this.injectionDetector = new PromptInjectionDetector();
+    this.skills = new SkillRegistry();
+
   }
 
   /**

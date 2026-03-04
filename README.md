@@ -3,6 +3,7 @@
 > Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
 
 [![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
+[![LSN Window Validator](https://github.com/BrianCLong/summit/actions/workflows/lsn-window.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/lsn-window.yml)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
