@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2026-07-30 - [StrategicPlanRepo Batch Hydration]
-**Learning:** Deep hydration of nested entities (Objectives -> KeyResults, Initiatives -> Deliverables) using O(N) loops with individual database round-trips causes significant performance degradation as data volume grows. Using PostgreSQL's `ANY($1)` operator to batch-load associations reduces the number of round-trips to O(1) per relationship type.
-**Action:** Use batch-loading helpers (`get[Entities]By[Parents]`) and in-memory `Map` association logic for hydrating complex repository objects.
+## 2026-03-04 - [O(N) Hydration Pattern for Batch Loaders]
+**Learning:** When using batch loaders (e.g., fetching all Milestones for multiple Initiatives in one query), hydrating the parent objects by searching the result array for each child creates $O(N^2)$ complexity. Using a `Map` to group results by parent ID and then mapping the parent objects achieves $O(N)$ complexity.
+**Action:** Always use a `Map` lookup when associating batch-loaded children with their parents in-memory to maintain linear performance.

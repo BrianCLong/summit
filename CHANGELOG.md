@@ -14,12 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-- **⚡ Bolt Performance Optimization**: Optimized `StrategicPlanRepo` by implementing batch-loading for nested entities (Milestones, Key Results, Deliverables, Mitigation Strategies). Replaced O(N) waterfalls with O(1) batch queries using PostgreSQL `ANY()` operator, significantly reducing database round-trips for complex plan retrievals.
-
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
+
+### Performance
+- **StrategicPlanRepo Optimization**: Implemented batch-loading for strategic plan relations (milestones, key results, deliverables, mitigations) using PostgreSQL `ANY($1)` operator. This reduces database round-trips from $O(N)$ to $O(1)$ for plan hydration, significantly improving response times for large plans.
 
 ### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
@@ -28,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
+- Fixed CI-blocking OPA image tag in `docker-compose.yml`.
+- Standardized CI workflows on Node.js 20 and pnpm 10 to resolve version mismatches.
+- Resolved ESLint `no-undef` errors in ESM-based server tests involving dynamic `import()` and `jest.unstable_mockModule`.
+- Moved strategic planning database migration to managed-migrations to satisfy online-safety guardrails.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 

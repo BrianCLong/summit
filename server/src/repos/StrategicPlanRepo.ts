@@ -512,18 +512,26 @@ export class StrategicPlanRepo {
       this.getKeyResultsByObjectives(objectiveIds),
     ]);
 
-    // Map milestones and key results to objectives
+    // Map milestones and key results to objectives in O(N)
     const milestonesMap = new Map<string, Milestone[]>();
     const keyResultsMap = new Map<string, KeyResult[]>();
 
     allMilestones.forEach((m) => {
-      const existing = milestonesMap.get(m.parentId) || [];
-      milestonesMap.set(m.parentId, [...existing, m]);
+      let list = milestonesMap.get(m.parentId);
+      if (!list) {
+        list = [];
+        milestonesMap.set(m.parentId, list);
+      }
+      list.push(m);
     });
 
     allKeyResults.forEach((kr) => {
-      const existing = keyResultsMap.get(kr.objectiveId) || [];
-      keyResultsMap.set(kr.objectiveId, [...existing, kr]);
+      let list = keyResultsMap.get(kr.objectiveId);
+      if (!list) {
+        list = [];
+        keyResultsMap.set(kr.objectiveId, list);
+      }
+      list.push(kr);
     });
 
     return objectives.map((o) => ({
@@ -746,18 +754,26 @@ export class StrategicPlanRepo {
       this.getDeliverablesByInitiatives(initiativeIds),
     ]);
 
-    // Map milestones and deliverables to initiatives
+    // Map milestones and deliverables to initiatives in O(N)
     const milestonesMap = new Map<string, Milestone[]>();
     const deliverablesMap = new Map<string, Deliverable[]>();
 
     allMilestones.forEach((m) => {
-      const existing = milestonesMap.get(m.parentId) || [];
-      milestonesMap.set(m.parentId, [...existing, m]);
+      let list = milestonesMap.get(m.parentId);
+      if (!list) {
+        list = [];
+        milestonesMap.set(m.parentId, list);
+      }
+      list.push(m);
     });
 
     allDeliverables.forEach((d) => {
-      const existing = deliverablesMap.get(d.initiativeId) || [];
-      deliverablesMap.set(d.initiativeId, [...existing, d]);
+      let list = deliverablesMap.get(d.initiativeId);
+      if (!list) {
+        list = [];
+        deliverablesMap.set(d.initiativeId, list);
+      }
+      list.push(d);
     });
 
     return initiatives.map((i) => ({
@@ -1025,12 +1041,16 @@ export class StrategicPlanRepo {
     const riskIds = risks.map((r) => r.id);
     const allMitigations = await this.getMitigationStrategiesByRisks(riskIds);
 
-    // Map mitigations to risks
+    // Map mitigations to risks in O(N)
     const mitigationsMap = new Map<string, MitigationStrategy[]>();
 
     allMitigations.forEach((m) => {
-      const existing = mitigationsMap.get(m.riskId) || [];
-      mitigationsMap.set(m.riskId, [...existing, m]);
+      let list = mitigationsMap.get(m.riskId);
+      if (!list) {
+        list = [];
+        mitigationsMap.set(m.riskId, list);
+      }
+      list.push(m);
     });
 
     return risks.map((r) => ({
@@ -1243,82 +1263,6 @@ export class StrategicPlanRepo {
   }
 
   // ============================================================================
-  // BATCH LOADING HELPERS
-  // ============================================================================
-
-  /**
-   * Batch load milestones for multiple parents
-   * OPTIMIZED: Reduces round-trips from O(N) to O(1)
-   */
-  async getMilestonesByParents(
-    parentIds: string[],
-    parentType: 'objective' | 'initiative',
-  ): Promise<Milestone[]> {
-    if (parentIds.length === 0) return [];
-
-    const { rows } = await this.pg.query(
-      `SELECT * FROM strategic_milestones
-       WHERE parent_id = ANY($1) AND parent_type = $2
-       ORDER BY due_date ASC`,
-      [parentIds, parentType],
-    );
-
-    return rows.map((row: any) => this.mapMilestoneRow(row));
-  }
-
-  /**
-   * Batch load deliverables for multiple initiatives
-   */
-  async getDeliverablesByInitiatives(
-    initiativeIds: string[],
-  ): Promise<Deliverable[]> {
-    if (initiativeIds.length === 0) return [];
-
-    const { rows } = await this.pg.query(
-      `SELECT * FROM strategic_deliverables
-       WHERE initiative_id = ANY($1)
-       ORDER BY due_date ASC`,
-      [initiativeIds],
-    );
-
-    return rows.map((row: any) => this.mapDeliverableRow(row));
-  }
-
-  /**
-   * Batch load mitigation strategies for multiple risks
-   */
-  async getMitigationStrategiesByRisks(
-    riskIds: string[],
-  ): Promise<MitigationStrategy[]> {
-    if (riskIds.length === 0) return [];
-
-    const { rows } = await this.pg.query(
-      `SELECT * FROM strategic_mitigations
-       WHERE risk_id = ANY($1)
-       ORDER BY deadline ASC`,
-      [riskIds],
-    );
-
-    return rows.map((row: any) => this.mapMitigationRow(row));
-  }
-
-  /**
-   * Batch load key results for multiple objectives
-   */
-  async getKeyResultsByObjectives(objectiveIds: string[]): Promise<KeyResult[]> {
-    if (objectiveIds.length === 0) return [];
-
-    const { rows } = await this.pg.query(
-      `SELECT * FROM strategic_key_results
-       WHERE objective_id = ANY($1)
-       ORDER BY due_date ASC`,
-      [objectiveIds],
-    );
-
-    return rows.map((row: any) => this.mapKeyResultRow(row));
-  }
-
-  // ============================================================================
   // ACTIVITY LOG
   // ============================================================================
 
@@ -1394,6 +1338,82 @@ export class StrategicPlanRepo {
       resources,
       kpis,
     };
+  }
+
+  // ============================================================================
+  // BATCH LOADING HELPERS
+  // ============================================================================
+
+  /**
+   * Batch load milestones for multiple parents
+   * OPTIMIZED: Reduces round-trips from O(N) to O(1)
+   */
+  async getMilestonesByParents(
+    parentIds: string[],
+    parentType: 'objective' | 'initiative',
+  ): Promise<Milestone[]> {
+    if (parentIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_milestones
+       WHERE parent_id = ANY($1) AND parent_type = $2
+       ORDER BY due_date ASC`,
+      [parentIds, parentType],
+    );
+
+    return rows.map((row: any) => this.mapMilestoneRow(row));
+  }
+
+  /**
+   * Batch load deliverables for multiple initiatives
+   */
+  async getDeliverablesByInitiatives(
+    initiativeIds: string[],
+  ): Promise<Deliverable[]> {
+    if (initiativeIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_deliverables
+       WHERE initiative_id = ANY($1)
+       ORDER BY due_date ASC`,
+      [initiativeIds],
+    );
+
+    return rows.map((row: any) => this.mapDeliverableRow(row));
+  }
+
+  /**
+   * Batch load mitigation strategies for multiple risks
+   */
+  async getMitigationStrategiesByRisks(
+    riskIds: string[],
+  ): Promise<MitigationStrategy[]> {
+    if (riskIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_mitigations
+       WHERE risk_id = ANY($1)
+       ORDER BY deadline ASC`,
+      [riskIds],
+    );
+
+    return rows.map((row: any) => this.mapMitigationRow(row));
+  }
+
+  /**
+   * Batch load key results for multiple objectives
+   */
+  async getKeyResultsByObjectives(objectiveIds: string[]): Promise<KeyResult[]> {
+    if (objectiveIds.length === 0) return [];
+
+    const { rows } = await this.pg.query(
+      `SELECT * FROM strategic_key_results
+       WHERE objective_id = ANY($1)
+       ORDER BY due_date ASC`,
+      [objectiveIds],
+    );
+
+    return rows.map((row: any) => this.mapKeyResultRow(row));
   }
 
   private calculateRiskLevel(score: number): RiskLevel {
