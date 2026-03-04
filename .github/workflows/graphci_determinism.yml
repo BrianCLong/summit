@@ -41,12 +41,7 @@ jobs:
           pip install pytest
 
       - name: Run Tests
-        run: |
-          if [[ -f tests/graphci/test_evidence_layout.py ]]; then
-            pytest tests/graphci/test_evidence_layout.py
-          else
-            echo "tests/graphci/test_evidence_layout.py not found; skipping pytest."
-          fi
+        run: pytest tests/graphci/test_evidence_layout.py
 
       - name: Determinism Verification
         run: |
