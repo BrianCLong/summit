@@ -27,6 +27,18 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
+      - name: Check Queue Saturation
+        run: |
+          # Fails if the queue depth is > 200, acting as an early warning for CI meltdown.
+          QUEUE_DEPTH=$(gh pr list --search "is:open is:pr" --limit 1000 --json number | jq '. | length')
+          echo "Current Queue Depth: $QUEUE_DEPTH"
+          if [ "$QUEUE_DEPTH" -gt 200 ]; then
+            echo "::error::Queue depth is saturated ($QUEUE_DEPTH > 200). Please hold new PRs."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Workflow Drift Sentinel
         run: node scripts/ci/validate_workflows.mjs
 
