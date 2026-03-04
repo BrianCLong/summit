@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { jest } from '@jest/globals';
 
 const axiosGetMock = jest.fn();
