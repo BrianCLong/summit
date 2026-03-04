@@ -64,6 +64,61 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+
+  ai-evals:
+    name: AI Evals (RAG Grounding & Safety)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run AI evals
+        run: node scripts/ai/run_ai_evals.mjs
+      - name: Attach evidence
+        if: always()
+        run: |
+          mkdir -p artifacts/ai-evals
+          node scripts/ci/emit_evidence_stamp.mjs \
+            --job ai-evals \
+            --runner ${{ runner.os }} \
+            --lock-hash "${{ hashFiles('**/pnpm-lock.yaml') }}" \
+            --out artifacts/ai-evals/stamp.json
+      - name: Upload AI eval artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-evals
+          path: artifacts/ai-evals
+
+
+  ai-evals-drift:
+    name: AI Evals Drift Check
+    if: github.event_name == 'schedule' || github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run Drift Check
+        run: node scripts/monitoring/eval-driven-agentic-rag-2026-drift.mjs
+
   unit-tests:
     name: Unit Tests (CI)
     runs-on: ubuntu-latest

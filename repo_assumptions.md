@@ -1,40 +1,14 @@
-# Repo Assumptions & Validation
+# Repo Reality Check — eval-driven-agentic-rag-2026
 
-## Verified vs Assumed Directory List
+## Verified
+- pnpm monorepo; quickstart uses pnpm + docker-compose (Neo4j/Postgres/Redis). (source: README)
+- CI jobs include lint/typecheck/unit-tests/security-compliance/soc-controls and evidence stamping via scripts/ci/emit_evidence_stamp.mjs.
+- RAG entrypoint is located at `server/src/rag/retrieval.ts`
+- Policy engine enforcer is located at `server/src/policy/enforcer.ts`
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumed (validate)
+- The exact entry point to AI RAG capabilities outside of retrieval (such as model execution, verifier loops). This will be built in `server/src/ai/rag/verifier.ts` or similar location based on instructions.
 
-## CI Check Names (Exact)
-
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Must-not-touch
+- scripts/ci/emit_evidence_stamp.mjs contract
+- .github/workflows/ci.yml required checks (only additive changes)
