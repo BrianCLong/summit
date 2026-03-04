@@ -19,7 +19,7 @@ set -euo pipefail
 
 # ── defaults ────────────────────────────────────────────────────────────────
 BATCH_SIZE=10
-MAX_QUEUE=40
+MAX_QUEUE=50
 DRY_RUN=false
 
 log()  { echo "[autopilot] $*"; }
