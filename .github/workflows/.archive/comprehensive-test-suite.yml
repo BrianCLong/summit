@@ -10,6 +10,7 @@ on:
       - '**.md'
       - 'prompts/**'
       - 'evidence/**'
+      - '.github/workflows/DOCS_CI_OPTIMIZATION_PROPOSAL.md'
   workflow_dispatch:
 
 concurrency:

@@ -8,6 +8,11 @@ name: Redaction Layer Tests
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       # Redaction policy and scripts
       - "docs/ci/REDACTION_POLICY.yml"

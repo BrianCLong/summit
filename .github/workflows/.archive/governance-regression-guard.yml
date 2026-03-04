@@ -9,6 +9,11 @@ name: Governance Regression Guard
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       # Policy files
       - "docs/ci/*.yml"
