@@ -83,10 +83,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
+          version: 10.0.0
           run_install: false
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -130,10 +127,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
+          version: 10.0.0
           run_install: false
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

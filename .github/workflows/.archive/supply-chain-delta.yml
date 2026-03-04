@@ -1,12 +1,14 @@
 name: ci/supply-chain-delta
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
-
+    paths:
+      - "pnpm-lock.yaml"
+      - "package.json"
+      - "**/package.json"
+      - "Dockerfile"
+      - "docker-compose*.yml"
+      - "docs/supply-chain/**"
+      - ".github/workflows/supply-chain-delta.yml"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
