@@ -7,10 +7,17 @@ jest.unstable_mockModule('../../db/postgres.js', () => ({
   }),
 }));
 
-const { ResidencyGuard, ResidencyViolationError } = await import('../residency-guard.js');
+let ResidencyGuard: any;
+let ResidencyViolationError: any;
 
 describe('ResidencyGuard', () => {
-  let guard: ResidencyGuard;
+  let guard: any;
+
+  beforeAll(async () => {
+    const module = await import('../residency-guard.js');
+    ResidencyGuard = module.ResidencyGuard;
+    ResidencyViolationError = module.ResidencyViolationError;
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
