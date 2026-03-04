@@ -1,4 +1,8 @@
 name: Weekly Ops Evidence Cadence
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   workflow_dispatch:

@@ -1,4 +1,8 @@
 name: Mega PR Containment
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   workflow_dispatch:

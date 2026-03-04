@@ -1,4 +1,8 @@
 name: Test Self-Hosted Runners
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 # Manual trigger for testing runners
 on:

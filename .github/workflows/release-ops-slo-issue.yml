@@ -7,6 +7,10 @@
 # Authority: docs/ci/RELEASE_OPS_SLO.md
 
 name: Release Ops SLO Issue
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   # Monthly on the 1st at 09:00 UTC

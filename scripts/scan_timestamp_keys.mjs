@@ -11,21 +11,38 @@ const IGNORE_FILES = ['stamp.json', 'package-lock.json', 'pnpm-lock.yaml', 'CHAN
 
 function scan(dir) {
   let violations = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
+  let entries = [];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch (e) {
+    if (e.code === 'EPERM' || e.code === 'EACCES') {
+      console.warn(`⚠️ skipping directory due to permissions: ${dir}`);
+      return [];
+    }
+    throw e;
+  }
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    
+
     if (entry.isDirectory()) {
       if (IGNORE_DIRS.includes(entry.name)) continue;
       violations = violations.concat(scan(fullPath));
     } else {
       if (IGNORE_FILES.includes(entry.name) || entry.name.endsWith('.png') || entry.name.endsWith('.jpg')) continue;
-      
-      const content = fs.readFileSync(fullPath, 'utf8');
-      if (FORBIDDEN_PATTERN.test(content)) {
-        console.warn(`❌ Forbidden timestamp found in: ${fullPath}`);
-        violations.push(fullPath);
+
+      try {
+        const content = fs.readFileSync(fullPath, 'utf8');
+        if (FORBIDDEN_PATTERN.test(content)) {
+          console.warn(`❌ Forbidden timestamp found in: ${fullPath}`);
+          violations.push(fullPath);
+        }
+      } catch (e) {
+        if (e.code === 'EPERM' || e.code === 'EACCES') {
+          console.warn(`⚠️ skipping file due to permissions: ${fullPath}`);
+          continue;
+        }
+        throw e;
       }
     }
   }

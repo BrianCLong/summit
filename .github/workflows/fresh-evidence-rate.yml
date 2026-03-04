@@ -1,5 +1,9 @@
 # .github/workflows/fresh-evidence-rate.yml
 name: Fresh Evidence Rate
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   schedule:

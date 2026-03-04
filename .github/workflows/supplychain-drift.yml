@@ -1,4 +1,8 @@
 name: Supply Chain Guardrails Drift Check
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   schedule:

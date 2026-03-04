@@ -1,4 +1,8 @@
 name: 🧪 Reusable - Test Runner
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Comprehensive test execution workflow
 # Supports: unit, integration, e2e tests with coverage reporting
 

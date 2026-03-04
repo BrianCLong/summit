@@ -1,4 +1,8 @@
 name: Release Promotion Guard
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 # AUTHORITATIVE PROMOTION GATE for MVP-4 Stabilization RC → GA
 # This workflow validates that an RC is safe to promote to GA

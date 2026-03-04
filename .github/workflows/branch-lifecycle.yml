@@ -1,4 +1,8 @@
 name: Branch Lifecycle Management
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 # Automatically clean up stale branches to prevent merge conflicts and repo hygiene issues
 # Current state: 409 remote branches (234 AI-generated)

@@ -1,4 +1,8 @@
 name: golden-main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   schedule: [{ cron: "*/30 * * * *" }]
   workflow_dispatch:

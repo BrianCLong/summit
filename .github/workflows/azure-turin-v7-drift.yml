@@ -1,4 +1,8 @@
 name: azure-turin-v7-drift
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   schedule:
     - cron: '0 0 * * 1' # Weekly

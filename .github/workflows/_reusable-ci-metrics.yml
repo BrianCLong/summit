@@ -7,6 +7,10 @@
 # Authority: docs/ci/CI_METRICS.md
 
 name: CI Metrics Collection
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   workflow_call:

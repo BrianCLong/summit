@@ -9,6 +9,10 @@
 # Authority: docs/ci/BRANCH_PROTECTION_RECONCILIATION.md
 
 name: Branch Protection Reconciliation
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   # Manual trigger only - reconciliation is an intentional action

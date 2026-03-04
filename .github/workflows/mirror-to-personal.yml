@@ -1,4 +1,8 @@
 name: Mirror to BrianCLong/summit
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 # Disabled: This workflow requires PERSONAL_MIRROR_TOKEN secret
 # and is only needed when mirroring from TopicalityLLC/Summit
