@@ -1,16 +1,21 @@
-# Repo Assumptions & Verification
+# Repo Assumptions
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified Paths
+- `summit/`
+- `summit/explain/` (Will be created)
+- `docs/standards/`
+- `docs/security/`
+- `docs/ops/runbooks/`
+- `scripts/monitoring/`
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Assumed Paths
+- JSON artifact schema conventions (e.g. `report.json`, `metrics.json`, `stamp.json` based on `subsumption/example/evidence`)
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Must-not-touch files
+- Any `package.json` or `tsconfig.json` outside the target scope
+- CI workflow files (unless specifically necessary for gates)
+- Existing tests or application source code outside `summit/explain/shap_iq/`
+
+## Required schema alignment tasks
+- Align JSON schema with `report.json` and `metrics.json` structure
+- Ensure deterministic output requirements

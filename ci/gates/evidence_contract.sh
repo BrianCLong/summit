@@ -41,8 +41,6 @@ def validate(instance, schema_path):
 def check_no_timestamps(data, path=""):
     FORBIDDEN = {'timestamp', 'date', 'created_at', 'updated_at', 'time', 'generated_at_utc'}
     errors = []
-    if not isinstance(data, (dict, list)):
-        return errors
     if isinstance(data, dict):
         for k, v in data.items():
             if k.lower() in FORBIDDEN:
@@ -58,7 +56,7 @@ def process_evidence(report_path):
     report = load_json(report_path)
 
     # Identify schema - for Moltbook Relay we use specific one
-    if isinstance(report, dict) and "moltbook-relay" in report.get("evidence_id", ""):
+    if "moltbook-relay" in report.get("evidence_id", ""):
         schema = "evidence/schemas/moltbook-relay-report.schema.json"
     else:
         schema = "evidence/schemas/report.schema.json"
@@ -71,13 +69,10 @@ def process_evidence(report_path):
         print(f"FAILED schema validation: {report_path}")
         return False
 
-    if "EVID-NARINT-SMOKE" in report_path:
-        pass
-    else:
-        ts_errors = check_no_timestamps(report)
-        if ts_errors:
-            print(f"FAILED timestamp check: {report_path} contains forbidden fields: {ts_errors}")
-            return False
+    ts_errors = check_no_timestamps(report)
+    if ts_errors:
+        print(f"FAILED timestamp check: {report_path} contains forbidden fields: {ts_errors}")
+        return False
 
     # Check metrics
     metrics_path = report_path.replace("report.json", "metrics.json")

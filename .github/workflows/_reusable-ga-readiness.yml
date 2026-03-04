@@ -1,4 +1,8 @@
 name: "Reusable: GA Readiness"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 # Consolidated GA Readiness checks.
 # This workflow is the single source of truth for "What defines GA readiness?"
