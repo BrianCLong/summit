@@ -1,4 +1,13 @@
 {
+  "evidence_id": "EVD-BABEL-TRUST-GOV-001",
+  "summary": "Verified subsumption bundle for Babel Street Trust AI OSINT.",
+  "claim_ref": "ITEM:CLAIM-01",
+  "source_nodes": ["docs/security/trustworthy-ai-osint.md"],
+  "confidence_level": "high",
+  "reasoning_steps": [
+    "Schema updated to enforce traceable reasoning.",
+    "Manifest created to validate subsumption of principles."
+  ],
   "claims": [
     {
       "backing": "ITEM:CLAIM-01",
@@ -13,10 +22,14 @@
     "Bundle verifier enforces manifest, schema, docs, and fixture presence.",
     "Evidence artifacts remain deterministic (report/metrics)."
   ],
-  "evidence_id": "EVD-BABEL-TRUST-GOV-001",
   "generated_by": "scripts/ci/verify_subsumption_bundle.mjs",
   "item_slug": "babel-street-trust",
   "notes": [
     "verifier_ok"
+  ],
+  "artifacts": [
+    "subsumption/babel-street-trust/manifest.yaml",
+    "subsumption/babel-street-trust/claims.md",
+    "docs/security/trustworthy-ai-osint.md"
   ]
 }

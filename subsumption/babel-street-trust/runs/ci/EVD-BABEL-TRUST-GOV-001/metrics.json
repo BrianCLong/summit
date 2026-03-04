@@ -2,8 +2,8 @@
   "evidence_id": "EVD-BABEL-TRUST-GOV-001",
   "item_slug": "babel-street-trust",
   "metrics": {
-    "docs_count": 4,
-    "fixtures_checked": 2,
-    "schemas_checked": 3
+    "docs_count": 1,
+    "schemas_checked": 3,
+    "fixtures_checked": 2
   }
 }

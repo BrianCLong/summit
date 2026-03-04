@@ -1,8 +1,5 @@
 {
   "evidence_id": "EVD-BABEL-TRUST-GOV-001",
   "item_slug": "babel-street-trust",
-  "timestamp": "2026-03-02T00:58:35.458Z",
-  "tool_versions": {
-    "node": "v22.22.0"
-  }
+  "timestamp": "2024-03-02T00:00:00.000Z"
 }
