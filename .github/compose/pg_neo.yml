@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  opa:
+    image: openpolicyagent/opa:0.68.0-rootless
+    ports:
+      - "8181:8181"
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+    ports:
+      - "5432:5432"
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/password
+    ports:
+      - "7474:7474"
+      - "7687:7687"
