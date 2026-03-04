@@ -14,14 +14,34 @@
       "all_required": true,
       "status_checks": [
         {
-          "context": "meta-gate",
+          "context": "CI - Comprehensive Gates / setup",
           "required": true,
           "description": "Environment setup and change detection"
         },
         {
-          "context": "ci-gate",
+          "context": "CI - Comprehensive Gates / lint-and-typecheck",
           "required": true,
-          "description": "Unified Tier 1 CI Gate"
+          "description": "Code quality and TypeScript validation"
+        },
+        {
+          "context": "CI - Comprehensive Gates / unit-integration-tests",
+          "required": true,
+          "description": "Test execution with ≥80% coverage requirement"
+        },
+        {
+          "context": "CI - Comprehensive Gates / security-gates",
+          "required": true,
+          "description": "SBOM generation, vulnerability scan, secret detection"
+        },
+        {
+          "context": "CI - Comprehensive Gates / build-and-attestation",
+          "required": true,
+          "description": "Application build and artifact generation"
+        },
+        {
+          "context": "CI - Comprehensive Gates / merge-readiness",
+          "required": true,
+          "description": "Overall merge readiness evaluation"
         }
       ],
       "optional_checks": [
@@ -43,9 +63,7 @@
     },
     "bypass_settings": {
       "allow_admin_bypass": false,
-      "emergency_bypass_teams": [
-        "platform-admins"
-      ],
+      "emergency_bypass_teams": ["platform-admins"],
       "bypass_requires_reason": true,
       "bypass_creates_audit_log": true
     }
@@ -89,18 +107,12 @@
     "emergency_disable": {
       "command": "gh api repos/:owner/:repo/merge-queue --method PATCH --field enabled=false",
       "reason_required": true,
-      "notification_channels": [
-        "#platform-alerts",
-        "#engineering"
-      ]
+      "notification_channels": ["#platform-alerts", "#engineering"]
     },
     "bypass_protection": {
       "temporary_admin_bypass": "For critical hotfixes only",
       "maximum_duration": "2 hours",
-      "requires_approval": [
-        "security-team",
-        "platform-lead"
-      ]
+      "requires_approval": ["security-team", "platform-lead"]
     }
   },
   "team_workflows": {

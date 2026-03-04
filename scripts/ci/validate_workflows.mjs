@@ -41,7 +41,7 @@ async function validateWorkflows() {
             }
 
         } catch (e) {
-            console.error(`❌ ${file}: Invalud YAML: ${e.message}`);
+            console.error(`❌ ${file}: Invalid YAML: ${e.message}`);
             errors++;
         }
     }

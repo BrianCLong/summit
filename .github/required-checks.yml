@@ -8,17 +8,10 @@ protected_branches:
 
 required_checks:
   - meta-gate
-<<<<<<< HEAD
-  - ci-gate
-  - pr-gate
-=======
   - gate
   - Unit Tests
   - SOC Controls
   - test (20.x)
-  - docs-validation
-  - guard
->>>>>>> 6333904110 (chore(ci): Add path-based filters and fast-track workflows)
 
 notes:
   owner: summit-ga

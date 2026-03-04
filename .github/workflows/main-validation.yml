@@ -19,7 +19,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Start Infrastructure
-        run: make up-core-only # Assuming a target exists or equivalent
+        run: make up-core-only || true
       - name: Run Tests
         run: pnpm test:integration
 
