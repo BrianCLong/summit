@@ -29,7 +29,6 @@ def test_window_is_monotonic_and_tombstones_valid():
     assert code == 0
 
 def test_drift_detection(tmp_path):
-    # create a bad sample with LSN regression
     bad = tmp_path / "bad.jsonl"
     bad.write_text(
         '\n'.join([
@@ -43,7 +42,6 @@ def test_drift_detection(tmp_path):
     assert code != 0
 
 def test_tombstone_required_after_delete(tmp_path):
-    # delete without tombstone should fail
     bad = tmp_path / "no_tombstone.jsonl"
     bad.write_text(
         '\n'.join([

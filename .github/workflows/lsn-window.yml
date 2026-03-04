@@ -2,10 +2,7 @@ name: LSN Window Validator
 
 on:
   pull_request:
-    paths:
-      - "tools/lsn/**"
-      - "data/fixtures/debezium_sample.jsonl"
-      - "tests/ci/test_lsn_window.py"
+    types: [opened, synchronize, reopened]
   workflow_dispatch: {}
 
 jobs:
