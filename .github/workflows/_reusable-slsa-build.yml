@@ -186,7 +186,7 @@ jobs:
       - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
-        uses: anchore/sbom-action@v0.16.0
+        uses: anchore/sbom-action@v0.17.2
         with:
           image: ${{ steps.image-uri.outputs.uri }}
           format: spdx-json, cyclonedx-json
