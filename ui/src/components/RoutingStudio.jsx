@@ -84,10 +84,11 @@ const RoutingStudio = () => {
           <h4 className="font-semibold mb-3">Task Meta</h4>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="task-select" className="block text-sm font-medium text-gray-700 mb-1">
                 Task:
               </label>
               <select
+                id="task-select"
                 value={task}
                 onChange={(e) => setTask(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -99,10 +100,11 @@ const RoutingStudio = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="loa-select" className="block text-sm font-medium text-gray-700 mb-1">
                 LOA:
               </label>
               <select
+                id="loa-select"
                 value={loa}
                 onChange={(e) => setLoa(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -113,10 +115,11 @@ const RoutingStudio = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="tenant-select" className="block text-sm font-medium text-gray-700 mb-1">
                 Tenant:
               </label>
               <select
+                id="tenant-select"
                 value={tenant}
                 onChange={(e) => setTenant(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -126,10 +129,11 @@ const RoutingStudio = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="cost-cap-input" className="block text-sm font-medium text-gray-700 mb-1">
                 Cost Cap:
               </label>
               <input
+                id="cost-cap-input"
                 type="text"
                 value={costCap}
                 onChange={(e) => setCostCap(e.target.value)}
