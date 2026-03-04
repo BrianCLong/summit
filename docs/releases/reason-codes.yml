@@ -65,3 +65,39 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+- code: 'SCHEMA_MAJOR_UNSUPPORTED'
+  description: 'Auto-added fix for SCHEMA_MAJOR_UNSUPPORTED.'
+
+- code: 'SCHEMA_VERSION_INVALID'
+  description: 'Auto-added fix for SCHEMA_VERSION_INVALID.'
+
+- code: 'JSON_PARSE_ERROR'
+  description: 'Auto-added fix for JSON_PARSE_ERROR.'
+
+- code: 'INVALID_ENUM'
+  description: 'Auto-added fix for INVALID_ENUM.'
+
+- code: 'DRIFT_DETECTED'
+  description: 'Auto-added fix for DRIFT_DETECTED.'
+
+- code: 'DRIFT_ERROR'
+  description: 'Auto-added fix for DRIFT_ERROR.'
+
+- code: 'SIG_ORPHAN'
+  description: 'Auto-added fix for SIG_ORPHAN.'
+
+- code: 'SIG_INVALID'
+  description: 'Auto-added fix for SIG_INVALID.'
+
+- code: 'COSIGN_MISSING'
+  description: 'Auto-added fix for COSIGN_MISSING.'
+
+- code: 'SIG_MISSING'
+  description: 'Auto-added fix for SIG_MISSING.'
+
+- code: 'ATTESTATION_MISSING'
+  description: 'Auto-added fix for ATTESTATION_MISSING.'
+
+- code: 'SHA256SUMS_INVALID_FORMAT'
+  description: 'Auto-added fix for SHA256SUMS_INVALID_FORMAT.'

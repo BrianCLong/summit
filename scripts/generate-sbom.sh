@@ -1,3 +1,4 @@
+mkdir -p ./sboms/
 #!/bin/bash
 # SBOM Generation Script for Summit Platform
 # Generates SBOMs for all artifacts and stores alongside binaries
