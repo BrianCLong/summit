@@ -1,0 +1,64 @@
+name: ci-gate
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened, ready_for_review]
+  merge_group:
+
+concurrency:
+  group: ci-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  gate:
+    name: "PR Gate"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Path-Based Filter & Run
+        run: |
+          set -e
+          CHANGES=$(git diff --name-only origin/main...HEAD)
+          
+          # 1. CORE CHECKS (Always run for code changes)
+          echo "Running Lint & Typecheck..."
+          pnpm lint
+          pnpm typecheck
+
+          # 2. SELECTIVE BUILD & TEST
+          if echo "$CHANGES" | grep -qE "^(server|packages/core|services/api-gateway)"; then
+            echo "Server/Core changes detected. Running server build & tests..."
+            pnpm --filter "@intelgraph/server" build
+            pnpm --filter "@intelgraph/server" test:unit
+          fi
+
+          if echo "$CHANGES" | grep -qE "^(client|apps/web)"; then
+            echo "Client changes detected. Running client build & tests..."
+            pnpm --filter "@intelgraph/web" build
+            pnpm --filter "@intelgraph/web" test:unit
+          fi
+
+          # 3. EVIDENCE CONSISTENCY (If scripts exist)
+          if [ -f scripts/verify_evidence_id_consistency.mjs ]; then
+            node scripts/verify_evidence_id_consistency.mjs
+          fi

@@ -1,0 +1,49 @@
+name: main-validation
+
+on:
+  push:
+    branches: [ main ]
+  merge_group:
+
+jobs:
+  integration-tests:
+    name: "Tier 2: Integration Tests"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Start Infrastructure
+        run: make up-core-only # Assuming a target exists or equivalent
+      - name: Run Tests
+        run: pnpm test:integration
+
+  e2e-suite:
+    name: "Tier 2: E2E Playwright"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Playwright Browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Run E2E
+        run: pnpm test:e2e
+
+  security-compliance:
+    name: "Tier 2: SOC & Compliance"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: SOC Audit
+        run: bash scripts/test-soc-controls.sh

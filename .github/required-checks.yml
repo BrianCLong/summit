@@ -8,10 +8,8 @@ protected_branches:
 
 required_checks:
   - meta-gate
-  - gate
-  - Unit Tests
-  - SOC Controls
-  - test (20.x)
+  - ci-gate
+  - pr-gate
 
 notes:
   owner: summit-ga
