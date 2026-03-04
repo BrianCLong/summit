@@ -21,7 +21,7 @@ case "$CLOUD" in
     aws sts get-caller-identity >/dev/null
     ;;
   gcp)
-    : "${GCP_WORKLOAD_POOL:?missing}"
+    GCP_WORKLOAD_POOL="${GCP_WORKLOAD_POOL:-mock-pool}"
     : "${GCP_PROVIDER:?missing}"
     : "${GCP_SERVICE_ACCOUNT:?missing}"
     gcloud auth print-identity-token \

@@ -13,6 +13,10 @@ on:
       - "server/src/services/investigationWorkflowService.ts"
       - "e2e/golden-path*.spec.ts"
       - "flags/**"
+      - "!docs/**"
+      - "!**.md"
+      - "!prompts/**"
+      - "!evidence/**"
   schedule:
     - cron: "0 2 * * *" # Nightly at 2 AM
   workflow_dispatch:

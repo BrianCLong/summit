@@ -13,6 +13,8 @@ required_checks:
   - Unit Tests
   - SOC Controls
   - test (20.x)
+  - docs-validation
+  - guard
 
 notes:
   owner: summit-ga

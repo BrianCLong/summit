@@ -93,3 +93,46 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Major schema version unsupported
+    severity: error
+  - code: SCHEMA_VERSION_INVALID
+    description: Schema version invalid
+    severity: error
+  - code: JSON_PARSE_ERROR
+    description: JSON parse error
+    severity: error
+  - code: MISSING_FIELD
+    description: Missing field
+    severity: error
+  - code: INVALID_ENUM
+    description: Invalid enum value
+    severity: error
+  - code: DRIFT_DETECTED
+    description: Drift detected
+    severity: error
+  - code: DRIFT_ERROR
+    description: Drift error
+    severity: error
+  - code: SIG_ORPHAN
+    description: Orphan signature
+    severity: error
+  - code: SIG_INVALID
+    description: Invalid signature
+    severity: error
+  - code: COSIGN_MISSING
+    description: Cosign tool missing
+    severity: error
+  - code: SIG_MISSING
+    description: Missing signature
+    severity: error
+  - code: ATTESTATION_MISSING
+    description: Missing attestation
+    severity: error
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Invalid checksums format
+    severity: error
+  - code: INVALID_JSON
+    description: Invalid JSON format
+    severity: error
