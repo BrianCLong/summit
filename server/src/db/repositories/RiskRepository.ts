@@ -66,35 +66,8 @@ export class RiskRepository {
             ) VALUES ${placeholders.join(', ')}
             RETURNING *`;
 
-          try {
-            const sigRows = await tx.query(batchSql, values);
-            sigRows.forEach((row: any) => savedSignals.push(this.mapSignal(row)));
-          } catch (e: any) {
-            // BOLT: Fallback to individual inserts if batch fails for reliability
-            for (const sig of chunk) {
-              try {
-                const individualSql = `
-                  INSERT INTO risk_signals (
-                    risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-                  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                  RETURNING *`;
-                const individualRows = await tx.query(individualSql, [
-                  savedScore.id,
-                  sig.type,
-                  sig.source || null,
-                  sig.value,
-                  sig.weight,
-                  sig.contributionScore,
-                  sig.description || null,
-                  sig.detectedAt || now,
-                ]);
-                savedSignals.push(this.mapSignal(individualRows[0]));
-              } catch (innerErr) {
-                // Silently skip failed individual inserts within this chunk or log them?
-                // Standard pattern from tickets.ts logs it.
-              }
-            }
-          }
+          const sigRows = await tx.query(batchSql, values);
+          sigRows.forEach((row: any) => savedSignals.push(this.mapSignal(row)));
         }
       }
 

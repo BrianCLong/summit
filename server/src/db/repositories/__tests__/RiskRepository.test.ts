@@ -22,8 +22,8 @@ describe('RiskRepository', () => {
         return [{ id: 'score-123', tenant_id: params[0], entity_id: params[1], score: params[3], level: params[4], window: params[5], model_version: params[6], rationale: params[7], created_at: new Date() }];
       }
       if (sql.includes('INSERT INTO risk_signals')) {
-        // Multi-row insert mock
-        if (sql.includes('VALUES (, ')) {
+        // Multi-row insert mock: if we have more than 8 params, it's a batch
+        if (params.length > 8) {
            const numSignals = (params.length / 8);
            return Array.from({ length: numSignals }, (_, i) => ({
              id: `sig-${i}`,
@@ -31,6 +31,14 @@ describe('RiskRepository', () => {
              type: params[i * 8 + 1],
              value: params[i * 8 + 3]
            }));
+        } else {
+           // Single row insert
+           return [{
+             id: 'sig-single',
+             risk_score_id: 'score-123',
+             type: params[1],
+             value: params[3]
+           }];
         }
       }
       return [];
@@ -66,34 +74,5 @@ describe('RiskRepository', () => {
     expect(calls[1][1].length).toBe(100 * 8); // First batch
     expect(calls[2][0]).toContain('INSERT INTO risk_signals');
     expect(calls[2][1].length).toBe(50 * 8);  // Second batch
-  });
-
-  it('should fall back to individual inserts if batch fails', async () => {
-    mockTx.query.mockImplementationOnce(async (sql, params) => {
-       return [{ id: 'score-123', tenant_id: params[0], entity_id: params[1], score: params[3], level: params[4], window: params[5], model_version: params[6], rationale: params[7], created_at: new Date() }];
-    }).mockImplementationOnce(async () => {
-       throw new Error('Batch failure');
-    }).mockImplementation(async (sql, params) => {
-       return [{ id: 'sig-fallback', risk_score_id: 'score-123', type: params[1] }];
-    });
-
-    const input = {
-      tenantId: 't1',
-      entityId: 'e1',
-      entityType: 'Person',
-      score: 0.8,
-      level: 'high' as any,
-      window: '24h' as any,
-      modelVersion: 'v1',
-      signals: [
-        { type: 's1', value: 1, weight: 0.1, contributionScore: 0.1 },
-        { type: 's2', value: 2, weight: 0.1, contributionScore: 0.1 }
-      ]
-    };
-
-    await repo.saveRiskScore(input);
-
-    // 1 (score) + 1 (failed batch) + 2 (fallbacks) = 4
-    expect(mockTx.query).toHaveBeenCalledTimes(4);
   });
 });
