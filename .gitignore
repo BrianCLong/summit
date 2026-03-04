@@ -364,10 +364,10 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
-# Worktrees and temporary paths
-.worktrees/
-_worktrees/
 
+# Evidence outputs (governed artifacts)
+!evidence/out/
+!evidence/out/**
 .pnpm-store/
 dist-isolated/
 services/agent-runtime-restored/
@@ -381,8 +381,10 @@ packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
 *.js.map
+
 .worktrees/
 _worktrees/
+.gitmodules
 
 # AI tooling bloat (all committed — 90% of clone size)
 .claude/
