@@ -1,0 +1,75 @@
+name: CI run metadata collector
+
+on:
+  workflow_run:
+    workflows: ["*"]
+    types: [completed]
+
+concurrency:
+  group: ci-metadata-collector-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/github-script@v7
+        id: grab
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const run = context.payload.workflow_run;
+            const { owner, repo } = context.repo;
+
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner, repo, run_id: run.id, filter: 'all', per_page: 100
+            });
+
+            const created = new Date(run.created_at);
+            const started = jobs.data.jobs.length
+              ? new Date(jobs.data.jobs[0].started_at)
+              : null;
+
+            const queue_delay_ms = started ? (started - created) : null;
+
+            const out = {
+              repo: `${owner}/${repo}`,
+              run_id: run.id,
+              run_number: run.run_number,
+              workflow: run.name,
+              event: run.event,
+              conclusion: run.conclusion,
+              created_at: run.created_at,
+              updated_at: run.updated_at,
+              queue_delay_ms,
+              head_branch: run.head_branch,
+              head_sha: run.head_sha,
+              jobs: jobs.data.jobs.map(j => ({
+                id: j.id,
+                name: j.name,
+                runner: j.runner_name || null,
+                status: j.status,
+                conclusion: j.conclusion,
+                started_at: j.started_at,
+                completed_at: j.completed_at,
+                duration_ms: j.completed_at
+                  ? (new Date(j.completed_at) - new Date(j.started_at))
+                  : null,
+                steps: (j.steps || []).map(s => ({
+                  name: s.name,
+                  conclusion: s.conclusion,
+                  number: s.number
+                }))
+              }))
+            };
+
+            fs.writeFileSync('run-meta.json', JSON.stringify(out, null, 2));
+      - uses: actions/upload-artifact@v4
+        with:
+          name: run-meta-${{ github.event.workflow_run.id }}
+          path: run-meta.json
+          retention-days: 7
