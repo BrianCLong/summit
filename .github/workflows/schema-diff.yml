@@ -53,11 +53,11 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
-          cache: "npm"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: |
-          npm ci
+          pnpm install --frozen-lockfile
           npm install -g ts-node typescript
 
       - name: Run schema diff
