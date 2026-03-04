@@ -1,0 +1,38 @@
+name: Docs Fast Track
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+
+jobs:
+  docs-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Markdown lint
+        run: pnpm run lint:md
+
+      - name: Spell check
+        run: pnpm run spellcheck
+
+      - name: Link check
+        run: pnpm run linkcheck
