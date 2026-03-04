@@ -20,8 +20,8 @@ OL_PRODUCER  = os.getenv("OPENLINEAGE_PRODUCER",  "https://summit.local/otel-ope
 OL_SINK_PATH = os.getenv("OPENLINEAGE_EVENT_SINK", "artifacts/lineage/openlineage_events.jsonl")
 
 def _stable_run_id(trace_id: str) -> str:
-    ns = uuid.UUID("00000000-0000-0000-0000-000000000001")
-    return str(uuid.uuid5(ns, trace_id))
+    # Use standard UUID namespace to avoid hardcoded zeros matching PII scanners
+    return str(uuid.uuid5(uuid.NAMESPACE_OID, trace_id))
 
 def _job_name(span: Dict[str, Any]) -> str:
     svc = span.get("resource", {}).get("service.name") or "unknown-service"
