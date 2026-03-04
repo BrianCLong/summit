@@ -231,8 +231,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x opa-bin
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x opa
           sudo mv opa /usr/local/bin/
 
       - name: Validate ingest policies

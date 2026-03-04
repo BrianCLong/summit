@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Evaluate restricted path changes
         uses: actions/github-script@v7
@@ -74,12 +74,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@v4
 
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs
@@ -91,12 +86,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -111,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Get changed files
         id: files
