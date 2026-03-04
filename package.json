@@ -56,6 +56,7 @@
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",
     "security:evidence-pack:offline": "npx tsx scripts/security/evidence-pack.ts --mode=offline --fixturesDir=scripts/security/fixtures",
     "security:drift-check": "npx tsx scripts/security/drift-check.ts",
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "test:quarantine": "echo 'Quarantine test placeholder - no flaky tests currently'",
