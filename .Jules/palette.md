@@ -1,3 +1,0 @@
-## 2024-05-24 - Missing ARIA Labels on Icon-Only Buttons
-**Learning:** Found a specific component (`ui/components/Switchboard.tsx`) where icon-only buttons for agent interactions lack `aria-label` or `title` attributes. This is an accessibility issue for screen readers. In standardizing this, we added localized strings so these elements are both translated and accessible.
-**Action:** When auditing or implementing new buttons that do not have text nodes, always ensure that localized `aria-label` and `title` attributes are included to explicitly state the button's action.
