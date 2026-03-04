@@ -18,5 +18,5 @@ ON MATCH
              THEN $props
              ELSE {}
            END,
-      n.__last_applied_lsn = GREATEST(coalesce(n.__last_applied_lsn, 0), $lsn)
+      n.__last_applied_lsn = CASE WHEN $lsn > coalesce(n.__last_applied_lsn, 0) THEN $lsn ELSE coalesce(n.__last_applied_lsn, 0) END
 RETURN n.pk_digest AS pk, n.__last_applied_lsn AS last_lsn
