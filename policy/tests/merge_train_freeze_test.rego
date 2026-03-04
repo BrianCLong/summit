@@ -26,7 +26,7 @@ weekend_window := [{
   "name": "Weekend freeze",
 }]
 
-test_allows_valid_token_during_holiday if {
+test_allows_valid_token_during_holiday {
   decision := merge_train.result with input as {
     "token": valid_token,
     "reasons": winter_window,
@@ -36,7 +36,7 @@ test_allows_valid_token_during_holiday if {
   count(decision.denies) == 0
 }
 
-test_denies_missing_token if {
+test_denies_missing_token {
   decision := merge_train.result with input as {
     "reasons": winter_window,
     "now": "2025-12-20T10:00:00Z",
@@ -46,7 +46,7 @@ test_denies_missing_token if {
   decision.denies[msg] == "missing override token"
 }
 
-test_denies_unapproved_role if {
+test_denies_unapproved_role {
   bad_token := object.union(valid_token, {"approved_by": ["random"]})
 
   decision := merge_train.result with input as {
@@ -58,7 +58,7 @@ test_denies_unapproved_role if {
   not decision.allow_override
 }
 
-test_requires_incident_for_after_hours if {
+test_requires_incident_for_after_hours {
   maintenance_token := object.union(valid_token, {"reason": "maintenance"})
 
   decision := merge_train.result with input as {

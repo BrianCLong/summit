@@ -31,7 +31,7 @@ base_context := {
   "currentAcr": "loa1"
 }
 
-decision_for(subject, resource, action) := decision if {
+decision_for(subject, resource, action) = decision {
   decision := abac.decision with input as {
     "subject": subject,
     "resource": resource,
@@ -42,45 +42,45 @@ decision_for(subject, resource, action) := decision if {
 
 base_decision(action) := decision_for(base_subject, base_resource, action)
 
-allow(decision) if {
+allow(decision) {
   decision.allow
 }
 
-test_allow_same_tenant if {
+test_allow_same_tenant {
   decision := base_decision("dataset:read")
   allow(decision)
   decision.reason == "allow"
   decision.obligations[0].type == "step_up"
 }
 
-test_deny_cross_tenant if {
+test_deny_cross_tenant {
   resource := merge(base_resource, {"tenantId": "tenantB"})
   decision := decision_for(base_subject, resource, "dataset:read")
   not decision.allow
   decision.reason == "tenant_mismatch"
 }
 
-test_deny_residency_mismatch if {
+test_deny_residency_mismatch {
   resource := merge(base_resource, {"residency": "eu"})
   decision := decision_for(base_subject, resource, "dataset:read")
   not decision.allow
   decision.reason == "residency_mismatch"
 }
 
-test_deny_clearance if {
+test_deny_clearance {
   subject := merge(base_subject, {"clearance": "restricted"})
   decision := decision_for(subject, base_resource, "dataset:read")
   not decision.allow
   decision.reason == "insufficient_clearance"
 }
 
-test_least_privilege_violation if {
+test_least_privilege_violation {
   decision := base_decision("dataset:delete")
   not decision.allow
   decision.reason == "least_privilege_violation"
 }
 
-test_requires_step_up_for_secret if {
+test_requires_step_up_for_secret {
   resource := merge(base_resource, {"classification": "secret"})
   subject := merge(base_subject, {"clearance": "secret"})
   decision := decision_for(subject, resource, "dataset:read")
@@ -88,7 +88,7 @@ test_requires_step_up_for_secret if {
   decision.obligations[0].type == "step_up"
 }
 
-test_step_up_satisfied_with_high_acr if {
+test_step_up_satisfied_with_high_acr {
   resource := merge(base_resource, {"classification": "confidential"})
   context := merge(base_context, {"currentAcr": "loa2"})
   decision := abac.decision with input as {
@@ -101,7 +101,7 @@ test_step_up_satisfied_with_high_acr if {
   count(decision.obligations) == 0
 }
 
-test_dual_control_blocks_privileged_action_without_approvals if {
+test_dual_control_blocks_privileged_action_without_approvals {
   subject := merge(base_subject, {
     "id": "sam",
     "roles": ["incident-responder"],
@@ -131,7 +131,7 @@ test_dual_control_blocks_privileged_action_without_approvals if {
   decision.obligations[i].type == "dual_control"
 }
 
-test_dual_control_rejects_self_approval_and_requires_two_distinct if {
+test_dual_control_rejects_self_approval_and_requires_two_distinct {
   subject := merge(base_subject, {
     "id": "sam",
     "roles": ["incident-responder"],
@@ -161,7 +161,7 @@ test_dual_control_rejects_self_approval_and_requires_two_distinct if {
   decision.obligations[i].type == "dual_control"
 }
 
-test_dual_control_allows_privileged_action_with_two_distinct_approvals if {
+test_dual_control_allows_privileged_action_with_two_distinct_approvals {
   subject := merge(base_subject, {
     "id": "sam",
     "roles": ["incident-responder"],

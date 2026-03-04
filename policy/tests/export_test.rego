@@ -1,6 +1,6 @@
 package intelgraph.policy.export
 
-test_deny_on_restricted_license if {
+test_deny_on_restricted_license {
   obj := {
     "action": "export",
     "dataset": {
@@ -15,7 +15,7 @@ test_deny_on_restricted_license if {
   count(dr) > 0
 }
 
-test_allow_when_no_denies if {
+test_allow_when_no_denies {
   obj := {
     "action": "export",
     "dataset": {

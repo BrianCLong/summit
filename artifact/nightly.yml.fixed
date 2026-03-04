@@ -1,0 +1,41 @@
+name: Nightly (Long-Tail Matrix)
+on:
+  schedule:
+    - cron: 0 2 * * *
+  workflow_dispatch: null
+jobs:
+  test-packages:
+    name: Test Package
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - graph-sync-validator
+          - intelgraph-server
+          - summit-api
+          - summit-web
+          - connector-sdk
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use pinned pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm --filter ${{ matrix.package }} build
+      - name: Test
+        run: pnpm --filter ${{ matrix.package }} test
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
+      cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true

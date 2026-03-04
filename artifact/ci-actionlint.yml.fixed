@@ -1,0 +1,38 @@
+name: Workflow Lint (actionlint)
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/**
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/**
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ci-actionlint:
+    name: ci-actionlint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install actionlint
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          sudo mv ./actionlint /usr/local/bin/
+          actionlint -version
+      - name: Run actionlint
+        run: |
+          # Lint only active top-level workflows; archived/legacy workflow
+          # snapshots are intentionally excluded from blocking CI.
+          find .github/workflows -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' \) \
+            | xargs actionlint -shellcheck= -color -verbose
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
+      cancel-in-progress: true

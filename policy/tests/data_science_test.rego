@@ -1,6 +1,6 @@
 package intelgraph.authz
 
-test_data_scientist_can_read_dataset if {
+test_data_scientist_can_read_dataset {
     allow with input as {
         "subject": {"role": "data_scientist"},
         "action": "read",
@@ -8,7 +8,7 @@ test_data_scientist_can_read_dataset if {
     }
 }
 
-test_data_scientist_can_deploy_staging if {
+test_data_scientist_can_deploy_staging {
     allow with input as {
         "subject": {"role": "data_scientist"},
         "action": "deploy",
@@ -16,7 +16,7 @@ test_data_scientist_can_deploy_staging if {
     }
 }
 
-test_data_scientist_cannot_deploy_prod if {
+test_data_scientist_cannot_deploy_prod {
     not allow with input as {
         "subject": {"role": "data_scientist"},
         "action": "deploy",

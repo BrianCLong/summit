@@ -39,16 +39,16 @@ unsupported_algo_input := {
   "expiry": "2025-02-13T11:00:00Z"
 }
 
-test_allow_valid_envelope if {
+test_allow_valid_envelope {
   signer.allow with input as valid_input
 }
 
-test_reject_expired_envelope if {
+test_reject_expired_envelope {
   not signer.allow with input as expired_input
   "attestation expired" in signer.reasons with input as expired_input
 }
 
-test_reject_unsupported_algorithm if {
+test_reject_unsupported_algorithm {
   not signer.allow with input as unsupported_algo_input
   signer.reasons[_] == "unsupported algorithm: rsa-1024" with input as unsupported_algo_input
 }

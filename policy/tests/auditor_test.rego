@@ -1,6 +1,6 @@
 package intelgraph.authz
 
-test_auditor_can_read_audit_logs if {
+test_auditor_can_read_audit_logs {
     allow with input as {
         "subject": {"role": "auditor"},
         "action": "read",
@@ -8,7 +8,7 @@ test_auditor_can_read_audit_logs if {
     }
 }
 
-test_auditor_can_read_compliance_report if {
+test_auditor_can_read_compliance_report {
     allow with input as {
         "subject": {"role": "auditor"},
         "action": "read",
@@ -16,7 +16,7 @@ test_auditor_can_read_compliance_report if {
     }
 }
 
-test_auditor_cannot_write_report if {
+test_auditor_cannot_write_report {
     not allow with input as {
         "subject": {"role": "auditor"},
         "action": "write",

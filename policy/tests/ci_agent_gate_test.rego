@@ -5,7 +5,7 @@ import future.keywords.if
 import future.keywords.in
 
 # Test: Allow non-agent user
-test_allow_user if {
+test_allow_user {
     input_data := {
         "user": {
             "type": "USER",
@@ -20,7 +20,7 @@ test_allow_user if {
 }
 
 # Test: Deny low-tier agent on protected path
-test_deny_low_tier_protected if {
+test_deny_low_tier_protected {
     input_data := {
         "user": {
             "type": "AGENT",
@@ -37,7 +37,7 @@ test_deny_low_tier_protected if {
 }
 
 # Test: Allow tier-4 agent on protected path
-test_allow_tier4_protected if {
+test_allow_tier4_protected {
     input_data := {
         "user": {
             "type": "AGENT",
@@ -52,7 +52,7 @@ test_allow_tier4_protected if {
 }
 
 # Test: Deny unknown tier
-test_deny_unknown_tier if {
+test_deny_unknown_tier {
     input_data := {
         "user": {
             "type": "AGENT",
@@ -69,7 +69,7 @@ test_deny_unknown_tier if {
 }
 
 # Test: Allow low-tier agent on non-protected path
-test_allow_low_tier_normal if {
+test_allow_low_tier_normal {
     input_data := {
         "user": {
             "type": "AGENT",
@@ -84,7 +84,7 @@ test_allow_low_tier_normal if {
 }
 
 # Helper to check partial message match
-contains_msg(denials, part) if {
+contains_msg(denials, part) {
     some d in denials
     contains(d, part)
 }
