@@ -2,7 +2,7 @@
   "name": "@intelgraph/gateway",
   "private": true,
   "scripts": {
-    "build": "tsc -p . || true",
+    "build": "tsc -p .",
     "dev": "node --watch dist/server.js || ts-node src/server.ts",
     "test:unit": "vitest run"
   },
