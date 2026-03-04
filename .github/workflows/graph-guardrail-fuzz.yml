@@ -34,6 +34,7 @@ jobs:
           GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 80
           GRAPH_GUARDRAIL_FUZZ_SEED: 8339
           GRAPH_GUARDRAIL_FUZZ_MAX_ITERATIONS: 120
+          NODE_OPTIONS: --experimental-vm-modules
       - name: Run guardrail fuzz (nightly full)
         if: github.event_name == 'schedule'
         run: pnpm test:fuzz:graph-guardrails
@@ -41,3 +42,4 @@ jobs:
           GRAPH_GUARDRAIL_FUZZ_ITERATIONS: 300
           GRAPH_GUARDRAIL_FUZZ_SEED: 8339
           GRAPH_GUARDRAIL_FUZZ_MAX_ITERATIONS: 300
+          NODE_OPTIONS: --experimental-vm-modules

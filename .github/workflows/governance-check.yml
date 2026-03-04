@@ -28,12 +28,14 @@ jobs:
               if (title.startsWith('feat:')) labels.push('minor');
               else if (title.startsWith('fix:')) labels.push('patch');
               else if (title.startsWith('docs:')) labels.push('patch');
+              else if (title.startsWith('perf:')) labels.push('patch');
+              else if (title.startsWith('⚡ Bolt:')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
-              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:, perf:, ⚡ Bolt:).");
             }
 
   check-approvals:
