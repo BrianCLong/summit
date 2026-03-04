@@ -14,7 +14,6 @@ describe('ResidencyGuard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    guard = ResidencyGuard.getInstance();
   });
 
   it('should allow access when region is allowed', async () => {

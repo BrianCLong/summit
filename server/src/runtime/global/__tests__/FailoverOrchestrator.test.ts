@@ -34,7 +34,6 @@ describe('FailoverOrchestrator', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         jest.useFakeTimers();
-        orchestrator = FailoverOrchestrator.getInstance();
 
         getStatusMock.mockReturnValue({
             failoverMode: 'AUTOMATIC',
