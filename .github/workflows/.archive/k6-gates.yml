@@ -32,7 +32,10 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9.12.0
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/main
           run_install: false
 
       - name: Install dependencies
