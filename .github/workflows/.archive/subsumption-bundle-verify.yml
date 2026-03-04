@@ -2,6 +2,11 @@ name: Subsumption Bundle Verify
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "subsumption/**"
       - "scripts/ci/**"

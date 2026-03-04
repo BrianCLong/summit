@@ -6,6 +6,11 @@ on:
       - 'ai-ml-suite/emu3/**'
       - '.github/workflows/emu3-ci.yml'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'ai-ml-suite/emu3/**'
       - '.github/workflows/emu3-ci.yml'
