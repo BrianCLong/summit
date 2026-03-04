@@ -3,6 +3,7 @@
 <!--
 POLICY:
 1. Always maintain an [Unreleased] section at the top.
+- Added `@intelgraph/summit-lineage-normalizer` to strictly normalize OpenTelemetry spans to OpenLineage canonical Dataset IDs.
 2. Use subsections: Added, Changed, Deprecated, Removed, Fixed, Security.
 3. Every PR must add an entry here unless labeled 'skip-changelog'.
 -->
@@ -13,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- Added `@intelgraph/summit-lineage-normalizer` to strictly normalize OpenTelemetry spans to OpenLineage canonical Dataset IDs.
 
 ### Fixed
 - Added paths-ignore blocks to ci pipelines
@@ -206,6 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [API Documentation](./docs/api/README.md)
 
 [Unreleased]: https://github.com/org/summit/compare/v3.0.0...HEAD
+- Added `@intelgraph/summit-lineage-normalizer` to strictly normalize OpenTelemetry spans to OpenLineage canonical Dataset IDs.
 [3.0.1]: https://github.com/org/summit/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/org/summit/releases/tag/v3.0.0
 ## v2.0.0-rc.1 (2025-10-07)
