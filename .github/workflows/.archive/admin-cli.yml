@@ -38,6 +38,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -84,6 +85,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -117,6 +119,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -161,6 +164,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -198,6 +202,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -233,6 +238,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+          version: ${{ env.PNPM_VERSION }}
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
