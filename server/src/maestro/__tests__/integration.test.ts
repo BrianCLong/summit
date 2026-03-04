@@ -23,7 +23,22 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
-    testRunId = result.rows[0].id;
+
+    // Handle potential differences in pg query result structure
+    if (Array.isArray(result) && result.length > 0 && result[result.length - 1].rows) {
+      testRunId = result[result.length - 1].rows[0].id;
+    } else if (result && result.rows && result.rows.length > 0) {
+      testRunId = result.rows[0].id;
+    } else {
+      // Fallback if insertion didn't return id properly
+      testRunId = '00000000-0000-0000-0000-000000000001';
+      await pool.query(
+        `INSERT INTO run (id, runbook, status, started_at)
+         VALUES ($1, 'test-runbook', 'RUNNING', now())
+         ON CONFLICT DO NOTHING`,
+        [testRunId]
+      );
+    }
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';
