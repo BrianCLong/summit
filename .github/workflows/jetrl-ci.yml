@@ -8,19 +8,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
       - run: pip install pytest jsonschema torch
-      - run: pytest tests/test_detectors_deny_by_default.py
-      - run: |
-          TEST_FILES=()
-          for f in tests/test_precision_flow_policy.py tests/test_detectors_deny_by_default.py; do
-            if [[ -f "$f" ]]; then
-              TEST_FILES+=("$f")
-            fi
-          done
-          if [[ "${#TEST_FILES[@]}" -gt 0 ]]; then
-            pytest "${TEST_FILES[@]}"
-          else
-            echo "No test files found; skipping pytest."
-          fi
+      - run: pytest tests/test_precision_flow_policy.py tests/test_detectors_deny_by_default.py
   evidence:
     runs-on: ubuntu-latest
     steps:

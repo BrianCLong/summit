@@ -65,6 +65,9 @@ on:
         description: "Container registry password/token"
         required: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -186,7 +189,7 @@ jobs:
       - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
-        uses: anchore/sbom-action@v0.16.0
+        uses: anchore/sbom-action@v0
         with:
           image: ${{ steps.image-uri.outputs.uri }}
           format: spdx-json, cyclonedx-json
