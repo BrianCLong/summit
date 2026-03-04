@@ -25,6 +25,34 @@ maestro_nogo:
     description: Required field missing
   - code: BUNDLE_INVALID_VALUE
     description: Unsupported enum/value encountered
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Auto-added
+  - code: SCHEMA_VERSION_INVALID
+    description: Auto-added
+  - code: JSON_PARSE_ERROR
+    description: Auto-added
+  - code: MISSING_FIELD
+    description: Auto-added
+  - code: INVALID_ENUM
+    description: Auto-added
+  - code: DRIFT_DETECTED
+    description: Auto-added
+  - code: DRIFT_ERROR
+    description: Auto-added
+  - code: SIG_ORPHAN
+    description: Auto-added
+  - code: SIG_INVALID
+    description: Auto-added
+  - code: COSIGN_MISSING
+    description: Auto-added
+  - code: SIG_MISSING
+    description: Auto-added
+  - code: ATTESTATION_MISSING
+    description: Auto-added
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Auto-added
+  - code: INVALID_JSON
+    description: Auto-added
 
 evidence_check:
   - code: EVIDENCE_MISSING
