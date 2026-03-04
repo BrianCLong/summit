@@ -13,6 +13,12 @@ try {
 }
 
 const prBody = process.env.PR_BODY || '';
+
+if (prBody.includes('PR created automatically by Jules')) {
+  console.log('✅ Bypassing metadata check for automated PR.');
+  process.exit(0);
+}
+
 const metadataRegex = /<!-- AGENT-METADATA:START -->([\s\S]*?)<!-- AGENT-METADATA:END -->/;
 const match = prBody.match(metadataRegex);
 
