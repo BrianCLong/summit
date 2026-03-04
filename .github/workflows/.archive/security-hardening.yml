@@ -30,7 +30,11 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

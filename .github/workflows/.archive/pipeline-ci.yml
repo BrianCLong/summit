@@ -29,7 +29,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -66,7 +70,11 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
           run_install: false
       - name: Get pnpm store directory
         shell: bash
@@ -196,7 +204,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
           run_install: false
 
       - name: Install dependencies

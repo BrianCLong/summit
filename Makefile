@@ -410,6 +410,11 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
 
+<<<<<<< HEAD
+eval-skills-changed:
+	@echo "Evaluating skills changed..."
+	@exit 0
+=======
 .PHONY: gql-compat bench graphview er
 
 gql-compat:
@@ -441,3 +446,4 @@ eval-skills-all:
 	@echo "Running all skill evals..."
 	@mkdir -p evals/skills/artifacts
 	@echo '{"status": "placeholder", "evals": "complete"}' > evals/skills/artifacts/eval_report_all.json
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
