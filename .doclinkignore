@@ -382,3 +382,8 @@ docs/warehouse/GUIDE.md:../packages/etl-pipelines/README.md
 docs/warehouse/GUIDE.md:../packages/query-optimizer/README.md
 README.md:CHANGELOG-v2.0.0.md
 README.md:docs/MIGRATION-v0.1-to-v2.0.md
+docs/ops/cloud-ga-slo.md:docs/architecture/cloud-ga-architecture.md
+docs/ops/cloud-ga-slo.md:docs/security/cloud-ga-security-model.md
+docs/rfcs/cloud-ga-readiness-spec.md:docs/architecture/cloud-ga-architecture.md
+docs/rfcs/cloud-ga-readiness-spec.md:docs/security/cloud-ga-security-model.md
+docs/rfcs/cloud-ga-readiness-spec.md:docs/ops/cloud-ga-slo.md

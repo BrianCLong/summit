@@ -78,24 +78,18 @@ class EvidenceBundleGenerator {
 
     // Run k6 performance tests
     let k6Results = {};
+    console.log('  🧪 Running k6 performance tests...');
     try {
-      console.log('  🧪 Running k6 performance tests...');
-      const k6Output = execSync(
+      execSync(
         'k6 run tests/k6/api-performance.js --out json=k6-results.json',
-        { encoding: 'utf8', timeout: 300000 },
+        { encoding: 'utf8', timeout: 300000, stdio: 'inherit' },
       );
 
-      // Read k6 results
-      try {
-        const k6Data = await fs.readFile('k6-summary.json', 'utf8');
-        k6Results = JSON.parse(k6Data);
-      } catch {
-        // Fallback to mock results for development
-        k6Results = this.generateMockSLOResults();
-      }
+      const k6Data = await fs.readFile('k6-summary.json', 'utf8');
+      k6Results = JSON.parse(k6Data);
     } catch (error) {
-      console.log('  ⚠️  k6 tests failed, using mock results');
-      k6Results = this.generateMockSLOResults();
+      console.error('  ❌ ERROR: k6 tests failed or k6-summary.json not found. ' + error.message);
+      throw new Error('SLO validation failed: live data required');
     }
 
     const sloValidation = {
@@ -147,8 +141,8 @@ class EvidenceBundleGenerator {
       sbom_generated: await this.generateSBOM(),
       vulnerability_scan: await this.runSecurityScan(),
       oidc_configuration: await this.validateOIDCConfig(),
-      encryption_at_rest: true, // Mock - TODO: Validate actual encryption
-      network_isolation: true, // Mock - TODO: Validate network policies
+      encryption_at_rest: await this.validateEncryptionAtRest(),
+      network_isolation: await this.validateNetworkIsolation(),
     };
 
     this.artifacts.security = security;
@@ -170,7 +164,7 @@ class EvidenceBundleGenerator {
         timestamp: this.timestamp,
       },
       supply_chain: {
-        dependencies_verified: true, // Mock - TODO: Implement actual verification
+        dependencies_verified: await this.verifyDependenciesIntegrity(),
         lockfile_integrity: await this.verifyLockfileIntegrity(),
       },
     };
@@ -488,25 +482,36 @@ class EvidenceBundleGenerator {
     }
   }
 
-  generateMockSLOResults() {
-    return {
-      slo_validation: {
-        entity_by_id_p95_ms: 285,
-        write_p95_ms: 420,
-        path_between_p95_ms: 890,
-        search_entities_p95_ms: 310,
-        entity_by_id_slo_met: true,
-        path_between_slo_met: true,
-        search_entities_slo_met: true,
-        error_rate: 0.008,
-        failure_rate: 0.003,
-      },
-      performance_metrics: {
-        total_requests: 5000,
-        avg_response_time_ms: 180,
-        throughput_rps: 42,
-      },
-    };
+  async validateEncryptionAtRest() {
+    console.log('  🔐 Validating encryption at rest...');
+    try {
+      // Check if DB volumes are using encrypted storage (e.g. searching for LUKS or cloud-provider encryption flags)
+      // In this dev environment, we check if PG_ENCRYPTION_ENABLED is true in the env
+      return process.env.PG_ENCRYPTION_ENABLED === 'true';
+    } catch {
+      return false;
+    }
+  }
+
+  async validateNetworkIsolation() {
+    console.log('  🌐 Validating network isolation...');
+    try {
+      // Execute docker network inspect to verify services are on the 'prov-tier' isolated network
+      const output = execSync('docker network inspect summit_prov-tier', { encoding: 'utf8' });
+      return output.includes('prov-ledger');
+    } catch {
+      return false;
+    }
+  }
+
+  async verifyDependenciesIntegrity() {
+    console.log('  📦 Verifying supply chain integrity...');
+    try {
+      execSync('pnpm audit', { stdio: 'pipe' });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async writeJSON(filename, data) {
@@ -536,19 +541,19 @@ ${summary.executive_summary.key_achievements.map((achievement) => `- ${achieveme
 ## Acceptance Criteria Status
 
 ${Object.entries(summary.acceptance_criteria)
-  .map(
-    ([criteria, status]) =>
-      `- **${criteria}**: ${status ? '✅ PASS' : '❌ FAIL'}`,
-  )
-  .join('\n')}
+        .map(
+          ([criteria, status]) =>
+            `- **${criteria}**: ${status ? '✅ PASS' : '❌ FAIL'}`,
+        )
+        .join('\n')}
 
 ## Performance SLO Validation
 
 ${Object.entries(
-  summary.technical_evidence.performance_validation.slo_compliance,
-)
-  .map(([slo, met]) => `- **${slo}**: ${met ? '✅ MET' : '❌ NOT MET'}`)
-  .join('\n')}
+          summary.technical_evidence.performance_validation.slo_compliance,
+        )
+        .map(([slo, met]) => `- **${slo}**: ${met ? '✅ MET' : '❌ NOT MET'}`)
+        .join('\n')}
 
 ## Security Compliance
 
@@ -561,8 +566,8 @@ ${Object.entries(
 ## Evidence Artifacts
 
 ${Object.entries(summary.evidence_artifacts)
-  .map(([key, file]) => `- **${key}**: \`${file}\``)
-  .join('\n')}
+        .map(([key, file]) => `- **${key}**: \`${file}\``)
+        .join('\n')}
 
 ## Next Steps
 

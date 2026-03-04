@@ -25,6 +25,34 @@ maestro_nogo:
     description: Required field missing
   - code: BUNDLE_INVALID_VALUE
     description: Unsupported enum/value encountered
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Bundle schema major version is not supported
+  - code: SCHEMA_VERSION_INVALID
+    description: Bundle schema version is invalid or unparseable
+  - code: JSON_PARSE_ERROR
+    description: Failed to parse JSON artifact
+  - code: MISSING_FIELD
+    description: Required field is missing from artifact
+  - code: INVALID_ENUM
+    description: Field contains an invalid enum value
+  - code: DRIFT_DETECTED
+    description: Content drift detected between committed and regenerated artifacts
+  - code: DRIFT_ERROR
+    description: Error occurred during drift detection
+  - code: SIG_ORPHAN
+    description: Signature file exists but target file is missing
+  - code: SIG_INVALID
+    description: Cryptographic signature is invalid
+  - code: COSIGN_MISSING
+    description: Cosign tool is missing but required for verification
+  - code: SIG_MISSING
+    description: Required cryptographic signature is missing
+  - code: ATTESTATION_MISSING
+    description: Required SLSA attestation is missing
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: SHA256SUMS file has an invalid format
+  - code: INVALID_JSON
+    description: Artifact contains invalid JSON
 
 evidence_check:
   - code: EVIDENCE_MISSING
