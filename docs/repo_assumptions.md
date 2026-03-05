@@ -1,18 +1,33 @@
-# Income Engine Repo Assumptions Validation
+# Maestro Spec Interview Repo Reality Check
 
-## Scope
-This document captures the repository reality check for the Income Engine MWS.
+This document records current assumptions and validation checkpoints for integrating
+`maestro_spec_interview_v1` as a first-class Summit capability.
 
-## Validation Results
+## Assumptions
 
-- **Evidence ID format**: no existing canonical Income Engine pattern was found in current pipeline modules; the engine adopts `EVID-INCOME-<YYYYMMDD>-<hash>` with regex validation in monitoring script.
-- **Deterministic file rules**: deterministic JSON writing with sorted keys and stable separators exists as a repeatable pattern in repository scripts; Income Engine enforces sorted output for `report.json`, `metrics.json`, and `stamp.json`.
-- **CI gate names**: no existing `CI-evidence-check`, `claim-linter`, or `deterministic-check` gates were discovered as exact names in this repository; this lane defines checks at test level pending CI workflow wiring.
-- **Test framework**: pytest is active for pipeline tests under `pipelines/tests`.
-- **JSON schema tooling**: `jsonschema` Draft7 validator is already used in pipeline registry code.
+- Prompt registry lives at `prompts/registry.yaml`.
+- Prompt assets live in `prompts/`.
+- Schema assets live in `schemas/`.
+- Deterministic artifact emitters can be hosted in `scripts/`.
+- Roadmap execution state is tracked in `docs/roadmap/STATUS.json`.
 
-## Commands Executed
+## Validation Checklist
 
-- `rg --files pipelines`
-- `rg -n "evidence|stamp.json|metrics.json|deterministic|CI-evidence-check|claim-linter|schema" docs pipelines scripts .github`
-- `sed -n '1,260p' pipelines/registry/core.py`
+- [x] Prompt registry path exists and is writable.
+- [ ] CI gate names for Maestro spec ingestion are confirmed in pipeline config.
+- [ ] Evidence ID schema pattern is confirmed against production evidence policy.
+- [ ] Jules task metadata schema alignment is confirmed.
+- [ ] Codex module naming convention alignment is confirmed.
+- [ ] `report.json` determinism requirements are confirmed.
+- [ ] `stamp.json` timestamp/immutability rules are confirmed.
+
+## Must-Not-Touch Guardrails
+
+- Core orchestrator runtime.
+- Existing CI enforcement scripts.
+- Production agent routing logic.
+
+## Status
+
+Intentionally constrained to repo-shaped scaffolding pending CI gate name and metadata schema
+verification in a follow-up hardening change.
