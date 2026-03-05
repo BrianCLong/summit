@@ -1,0 +1,96 @@
+name: Neo4j Plan Sampler
+
+on:
+  pull_request:
+    paths:
+      - 'db/**'
+      - 'graph/**'
+      - 'tools/neo4j/**'
+      - '**/*.cql'
+      - '**/*.cypher'
+      - '.github/workflows/neo4j-plan-sample.yml'
+  schedule:
+    - cron: '17 3 * * *'   # nightly sample
+  workflow_dispatch: {}
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install neo4j
+
+      - name: Seed queries
+        run: |
+          if [ ! -f tools/neo4j/seed_queries.txt ]; then
+            mkdir -p tools/neo4j
+            cat > tools/neo4j/seed_queries.txt <<'SEED_EOF'
+          MATCH (q:QuerySeed) RETURN q.id LIMIT 5
+          // --- Add critical upserts / GraphRAG seeds below ---
+          //
+          // Example:
+          // MERGE (p:Person {id:$id}) ON CREATE SET p.name = $name RETURN p
+          SEED_EOF
+          fi
+
+      - name: Run plan sampler
+        env:
+          NEO4J_URI: ${{ secrets.NEO4J_URI }}
+          NEO4J_USER: ${{ secrets.NEO4J_USER }}
+          NEO4J_PASS: ${{ secrets.NEO4J_PASS }}
+          PLAN_SEEDS_FILE: tools/neo4j/seed_queries.txt
+          PLAN_FINGERPRINT_OUT: plan-fingerprints.jsonl
+        run: |
+          python tools/neo4j/plan_sampler.py
+          echo "Sampler complete."
+
+      - name: Upload sample artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-fingerprints
+          path: plan-fingerprints.jsonl
+          if-no-files-found: error
+
+  compare:
+    needs: sample
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+
+      - name: Download candidate artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: plan-fingerprints
+          path: candidate
+
+      - name: Fetch baseline (last successful on main)
+        run: |
+          mkdir -p baseline
+          # baseline retrieval strategy:
+          # 1) Prefer repo file if present (committed golden baseline)
+          if [ -f tools/neo4j/baseline-plan-fingerprints.jsonl ]; then
+            cp tools/neo4j/baseline-plan-fingerprints.jsonl baseline/plan-fingerprints.jsonl
+          else
+            # 2) Or pull from previous workflow artifact via GH API (optional)
+            echo "" > baseline/plan-fingerprints.jsonl
+          fi
+
+      - name: Compare fingerprints
+        run: |
+          python tools/neo4j/compare_fingerprints.py \
+            --baseline baseline/plan-fingerprints.jsonl \
+            --candidate candidate/plan-fingerprints.jsonl \
+            --novel-threshold 0.10 \
+            --min-count-rare 1

@@ -454,7 +454,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions: { id-token: write, contents: read }
     steps:
-      - run: cosign verify-attestation --type slsa.provenance $IMAGE
+      - run: cosign verify-attestation --use-signed-timestamps --type slsa.provenance $IMAGE
 ```
 
 ### 4.9 Runbooks & Docs
