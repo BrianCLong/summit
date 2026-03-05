@@ -1,0 +1,5 @@
+name: Semantic Search GA
+checks:
+  - semantic retrieval benchmark
+  - security policy checks
+  - CI evaluation pass

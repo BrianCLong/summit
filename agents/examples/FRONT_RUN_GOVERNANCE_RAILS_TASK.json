@@ -1,0 +1,43 @@
+{
+  "task_id": "FRONT_RUN_GOVERNANCE_RAILS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "front-run-governance-rails",
+    "version": "v1",
+    "sha256": "7153ebc2d161ac63eec7e9b6fba2335cf97215b5ff4cd690c90107a0ba227c21",
+    "path": "prompts/io/front-run-governance-rails@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/io/front_run_bands.md",
+      "policy/dual_use_policy.md",
+      "policy/segment_governance.yaml",
+      "ci/policy_checks/dual_use_policy_gate.py",
+      "ci/policy_checks/segment_policy_gate.py",
+      "docs/roadmap/STATUS.json",
+      "prompts/io/front-run-governance-rails@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/FRONT_RUN_GOVERNANCE_RAILS_TASK.json"
+    ],
+    "domains": ["documentation", "governance", "policy", "ci"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["policy-gate-output", "roadmap-update"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Defensive front-run governance scope documented.",
+    "Dual-use and segment governance policies are in place.",
+    "Policy gate scripts validate guardrail presence.",
+    "Roadmap status updated with initiative entry."
+  ],
+  "stop_conditions": [
+    "Any request to implement offensive optimization.",
+    "Policy gate requirements cannot be satisfied."
+  ]
+}

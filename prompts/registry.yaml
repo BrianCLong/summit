@@ -1,22 +1,21 @@
 version: 1
 prompts:
-  - id: saas-crash-2026-positioning-pack
+  - id: govos-1-governed-multi-agent-os
     version: v1
-    path: prompts/positioning/saas-crash-2026@v1.md
-    sha256: 1acce34de92a05653ef32c23fed94b971bf06b529c6d76fcb9c8ad43c7d48ed8
-    description: Create the saas-crash-2026 positioning pack, claim registry, and repo validation alignment.
+    path: prompts/epics/govos-1-governed-multi-agent-os@v1.md
+    sha256: eb01ec40753e208354ad52e26d9000528dae5ee92b7f44782eea6513c200b873
+    description: Create GOVOS-1 governed multi-agent OS epic doc and register roadmap status.
     scope:
       paths:
-        - docs/positioning/saas-crash-2026.md
-        - docs/positioning/claim-registry.md
-        - repo_assumptions.md
+        - docs/epics/govos-1-governed-multi-agent-os.md
         - docs/roadmap/STATUS.json
-        - prompts/positioning/saas-crash-2026@v1.md
+        - prompts/epics/govos-1-governed-multi-agent-os@v1.md
         - prompts/registry.yaml
+        - agents/examples/GOVOS_1_EPIC_DOC_20260208.json
       domains:
         - documentation
-        - positioning
         - governance
+        - epics
     verification:
       tiers_required:
         - C
@@ -67,6 +66,33 @@ prompts:
         - content
         - governance
         - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: influence-ops-suite-docs
+    version: v1
+    path: prompts/docs/influence-ops-suite-docs@v1.md
+    sha256: 6854419a0bd51077b05311129becf7f3727a2c2dd2287c2d07317d31c3053b69
+    description: Publish Influence Ops Suite documentation and roadmap status updates.
+    scope:
+      paths:
+        - docs/influence_ops/
+        - docs/strategy/forward_generalization.md
+        - docs/security/threat_model_influence_ops.md
+        - docs/ops/runbooks/influence_ops_jobs.md
+        - docs/roadmap/STATUS.json
+        - prompts/docs/influence-ops-suite-docs@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - influence-ops
     verification:
       tiers_required:
         - C
@@ -921,4 +947,29 @@ prompts:
         permitted: 0
         retirement_target: 0
     allowed_operations:
+      - edit
+  - id: switchboard-router-observability
+    version: v1
+    path: prompts/switchboard/switchboard-router-observability@v1.md
+    sha256: 08dc4dfcc36f7dcc58264211c51275b2268d426f028d2fc62521ee1ef56afd4f
+    description: Centralize Switchboard router observability defaults and error logging.
+    scope:
+      paths:
+        - october2025/companyos-switchboard/apps/web/src/switchboard/
+        - docs/roadmap/STATUS.json
+        - prompts/switchboard/switchboard-router-observability@v1.md
+        - prompts/registry.yaml
+        - agents/examples/
+      domains:
+        - switchboard
+        - observability
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
       - edit

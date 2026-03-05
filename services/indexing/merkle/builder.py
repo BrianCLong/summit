@@ -2,7 +2,9 @@ import hashlib
 import hmac
 from pathlib import Path
 from typing import Dict, List, Optional
+
 from .models import MerkleNode, MerkleTree
+
 
 class MerkleBuilder:
     """Builds a Merkle tree with opaque path IDs (HMAC)."""
@@ -43,7 +45,7 @@ class MerkleBuilder:
             while chunk := f.read(8192): sha256.update(chunk)
         return sha256.hexdigest()
 
-    def _hash_directory(self, children: Dict[str, MerkleNode]) -> str:
+    def _hash_directory(self, children: dict[str, MerkleNode]) -> str:
         sha256 = hashlib.sha256()
         for opaque_id in sorted(children.keys()):
             sha256.update(opaque_id.encode('utf-8'))
@@ -52,13 +54,13 @@ class MerkleBuilder:
 
 class SyncPlanner:
     @staticmethod
-    def diff(client_tree: MerkleTree, server_tree: MerkleTree) -> List[str]:
+    def diff(client_tree: MerkleTree, server_tree: MerkleTree) -> list[str]:
         to_sync = []
         SyncPlanner._diff_recursive(client_tree.root, server_tree.root, to_sync)
         return to_sync
 
     @staticmethod
-    def _diff_recursive(client_node: MerkleNode, server_node: MerkleNode, to_sync: List[str]):
+    def _diff_recursive(client_node: MerkleNode, server_node: MerkleNode, to_sync: list[str]):
         if client_node.hash == server_node.hash: return
         if not client_node.is_dir:
             to_sync.append(client_node.name)
