@@ -53,16 +53,19 @@ When your proposals need to demonstrate:
 ## Partnership Model
 
 ### Option A: Referral Partner (Lightest Touch)
+
 - You identify opportunities; we close and deliver
 - **20% referral fee** on Year 1 TCV
 - No delivery responsibility on your side
 
 ### Option B: Resell Partner
+
 - You contract with customer; we deliver through you
 - **10–25% margin** (based on volume and commitment)
 - Joint delivery support available
 
 ### Option C: Co-Delivery / OEM
+
 - Summit embedded in your solution stack
 - Per-program or per-seat licensing
 - Joint go-to-market on specific pursuits
@@ -77,6 +80,7 @@ When your proposals need to demonstrate:
 **Objective:** Prove fit for a specific pursuit or program.
 
 **Scope:**
+
 - Discovery session with your capture/solution team
 - Reference architecture aligned to pursuit requirements
 - Demo environment with sample data
@@ -91,12 +95,14 @@ When your proposals need to demonstrate:
 ### Joint Pursuit Motion
 
 **Phase 1: Capture Support**
+
 - Technical discriminators language
 - Architecture diagrams for proposals
 - Compliance/security documentation
 - Demo support for orals/tech evals
 
 **Phase 2: Delivery (Post-Award)**
+
 - Summit platform deployment
 - Data source integration
 - Training and enablement
@@ -115,6 +121,7 @@ Summit is strongest on pursuits involving:
 - **Analyst Modernization** — replacing legacy tools, reducing swivel-chair
 
 **Example Agencies/Programs:**
+
 - DHS I&A, CISA JCDC, FBI Cyber, USSOCOM J2, Service intel (A2/G2/N2)
 - Intel community modernization programs
 - State/local fusion centers
