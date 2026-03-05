@@ -27,7 +27,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -83,7 +87,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -158,7 +166,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
+<<<<<<< HEAD
+
+=======
           version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

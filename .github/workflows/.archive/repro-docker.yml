@@ -1,16 +1,60 @@
 name: Reproducible Docker Build
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+
 on:
   push:
     branches: [ main ]
   pull_request:
 
 jobs:
-  build-repro:
+  build-and-verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-          fetch-depth: 0
-      - name: Build
-        run: docker build -t repro-test .
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+<<<<<<<< HEAD:.github/workflows/.archive/repro-docker.yml
+<<<<<<< HEAD:.github/workflows/.archive/repro-docker.yml
+
+=======
+          version: 10.0.0
+>>>>>>> eb5c989f9 (chore: complete pre-commit steps):.github/workflows/repro-docker.yml
+========
+          version: 10.0.0
+>>>>>>>> origin/main:.github/workflows/repro-docker.yml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Verify Lockfile
+        run: scripts/ci/verify_pnpm_lock.sh
+
+      - name: Set SOURCE_DATE_EPOCH
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> $GITHUB_ENV
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            --build-arg SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH} \
+            -f docker/repro.Dockerfile \
+            -t summit-repro:latest \
+            .
+
+      - name: Verify Reproducibility (Smoke)
+        run: |
+          docker build \
+            --build-arg SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH} \
+            -f docker/repro.Dockerfile \
+            -t summit-repro:latest-2 \
+            .
+          docker inspect summit-repro:latest --format='{{.Created}}' > ts1
+          docker inspect summit-repro:latest-2 --format='{{.Created}}' > ts2
+          diff ts1 ts2

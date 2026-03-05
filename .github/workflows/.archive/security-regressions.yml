@@ -3,11 +3,6 @@ name: Security Regression Harness
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "server/src/security/**"
       - "src/agents/archetypes/**"
@@ -42,7 +37,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Run Regression Pack
-        run: npm run test:server
+        run: pnpm test:integration
         env:
           NODE_ENV: test
 

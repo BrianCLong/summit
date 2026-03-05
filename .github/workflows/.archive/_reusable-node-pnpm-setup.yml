@@ -1,4 +1,8 @@
 name: Reusable Node.js & pnpm Setup
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   workflow_call:

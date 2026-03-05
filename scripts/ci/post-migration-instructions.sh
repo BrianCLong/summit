@@ -15,11 +15,11 @@ NC='\033[0m'
 echo -e "${BLUE}=== CI Migration Guide Poster ===${NC}\n"
 
 # Find PRs created before consolidation date
-CUTOFF_DATE="2026-03-03"
-OLD_PRS=$(gh pr list --state open --limit 1000 --json number,createdAt,title,author \
+CUTOFF_DATE="2026-03-04"
+OLD_PRS=$(gh pr list --state open --limit 100 --json number,createdAt,title,author \
   --jq ".[] | select(.createdAt < \"$CUTOFF_DATE\") | .number")
 
-PR_COUNT=$(echo "$OLD_PRS" | grep -c '[0-9]' || true)
+PR_COUNT=$(echo "$OLD_PRS" | wc -l | tr -d ' ')
 
 if [ "$PR_COUNT" -eq 0 ]; then
   echo -e "${GREEN}No old PRs found. All PRs are using new CI system!${NC}"
@@ -74,7 +74,7 @@ EOF
 if [ "$DRY_RUN" = "true" ]; then
   echo -e "${YELLOW}DRY RUN MODE - No comments will be posted${NC}\n"
   echo -e "${BLUE}Would post to these PRs:${NC}"
-  while read -r pr_num; do
+  echo "$OLD_PRS" | while read -r pr_num; do
     pr_info=$(gh pr view "$pr_num" --json number,title,author --jq '"\(.number): \(.title) (@\(.author.login))"')
     echo -e "  #$pr_info"
   done
@@ -88,10 +88,9 @@ else
   posted=0
   failed=0
 
-  while read -r pr_num; do
+  echo "$OLD_PRS" | while read -r pr_num; do
     pr_info=$(gh pr view "$pr_num" --json number,title --jq '"\(.number): \(.title)"')
-    printf 'Posting to #%s
-' "$pr_info"
+    echo -e "Posting to #$pr_info"
 
     if gh pr comment "$pr_num" --body "$COMMENT" 2>&1; then
       ((posted++)) || true

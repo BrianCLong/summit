@@ -1,4 +1,8 @@
 name: 🔧 Reusable - Environment Setup
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Universal setup workflow for Node.js, pnpm, Python, and caching
 # Optimized for monorepo with Turbo and pnpm workspaces
 

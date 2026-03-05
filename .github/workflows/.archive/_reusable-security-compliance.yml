@@ -1,4 +1,8 @@
 name: "Reusable: Security & Compliance"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 # Unified Security and Governance gate.
 # Authoritative check for:

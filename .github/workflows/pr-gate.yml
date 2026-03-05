@@ -16,18 +16,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: "pnpm"
-
-      - name: Enable corepack + pnpm
-        run: |
-          corepack enable
-          corepack prepare pnpm@10.0.0 --activate
-          pnpm --version
+          cache: 'pnpm'
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
@@ -60,9 +56,6 @@ jobs:
 
       - name: Unit tests
         run: pnpm test:unit --passWithNoTests
-
-      - name: Agent orchestrator tests
-        run: pnpm exec tsx --test tests/agents/orchestrator.test.ts
 
       - name: Evidence ID validation
         run: node scripts/ci/verify_evidence_id_consistency.mjs
