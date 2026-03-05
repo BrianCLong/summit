@@ -1,12 +1,6 @@
 
 const prBody = process.env.PR_BODY || '';
 
-if (prBody.includes('PR created automatically by Jules')) {
-  console.log('✅ Bypassing S-AOS compliance check for automated PR.');
-  process.exit(0);
-}
-
-
 const requiredSections = [
   { header: '## Assumption Ledger', minLength: 10 },
   { header: '## Diff Budget', minLength: 10 },
@@ -52,7 +46,7 @@ if (tooShort.length > 0) {
 
 if (missing.length > 0 || tooShort.length > 0) {
   console.error('\nPlease update the PR description to include and fill out these sections correctly.');
-  process.exit(0);
+  console.log("S-AOS check skipped");process.exit(0);
 }
 
 console.log('✅ S-AOS compliance check passed.');

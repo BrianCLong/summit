@@ -1,4 +1,3 @@
-<!-- markdownlint-disable -->
 # Summit Pilot Proposal Template
 
 **Instructions:** Copy this template, replace all `{{variables}}`, remove guidance notes, and customize for each opportunity.
@@ -19,16 +18,13 @@
 
 This proposal outlines an {{Duration}}-week paid pilot engagement to deploy Summit's Analyst Workbench for {{Customer Name}}'s {{Unit/Division}} team.
 
-### Pilot Objective
-
+**Pilot Objective:**
 {{One sentence describing primary goal, e.g., "Prove that analysts can reduce time-to-answer on priority cases by 40% while maintaining full provenance and compliance with data-handling policies."}}
 
-### Scope
+**Scope:**
 
 - {{Number}} named users (analysts + supervisors)
-
 - {{Number}} initial data sources
-
 - {{Number}} priority use cases / workflows
 
 **Investment:** ${{Amount}}
@@ -88,12 +84,10 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | {{Source 3}} | {{Type}} | {{Method}} | P2 |
 | {{Source 4}} | {{Type}} | {{Method}} | P2 |
 
-### Notes
+**Notes:**
 
 - P1 sources will be integrated in first 2 weeks
-
 - P2 sources as stretch goals or Phase 2
-
 - Additional sources available as change orders
 
 ### 2.3 Use Cases / Workflows
@@ -143,7 +137,7 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 
 ### 3.3 Team & Responsibilities
 
-### Summit Team
+**Summit Team:**
 
 | Role | Name | Responsibilities |
 |------|------|------------------|
@@ -151,7 +145,7 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | Solutions Architect | {{Name}} | Technical design, integration, configuration |
 | Customer Success | {{Name}} | Training, adoption, feedback |
 
-### {{Customer}} Team
+**{{Customer}} Team:**
 
 | Role | Name | Responsibilities |
 |------|------|------------------|
@@ -176,7 +170,7 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 
 ### 4.1 Architecture Overview
 
-```text
+```
 ┌─────────────────────────────────────────────────────────────────┐
 │                      {{Customer}} Environment                    │
 ├─────────────────────────────────────────────────────────────────┤
@@ -216,7 +210,8 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 │                    {{#}} Analyst Users                          │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
-```text
+```
+
 ### 4.2 Security & Compliance
 
 | Control | Implementation |
@@ -229,18 +224,13 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | Encryption in Transit | TLS 1.3 (external), mTLS (internal) |
 | Network Isolation | {{Describe network controls}} |
 
-### Compliance Documentation Provided:
+**Compliance Documentation Provided:**
 
 - [ ] SBOM (CycloneDX)
-
 - [ ] SLSA attestation
-
 - [ ] Architecture diagram
-
 - [ ] Data flow diagram
-
 - [ ] Audit log samples
-
 - [ ] Security questionnaire responses
 
 ---
@@ -285,34 +275,25 @@ Summit's Analyst Workbench is designed for exactly these challenges:
 | {{Optional Add-on}} | {{Description}} | ${{Amount}} |
 | **Total** | | **${{Total}}** |
 
-### Payment Terms:
+**Payment Terms:**
 
 - 50% due at contract signature
-
 - 50% due at pilot midpoint (Week {{N/2}})
 
 ### 6.2 What's Included
 
 - Environment provisioning ({{deployment pattern}})
-
 - Data source integration (up to {{#}} P1 sources)
-
 - Policy/role configuration
-
 - Analyst training (up to {{#}} sessions)
-
 - Weekly working sessions and support
-
 - Pilot exit readout and production roadmap
 
 ### 6.3 What's Not Included
 
 - Additional data sources beyond scope (available as change order: ${{X}}k per source)
-
 - Custom connector development (scoped separately)
-
 - Hardware/infrastructure costs (customer-provided)
-
 - Production licensing (quoted separately at pilot exit)
 
 ### 6.4 Production Path
@@ -338,9 +319,7 @@ This pilot engagement is for {{Duration}} weeks from kickoff date, with option t
 ### 7.2 Data Handling
 
 - All customer data remains in customer-controlled environment
-
 - Summit personnel access only as required for delivery
-
 - No data retained by Summit post-engagement without written consent
 
 ### 7.3 Confidentiality
@@ -354,9 +333,7 @@ Liability limited to fees paid under this pilot engagement.
 ### 7.5 Intellectual Property
 
 - Summit retains ownership of Summit platform and all pre-existing IP
-
 - Customer retains ownership of customer data
-
 - Customizations/configurations developed during pilot: {{ownership terms}}
 
 ---
@@ -374,7 +351,7 @@ Liability limited to fees paid under this pilot engagement.
 
 ## 9. Contacts
 
-### Summit:
+**Summit:**
 
 | Role | Name | Email | Phone |
 |------|------|-------|-------|
@@ -382,7 +359,7 @@ Liability limited to fees paid under this pilot engagement.
 | Solutions Architect | {{Name}} | {{email}} | {{phone}} |
 | Account Executive | {{Name}} | {{email}} | {{phone}} |
 
-### {{Customer}}:
+**{{Customer}}:**
 
 | Role | Name | Email | Phone |
 |------|------|-------|-------|
@@ -405,18 +382,18 @@ Liability limited to fees paid under this pilot engagement.
 
 ---
 
-### Acceptance:
+**Acceptance:**
 
 By signing below, both parties agree to the terms and scope outlined in this proposal.
 
-### Summit Intelligence Systems:
+**Summit Intelligence Systems:**
 
 Signature: _________________________
 Name: {{Name}}
 Title: {{Title}}
 Date: _________________________
 
-### {{Customer Name}}:
+**{{Customer Name}}:**
 
 Signature: _________________________
 Name: {{Name}}

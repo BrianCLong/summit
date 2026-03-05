@@ -26,14 +26,20 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
     },
 }));
 
-const { FailoverOrchestrator } = await import('../FailoverOrchestrator.js');
+const { import { FailoverOrchestrator } from "../FailoverOrchestrator";
+FailoverOrchestrator } = await import('../import { FailoverOrchestrator } from "../FailoverOrchestrator";
+FailoverOrchestrator.js');
 
-describe('FailoverOrchestrator', () => {
-    let orchestrator: any;
+describe('import { FailoverOrchestrator } from "../FailoverOrchestrator";
+FailoverOrchestrator', () => {
+    let orchestrator: import { FailoverOrchestrator } from "../FailoverOrchestrator";
+FailoverOrchestrator;
 
     beforeEach(() => {
         jest.clearAllMocks();
         jest.useFakeTimers();
+        orchestrator = import { FailoverOrchestrator } from "../FailoverOrchestrator";
+FailoverOrchestrator.getInstance();
 
         getStatusMock.mockReturnValue({
             failoverMode: 'AUTOMATIC',

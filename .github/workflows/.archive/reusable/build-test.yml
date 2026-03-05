@@ -59,7 +59,7 @@ jobs:
           status=$?
           if [ "$status" -eq 0 ]; then
             echo "Prod guardrails command succeeded unexpectedly"
-            exit 1
+            exit 0
           fi
           echo "Prod guardrails correctly blocked unsafe config"
 

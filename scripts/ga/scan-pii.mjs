@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
@@ -14,8 +16,7 @@ try {
 // Simple PII scanner
 const piiPatterns = contract.piiPatterns.map(p => ({
   name: p.name,
-  regex: new RegExp(p.pattern, 'g'),
-  ignorePath: p.ignorePath ? new RegExp(p.ignorePath) : null
+  regex: new RegExp(p.pattern, 'g')
 }));
 
 function scanFile(filePath) {
@@ -36,9 +37,6 @@ function scanFile(filePath) {
     const content = readFileSync(filePath, 'utf8');
     let found = false;
     for (const p of piiPatterns) {
-      if (p.ignorePath && p.ignorePath.test(filePath)) {
-        continue;
-      }
       if (p.regex.test(content)) {
         console.error(`[PII DETECTED] ${p.name} found in ${filePath}`);
         found = true;
