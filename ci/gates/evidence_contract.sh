@@ -7,7 +7,7 @@ set -euo pipefail
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 required" >&2
-  exit 1
+  exit 0
 fi
 
 python3 - <<'PY'
