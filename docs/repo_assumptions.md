@@ -1,33 +1,21 @@
-# Maestro Spec Interview Repo Reality Check
+# Decentralized AI MWS Repo Assumptions
 
-This document records current assumptions and validation checkpoints for integrating
-`maestro_spec_interview_v1` as a first-class Summit capability.
+## Verified
 
-## Assumptions
+- `summit/` exists and is a Python package with test coverage under `summit/tests`.
+- `pipelines/` exists and supports Python entrypoints.
+- `scripts/` exists with CI and operational utilities.
+- `docs/` exists and contains standards, security, and runbook conventions.
 
-- Prompt registry lives at `prompts/registry.yaml`.
-- Prompt assets live in `prompts/`.
-- Schema assets live in `schemas/`.
-- Deterministic artifact emitters can be hosted in `scripts/`.
-- Roadmap execution state is tracked in `docs/roadmap/STATUS.json`.
+## Assumed
 
-## Validation Checklist
+- New decentralized AI assurance logic can be safely isolated under `summit/subsumption/decentralized_ai/`.
+- Deterministic artifact generation requires sorted keys, stable ordering, and timestamp-free outputs.
+- CI gates can consume `report.json`, `metrics.json`, and `stamp.json` without modifying baseline release gates.
+- Policy regression harnesses can validate threshold-based checks in later PRs.
 
-- [x] Prompt registry path exists and is writable.
-- [ ] CI gate names for Maestro spec ingestion are confirmed in pipeline config.
-- [ ] Evidence ID schema pattern is confirmed against production evidence policy.
-- [ ] Jules task metadata schema alignment is confirmed.
-- [ ] Codex module naming convention alignment is confirmed.
-- [ ] `report.json` determinism requirements are confirmed.
-- [ ] `stamp.json` timestamp/immutability rules are confirmed.
+## Must-Not-Touch
 
-## Must-Not-Touch Guardrails
-
-- Core orchestrator runtime.
-- Existing CI enforcement scripts.
-- Production agent routing logic.
-
-## Status
-
-Intentionally constrained to repo-shaped scaffolding pending CI gate name and metadata schema
-verification in a follow-up hardening change.
+- `LICENSE`
+- Existing core scoring engines outside the new `summit/subsumption/decentralized_ai/` namespace.
+- Existing CI baseline checks unrelated to decentralized AI.
