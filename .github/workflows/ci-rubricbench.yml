@@ -1,0 +1,37 @@
+name: RubricBench Evaluation Gate
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  rubric-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Run RubricBench evaluation
+        run: npx tsx scripts/benchmarks/run-rubricbench.ts
+        env:
+          SUMMIT_FEATURE_RUBRICBENCH: false
+
+      - name: Check Rubric Alignment
+        run: |
+          metrics_file="artifacts/rubricbench/metrics.json"
+          rubric_alignment=$(jq -r '.rubric_alignment' $metrics_file)
+          baseline=0.60
+
+          echo "Comparing $rubric_alignment to baseline $baseline"
+          # Compare floating point numbers with awk, then exit.
+          echo "$rubric_alignment $baseline" | awk '{ if ($1 < $2) { print "Error: Rubric alignment ("$1") fell below baseline ("$2")"; system("exit 1"); } else { print "Success: Rubric alignment ("$1") meets baseline ("$2")"; system("exit 0"); } }'

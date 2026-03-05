@@ -1,5 +1,6 @@
-from typing import Dict, Any, List
 from dataclasses import dataclass
+from typing import Any, Dict, List
+
 
 @dataclass
 class CompactedState:
@@ -8,7 +9,7 @@ class CompactedState:
     invariant_check: bool
 
 class CompactionAdapter:
-    def compact_items(self, items: List[Dict[str, Any]]) -> CompactedState:
+    def compact_items(self, items: list[dict[str, Any]]) -> CompactedState:
         """
         Simulates compaction. In a real scenario, this would call the /responses/compact endpoint.
         """
@@ -17,7 +18,7 @@ class CompactionAdapter:
         encrypted = "opaque_blob_simulated"
         return CompactedState(summary=summary, encrypted_content=encrypted, invariant_check=True)
 
-    def restore_from_compact(self, state: CompactedState) -> List[Dict[str, Any]]:
+    def restore_from_compact(self, state: CompactedState) -> list[dict[str, Any]]:
         """
         Restoring from compaction.
         """
