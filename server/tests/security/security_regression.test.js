@@ -17,6 +17,18 @@ describe('Security Configuration Regression', () => {
         }
     });
 
+    test('Operational endpoints require auth + role checks', () => {
+        const serverPath = path.join(__dirname, '../../src/app.ts');
+        if (fs.existsSync(serverPath)) {
+            const content = fs.readFileSync(serverPath, 'utf8');
+            expect(content).toMatch(/app\.use\('\/airgap',\s*authenticateToken,\s*ensureRole\(\['ADMIN'\]\)/);
+            expect(content).toMatch(/app\.use\('\/analytics',\s*authenticateToken,\s*ensureRole\(\['ADMIN',\s*'ANALYST'\]\)/);
+            expect(content).toMatch(/app\.use\('\/dr',\s*authenticateToken,\s*ensureRole\(\['ADMIN'\]\)/);
+        } else {
+            console.warn("app.ts not found, skipping operational endpoint auth check");
+        }
+    });
+
     test('No hardcoded secrets in source code', () => {
          // This is a simplified check, the python tool does a better job
          const srcDir = path.join(__dirname, '../../src');
