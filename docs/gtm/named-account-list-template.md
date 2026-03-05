@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Named Account List Template
 
 **Purpose:** Structure for tracking target accounts across Gov/Defense/Intel, Primes/SIs, and Regulated Enterprise segments.
@@ -12,8 +13,7 @@ _Copy headers to your CRM or spreadsheet. Tags and fields align with MEDDICC qua
 
 ```csv
 Account Name,Segment,Sub-Segment,Tier,HQ City,HQ State,Parent Company,Website,Employee Count,Annual Revenue,Data Sensitivity,Deployment Preference,Contract Vehicles,Incumbent Tools,Key Pain Points,Hypothesis,Trigger Events,Account Owner,Source,Status,Notes,Last Updated
-```
-
+```text
 ### Column Definitions
 
 | Column | Description | Example Values |
@@ -83,8 +83,7 @@ Account Name,Segment,Sub-Segment,Tier,HQ City,HQ State,Parent Company,Website,Em
 
 ```csv
 Contact ID,Account Name,First Name,Last Name,Title,Role,Email,Phone,LinkedIn,Source,Opt-In,Engagement History,Last Contact,Next Action,Notes
-```
-
+```text
 ### Column Definitions
 
 | Column | Description | Example Values |
@@ -95,7 +94,7 @@ Contact ID,Account Name,First Name,Last Name,Title,Role,Email,Phone,LinkedIn,Sou
 | **Last Name** | Contact last name | "Smith" |
 | **Title** | Job title | "Director of Intelligence Operations" |
 | **Role** | MEDDICC role | Economic Buyer, Technical Buyer, Champion, User, Influencer, Legal/Compliance |
-| **Email** | Work email | "jane.smith@agency.gov" |
+| **Email** | Work email | "<jane.smith@agency.gov>" |
 | **Phone** | Work phone | "+1-202-555-0100" |
 | **LinkedIn** | LinkedIn profile URL | "linkedin.com/in/janesmith" |
 | **Source** | How contact was acquired | "LinkedIn", "Conference", "Referral", "Website" |
@@ -124,8 +123,7 @@ Contact ID,Account Name,First Name,Last Name,Title,Role,Email,Phone,LinkedIn,Sou
 
 ```csv
 Opportunity ID,Account Name,Opportunity Name,Amount (ARR),Stage,Close Date,Owner,Pilot?,Pilot Weeks,Procurement Path,Funding Line,Use Case,Primary Data Sources,MEDDICC Score,Win Risk,Next Step,Next Step Date,Notes
-```
-
+```text
 ### Stage Values (Per GTM Starter Pack)
 
 | Stage | Definition | Exit Criteria |
@@ -180,21 +178,33 @@ Opportunity ID,Account Name,Opportunity Name,Amount (ARR),Stage,Close Date,Owner
 ### Account Tags
 
 - `strategic-logo` — High brand value if won
+
 - `expansion-potential` — Land-and-expand opportunity
+
 - `partner-sourced` — Brought by partner
+
 - `competitor-displacement` — Replacing incumbent
+
 - `quick-close` — Short sales cycle expected
+
 - `compliance-driver` — Compliance is primary buying trigger
+
 - `ai-guardrails` — Policy-gated AI is key differentiator
 
 ### Trigger Event Tags
 
 - `rfi-rfp-active` — Active solicitation
+
 - `budget-cycle` — Fiscal year timing
+
 - `leadership-change` — New decision maker
+
 - `incident-breach` — Recent security incident
+
 - `modernization-mandate` — Top-down modernization push
+
 - `audit-finding` — Compliance gap identified
+
 - `contract-recompete` — Incumbent contract ending
 
 ---

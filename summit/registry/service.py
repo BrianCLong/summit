@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import dataclasses
 import os
-from typing import List, Optional, Dict, Any
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List, Optional
 
+from summit.governance.audit import AuditEvent, emit
 from summit.registry.model import AgentDefinition, RegistryDocument, RiskTier
 from summit.registry.store import load_registry, save_registry
-from summit.governance.audit import emit, AuditEvent
+
 
 class RegistryService:
     def __init__(self, registry_path: str = "summit/registry/data/registry.json"):
@@ -51,7 +52,7 @@ class RegistryService:
                 return agent
         return None
 
-    def update_agent(self, agent_id: str, updates: Dict[str, Any]) -> Optional[AgentDefinition]:
+    def update_agent(self, agent_id: str, updates: dict[str, Any]) -> Optional[AgentDefinition]:
         doc = self._load()
         agent_idx = next((i for i, a in enumerate(doc.agents) if a.id == agent_id), -1)
 
@@ -65,7 +66,7 @@ class RegistryService:
              updates["risk_tier"] = RiskTier(updates["risk_tier"])
 
         # Auto-update updated_at
-        updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+        updates["updated_at"] = datetime.now(UTC).isoformat()
 
         updated_agent = dataclasses.replace(current_agent, **updates)
 
@@ -85,7 +86,7 @@ class RegistryService:
 
         return updated_agent
 
-    def list_agents(self, filters: Dict[str, Any] = None) -> List[AgentDefinition]:
+    def list_agents(self, filters: dict[str, Any] = None) -> list[AgentDefinition]:
         doc = self._load()
         agents = doc.agents
 

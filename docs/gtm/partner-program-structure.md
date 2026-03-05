@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Partner Program
 
 **Purpose:** Structure for engaging referral, resell, and co-delivery partners. Use for partner recruitment, onboarding, and management.
@@ -26,19 +27,29 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 ### Tier 1: Registered Partner
 
 **Commitment:** Minimal; intro-level engagement
-**Benefits:**
+
+### Benefits
+
 - Partner portal access
+
 - Basic sales enablement materials
+
 - Referral fee eligibility (15%)
+
 - Quarterly partner newsletter
 
-**Requirements:**
+### Requirements
+
 - Signed partner agreement
+
 - Complete partner onboarding (1 hour)
+
 - Identify 2+ potential opportunities
 
-**Support:**
+### Support
+
 - Email support
+
 - Quarterly check-ins
 
 ---
@@ -46,24 +57,39 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 ### Tier 2: Certified Partner
 
 **Commitment:** Moderate; trained and enabled
-**Benefits:**
+
+### Benefits
+
 - All Registered benefits, plus:
+
 - Enhanced referral fee (20%)
+
 - Resell authorization (15% margin)
+
 - Co-branded materials
+
 - Deal registration with protection
+
 - Partner advisory board eligibility
+
 - Joint marketing fund access ($5k/year)
 
-**Requirements:**
+### Requirements
+
 - 2+ team members complete Summit certification
+
 - $100k+ influenced pipeline (trailing 12 months)
+
 - Quarterly business reviews
+
 - Customer success commitment
 
-**Support:**
+### Support
+
 - Dedicated partner manager
+
 - Pre-sales technical support
+
 - Monthly syncs
 
 ---
@@ -71,27 +97,45 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 ### Tier 3: Premier Partner
 
 **Commitment:** Strategic; deep integration
-**Benefits:**
+
+### Benefits
+
 - All Certified benefits, plus:
+
 - Premium referral fee (25%)
+
 - Enhanced resell margin (20-25%)
+
 - Joint pursuit funding
+
 - Executive sponsorship
+
 - Roadmap input
+
 - Joint marketing fund ($25k/year)
+
 - Early access to new features
+
 - Custom training/enablement
 
-**Requirements:**
+### Requirements
+
 - $500k+ closed revenue (trailing 12 months)
+
 - 3+ certified practitioners
+
 - Named account alignment
+
 - Quarterly executive reviews
+
 - Joint go-to-market plan
 
-**Support:**
+### Support
+
 - Executive sponsor
+
 - Dedicated solutions architect
+
 - Weekly pipeline reviews
 
 ---
@@ -106,10 +150,14 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 | Certified | 20% | Net 30 after customer payment |
 | Premier | 25% | Net 30 after customer payment |
 
-**Eligibility:**
+### Eligibility
+
 - Referral must be net-new opportunity
+
 - Deal registration required within 14 days of intro
+
 - Customer must close within 12 months
+
 - Referral fee paid on Year 1 only
 
 ---
@@ -121,10 +169,14 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 | Certified | 15% | Standard products/services |
 | Premier | 20-25% | Volume-based; negotiable |
 
-**Terms:**
+### Terms
+
 - Partner contracts with customer
+
 - Summit invoices partner at discounted rate
+
 - Partner responsible for collections
+
 - Summit provides delivery support (scoped separately)
 
 ---
@@ -169,14 +221,21 @@ For joint delivery engagements:
 ### Summit Certified Practitioner
 
 **Duration:** 4 hours (self-paced + live assessment)
-**Content:**
+
+### Content
+
 - Summit platform overview (1 hr)
+
 - Value proposition & positioning (1 hr)
+
 - Demo certification (1 hr)
+
 - Sales process & deal registration (1 hr)
 
-**Assessment:**
+### Assessment
+
 - Platform demo delivery (pass/fail)
+
 - Value proposition pitch (pass/fail)
 
 **Certification Validity:** 12 months (annual recertification required)
@@ -187,14 +246,21 @@ For joint delivery engagements:
 
 **Duration:** 8 hours (instructor-led + hands-on)
 **Prerequisites:** Certified Practitioner
-**Content:**
+
+### Content
+
 - Technical architecture deep dive (2 hrs)
+
 - Deployment patterns (cloud, on-prem, air-gap) (2 hrs)
+
 - Integration & data sources (2 hrs)
+
 - Security & compliance (2 hrs)
 
-**Assessment:**
+### Assessment
+
 - Architecture design exercise
+
 - Hands-on deployment lab
 
 **Certification Validity:** 12 months
@@ -225,10 +291,14 @@ For joint delivery engagements:
 | Certified | $5,000 | Events, content, campaigns |
 | Premier | $25,000 | Events, content, campaigns, ABM |
 
-**MDF Rules:**
+### MDF Rules
+
 - 50/50 cost share (partner matches Summit contribution)
+
 - Pre-approval required
+
 - Receipts/proof of performance required
+
 - Funds expire annually; no rollover
 
 ### Co-Marketing Activities
@@ -303,7 +373,8 @@ For joint delivery engagements:
 
 ### Quarterly Business Review (QBR)
 
-**Agenda:**
+### Agenda
+
 1. Pipeline review (registered, qualified, closing)
 2. Closed business (trailing quarter)
 3. Enablement status (certifications, training)
@@ -354,22 +425,31 @@ For joint delivery engagements:
 ### Phase 1 (Now)
 
 - Partner agreement execution
+
 - Enablement materials (PDF/video)
+
 - Deal registration (form-based)
+
 - Contact/support
 
 ### Phase 2 (Q1)
 
 - Self-service certification
+
 - Demo environment provisioning
+
 - Deal registration tracking
+
 - MDF request/tracking
 
 ### Phase 3 (Q2)
 
 - Partner dashboard (pipeline, revenue, certifications)
+
 - Co-branded collateral generator
+
 - Integration with CRM
+
 - Partner community/forum
 
 ---
@@ -387,7 +467,7 @@ For joint delivery engagements:
 
 ## Appendix: Partner Agreement Template (Summary)
 
-**Full agreement provided upon request. Key sections:**
+### Full agreement provided upon request. Key sections
 
 1. Definitions
 2. Appointment & Scope
