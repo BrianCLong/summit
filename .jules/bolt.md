@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-03-04 - [Postgres Performance Pattern: Batch Loading]
+**Learning:** Replacing N+1 query loops with batch-loading using `WHERE field = ANY($1)` significantly reduces database round-trip latency. Reconciling the results in-memory using a `Map` keyed by the parent ID allows for O(1) lookup during record mapping, keeping the complexity at O(N+M) instead of O(N*M).
+**Action:** Always identify N+1 fetch patterns in repositories and refactor them to use batch fetching with the `ANY` operator and in-memory Map association.

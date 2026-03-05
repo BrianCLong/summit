@@ -47,7 +47,6 @@ export interface TracingConfig {
   jaegerEndpoint?: string;
   otlpTracesEndpoint?: string;
   otlpMetricsEndpoint?: string;
-  otlpHeaders?: Record<string, string>;
   enableAutoInstrumentation?: boolean;
   sampleRate?: number;
 }
@@ -85,7 +84,6 @@ export class IntelGraphTracer {
       if (this.config.otlpTracesEndpoint) {
           traceExporter = new OTLPTraceExporter({
               url: this.config.otlpTracesEndpoint,
-              headers: this.config.otlpHeaders,
           });
           logger.info(`OTLP Trace exporter configured: ${this.config.otlpTracesEndpoint}`);
       } else if (this.config.jaegerEndpoint) {
@@ -100,7 +98,6 @@ export class IntelGraphTracer {
           metricReader = new PeriodicExportingMetricReader({
               exporter: new OTLPMetricExporter({
                   url: this.config.otlpMetricsEndpoint,
-                  headers: this.config.otlpHeaders,
               }),
               exportIntervalMillis: 15000,
           });
@@ -355,16 +352,6 @@ export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTr
     jaegerEndpoint: process.env.JAEGER_ENDPOINT,
     otlpTracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
     otlpMetricsEndpoint: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
-    otlpHeaders: process.env.OTEL_EXPORTER_OTLP_HEADERS ?
-      process.env.OTEL_EXPORTER_OTLP_HEADERS.split(',').reduce((acc, curr) => {
-        const idx = curr.indexOf('=');
-        if (idx !== -1) {
-          const key = curr.substring(0, idx).trim();
-          const value = curr.substring(idx + 1).trim();
-          if (key) acc[key] = value;
-        }
-        return acc;
-      }, {} as Record<string, string>) : undefined,
     enableAutoInstrumentation: process.env.OTEL_AUTO_INSTRUMENT !== 'false',
     sampleRate: parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
   };

@@ -1,0 +1,16 @@
+name: Reproducible Docker Build
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-repro:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+          fetch-depth: 0
+      - name: Build
+        run: docker build -t repro-test .
