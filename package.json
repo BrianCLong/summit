@@ -127,6 +127,7 @@
     "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "compliance:antigravity": "pnpm compliance:check && pnpm verify:governance && pnpm ga:verify",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
+    "prepare": "husky",
     "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
     "ga:evidence": "pnpm compliance:evidence"
   },
