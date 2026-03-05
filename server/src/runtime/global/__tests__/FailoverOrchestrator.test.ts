@@ -29,7 +29,7 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
 const { FailoverOrchestrator } = await import('../FailoverOrchestrator.js');
 
 describe('FailoverOrchestrator', () => {
-    let orchestrator: FailoverOrchestrator;
+    let orchestrator: any;
 
     beforeEach(() => {
         jest.clearAllMocks();

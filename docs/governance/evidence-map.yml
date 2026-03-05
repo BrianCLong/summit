@@ -1,0 +1,11 @@
+# Governance Evidence Map
+evidence_items:
+  - id: SLSA_PROVENANCE
+    description: "SLSA Level 3 Provenance for container images."
+    required_for: ["release", "deploy"]
+  - id: SBOM_SCAN
+    description: "Software Bill of Materials scan results."
+    required_for: ["release"]
+  - id: SAST_SCAN
+    description: "Static Application Security Testing results."
+    required_for: ["merge"]

@@ -1,18 +1,19 @@
-import os
-import sys
-import logging
 import argparse
 import json
+import logging
+import os
+import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 from pathlib import Path
+
 from neo4j import GraphDatabase, basic_auth
 
 # Add tool directory to path for local imports
 tool_dir = Path(__file__).resolve().parent
 sys.path.append(str(tool_dir))
 
-from lib import reservoir_sample, calculate_skewness, calculate_top_k_mass
+from lib import calculate_skewness, calculate_top_k_mass, reservoir_sample
 
 # Configure logging
 logging.basicConfig(
@@ -46,7 +47,7 @@ def load_metrics():
     if not METRICS_FILE.exists():
         return []
     try:
-        with open(METRICS_FILE, "r") as f:
+        with open(METRICS_FILE) as f:
             return json.load(f)
     except json.JSONDecodeError:
         logger.warning(f"Could not decode {METRICS_FILE}, starting fresh.")
@@ -62,7 +63,7 @@ def calculate_baseline(metrics, label, days=14):
     """
     Calculates avg skew and top1p_mass for the given label over the last 'days'.
     """
-    cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+    cutoff = datetime.now(UTC) - timedelta(days=days)
     relevant = []
 
     for m in metrics:
@@ -130,7 +131,7 @@ def main():
 
         current_metric = {
             "label": args.label,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "skew": skew,
             "top1p_mass": top1p,
             "mean_deg": mean_deg,
@@ -156,7 +157,7 @@ def main():
             delta_skew = abs(skew - baseline['skew_avg'])
             delta_top1p_points = (top1p - baseline['top1p_avg']) * 100 # percentage points
 
-            logger.info(f"Deltas:")
+            logger.info("Deltas:")
             logger.info(f"  Delta Skew: {delta_skew:.4f}")
             logger.info(f"  Delta Top 1% Mass (pp): {delta_top1p_points:.2f}")
 

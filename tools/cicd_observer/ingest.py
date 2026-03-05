@@ -1,12 +1,13 @@
 import json
 import os
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-def ingest_from_file(filepath: str) -> List[Dict[Any, Any]]:
+
+def ingest_from_file(filepath: str) -> list[dict[Any, Any]]:
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"Fixture not found: {filepath}")
 
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         data = json.load(f)
 
     # Expecting either a list of runs or a GH API response object
@@ -17,7 +18,7 @@ def ingest_from_file(filepath: str) -> List[Dict[Any, Any]]:
     else:
         return []
 
-def ingest_directory(directory: str) -> List[Dict[Any, Any]]:
+def ingest_directory(directory: str) -> list[dict[Any, Any]]:
     all_runs = []
     for filename in os.listdir(directory):
         if filename.endswith(".json"):
