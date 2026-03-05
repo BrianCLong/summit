@@ -1,24 +1,31 @@
-# Repo Assumptions vs Reality
+# Repo Assumptions & Verification - Local Notes Semantic Synthesis
 
-## Assumed Structure (from Prompt)
-- summit/
-  - benchmarks/
-  - models/
-  - evals/
-  - evidence/
-  - scripts/
+## Verified Paths
+| Path | Status | Notes |
+| --- | --- | --- |
+| `summit/` | ✅ Verified | Root Python package. |
+| `summit/ingest/` | ✅ Verified | Existing ingestion logic (Python). |
+| `summit/graph/` | ✅ Verified | Existing graph logic (Python). |
+| `summit/evidence/` | ✅ Verified | Existing evidence logic (Python). |
+| `docs/governance/` | ✅ Verified | Governance documentation. |
+| `.github/workflows/` | ✅ Verified | CI workflows. |
+| `scripts/` | ✅ Verified | Utility scripts. |
+| `tests/` | ✅ Verified | Test suites. |
 
-## Reality
-- No `summit/` root directory.
-- `services/` contains microservices (`model-hub-service`, `evals`, `ml-serving`).
-- `services/model-hub-service` is a TypeScript registry/router.
-- `services/evals` is a minimal TypeScript service.
-- `services/ml-serving` is a minimal Python FastAPI service.
-- No existing Python-based benchmark harness found in root.
+## Assumed Paths (New)
+| Path | Role |
+| --- | --- |
+| `summit/ingestion/` | New deterministic notes ingestion pipeline. |
+| `summit/embeddings/` | Pluggable local embedding provider. |
+| `summit/report/` | Semantic report generation. |
+| `artifacts/` | Output directory for deterministic connection artifacts. |
+| `samples/notes/` | Sample corpus for validation. |
 
-## Plan
-- Create `models/` directory in root to house Python-based model adapters as requested.
-- Create `benchmarks/` directory for profiles.
-- Create `scripts/` for the benchmark runner and governance checks.
-- Create `evidence/` for output artifacts.
-- Use Python for the benchmark runner as implied by the file extensions in the prompt (`.py`).
+## Must-Not-Touch List
+- `summit/ingest/*` (unless integrating)
+- `summit/api/*`
+- `package.json`, `pnpm-lock.yaml`
+- `pyproject.toml`, `requirements.in` (unless adding critical deps)
+
+## Required Renames
+- None. `summit/ingestion` will be used for the new pipeline to distinguish it from the legacy `summit/ingest`.

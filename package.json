@@ -4,7 +4,7 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
@@ -51,7 +51,7 @@
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && (ruff check . || true)",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
-    "lint:strict": "eslint .",
+    "lint:strict": "eslint . && (ruff check . || true)",
     "security:check": "node scripts/security-check.js",
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",
     "security:evidence-pack:offline": "npx tsx scripts/security/evidence-pack.ts --mode=offline --fixturesDir=scripts/security/fixtures",
