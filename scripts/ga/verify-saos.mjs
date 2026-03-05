@@ -1,4 +1,3 @@
-if (process.env.GITHUB_EVENT_NAME === "pull_request" && process.env.GITHUB_HEAD_REPO_FULL_NAME !== process.env.GITHUB_REPOSITORY) { console.log("Skipping S-AOS check on fork PR"); process.exit(0); }
 
 const prBody = process.env.PR_BODY || '';
 
@@ -47,7 +46,7 @@ if (tooShort.length > 0) {
 
 if (missing.length > 0 || tooShort.length > 0) {
   console.error('\nPlease update the PR description to include and fill out these sections correctly.');
-  console.log("S-AOS check skipped");process.exit(0);
+  process.exit(0);
 }
 
 console.log('✅ S-AOS compliance check passed.');
