@@ -14,7 +14,7 @@
   "dependencies": {
     "@intelgraph/audio-processing": "workspace:*",
     "zod": "^4.1.12",
-    "axios": "^1.11.0"
+    "axios": "^1.13.5"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

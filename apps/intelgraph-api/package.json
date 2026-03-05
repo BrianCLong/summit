@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@apollo/server": "^4.10.0",
+    "@apollo/server": "^5.4.0",
     "@as-integrations/express4": "^1.0.0",
     "graphql-tag": "^2.12.6",
     "express": "^5.2.0",

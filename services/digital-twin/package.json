@@ -19,7 +19,7 @@
     "redis": "^5.8.1",
     "kafkajs": "^2.2.4",
     "express": "^4.18.2",
-    "@apollo/server": "^4.11.0",
+    "@apollo/server": "^5.4.0",
     "graphql": "^16.8.1",
     "zod": "^3.22.4",
     "pino": "^8.17.2",
