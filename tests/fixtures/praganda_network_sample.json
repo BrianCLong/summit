@@ -1,0 +1,10 @@
+{
+  "network_id": "pravda-01",
+  "domains": [
+    "news-local.xyz",
+    "global-truth.net"
+  ],
+  "articles": [
+    {"title": "The truth about the conflict", "content": "..."}
+  ]
+}
