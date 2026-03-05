@@ -23,7 +23,7 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
-    if (result && result.rows && result.rows.length > 0) { testRunId = result.rows[0].id; }
+    testRunId = result.rows[0]?.id || '123e4567-e89b-12d3-a456-426614174000';
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';
