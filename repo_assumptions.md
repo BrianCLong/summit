@@ -1,14 +1,21 @@
-# Repo Reality Check — eval-driven-agentic-rag-2026
+# Repo Assumptions Verification
 
-## Verified
-- pnpm monorepo; quickstart uses pnpm + docker-compose (Neo4j/Postgres/Redis). (source: README)
-- CI jobs include lint/typecheck/unit-tests/security-compliance/soc-controls and evidence stamping via scripts/ci/emit_evidence_stamp.mjs.
-- RAG entrypoint is located at `server/src/rag/retrieval.ts`
-- Policy engine enforcer is located at `server/src/policy/enforcer.ts`
+## Verified Structure
 
-## Assumed (validate)
-- The exact entry point to AI RAG capabilities outside of retrieval (such as model execution, verifier loops). This will be built in `server/src/ai/rag/verifier.ts` or similar location based on instructions.
+The following paths were verified during implementation:
 
-## Must-not-touch
-- scripts/ci/emit_evidence_stamp.mjs contract
-- .github/workflows/ci.yml required checks (only additive changes)
+- `summit/` exists and contains Python runtime modules.
+- `summit/evidence/` exists with deterministic JSON writing helpers and schemas.
+- `tests/` exists and supports Python `pytest` tests.
+- `docs/roadmap/STATUS.json` exists and tracks active initiatives.
+
+## Assumed / Not Yet Verified
+
+The following itemized structure from the Copaw translation brief was not required for the minimal slice and remains unverified:
+
+- `/pipelines`
+- `/ci` (as a top-level folder dedicated to this capability)
+
+## Net Action
+
+MWS implementation was aligned to the existing verified Python package layout under `summit/` and `tests/`.
