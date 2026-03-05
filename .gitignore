@@ -364,7 +364,10 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
-\n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
+# Worktrees and temporary paths
+.worktrees/
+_worktrees/
+
 .pnpm-store/
 dist-isolated/
 services/agent-runtime-restored/
@@ -380,5 +383,4 @@ evidence/skills/
 *.js.map
 .worktrees/
 _worktrees/
-.worktrees/
 .gitmodules

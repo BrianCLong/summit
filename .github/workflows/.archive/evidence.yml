@@ -2,6 +2,11 @@ name: evidence-gates
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "docs/tech-radar/**"
       - "docs/cogwar/**"

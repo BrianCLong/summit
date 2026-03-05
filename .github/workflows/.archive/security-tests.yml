@@ -3,6 +3,11 @@ name: Security Tests
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'server/src/security/**'
       - 'server/package.json'

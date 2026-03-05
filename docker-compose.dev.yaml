@@ -6,15 +6,15 @@ services:
     container_name: summit-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: summit_dev
-      POSTGRES_USER: summit
-      POSTGRES_PASSWORD: test1234
+      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-summit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U summit -d summit_dev' ]
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -31,7 +31,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: [ 'CMD', 'redis-cli', 'ping' ]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -43,7 +43,7 @@ services:
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: neo4j/test1234
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env (see .env.example)}
       NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
       NEO4J_PLUGINS: '["apoc","graph-data-science"]'
     ports:
@@ -53,7 +53,8 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
     healthcheck:
-      test: [ 'CMD-SHELL', 'cypher-shell -u neo4j -p test1234 "RETURN 1"' ]
+      test:
+        ['CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"']
       interval: 15s
       timeout: 10s
       retries: 10
@@ -72,7 +73,7 @@ services:
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=false
-      - ELASTIC_PASSWORD=devpassword
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-devpassword}
       - xpack.security.enrollment.enabled=false
     ulimits:
       memlock:
@@ -87,7 +88,7 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: [ 'CMD-SHELL', 'curl -f -u elastic:devpassword http://localhost:9200/_cluster/health || exit 1' ]
+      test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
       interval: 15s
       timeout: 30s
       retries: 20
@@ -103,24 +104,23 @@ services:
       dockerfile: Dockerfile.dev
     container_name: summit-api
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       PORT: 4000
-      DATABASE_URL: postgresql://summit:test1234@postgres:5432/summit_dev
+      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
       NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: neo4j
-      NEO4J_PASSWORD: test1234
+      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: devpassword
-      CORS_ORIGIN: http://localhost:3000
-      RATE_LIMIT_MAX: 600
-      RATE_LIMIT_WINDOW_MS: 60000
-      JWT_SECRET: dev-secret-do-not-use-in-prod-and-longer
-      JWT_REFRESH_SECRET: another-dev-secret-refresh-key-32-chars
-      SESSION_SECRET: dev-secret-do-not-use-in-prod
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-devpassword}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-600}
+      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-api
       OTEL_SERVICE_VERSION: 1.0.0
@@ -128,7 +128,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
     ports:
-      - '4001:4000'
+      - '4000:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -139,7 +139,7 @@ services:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: [ 'CMD-SHELL', 'wget -qO- http://localhost:4000/health || exit 1' ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
       interval: 15s
       timeout: 30s
       retries: 20
@@ -148,25 +148,6 @@ services:
     labels:
       - 'prometheus.job=summit_api'
       - 'prometheus.port=4000'
-
-  api-gateway:
-    build:
-      context: .
-      dockerfile: services/api-gateway/Dockerfile
-    container_name: summit-api-gateway
-    command: [ "node", "gateway-proxy.js" ]
-    restart: unless-stopped
-    environment:
-      - PORT=4000
-      - NODE_ENV=development
-      - SERVER_URL=http://api:4000
-    ports:
-      - '4000:4000'
-    depends_on:
-      api:
-        condition: service_healthy
-    networks:
-      - summit
 
   gateway:
     build:
@@ -189,19 +170,18 @@ services:
       TYPESENSE_HOST: "typesense"
       TYPESENSE_PORT: "8108"
       TYPESENSE_API_KEY: "xyz"
-      GRAPH_SERVICE_URL: "http://api-gateway:4000/graphql"
     depends_on:
-      api-gateway:
-        condition: service_started
+      api:
+        condition: service_healthy
       policy-compiler:
         condition: service_healthy
       typesense:
         condition: service_healthy
     ports:
-      - '8080:4100'
+      - '4100:4100'
       - '9464:9464'
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:4100/health' ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4100/health']
       interval: 15s
       timeout: 5s
       retries: 10
@@ -219,7 +199,7 @@ services:
     build: ./services/policy-compiler
     ports: [ "8102:8080" ]
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -282,7 +262,7 @@ services:
     volumes:
       - ./tmp/typesense-data:/data
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8108/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8108/health"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -307,18 +287,20 @@ services:
       dockerfile: Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
-      VITE_API_URL: http://localhost:4000/graphql
-      VITE_WS_URL: ws://localhost:4000/graphql
-      VITE_WEBSOCKET_URL: ws://localhost:9001
+      VITE_API_URL: http://api:4000/graphql
+      VITE_WS_URL: ws://api:4000/graphql
+      VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:
       - '3000:3000'
     depends_on:
-      api-gateway:
-        condition: service_started
+      api:
+        condition: service_healthy
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:3000' ]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
       interval: 15s
       timeout: 5s
       retries: 10
@@ -332,16 +314,18 @@ services:
     command: node dist/index.js
     container_name: summit-websocket-server
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       PORT: 9001
       HOST: 0.0.0.0
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV:-development}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: dev-secret-do-not-use-in-prod-and-longer
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
       JWT_ALGORITHM: HS256
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       CORS_CREDENTIALS: "true"
       CLUSTERING_ENABLED: "true"
       NODE_ID: ws-dev-1
@@ -355,7 +339,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ 'CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })' ]
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })']
       interval: 15s
       timeout: 10s
       retries: 3
@@ -389,8 +373,8 @@ services:
     container_name: summit-grafana
     restart: unless-stopped
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel
       GF_FEATURE_TOGGLES_ENABLE: tempoSearch tempoBackendSearch
     ports:
@@ -496,14 +480,14 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WORKER_CONCURRENCY: 4
-      CORS_ORIGIN: http://localhost:3000
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
     ports:
       - '4020:4020'
     depends_on:
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ 'CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4020/health' ]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4020/health']
       interval: 15s
       timeout: 5s
       retries: 10
@@ -531,7 +515,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: [ 'CMD', 'node', '-e', 'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})' ]
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})']
       interval: 15s
       timeout: 5s
       retries: 10
@@ -552,7 +536,6 @@ volumes:
   prometheus_data:
   loki_data:
   alertmanager_data:
-
 
 networks:
   summit:
