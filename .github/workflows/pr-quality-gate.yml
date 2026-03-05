@@ -1,4 +1,4 @@
-name: "[info] PR Quality Gate"
+name: PR Quality Gate
 
 on:
   pull_request:

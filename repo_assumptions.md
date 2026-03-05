@@ -1,39 +1,35 @@
-# Repo Assumptions & Validation Baseline
+# Repo Assumptions & Validation
 
-## Status
+## Structure Validation
 
-This file captures **current verified facts** and **deferred validations** for intent-engineering integration work.
+| Plan Path | Actual Path | Status | Notes |
+|Str|Str|Str|Str|
+| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
+| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
+| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
+| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
+| `docs/` | `docs/` | ✅ Exists | Root directory. |
+| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
+| `tests/` | `tests/` | ✅ Exists | Root directory. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
 
-## Verified Paths
+## Component Mapping
 
-Validated from repository root:
+| Planned Component | Proposed Location | Actual Location / Action |
+|Str|Str|Str|
+| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
+| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
+| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
+| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
 
-- `.github/workflows/`
-- `docs/`
-- `docs/standards/`
-- `docs/security/data-handling/`
-- `docs/ops/runbooks/`
-- `scripts/`
-- `schemas/`
-- `tests/`
+## Constraints & Checks
 
-## Deferred Pending Validation (Before Merge-Critical Changes)
+* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
+* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
+* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
+* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
 
-1. Existing evidence ID schema format and naming rules.
-2. Canonical CI job/check names enforced by branch protection.
-3. Current JSON output conventions for deterministic artifacts.
-4. Deterministic artifact stamping rules (what may vary and where).
-5. Feature-flag framework and authoritative config source.
+## Next Steps
 
-## Must-Not-Touch Until Explicitly Confirmed
-
-- Core evaluation engine internals.
-- Existing CI matrix topology and required-check wiring.
-- Security policy files and governance gates.
-
-## Working Guardrails
-
-- Keep scope to validation-first intent integration.
-- Default feature flag posture: `INTENT_ENGINE_V1=OFF`.
-- No autonomous runtime behavior in this phase.
-- No unrelated refactors while establishing baseline gates.
+1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
+2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).

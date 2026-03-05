@@ -2,14 +2,47 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 
-# Lockfjes must remain diffable for CODEX PRs
+# Lockfiles must remain diffable for CODEX PRs
 package-lock.json text diff
 yarn.lock text diff
 pnpm-lock.yaml text diff
 poetry.lock text diff
 composer.lock text diff
 Cargo.lock text diff
-
+# Go ecosystem lockfiles must remain diffable for CODEX PRs
 go.sum text diff
 
-* -text
+# GraphQL schemas
+*.graphql diff
+*.gql diff
+*.qql diff
+
+# LFS-managed binaries (safe fallback if any slip through)
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.pdf filter=lfs diff=lfs merge=lfs -text
+*.wasm filter=lfs diff=lfs merge=lfs -text
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.tar filter=lfs diff=lfs merge=lfs -text
+
+verification/*.png -filter -diff -merge -text
+# The following assets are intentionally stored without Git LFS to avoid
+# spurious dirty states in environments where LFS remotes are unavailable.
+website/blog/2021-08-26-welcome/docusaurus-plushie-banner.jpeg -filter -diff -merge -text
+website/docs/tutorial-extras/img/docsVersionDropdown.png -filter -diff -merge -text
+website/docs/tutorial-extras/img/localeDropdown.png -filter -diff -merge -text
+website/static/img/docusaurus-social-card.jpg -filter -diff -merge -text
+website/static/img/docusaurus.png -filter -diff -merge -text
+*.db -diff
+*.sqlite* -diff
+
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf

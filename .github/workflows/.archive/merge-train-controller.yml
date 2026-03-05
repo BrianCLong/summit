@@ -56,12 +56,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🧹 Normalize Branches (Hourly)
-        if: (github.event_name == 'schedule') && (always())
+        if: github.event_name == 'schedule'
         run: ./scripts/normalize-branches.sh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 📊 Post Status Report
+        if: always()
         run: |
           echo "Merge Train Stabilization Cycle Complete"
           # Could post to Slack/Discord here

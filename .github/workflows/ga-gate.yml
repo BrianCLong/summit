@@ -11,19 +11,15 @@ name: "GA Gate"
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
   push:
     branches: [main]
   merge_group:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ga-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   gate:
     name: gate
@@ -44,11 +40,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: 20
           cache: 'pnpm'
+          node-version-file: .nvmrc
 
       - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Run GA Verification
         run: |
