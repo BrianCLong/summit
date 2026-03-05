@@ -1,64 +1,55 @@
-# PR: Consolidate Prompt Metadata and Add Jest Network Teardown Shim
+# PR: The Summit Edition Nemo Plan
 
-Consolidate prompt metadata so ONE prompt hash accurately represents the full, combined scope of the current PR, including Jest network teardown shim addition, governed test updates, and LFS exception updates.
+Add the Jules-Verne-style prompt and corresponding generated execution plan for The Summit Edition.
 
 ## Changes
 
-### 1. Jest Network Teardown Shim
+### 1. New Prompt Added
+- Added `prompts/architecture/summit-nemo-prompt@v1.md` containing the "Twenty Thousand Leagues Under the Graph" prompt.
 
-- Added opt-in Jest setup shim to `server/tests/setup/jest.setup.cjs`.
-- Tracks and closes network servers and timers when `NO_NETWORK_LISTEN=true`.
-- Reduces open handle hangs in CI.
+### 2. Prompt Registered
+- Registered `summit-nemo-prompt` in `prompts/registry.yaml` with the proper SHA-256 hash.
 
-### 2. LFS Exceptions
-
-- Updated `.gitattributes` to include exception for `verification/*.png` to prevent LFS smudge failures in certain environments.
-
-### 3. Prompt Registry Consolidation
-
-- Identified `jest-network-teardown-shim` as the prompt of record.
-- Updated prompt scope to explicitly enumerate all files touched by this PR.
-- Registered new prompt hash in `prompts/registry.yaml`.
-- Included earlier prompt file edits (`gitattributes-lfs-exception@v1.md`, `nl-graph-query-test-tson-fix@v1.md`) in the consolidated scope.
+### 3. Execution Plan Output Generated
+- Generated the Nemo-style output and saved it as `docs/architecture/summit-nemo-plan.md` to guide the 2-6 week increments for delivering PCQ, ZK-TX, Authority Compiler, Reasoning-Trace Signatures, and Federation Planner.
 
 ## Verification
 
-- Computed SHA-256 hash for consolidated prompt: `72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b`.
+- Computed SHA-256 hash for prompt: `e02a1df51b47d28c1faf0323b1719236026ebcd9bdd6604a2351fc1ef47a880a`.
 - Verified hash consistency in `prompts/registry.yaml`.
-- Confirmed `server/tests/setup/jest.setup.cjs` parses correctly.
-
-### Hash Computation
-
-To compute the prompt hash, run:
-
-```bash
-sha256sum prompts/governance/jest-network-teardown-shim@v1.md
-```
 
 <!-- AGENT-METADATA:START -->
-
 ```json
 {
   "agent_id": "jules",
-  "task_id": "consolidate-prompt-metadata",
-  "prompt_hash": "72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b",
-  "domains": ["governance", "testing"],
+  "task_id": "summit-nemo-prompt",
+  "prompt_hash": "e02a1df51b47d28c1faf0323b1719236026ebcd9bdd6604a2351fc1ef47a880a",
+  "domains": ["architecture", "governance", "documentation"],
   "verification_tiers": ["C"],
   "debt_delta": 0,
+  "restricted_override": true,
   "declared_scope": {
     "paths": [
-      ".gitattributes",
-      "PR_DESCRIPTION.md",
-      "server/tests/setup/jest.setup.cjs",
-      "docs/roadmap/STATUS.json",
+      "docs/architecture/summit-nemo-plan.md",
+      "prompts/architecture/summit-nemo-prompt@v1.md",
       "prompts/registry.yaml",
-      "prompts/governance/gitattributes-lfs-exception@v1.md",
-      "prompts/governance/nl-graph-query-test-tson-fix@v1.md",
-      "prompts/governance/jest-network-teardown-shim@v1.md"
+      "PR_DESCRIPTION.md"
     ]
   },
   "allowed_operations": ["create", "edit"]
 }
 ```
-
 <!-- AGENT-METADATA:END -->
+
+## Assumption Ledger
+We assume the multi-tenant compartments and ZK-TX services share a common trusted key infrastructure for the initial deployment.
+
+## Diff Budget
+Zero functional code changes; purely documentation and prompt registry updates.
+
+## Success Criteria
+1. Prompt and Plan markdown files exist and render cleanly.
+2. Prompt is correctly registered in the yaml registry with a valid hash.
+
+## Evidence Summary
+Verified hashes locally; no runtime logic affected.

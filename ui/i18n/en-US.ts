@@ -1,5 +1,8 @@
 export const enUS = {
   agentsTitle: 'Agents',
+  messageAgent: 'Message {{agentName}}',
+  callAgent: 'Call {{agentName}}',
+  videoCallAgent: 'Video call {{agentName}}',
   openCommandPalette: 'Open Command Palette (⌘K)',
   meetingStageTitle: 'Meeting Stage',
   liveWebrtcStage: 'Live WebRTC Stage',

@@ -6,15 +6,15 @@ services:
     container_name: summit-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
-      POSTGRES_USER: ${POSTGRES_USER:-summit}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      POSTGRES_DB: summit_dev
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: test1234
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}' ]
+      test: [ 'CMD-SHELL', 'pg_isready -U summit -d summit_dev' ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -43,7 +43,7 @@ services:
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-devpassword}
+      NEO4J_AUTH: neo4j/test1234
       NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
       NEO4J_PLUGINS: '["apoc","graph-data-science"]'
     ports:
@@ -53,7 +53,7 @@ services:
       - neo4j_data:/data
       - neo4j_logs:/logs
     healthcheck:
-      test: [ 'CMD-SHELL', 'cypher-shell -u ${NEO4J_USERNAME:-neo4j} -p ${NEO4J_PASSWORD} "RETURN 1"' ]
+      test: [ 'CMD-SHELL', 'cypher-shell -u neo4j -p test1234 "RETURN 1"' ]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -72,7 +72,7 @@ services:
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - xpack.security.enabled=true
       - xpack.security.http.ssl.enabled=false
-      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-devpassword}
+      - ELASTIC_PASSWORD=devpassword
       - xpack.security.enrollment.enabled=false
     ulimits:
       memlock:
@@ -87,7 +87,7 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: [ 'CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1' ]
+      test: [ 'CMD-SHELL', 'curl -f -u elastic:devpassword http://localhost:9200/_cluster/health || exit 1' ]
       interval: 15s
       timeout: 30s
       retries: 20
@@ -105,19 +105,22 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4000
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
+      DATABASE_URL: postgresql://summit:test1234@postgres:5432/summit_dev
       NEO4J_URI: bolt://neo4j:7687
-      NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-devpassword}
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: test1234
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_PASSWORD: ""
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_USERNAME: elastic
-      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-devpassword}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
-      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-600}
-      RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
+      ELASTICSEARCH_PASSWORD: devpassword
+      CORS_ORIGIN: http://localhost:3000
+      RATE_LIMIT_MAX: 600
+      RATE_LIMIT_WINDOW_MS: 60000
+      JWT_SECRET: dev-secret-do-not-use-in-prod-and-longer
+      JWT_REFRESH_SECRET: another-dev-secret-refresh-key-32-chars
+      SESSION_SECRET: dev-secret-do-not-use-in-prod
       # OpenTelemetry Configuration
       OTEL_SERVICE_NAME: summit-api
       OTEL_SERVICE_VERSION: 1.0.0
@@ -125,7 +128,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
     ports:
-      - '4005:4000'
+      - '4001:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -136,7 +139,7 @@ services:
       elasticsearch:
         condition: service_healthy
     healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:4000/health/ready' ]
+      test: [ 'CMD-SHELL', 'wget -qO- http://localhost:4000/health || exit 1' ]
       interval: 15s
       timeout: 30s
       retries: 20
@@ -148,52 +151,65 @@ services:
 
   api-gateway:
     build:
-      context: ./services/api-gateway
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     container_name: summit-api-gateway
+    command: [ "node", "gateway-proxy.js" ]
     restart: unless-stopped
     environment:
-      - NODE_ENV=development
       - PORT=4000
-      - POLICY_DRY_RUN=true
-      - PROV_LEDGER_URL=http://prov-ledger:4010
-      - GRAPH_SERVICE_URL=http://api:4000
-      - GRAPH_XAI_URL=http://graph-xai:4011
-      - AGENT_RUNTIME_URL=http://agent-runtime:4012
-      - PREDICTIVE_SUITE_URL=http://predictive-suite:4013
-      - XAI_EXPLAIN_ANOMALY_URL=http://xai-explain-anomaly:4000
-      - GRAPH_XAI_URL=http://graph-xai:4011
-      - CONTEXT_XAI_URL=http://graph-xai:4011
-      - AGENT_RUNTIME_URL=http://agent-runtime:4012
-      - PREDICTIVE_SUITE_URL=http://prediction-service:4013
-      - CONDUCTOR_API_URL=http://conductor-api:4000
-      - LICENSE_REGISTRY_URL=http://license-registry:4030
+      - NODE_ENV=development
+      - SERVER_URL=http://api:4000
+    ports:
+      - '4000:4000'
     depends_on:
       api:
         condition: service_healthy
-      prov-ledger:
-        condition: service_started
-      xai-explain-anomaly:
-        condition: service_started
-      graph-xai:
-        condition: service_started
-      agent-runtime:
-        condition: service_started
-      prediction-service:
-        condition: service_started
-      conductor-api:
-        condition: service_started
-      license-registry:
-        condition: service_started
-    ports:
-      - '4000:4000'
-      - '9464:4000'
     networks:
       - summit
+
+  gateway:
+    build:
+      context: ./services/dev-gateway
+    container_name: summit-gateway
+    restart: unless-stopped
+    environment:
+      PORT: 4100
+      PROMETHEUS_PORT: 9464
+      # OpenTelemetry Configuration
+      OTEL_SERVICE_NAME: summit-gateway
+      OTEL_SERVICE_VERSION: 1.0.0
+      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      FEATURE_LAC_ENFORCE: "true"
+      COPILOT_NLQ: "true"
+      UI_TRIPANE: "true"
+      POLICY_COMPILER_URL: "http://policy-compiler:8080"
+      OPA_DECISION_URL: "http://opa:8181/v1/data/policy/authz/abac/decision"
+      TYPESENSE_HOST: "typesense"
+      TYPESENSE_PORT: "8108"
+      TYPESENSE_API_KEY: "xyz"
+      GRAPH_SERVICE_URL: "http://api-gateway:4000/graphql"
+    depends_on:
+      api-gateway:
+        condition: service_started
+      policy-compiler:
+        condition: service_healthy
+      typesense:
+        condition: service_healthy
+    ports:
+      - '8080:4100'
+      - '9464:9464'
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:4000/health" ]
-      interval: 10s
+      test: [ 'CMD', 'curl', '-f', 'http://localhost:4100/health' ]
+      interval: 15s
       timeout: 5s
-      retries: 5
+      retries: 10
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=summit_gateway'
+      - 'prometheus.port=4100'
 
   prov-ledger:
     build: ./services/prov-ledger
@@ -225,82 +241,6 @@ services:
   zk-tx:
     build: ./services/zk-tx
     ports: [ "8106:8080" ]
-
-  xai-explain-anomaly:
-    build:
-      context: ./services/xai-explain-anomaly
-    container_name: summit-xai-explain-anomaly
-    restart: unless-stopped
-    ports:
-      - '4022:4000'
-    networks:
-      - summit
-
-  graph-xai:
-    build:
-      context: ./services/graph-xai
-    container_name: summit-graph-xai
-    restart: unless-stopped
-    environment:
-      - PYTHONPATH=/app
-      - MODEL_CACHE_TTL=3600
-    ports:
-      - '4011:4011'
-    networks:
-      - summit
-
-  agent-runtime:
-    build:
-      context: ./services/agent-runtime
-    container_name: summit-agent-runtime
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=development
-      - REDIS_URL=redis://redis:6379
-      - API_GATEWAY_URL=http://api-gateway:4000
-    ports:
-      - '4012:4012'
-    networks:
-      - summit
-
-  prediction-service:
-    build:
-      context: ./services/prediction-service
-    container_name: summit-prediction-service
-    restart: unless-stopped
-    environment:
-      - PYTHONPATH=/app
-      - MODEL_REGISTRY_URL=http://prov-ledger:4010
-    ports:
-      - '4013:4013'
-    networks:
-      - summit
-
-  conductor-api:
-    build:
-      context: ./services/conductor
-    container_name: summit-conductor-api
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgres://summit:devpassword@postgres:5432/summit_dev
-    ports:
-      - '4020:4000'
-    networks:
-      - summit
-
-  license-registry:
-    build:
-      context: ./services/license-registry
-    container_name: summit-license-registry
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgres://summit:devpassword@postgres:5432/summit_dev
-    ports:
-      - '4030:4030'
-    networks:
-      - summit
 
   predictd:
     build:
@@ -368,15 +308,15 @@ services:
     container_name: summit-web
     restart: unless-stopped
     environment:
-      VITE_API_URL: http://api:4000/graphql
-      VITE_WS_URL: ws://api:4000/graphql
-      VITE_WEBSOCKET_URL: ws://websocket-server:9001
+      VITE_API_URL: http://localhost:4000/graphql
+      VITE_WS_URL: ws://localhost:4000/graphql
+      VITE_WEBSOCKET_URL: ws://localhost:9001
       VITE_PORT: 3000
     ports:
       - '3000:3000'
     depends_on:
-      api:
-        condition: service_healthy
+      api-gateway:
+        condition: service_started
     healthcheck:
       test: [ 'CMD', 'curl', '-f', 'http://localhost:3000' ]
       interval: 15s
@@ -395,13 +335,13 @@ services:
     environment:
       PORT: 9001
       HOST: 0.0.0.0
-      NODE_ENV: ${NODE_ENV:-development}
+      NODE_ENV: development
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_12345}
+      JWT_SECRET: dev-secret-do-not-use-in-prod-and-longer
       JWT_ALGORITHM: HS256
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_ORIGIN: http://localhost:3000
       CORS_CREDENTIALS: "true"
       CLUSTERING_ENABLED: "true"
       NODE_ID: ws-dev-1
@@ -449,8 +389,8 @@ services:
     container_name: summit-grafana
     restart: unless-stopped
     environment:
-      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
       GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-piechart-panel
       GF_FEATURE_TOGGLES_ENABLE: tempoSearch tempoBackendSearch
     ports:
@@ -556,7 +496,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       WORKER_CONCURRENCY: 4
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_ORIGIN: http://localhost:3000
     ports:
       - '4020:4020'
     depends_on:
