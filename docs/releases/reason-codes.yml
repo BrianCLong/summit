@@ -65,3 +65,33 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
+maestro_nogo_extended:
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: SCHEMA_MAJOR_UNSUPPORTED
+  - code: SCHEMA_VERSION_INVALID
+    description: SCHEMA_VERSION_INVALID
+  - code: JSON_PARSE_ERROR
+    description: JSON_PARSE_ERROR
+  - code: MISSING_FIELD
+    description: MISSING_FIELD
+  - code: INVALID_ENUM
+    description: INVALID_ENUM
+  - code: DRIFT_DETECTED
+    description: DRIFT_DETECTED
+  - code: DRIFT_ERROR
+    description: DRIFT_ERROR
+  - code: SIG_ORPHAN
+    description: SIG_ORPHAN
+  - code: SIG_INVALID
+    description: SIG_INVALID
+  - code: COSIGN_MISSING
+    description: COSIGN_MISSING
+  - code: SIG_MISSING
+    description: SIG_MISSING
+  - code: ATTESTATION_MISSING
+    description: ATTESTATION_MISSING
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: SHA256SUMS_INVALID_FORMAT
+  - code: INVALID_JSON
+    description: INVALID_JSON
