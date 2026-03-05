@@ -87,14 +87,14 @@ router.post(
 // Minimal tickets endpoint (placeholder for GH/Jira merged view)
 router.get('/tickets', async (req, res) => {
   try {
-    const limit = Number((((req.query.limit as string) as string) as string) || 50);
-    const offset = Number((((req.query.offset as string) as string) as string) || 0);
+    const limit = Number((req.query.limit as string) || 50);
+    const offset = Number((req.query.offset as string) || 0);
     const filters = {
-      provider: ((((req.query.provider as string) as string) as string) as any) || undefined,
-      assignee: ((((req.query.assignee as string) as string) as string) as string) || undefined,
-      label: ((((req.query.label as string) as string) as string) as string) || undefined,
-      project: ((((req.query.project as string) as string) as string) as string) || undefined,
-      repo: ((((req.query.repo as string) as string) as string) as string) || undefined,
+      provider: (req.query.provider as any) || undefined,
+      assignee: (req.query.assignee as string) || undefined,
+      label: (req.query.label as string) || undefined,
+      project: (req.query.project as string) || undefined,
+      repo: (req.query.repo as string) || undefined,
     };
     const items = await listTickets(limit, offset, filters);
     return res.json({ items, total: items.length, limit, offset });

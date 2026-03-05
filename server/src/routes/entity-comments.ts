@@ -22,24 +22,15 @@ function getRequestContext(req: any): {
   tenantId: string | null;
   userId: string | null;
 } {
-  // SEC-2025-002: Prioritize identity and tenant context from authenticated user object
-  // populated by middleware, rather than untrusted headers to prevent spoofing.
-  const tenantId =
-    req.user?.tenantId ||
-    req.user?.tenant_id ||
-    req.tenant_id ||
-    req.tenantContext?.tenantId ||
-    (process.env.NODE_ENV === 'test' ? (req.headers['x-tenant-id'] || req.headers['x-tenant']) : null);
-
+  const tenantId = String(
+    req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
+  );
   const userId =
-    req.user?.id ||
-    req.user?.sub ||
-    req.user?.email ||
-    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : null);
+    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
 
   return {
-    tenantId: tenantId ? String(tenantId) : null,
-    userId: userId ? String(userId) : null,
+    tenantId: tenantId || null,
+    userId: userId || null,
   };
 }
 
@@ -178,11 +169,11 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = (((req.query.limit as string) as string) as string)
-      ? parseInt((((req.query.limit as string) as string) as string) as string, 10)
+    const limit = req.query.limit
+      ? parseInt(req.query.limit as string as string, 10)
       : undefined;
-    const offset = (((req.query.offset as string) as string) as string)
-      ? parseInt((((req.query.offset as string) as string) as string) as string, 10)
+    const offset = req.query.offset
+      ? parseInt(req.query.offset as string as string, 10)
       : undefined;
 
     await authorizer({
@@ -201,7 +192,7 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
       limit,
       offset,
       {
-        includeDeleted: String((((req.query.includeDeleted as string) as string) as string) || '') === 'true',
+        includeDeleted: String(req.query.includeDeleted || '') === 'true',
       },
     );
 
