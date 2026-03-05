@@ -30,7 +30,7 @@ permissions:
 
 env:
   NODE_VERSION: '20.x'
-  PNPM_VERSION: '9.12.0'
+  PNPM_VERSION: '10.0.0'
   PYTHON_VERSION: '3.11'
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
@@ -136,7 +136,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.preflight.outputs.node-version }}
@@ -177,7 +181,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.preflight.outputs.node-version }}
@@ -215,7 +223,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.preflight.outputs.node-version }}
@@ -254,7 +266,9 @@ jobs:
           category: trivy-security-scan
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4          name: sbom-${{ github.run_number }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.run_number }}
           path: sbom.spdx.json
           retention-days: 90
 
@@ -288,7 +302,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -324,7 +342,9 @@ jobs:
           NODE_ENV: production
 
       - name: Upload build artifacts (Ubuntu only)
-        uses: actions/upload-artifact@v4          name: build-artifacts-${{ github.run_number }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
           path: |
             dist/
             build/
@@ -359,7 +379,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -369,7 +393,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Download build artifacts
-        uses: actions/download-artifact@v4          name: build-artifacts-${{ github.run_number }}
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
         continue-on-error: true
 
       - name: Run unit tests
@@ -379,7 +405,9 @@ jobs:
           CI: true
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v4          name: coverage-unit-${{ matrix.os }}-${{ matrix.node }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit-${{ matrix.os }}-${{ matrix.node }}
           path: coverage/
           retention-days: 14
           if-no-files-found: ignore
@@ -436,7 +464,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.preflight.outputs.node-version }}
@@ -491,7 +523,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.preflight.outputs.node-version }}
@@ -555,7 +591,11 @@ jobs:
         run: corepack enable
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4      - name: Setup Node.js
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.preflight.outputs.node-version }}

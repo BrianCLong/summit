@@ -13,7 +13,7 @@ concurrency:
 
 env:
   NODE_VERSION: '18'
-  PNPM_VERSION: '9.12.0'
+  PNPM_VERSION: '10.0.0'
   CACHE_VERSION: v1
 
 jobs:
@@ -268,7 +268,9 @@ jobs:
 
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4          name: playwright-report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
           path: playwright-report/
           retention-days: 30
 
@@ -310,7 +312,9 @@ jobs:
         run: pnpm build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4          name: build-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
           path: |
             packages/*/dist
             services/*/dist
