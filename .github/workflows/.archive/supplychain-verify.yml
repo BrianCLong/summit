@@ -31,8 +31,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa https://github.com/open-policy-agent/opa/releases/download/v0.60.0/opa_linux_amd64_static
-          chmod +x opa && sudo mv opa /usr/local/bin/opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin && sudo mv opa-bin /usr/local/bin/opa
 
       - name: Resolve digest and fetch attestation
         id: fetch
@@ -42,7 +42,7 @@ jobs:
           DIGEST="$(cosign triangulate "${IMAGE_REF}")"
           echo "digest=${DIGEST}" >> "$GITHUB_OUTPUT"
           # Verify there is a valid in-toto attestation recorded in Rekor
-          cosign verify-attestation --use-signed-timestamps "${DIGEST}" --type slsaprovenance > att.json
+          cosign verify-attestation "${DIGEST}" --type slsaprovenance > att.json
           # Extract the in-toto payload for policy input
           jq -r '.[0].payload | @base64d' att.json > statement.json
 

@@ -22,8 +22,8 @@ on:
       - ".github/workflows/ci-preflight.yml"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ci-preflight-${{ github.ref }}
+
 env:
   POSTGRES_PASSWORD: ci-postgres-password
   NEO4J_PASSWORD: ci-neo4j-password
@@ -50,7 +50,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
+          node-version-file: .nvmrc
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

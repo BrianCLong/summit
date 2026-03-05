@@ -1,4 +1,3 @@
-<!-- markdownlint-disable -->
 # Summit Trust Center
 
 **Last Updated:** November 20, 2025
@@ -11,21 +10,21 @@ Welcome to the Summit Trust Center. Security, privacy, and compliance are founda
 
 ### Architecture Principles
 
-### 1. Zero Trust Architecture
+**1. Zero Trust Architecture**
 
 - All access requires authentication and authorization
 - Policy-based access control (OPA/ABAC)
 - Least privilege by default
 - Continuous verification
 
-### 2. Defense in Depth
+**2. Defense in Depth**
 
 - Network segmentation
 - Application-layer security
 - Data encryption (at-rest and in-transit)
 - Audit logging for all operations
 
-### 3. AI-First, Human-in-Command
+**3. AI-First, Human-in-Command**
 
 - AI agents recommend, humans approve
 - Explainable AI decisions

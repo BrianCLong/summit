@@ -30,7 +30,7 @@ on:
 jobs:
   ga-readiness:
     name: GA Readiness Gate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     outputs:
       ready: ${{ steps.summary.outputs.ready }}
@@ -71,9 +71,9 @@ jobs:
       - name: Install Tools (OPA, Cosign, Syft, Grype)
         run: |
           # OPA
-          curl -L -o opa https://github.com/open-policy-agent/opa/releases/download/v0.61.0/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
+          chmod +x opa-bin
+          sudo mv opa-bin /usr/local/bin/
 
           # Cosign
           curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v2.2.3/cosign-linux-amd64
@@ -94,6 +94,7 @@ jobs:
         id: antigravity
         run: |
           echo "⚖️ Verifying Antigravity Governance..."
+          npm run compliance:antigravity
 
       # 2. Security: Secrets & Vulns
       - name: Run Trivy (Secrets)
