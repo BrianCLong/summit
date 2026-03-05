@@ -1,6 +1,11 @@
 name: CI • Workflow Drift Guard
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - ".github/workflows/**"
       - "scripts/ci/workflows_diff/**"
