@@ -298,9 +298,9 @@ After resolving:
 ## Related Runbooks
 
 - [Error Rate Spike](./error-rate-spike.md)
-- [High CPU Usage](./high-cpu.md)
-- [Database Performance](./database-performance.md)
-- [Memory Leak Investigation](./memory-leak.md)
+- High CPU Usage
+- Database Performance
+- Memory Leak Investigation
 
 ---
 

@@ -62,7 +62,7 @@ TOTAL_DRAFT=$(gh pr list --state open --draft --limit 500 --json number | jq 'le
 if [ "$TOTAL_OPEN" -eq 0 ]; then
     CONFLICT_RATE=0
 else
-    CONFLICT_RATE=$(echo "scale=1; $TOTAL_CONFLICTING * 100 / $TOTAL_OPEN" | bc)
+    CONFLICT_RATE=$(awk "BEGIN {printf \"%.1f\", $TOTAL_CONFLICTING * 100 / $TOTAL_OPEN}")
 fi
 
 log_metric "Total Open PRs" "$TOTAL_OPEN"
@@ -107,8 +107,8 @@ MERGES_TODAY=$(gh pr list --state merged --search "merged:>=$(date +%Y-%m-%d)" -
 MERGES_WEEK=$(gh pr list --state merged --search "merged:>=$(date -d '7 days ago' +%Y-%m-%d 2>/dev/null || date -v-7d +%Y-%m-%d)" --limit 500 --json number | jq 'length')
 MERGES_MONTH=$(gh pr list --state merged --search "merged:>=$(date -d '30 days ago' +%Y-%m-%d 2>/dev/null || date -v-30d +%Y-%m-%d)" --limit 500 --json number | jq 'length')
 
-DAILY_AVG=$(echo "scale=1; $MERGES_WEEK / 7" | bc)
-WEEKLY_AVG=$(echo "scale=1; $MERGES_MONTH / 4" | bc)
+DAILY_AVG=$(awk "BEGIN {printf \"%.1f\", $MERGES_WEEK / 7}")
+WEEKLY_AVG=$(awk "BEGIN {printf \"%.1f\", $MERGES_MONTH / 4}")
 
 log_metric "Merged today" "$MERGES_TODAY"
 log_metric "Merged this week" "$MERGES_WEEK (avg ${DAILY_AVG}/day)"

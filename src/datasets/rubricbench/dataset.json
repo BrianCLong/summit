@@ -1,0 +1,9 @@
+[
+  {
+    "instruction": "Write a python script to calculate the fibonacci sequence",
+    "output_a": "def fib(n): return n if n <= 1 else fib(n-1) + fib(n-2)",
+    "output_b": "def fib(n):\n  if n <= 1:\n    return n\n  return fib(n-1) + fib(n-2)",
+    "human_preference": "B",
+    "rubrics": ["r1", "r2"]
+  }
+]

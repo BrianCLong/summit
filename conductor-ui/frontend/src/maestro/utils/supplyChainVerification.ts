@@ -642,37 +642,47 @@ export class SupplyChainVerifier {
     details: SupplyChainVerificationResult[];
   }> {
     const total = results.length;
-    const verified = results.filter((r) => r.verified).length;
-    const failed = total - verified;
-    const withSBOM = results.filter((r) => r.sbomVerification?.present).length;
-    const withSLSA = results.filter((r) => r.slsaVerification?.present).length;
 
-    const slsaLevels = results
-      .map((r) => r.slsaVerification?.level || 0)
-      .filter((level) => level > 0);
-    const avgSLSALevel =
-      slsaLevels.length > 0
-        ? slsaLevels.reduce((sum, level) => sum + level, 0) / slsaLevels.length
-        : 0;
+    // ⚡ Bolt Optimization: Use a single reduce pass instead of 5 separate filter/map/reduce passes over the results array
+    const summaryData = results.reduce(
+      (acc, r) => {
+        if (r.verified) acc.verified++;
+        if (r.sbomVerification?.present) acc.withSBOM++;
+        if (r.slsaVerification?.present) acc.withSLSA++;
 
-    const criticalVulnerabilities = results.reduce((total, r) => {
-      return (
-        total +
-        (r.sbomVerification?.vulnerabilities?.filter(
-          (v) => v.severity === 'critical',
-        ).length || 0)
-      );
-    }, 0);
+        const level = r.slsaVerification?.level || 0;
+        if (level > 0) {
+          acc.slsaLevelSum += level;
+          acc.slsaLevelCount++;
+        }
+
+        if (r.sbomVerification?.vulnerabilities) {
+          for (const v of r.sbomVerification.vulnerabilities) {
+            if (v.severity === 'critical') {
+              acc.criticalVulnerabilities++;
+            }
+          }
+        }
+
+        return acc;
+      },
+      { verified: 0, withSBOM: 0, withSLSA: 0, slsaLevelSum: 0, slsaLevelCount: 0, criticalVulnerabilities: 0 }
+    );
+
+    const failed = total - summaryData.verified;
+    const avgSLSALevel = summaryData.slsaLevelCount > 0
+      ? summaryData.slsaLevelSum / summaryData.slsaLevelCount
+      : 0;
 
     return {
       summary: {
         total,
-        verified,
+        verified: summaryData.verified,
         failed,
-        withSBOM,
-        withSLSA,
+        withSBOM: summaryData.withSBOM,
+        withSLSA: summaryData.withSLSA,
         avgSLSALevel: Math.round(avgSLSALevel * 100) / 100,
-        criticalVulnerabilities,
+        criticalVulnerabilities: summaryData.criticalVulnerabilities,
       },
       details: results,
     };

@@ -12,7 +12,7 @@ class AuditEvent:
     agent_version: str
     snapshot_hash: str
     policy_decision: str
-    policy_refs: List[str]
-    details: Dict[str, Any]
+    policy_refs: list[str]
+    details: dict[str, Any]
     hash_chain_prev: str | None = None
     hash_chain_self: str | None = None
