@@ -11,7 +11,7 @@ This runbook standardizes the process for triaging and resolving security alerts
     - Confirm if the alert is a true positive.
     - Determine the `affected_area` (e.g., `services/auth`, `infra/vpc`).
     - Identify the `owner` based on `CODEOWNERS`.
-3.  **Containment**: If the alert indicates an active exploit or secret leak, immediately follow the [Security Incident Response Playbook](docs/runbooks/security-incident-response.md).
+3.  **Containment**: If the alert indicates an active exploit or secret leak, immediately follow the Security Incident Response Playbook.
 4.  **Remediation Planning**: Define the `fix_type` (config/docs/code) and assign a priority based on the classification below.
 
 ## 2. Classification and Prioritization
@@ -42,7 +42,7 @@ Before closing an alert in the backlog or GitHub UI, the following evidence must
 
 ### “What do we do when CI is blocked?”
 
-- **Do NOT bypass gates**: Security gates (CodeQL, Trivy, Gitleaks) are mandatory. If CI is failing due to infrastructure issues, follow the [CI Unblocking Runbook](docs/runbooks/ci-unblocking.md).
+- **Do NOT bypass gates**: Security gates (CodeQL, Trivy, Gitleaks) are mandatory. If CI is failing due to infrastructure issues, follow the CI Unblocking Runbook.
 - **Emergency Overrides**: Requires approval from at least two Release Captains and must be documented in the `SECURITY_BACKLOG.md` with a `fix_type: config (exception)` and a 7-day expiry.
 - **Queue Congestion**: Prioritize security PRs (P0/P1) by using the `priority/security` label to move them to the front of the merge train.
 
@@ -72,4 +72,4 @@ _Note: No changes to `server/src`, `packages/_` runtime code, or core business l
 ### Supply-chain Provenance & SBOM
 
 - Every release must have a generated SBOM and SLSA attestation.
-- Failure to generate provenance blocks the release. See [PROVENANCE.md](docs/ga/PROVENANCE.md) for policy details.
+- Failure to generate provenance blocks the release. See PROVENANCE.md for policy details.
