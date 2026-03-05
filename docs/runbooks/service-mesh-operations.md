@@ -747,8 +747,8 @@ kubectl delete service istiod-1-20-0 -n istio-system
 
 ## Related Documentation
 
-- [Service Mesh Architecture](../docs/architecture/service-mesh-architecture.md)
-- [Service Mesh Best Practices](../docs/architecture/service-mesh-best-practices.md)
+- Service Mesh Architecture
+- Service Mesh Best Practices
 - [Istio Documentation](https://istio.io/latest/docs/)
 - [OpenTelemetry Documentation](https://opentelemetry.io/docs/)
 

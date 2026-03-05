@@ -9,7 +9,7 @@ protected_branches:
 required_checks:
   - meta-gate
   - gate
-  - Unit Tests
+  - Unit Tests (Core)
   - SOC Controls
 
 notes:

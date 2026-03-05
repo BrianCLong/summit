@@ -355,7 +355,7 @@ if (existsSync(sumsPath)) {
             } else if (e instanceof ReleaseBundleError) {
                 addError(e.code, e.message);
             } else {
-                addError('INTERNAL_ERROR', `Error processing bundle-index.json: ${e.message}`);
+                addError('INVALID_JSON', `Error processing bundle-index.json: ${e.message}`);
             }
         }
     }
