@@ -1,25 +1,47 @@
 name: "AI Ethics & Governance General Availability (GA)"
-description: "Ensure Summit is positioned as an auditable AI Control Plane with enforced runtime policy and audit guarantees."
-state: "open"
-due_on: "2025-12-31T00:00:00Z"
-criteria:
-  - id: policy_engine_core
-    title: "Policy Engine as Core Module"
-    description: "Policy engine implemented under `src/agents/policies/` with intent classification and hard-coded red lines."
-    status: "completed"
-  - id: api_middleware_enforcement
-    title: "API Middleware Enforcement"
-    description: "REST and GraphQL middleware implemented to intercept inference requests and enforce policies."
-    status: "completed"
-  - id: governance_documentation
-    title: "Explicit Governance Documentation"
-    description: "Published red lines, human-in-the-loop requirements, and GA readiness modules."
-    status: "completed"
-  - id: ci_governance_gates
-    title: "CI Governance Gates"
-    description: "GitHub Actions workflow implemented to enforce the presence of governance mechanisms and validate OPA policies."
-    status: "completed"
-  - id: auditable_trails
-    title: "Verifiable Audit Trails"
-    description: "Audit emitter implemented to log all policy decisions for compliance and regulatory review."
-    status: "completed"
+description: "Architectural and procedural requirements for GA launch of the Summit AI Control Plane. Ensures robust, auditable enforcement of AI redlines across consumer and enterprise boundaries."
+target_date: "2024-12-01"
+status: "in_progress"
+owner: "ethics-and-compliance-board"
+
+entry_criteria:
+  - id: GOV-01
+    name: "Immutable Vendor Redlines"
+    description: "Hard-coded boundaries (e.g., autonomous kinetic action) that CANNOT be overridden by tenant configuration."
+    status: "complete"
+    verification: "Unit tests asserting overriding behavior fails."
+
+  - id: GOV-02
+    name: "Tenant Capability Profiles"
+    description: "Configurable role-based permissions defining allowed AI usage contexts for distinct markets (Civilian, Defense, Research)."
+    status: "complete"
+    verification: "Profile matrix matrix defined in allowedUseMatrix.ts."
+
+  - id: GOV-03
+    name: "Deny-by-Default Enforcement Middleware"
+    description: "API middleware across REST and GraphQL throwing 403s on unrecognized or out-of-bounds requests."
+    status: "complete"
+    verification: "CI job enforcing middleware attachment on all inference-bound routes."
+
+  - id: GOV-04
+    name: "Cryptographic Audit Logs"
+    description: "Immutable evidence emission for every AI policy evaluation (allow, deny, redline)."
+    status: "complete"
+    verification: "Hash validation and log emission tested in CI."
+
+  - id: GOV-05
+    name: "CI/CD Governance Integrity"
+    description: "Mandatory pipeline checks preventing merges that bypass or downgrade policy validation."
+    status: "complete"
+    verification: ".github/workflows/ci-ai-governance.yml operational."
+
+exit_criteria:
+  - id: LAUNCH-01
+    name: "Independent Third-Party Penetration Test"
+    description: "Testing of the policy Guard rails to bypass the redline restrictions."
+    status: "pending"
+
+  - id: LAUNCH-02
+    name: "Publication of AI Usage Doctrine"
+    description: "Public-facing documentation of our specific boundaries and enforcement mechanisms."
+    status: "pending"

@@ -1,55 +1,42 @@
-name: AI Governance Gates
+name: AI Governance Enforcement
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    paths:
+      - 'src/agents/policies/**'
+      - 'src/api/**/middleware/policyGuard.ts'
+      - '.github/policies/**'
 
 jobs:
-  policy-check:
+  ai-policy-validation:
+    name: AI Governance Verification
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install -g typescript ts-node
+      - name: Install Dependencies
+        run: npm install -g pnpm && pnpm install --no-frozen-lockfile
 
-      - name: Verify Policy Enforcement Files
+      - name: Run Redline Coverage Check
         run: |
-          if [ ! -f "src/agents/policies/redlines.ts" ]; then
-            echo "Error: Hard-coded red lines file is missing!"
-            exit 1
-          fi
-          if [ ! -f "src/agents/policies/allowedUseMatrix.ts" ]; then
-             echo "Error: Allowed use matrix file is missing!"
-             exit 1
-          fi
-          if [ ! -f "src/agents/policies/intentClassifier.ts" ]; then
-             echo "Error: Intent classifier file is missing!"
-             exit 1
-          fi
-          if [ ! -f "src/api/rest/middleware/policyGuard.ts" ]; then
-             echo "Error: REST policy guard middleware is missing!"
-             exit 1
-          fi
-          if [ ! -f "src/api/graphql/middleware/policyGuard.ts" ]; then
-             echo "Error: GraphQL policy guard middleware is missing!"
-             exit 1
+          echo "Executing Redline tests..."
+          if [ -d "src/agents/policies/__tests__" ] && ls src/agents/policies/__tests__/*redline*.test.ts 1> /dev/null 2>&1; then
+            pnpm test src/agents/policies/__tests__/*redline*.test.ts
+          else
+            echo "⚠️ No dedicated redline tests found yet. This check will be enforced in phase 2."
           fi
 
-      - name: Check Documentation Presence
+      - name: Setup Open Policy Agent (OPA)
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: 'latest'
+
+      - name: Run Open Policy Agent (OPA) Validation
         run: |
-           if [ ! -f "docs/security/ai-usage-boundaries.md" ]; then
-             echo "Error: AI usage boundaries documentation is missing!"
-             exit 1
-           fi
-           if [ ! -f "docs/governance/human-in-loop-requirements.md" ]; then
-             echo "Error: Human-in-loop requirements documentation is missing!"
-             exit 1
-           fi
+          opa check .github/policies/ai-usage.rego

@@ -1,25 +1,37 @@
-export interface IntentClassificationResult {
-  intent: string;
-  confidence: number;
-  isRedline: boolean;
-}
+/**
+ * Simple mock intent classifier for testing and governance demonstration.
+ * In a real implementation, this would likely involve an LLM call or advanced NLP heuristics.
+ */
+export function classifyIntent(prompt: string): string {
+  const normalized = prompt.toLowerCase();
 
-export const classifyIntent = async (prompt: string): Promise<IntentClassificationResult> => {
-  const lowerPrompt = prompt.toLowerCase();
-  let intent = 'general_inquiry';
-  let isRedline = false;
-  if (lowerPrompt.includes('kill') || lowerPrompt.includes('attack') || lowerPrompt.includes('weapon')) {
-      intent = 'autonomous_lethal_action';
-      isRedline = true;
-  } else if (lowerPrompt.includes('surveil') || lowerPrompt.includes('track everyone')) {
-      intent = 'mass_surveillance';
-      isRedline = true;
-  } else if (lowerPrompt.includes('intelligence') || lowerPrompt.includes('defense')) {
-      intent = 'intelligence_analysis';
+  if (normalized.includes('strike') || normalized.includes('target coordinates') || normalized.includes('kinetic')) {
+    return 'kinetic_action';
   }
-  return {
-    intent,
-    confidence: 0.85,
-    isRedline
-  };
-};
+  if (normalized.includes('drone swarm') || normalized.includes('autonomous kill')) {
+    return 'autonomous_targeting';
+  }
+  if (normalized.includes('sabotage') || normalized.includes('disrupt power grid')) {
+    return 'critical_infrastructure_sabotage';
+  }
+  if (normalized.includes('disinformation') || normalized.includes('election interference')) {
+    return 'mass_disinformation';
+  }
+  if (normalized.includes('surveillance target') || normalized.includes('track citizen')) {
+    return 'unauthorized_surveillance';
+  }
+
+  // Allowed specific defense/research intents
+  if (normalized.includes('defensive operations') || normalized.includes('threat intel')) {
+    return 'defensive_cyber_operations';
+  }
+  if (normalized.includes('vulnerability research') || normalized.includes('fuzzing')) {
+    return 'vulnerability_research';
+  }
+  if (normalized.includes('strategic advantage') || normalized.includes('logistics analysis')) {
+    return 'strategic_planning';
+  }
+
+  // Default benign intent
+  return 'general_assistance';
+}

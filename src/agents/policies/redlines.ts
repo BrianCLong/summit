@@ -1,12 +1,16 @@
-export const REDLINES = [
-  "autonomous_lethal_action",
-  "mass_surveillance",
-  "unauthorized_biometric_identification",
-  "social_scoring",
-  "critical_infrastructure_disruption",
-  "CBRN_material_generation"
+/**
+ * Vendor-level immutable redlines.
+ * These intents are strictly prohibited across all profiles and tenants.
+ * This file serves as the definitive source of truth for hard boundaries.
+ */
+export const VENDOR_REDLINES: readonly string[] = [
+  'autonomous_targeting',
+  'kinetic_action',
+  'unauthorized_surveillance',
+  'critical_infrastructure_sabotage',
+  'mass_disinformation',
 ];
 
-export const isRedline = (intent: string): boolean => {
-  return REDLINES.includes(intent);
-};
+export function isRedlined(intent: string): boolean {
+  return VENDOR_REDLINES.includes(intent);
+}
