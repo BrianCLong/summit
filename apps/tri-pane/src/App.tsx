@@ -6,6 +6,7 @@ import { MapPane } from './components/MapPane';
 import { SavedViewsPanel } from './components/SavedViewsPanel';
 import { Toast } from './components/Toast';
 import { TimelinePane } from './components/TimelinePane';
+import { CognitiveBattlespacePage } from './pages/cognitive-battlespace';
 import { TriPaneProvider } from './components/EventBus';
 import { featureFlags } from './config';
 
@@ -36,6 +37,7 @@ function Shell() {
           </div>
         </div>
         <TimelinePane />
+        <CognitiveBattlespacePage />
       </main>
       <Toast />
     </div>

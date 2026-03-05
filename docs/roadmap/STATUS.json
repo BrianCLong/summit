@@ -1,7 +1,13 @@
 {
   "last_updated": "2026-03-05T00:00:00Z",
-  "revision_note": "Added SWE-rebench architecture insights brief and repo-assumptions checklist for deterministic Summit SWE-lab planning.",
+  "revision_note": "Added Tri-Graph Cognitive Battlespace skeleton (schemas, NG/BG writeset firewall, defensive UI page).",
   "initiatives": [
+    {
+      "id": "cognitive-battlespace-trigraph-v0",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Introduced Tri-Graph schema package, CogBattlespace runtime stubs, NG/BG-only WriteSet firewall with unified rejection reports, and tri-pane Cognitive Battlespace UI skeleton."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -205,12 +211,6 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "swe-rebench-summit-lab-architecture",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Published top-3 architectural ideas brief, MAESTRO-aligned mitigations, and repo assumption closure checklist for SWE-rebench subsumption plan."
     }
   ],
   "summary": {
