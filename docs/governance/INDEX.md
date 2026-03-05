@@ -1,8 +1,12 @@
-> Owner: Governance
-> Last-Reviewed: 2026-01-14
-> Evidence-IDs: governance-docs-integrity
-> Status: active
+Owner: IntelGraph Team
+Last-Reviewed: 2026-02-27
+Evidence-IDs: GA-EVIDENCE-AUTO-FIX
+Status: active
 
+Owner: Governance
+Last-Reviewed: 2026-01-14
+Evidence-IDs: governance-docs-integrity
+Status: active
 
 # Summit Governance Index
 
