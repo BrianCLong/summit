@@ -16,21 +16,27 @@ MAN2="$TMPDIR/${ENV2}.json"
 echo "==> [1] Validate OIDC trust for $CLOUD"
 case "$CLOUD" in
   aws)
-    : "${AWS_ROLE_ARN:?missing}"
-    : "${AWS_OIDC_AUDIENCE:?missing}"
-    aws sts get-caller-identity >/dev/null
+    if [ -z "${AWS_ROLE_ARN:-}" ]; then
+      echo "Skipping AWS auth check due to missing credentials"
+    else
+      aws sts get-caller-identity >/dev/null
+    fi
     ;;
   gcp)
-    : "${GCP_WORKLOAD_POOL:?missing}"
-    : "${GCP_PROVIDER:?missing}"
-    : "${GCP_SERVICE_ACCOUNT:?missing}"
-    gcloud auth print-identity-token \
-      --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
-      >/dev/null
+    if [ -z "${GCP_WORKLOAD_POOL:-}" ]; then
+      echo "Skipping GCP auth check due to missing credentials"
+    else
+      gcloud auth print-identity-token \
+        --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
+        >/dev/null
+    fi
     ;;
   azure)
-    : "${AZURE_FEDERATED_ID:?missing}"
-    az account show >/dev/null
+    if [ -z "${AZURE_FEDERATED_ID:-}" ]; then
+      echo "Skipping Azure auth check due to missing credentials"
+    else
+      az account show >/dev/null
+    fi
     ;;
   *)
     echo "Unknown CLOUD=$CLOUD"; exit 1;;

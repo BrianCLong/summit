@@ -1,0 +1,44 @@
+name: API Lint
+
+on:
+  push:
+    paths:
+      - 'docs/api-spec.yaml'
+      - 'openapi/**'
+      - '.github/workflows/api-lint.yml'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+    paths:
+      - 'docs/api-spec.yaml'
+      - 'openapi/**'
+      - '.github/workflows/api-lint.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-openapi:
+    name: Lint OpenAPI Specs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4 # v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          cache: 'pnpm'
+          node-version: '20'
+
+      - name: Install Spectral
+        run: npm install -g @stoplight/spectral-cli
+
+      - name: Lint API Spec
+        run: spectral lint docs/api-spec.yaml --ruleset openapi/.spectral.yaml

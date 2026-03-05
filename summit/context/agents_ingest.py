@@ -13,11 +13,11 @@ def ingest_agents_instructions(repo_root: str) -> str:
     content = ""
 
     if os.path.exists(agents_md):
-        with open(agents_md, 'r', encoding='utf-8') as f:
+        with open(agents_md, encoding='utf-8') as f:
             content += f.read()
 
     if os.path.exists(override_md):
-        with open(override_md, 'r', encoding='utf-8') as f:
+        with open(override_md, encoding='utf-8') as f:
             content += "\n\n" + f.read()
 
     if len(content.encode('utf-8')) > MAX_AGENTS_SIZE:
