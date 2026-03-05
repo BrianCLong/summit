@@ -3,6 +3,7 @@ import type { User } from '@/types'
 
 interface AuthContextType {
   user: User | null
+  token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   logout: () => Promise<void>
@@ -21,6 +22,7 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -38,14 +40,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchCurrentUser = async (isMountedRef: () => boolean = () => true) => {
-    const token = localStorage.getItem('auth_token')
+    const storedToken = localStorage.getItem('auth_token')
+    if (isMountedRef()) {
+      setToken(storedToken)
+    }
 
     try {
       const response = await fetch('/users/me', {
         credentials: 'include',
-        headers: token
+        headers: storedToken
           ? {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${storedToken}`,
             }
           : undefined,
       })
@@ -56,10 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const userData = await response.json()
         setUser(userData)
       } else if (
-        token &&
+        storedToken &&
         (response.status === 401 || response.status === 403)
       ) {
         localStorage.removeItem('auth_token')
+        setToken(null)
       }
     } catch (error) {
       if (isMountedRef()) {
@@ -86,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const { token, user: userData } = await response.json()
         localStorage.setItem('auth_token', token)
+        setToken(token)
         setUser(userData)
       } else {
         const error = await response.json()
@@ -104,12 +111,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Logout error:', error)
     } finally {
       localStorage.removeItem('auth_token')
+      setToken(null)
       setUser(null)
     }
   }
 
   const value = {
     user,
+    token,
     loading,
     login,
     logout,
