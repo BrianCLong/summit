@@ -2,7 +2,10 @@
 import sys
 
 def main():
-    print("Mocking relay policy enforcement. Policy is OK.")
+    if len(sys.argv) < 2:
+        print("Usage: enforce.py <policy.json>")
+        sys.exit(2)
+    print("Policy check simulated passing.")
     sys.exit(0)
 
 if __name__ == "__main__":

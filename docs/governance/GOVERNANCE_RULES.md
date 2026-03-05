@@ -49,3 +49,7 @@ The following actions will cause CI failure:
 ## 5. Reporting
 
 - **Weekly GA Ops Snapshot:** A required weekly report capturing the state of governance drift, evidence freshness, and operational health. This snapshot serves as the primary artifact for executive review.
+
+| Type | Description |
+| --- | --- |
+| 1 | 1 |
