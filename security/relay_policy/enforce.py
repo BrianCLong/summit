@@ -1,1 +1,3 @@
-import sys; print("Mock enforce.py"); sys.exit(0)
+import sys
+print("Simulating policy enforcement")
+sys.exit(0)

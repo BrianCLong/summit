@@ -1,18 +1,20 @@
-# Repo Assumptions Validation
+# Repository Assumptions for MALE (Media AI List Evaluator)
 
-## Verified
-- **Policies directory exists:** `/policies` is present.
-- **Scripts directory exists:** `/scripts` is present and contains CI checks.
-- **Docs directory exists:** `/docs` is present.
-- **GitHub workflows exist:** `/.github/workflows/` is present.
-- **Evidence mechanisms:** Evidence is managed via `stamp.json` files and artifacts are meant to be deterministic.
+## Verified vs Assumed Paths
+* **Verified**: `data/`, `scripts/`, `docs/`, `.github/workflows/`, `tests/` directories exist or have been created.
+* **Assumed/Created**: `reports/` did not exist initially, created `reports/media_ai_lists/` to store the generated reports.
+* **Assumed/Created**: `data/media_ai_lists/`, `scripts/media_list/`, `docs/standards/`, `docs/ops/runbooks/`, `docs/security/data-handling/`.
 
-## Assumed
-- **Go Project Structure (`/cmd`, `/internal`, `/pkg`):** **INCORRECT.** The repository is not a single Go module. It is a polyglot monorepo containing multiple independent services and libraries across Go, Python, and Node.js. Root-level directories like `/lho`, `/pcbo`, and `/pbs` are individual Go modules, each with their own `cmd` and `internal` directories. There is no root-level `/internal` or `/pkg` directory.
-- **New Module Placement:** Putting the new module at `/internal/frameworkrisk/` will not work because `/internal` doesn't exist. It should likely be created as a new root-level module (e.g., `/frameworkrisk/`) or integrated into an existing relevant module if one exists.
-- **Evidence Format:** Evidence artifacts (like `report.json`, `metrics.json`) should be stored in a dedicated `evidence` folder (e.g. `artifacts/frameworkrisk/` or `evidence/aeip/`) and must avoid dynamic timestamps.
+## Evidence Schema Confirmation
+* The project requires evidence artifacts to follow the Summit Evidence schema.
+* Evidence paths: `data/media_ai_lists/<slug>/evidence.json`.
+* Evidence ID pattern: `MEDIA-<slug>-CLAIM-###`.
+* Reports and metrics: `reports/media_ai_lists/<slug>/{report.json,metrics.json,stamp.json}`.
 
-## Must-not-touch files
-- **`evidence/stamp.json`**: Do not use dynamic timestamps for evidence artifacts to prevent CI determinism failures (`evidence-verify`).
-- **Existing Policies**: Do not broadly modify existing policies unless necessary for the new risk gate.
-- **Root `cmd/summit`**: Does not exist as assumed. The primary entry points are distributed across the respective module directories (e.g. `summit/main.py` for the python summit agent, or `lho/cmd/lho/main.go`).
+## CI Naming Convention
+* MALE drift workflow: `.github/workflows/media-list-drift.yml`.
+* CI checks: `media_list_validation`, `claim-ci`, `policy-ci`, `determinism-ci`.
+
+## Must-not-touch
+* Core scoring engine: The `src/agents/policies/` or core Summit scoring mechanisms will be used but not modified directly. MALE is an overlay/plugin.
+* Feature flag: `media_ai_list.enabled=false` by default.

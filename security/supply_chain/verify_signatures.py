@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
 import sys
-import json
-print("Mocking signature verification...")
+print("Simulating signature verification")
 sys.exit(0)
