@@ -1,21 +1,32 @@
-# SHAP-IQ Subsumption Repo Assumptions
+# Repo Assumptions & Verification (Dyad v0.38.0 Subsumption)
 
-## Verified paths
-- `explain/shap_iq/` (new module created in this change set).
-- `scripts/explain_run.py` and `scripts/monitoring/shap_iq-drift.py`.
-- `docs/standards/`, `docs/security/data-handling/`, `docs/ops/runbooks/`.
+## Verified repository facts
 
-## Assumed paths
-- Existing CI quality gates and profiling harness naming conventions are assumed and must be wired in follow-up CI workflow updates.
-- Existing evidence ID and metrics schema standards may require additional alignment with governance-owned schemas.
+1. Agent orchestration and runtime logic exist under `agents/`, including `agents/orchestrator/src`, `agents/executor`, `agents/runner`, and `agents/antigravity`.
+2. Evidence artifacts are already persisted under `artifacts/`, including machine-readable agent run records in `artifacts/agent-runs/*.json`.
+3. CI is workflow-driven from `.github/workflows/` with `pr-quality-gate.yml` present as the stated PR gate standard.
+4. Governance and prompt integrity enforcement scripts already exist under `scripts/ci/` (for example `verify-prompt-integrity.ts` and `validate-pr-metadata.ts`, per root policy docs).
+5. A model routing/catalog surface already exists in `agents/orchestrator/src/daao/routing/modelCatalog.ts`, indicating model expansion should align there instead of introducing an unrelated registry format.
 
-## Must-not-touch files
-- No production model training pipelines.
-- No UI bundles or frontend routes.
-- No authentication/authorization policy engines.
+## Assumptions intentionally constrained for implementation planning
 
-## Required schema alignment tasks
-1. Confirm whether `EV-SHAPIQ-<model>-<hash>` aligns with canonical evidence ID policy.
-2. Validate `metrics.json` field naming against repo-wide metrics contract.
-3. Register explainability artifacts in CI schema checks and retention rules.
-4. Add policy tests for artifact gate failures (matrix missing, malformed evidence ID, latency overflow).
+1. Planning preflight should be introduced behind a default-off feature flag (`SUMMIT_AGENT_PLANNING=0`) to preserve current behavior.
+2. New planning/todo artifacts should align with existing artifact conventions (`artifacts/agent-runs/*.json` or adjacent deterministic JSON outputs) instead of ad hoc transient state.
+3. The first increment should target one execution path (`agents/orchestrator` + one runner) before ecosystem-wide adoption.
+4. CI gating for planning completeness should be added as an extension to existing quality gates rather than as a standalone pipeline.
+
+## Validation checklist status
+
+- [x] Confirmed location of agent orchestration logic.
+- [x] Identified existing run evidence artifact pattern.
+- [x] Verified available CI workflow names and quality gate entrypoint.
+- [x] Confirmed deterministic JSON artifact norms in repository policy and existing artifacts.
+- [x] Verified model catalog/registry surface exists.
+
+## Commands used for verification
+
+- `rg --files -g 'AGENTS.md'`
+- `find agents -maxdepth 2 -type d`
+- `find artifacts -maxdepth 2 -type f`
+- `rg --files .github/workflows`
+- `rg --files | rg 'registry\\.ya?ml$|models?/registry|agent.*model'`
