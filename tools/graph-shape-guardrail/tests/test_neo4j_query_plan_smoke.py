@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
+
 from graph_shape_guardrail.neo4j_client import Neo4jClient
+
 
 def test_neo4j_client_query_construction():
     mock_driver = MagicMock()

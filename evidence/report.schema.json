@@ -48,7 +48,10 @@
           }
         }
       }
-    }
+    },
+    "experiment": { "type": "string" },
+    "dataset": { "type": "string" },
+    "result": { "type": "object" }
   },
   "additionalProperties": false
 }

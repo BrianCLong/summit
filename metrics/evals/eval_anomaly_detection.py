@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 import json
+import random
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple
-
-import random
 
 from gmr_math import mad, median
 
@@ -15,17 +14,17 @@ class EvalResult:
     precision: float
     recall: float
     thresholds: dict
-    detections: List[int]
-    anomalies: List[int]
+    detections: list[int]
+    anomalies: list[int]
 
 
-def generate_series(seed: int, length: int) -> List[float]:
+def generate_series(seed: int, length: int) -> list[float]:
     rng = random.Random(seed)
     base = 2.0
     return [base + rng.uniform(-0.05, 0.05) for _ in range(length)]
 
 
-def inject_anomalies(series: List[float]) -> Tuple[List[float], List[int]]:
+def inject_anomalies(series: list[float]) -> tuple[list[float], list[int]]:
     anomalies = []
     mutated = list(series)
     anomaly_points = {
@@ -52,7 +51,7 @@ def inject_anomalies(series: List[float]) -> Tuple[List[float], List[int]]:
     return mutated, sorted(set(anomalies))
 
 
-def detect(series: List[float], window: int, multiplier: float) -> List[int]:
+def detect(series: list[float], window: int, multiplier: float) -> list[int]:
     detections = []
     for idx in range(window, len(series)):
         baseline = series[idx - window : idx]
@@ -65,7 +64,7 @@ def detect(series: List[float], window: int, multiplier: float) -> List[int]:
     return detections
 
 
-def score(detections: List[int], anomalies: List[int], warmup: int) -> EvalResult:
+def score(detections: list[int], anomalies: list[int], warmup: int) -> EvalResult:
     detection_set = set(detections)
     anomaly_set = {idx for idx in anomalies if idx >= warmup}
     true_positive = len(detection_set & anomaly_set)

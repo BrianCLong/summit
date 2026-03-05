@@ -39,11 +39,36 @@ scrape_configs:
     scrape_timeout: 10s
     honor_labels: true
 
+  # Summit API (alias for server)
+  - job_name: 'summit-api'
+    static_configs:
+      - targets: ['server:4000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+
   # OpenTelemetry Collector
   - job_name: 'otel-collector'
     static_configs:
       - targets: ['otel-collector:8889']
     scrape_interval: 10s
+
+  # Jaeger Collector
+  - job_name: 'jaeger-collector'
+    static_configs:
+      - targets: ['jaeger-collector:14269']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+
+  # Tempo
+  - job_name: 'tempo'
+    static_configs:
+      - targets: ['tempo:3200']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
 
   # MCP GraphOps server
   - job_name: 'mcp-graphops'
