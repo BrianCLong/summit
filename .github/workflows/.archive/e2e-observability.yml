@@ -76,7 +76,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: npm
           cache-dependency-path: '**/package-lock.json'
 
@@ -208,12 +208,16 @@ jobs:
           echo "artifact_name=e2e-metrics-${{ matrix.test_suite }}" >> $GITHUB_OUTPUT
 
       - name: Upload metrics artifact
-        uses: actions/upload-artifact@v4          name: e2e-metrics-${{ matrix.test_suite }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-metrics-${{ matrix.test_suite }}
           path: metrics-output/
           retention-days: 30
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4          name: e2e-results-${{ matrix.test_suite }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ matrix.test_suite }}
           path: |
             client/test-results/
             client/playwright-report/
@@ -324,7 +328,9 @@ jobs:
           EOF
 
       - name: Upload aggregated metrics
-        uses: actions/upload-artifact@v4          name: e2e-aggregated-metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-aggregated-metrics
           path: aggregated/
           retention-days: 90
 
@@ -339,7 +345,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download aggregated metrics
-        uses: actions/download-artifact@v4          name: e2e-aggregated-metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-aggregated-metrics
           path: metrics/
 
       - name: Update historical metrics
@@ -389,7 +397,9 @@ jobs:
     needs: [aggregate-metrics]
     steps:
       - name: Download metrics
-        uses: actions/download-artifact@v4          name: e2e-aggregated-metrics
+        uses: actions/download-artifact@v4
+        with:
+          name: e2e-aggregated-metrics
           path: metrics/
         continue-on-error: true
 

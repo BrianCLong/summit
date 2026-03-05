@@ -1,0 +1,7 @@
+# Stub for CI gates
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+  neo4j:
+    image: neo4j:5-community

@@ -11,7 +11,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 18
+          node-version: 20
       - name: Build and start compose
         run: |
           docker compose -f .github/ci/docker-compose.ci.yml build
@@ -26,7 +26,9 @@ jobs:
           UI_URL: http://localhost:3000
         run: npm run screenshots
       - name: Upload screenshots
-        uses: actions/upload-artifact@v4          name: cookbook-screenshots-compose
+        uses: actions/upload-artifact@v4
+        with:
+          name: cookbook-screenshots-compose
           path: docs/cookbook/screenshots
       - name: Compose down
         if: always()

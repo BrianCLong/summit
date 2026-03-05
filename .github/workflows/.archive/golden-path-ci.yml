@@ -54,7 +54,9 @@ jobs:
 
       - name: Upload Cypress Screenshots
         if: failure()
-        uses: actions/upload-artifact@v4          name: cypress-screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
           path: cypress/screenshots
 
   performance-baseline:
@@ -99,7 +101,9 @@ jobs:
           fi
 
       - name: Upload Metrics
-        uses: actions/upload-artifact@v4          name: performance-metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
           path: metrics.json
 name: Golden Path CI/CD
 
@@ -121,7 +125,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -141,7 +145,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies

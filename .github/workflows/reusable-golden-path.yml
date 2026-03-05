@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "pnpm"
 
       - name: Install dependencies
@@ -127,8 +127,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa_tool https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x ./opa_tool
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          chmod +x ./opa-bin
 
       - name: Pull image and get config for policy check
         run: |
@@ -137,7 +137,7 @@ jobs:
 
       - name: Evaluate OPA policy
         run: |
-          ./opa_tool eval --fail \
+          ./opa-bin eval --fail \
             --data zero-trust/policies/opa/deployment.rego \
             --input image-config.json \
             'data.docker.policy.deny'

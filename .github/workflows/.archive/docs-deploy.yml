@@ -30,12 +30,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
           cache-dependency-path: website/pnpm-lock.yaml
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+      
+      - name: Install dependencies
         run: |
           cd website
           pnpm install --frozen-lockfile
@@ -73,7 +76,9 @@ jobs:
           cname: docs.summit.io
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3          name: docs-build
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs-build
           path: website/build/
           retention-days: 7
 
@@ -88,10 +93,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: '18'
+          node-version: '20'
       
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+      
+      - name: Install dependencies
         run: |
           cd website
           pnpm install --frozen-lockfile

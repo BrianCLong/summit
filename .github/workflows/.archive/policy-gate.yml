@@ -32,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
+        with: { node-version: 20, cache: 'pnpm' }
+      - uses: actions/setup-node@v4
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true
       - run: pnpm audit --json > audit-report.json || true
@@ -75,17 +75,17 @@ jobs:
       - name: OPA Eval Access Control
         # Verify core access control policy evaluates successfully
         run: |
-          opa eval -d policy/rego/ 'data.access_control' > /dev/null
+          ./opa-bin eval -d policy/rego/ 'data.access_control' > /dev/null
 
       - name: OPA Eval Conductor
         # Verify conductor policy evaluates successfully
         run: |
-          opa eval -d policy/rego/ 'data.conductor' > /dev/null
+          ./opa-bin eval -d policy/rego/ 'data.conductor' > /dev/null
 
       - name: OPA Eval Governance
         # Verify governance policy evaluates successfully
         run: |
-          opa eval -d policy/rego/ 'data.governance' > /dev/null
+          ./opa-bin eval -d policy/rego/ 'data.governance' > /dev/null
 
   opa-quality-gate:
     runs-on: ubuntu-latest
@@ -147,7 +147,7 @@ EOF
 
       - name: Evaluate summit quality gates
         run: |
-          opa eval --format json --data .github/policies/summit-quality-gates.rego --input opa-input.json 'data.summit.quality.decision' > decision.json
+          ./opa-bin eval --format json --data .github/policies/summit-quality-gates.rego --input opa-input.json 'data.summit.quality.decision' > decision.json
           jq '.result[0].expressions[0].value' decision.json > gate.json
           jq '.' gate.json
           approved=$(jq -r '.approved' gate.json)

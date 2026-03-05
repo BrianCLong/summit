@@ -24,11 +24,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Install dependencies
         run: |
           pnpm add -g @apidevtools/swagger-cli
           pnpm add -g @stoplight/spectral-cli
@@ -76,11 +79,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Validate GraphQL schema
@@ -134,11 +140,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Validate examples against schema
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Validate examples against schema
         run: |
           pnpm add -g ajv-cli
 
@@ -165,11 +174,14 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Generate static documentation
@@ -183,7 +195,9 @@ jobs:
             --options.theme.colors.primary.main="#667eea"
 
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4          name: api-documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation
           path: docs/api/
           retention-days: 30
 
@@ -279,7 +293,9 @@ jobs:
 
     steps:
       - name: Download documentation artifact
-        uses: actions/download-artifact@v4          name: api-documentation
+        uses: actions/download-artifact@v4
+        with:
+          name: api-documentation
           path: docs/api/
 
       - name: Comment on PR

@@ -80,7 +80,7 @@ jobs:
       - name: Evaluate deploy policy
         id: deploy
         run: |
-          opa eval \
+          ./opa-bin eval \
             --format=json \
             -d policy/ \
             -I ci/input.json \
@@ -90,7 +90,7 @@ jobs:
       - name: Evaluate PR policy
         id: pr
         run: |
-          opa eval \
+          ./opa-bin eval \
             --format=json \
             -d policy/ \
             -I ci/input.json \
@@ -101,7 +101,7 @@ jobs:
         id: sbom
         run: |
           if [ -f "samples/sbom/valid.json" ]; then
-            opa eval \
+            ./opa-bin eval \
               --format=json \
               -d policy/ \
               -I samples/sbom/valid.json \
@@ -123,5 +123,7 @@ jobs:
           cat governance-decision.json
 
       - name: Upload governance decision artifact
-        uses: actions/upload-artifact@v4          name: governance-decision
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-decision
           path: governance-decision.json

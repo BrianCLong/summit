@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -30,8 +30,9 @@ jobs:
       - name: Enable corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
+          version: 9.12.0
           run_install: false
 
       - name: Install dependencies
@@ -61,7 +62,9 @@ jobs:
 
       - name: Upload K6 artifacts
         if: (((always()) && (always())) && (${{ github.event_name != 'pull_request' && secrets.STAGING_BASE_URL != '' }})) && (always())
-        uses: actions/upload-artifact@v4          name: k6-mock-results
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-mock-results
           path: |
             smoke-test-results.json
             graphql-slo-results.json
@@ -91,7 +94,9 @@ jobs:
         run: k6 run tests/k6-graphql-slo.js
 
       - name: Upload strict artifacts
-        uses: actions/upload-artifact@v4          name: k6-strict-results
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-strict-results
           path: |
             smoke-test-results.json
             graphql-slo-results.json
