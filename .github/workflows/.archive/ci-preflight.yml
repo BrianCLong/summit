@@ -56,7 +56,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -76,4 +76,6 @@ jobs:
           echo "JWT_SECRET=ci-jwt-secret" >> .env
           echo "JWT_REFRESH_SECRET=ci-refresh-secret" >> .env
       - name: Build Gateway Docker Image
-        run: docker compose -f docker-compose.dev.yaml build gateway
+        run: |
+          # Gateway service is actually named api-gateway in compose file
+          docker compose -f docker-compose.dev.yaml build api-gateway

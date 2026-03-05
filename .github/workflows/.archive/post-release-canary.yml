@@ -1,8 +1,4 @@
 name: "[info] Post-Release Canary"
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 
 on:
   schedule:
@@ -21,7 +17,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: '20'
           cache: pnpm
 
       - name: Install dependencies (script only)

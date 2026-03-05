@@ -1,8 +1,4 @@
 name: Security Playbook Automation
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 
 on:
   schedule:
@@ -31,7 +27,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.11'
 
       - name: Run Triage Script
         env:

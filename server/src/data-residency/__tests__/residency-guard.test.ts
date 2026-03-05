@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import type { ResidencyGuard as ResidencyGuardType } from '../residency-guard.js';
 
 const queryMock = jest.fn();
 jest.unstable_mockModule('../../db/postgres.js', () => ({
@@ -7,21 +8,14 @@ jest.unstable_mockModule('../../db/postgres.js', () => ({
   }),
 }));
 
-let ResidencyGuard: any;
-let ResidencyViolationError: any;
+const { ResidencyGuard, ResidencyViolationError } = await import('../residency-guard.js');
 
 describe('ResidencyGuard', () => {
-  let guard: any;
-
-  beforeAll(async () => {
-    const module = await import('../residency-guard.js');
-    ResidencyGuard = module.ResidencyGuard;
-    ResidencyViolationError = module.ResidencyViolationError;
-  });
+  let guard: ResidencyGuardType;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    guard = ResidencyGuard.getInstance();
+    guard = (ResidencyGuard as any).getInstance();
   });
 
   it('should allow access when region is allowed', async () => {

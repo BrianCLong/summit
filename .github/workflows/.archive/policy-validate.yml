@@ -2,11 +2,6 @@ name: Policy Validation
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "policies/**"
       - "packages/policy-cards/**"
@@ -33,7 +28,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: "pnpm"
 
       - name: Install dependencies

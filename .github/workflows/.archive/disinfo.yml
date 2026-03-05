@@ -12,6 +12,9 @@ on:
       - 'packages/disinfo-news-ecosystem/**'
       - 'fixtures/disinfo/**'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   CI: true
@@ -22,6 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          version: "10.0.0"
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc

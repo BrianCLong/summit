@@ -1,4 +1,5 @@
 import { jest } from '@jest/globals';
+import type { FailoverOrchestrator as FailoverOrchestratorType } from '../FailoverOrchestrator.js';
 
 const axiosGetMock = jest.fn();
 jest.unstable_mockModule('axios', () => ({
@@ -26,20 +27,15 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
     },
 }));
 
-let FailoverOrchestrator: any;
+const { FailoverOrchestrator } = await import('../FailoverOrchestrator.js');
 
 describe('FailoverOrchestrator', () => {
-    let orchestrator: any;
-
-    beforeAll(async () => {
-        const module = await import('../FailoverOrchestrator.js');
-        FailoverOrchestrator = module.FailoverOrchestrator;
-    });
+    let orchestrator: FailoverOrchestratorType;
 
     beforeEach(() => {
         jest.clearAllMocks();
         jest.useFakeTimers();
-        orchestrator = FailoverOrchestrator.getInstance();
+        orchestrator = (FailoverOrchestrator as any).getInstance();
 
         getStatusMock.mockReturnValue({
             failoverMode: 'AUTOMATIC',
@@ -71,10 +67,6 @@ describe('FailoverOrchestrator', () => {
 
     it('should recover region if health check succeeds', async () => {
         axiosGetMock.mockResolvedValue({ status: 200 });
-
-        // Simulate current state is failure (manually trigger one failure first)
-        // We need to access private state or just run it multiple times.
-        // Let's assume it was down and now recovers.
 
         // To test recovery, we first need to get it to a failed state.
         axiosGetMock.mockRejectedValueOnce(new Error('Fail'));

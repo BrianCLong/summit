@@ -127,6 +127,7 @@
     "jsdom": "^27.4.0",
     "json2csv": "5.0.7",
     "jsonwebtoken": "9.0.2",
+    "nanoid": "3.3.8",
     "juice": "^10.0.0",
     "kafkajs": "^2.2.4",
     "lodash": "4.17.21",

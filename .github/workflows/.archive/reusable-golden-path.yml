@@ -23,7 +23,7 @@ env:
 jobs:
   test:
     name: Test Service
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
@@ -34,7 +34,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: '20'
           cache: "pnpm"
 
       - name: Install dependencies
@@ -45,7 +45,7 @@ jobs:
 
   build-scan-sign:
     name: Build, Scan, Sign, and Attest
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: test
     permissions:
       contents: read
@@ -111,7 +111,7 @@ jobs:
 
   policy-gate:
     name: OPA Policy Gate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     needs: build-scan-sign
 
     steps:
@@ -127,7 +127,7 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64
+          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
           chmod +x ./opa
 
       - name: Pull image and get config for policy check
@@ -137,7 +137,7 @@ jobs:
 
       - name: Evaluate OPA policy
         run: |
-          ./opa-bin eval --fail \
+          ./opa eval --fail \
             --data zero-trust/policies/opa/deployment.rego \
             --input image-config.json \
             'data.docker.policy.deny'
