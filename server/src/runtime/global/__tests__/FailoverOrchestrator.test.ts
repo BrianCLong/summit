@@ -1,5 +1,7 @@
+import { FailoverOrchestrator } from '../FailoverOrchestrator';
+
 describe('FailoverOrchestrator', () => {
-    it('should initialize without failing', () => {
-        expect(true).toBe(true);
-    });
+  it('should be defined', () => {
+    expect(FailoverOrchestrator).toBeDefined();
+  });
 });

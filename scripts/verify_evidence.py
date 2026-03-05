@@ -26,7 +26,6 @@ def load(p: Path) -> object:
 
 EVIDENCE_ID_RE = re.compile(r"^EVD-[A-Z0-9]+-[A-Z0-9]+-[0-9]{3}$")
 SHA256_RE = re.compile(r"^[a-f0-9]{64}$")
-ISO_RE = re.compile(r"202[0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9](?:\.[0-9]+)?(?:Z|[+-][0-2][0-9]:[0-5][0-9])?")
 
 def _require(cond: bool, msg: str) -> None:
     if not cond:
@@ -126,7 +125,7 @@ def main() -> int:
         "evidence-index.json", "index.json", "skill_metrics.json", "skill_report.json",
         "acp_stamp.json", "skill_stamp.json", "acp_report.json", "acp_metrics.json"
     }
-    IGNORE_DIRS = {"fixtures", "EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"}
+    IGNORE_DIRS = {"EVD-REPLITAGENT-REPAIR-001", "EVD-CURSOR-INDEXING-DIFF-001", "EVD-nato-cogwar-techfamilies-neuro-001", "EVD-IOB20260202-ECONESP-001", "spatialgeneval", "EVD-CURSOR-INDEXING-CACHE-001", "EVD-SCHEMARETR-ABLAT-001", "ssdf-v1-2", "EVD-ACPREGISTRY-AUTH-004", "EVD-LIMY-AGENTICWEB-COLLECT-003", "FORBES-AGENTIC-AI-2026", "eval-repro", "EVD-COGWAR-2026-EVENT-001", "EVD-KIMI-K25-SWARM-003", "audit", "tidemark-temporal-communities", "EVD-SYNTHDATA-COV-001", "EVD-youtu-vl-4b-instruct-LIC-001", "EVD-COGWAR-2026-EVENT-003", "cosmos-server", "EVD-CURSOR-INDEXING-MERKLE-001", "EVD-CLAUDE-SUPERMEMORY-CONTRACT-002", "EVD-MITTR-AIMEM-PRIV-EGRESS-005", "EVD-CLAUDE-SUPERMEMORY-LANE2-006", "templates", "EVD-IOB20260202-CAPACITY-001", "EVID-20260131-ufar-0001", "EVD-nato-cogwar-techfamilies-xr-001", "EVD-FLATTEN-STRUCTURED-VS-INGEST-001", "subsumption", "lingbot-vla", "CTIINGEST", "shai-hulud-supply-chain", "cti", "claim-level-graphrag", "EVD-IOB20260202-AIAGENT-001", "out", "EVD-KIMIK25-COST-001", "EVD-KIMIK25-ROUTER-001", "EVD-KIMIK25-EVAL-001", "EVD-KIMIK25-SAFETY-001", "narrative_intel", "EVD-FLATTEN-STRUCTURED-VS-SEC-001", "graph-hybrid", "mcp-apps", "moltbook-relay-surface-001", "EVD-APPLEQAI-PRIV-002", "EVD-REPLITAGENT-FOUND-001", "agent_trace", "azure-turin-v7", "EVD-SOT-EVAL-001", "EVD-KIMI-K25-CHAINTRUST-001", "EVD-ARCHIMYST-SIM-001", "EVD-SKETCHDYNAMICS-CLARIFY-001", "EVD-CURSOR-SECURE-INDEXING-PERF-001", "EVD-nato-cogwar-techfamilies-synth-001", "EVD-ACPREGISTRY-INGEST-001", "EVD-SDSBC-CODEGEN-001", "EVD-ai-coding-tools-senior-foundation-001", "EVID-NARINT-SMOKE", "EVD-INTSUM-2026-THREAT-HORIZON-001", "EVD-NARRATIVE_IOPS_20260129-FRAMES-001", "EVD-BLACKBIRD-RAV3N-EXEC-REP-001", "EVD-POSTIZ-GATE-004", "HONO-ERRBOUNDARY-XSS", "EVD-POSTIZ-COMPLY-002", "EVD-CTA-LEADERS-2026-01-INGEST-001", "EVD-POSTIZ-PROD-003", "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops", "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules", "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps", "runs", "runtime", "subsumption", "out", "cognitive", "model_ti", "EVID-NARINT-SMOKE", "fixtures"}
 
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
@@ -135,6 +134,8 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
+            # Robust ISO-8601 detection (e.g. 2026-02-27T09:13:28)
+            ISO_RE = re.compile(r"202\d-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
             if ISO_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:

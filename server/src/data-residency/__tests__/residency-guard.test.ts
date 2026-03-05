@@ -1,5 +1,7 @@
+import { ResidencyGuard } from '../residency-guard';
+
 describe('ResidencyGuard', () => {
-    it('should allow default initialization', () => {
-        expect(true).toBe(true);
-    });
+  it('should be defined', () => {
+    expect(ResidencyGuard).toBeDefined();
+  });
 });

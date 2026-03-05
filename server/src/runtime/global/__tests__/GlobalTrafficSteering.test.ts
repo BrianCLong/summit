@@ -1,5 +1,7 @@
+import { GlobalTrafficSteering } from '../GlobalTrafficSteering';
+
 describe('GlobalTrafficSteering', () => {
-    it('should run successfully', () => {
-        expect(true).toBe(true);
-    });
+  it('should be defined', () => {
+    expect(GlobalTrafficSteering).toBeDefined();
+  });
 });

@@ -1,1 +1,5 @@
-import sys; print("Mock verify_signatures.py"); sys.exit(0)
+#!/usr/bin/env python3
+import sys
+import json
+print("Mocking signature verification...")
+sys.exit(0)
