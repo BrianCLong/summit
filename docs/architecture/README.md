@@ -17,11 +17,11 @@ Use these documents as the canonical references when implementing or reviewing c
 - **Data & provenance:** [`docs/architecture/prov-ledger.md`](./prov-ledger.md), [`docs/architecture/provenance-ledger-beta.md`](./provenance-ledger-beta.md), [`docs/architecture/event-schemas.md`](./event-schemas.md)
 - **Operational guardrails:** [`docs/architecture/ci-cd-architecture.md`](./ci-cd-architecture.md), [`docs/architecture/dependency-graph.md`](./dependency-graph.md), [`docs/architecture/dependency-risk-table.md`](./dependency-risk-table.md)
 - **Resilience & isolation:** [`docs/architecture/blast-radius-report.txt`](./blast-radius-report.txt), [`docs/architecture/tenant-hierarchy-model.md`](./TENANT_HIERARCHY_MODEL.md), [`docs/architecture/cache-policy.md`](./cache-policy.md)
-- **Agent Architecture:** [`docs/architecture/mcp-first.md`](./mcp-first.md), [`docs/agents/context-engineering.md`](../agents/context-engineering.md), [`docs/architecture/comparisons/opensandbox-vs-summit.md`](./comparisons/opensandbox-vs-summit.md)
+- **Agent Architecture:** [`docs/architecture/mcp-first.md`](./mcp-first.md), [`docs/agents/context-engineering.md`](../agents/context-engineering.md)
+- **AI Application Layer / GenAI Stack:** [`docs/architecture/ai-application-layer.md`](./ai-application-layer.md)
 - **Intelligence Methodology:** [`docs/architecture/ufar.md`](./ufar.md)
 - **Credibility Dynamics:** [`docs/architecture/credibility_dynamics.md`](./credibility_dynamics.md)
 - **Signal Analysis:** [`docs/analytics/entropy_signals.md`](../analytics/entropy_signals.md)
-- **Strategic Capabilities:** [`docs/architecture/STRATEGIC_CAPABILITIES.md`](./STRATEGIC_CAPABILITIES.md)
 
 ## Codex execution program
 
@@ -75,9 +75,3 @@ The Summit Codex Execution Plan runs eight parallel workstreams with explicit bo
 ## Innovation posture
 
 Each track should propose at least one forward-leaning enhancement (e.g., stronger type safety in governance schemas, novel CI annotations for enforcement drift, or advanced streaming feature derivations) while keeping compatibility with the mandated specs and merge discipline.
-
-## Trust Infrastructure
-- **Agent Identity & Authorization:** [`docs/architecture/trust-infrastructure.md`](./trust-infrastructure.md)
-
-## Trust Infrastructure
-- **Agent Identity & Authorization:** [`docs/architecture/trust-infrastructure.md`](./trust-infrastructure.md)
