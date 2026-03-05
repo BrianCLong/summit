@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-05T00:00:00Z",
+  "revision_note": "Added summit-praxeology package skeleton with analytic-only validation, matching engine, and golden tests.",
   "initiatives": [
+    {
+      "id": "summit-praxeology-analytic-layer",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Introduced @summit/summit-praxeology with AJV+semantic guardrails for analytic/defensive playbooks and non-prescriptive hypothesis generation."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",

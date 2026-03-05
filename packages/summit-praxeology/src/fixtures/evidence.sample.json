@@ -1,0 +1,14 @@
+[
+  {
+    "id": "ev1",
+    "kind": "post",
+    "signal": "high-volume coordinated posting pattern",
+    "ts": "2026-03-05T00:10:00Z"
+  },
+  {
+    "id": "ev2",
+    "kind": "report",
+    "signal": "cross-platform amplification observed",
+    "ts": "2026-03-05T00:20:00Z"
+  }
+]
