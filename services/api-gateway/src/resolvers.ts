@@ -132,6 +132,32 @@ export const resolvers = {
       }
     },
 
+    // Investigation resolvers
+    investigation: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `query($id: ID!) { investigation(id: $id) { id name description status priority createdAt updatedAt entities { id type } relationships { id type } } }`,
+        args,
+        context
+      );
+    },
+
+    investigations: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `query($limit: Int, $offset: Int) { investigations(limit: $limit, offset: $offset) { id name description status priority createdAt updatedAt } }`,
+        args,
+        context
+      );
+    },
+
+    // Auth resolvers
+    me: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `query { me { id email username role isActive lastLogin createdAt updatedAt } }`,
+        {},
+        context
+      );
+    },
+
     // XAI resolvers (delegated to graph-xai service)
     explainEntity: async (parent: any, args: any, context: any) => {
       const { entityId, model, version } = args;
@@ -155,31 +181,6 @@ export const resolvers = {
       }
 
       return response.json();
-    },
-
-    explainAnomaly: async (parent: any, args: any, context: any) => {
-      const response = await fetch(
-        `${process.env.XAI_EXPLAIN_ANOMALY_URL}/graphql`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': context.token || 'Bearer dev-token',
-            'x-tenant-id': context.tenantId || 'tenant_1',
-          },
-          body: JSON.stringify({
-            query: `query($id: ID!) { explainAnomaly(id: $id) { id score explanation features { name contribution } } }`,
-            variables: { id: args.id },
-          }),
-        },
-      );
-
-      if (!response.ok) {
-        throw new Error(`XAI Anomaly service error: ${response.status}`);
-      }
-
-      const result = await response.json();
-      return result.data?.explainAnomaly;
     },
 
     // Provenance resolvers (delegated to prov-ledger service)
@@ -322,6 +323,15 @@ export const resolvers = {
   },
 
   Mutation: {
+    // Graph mutations
+    createInvestigation: async (parent: any, args: any, context: any) => {
+      return delegateToBackend(
+        `mutation($input: InvestigationInput!) { createInvestigation(input: $input) { id name status priority createdAt } }`,
+        args,
+        context
+      );
+    },
+
     // Provenance mutations
     createClaim: async (parent: any, args: any, context: any) => {
       const serviceHeaders = await buildServiceHeaders('prov-ledger', [

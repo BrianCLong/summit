@@ -137,7 +137,7 @@
 - Unified audit log middleware (API, UI actions via event bus).
 - AI policy engine (allow/deny, PII redaction, model allowlist, max‑cost per request).
 - Redaction library supporting deterministic hashing (for re‑identification under lawful basis).
-- SBOM publish to artifact registry; cosign verify in CI gate; provenance attestation attached.
+- SBOM publish to artifact registry; cosign verify --use-signed-timestamps in CI gate; provenance attestation attached.
 
 ### 4.6 Non‑Functional Requirements
 
@@ -158,7 +158,7 @@
 - **Policy Layer:** OPA sidecar + Rego bundles; GraphQL resolver guard.
 - **Audit Pipeline:** Event bus → normalizer → sinks (DB/file).
 - **Secrets/KMS:** Envelope encryption for at‑rest sensitive blobs; API for key rotation.
-- **Compose Profiles:** `core` `ai` `kafka` `secure` (`secure` enables mTLS, cosign verify hooks).
+- **Compose Profiles:** `core` `ai` `kafka` `secure` (`secure` enables mTLS, cosign verify --use-signed-timestamps hooks).
 
 ### 4.9 Data Model Notes
 
