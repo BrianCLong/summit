@@ -56,7 +56,7 @@ attestation_json="$(mktemp)"
 trap 'rm -f "$attestation_json"' EXIT
 
 echo "Verifying in-toto attestations for ${IMAGE_REF}..."
-cosign verify-attestation --type in-toto "${IMAGE_REF}" \
+cosign verify-attestation --use-signed-timestamps --type in-toto "${IMAGE_REF}" \
   --certificate-oidc-issuer "${OIDC_ISSUER}" \
   --certificate-identity-regexp "${IDENTITY_REGEX}" \
   --rekor-url "${REKOR_URL}" \

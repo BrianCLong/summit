@@ -5,6 +5,8 @@
  */
 
 import { BaseAgentArchetype } from './BaseAgentArchetype';
+import { defaultSkillRegistry } from '../../skills/registry';
+import { GraphQuerySkill } from '../../skills/graphQuerySkill';
 import { AgentRole, AgentContext, AgentResult, AgentStatusInfo, AgentHealth } from './types';
 
 export class AgentRegistry {
@@ -23,6 +25,9 @@ export class AgentRegistry {
   public static getInstance(): AgentRegistry {
     if (!AgentRegistry.instance) {
       AgentRegistry.instance = new AgentRegistry();
+
+      // Register standard built-in skills to the global default registry
+      defaultSkillRegistry.register(new GraphQuerySkill());
     }
     return AgentRegistry.instance;
   }
@@ -36,6 +41,15 @@ export class AgentRegistry {
     }
 
     this.agents.set(agent.role, agent);
+
+    // Inject global skills into the agent upon registration
+    const globalSkills = defaultSkillRegistry.list();
+    for (const skillMeta of globalSkills) {
+      const skill = defaultSkillRegistry.get(skillMeta.id);
+      if (skill) {
+        agent.skills.register(skill, skillMeta.version);
+      }
+    }
     console.log(`[AgentRegistry] Registered agent: ${agent.name} (${agent.role})`);
   }
 

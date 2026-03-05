@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Outreach Sequences
 
 **Purpose:** Ready-to-use email and LinkedIn sequences for each ICP segment. Copy, personalize variables, and send.
@@ -17,13 +18,20 @@ Each sequence follows a 3-touch + 1 breakup pattern over ~3 weeks:
 | Email 3 | Day 10-12 | Direct ask + low-friction next step |
 | Email 4 (Breakup) | Day 18-21 | Permission to close loop |
 
-**Variables to personalize:**
+### Variables to personalize
+
 - `{{First}}` — Contact first name
+
 - `{{Org}}` — Organization name
+
 - `{{Unit}}` — Specific unit/division
+
 - `{{Role}}` — Their role/title
+
 - `{{Mission}}` — Specific mission area
+
 - `{{Pain}}` — Observed pain point
+
 - `{{Trigger}}` — Triggering event (RFI, incident, budget)
 
 ---
@@ -45,7 +53,9 @@ Summit is an **analyst workbench** used to fuse OSINT and all-source data into a
 For a team like {{Org}}/{{Unit}}, that typically shows up as:
 
 - Faster triage of incoming reports and tips
+
 - Clearer chains-of-custody for decisions
+
 - Less swivel-chair between disconnected tools
 
 Would you be open to a 25-minute conversation to see how other mission teams are structuring 8–12 week pilots around this?
@@ -73,7 +83,9 @@ We connected a handful of OSINT and internal sources into Summit, gave 15 analys
 By the end of the pilot they had:
 
 - Shortened their analytic cycle for key cases
+
 - A repeatable way to show **who saw what, when, and under which rules**
+
 - A roadmap to roll out to more missions without starting from scratch
 
 If there's a mission thread in {{Org}} where this is already a headache, a short working session to map a potential pilot could be useful. How does {{Date1}} or {{Date2}} look?
@@ -94,6 +106,7 @@ If now isn't a good time to look at analyst workbench options, I'll stop chasing
 If it is a live topic, here's a very lightweight next step:
 
 - **15-minute call** to understand where OSINT/all-source workflows are slow or risky today
+
 - We come back with a **1-page pilot concept** tailored to {{Org}} (scope, timeline, not a sales deck)
 
 No obligation beyond that. Would {{Date}} work, or is there someone else on your team (e.g., {{AlternateRole}}) I should coordinate with?
@@ -112,8 +125,11 @@ Hi {{First}},
 Haven't heard back, so I'll assume the timing isn't right for {{Org}} to look at analyst workbench options.
 
 If that changes—especially if you're facing:
+
 - A modernization deadline
+
 - An audit or compliance push
+
 - A new mission thread that needs OSINT fusion
 
 —feel free to reach out. Happy to pick this back up whenever it makes sense.
@@ -146,6 +162,7 @@ Many primes we talk to end up **rebuilding the same substrate**—graph, provena
 Summit gives you a reusable substrate you can:
 
 - Drop under existing UIs and workflows, or
+
 - Present as a differentiator in new bids (provenance-first AI, explainability, SBOM/SLSA story, etc.)
 
 Could we spend 20 minutes mapping where your current intel/analytics pursuits might benefit from a COTS substrate instead of another custom build?
@@ -167,7 +184,9 @@ Following up with a more concrete angle.
 For pursuits like {{Program}}, primes are being asked to show:
 
 - Explainable AI, not just dashboards
+
 - Strong data governance (ABAC/OPA, DLP, audit)
+
 - A credible path to ATO / FedRAMP alignment
 
 Summit already has those building blocks baked in. You bring mission knowledge and delivery muscle; we provide the substrate that makes your proposal cleaner and your delivery faster.
@@ -238,13 +257,17 @@ We help security and fraud teams unify their feeds—dark web, OSINT, vendor int
 Instead of swivel-chairing between tools, analysts get:
 
 - **Natural-language queries** against the graph (no Cypher required)
+
 - **Full provenance** on every answer (who saw what, when, from which source)
+
 - **Policy enforcement** (DLP, redaction, audit logs) that satisfies compliance
 
 For {{Org}}'s {{Unit}} team, this typically helps with:
 
 - Faster triage of incoming intel
+
 - Clearer evidence packages for escalation
+
 - Audit-ready documentation without extra work
 
 Worth a 20-minute look?
@@ -268,7 +291,9 @@ Boards and regulators are increasingly asking threat intel and fraud teams to sh
 Summit is built provenance-first:
 
 - Every fact traced to source
+
 - Every analyst action logged
+
 - Every AI-assisted answer explainable
 
 One team we work with reduced their time spent on post-incident documentation by 60% because the audit trail was already built into their workflow.
@@ -291,6 +316,7 @@ Trying once more—if threat intel or fraud graph tooling isn't a priority right
 If it is, here's the lowest-friction next step:
 
 - **20-minute call** to understand your current stack and pain points
+
 - We come back with a **1-page pilot concept** (scope, data sources, success criteria)
 
 No obligation. Would {{Date}} work, or is there a better person on your team to connect with?
@@ -309,7 +335,9 @@ Hi {{First}},
 Assume this isn't the right time. If that changes—especially if you're facing:
 
 - A new regulatory audit
+
 - An incident that exposed gaps in your intel fusion
+
 - Budget for security tooling consolidation
 
 —feel free to reach out. Happy to pick up whenever it makes sense.
@@ -407,17 +435,20 @@ Best,
 
 ### Discovery Questions
 
-**Current State:**
+### Current State
+
 1. "Walk me through how your analysts handle a typical [case / investigation / alert] today."
 2. "What tools are they using? Where do they spend the most time?"
 3. "When something needs to go to [leadership / legal / oversight], what does that process look like?"
 
-**Pain Points:**
+### Pain Points
+
 4. "Where do things break down or slow down?"
 5. "What happens when you can't trace how a conclusion was reached?"
 6. "Have you had any audit findings or compliance gaps in the last 12 months?"
 
-**Decision Process:**
+### Decision Process
+
 7. "If you wanted to pilot something like this, what would that process look like?"
 8. "Who else would need to be involved?"
 9. "What budget/timeline constraints should I know about?"
@@ -452,10 +483,14 @@ Track in CRM:
 | Sequence completion | > 90% (don't abandon early) |
 | Time to first reply | < 5 days |
 
-**A/B Test Candidates:**
+### A/B Test Candidates
+
 - Subject lines (problem vs. outcome)
+
 - Email length (short vs. detailed)
+
 - CTA (specific time vs. "let me know")
+
 - Social proof (named vs. anonymized)
 
 ---

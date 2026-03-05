@@ -310,7 +310,7 @@ This document explicitly states what the **Governance & Attestation (GA)** syste
 **Why Not**:
 
 - Database-level isolation is expensive (N databases for N tenants)
-- GA provides IC-grade logical isolation (see [IC-MULTI-TENANCY.md](../../SECURITY/docs/IC-MULTI-TENANCY.md))
+- GA provides IC-grade logical isolation (see IC-MULTI-TENANCY.md)
 - Physical isolation is overkill for most use cases
 
 **Alternative**:
