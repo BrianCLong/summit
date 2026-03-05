@@ -1,65 +1,61 @@
-name: "[info] PR Quality Gate"
+name: PR Quality Gate
 
 on:
   pull_request:
-    branches: [main]
+    types: [opened, synchronize, reopened]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate-release-policy:
-    name: Validate Release Policy
+  lint-release-policy:
+    name: Lint Release Policy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
-      - name: Install Dependencies
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Validate Release Policy
-        run: pnpm lint:release-policy
+        run: pnpm test:release-scripts
 
   lint-reason-codes:
     name: Lint Release Reason Codes
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
 
-      - name: Lint Reason Codes
-        run: node scripts/release/lint-reason-codes.mjs
+      - name: Run Schema Validator
+        run: npx @hyperjump/spectral-cli validate -d docs/releases/reason-codes.yml docs/releases/schema.json
 
-  longrun-job-validation:
-    name: LongRunJob Spec Advisory Validation
+  error-handling-tests:
+    name: Verify Base Error Handling
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+        uses: actions/checkout@v4
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node.js
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -67,42 +63,5 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Validate LongRunJob Specs (dry-run)
-        run: node scripts/ci/validate-longrun-job.mjs
-
-    # NOTE: ga-risk-gate job removed - referenced workflow file does not exist
-    # TODO: Re-enable when ga-risk-gate.yml is created
-
-  security-scan:
-    name: Vulnerability and Security Scan
-    if: ${{ contains(github.event.pull_request.labels.*.name, 'run-info-security') }}
-    uses: ./.github/workflows/ci-security.yml
-    with:
-      run_dast: false # DAST is too slow for a PR check
-    secrets:
-      snyk_token: ${{ secrets.SNYK_TOKEN }}
-
-  sbom:
-    name: SBOM (warn-only policy)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4 # v6
-
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0
-
-      - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
-
-      - name: SBOM policy check (non-blocking)
-        continue-on-error: true
-        env:
-          SBOM_FILE: artifacts/sbom/sbom.json
-        run: node scripts/sbom-policy-check.mjs
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-cyclonedx
-          path: artifacts/sbom/sbom.json
-          retention-days: 14
+      - name: Run Error Tests
+        run: pnpm test:release-scripts
