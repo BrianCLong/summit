@@ -7,24 +7,16 @@ on:
 
 jobs:
   build-and-verify:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Docker Preflight Checks
-        run: |
-          docker --version
-          docker compose version
-          uname -r
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
           cache: 'pnpm'
 
       - name: Verify Lockfile

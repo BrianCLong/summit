@@ -2,11 +2,6 @@ name: agent-guardrails
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, reopened, synchronize, edited, labeled]
 
 concurrency:
@@ -22,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Evaluate restricted path changes
         uses: actions/github-script@v7
@@ -70,7 +65,7 @@ jobs:
             if (violations.length > 0) {
               const message = `Restricted paths modified without override: ${violations.join(', ')}. ` +
                 `Add a relevant override label or include ${overrideToken} in the AGENT-METADATA block with justification.`;
-              core.warning(message);
+              core.setFailed(message);
             } else {
               core.info('No restricted path changes detected.');
             }
@@ -79,15 +74,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: actions/checkout@v4
 
       - name: Check PR Metadata
-        run: node scripts/ga/check-pr-metadata.mjs || true
+        run: node scripts/ga/check-pr-metadata.mjs
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 
@@ -96,19 +86,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
 
       - name: Verify S-AOS Compliance
-        run: node scripts/ga/verify-saos.mjs || true
+        run: node scripts/ga/verify-saos.mjs
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
 
@@ -116,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
 
       - name: Get changed files
         id: files
