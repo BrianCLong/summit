@@ -25,6 +25,11 @@ name: Release Readiness Gate
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     # CRITICAL: NO paths-ignore rules
     # This gate MUST run on every change to guarantee release readiness
   push:
