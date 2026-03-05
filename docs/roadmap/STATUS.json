@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:00:00Z",
-  "revision_note": "Added Switchboard OpenClaw wedge strategy for governed personal-agent market entry.",
+  "last_updated": "2026-02-08T04:34:12Z",
+  "revision_note": "Added Governed Multi-Agent OS documentation initiative with readiness-aligned governance guarantees.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -61,6 +61,12 @@
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
     },
     {
+      "id": "governed-multi-agent-os",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Governed OS doc set: overview, policy graph, provenance graph, auditor verify, SLOs/dashboards, security model. Anchored to Summit Readiness Assertion with evidence-first guarantees."
+    },
+    {
       "id": "summit-skill-router-ga-orchestrator",
       "status": "in_progress",
       "owner": "codex",
@@ -83,12 +89,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
-    },
-    {
-      "id": "switchboard-openclaw-wedge-strategy",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Published governed consumer wedge and white-label strategy for Switchboard with receipts-first and verified skills posture."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -218,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
