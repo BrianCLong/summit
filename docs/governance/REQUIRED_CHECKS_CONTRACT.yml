@@ -1,0 +1,45 @@
+required_checks:
+  - context: "CI / Unit Tests (CI)"
+    type: "workflow"
+    workflow:
+      file: ".github/workflows/ci.yml"
+      workflow_name: "CI"
+      job_id: "unit-tests"
+      job_name: "Unit Tests (CI)"
+      triggers: ["pull_request"]
+
+  - context: "GA Gate / gate"
+    type: "workflow"
+    workflow:
+      file: ".github/workflows/ga-gate.yml"
+      workflow_name: "GA Gate"
+      job_id: "gate"
+      job_name: "gate"
+      triggers: ["pull_request"]
+
+  - context: "Governance Meta Gate / meta-gate"
+    type: "workflow"
+    workflow:
+      file: ".github/workflows/governance-meta-gate.yml"
+      workflow_name: "Governance Meta Gate"
+      job_id: "meta-gate"
+      job_name: "meta-gate"
+      triggers: ["pull_request"]
+
+  - context: "SOC Controls / SOC Controls"
+    type: "workflow"
+    workflow:
+      file: ".github/workflows/soc-controls.yml"
+      workflow_name: "SOC Controls"
+      job_id: "soc-controls"
+      job_name: "SOC Controls"
+      triggers: ["pull_request"]
+
+  - context: "Unit Tests & Coverage / test (20.x)"
+    type: "workflow"
+    workflow:
+      file: ".github/workflows/unit-test-coverage.yml"
+      workflow_name: "Unit Tests & Coverage"
+      job_id: "test"
+      job_name: "test (${{ matrix.node-version }})"
+      triggers: ["pull_request"]
