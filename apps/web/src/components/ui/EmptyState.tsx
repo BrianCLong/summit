@@ -1,24 +1,10 @@
 import * as React from 'react'
-import {
-  AlertCircle,
-  FileX,
-  Search,
-  Plus,
-  BarChart3,
-  Activity,
-} from 'lucide-react'
+import { AlertCircle, FileX, Search, Plus, BarChart3, Activity } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from './Button'
 
 interface EmptyStateProps {
-  icon?:
-    | 'search'
-    | 'file'
-    | 'alert'
-    | 'plus'
-    | 'chart'
-    | 'activity'
-    | React.ReactNode
+  icon?: 'search' | 'file' | 'alert' | 'plus' | 'chart' | 'activity' | React.ReactNode
   title: string
   description?: string
   action?: {
@@ -60,9 +46,9 @@ export function EmptyState({
             className="h-8 w-8 text-muted-foreground"
             aria-hidden="true"
           />
-        ) : (
+        ) : typeof icon !== 'string' ? (
           icon
-        )}
+        ) : null}
       </div>
       <h3 className="mb-2 text-lg font-semibold">{title}</h3>
       {description && (
