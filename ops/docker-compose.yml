@@ -1,4 +1,4 @@
-version: '3.9'
+#version: "3.9"
 
 x-common-env: &common-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
