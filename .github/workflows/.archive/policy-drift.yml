@@ -1,8 +1,4 @@
 name: Policy Drift Monitor
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 
 on:
   schedule:
@@ -19,7 +15,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20''
           cache: 'npm'
 
       - name: Install dependencies

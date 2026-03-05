@@ -1,8 +1,4 @@
 name: "Reusable: Security & Compliance"
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 
 # Unified Security and Governance gate.
 # Authoritative check for:
@@ -50,10 +46,7 @@ jobs:
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version-file: .nvmrc # v4
+        uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
@@ -78,7 +71,6 @@ jobs:
       # 1. Antigravity Governance
       # ═══════════════════════════════════════════════════════════════════════════
       - name: Antigravity Compliance
-        run: npm run compliance:antigravity || true
 
       # ═══════════════════════════════════════════════════════════════════════════
       # 2. Security Scans

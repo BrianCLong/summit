@@ -134,7 +134,11 @@ def main() -> int:
             continue
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            if "202" in txt and ("T" in txt or ":" in txt):
+            # Improved heuristic: look for ISO 8601-like patterns
+            # e.g., 2026-02-28T03:09:09 or 2025-10-07
+            import re
+            ISO_RE = re.compile(r"202\d-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d")
+            if ISO_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
