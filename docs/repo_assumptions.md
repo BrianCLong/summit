@@ -1,21 +1,5 @@
 # Repo Assumptions
-
-## Verified Paths
-- `summit/`
-- `summit/explain/` (Will be created)
-- `docs/standards/`
-- `docs/security/`
-- `docs/ops/runbooks/`
-- `scripts/monitoring/`
-
-## Assumed Paths
-- JSON artifact schema conventions (e.g. `report.json`, `metrics.json`, `stamp.json` based on `subsumption/example/evidence`)
-
-## Must-not-touch files
-- Any `package.json` or `tsconfig.json` outside the target scope
-- CI workflow files (unless specifically necessary for gates)
-- Existing tests or application source code outside `summit/explain/shap_iq/`
-
-## Required schema alignment tasks
-- Align JSON schema with `report.json` and `metrics.json` structure
-- Ensure deterministic output requirements
+1. Verify pipeline framework location: `pipelines/` exists.
+2. Verify schema conventions for artifacts: `artifacts/docgraph/` to be used.
+3. Verify CI gate naming: `ci/` directory used for python CI checks.
+4. Confirm test harness directory: `tests/` directory used.
