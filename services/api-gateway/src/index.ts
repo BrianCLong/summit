@@ -52,6 +52,7 @@ async function startServer() {
     }) as any,
   );
 
+  // Health check - main endpoint
   app.get(['/health', '/api/health'], (req, res) => {
     res.json({
       status: 'ok',
@@ -59,27 +60,6 @@ async function startServer() {
       uptime: process.uptime(),
       environment: NODE_ENV,
     });
-  });
-
-  // Mock ingest connectors for smoke tests
-  app.get('/ingest/connectors', (req, res) => {
-    res.json([
-      { id: 'csv-http', name: 'HTTP CSV Connector', status: 'available' },
-      { id: 'postgresql', name: 'PostgreSQL Connector', status: 'available' },
-      { id: 'neo4j', name: 'Neo4j Connector', status: 'beta' }
-    ]);
-  });
-
-  // Prometheus metrics for smoke tests
-  app.get('/metrics', (req, res) => {
-    res.set('Content-Type', 'text/plain; version=0.0.4');
-    res.send(`# HELP gateway_requests_total Total requests
-# TYPE gateway_requests_total counter
-gateway_requests_total 1
-# HELP gateway_uptime_seconds Uptime
-# TYPE gateway_uptime_seconds gauge
-gateway_uptime_seconds ${process.uptime()}
-`);
   });
 
   // K8s liveness probe
