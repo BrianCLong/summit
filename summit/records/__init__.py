@@ -1,2 +1,2 @@
-from .model import Record, Action
+from .model import Action, Record
 from .policy import check_access
