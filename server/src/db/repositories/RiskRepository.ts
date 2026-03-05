@@ -36,10 +36,8 @@ export class RiskRepository {
       // 2. Insert Risk Signals
       if (input.signals && input.signals.length > 0) {
         // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
-        // Reduces round-trip overhead from O(N) to O(N/100).
-        // Expected Impact: For 500 signals, reduces network round-trips from 500 to 5.
-        // On a typical 1ms latency connection, this saves ~495ms per saveRiskScore call.
         const chunkSize = 100;
+
         for (let i = 0; i < input.signals.length; i += chunkSize) {
           const chunk = input.signals.slice(i, i + chunkSize);
           const values: any[] = [];
@@ -50,11 +48,11 @@ export class RiskRepository {
             values.push(
               savedScore.id,
               sig.type,
-              sig.source || null,
+              sig.source,
               sig.value,
               sig.weight,
               sig.contributionScore,
-              sig.description || null,
+              sig.description,
               sig.detectedAt || new Date(),
             );
             placeholders.push(
@@ -69,8 +67,10 @@ export class RiskRepository {
             ) VALUES ${placeholders.join(', ')}
             RETURNING *`;
 
-          const sigRows = await tx.query(batchSql, values);
-          savedSignals.push(...sigRows.map((r: any) => this.mapSignal(r)));
+          const batchRows = await tx.query(batchSql, values);
+          batchRows.forEach((row: any) =>
+            savedSignals.push(this.mapSignal(row)),
+          );
         }
       }
 

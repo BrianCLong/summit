@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2026-02-11 - [Optimized Input Sanitization Middleware]
-**Learning:** Global middleware like input sanitization can be a significant bottleneck as it runs on every request. A copy-on-write pattern that skips allocations for clean objects/arrays, combined with O(1) character checks (key[0]) and preservation of Date/RegExp/Buffer, can improve performance by ~30% and significantly reduce GC pressure.
-**Action:** Use copy-on-write and Object.keys() for high-frequency object traversal to avoid unnecessary cloning.
+## 2026-08-10 - [Transactional Batching in PostgreSQL]
+**Learning:** Fallback logic (batch to individual) is functionally useless inside a PostgreSQL transaction block if the failure is a database-level error (e.g., constraint violation). Any error immediately aborts the transaction, making subsequent queries in the `catch` block fail.
+**Action:** For transactional operations, prioritize batching for performance but avoid complex fallbacks unless using `SAVEPOINT`s. Ensure all data is validated before the batch insert to minimize failures.
