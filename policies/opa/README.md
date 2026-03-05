@@ -6,6 +6,7 @@ These Rego modules are minimal, production-lean starters. They expect inputs sha
 - `dlp.rego`: block promotion if logs/artifacts flagged by DLP
 - `cmk.rego`: require tenant CMK encryption at rest
 - `policy_shadow.rego`: evaluate policies in **shadow** vs **enforce** and emit decision diffs
+- `golden_path.rego`: warn if deployable branches (e.g. main) do not have passing Golden Path checks
 
 ### Quick eval
 
