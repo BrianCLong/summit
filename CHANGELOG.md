@@ -20,6 +20,12 @@ n### Added
 ### Security
 - **Defense in Depth**: Hardened sensitive administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control (RBAC) directly within the router files.
 
+### Security
+- SEC-2025-002: Hardened identity and tenant context resolution in API routes to prevent spoofing by prioritizing authenticated user objects over untrusted headers.
+
+### Security
+- SEC-2025-002: Hardened identity and tenant context resolution in API routes to prevent spoofing by prioritizing authenticated user objects over untrusted headers.
+
 ### Added
 - Added standardized `Kbd` component to `@intelgraph/web` for platform-aware keyboard shortcut hints (⌘/Ctrl and ⇧/Shift).
 - Added `@summit/trends` package for business trend instrumentation.
