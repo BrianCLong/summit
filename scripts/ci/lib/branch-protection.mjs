@@ -10,7 +10,10 @@ import {
 import {
   resolve
 } from 'node:path';
-import yaml from 'js-yaml';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const yaml = require('js-yaml');
 
 export const VerificationState = {
   VERIFIED_MATCH: 'VERIFIED_MATCH',

@@ -3,8 +3,13 @@ import { AnalyticsService } from '../services/AnalyticsService.js';
 import { logger } from '../config/logger.js';
 import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 
 const router = Router();
+
+// SEC-2026-004: Protect Analytics endpoints with authentication and RBAC
+router.use(ensureAuthenticated);
+router.use(ensureRole(['ADMIN', 'admin', 'ANALYST', 'analyst']));
 const analyticsService = AnalyticsService.getInstance();
 
 // Helper to handle async route errors

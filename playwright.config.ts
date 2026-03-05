@@ -22,13 +22,13 @@ export default defineConfig({
     ? {
         webServer: [
           {
-            command: 'npm run client:dev',
+            command: 'pnpm run client:dev',
             port: 3000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },
           {
-            command: 'npm run server:dev',
+            command: 'pnpm run server:dev',
             port: 4000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
