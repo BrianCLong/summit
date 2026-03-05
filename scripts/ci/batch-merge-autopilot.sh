@@ -31,7 +31,7 @@ get_ready_prs() {
       --search "is:pr is:open draft:false status:success" \
       --json number,title,headRefName \
       --limit "$BATCH_SIZE" \
-      --jq '.' 2>/dev/null); then
+      --jq '.' 2> >(cat >&2)
       echo "$output"
       return 0
     fi
