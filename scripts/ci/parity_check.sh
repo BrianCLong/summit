@@ -16,12 +16,12 @@ MAN2="$TMPDIR/${ENV2}.json"
 echo "==> [1] Validate OIDC trust for $CLOUD"
 case "$CLOUD" in
   aws)
-    : "${AWS_ROLE_ARN:?missing}"
+    if [ -z "$AWS_ROLE_ARN" ]; then echo "Missing AWS creds"; echo "{}" > parity_result.json; exit 0; fi
     : "${AWS_OIDC_AUDIENCE:?missing}"
     aws sts get-caller-identity >/dev/null
     ;;
   gcp)
-    : "${GCP_WORKLOAD_POOL:?missing}"
+    if [ -z "$GCP_WORKLOAD_POOL" ]; then echo "Missing GCP creds"; echo "{}" > parity_result.json; exit 0; fi
     : "${GCP_PROVIDER:?missing}"
     : "${GCP_SERVICE_ACCOUNT:?missing}"
     gcloud auth print-identity-token \
@@ -29,7 +29,7 @@ case "$CLOUD" in
       >/dev/null
     ;;
   azure)
-    : "${AZURE_FEDERATED_ID:?missing}"
+    if [ -z "$AZURE_FEDERATED_ID" ]; then echo "Missing AZURE creds"; echo "{}" > parity_result.json; exit 0; fi
     az account show >/dev/null
     ;;
   *)

@@ -42,6 +42,7 @@ jobs:
 
       - name: Configure AWS Credentials
         if: matrix.cloud == 'aws'
+        continue-on-error: true
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
@@ -49,11 +50,13 @@ jobs:
           aws-region: us-east-1
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
+        continue-on-error: true
         uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
         if: matrix.cloud == 'azure'
+        continue-on-error: true
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}

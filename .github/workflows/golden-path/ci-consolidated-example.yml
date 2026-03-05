@@ -89,7 +89,7 @@ jobs:
         os:
           - ubuntu-latest
         # Can add node versions if needed
-        # node-version: [18, 20]
+        # node-version: 20, 20]
         
         # Conditional includes for specific combinations
         include:

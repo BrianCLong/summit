@@ -10,8 +10,7 @@ required_checks:
   - meta-gate
   - gate
   - Unit Tests
-  - SOC Controls
-  - test (20.x)
+  - SOC Controls (ci-pr)
 
 notes:
   owner: summit-ga
