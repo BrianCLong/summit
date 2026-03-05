@@ -41,7 +41,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install deps
@@ -63,7 +63,6 @@ jobs:
 
       - name: Comment on PR
         if: ${{ github.event_name == 'pull_request' }}
-        continue-on-error: true
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true

@@ -29,7 +29,7 @@ jobs:
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -62,7 +62,7 @@ jobs:
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -94,7 +94,7 @@ jobs:
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -137,7 +137,7 @@ jobs:
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -173,7 +173,7 @@ jobs:
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -206,7 +206,7 @@ jobs:
       - uses: pnpm/action-setup@v4 # v4
       - uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: pnpm
 
       - name: Install dependencies
@@ -239,7 +239,7 @@ jobs:
       - deprecated-checks
       - performance-regression
       - accessibility-audit
-    if: ${{ (vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule') && always() }}
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} ) && (always())
     steps:
       - name: Report results (non-blocking)
         run: |
