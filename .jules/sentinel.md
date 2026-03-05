@@ -76,7 +76,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
 
-## 2026-03-01 - [XAI PII Leakage Prevention]
-**Vulnerability:** Instance-level explanations could leak PII if models are passed raw text featuring SSNs, emails, or credit card numbers, exposing them in plaintext within evidence files like `report.json`.
-**Learning:** Hard-coded regular expressions acting as a deny-by-default filter for features provides a strong fallback guardrail against emitting unintended PII in deterministic artifact logging in offline-first XAI pipelines.
-**Prevention:** Implemented a `redact_pii` step applying rigorous regex replacements before the calculation and output writing stage inside the SHAP-IQ feature filtering logic.
+## 2026-03-01 - [HIGH] Timing Attack in Abyss Auth Header
+**Vulnerability:** The `extremeAuth` middleware in `server/src/routes/abyss.ts` used a simple string comparison (`===`) to validate the security header. This is vulnerable to timing attacks where an attacker can deduce the secret byte-by-byte by measuring response times.
+**Learning:** Standard string comparisons fail early, leaking information about how much of the string matched. For security-critical secrets like API keys or tokens, comparison time must be constant regardless of the input.
+**Prevention:** Use `crypto.timingSafeEqual` for all secret comparisons. Ensure buffers are of equal length before comparison to avoid length-leaking optimizations in the comparison function itself (though often acceptable for fixed-length tokens, it's safer to be explicit).
