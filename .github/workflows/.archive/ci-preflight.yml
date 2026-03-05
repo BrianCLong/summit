@@ -5,11 +5,6 @@ on:
 
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "server/**"
       - "apps/gateway/**"
@@ -37,29 +32,23 @@ env:
 
 jobs:
   validate-compose:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Docker Preflight Checks
+      - name: Create dummy .env
         run: |
-          docker --version
-          docker compose version
-          uname -r
-
+          echo "NEO4J_PASSWORD=ci-neo4j-password" >> .env
+          echo "POSTGRES_PASSWORD=ci-postgres-password" >> .env
+          echo "JWT_SECRET=ci-jwt-secret" >> .env
+          echo "JWT_REFRESH_SECRET=ci-refresh-secret" >> .env
       - name: Validate Docker Compose Config
-        run: touch .env && docker compose -f docker-compose.dev.yaml config
+        run: docker compose -f docker-compose.dev.yaml config
 
   verify-server-build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Docker Preflight Checks
-        run: |
-          docker --version
-          docker compose version
-          uname -r
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -67,7 +56,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -76,15 +65,15 @@ jobs:
         run: pnpm -C server build
 
   verify-gateway-build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Docker Preflight Checks
+      - name: Create dummy .env
         run: |
-          docker --version
-          docker compose version
-          uname -r
-
+          echo "NEO4J_PASSWORD=ci-neo4j-password" >> .env
+          echo "POSTGRES_PASSWORD=ci-postgres-password" >> .env
+          echo "JWT_SECRET=ci-jwt-secret" >> .env
+          echo "JWT_REFRESH_SECRET=ci-refresh-secret" >> .env
       - name: Build Gateway Docker Image
-        run: docker compose -f docker-compose.dev.yaml build api-gateway
+        run: docker compose -f docker-compose.dev.yaml build gateway
