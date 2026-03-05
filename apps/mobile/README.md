@@ -27,7 +27,7 @@ React Native OSINT mobile application for Summit IntelGraph with offline-first a
 ### Prerequisites
 
 - Node.js >= 18.0.0
-- pnpm >= 9.12.0
+- pnpm >= 10.0.0
 - Xcode 15+ (for iOS)
 - Android Studio (for Android)
 - CocoaPods (for iOS)
