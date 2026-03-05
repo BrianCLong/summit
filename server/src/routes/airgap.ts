@@ -20,6 +20,10 @@ airgapRouter.use(ensureRole(['ADMIN', 'admin']));
 // Middleware to ensure tenant context
 airgapRouter.use(tenantHeader());
 
+// SEC-2025-001: Enforce authentication and admin role for airgap operations
+airgapRouter.use(ensureAuthenticated);
+airgapRouter.use(ensureRole(['ADMIN', 'admin']));
+
 // Export Route
 airgapRouter.post('/export', async (req: any, res) => {
     let session;

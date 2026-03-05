@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { ensureAuthenticated } from '../middleware/auth.js';
 import { AnalyticsService } from '../services/AnalyticsService.js';
 import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { logger } from '../config/logger.js';
@@ -6,6 +7,10 @@ import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
 
 const router = Router();
+
+// SEC-2025-001: Enforce authentication for analytics operations
+router.use(ensureAuthenticated);
+
 const analyticsService = AnalyticsService.getInstance();
 
 // SEC-2026-003: Enforce authentication and RBAC for analytics endpoints.
