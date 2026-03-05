@@ -1,0 +1,10 @@
+{
+  "evidence_id": "EVIDENCE-GH-COPILOT-PR-001",
+  "item": "github-copilot-pr-metrics-2026",
+  "metrics": {
+    "pr_throughput": null,
+    "time_to_merge_hours": null
+  },
+  "schema_version": "1.0.0",
+  "source": "github.copilot.usage_metrics_api"
+}
