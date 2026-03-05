@@ -658,19 +658,19 @@ export class DashboardService {
       // Apply aggregation functions
       for (const [field, func] of Object.entries(aggregations)) {
         const values = items
-          .map((item) => item[field])
-          .filter((v) => v != null);
+          .map((item: any) => item[field])
+          .filter((v: any) => v != null);
 
         switch (func) {
           case 'sum':
             aggregated[field] = values.reduce(
-              (sum, val) => sum + Number(val),
+              (sum: number, val: any) => sum + Number(val),
               0,
             );
             break;
           case 'avg':
             aggregated[field] =
-              values.reduce((sum, val) => sum + Number(val), 0) / values.length;
+              values.reduce((sum: number, val: any) => sum + Number(val), 0) / values.length;
             break;
           case 'count':
             aggregated[field] = values.length;

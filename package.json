@@ -4,7 +4,7 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
@@ -275,6 +275,7 @@
       "ignoreCves": []
     },
     "overrides": {
+      "change-case-all": "https://registry.npmjs.org/change-case-all/-/change-case-all-1.0.15.tgz",
       "entities": "^4.5.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
