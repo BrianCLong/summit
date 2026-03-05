@@ -21,7 +21,7 @@ Based on the architectural documents (ADR-003, ADR-050, Ontology Engine Referenc
 
 4. **Provenance & source attribution — 🟢 (Solid)**
    - *Evidence:* `docs/architecture/prov-ledger.md`.
-   - *Details:* The Provenance Ledger microservice handles immutable chains-of-custody, attaching source, license, and transformation metadata to *every* assertion. It also generates verfiable disclosure bundles with Merkle roots and Ed25519 signatures.
+   - *Details:* The Provenance Ledger microservice handles immutable chains-of-custody, attaching source, license, and transformation metadata to *every* assertion. It also generates verifiable disclosure bundles with Merkle roots and Ed25519 signatures.
 
 5. **Data ingestion framework (connectors + pipeline) — 🟡 (Partial)**
    - *Evidence:* `workers/ingest/`, `docs/architecture/CONNECTOR_GA_SUMMARY.md` (present in tree).
