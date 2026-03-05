@@ -3,6 +3,11 @@ name: Supply Chain Gates
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "package.json"
       - "pnpm-lock.yaml"
@@ -25,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

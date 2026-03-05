@@ -110,8 +110,8 @@ jobs:
             fi
           fi
 
-          echo "pnpm=9.12.0" >> "$GITHUB_OUTPUT"
-          echo "⚠️  Falling back to pinned pnpm 9.12.0"
+          echo "pnpm=10.0.0" >> "$GITHUB_OUTPUT"
+          echo "⚠️  Falling back to pinned pnpm 10.0.0"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4

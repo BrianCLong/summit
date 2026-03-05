@@ -35,13 +35,19 @@ env:
 jobs:
   # Single setup job that all test jobs can depend on
   setup:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 📦 Setup Dependencies
     outputs:
       cache-key: ${{ steps.cache.outputs.cache-primary-key }}
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
@@ -99,6 +105,12 @@ jobs:
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
@@ -145,7 +157,7 @@ jobs:
   # Aggregate results from all test jobs
   test-summary:
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 📊 Test Summary
     
     steps:
@@ -167,11 +179,17 @@ jobs:
   # Quality gates - run in parallel with tests
   lint:
     needs: setup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: ✨ Lint
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
@@ -200,11 +218,17 @@ jobs:
   docker-build:
     if: contains(github.event.pull_request.labels.*.name, 'docker')
     needs: [test, lint]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: 🐳 Docker Build
     
     steps:
       - uses: actions/checkout@v4 # v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       
       - name: Build Docker image
         run: docker build -t summit-example:${{ github.sha }} .

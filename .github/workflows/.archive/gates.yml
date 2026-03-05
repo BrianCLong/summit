@@ -3,6 +3,11 @@ name: "Gates (GA + Evidence + Determinism)"
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   merge_group:
   workflow_dispatch: {}
 
@@ -35,10 +40,10 @@ jobs:
       - name: Evidence Map present
         run: |
           # Adjust file name/path to your canonical evidence map
-          if [ -f docs/governance/evidence-map.yml ] || [ -f docs/governance/evidence-map.yaml ]; then
+          if [ -f docs/governance/evidence-map.yml ] || [ -f docs/governance/evidence-map.yaml ] || [ -f docs/governance/evidence-map.md ]; then
             echo "Evidence map present."
           else
-            echo "Missing Evidence Map (docs/governance/evidence-map.yml|yaml)"
+            echo "Missing Evidence Map (docs/governance/evidence-map.yml|yaml|md)"
             exit 1
           fi
 
