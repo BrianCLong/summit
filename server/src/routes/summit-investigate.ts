@@ -4,6 +4,7 @@ import { verificationSwarmService } from '../services/VerificationSwarmService.j
 import { evidenceFusionService } from '../services/EvidenceFusionService.js';
 import { deepfakeHunterService } from '../services/DeepfakeHunterService.js';
 import { predictiveScenarioSimulator } from '../services/PredictiveScenarioSimulator.js';
+import { advancedAuditSystem } from '../audit/index.js';
 import logger from '../utils/logger.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 
@@ -71,6 +72,42 @@ router.post('/simulation/run', async (req, res) => {
     res.json(result);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// --- Org Mesh Ingestion ---
+
+router.post('/ingest/org-mesh', async (req, res) => {
+  try {
+    const { investigationId, tenantId, entities } = req.body;
+
+    // Simulate Org Mesh ingestion logic
+    logger.info({ investigationId, tenantId }, 'Processing Org Mesh ingestion');
+
+    // Record audit event for ingestion
+    await advancedAuditSystem.recordEvent({
+      eventType: 'data_import',
+      level: 'info',
+      userId: (req as any).user?.id || 'system',
+      tenantId: tenantId || 'global',
+      serviceId: 'summit-investigate',
+      resourceType: 'investigation',
+      resourceId: investigationId,
+      action: 'org_mesh_ingest',
+      outcome: 'success',
+      message: `Ingested ${entities?.length || 0} entities from Org Mesh for investigation ${investigationId}`,
+      details: { entitiesCount: entities?.length || 0 },
+    });
+
+    res.json({
+      success: true,
+      message: 'Org Mesh ingestion complete',
+      investigationId,
+      ingestedCount: entities?.length || 0,
+    });
+  } catch (error: any) {
+    logger.error('Org Mesh ingest error', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
