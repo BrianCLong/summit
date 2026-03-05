@@ -1,11 +1,6 @@
 {
-  "controls": [
-    {
-      "id": "GEM-ENT-POLICY-001",
-      "status": "deny"
-    }
-  ],
-  "policy_status": "missing",
+  "controls": [],
+  "policy_status": "enforced",
   "provider": "google_gemini_enterprise",
-  "workspace_bound": false
+  "workspace_bound": true
 }

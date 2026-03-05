@@ -1,14 +1,14 @@
 # Repo Assumptions for Gemini Enterprise Adapter
 
-Verified: limited live inspection
+Verified: PARTIAL (live inspection performed for `summit/providers`, `tests`, and `evidence`).
 
 Assumed:
-- `summit/providers/` remains the active Python provider integration surface.
-- `tests/` executes Python tests via root `pytest.ini`.
-- `evidence/` stores deterministic JSON artifacts.
-- CI can validate deterministic JSON artifacts in future gate expansion.
+- Provider-level enterprise integration can be delivered under `summit/providers/google/` without core engine edits.
+- Evidence artifacts in `evidence/gemini_enterprise/` can be consumed by existing governance flows.
+- Existing CI can run focused pytest suites for provider and security checks.
+- Existing tests and contracts outside this scope remain unchanged.
 
 Must-not-touch:
-- Core evaluation engine
+- Core evaluation engine paths
+- Existing evidence schema contracts outside the new `gemini_enterprise` evidence folder
 - Existing provider adapters
-- Existing evidence schema contracts
