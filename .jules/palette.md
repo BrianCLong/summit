@@ -45,10 +45,6 @@
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
 
-## 2025-02-25 - Tooltips and Semantic Shortcuts
-
-**Learning:** Icon-only buttons (like "Clear search") can be ambiguous and lack sufficient descriptive text for screen readers. Adding a Tooltip with an `aria-label` provides both a visual cue on hover and a reliable name for assistive technology.
-**Action:** Always wrap icon-only buttons in a Tooltip and ensure they have a descriptive `aria-label`.
-
-**Learning:** Standardizing keyboard shortcut hints with the semantic `<kbd>` tag improves both accessibility and visual consistency. Styling these tags as subtle UI elements (like cards or badges) makes them feel integrated into the design system rather than floating text.
-**Action:** Use the `<kbd>` tag for shortcut hints and apply consistent design system styling (e.g., bg-muted, border, rounded).
+## 2026-03-01 - Search Interaction Polish
+**Learning:** Users often click "clear" on a search bar and expect to immediately type a new query, but default implementations often leave focus on the clear button or blur it.
+**Action:** Always programmatically focus the input element after a "clear" action to maintain user flow.

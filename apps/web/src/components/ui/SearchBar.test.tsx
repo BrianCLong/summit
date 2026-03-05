@@ -2,28 +2,19 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { SearchBar } from './SearchBar';
 import React, { useState } from 'react';
-import { TooltipProvider } from './Tooltip';
 
 // Use fake timers
 vi.useFakeTimers();
 
 describe('SearchBar', () => {
   it('renders correctly', () => {
-    render(
-      <TooltipProvider>
-        <SearchBar placeholder="Test Search" />
-      </TooltipProvider>
-    );
+    render(<SearchBar placeholder="Test Search" />);
     expect(screen.getByPlaceholderText('Test Search')).toBeInTheDocument();
   });
 
   it('debounces onChange calls', () => {
     const handleChange = vi.fn();
-    render(
-      <TooltipProvider>
-        <SearchBar onChange={handleChange} debounceTime={300} />
-      </TooltipProvider>
-    );
+    render(<SearchBar onChange={handleChange} debounceTime={300} />);
 
     const input = screen.getByRole('searchbox');
     fireEvent.change(input, { target: { value: 'test' } });
@@ -40,11 +31,7 @@ describe('SearchBar', () => {
   });
 
   it('updates display value immediately', () => {
-    render(
-      <TooltipProvider>
-        <SearchBar />
-      </TooltipProvider>
-    );
+    render(<SearchBar />);
     const input = screen.getByRole('searchbox') as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'test' } });
     expect(input.value).toBe('test');
@@ -53,11 +40,7 @@ describe('SearchBar', () => {
   it('works correctly as a controlled component', () => {
     const TestComponent = () => {
       const [val, setVal] = useState('initial');
-      return (
-        <TooltipProvider>
-          <SearchBar value={val} onChange={setVal} debounceTime={300} />
-        </TooltipProvider>
-      );
+      return <SearchBar value={val} onChange={setVal} debounceTime={300} />;
     };
 
     render(<TestComponent />);
@@ -87,11 +70,7 @@ describe('SearchBar', () => {
 
   it('clears value immediately when clear button is clicked', () => {
     const handleChange = vi.fn();
-    render(
-      <TooltipProvider>
-        <SearchBar onChange={handleChange} value="initial" />
-      </TooltipProvider>
-    );
+    render(<SearchBar onChange={handleChange} value="initial" />);
 
     const clearButton = screen.getByRole('button', { name: /clear search/i });
     fireEvent.click(clearButton);
@@ -102,11 +81,7 @@ describe('SearchBar', () => {
 
   it('resets timer on consecutive keystrokes', () => {
     const handleChange = vi.fn();
-    render(
-      <TooltipProvider>
-        <SearchBar onChange={handleChange} debounceTime={300} />
-      </TooltipProvider>
-    );
+    render(<SearchBar onChange={handleChange} debounceTime={300} />);
 
     const input = screen.getByRole('searchbox');
 
@@ -132,5 +107,15 @@ describe('SearchBar', () => {
 
     expect(handleChange).toHaveBeenCalledWith('ab');
     expect(handleChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('focuses input when clear button is clicked', () => {
+    render(<SearchBar value="test" />);
+    const clearButton = screen.getByRole('button', { name: /clear search/i });
+    const input = screen.getByRole('searchbox');
+
+    fireEvent.click(clearButton);
+
+    expect(input).toHaveFocus();
   });
 });
