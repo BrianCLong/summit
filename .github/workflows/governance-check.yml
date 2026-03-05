@@ -2,6 +2,11 @@ name: Governance Check
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [opened, synchronize, reopened, labeled]
 
 concurrency:
@@ -27,6 +32,7 @@ jobs:
             if (labels.length === 0) {
               if (title.startsWith('feat:')) labels.push('minor');
               else if (title.startsWith('fix:')) labels.push('patch');
+              else if (title.startsWith('chore:')) labels.push('patch');
               else if (title.startsWith('docs:')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
