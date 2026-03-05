@@ -1,18 +1,21 @@
 {
-  "name": "@intelgraph/agent-longhorizon",
-  "version": "0.0.1",
-  "description": "Long-horizon PR-chain evaluation framework",
+  "name": "@summit/agent-longhorizon",
+  "version": "4.1.15",
+  "description": "LongHorizon PR-Chains evaluation module",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./src/index.ts",
   "scripts": {
-    "build": "../../node_modules/.bin/tsc -b",
     "test": "vitest run",
-    "lint": "eslint src --ext .ts"
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "3.25.76"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "vitest": "^1.0.0",
-    "@types/node": "^20.10.0"
+    "vitest": "^4.0.16",
+    "typescript": "^5.7.3",
+    "@types/node": "^25.0.3"
   }
 }
