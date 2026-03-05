@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { GraphQLError } from 'graphql';
-import { expressMiddleware } from '@as-integrations/express4';
+import { expressMiddleware } from '@apollo/server/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
@@ -97,7 +97,10 @@ import resourceCostsRouter from './routes/resource-costs.js';
 
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
-import correctnessProgramRouter from './routes/correctness-program.js';
+import CORRECTNESS_PROGRAM_ROUTER from './routes/correctness-program.js';
+import { initializeAIA, AgentInsight } from '@intelgraph/aia';
+import { agentsRouter } from './routes/agents.js';
+import { getPostgresPool } from './db/postgres.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import ontologyRouter from './routes/ontology.js';
@@ -384,7 +387,7 @@ export const createApp = async () => {
   // Requires authentication and admin role
   app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
-      const status = await advancedRateLimiter.getStatus(req.params.userId);
+      const status = await advancedRateLimiter.getStatus((req.params.userId as string));
       res.json(status);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });
@@ -470,7 +473,32 @@ export const createApp = async () => {
   app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
 
-  app.use('/api/correctness', correctnessProgramRouter);
+  // Phase 4: AIA Initialization
+  try {
+    initializeAIA(async (insight: AgentInsight) => {
+      const db = getPostgresPool();
+      const workflowResult = await db.query(
+        'INSERT INTO aia_insights (id, agent_id, type, severity, severity_score, confidence, rationale, evidence, is_actionable) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+        [insight.id, insight.agentId, insight.type, insight.severity, insight.severityScore, insight.confidence, insight.rationale, JSON.stringify(insight.evidence), insight.isActionable]
+      );
+
+      if (insight.isActionable) {
+        // Trigger actual DAL workflow execution
+        const triggerResult = await db.query(
+          'INSERT INTO aia_workflow_triggers (insight_id, workflow_type) VALUES ($1, $2) RETURNING id',
+          [insight.id, insight.type]
+        );
+        return triggerResult.rows[0]?.id || null;
+      }
+      return null;
+    });
+    logger.info('AIA Engine initialized and bridged to DAL');
+  } catch (error) {
+    logger.error({ error }, 'Failed to initialize AIA Engine');
+  }
+
+  app.use('/api/v1/agents', agentsRouter);
+  app.use('/api/correctness', CORRECTNESS_PROGRAM_ROUTER);
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
@@ -479,8 +507,8 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
-  app.use('/airgap', airgapRouter);
-  app.use('/analytics', analyticsRouter);
+  app.use('/airgap', authenticateToken, airgapRouter);
+  app.use('/analytics', authenticateToken, analyticsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
@@ -490,7 +518,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', drRouter);
+  app.use('/dr', authenticateToken, drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
