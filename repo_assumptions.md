@@ -1,24 +1,32 @@
-# Repository Assumptions Log — Formae Subsumption Slice
+# Kafka Push Proxy Repo Assumptions Validation
 
-## Verified
+## Scope
+Validation checkpoint for PR-1 scaffold of `ingestion/kafka_push_proxy`.
 
-- Repository root is `BrianCLong/summit` working tree.
-- Roadmap status file exists at `docs/roadmap/STATUS.json`.
+## Checklist
 
-## Assumed (Pending Local/CI Confirmation)
+1. **Ingestion module layout and naming** — **Verified**
+   - Repository contains Python ingestion entrypoints under `ingestion/` and ingestor modules under `ingestion/ingestors/`.
+   - New module path `ingestion/kafka_push_proxy/` aligns with existing Python ingestion layout.
 
-- Existing evidence schema must not be broken by new multi-cloud artifacts.
-- Existing CI check names must remain stable; add new checks without renaming incumbents.
-- Multi-cloud implementation lane can begin as standards/docs + deterministic artifact contract before runtime wiring.
+2. **Evidence ID pattern** — **Partially verified (intentionally constrained)**
+   - Multiple active patterns exist (`EVID-cti-YYYYMMDD-<sha8>`, `EVID-SC-...`, `EVID-SERA-CLI-...`).
+   - No single repository-wide canonical pattern was identified for all domains in this pass.
+   - Decision: PR-1 scaffold defers evidence-id canonicalization pending schema-layer implementation PR.
 
-## Must-Not-Touch Constraints
+3. **CI check names and thresholds** — **Verified**
+   - Existing workflows include `policy-check` and `determinism-check` jobs.
+   - No top-level `schema-validate` job name was found in the sampled CI workflows, so schema validation naming remains deferred pending gate mapping in a follow-up PR.
 
-- Core evidence contracts and required CI gate names.
-- Release pipeline behavior outside additive workflow integration.
+4. **Must-not-touch surfaces** — **Verified by constraint**
+   - This PR does not modify `core/engine/*`, `evidence/schema/*.json`, or release workflows.
 
-## Validation Checklist
+## Commands used
 
-- [ ] Confirm canonical evidence schema filename and required fields.
-- [ ] Confirm CI workflow naming conventions and required checks.
-- [ ] Confirm implementation zone ownership for `pkg`/`internal`/`packages` equivalent paths.
-- [ ] Confirm naming conventions for new artifact files and policy gate IDs.
+- `find . -maxdepth 3 -type d -name ingestion | head`
+- `rg --files ingestion | head -n 50`
+- `rg -n "EVID-[A-Za-z]+-|EVID-" . | head -n 40`
+- `rg -n "policy-check|schema-validate|determinism-check|rate-limit-check|replay-check" .github/workflows scripts/ci docs/CI_STANDARDS.md | head -n 80`
+
+## Status
+Ready for PR-1 scaffold merge with feature flag default OFF.
