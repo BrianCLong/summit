@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/Button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/Badge';
 import { Label } from '@/components/ui/label';
-import { EmptyState } from '@/components/ui/EmptyState';
 import { useToast } from '@/hooks/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
@@ -39,6 +38,7 @@ export function CopilotPanel() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('prompt');
   const { toast } = useToast();
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // jQuery ref for the action panel
@@ -192,7 +192,7 @@ export function CopilotPanel() {
                         type="button"
                         onClick={() => {
                           setPrompt(p);
-                          textareaRef.current?.focus();
+                          setTimeout(() => textareaRef.current?.focus(), 0);
                         }}
                         aria-label={`Use prompt: ${p}`}
                         className="rounded-full border border-input bg-background px-2 py-0.5 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -203,7 +203,11 @@ export function CopilotPanel() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleTranslate} loading={loading} className="w-full">
+              <Button
+                onClick={handleTranslate}
+                loading={loading}
+                className="w-full"
+              >
                 Generate Cypher
               </Button>
             </TabsContent>
@@ -282,7 +286,10 @@ export function CopilotPanel() {
                       disabled={!result?.isValid}
                       aria-label="Run Cypher query in sandbox"
                     >
-                      <Play className="w-4 h-4 mr-1" aria-hidden="true" /> Run in Sandbox
+                      {!loading && (
+                        <Play className="w-4 h-4 mr-1" aria-hidden="true" />
+                      )}
+                      Run in Sandbox
                     </Button>
                   </div>
                 </div>
@@ -292,11 +299,7 @@ export function CopilotPanel() {
             <TabsContent value="results" className="flex-1 pt-4 overflow-auto">
               <div className="result-area">
                  {sandboxResult && sandboxResult.length === 0 && (
-                   <EmptyState
-                     icon="search"
-                     title="No results found"
-                     description="Try adjusting your prompt or Cypher query."
-                   />
+                   <div className="text-center text-muted-foreground py-8">No results found.</div>
                  )}
                  {sandboxResult && sandboxResult.length > 0 && (
                    <table className="w-full text-sm border-collapse">
@@ -337,7 +340,7 @@ export function CopilotPanel() {
                     <CardContent className="py-2 text-sm text-muted-foreground flex gap-2 items-center">
                       <BookOpen className="w-4 h-4" />
                       <span>ID: {cit.id}</span>
-                      {cit.url && <a href={cit.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-2">View Source</a>}
+                      {cit.url && <a href={cit.url} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline ml-2">View Source</a>}
                     </CardContent>
                   </Card>
                 ))}
