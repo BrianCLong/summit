@@ -25,7 +25,7 @@ router.get('/tenants/:tenantId', ensureAuthenticated, async (req, res) => {
   try {
     const tenantId = (req.params.tenantId as string);
     const { partnerId } = querySchema.parse(req.query);
-    const resolution = await service.getBrandPack(tenantId, partnerId);
+    const resolution = await service.getBrandPack(tenantId: tenantId as string, partnerId);
 
     res.json({
       tenantId,
@@ -48,13 +48,13 @@ router.post('/tenants/:tenantId/apply', ensureAuthenticated, async (req, res) =>
     const appliedAt = new Date().toISOString();
 
     const resolution = await service.applyBrandPack(
-      tenantId,
+      tenantId: tenantId as string,
       payload.packId,
       payload.partnerId,
     );
 
     const receipt = await emitBrandPackReceipt({
-      tenantId,
+      tenantId: tenantId as string,
       packId: payload.packId,
       actorId,
       appliedAt,
@@ -83,7 +83,7 @@ router.post('/tenants/:tenantId/apply', ensureAuthenticated, async (req, res) =>
           name: resolution.pack.name,
           path: `/api/brand-packs/tenants/${tenantId}`,
         },
-        tenantId,
+        tenantId: tenantId as string,
         traceId: req.headers['x-request-id'] as string | undefined,
         metadata: {
           partnerId: payload.partnerId,

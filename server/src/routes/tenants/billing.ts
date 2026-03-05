@@ -39,7 +39,7 @@ router.get(
       const { start, end, format } = BillingExportQuery.parse(req.query);
       const tenantId = (req.params.tenantId as string);
 
-      const report = await finopsReportService.buildReport(tenantId, start, end);
+      const report = await finopsReportService.buildReport((tenantId as string), start, end);
 
       if (format === 'csv') {
         const csv = finopsReportService.toCsv(report);

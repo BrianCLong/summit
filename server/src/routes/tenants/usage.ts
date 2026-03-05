@@ -92,7 +92,7 @@ router.get('/', ensureAuthenticated, validateRequest, enforceTenant, async (req,
   try {
     let plan: any = null;
     try {
-      const pricing = await PricingEngine.getEffectivePlan(tenantId);
+      const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
       plan = pricing?.plan || null;
     } catch (error: any) {
       plan = null;
@@ -214,7 +214,7 @@ router.get(
       client = await pool.connect();
       let plan: any = null;
       try {
-        const pricing = await PricingEngine.getEffectivePlan(tenantId);
+        const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
         plan = pricing?.plan || null;
       } catch (error: any) {
         plan = null;
@@ -309,7 +309,7 @@ router.get(
       client = await pool.connect();
       let plan: any = null;
       try {
-        const pricing = await PricingEngine.getEffectivePlan(tenantId);
+        const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
         plan = pricing?.plan || null;
       } catch (error: any) {
         plan = null;
