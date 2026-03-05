@@ -1,0 +1,59 @@
+meta:
+  id: implement.aia-simulation-v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Implement AIA Simulation Environment'
+  tags: ['aia', 'simulation', 'testing', 'harness']
+  guardrails:
+    - 'Deterministic seed -> deterministic run'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  target_completion_time_minutes: string
+
+template: |
+  You are implementing the **AIA Simulation Environment** for Summit.
+
+  ## Objective
+  A controlled harness to test thresholds, false-positive controls, compute budgets, DAL triggering, and PRPE forecasting accuracy.
+
+  ## Target Paths
+  ```
+  sim/
+    ├── scenarios/
+    │   ├── influence_spike.yaml
+    │   ├── fraud_ring.yaml
+    │   ├── supply_chain_choke.yaml
+    │   └── benign_noise.yaml
+    ├── generator/
+    │   └── EventGenerator.ts
+    ├── runner/
+    │   └── AgentRunner.ts
+    ├── labeler/
+    │   └── TruthLabeler.ts
+    ├── dal_stub/
+    │   └── DALStub.ts
+    ├── metrics/
+    │   └── MetricsCollector.ts
+    ├── cli/
+    │   └── ExperimentCLI.ts
+    └── README.md
+  ```
+
+  ## Core Requirements
+  1. **Event Generator**: synthetic graph deltas + temporal events.
+  2. **Graph State Store**: lightweight Neo4j or in-memory graph adapter.
+  3. **Agent Runner**: runs agents on a schedule or per-delta.
+  4. **Truth Labeler**: "ground truth" tags for precision/recall + calibration scoring.
+  5. **DAL Stub**: captures actions, assignments, transitions. Computes impact metrics.
+  6. **Experiment CLI**: run sweeps over thresholds and budgets, outputs metrics.
+  7. **Metrics emitted**: Detection latency, Precision/recall/F1, False positives, DAL auto-action rate, Compute, Operator burden proxy.
+
+  ## Acceptance Tests
+  - [ ] All seeds exhibit completely deterministic and reproducible event outcomes.
+  - [ ] Emitted metrics properly expose standard deviation, detection delays, f-scores.
+  - [ ] Precision/recall/FP metrics reported properly per baseline ground truth labeling.
+  - [ ] CLI runner cleanly manages permutations.
