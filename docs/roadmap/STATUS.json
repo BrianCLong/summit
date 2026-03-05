@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-05T02:04:12Z",
+  "revision_note": "Added WorkOS-to-Summit identity subsumption architecture brief and governance-aligned roadmap entry.",
   "initiatives": [
+    {
+      "id": "workos-identity-subsumption-brief",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published clean-room architecture brief defining WorkOS baseline and Summit identity-graph subsumption roadmap."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
