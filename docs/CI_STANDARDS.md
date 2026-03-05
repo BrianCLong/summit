@@ -9,6 +9,7 @@ Our CI philosophy is **Fast, Strict, and Consolidated**.
 - **Fast**: We use caching and parallel jobs to keep feedback loops short.
 - **Strict**: We enforce high standards (type safety, linting, security, testing) on every PR.
 - **Consolidated**: We rely on a single "Quality Gate" workflow rather than many fragmented checks.
+- **Governed**: Readiness expectations are asserted in [`docs/SUMMIT_READINESS_ASSERTION.md`](SUMMIT_READINESS_ASSERTION.md).
 
 ## The Official Pipeline: `pr-quality-gate.yml`
 
@@ -32,7 +33,31 @@ This is the "Fail Fast" stage. If your code is messy or insecure, we stop here.
 ### 3. Deterministic Build Attestation
 
 - Runs a double-build to prove reproducibility (hash comparison between builds).
-- Fails the gate if `package-lock.json` is mutated or build artifacts diverge between runs.
+- Fails the gate if `pnpm-lock.yaml` is mutated or build artifacts diverge between runs.
+- Normalizes timestamps via `SOURCE_DATE_EPOCH` derived from the Git commit time to keep build IDs stable.
+- Emits a Git-derived build ID in build metadata for traceability.
+
+### 3.1 Hermetic Inputs & Reproducibility Guardrails
+
+Deterministic builds require that **all inputs are pinned** and **timestamps are normalized**.
+
+- **Lockfile Integrity**: Always use `pnpm ci --frozen-lockfile` in CI to enforce the committed lockfile.
+- **Pinned Base Images**: Use Docker image digests (e.g., `node:20-alpine@sha256:...`) instead of tags.
+- **Timestamp Normalization**: Set `SOURCE_DATE_EPOCH` to `git log -1 --format=%ct` for build steps.
+- **Sorted JSON Outputs**: Ensure JSON emissions are deterministic (sorted keys / stable formatting).
+- **Git-Derived Build IDs**: Use commit SHA + timestamp to label artifacts.
+- **Hermetic Environments**: Do not pull data from external services during builds unless explicitly cached.
+
+Example GitHub Actions install step:
+
+```yaml
+- uses: pnpm/action-setup@v4
+  with:
+    version: 9
+- run: pnpm ci --frozen-lockfile
+  env:
+    SOURCE_DATE_EPOCH: ${{ github.event.head_commit.timestamp }}
+```
 
 ### 4. Integration Suite (merge-blocking)
 
@@ -100,6 +125,11 @@ Local verification example:
 ```bash
 scripts/ci/verify-sbom-signature.sh ghcr.io/org/app@sha256:...
 ```
+
+## Artifact Hashing & Evidence
+
+- Compute `sha256sum` for build artifacts (packages, containers) and attach to evidence bundles.
+- Prefer digest-based deploys and signatures to enable rollbacks and verification.
 
 ### Metrics Gate (Prometheus)
 

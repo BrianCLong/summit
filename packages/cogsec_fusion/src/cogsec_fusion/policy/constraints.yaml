@@ -1,0 +1,10 @@
+constraints:
+  - id: "POLICY-NO-OFFENSIVE-IO"
+    rule: "Do not generate or deploy offensive influence content."
+    enforcement: "BLOCK"
+  - id: "POLICY-PROTECT-VULNERABLE"
+    rule: "Flag and block content exploiting vulnerable populations (children, refugees)."
+    enforcement: "BLOCK"
+  - id: "POLICY-PROVENANCE-REQUIRED"
+    rule: "All disseminated artifacts must have a provenance record."
+    enforcement: "WARN"

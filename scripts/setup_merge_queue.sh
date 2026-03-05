@@ -58,17 +58,30 @@ gh api -X PUT repos/$OWNER/$REPO/merge-queue/settings --input - <<EOF
 }
 EOF
 
-# 3) Create a “Ready for Queue” Control Label
-echo "Creating 'queue:ready' label..."
-gh label create queue:ready \
-  --repo $OWNER/$REPO \
-  --description "Approved, CI-green, enqueue for merge train" \
-  --color 0E8A16 || echo "Label 'queue:ready' might already exist, skipping creation."
+# 3) Create deterministic queue control labels
+create_label() {
+  local name="$1"
+  local color="$2"
+  local description="$3"
+
+  gh label create "$name" \
+    --repo "$OWNER/$REPO" \
+    --description "$description" \
+    --color "$color" || echo "Label '$name' might already exist, skipping creation."
+}
+
+echo "Creating queue labels..."
+create_label "queue:merge-now" "0E8A16" "Green, approved, mergeable: enqueue now"
+create_label "queue:needs-rebase" "FBCA04" "Branch stale against main and needs rebase"
+create_label "queue:conflict" "D93F0B" "Merge conflict detected"
+create_label "queue:blocked" "B60205" "Blocked by dependency or human decision"
+create_label "queue:obsolete" "6A737D" "Superseded/duplicate/no longer needed"
+create_label "queue:ready" "0E8A16" "Legacy compatibility label for enqueue"
 
 echo "---------------------------------------------------"
 echo "✅ Configuration Complete!"
 echo "Next steps:"
 echo "1. Approve all currently green PRs."
-echo "2. Apply 'queue:ready' label to them."
+echo "2. Apply 'queue:merge-now' (or legacy 'queue:ready') label to them."
 echo "3. Watch the train run."
 echo "---------------------------------------------------"

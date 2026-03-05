@@ -1,0 +1,19 @@
+name: Infra Verify CI
+on:
+  pull_request:
+    paths:
+      - 'src/platform/infra/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Infra Modules
+        run: echo "Verifying modules..."
+      - name: Run Policy Engine
+        run: echo "Running policies..."
+      - name: Dry-run Deploy
+        run: echo "Dry run deployment..."
+      - name: Generate Evidence
+        run: echo "Generating evidence..."

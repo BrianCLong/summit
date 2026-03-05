@@ -1,5 +1,6 @@
+package policies.abac_tenant_isolation
 
-package policies
+import rego.v1
 
 default allow = false
 
@@ -9,7 +10,7 @@ allow if {
 }
 
 # Deny if tenants do not match
-deny[msg] if {
+deny contains msg if {
     not allow
     msg := sprintf("Access denied: principal from tenant '%s' cannot access resource in tenant '%s'",
                  [input.principal.tenant_id, input.resource.tenant_id])

@@ -4,10 +4,7 @@ from dataclasses import dataclass
 import math
 from typing import Any, Dict
 
-try:
-    import torch
-except ImportError:
-    torch = None
+import torch
 
 
 @dataclass
@@ -32,6 +29,9 @@ def compute_mismatch_metrics(
 
     if train_logprobs is None or rollout_logprobs is None:
         return MismatchReport()
+
+    if torch is None:
+        raise ImportError("torch is required for computing mismatch metrics involving tensors")
 
     delta = (train_logprobs - rollout_logprobs).abs()
 

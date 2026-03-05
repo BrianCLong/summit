@@ -114,7 +114,7 @@ Based on Google SRE Workbook methodology:
 
 ### 5. ✅ Troubleshooting Runbooks
 
-**New Runbooks** (`RUNBOOKS/observability/`):
+**New Runbooks** (`runbooks/observability/`):
 
 1. **High Latency Investigation** (`high-latency.md`)
    - Initial assessment (2 minutes)
@@ -263,7 +263,7 @@ logger.info({ userId: '123' }, 'User action');
 
 1. Define SLO in `observability/slo/comprehensive-slos.yaml`
 2. Create alert rule in `observability/prometheus/alerts/`
-3. Add runbook in `RUNBOOKS/observability/`
+3. Add runbook in `runbooks/observability/`
 4. Test with PromQL in Prometheus UI
 5. Commit and deploy
 
@@ -318,7 +318,7 @@ logger.info({ userId: '123' }, 'User action');
 - `packages/logger/*` - New shared logging package
 - `observability/*` - Enhanced configurations and new dashboards
 - `docs/OBSERVABILITY*.md` - Comprehensive documentation
-- `RUNBOOKS/observability/*` - New troubleshooting runbooks
+- `runbooks/observability/*` - New troubleshooting runbooks
 
 ## Testing
 
@@ -347,8 +347,8 @@ logger.info({ userId: '123' }, 'User action');
 ### Documentation
 - [Observability Guide](docs/OBSERVABILITY.md)
 - [Observability Audit](docs/OBSERVABILITY_AUDIT.md)
-- [High Latency Runbook](RUNBOOKS/observability/high-latency.md)
-- [Error Rate Spike Runbook](RUNBOOKS/observability/error-rate-spike.md)
+- [High Latency Runbook](runbooks/observability/high-latency.md)
+- [Error Rate Spike Runbook](runbooks/observability/error-rate-spike.md)
 - [Logger Package README](packages/logger/README.md)
 
 ### Dashboards

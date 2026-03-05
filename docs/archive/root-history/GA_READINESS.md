@@ -45,7 +45,7 @@ This document tracks the readiness of Summit for General Availability across fou
 > “It survives bad days.”
 
 - [x] **Runbooks**
-    - [x] Incident Response Playbook (`RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md`) - *Verified complete.*
+    - [x] Incident Response Playbook (`runbooks/INCIDENT_RESPONSE_PLAYBOOK.md`) - *Verified complete.*
     - [x] Disaster Recovery Playbook (`docs/runbooks/DR_RUNBOOK.md`) - *Upgraded to Production Grade (S3/PITR).*
 - [x] **Reliability**
     - [x] Load tests (k6) passing for 2x expected load

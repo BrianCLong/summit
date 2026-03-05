@@ -1,4 +1,5 @@
 package compliance.lib_time
+import rego.v1
 
 # Calculate elapsed days between two ISO timestamps
 elapsed_days(start_iso, end_iso) = days {
