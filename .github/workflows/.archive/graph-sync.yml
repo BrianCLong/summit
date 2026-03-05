@@ -21,7 +21,7 @@ jobs:
       - name: Neo4j & PG services
         uses: hoverkraft-tech/compose-action@v2
         with:
-          compose-file: docker-compose.dev.yml
+          compose-file: deploy/compose/docker-compose.db.yml
       - name: Validate Graph↔PG sync
         run: node scripts/ci/validate_graph_pg_sync.mjs
       - name: Upload evidence

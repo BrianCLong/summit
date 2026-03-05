@@ -36,12 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create dummy .env
-        run: |
-          echo "NEO4J_PASSWORD=ci-neo4j-password" >> .env
-          echo "POSTGRES_PASSWORD=ci-postgres-password" >> .env
-          echo "JWT_SECRET=ci-jwt-secret" >> .env
-          echo "JWT_REFRESH_SECRET=ci-refresh-secret" >> .env
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
@@ -56,7 +50,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -69,13 +63,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create dummy .env
-        run: |
-          echo "NEO4J_PASSWORD=ci-neo4j-password" >> .env
-          echo "POSTGRES_PASSWORD=ci-postgres-password" >> .env
-          echo "JWT_SECRET=ci-jwt-secret" >> .env
-          echo "JWT_REFRESH_SECRET=ci-refresh-secret" >> .env
       - name: Build Gateway Docker Image
-        run: |
-          # Gateway service is actually named api-gateway in compose file
-          docker compose -f docker-compose.dev.yaml build api-gateway
+        run: docker compose -f docker-compose.dev.yaml build api-gateway
