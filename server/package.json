@@ -13,7 +13,7 @@
     "test": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts",
     "test:watch": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --watch",
     "test:coverage": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --coverage",
-    "test:ci": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --passWithNoTests --coverage --reporters=default --reporters=jest-junit",
+    "test:ci": "cross-env NODE_OPTIONS='--experimental-vm-modules' pnpm exec jest --config jest.config.ts --passWithNoTests --coverage --reporters=default --reporters=jest-junit",
     "test:quarantine": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.quarantine.config.cjs --passWithNoTests",
     "test:integration": "cross-env NODE_OPTIONS='--experimental-vm-modules' jest --config jest.config.ts --testPathPattern=integration --passWithNoTests",
     "test:unit": "node scripts/run-jest.mjs",

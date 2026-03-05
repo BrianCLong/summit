@@ -273,7 +273,7 @@ Summit's controls align with:
 
 - Automated alerting
 - Security monitoring tools
-- Customer reports (<security@summit.com>)
+- Customer reports (security@summit.com)
 
 **Response:**
 
@@ -516,13 +516,13 @@ Customers notified 30 days before adding new subprocessors.
 
 **Report a Vulnerability:**
 
-- Email: [security@summit.com](mailto:security@summit.com)
+- Email: <security@summit.com>(mailto:security@summit.com)
 - PGP Key: [Download](https://summit.local/security/pgp.asc)
 - Response SLA: 24 hours
 
 **Security Questions:**
 
-- Email: [security@summit.com](mailto:security@summit.com)
+- Email: <security@summit.com>(mailto:security@summit.com)
 - Trust Center: [summit.local/trust](https://summit.local/trust)
 - Status Page: [status.summit.com](https://status.summit.com)
 
@@ -574,4 +574,4 @@ Summit is built on open standards and contributes back:
 
 ---
 
-*This Trust Center is updated regularly. For questions or additional information, contact our security team at <security@summit.com>.*
+*This Trust Center is updated regularly. For questions or additional information, contact our security team at security@summit.com.*
