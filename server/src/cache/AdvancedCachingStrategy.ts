@@ -119,13 +119,7 @@ export interface RedisClientInterface {
 
 /**
  * L1 in-memory cache with configurable eviction.
- *
- * BOLT PERFORMANCE OPTIMIZATION:
- * Replaced inefficient O(N) array-based tracking with Map-native insertion order.
- *
- * Benchmark results (N=50,000 entries):
- * - get() hits: 17,867ms -> 47ms (~380x faster)
- * - set() evictions: 11,269ms -> 3,161ms (~3.5x faster)
+ * Optimized to use Map's insertion order for O(1) LRU and FIFO.
  */
 class L1Cache<T> {
   private cache: Map<string, CacheEntry<T>> = new Map();
@@ -143,7 +137,7 @@ class L1Cache<T> {
 
     // Check expiration
     if (entry.expiresAt < Date.now()) {
-      this.delete(key);
+      this.cache.delete(key);
       return undefined;
     }
 
@@ -151,8 +145,7 @@ class L1Cache<T> {
     entry.accessCount++;
     entry.lastAccessedAt = Date.now();
 
-    // BOLT OPTIMIZATION: Use Map's native insertion order for O(1) LRU management.
-    // Deleting and re-setting the key moves it to the "most recently used" position (end of the Map).
+    // Update access order for LRU: move to end of Map in O(1)
     if (this.evictionPolicy === 'lru') {
       this.cache.delete(key);
       this.cache.set(key, entry);
@@ -162,26 +155,18 @@ class L1Cache<T> {
   }
 
   set(key: string, entry: CacheEntry<T>): void {
-    const exists = this.cache.has(key);
-
-    // BOLT OPTIMIZATION: If updating an existing key in LRU, move it to the end.
-    if (exists && this.evictionPolicy === 'lru') {
+    if (this.cache.has(key)) {
+      // Re-insert to update order
       this.cache.delete(key);
-    }
-
-    // Evict if necessary before adding a new entry
-    if (!exists) {
-      while (this.cache.size >= this.maxEntries) {
-        this.evict();
-      }
+    } else if (this.cache.size >= this.maxEntries) {
+      // Evict oldest entry in O(1)
+      this.evict();
     }
 
     this.cache.set(key, entry);
   }
 
   delete(key: string): boolean {
-    // BOLT OPTIMIZATION: Map.delete is O(1).
-    // Removed the O(N) accessOrder.indexOf/splice operations.
     return this.cache.delete(key);
   }
 
@@ -200,16 +185,11 @@ class L1Cache<T> {
   private evict(): void {
     let keyToEvict: string | undefined;
 
-    switch (this.evictionPolicy) {
-      case 'lru':
-      case 'fifo':
-        // BOLT OPTIMIZATION: In a Map, the first key is the oldest (LRU or FIFO).
-        // This is O(1) in modern JS engines instead of O(N) shift().
-        keyToEvict = this.cache.keys().next().value;
-        break;
-      case 'lfu':
-        keyToEvict = this.findLFUKey();
-        break;
+    if (this.evictionPolicy === 'lru' || this.evictionPolicy === 'fifo') {
+      // BOLT OPTIMIZATION: Map.keys().next().value gives the oldest entry in O(1)
+      keyToEvict = this.cache.keys().next().value;
+    } else if (this.evictionPolicy === 'lfu') {
+      keyToEvict = this.findLFUKey();
     }
 
     if (keyToEvict !== undefined) {
