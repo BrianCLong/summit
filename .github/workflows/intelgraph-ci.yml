@@ -25,33 +25,12 @@ jobs:
         uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4
 
-      - name: Cache deps
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-deps-
-          retention-days: 7
-
-      - name: Cache build
-        uses: actions/cache@v4
-        with:
-          path: |
-            ./dist
-            ./.turbo
-          key: ${{ runner.os }}-build-${{ github.job }}-${{ hashFiles('**/*.{ts,tsx,js,jsx,rs,go}', '**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ github.job }}-
-          retention-days: 7
-
-
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
+          node-version: "18"
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 

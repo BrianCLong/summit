@@ -25,6 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -37,4 +39,4 @@ jobs:
         run: pnpm --filter @intelgraph/disinfo-news-ecosystem test
 
       - name: Run Drift Check (Functional)
-        run: npx tsx scripts/monitoring/disinfo-news-ecosystem-2026-drift.ts
+        run: npx tsx scripts/monitoring/disinfo-news-ecosystem-1826-drift.ts

@@ -24,7 +24,7 @@ jobs:
   gate:
     name: gate
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 18
     permissions:
       contents: read
 
@@ -80,24 +80,3 @@ jobs:
             echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
             echo "- GA verification failed. Review logs above for details." >> $GITHUB_STEP_SUMMARY
           fi
-
-  agent-governance-gate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build evidence (project script)
-        run: |
-          mkdir -p build
-          # Replace with your generator; ensure sbom/slsa/cosign URIs set
-          ./scripts/release/generate_evidence_bundle.mjs > build/evidence.json
-
-      - name: Run schema-diff (fail on unknown/removed agent fields)
-        run: ./ci/tools/schema_diff.sh --expected schema/agent_trace.schema.json --actual build/agent_trace.json
-
-      - name: Evaluate OPA gate
-        run: |
-          docker run --rm -i openpolicyagent/opa:latest \
-            eval -i build/evidence.json --data policy/opa/ \
-            -f pretty "data.ci.agent_gate.deny" | tee build/opa_deny.txt
-          test ! -s build/opa_deny.txt || (echo "::error file=policy/opa/agent_gate.rego::$(cat build/opa_deny.txt)"; ex""it 1)

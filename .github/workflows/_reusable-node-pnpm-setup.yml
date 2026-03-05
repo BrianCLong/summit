@@ -6,12 +6,7 @@ on:
       node-version:
         description: "Node.js version to use"
         required: false
-        default: "20.x"
-        type: string
-      pnpm-version:
-        description: "pnpm version to use"
-        required: false
-        default: "10.0.0"
+        default: "18.x"
         type: string
       install-deps:
         description: "Whether to install dependencies"
