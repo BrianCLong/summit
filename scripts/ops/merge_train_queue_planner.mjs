@@ -8,6 +8,7 @@ const QUEUE_LABELS = {
   conflict: "queue:conflict",
   blocked: "queue:blocked",
   obsolete: "queue:obsolete",
+  splitRequired: "queue:split-required",
 };
 
 const PRIO_RANK = {
@@ -65,15 +66,19 @@ function classifyPr(pr, options) {
 
   const isBlocked = hasLabel(labels, QUEUE_LABELS.blocked) || hasLabel(labels, "do-not-merge");
   const isMergeConflict = pr.mergeable === "CONFLICTING";
-  const checksFailing = pr.statusCheckRollup?.state === "FAILURE" || pr.status === "failure";
-  const checksPassing = pr.statusCheckRollup?.state === "SUCCESS" || pr.status === "success";
+  const checksFailing = pr.statusCheckRollup?.state === "FAILURE" || pr.status === "failure" || (pr.checks && pr.checks.some(c => c.state === "FAIL"));
+  const checksPassing = pr.statusCheckRollup?.state === "SUCCESS" || pr.status === "success" || (pr.checks && pr.checks.every(c => c.state === "PASS"));
   const behindBase = Number(pr.commitsBehindBase ?? pr.behindBy ?? 0) > 0;
   const approvalsSatisfied =
     pr.reviewDecision === undefined || ["APPROVED", "REVIEW_REQUIRED"].includes(pr.reviewDecision);
   const likelyDuplicate = Boolean(pr.isDuplicate || labels.includes("duplicate"));
   const targetDeleted = Boolean(pr.baseRefDeleted || pr.baseDeleted);
 
+  // Large diff check for split-required
+  const isLarge = pr.changedFiles > 50 || pr.additions > 1000;
+
   if (targetDeleted || likelyDuplicate) return QUEUE_LABELS.obsolete;
+  if (isLarge) return QUEUE_LABELS.splitRequired;
   if (isBlocked) return QUEUE_LABELS.blocked;
   if (isMergeConflict) return QUEUE_LABELS.conflict;
 
@@ -99,8 +104,8 @@ function sortForMerge(prs) {
     const bMergeable = b.mergeable === "MERGEABLE" ? 0 : 1;
     if (aMergeable !== bMergeable) return aMergeable - bMergeable;
 
-    const aSuccess = a.statusCheckRollup?.state === "SUCCESS" || a.status === "success" ? 0 : 1;
-    const bSuccess = b.statusCheckRollup?.state === "SUCCESS" || b.status === "success" ? 0 : 1;
+    const aSuccess = (a.statusCheckRollup?.state === "SUCCESS" || a.status === "success" || (a.checks && a.checks.every(c => c.state === "PASS"))) ? 0 : 1;
+    const bSuccess = (b.statusCheckRollup?.state === "SUCCESS" || b.status === "success" || (b.checks && b.checks.every(c => c.state === "PASS"))) ? 0 : 1;
     if (aSuccess !== bSuccess) return aSuccess - bSuccess;
 
     return (
@@ -117,6 +122,7 @@ function buildPlan(openPrs, options) {
     [QUEUE_LABELS.conflict]: [],
     [QUEUE_LABELS.blocked]: [],
     [QUEUE_LABELS.obsolete]: [],
+    [QUEUE_LABELS.splitRequired]: [],
   };
 
   for (const pr of openPrs) {
