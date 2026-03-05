@@ -1,18 +1,12 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added Switchboard wedge initiative and documentation deliverables.",
+  "last_updated": "2026-02-08T01:00:00Z",
+  "revision_note": "Added Switchboard OpenClaw wedge strategy for governed personal-agent market entry.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
-    },
-    {
-      "id": "switchboard-wedge",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Switchboard consumer-to-enterprise wedge: positioning, policy modes, receipts/replay, skill trust ladder, white-label admin, and threat model docs."
     },
     {
       "id": "B",
@@ -89,6 +83,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
+    },
+    {
+      "id": "switchboard-openclaw-wedge-strategy",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published governed consumer wedge and white-label strategy for Switchboard with receipts-first and verified skills posture."
     },
     {
       "id": "promptspec-foundation-lane1",
