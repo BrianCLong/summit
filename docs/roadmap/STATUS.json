@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-05T00:17:11Z",
+  "revision_note": "Added Palantir-class assessment, ordered execution roadmap, and canonical graph contract v1 baseline.",
   "initiatives": [
+    {
+      "id": "palantir-class-readiness-program",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published 12-component capability assessment, sequenced multi-phase roadmap, and canonical graph contract v1 for graph-first evidence-first execution."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
