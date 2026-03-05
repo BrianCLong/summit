@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: 'pnpm'
 
       - name: Setup Python
@@ -34,7 +34,10 @@ jobs:
           cache: 'pip'
 
       - name: Install Node Dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          corepack enable
+          corepack prepare pnpm@latest --activate
+          pnpm install --frozen-lockfile
 
       - name: Install Python Dependencies
         run: |

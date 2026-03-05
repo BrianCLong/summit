@@ -1,12 +1,14 @@
-with open('scripts/release/verify-release-bundle.mjs', 'r') as f:
+import re
+
+with open('.github/workflows/comprehensive-test.yml', 'r') as f:
     content = f.read()
 
-replacement = """        } catch (e) {
-            if (e instanceof SyntaxError) {
-                addError('INVALID_JSON', `Failed to parse bundle-index.json: ${e.message}`);
-            } else if (e instanceof ReleaseBundleError) {"""
+# Add corepack
+content = re.sub(
+    r"run: pnpm install --frozen-lockfile",
+    "run: |\n          corepack enable\n          corepack prepare pnpm@latest --activate\n          pnpm install --frozen-lockfile",
+    content
+)
 
-content = content.replace("        } catch (e) {\n            if (e instanceof ReleaseBundleError) {", replacement)
-
-with open('scripts/release/verify-release-bundle.mjs', 'w') as f:
+with open('.github/workflows/comprehensive-test.yml', 'w') as f:
     f.write(content)
