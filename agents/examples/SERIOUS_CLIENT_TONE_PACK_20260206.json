@@ -1,0 +1,51 @@
+{
+  "task_id": "SERIOUS_CLIENT_TONE_PACK_20260206",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "serious-client-tone-pack",
+    "version": "v1",
+    "sha256": "6f9d3c448afe78bca234776d5a85176c7816cb21526875453131c4436aed62d2",
+    "path": "prompts/promptpacks/serious-client-tone-pack@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "summit/promptpacks/serious_client_tone/",
+      "summit/cli/run_promptpack.py",
+      "summit/flags.py",
+      "prompts/packs/serious-client-tone/",
+      "prompts/promptpacks/serious-client-tone-pack@v1.md",
+      "prompts/registry.yaml",
+      "fixtures/serious_client_tone/",
+      "tests/promptpacks/test_serious_client_tone.py",
+      "tests/golden/serious_client_tone/",
+      "docs/standards/forbes-serious-clients-prompts-2026-02-06.md",
+      "docs/security/data-handling/forbes-serious-clients-prompts-2026-02-06.md",
+      "docs/ops/runbooks/forbes-serious-clients-prompts-2026-02-06.md",
+      "scripts/monitoring/forbes-serious-clients-prompts-2026-02-06-drift.py",
+      "scripts/monitoring/fixtures/serious-client-tone-baseline.json",
+      ".github/workflows/serious-client-tone-drift.yml",
+      "docs/roadmap/STATUS.json",
+      "packages/decision-ledger/decision_ledger.json",
+      "agents/examples/SERIOUS_CLIENT_TONE_PACK_20260206.json"
+    ],
+    "domains": ["promptpack", "eval", "docs", "governance", "ci", "monitoring"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["pytest tests/promptpacks/test_serious_client_tone.py"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Serious client tone prompt pack artifacts are deterministic",
+    "Availability signals and transformation-first checks are evaluated",
+    "Governance docs and roadmap status are updated"
+  ],
+  "stop_conditions": [
+    "Scope expansion beyond declared paths",
+    "Non-deterministic artifacts or leaked inputs"
+  ]
+}

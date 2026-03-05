@@ -134,7 +134,7 @@ router.get(
 
       const envelope = await userService.getUser(
         principal.tenantId,
-        id,
+        (id as string),
         principal.id
       );
 
@@ -219,7 +219,7 @@ router.patch(
 
       const envelope = await userService.updateUser(
         principal.tenantId,
-        id,
+        (id as string),
         parseResult.data,
         principal.id
       );
@@ -254,7 +254,7 @@ router.delete(
 
       const envelope = await userService.deleteUser(
         principal.tenantId,
-        id,
+        (id as string),
         principal.id,
         hardDelete
       );
@@ -294,7 +294,7 @@ router.post(
 
       const envelope = await userService.lockUser(
         principal.tenantId,
-        id,
+        (id as string),
         principal.id,
         reason
       );
@@ -328,7 +328,7 @@ router.post(
 
       const envelope = await userService.unlockUser(
         principal.tenantId,
-        id,
+        (id as string),
         principal.id
       );
 
@@ -366,7 +366,7 @@ router.post(
       }
 
       const envelope = await userService.addUserToTenant(
-        id,
+        (id as string),
         tenantId,
         roles,
         principal.id
@@ -395,8 +395,8 @@ router.delete(
       const { id, tenantId } = req.params;
 
       const envelope = await userService.removeUserFromTenant(
-        id,
-        tenantId,
+        (id as string),
+        (tenantId as string),
         principal.id
       );
 

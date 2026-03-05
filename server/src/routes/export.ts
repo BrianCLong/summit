@@ -102,7 +102,11 @@ exportRouter.get('/provenance', async (req, res) => {
       } catch {}
     }
 
-    const secret = process.env.EXPORT_SIGNING_SECRET || 'dev-secret';
+    const secret = process.env.EXPORT_SIGNING_SECRET;
+    if (!secret) {
+      return res.status(500).json({ error: 'server_configuration_error' });
+    }
+
     const params: Record<string, string> = {
       scope,
       id,
