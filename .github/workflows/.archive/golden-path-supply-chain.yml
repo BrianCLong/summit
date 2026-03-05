@@ -1,13 +1,46 @@
 name: Golden Path Supply Chain
+
 on:
+  push:
+    branches: ["main"]
   pull_request:
-    branches: [main]
+    branches: ["main"]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: write
+  packages: write
+  id-token: write
+  attestations: write
 
 jobs:
-  supply-chain-no-op:
-    name: Supply Chain Protection (Stub)
-    runs-on: ubuntu-latest
-    steps:
-      - name: Stub execution
-        run: |
-          echo "Migration stub: Supply chain protection is now integrated into main-validation and release-ga workflows."
+  build-server:
+    name: Build Server (SLSA L3)
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: server
+      dockerfile: server/Dockerfile
+      context: .
+      push: ${{ github.event_name == 'push' }}
+      sign: true
+      sbom: true
+      slsa_provenance: true
+    secrets: inherit
+
+  build-client:
+    name: Build Client (SLSA L3)
+    uses: ./.github/workflows/_reusable-slsa-build.yml
+    with:
+      image_name: client
+      dockerfile: client/Dockerfile
+      context: .
+      push: ${{ github.event_name == 'push' }}
+      sign: true
+      sbom: true
+      slsa_provenance: true
+    secrets: inherit
