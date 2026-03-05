@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T04:40:42Z",
-  "revision_note": "Added Switchboard Flywheel strategy track with PR-1..PR-8 epic map and governance gates.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Added Switchboard wedge initiative and documentation deliverables.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -9,10 +9,10 @@
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
     },
     {
-      "id": "switchboard-flywheel",
+      "id": "switchboard-wedge",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Switchboard Flywheel strategy track: consumer wedge + white-label plan with PR-1..PR-8 epic gates and evidence artifacts in docs/roadmap/strategic/switchboard-flywheel-epic.md."
+      "notes": "Switchboard consumer-to-enterprise wedge: positioning, policy modes, receipts/replay, skill trust ladder, white-label admin, and threat model docs."
     },
     {
       "id": "B",
@@ -218,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 23,
+    "total": 17,
     "ga_blockers": []
   }
 }
