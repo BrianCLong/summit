@@ -9,7 +9,6 @@ echo "🚀 Starting SBOM Generation Process..."
 # Configuration
 ARTIFACT_NAME=${1:-"summit-platform"}
 VERSION=${2:-$(git describe --tags --always)}
-VERSION=$(echo "$VERSION" | tr '/' '-')
 OUTPUT_DIR=${3:-"./sboms"}
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -38,15 +37,15 @@ if [ -f "Dockerfile" ] || [ -f "Dockerfile.*" ]; then
         
         # Generate CycloneDX format (Targeting $CYCLONEDX_VERSION)
         # Note: syft uses -o cyclonedx-json. Explicit versioning might require additional flags or tool-specific config.
-        syft scan dir:. -o cyclonedx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json" 2>/dev/null || \
-        syft scan dir:. -o cyclonedx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
+        syft scan dir:. -o "cyclonedx-json@$CYCLONEDX_VERSION" ="$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json" 2>/dev/null || \
+        syft scan dir:. -o cyclonedx-json ="$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"
         
         # Generate SPDX format (Targeting $SPDX_VERSION)
-        syft scan dir:. -o spdx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json" 2>/dev/null || \
-        syft scan dir:. -o spdx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
+        syft scan dir:. -o "spdx-json@$SPDX_VERSION" ="$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json" 2>/dev/null || \
+        syft scan dir:. -o spdx-json ="$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.spdx.json"
         
         # Generate syft table format for human consumption
-        syft scan dir:. -o table= "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.syft.txt"
+        syft scan dir:. -o table ="$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.syft.txt"
       fi
     done
   else
@@ -69,7 +68,7 @@ if [ -f "package.json" ]; then
   
   # Alternative: Use syft for npm
   if command -v syft &> /dev/null; then
-    syft scan dir:. -o cyclonedx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-npm-${VERSION}-alt.cdx.json"
+    syft scan dir:. -o cyclonedx-json ="$OUTPUT_DIR/${ARTIFACT_NAME}-npm-${VERSION}-alt.cdx.json"
   fi
 fi
 
@@ -78,12 +77,12 @@ if [ -f "requirements.txt" ] || [ -f "pyproject.toml" ]; then
   echo "🐍 Generating SBOM for Python packages..."
   
   if command -v syft &> /dev/null; then
-    syft scan dir:. -o cyclonedx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-python-${VERSION}.cdx.json"
+    syft scan dir:. -o cyclonedx-json ="$OUTPUT_DIR/${ARTIFACT_NAME}-python-${VERSION}.cdx.json"
   fi
   
   # If cdx-vex-gen is available, enhance with vulnerability info
   if command -v grype &> /dev/null; then
-    grype dir:. -o cyclonedx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-python-vulns-${VERSION}.cdx.json"
+    grype dir:. -o cyclonedx-json ="$OUTPUT_DIR/${ARTIFACT_NAME}-python-vulns-${VERSION}.cdx.json"
   fi
 fi
 
@@ -92,32 +91,12 @@ if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
   echo "☕ Generating SBOM for Java packages..."
   
   if command -v syft &> /dev/null; then
-    syft scan dir:. -o cyclonedx-json= "$OUTPUT_DIR/${ARTIFACT_NAME}-java-${VERSION}.cdx.json"
+    syft scan dir:. -o cyclonedx-json ="$OUTPUT_DIR/${ARTIFACT_NAME}-java-${VERSION}.cdx.json"
   fi
 fi
 
 # Create summary file
-# We use a temporary file to hold the array items, so we don't accidentally
-# modify the summary file while reading from the directory.
-# Ensure output dir exists first
-mkdir -p "$OUTPUT_DIR"
-# Replace slashes in VERSION just in case it's a branch name or file path
-SAFE_VERSION=$(echo "$VERSION" | tr '/' '-')
-SUMMARY_FILE="$OUTPUT_DIR/SBOM_SUMMARY-${SAFE_VERSION}.json"
-TEMP_FILE="$OUTPUT_DIR/temp_sbom_items.txt"
-
-> "$TEMP_FILE"
-for sbom in "$OUTPUT_DIR"/*.json; do
-  if [ -f "$sbom" ] && [ "$sbom" != "$SUMMARY_FILE" ]; then
-    sbom_name=$(basename "$sbom")
-    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo "$sbom_name" | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$TEMP_FILE"
-  fi
-done
-
-# Remove trailing comma from temp file
-sed -i '$ s/,$//' "$TEMP_FILE" 2>/dev/null || true
-
-cat > "$SUMMARY_FILE" << EOF
+cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
 {
   "artifactName": "$ARTIFACT_NAME",
   "version": "$VERSION",
@@ -125,19 +104,24 @@ cat > "$SUMMARY_FILE" << EOF
   "generatedSboms": [
 EOF
 
-cat "$TEMP_FILE" >> "$SUMMARY_FILE"
+for sbom in "$OUTPUT_DIR"/*.json; do
+  if [ -f "$sbom" ]; then
+    sbom_name=$(basename "$sbom")
+    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+  fi
+done
 
-cat >> "$SUMMARY_FILE" << EOF
+# Remove the trailing comma and close the array
+sed -i '' '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" 2>/dev/null || sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+cat >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
   ],
-  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -v "$SUMMARY_FILE" | grep -c "cdx\|spdx" || echo 0)
+  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -c "cdx\|spdx" || echo 0)
 }
 EOF
 
-rm -f "$TEMP_FILE"
-
 echo "✅ SBOM Generation Complete!"
 echo "📁 Generated SBOMs stored in: $OUTPUT_DIR"
-echo "📋 Summary available at: $SUMMARY_FILE"
+echo "📋 Summary available at: $OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
 
 # Verification
 if [ -d "$OUTPUT_DIR" ] && [ "$(ls -1q "$OUTPUT_DIR"/*.json | wc -l)" -gt 0 ]; then

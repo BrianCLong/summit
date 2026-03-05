@@ -31,7 +31,7 @@ const workspacePlugin = {
           if (fs.existsSync(resolvedPath)) {
             return { path: resolvedPath, namespace: 'file' };
           }
-        } catch (e) {
+        } catch (_e) {
           // ignore
         }
       }
