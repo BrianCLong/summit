@@ -1,20 +1,8 @@
-# Repo Assumptions & Reality Check
+# Repo Reality Check: Generative Interface Runtime
 
-## Verified vs Assumed paths
-- Assumed `agents/` runtime
-- Assumed `scripts/`
-- Assumed `tests/`
-- Assumed `docs/`
-- Assumed `.github/workflows/`
+This document records the initial assumptions and paths for the new Generative Interface Runtime (GenUI) based on the project overview.
 
-## Artifact schemas
-- `run_plan.json`
-- `execution_ledger.json`
-- `patch_stack.json`
-- `eval_report.json`
-- `policy_report.json`
-
-## Must-not-touch list
-- existing artifact schemas
-- CI workflow names
-- security policy enforcement modules
+- **Monorepo Structure**: Expected `packages/agents`, `packages/genui`, `packages/api` etc.
+- **GraphQL Schema**: Expected to exist to be extended for `getInterface` query.
+- **Frontend Layer**: A rendering layer that supports converting UIBlocks into React/Vue components.
+- **Agent Event Bus**: Agents output structured specs that GenUI can intercept and process.
