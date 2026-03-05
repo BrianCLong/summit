@@ -24,6 +24,7 @@ class ComprehensiveTelemetry {
       dels: { add: (value?: number) => void };
     };
     api: { requests: { add: (value?: number) => void }; errors: { add: (value?: number) => void } };
+    adoption: { track: (featureId: string, action: string, tenantId: string, userId: string, metadata?: any) => void };
   };
 
   // Request/response timing
@@ -45,8 +46,8 @@ class ComprehensiveTelemetry {
     this.meter = meterProvider.getMeter('intelgraph-server-telemetry-legacy');
 
     // Mocks to satisfy type checker while we migrate
-    this.requestDuration = { record: () => {} };
-    this.activeConnections = { add: (value: number) => {} };
+    this.requestDuration = { record: () => { } };
+    this.activeConnections = { add: (value: number) => { } };
 
     // Wire up subsystems to actual metrics
     this.subsystems = {
@@ -61,9 +62,9 @@ class ComprehensiveTelemetry {
         },
         errors: {
           add: (value: number = 1) => {
-             if (metrics.dbQueriesTotal) {
-               metrics.dbQueriesTotal.labels('unknown', 'query', 'error').inc(value);
-             }
+            if (metrics.dbQueriesTotal) {
+              metrics.dbQueriesTotal.labels('unknown', 'query', 'error').inc(value);
+            }
           }
         },
         latency: {
@@ -73,7 +74,7 @@ class ComprehensiveTelemetry {
             }
             // Also update legacy metric
             if (metrics.intelgraphDatabaseQueryDuration) {
-               metrics.intelgraphDatabaseQueryDuration.labels('unknown', 'query').observe(value);
+              metrics.intelgraphDatabaseQueryDuration.labels('unknown', 'query').observe(value);
             }
           }
         },
@@ -98,7 +99,7 @@ class ComprehensiveTelemetry {
         requests: {
           add: (value: number = 1) => {
             if (metrics.stdHttpRequestsTotal) {
-               metrics.stdHttpRequestsTotal.labels('GET', 'unknown', '200').inc(value);
+              metrics.stdHttpRequestsTotal.labels('GET', 'unknown', '200').inc(value);
             }
           }
         },

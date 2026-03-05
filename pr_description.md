@@ -1,26 +1,55 @@
-## Assumption Ledger
-- Node 18 was causing Vite configuration failures on `npm run build`. Upgraded to Node 20.
-- Certain doc links were dead, causing the markdown linter to fail. Appended them to `.doclinkignore` as prescribed.
-- Helm lint was running on the wrong directory, updated to point to `helm/summit`.
-- Missing testing configuration caused the multimodal testing suite to crash.
-- Minor fixes in security workflows to pass CI gates.
+# PR: The Summit Edition Nemo Plan
 
-## Diff Budget
-- Modifies `.doclinkignore` (+144 lines).
-- Modifies GitHub Action workflows to fix Node and Helm.
-- Small configuration and typo fixes in test specifications to prevent script crashes.
+Add the Jules-Verne-style prompt and corresponding generated execution plan for The Summit Edition.
 
-## Success Criteria
-- PR successfully checks out and merges, passing the `Build & Test`, `Documentation`, `Infrastructure Checks`, and `Security` CI test suites.
+## Changes
 
-## Evidence Summary
-- Successfully passed the previously failing GitHub workflows and ran all tests smoothly via `pnpm run test:server` and `npm run precommit`.
+### 1. New Prompt Added
+- Added `prompts/architecture/summit-nemo-prompt@v1.md` containing the "Twenty Thousand Leagues Under the Graph" prompt.
+
+### 2. Prompt Registered
+- Registered `summit-nemo-prompt` in `prompts/registry.yaml` with the proper SHA-256 hash.
+
+### 3. Execution Plan Output Generated
+- Generated the Nemo-style output and saved it as `docs/architecture/summit-nemo-plan.md` to guide the 2-6 week increments for delivering PCQ, ZK-TX, Authority Compiler, Reasoning-Trace Signatures, and Federation Planner.
+
+## Verification
+
+- Computed SHA-256 hash for prompt: `e02a1df51b47d28c1faf0323b1719236026ebcd9bdd6604a2351fc1ef47a880a`.
+- Verified hash consistency in `prompts/registry.yaml`.
 
 <!-- AGENT-METADATA:START -->
+```json
 {
-  "restricted_override": true,
   "agent_id": "jules",
-  "tool_usage": ["run_in_bash_session", "set_plan", "plan_step_complete"],
-  "lane": "lane:infra"
+  "task_id": "summit-nemo-prompt",
+  "prompt_hash": "e02a1df51b47d28c1faf0323b1719236026ebcd9bdd6604a2351fc1ef47a880a",
+  "domains": ["architecture", "governance", "documentation"],
+  "verification_tiers": ["C"],
+  "debt_delta": 0,
+  "restricted_override": true,
+  "declared_scope": {
+    "paths": [
+      "docs/architecture/summit-nemo-plan.md",
+      "prompts/architecture/summit-nemo-prompt@v1.md",
+      "prompts/registry.yaml",
+      "PR_DESCRIPTION.md"
+    ]
+  },
+  "allowed_operations": ["create", "edit"]
 }
+```
 <!-- AGENT-METADATA:END -->
+
+## Assumption Ledger
+We assume the multi-tenant compartments and ZK-TX services share a common trusted key infrastructure for the initial deployment.
+
+## Diff Budget
+Zero functional code changes; purely documentation and prompt registry updates.
+
+## Success Criteria
+1. Prompt and Plan markdown files exist and render cleanly.
+2. Prompt is correctly registered in the yaml registry with a valid hash.
+
+## Evidence Summary
+Verified hashes locally; no runtime logic affected.
