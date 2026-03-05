@@ -81,7 +81,7 @@ verify_release:
       with: { name: compliance-signature, path: . }
     - name: Verify signature
       run: |
-        COSIGN_EXPERIMENTAL=1 cosign verify-blob \
+        COSIGN_EXPERIMENTAL=1 cosign verify-blob --use-signed-timestamps \
           --certificate-oidc-issuer https://token.actions.githubusercontent.com \
           --signature compliance-pack.sig compliance-pack.zip
 ```
