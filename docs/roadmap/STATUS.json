@@ -1,18 +1,12 @@
 {
-  "last_updated": "2026-03-05T02:04:12Z",
-  "revision_note": "Added WorkOS-to-Summit identity subsumption architecture brief and governance-aligned roadmap entry.",
+  "last_updated": "2026-03-05T08:55:49Z",
+  "revision_note": "Added summit-cultural CDLRM foundation package and roadmap tracking entry.",
   "initiatives": [
     {
-      "id": "workos-identity-subsumption-brief",
+      "id": "summit-cultural-cdlrm-foundation",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published clean-room architecture brief defining WorkOS baseline and Summit identity-graph subsumption roadmap."
-    },
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+      "notes": "Added @intelgraph/summit-cultural package scaffold with Cultural Reality Graph schema, compatibility scoring, diffusion engine, fixtures, and golden test."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -195,12 +189,6 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -230,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
