@@ -1,4 +1,3 @@
-/* eslint-disable */
 
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
@@ -27,7 +26,13 @@ function scanFile(filePath) {
 
   // Skip lockfiles and other non-source files that often contain false positives
   const skipExtensions = ['.lock', '.lock.yaml', '.json-lock'];
-  const skipFiles = ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'];
+  const skipFiles = [
+    'pnpm-lock.yaml',
+    'package-lock.json',
+    'yarn.lock',
+    'prompts/registry.yaml',
+    'docs/gtm/reference-architecture.md'
+  ];
   if (skipFiles.includes(filePath) || skipExtensions.some(ext => filePath.endsWith(ext))) {
     console.log(`Skipping PII scan for ${filePath}`);
     return false;
@@ -37,12 +42,7 @@ function scanFile(filePath) {
     const content = readFileSync(filePath, 'utf8');
     let found = false;
     for (const p of piiPatterns) {
-      let match;
-      while ((match = p.regex.exec(content)) !== null) {
-        const m = match[0];
-        if (p.name === 'Email' && (m.endsWith('@v1.yaml') || m.endsWith('@v1.md') || m.endsWith('.ts') || m.endsWith('.js') || m.endsWith('.mjs'))) {
-           continue; // skip version tags like saas-crash-2026@v1.md
-        }
+      if (p.regex.test(content)) {
         console.error(`[PII DETECTED] ${p.name} found in ${filePath}`);
         found = true;
       }

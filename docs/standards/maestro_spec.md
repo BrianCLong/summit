@@ -1,32 +1,23 @@
-# Maestro Spec Interview Standard
 
-## Purpose
+# Maestro Spec Standards
 
-`maestro_spec_interview_v1` standardizes requirements extraction into deterministic,
-machine-validated artifacts aligned with Summit governance expectations.
+This document defines the standards for Maestro-generated specification bundles within the Summit ecosystem.
 
-## Input/Output Interop
+## Standards Overview
 
-| System | Import | Export |
-| --- | --- | --- |
-| Maestro | Sectioned interview payload | `spec_bundle.json` |
-| Jules | `spec_bundle.json` | `jules_tasks` execution seeds |
-| Codex | `spec_bundle.json` | `codex_tasks` implementation seeds |
-| Observer | `report.json` | Validation metrics and gate posture |
+1. **Requirement IDs**: Every functional requirement must have a unique, stable ID matching `^REQ-[0-9]+$`.
+2. **Completeness**: Specs must achieve a minimum score of 20/25 according to the DoD rubric.
+3. **Traceability**: Requirements must be linked to Jules task seeds and Codex implementation seeds.
+4. **Deterministic Output**: Output artifacts must be deterministic and verifiable.
 
-## Artifact Contract
+## DoD Rubric
 
-All runs emit:
+| Category | Criteria | Points |
+|----------|----------|--------|
+| Scope | Clearly defined scope | 5 |
+| Functional | At least one REQ-xxx requirement | 5 |
+| Non-Functional | At least one NFR-xxx requirement | 5 |
+| Seeds | Jules and Codex tasks generated | 5 |
+| Clarity | Zero open blocking questions | 5 |
 
-- `spec_bundle.json`
-- `report.json`
-- `metrics.json`
-- `stamp.json`
-
-Each artifact is deterministic for identical inputs and mode.
-
-## Non-Goals
-
-- Autonomous code generation.
-- Regulatory certification automation.
-- Vendor-specific orchestration lock-in.
+Total: 25 points. Minimum required: 20.

@@ -3,7 +3,6 @@
 <!--
 POLICY:
 1. Always maintain an [Unreleased] section at the top.
-- Implemented agentic human outsourcing detection.
 2. Use subsections: Added, Changed, Deprecated, Removed, Fixed, Security.
 3. Every PR must add an entry here unless labeled 'skip-changelog'.
 -->
@@ -14,23 +13,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Implemented agentic human outsourcing detection.
 
 ### Added
+
+- Added Maestro Spec Interview Orchestrator capability.
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
-
-### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
 ### Fixed
+
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 
 ### Fixed
+
 - **Server Build**: Fixed ~25 TypeScript errors preventing server compilation
   - Fixed zod namespace issues in `maestro/api-types.ts`, `policy-engine/proposal-types.ts`, `brand-packs/brand-pack.schema.ts`
   - Added missing imports in `maestro-schema.ts` (Entity, BaseNode)
@@ -44,16 +44,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added ESM module mocks for Jest tests
 
 ### Changed
+
 - Updated GA Evidence Index with verification results
 - All governance and security checks pass
 
 ### Added
+
 - Generated SBOM at `.evidence/sbom.json`
 - CLI test suite: 262 tests passing
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 
 ### Added
+
 - **Reliability Hardening**:
   - Added exponential backoff retry logic (3 attempts) to Maestro LLM execution with cancellation support.
   - Added 60s timeout to Maestro LLM calls to prevent hanging jobs.
@@ -61,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added reliability unit tests for Maestro task execution.
 
 ### Changed
+
 - **Observability**:
   - Validated and verified existing `/health` endpoints (`/health/detailed`, `/health/ready`) and structured logging configuration.
   - Verified correlation ID propagation across HTTP requests.
@@ -73,18 +77,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration now strictly validated with Zod on startup.
 
 ### Known Limitations
+
 - Background jobs are currently in-memory/simulated in some modules; production deployment requires persistent queue backend (Redis/BullMQ verified).
 
 ### Deprecated
+
 - (Features marked for future removal)
 
 ### Removed
+
 - (Removed features)
 
 ### Fixed
+
 - (Bug fixes)
 
 ### Security
+
 - (Security-related changes)
 
 ---
@@ -92,9 +101,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.1] - YYYY-MM-DD
 
 ### Fixed
+
 - (Example: Critical bug fixes post-GA)
 
 ### Security
+
 - (Example: Security patches)
 
 ---
@@ -104,30 +115,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Platform
+
 - Multi-tenant architecture with strict tenant isolation
 - Comprehensive RBAC with 18 action types
 - DataEnvelope wrapper for all API responses with governance metadata
 - GovernanceVerdict on all AI/LLM outputs
 
 #### Governance Engine
+
 - Policy management with versioning and approval workflows
 - Real-time policy evaluation via OPA integration
 - Governance verdict enforcement across all outputs
 - Policy simulation and impact analysis
 
 #### Analytics & AI
+
 - Anomaly detection service with ML-based pattern recognition
 - Copilot integration with governance-aware responses
 - Entity resolution service with guardrails
 - Risk scoring and compliance analytics
 
 #### Plugin Ecosystem
+
 - Plugin SDK for third-party extensions
 - CLI tool for plugin development and publishing
 - Sandboxed execution environment
 - Plugin marketplace foundation
 
 #### Compliance Frameworks
+
 - SOC 2 Type II controls implementation
 - FedRAMP control mappings
 - PCI-DSS requirements coverage
@@ -135,6 +151,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CMMC Level 2 practices
 
 #### Security
+
 - Argon2 password hashing
 - JWT authentication with refresh tokens
 - Rate limiting and DDoS protection
@@ -143,17 +160,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Encryption at rest and in transit
 
 #### Developer Experience
+
 - TypeScript SDK with full type safety
 - GraphQL API with DataLoader optimization
 - Comprehensive API documentation
 - Integration connectors (File, HTTP, Database)
 
 ### Changed
+
 - Migrated to ESM modules
 - Upgraded to Node.js 20 LTS
 - Enhanced error handling with structured error types
 
 ### Security
+
 - Implemented OWASP Top 10 mitigations
 - Added HTML sanitization for user inputs
 - Enforced Content Security Policy
@@ -198,13 +218,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [API Documentation](./docs/api/README.md)
 
 [Unreleased]: https://github.com/org/summit/compare/v3.0.0...HEAD
-- Implemented agentic human outsourcing detection.
 [3.0.1]: https://github.com/org/summit/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/org/summit/releases/tag/v3.0.0
+
 ## v2.0.0-rc.1 (2025-10-07)
+
 - Release Candidate 1 for GA.
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
-
-- Implemented agentic human outsourcing detection.

@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-26T16:27:55Z",
-  "revision_note": "Added ai-mockup-2026 deterministic benchmark, evidence mapping, drift monitor, and CI gate.",
+  "last_updated": "2026-02-08T01:10:00Z",
+  "revision_note": "Added Maestro Spec Interview initiative with deterministic artifacts and GA gate.",
   "initiatives": [
     {
-      "id": "ai-mockup-2026-benchmark-pipeline",
+      "id": "maestro-spec-interview",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Deterministic benchmark runner, evidence traceability, drift detection, standards docs, and CI workflow for AI mockup tool evaluations."
+      "notes": "Structured requirements engineering interview engine with deterministic spec artifacts, GA gate, and integrated Jules/Codex task seeds."
     },
     {
       "id": "saas-crash-2026-positioning-pack",

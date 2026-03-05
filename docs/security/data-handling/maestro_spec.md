@@ -1,27 +1,23 @@
-# Maestro Spec Interview Data Handling
 
-## Classification
+# Data Handling: Maestro Spec Interview
 
-- Interview transcript input: **Confidential**.
-- Spec bundle artifacts: **Internal**.
-- Task seeds: **Internal**.
+This document defines the data classification and retention rules for Maestro Spec Interview artifacts.
 
-## Logging Controls
+## Data Classification
 
-Never log:
+- **Interview Transcripts**: Confidential
+- **Spec Bundle**: Internal
+- **Requirement IDs**: Public (within repo)
+
+## Never-Log List
+
+The following data must never be logged or stored in cleartext:
 
 - API keys
 - Access tokens
 - Secrets
-- User private notes
+- User private notes (unless explicitly part of the spec)
 
-## Retention Guidance
+## PII Handling
 
-- Keep raw interview inputs only as long as operationally required.
-- Keep deterministic artifacts for audit and reproducibility windows.
-- Apply least-privilege access to artifact directories.
-
-## Security Posture
-
-- Deny by default when mandatory sections or IDs are missing.
-- Treat unresolved blocking questions as deployment blockers unless explicitly in MVS mode.
+Ensure all PII is redacted from specs before commit. Use `PIIRedactor` if necessary.
