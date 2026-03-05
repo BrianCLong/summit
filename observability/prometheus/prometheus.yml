@@ -61,3 +61,13 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: blackbox-exporter:9115
+
+  - job_name: 'rag'
+    static_configs:
+      - targets: ['rag:8001']
+    metrics_path: /metrics
+
+  - job_name: 'graphrag'
+    static_configs:
+      - targets: ['graphrag:8002']
+    metrics_path: /metrics
