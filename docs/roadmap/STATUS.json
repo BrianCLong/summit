@@ -1,12 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Registered Switchboard router observability prompt/task and centralized observability defaults.",
+  "last_updated": "2026-02-08T04:58:21Z",
+  "revision_note": "Added Sprint +1 governed delivery plan for Incident Hub, Runbook Center, Tenant Console, and metering.",
   "initiatives": [
     {
-      "id": "saas-crash-2026-positioning-pack",
+      "id": "sprint-plus1-incident-hub-runbook-tenant-console",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+      "notes": "Sprint +1 delivery plan for Incident Hub v1, Runbook Center v1, Tenant Console v1, and metering v0 (governed extension).",
+      "evidence": "sprint/sprint-plus1-incident-hub-runbook-tenant-console.md"
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -64,7 +65,31 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+    },
+    {
+      "id": "summit-skill-router-ga-orchestrator",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Summit Skill Router to discover skills, chain GA-aware workflows, emit deterministic evidence-first outputs, and ship UI metadata + skills registry + reference map."
+    },
+    {
+      "id": "summit-ops-incident-console",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Codex Desktop Summit Ops & Incident Console plan with threads, skills, automation, safe Git profiles, and incident-mode outputs."
+    },
+    {
+      "id": "summit-ga-preflight-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
+    },
+    {
+      "id": "summit-pr-stack-sequencer-skill",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -165,12 +190,6 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -200,7 +219,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
