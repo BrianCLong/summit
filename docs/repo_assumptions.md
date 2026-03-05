@@ -1,21 +1,15 @@
-# Repo Assumptions
+# Autonomous Engineer v2 Repo Assumptions
 
-## Verified Paths
-- `summit/`
-- `summit/explain/` (Will be created)
-- `docs/standards/`
-- `docs/security/`
-- `docs/ops/runbooks/`
-- `scripts/monitoring/`
+## Verified
+- `agents/`, `scripts/`, `docs/`, `artifacts/`, and `metrics/` exist in the repository root.
+- `docs/roadmap/STATUS.json` is the active roadmap status index.
 
-## Assumed Paths
-- JSON artifact schema conventions (e.g. `report.json`, `metrics.json`, `stamp.json` based on `subsumption/example/evidence`)
+## Assumed (deferred pending focused verification)
+- CI checks `check_plan_gate`, `check_patch_policy`, and `check_eval_min_score` can be added without renaming existing gates.
+- Artifact contract additions under `artifacts/schemas/` do not conflict with current consumers.
+- Python-based gate scripts are acceptable in current CI job runners.
 
-## Must-not-touch files
-- Any `package.json` or `tsconfig.json` outside the target scope
-- CI workflow files (unless specifically necessary for gates)
-- Existing tests or application source code outside `summit/explain/shap_iq/`
-
-## Required schema alignment tasks
-- Align JSON schema with `report.json` and `metrics.json` structure
-- Ensure deterministic output requirements
+## Must-Not-Touch (until explicit verification task)
+- Existing artifact schema IDs and semantics outside `autonomous-engineer-v2` files.
+- Existing workflow names under `.github/workflows/`.
+- Security policy enforcement modules outside this scoped lane.

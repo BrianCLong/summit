@@ -2,8 +2,14 @@ import express from 'express';
 import { BackupInventoryService } from '../dr/backup-inventory/BackupInventoryService.js';
 import { PolicyChecker } from '../dr/backup-inventory/PolicyChecker.js';
 import { BackupPolicy } from '../dr/backup-inventory/types.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// SEC-2026-001: Enforce authentication and role-based access control (RBAC) for disaster recovery operations.
+// This implements a "deny-by-default" posture for sensitive infrastructure management endpoints.
+router.use(ensureAuthenticated);
+router.use(ensureRole(['ADMIN', 'admin', 'OPERATOR']));
 const service = BackupInventoryService.getInstance();
 const checker = new PolicyChecker();
 

@@ -8,6 +8,11 @@ on:
       - 'scripts/ci/.*extortion'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'packages/extortion/**'
       - 'scripts/ci/.*extortion'

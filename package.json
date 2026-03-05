@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.15",
+  "version": "4.2.3",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -124,12 +124,12 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
+    "compliance:antigravity": "pnpm compliance:check && pnpm verify:governance && pnpm ga:verify",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
-    "ga:evidence": "pnpm compliance:evidence",
-    "orchestrate:skills-demo": "node tools/governance/orchestrate-skills-demo.ts",
-    "test:governance": "node --import tsx --test tests/governance/*.test.ts"
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
+    "ga:evidence": "pnpm compliance:evidence"
   },
   "keywords": [
     "intelligence-analysis",
@@ -262,7 +262,7 @@
     "react-monaco-editor": "^0.59.0",
     "redis": "^5.8.1",
     "supertest": "^7.1.4",
-    "vitest": "^4.0.16",
+    "vitest": "^4.0.18",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.9"
