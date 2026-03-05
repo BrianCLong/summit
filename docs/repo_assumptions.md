@@ -1,20 +1,15 @@
-# Repo Assumptions & Reality Check
+# Repo Reality Check
 
-## Verified vs Assumed paths
-- Assumed `agents/` runtime
-- Assumed `scripts/`
-- Assumed `tests/`
-- Assumed `docs/`
-- Assumed `.github/workflows/`
+## Assumptions
+* Monorepo layout exists with `/packages`
+* GraphQL schema location is known
+* Frontend rendering layer supports dynamic component resolution
+* Event bus exists for agent outputs
 
-## Artifact schemas
-- `run_plan.json`
-- `execution_ledger.json`
-- `patch_stack.json`
-- `eval_report.json`
-- `policy_report.json`
+# Repo Reality Check
 
-## Must-not-touch list
-- existing artifact schemas
-- CI workflow names
-- security policy enforcement modules
+## Assumptions
+* Monorepo layout exists with `/packages`
+* GraphQL schema location is known
+* Frontend rendering layer supports dynamic component resolution
+* Event bus exists for agent outputs

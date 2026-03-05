@@ -1,25 +1,37 @@
 #!/usr/bin/env python3
-import sys
 import json
-import os
+import sys
+from pathlib import Path
 
-def check_policy():
-    if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
-        print("Feature flag SUMMIT_AUTON_ENGINEER is OFF. Skipping patch policy check.")
-        sys.exit(0)
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from agents.policy.diff_policy import PatchPolicyViolation, check_patch_policy
+
+
+def main() -> int:
+    patch_path = Path("artifacts/patch_stack.json")
+    report_path = Path("artifacts/policy_report.json")
+    if not patch_path.exists():
+        report = {"check": "check_patch_policy", "pass": False, "reason": "missing patch_stack.json"}
+        report_path.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        return 1
+
+    payload = json.loads(patch_path.read_text(encoding="utf-8"))
+    lines = [patch.get("diff", "") for patch in payload.get("patches", [])]
 
     try:
-        with open("artifacts/patch_stack.json", "r") as f:
-            patches = json.load(f)
-        # TODO: call agents.policy.diff_policy.check_diff_policy
-        print("Patch policy passed")
+        check_patch_policy(lines)
+        report = {"check": "check_patch_policy", "pass": True}
+        code = 0
+    except PatchPolicyViolation as exc:
+        report = {"check": "check_patch_policy", "pass": False, "reason": str(exc)}
+        code = 1
 
-        with open("artifacts/policy_report.json", "w") as f:
-            json.dump({"status": "passed"}, f)
+    report_path.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    return code
 
-    except FileNotFoundError:
-        print("artifacts/patch_stack.json not found")
-        sys.exit(1)
 
 if __name__ == "__main__":
-    check_policy()
+    sys.exit(main())
