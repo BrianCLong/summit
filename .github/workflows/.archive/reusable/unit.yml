@@ -11,10 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # v4
-      - uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version-file: .nvmrc # v4
+      - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -22,7 +19,7 @@ jobs:
         run: corepack enable
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
-          version: 10.0.0
+
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
@@ -86,10 +83,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: pnpm
-          node-version-file: .nvmrc # v4
+        uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
