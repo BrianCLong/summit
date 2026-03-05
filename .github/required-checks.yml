@@ -9,9 +9,11 @@ protected_branches:
 required_checks:
   - meta-gate
   - gate
-  - Unit Tests
+  - Unit Tests & Coverage
   - SOC Controls
 
 notes:
   owner: summit-ga
   policy: docs/governance/branch-protection/README.md
+
+  - ai-evals

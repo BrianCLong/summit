@@ -2,11 +2,6 @@ name: parity-check
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, synchronize, reopened]
   workflow_dispatch:
   merge_group:
@@ -49,35 +44,39 @@ jobs:
         if: matrix.cloud == 'aws'
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN || 'arn:aws:iam::123456789012:role/placeholder' }}
           audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
           aws-region: us-east-1
+      - name: Authenticate to Google Cloud
+        if: matrix.cloud == 'gcp'
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_PROVIDER || 'projects/123456789/locations/global/workloadIdentityPools/placeholder-pool/providers/placeholder-provider' }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT || 'placeholder@placeholder.iam.gserviceaccount.com' }}
       - name: Setup gcloud
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v3
         with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          project_id: ${{ secrets.GCP_PROJECT_ID || 'placeholder-project' }}
       - name: Setup Azure CLI
         if: matrix.cloud == 'azure'
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID || '00000000-0000-0000-0000-000000000000' }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID || '00000000-0000-0000-0000-000000000000' }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID || '00000000-0000-0000-0000-000000000000' }}
 
       - name: Run parity check
         env:
           CLOUD: ${{ matrix.cloud }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF: ${{ github.ref }}
-          AWS_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
-          AWS_OIDC_AUDIENCE: ${{ secrets.AWS_OIDC_AUDIENCE }}
-          GCP_WORKLOAD_POOL: ${{ secrets.GCP_WORKLOAD_POOL }}
-          GCP_PROVIDER: ${{ secrets.GCP_PROVIDER }}
-          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
-          AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID }}
+          AWS_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN || 'arn:aws:iam::123456789012:role/placeholder' }}
+          AWS_OIDC_AUDIENCE: ${{ secrets.AWS_OIDC_AUDIENCE || 'sts.amazonaws.com' }}
+          GCP_WORKLOAD_POOL: ${{ secrets.GCP_WORKLOAD_POOL || 'placeholder-pool' }}
+          GCP_PROVIDER: ${{ secrets.GCP_PROVIDER || 'placeholder-provider' }}
+          GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT || 'placeholder@placeholder.iam.gserviceaccount.com' }}
+          AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID || 'placeholder-id' }}
           PARITY_ENV1: prodlike
           PARITY_ENV2: canary
         run: bash scripts/ci/parity_check.sh

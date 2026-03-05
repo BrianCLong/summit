@@ -1,0 +1,38 @@
+name: AI Supply Chain Firewall
+
+on:
+  pull_request:
+    paths:
+      - '**/requirements.txt'
+      - '**/package.json'
+      - '**/Cargo.toml'
+  push:
+    branches:
+      - main
+    paths:
+      - '**/requirements.txt'
+      - '**/package.json'
+      - '**/Cargo.toml'
+
+jobs:
+  ai-supply-chain-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Evaluate Dependencies
+        run: |
+          PYTHONPATH=. python summit/agents/ai_supply_chain_monitor/policy_gate.py
+
+      - name: Upload Evidence Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-supply-chain-evidence
+          path: evidence/ai-supply-chain/
