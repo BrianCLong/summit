@@ -14,19 +14,13 @@ on:
 
 jobs:
   golden-path:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: '1'
       COMPOSE_DOCKER_CLI_BUILD: '1'
       PNPM_CACHE_FOLDER: ${{ inputs.pnpm_cache_folder }}
     steps:
       - uses: actions/checkout@v4 # v4
-
-      - name: Docker Preflight Checks
-        run: |
-          docker --version
-          docker compose version
-          uname -r
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
@@ -35,6 +29,7 @@ jobs:
         run: corepack enable
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
         with:
+
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4

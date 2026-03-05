@@ -411,6 +411,4 @@ copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
 
 eval-skills-changed:
-	@echo "Evaluating changed skills..."
-	@echo "No logic currently defined, returning success for CI."
-	@exit 0
+	@echo "Stub target for eval-skills-changed"

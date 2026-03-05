@@ -17,5 +17,5 @@ identities:
     roles: ["developer", "reviewer"]
   - id: "BrianCLong"
     type: "user"
-    description: "Repo Owner"
-    roles: ["developer", "reviewer", "admin"]
+    description: "Repository owner"
+    roles: ["admin", "developer", "reviewer"]

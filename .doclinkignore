@@ -465,8 +465,6 @@ docs/prds/INNOVATION_INDEX.md:./PRD-008-HANDSHAKE.md
 docs/release/versioning.md:../../RUNBOOKS/release-captain.md
 docs/releases/BUNDLE_SBOM.md:BUNDLE_INDEX_SCHEMA.md
 docs/releases/GA_EVIDENCE_PACK.md:GA_EVIDENCE_INDEX.md
-docs/reports/RELEASE_v2026.02.26-ga_branch_protection_plan.md:/app/docs/ci/REQUIRED_CHECKS_POLICY.yml
-docs/reports/RELEASE_v2026.02.26-ga_branch_protection_plan.md:/app/docs/ci/REQUIRED_CHECKS_EXCEPTIONS.yml
 docs/runbooks/INCIDENT_RESPONSE_PLAYBOOK.md:INDEX.md
 docs/runbooks/KEY_MANAGEMENT.md:../.github/workflows/semgrep-sast.yml
 docs/runbooks/README.md:INDEX.md
