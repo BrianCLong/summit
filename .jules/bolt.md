@@ -26,3 +26,7 @@
 ## 2026-11-20 - [Concurrent Async Operations]
 **Learning:** Using sequential `await`s in a loop to fetch independent data (like resolving multiple entity IDs to check for supernode status) is a significant performance bottleneck because it unnecessarily blocks each subsequent query until the current one finishes.
 **Action:** When executing multiple independent asynchronous operations, map them to an array of promises and await them concurrently using `Promise.all` to minimize total latency.
+
+## 2027-01-14 - [Neo4j UNWIND Batching with Dynamic Identifiers]
+**Learning:** Cypher's UNWIND clause doesn't support dynamic labels or relationship types. To batch these, records must be pre-grouped by their identifier in JS. To prevent injection, these dynamic identifiers must be validated against a strict regex and escaped with backticks.
+**Action:** Use a Map to group batch items by kind/type, validate with `/^[A-Za-z0-9_]+$/`, and wrap in backticks in the Cypher template.

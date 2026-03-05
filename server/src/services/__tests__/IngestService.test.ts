@@ -133,13 +133,32 @@ describe('IngestService', () => {
       mockClient.query
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // INSERT provenance
-        .mockResolvedValueOnce({ rows: [] }) // Check existing entity
+        .mockResolvedValueOnce({ rows: [] }) // Check existing entity 1
         .mockResolvedValueOnce({ rows: [{ id: 'stable-id-1' }] }) // INSERT entity 1
-        .mockResolvedValueOnce({ rows: [] }) // Check existing entity
+        .mockResolvedValueOnce({ rows: [] }) // Check existing entity 2
         .mockResolvedValueOnce({ rows: [{ id: 'stable-id-2' }] }) // INSERT entity 2
         .mockResolvedValueOnce({ rows: [] }) // Check existing relationship
         .mockResolvedValueOnce({ rows: [{ id: 'rel-1' }] }) // INSERT relationship
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
+
+      // Mock Neo4j session and PG for syncToNeo4j
+      const mockSession = {
+        run: jest.fn().mockResolvedValue({}),
+        close: jest.fn(),
+      };
+      mockNeo4j.session.mockReturnValue(mockSession as any);
+
+      mockPg.connect.mockResolvedValueOnce(mockClient); // Initial connect
+      mockPg.connect.mockResolvedValueOnce(mockClient); // Connect for syncToNeo4j
+
+      mockClient.query
+        .mockResolvedValueOnce({ rows: [
+          { id: 'stable-id-1', tenant_id: 'test-tenant', kind: 'person', labels: ['Person'], props: JSON.stringify({ name: 'Alice Smith' }), created_at: new Date(), updated_at: new Date() },
+          { id: 'stable-id-2', tenant_id: 'test-tenant', kind: 'organization', labels: ['Organization'], props: JSON.stringify({ name: 'Tech Corp' }), created_at: new Date(), updated_at: new Date() }
+        ] }) // SELECT entities for sync
+        .mockResolvedValueOnce({ rows: [
+          { id: 'rel-1', tenant_id: 'test-tenant', from_entity_id: 'stable-id-1', to_entity_id: 'stable-id-2', relationship_type: 'MEMBER_OF', props: JSON.stringify({ role: 'CEO' }), confidence: 0.95, source: 's3-csv', first_seen: new Date(), last_seen: new Date() }
+        ] }); // SELECT relationships for sync
 
       const result = await ingestService.ingest(input);
 
@@ -157,6 +176,16 @@ describe('IngestService', () => {
 
       // Verify client was released
       expect(mockClient.release).toHaveBeenCalled();
+
+      // BOLT: Verify batched Neo4j calls
+      expect(mockSession.run).toHaveBeenCalledWith(
+        expect.stringContaining('UNWIND $batch AS item'),
+        expect.objectContaining({
+          batch: expect.arrayContaining([
+            expect.objectContaining({ id: 'stable-id-1' })
+          ])
+        })
+      );
     });
 
     it('should generate stable IDs for duplicate entities', async () => {
