@@ -4,8 +4,9 @@ Ensures context doesn't contain PII, secrets, or exceed length limits.
 """
 from __future__ import annotations
 
-import re
 import os
+import re
+
 import summit.flags
 
 MAX_CONTEXT_LENGTH = 1000
