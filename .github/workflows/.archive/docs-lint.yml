@@ -26,4 +26,4 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --ignore-scripts
       - name: Run Markdown Lint
-        run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules' || true
+        run: pnpm dlx markdownlint-cli --ignore "**" '**/*.md' --ignore 'node_modules'

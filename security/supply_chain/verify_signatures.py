@@ -1,1 +1,1 @@
-print('Supply chain ok')
+print('stub')

@@ -1,1 +1,1 @@
-print('Relay policy ok')
+print('stub')

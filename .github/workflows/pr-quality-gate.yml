@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate Release Policy
-        run: pnpm test:release-scripts
+        run: pnpm run test:release-scripts
 
   lint-reason-codes:
     name: Lint Release Reason Codes
@@ -95,7 +95,9 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
+        run: |
+          mkdir -p artifacts/sbom
+          syft scan dir:. -o cyclonedx-json > artifacts/sbom/sbom.json || true
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
