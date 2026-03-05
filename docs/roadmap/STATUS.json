@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-03-01T22:45:00Z",
+  "revision_note": "Added deterministic issue queue bot automation for P0 candidate triage and queue ordering.",
   "initiatives": [
+    {
+      "id": "deterministic-issue-queue-bot",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented deterministic P0/P1 classifier, queue labels, stable payload comment, workflow automation, and tests under .github/scripts/issue-queue-bot."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",

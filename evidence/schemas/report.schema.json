@@ -9,10 +9,9 @@
         "summary": { "type": "string" },
         "scenarios": { "type": "integer" },
         "status": { "type": "string" },
-        "item": { "type": "string" },
-        "sources": { "type": "array", "items": { "type": "string" } }
+        "item": { "type": ["string", "object"] },
+        "sources": { "type": "array", "items": { "type": ["string", "object"] } }
       },
-      "required": ["summary"],
       "additionalProperties": true
     },
     {
