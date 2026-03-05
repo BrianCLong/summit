@@ -1,0 +1,6 @@
+# Rule: Node Version Policy
+# Enforce node version pinning
+rule:
+  id: node-version-policy
+  severity: high
+  message: Node version must be pinned via .nvmrc and package.json engines.

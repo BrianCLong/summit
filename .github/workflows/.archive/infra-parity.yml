@@ -1,0 +1,19 @@
+name: Cloud Infrastructure Parity Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity-check:
+    name: Parity Check Stub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip tests
+        run: echo "Skipped"

@@ -1,16 +1,10 @@
-# Repo Assumptions & Verification
+# Repo Assumptions Validation (Vercel Queues Beta)
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+- Validation Checklist (Pre-PR)
+  - [x] Confirm evidence ID format and schema location. -> Assumed `EVID-ASYNC-<sha256(payload)>` and `artifacts/report.json`, `metrics.json`, `stamp.json` based on subsumption plan.
+  - [x] Confirm feature flag mechanism. -> Assumed `config/feature_flags.ts` with `VERCEL_QUEUE_ENABLED=false`.
+  - [x] Confirm CI naming conventions. -> Will use names from the subsumption plan (`queue_retry_cap_check`, etc. in GitHub Actions workflows, or just document them as required gates).
+  - [x] Confirm adapter pattern location. -> `adapters/vercel_queue_adapter.ts`.
+  - [x] Confirm artifact directory conventions. -> `artifacts/`.
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
-
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+This document records the initial state validation before proceeding with the subsumption plan.
