@@ -352,20 +352,22 @@ export class StrategicPlanRepo {
 
     const whereClause = conditions.join(' AND ');
 
-    const countResult = await this.pg.query(
+    const countQuery = this.pg.query(
       `SELECT COUNT(*) FROM strategic_plans WHERE ${whereClause}`,
       params,
     );
-    const total = parseInt(countResult.rows[0].count, 10);
 
-    params.push(Math.min(limit, 100), offset);
-    const queryRes = await this.pg.query(
+    const dataParams = [...params, Math.min(limit, 100), offset];
+    const dataQuery = this.pg.query(
       `SELECT * FROM strategic_plans
        WHERE ${whereClause}
        ORDER BY created_at DESC
        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      params,
+      dataParams,
     );
+
+    const [countResult, queryRes] = await Promise.all([countQuery, dataQuery]);
+    const total = parseInt(countResult.rows[0].count, 10);
     const rows = (queryRes as any)?.rows || [];
 
     const plans = rows.map((row: any) => this.mapPlanRow(row));
@@ -490,8 +492,13 @@ export class StrategicPlanRepo {
     if (!rows[0]) return null;
 
     const objective = this.mapObjectiveRow(rows[0]);
-    objective.milestones = await this.getMilestones(id, 'objective');
-    objective.keyResults = await this.getKeyResults(id);
+    const [milestones, keyResults] = await Promise.all([
+      this.getMilestones(id, 'objective'),
+      this.getKeyResults(id),
+    ]);
+
+    objective.milestones = milestones;
+    objective.keyResults = keyResults;
 
     return objective;
   }
@@ -733,8 +740,13 @@ export class StrategicPlanRepo {
     if (!rows[0]) return null;
 
     const initiative = this.mapInitiativeRow(rows[0]);
-    initiative.milestones = await this.getMilestones(id, 'initiative');
-    initiative.deliverables = await this.getDeliverables(id);
+    const [milestones, deliverables] = await Promise.all([
+      this.getMilestones(id, 'initiative'),
+      this.getDeliverables(id),
+    ]);
+
+    initiative.milestones = milestones;
+    initiative.deliverables = deliverables;
 
     return initiative;
   }
