@@ -378,11 +378,3 @@ packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
 *.js.map
-node_modules/
-coverage/
-__pycache__/
-.evidence/
-node_modules/
-coverage/
-__pycache__/
-.evidence/

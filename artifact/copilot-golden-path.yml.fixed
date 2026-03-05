@@ -1,0 +1,20 @@
+name: Copilot Golden Path
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Reason for manual run
+        required: false
+        type: string
+jobs:
+  placeholder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder
+        run: echo "This workflow is disabled pending refactoring of reusable workflow locations"
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
+      cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
