@@ -1,0 +1,91 @@
+name: AEIP Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  check-context-determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run context validation
+        run: |
+          python3 -c "
+from summit.agent_integrity.context_validator import ContextValidator
+cv = ContextValidator()
+assert cv.validate_recency({'last_updated': '2023-01-01'}), 'Failed recency validation'
+          "
+  check-policy-binding:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run policy enforcement validation
+        run: |
+          python3 -c "
+from summit.agent_integrity.permission_enforcer import PermissionEnforcer
+pe = PermissionEnforcer()
+assert pe.enforce({'agent_id': 'agent-1', 'action_type': 'read'}, {'clearance': 'level-1'}), 'Failed policy enforcement'
+          "
+  check-entity-reconciliation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run entity reconciliation
+        run: |
+          python3 -c "
+from summit.agent_integrity.reconciliation_engine import ReconciliationEngine
+re = ReconciliationEngine()
+assert re.reconcile({'id': '123'}, {'entity_id': '123'}), 'Failed entity reconciliation'
+          "
+  check-evidence-id-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Validate evidence ID
+        run: |
+          python3 -c "
+import os
+import sys
+# Create mock evidence
+from summit.agent_integrity.action_ledger import ActionLedger
+al = ActionLedger()
+al.write_evidence('AEIP-TEST-CONTROL-001', {'report': 'data'}, {'latency': 100})
+# Check schema
+for dir_name in os.listdir('evidence/aeip'):
+    if not dir_name.startswith('AEIP-'):
+        print(f'Invalid Evidence ID format: {dir_name}')
+        sys.exit(1)
+          "
+  check-stamp-determinism:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Validate determinism in stamp
+        run: |
+          python3 -c "
+import json
+from summit.agent_integrity.action_ledger import ActionLedger
+al = ActionLedger()
+al.write_evidence('AEIP-TEST-CONTROL-002', {'report': 'data'}, {'latency': 100})
+with open('evidence/aeip/AEIP-TEST-CONTROL-002/stamp.json', 'r') as f:
+    stamp = json.load(f)
+    if 'timestamp' in stamp:
+        raise ValueError('Timestamp found in stamp file violating determinism.')
+          "
+  check-performance-budget:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Profile AEIP
+        run: |
+          ./scripts/profile_aeip.py
+          python3 -c "
+import json
+with open('evidence/aeip/performance.json', 'r') as f:
+    data = json.load(f)
+    if data['budget_exceeded']:
+        raise ValueError('Performance budget exceeded')
+          "

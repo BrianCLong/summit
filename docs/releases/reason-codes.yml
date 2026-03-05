@@ -15,6 +15,34 @@ release_status_blocked:
     description: Unclassified failure
 
 maestro_nogo:
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Schema major version is not supported.
+  - code: SCHEMA_VERSION_INVALID
+    description: Schema version is invalid.
+  - code: JSON_PARSE_ERROR
+    description: Failed to parse JSON.
+  - code: MISSING_FIELD
+    description: Missing required field.
+  - code: INVALID_ENUM
+    description: Invalid enum value.
+  - code: DRIFT_DETECTED
+    description: Drift detected.
+  - code: DRIFT_ERROR
+    description: Error detecting drift.
+  - code: SIG_ORPHAN
+    description: Orphaned signature.
+  - code: SIG_INVALID
+    description: Invalid signature.
+  - code: COSIGN_MISSING
+    description: Cosign is missing.
+  - code: SIG_MISSING
+    description: Missing signature.
+  - code: ATTESTATION_MISSING
+    description: Missing attestation.
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Invalid SHA256 sums format.
+  - code: INVALID_JSON
+    description: Invalid JSON format.
   - code: BUNDLE_SCHEMA_INCOMPATIBLE
     description: Bundle schema major unsupported
   - code: BUNDLE_SCHEMA_INVALID
@@ -66,32 +94,31 @@ evidence_check:
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
 
-new_codes:
   - code: SCHEMA_MAJOR_UNSUPPORTED
     description: Schema major version is not supported
   - code: SCHEMA_VERSION_INVALID
     description: Schema version is invalid
   - code: JSON_PARSE_ERROR
-    description: Failed to parse JSON file
+    description: Failed to parse JSON
   - code: MISSING_FIELD
-    description: A required field is missing
+    description: Required field is missing
   - code: INVALID_ENUM
-    description: An invalid enum value was encountered
+    description: Invalid enum value
   - code: DRIFT_DETECTED
-    description: Drift detected during verification
+    description: Configuration drift detected
   - code: DRIFT_ERROR
-    description: Error calculating drift
+    description: Error checking for drift
   - code: SIG_ORPHAN
     description: Signature without corresponding artifact
   - code: SIG_INVALID
-    description: Invalid signature
+    description: Signature verification failed
   - code: COSIGN_MISSING
-    description: Cosign verification failed
+    description: Cosign binary missing
   - code: SIG_MISSING
-    description: Missing signature
+    description: Required signature missing
   - code: ATTESTATION_MISSING
-    description: Missing attestation
+    description: Required attestation missing
   - code: SHA256SUMS_INVALID_FORMAT
-    description: Invalid format in SHA256SUMS file
+    description: Invalid SHA256SUMS format
   - code: INVALID_JSON
-    description: Invalid JSON content
+    description: Invalid JSON format
