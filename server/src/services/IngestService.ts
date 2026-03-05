@@ -489,7 +489,6 @@ export class IngestService {
   private async syncToNeo4j(tenantId: string, provenanceId: string): Promise<void> {
     const session = this.neo4j.session();
     const BATCH_SIZE = 1000;
-    const identifierRegex = /^[A-Za-z0-9_]+$/;
 
     try {
       const client = await this.pg.connect();
@@ -509,13 +508,15 @@ export class IngestService {
             break;
           }
 
-          // BOLT: Batching by entity kind for UNWIND performance
-          // Records must be pre-grouped by entity 'kind' because Cypher does not support
-          // passing labels as dynamic parameters within an UNWIND block.
+          // Process entity batch using UNWIND for performance
+          // Group by kind to allow dynamic labeling with backticks
           const entitiesByKind = new Map<string, any[]>();
           for (const entity of entities) {
-            if (!entitiesByKind.has(entity.kind)) entitiesByKind.set(entity.kind, []);
-            entitiesByKind.get(entity.kind)!.push({
+            const kind = entity.kind;
+            if (!entitiesByKind.has(kind)) {
+              entitiesByKind.set(kind, []);
+            }
+            entitiesByKind.get(kind)!.push({
               id: entity.id,
               tenantId: entity.tenant_id,
               properties: {
@@ -528,35 +529,17 @@ export class IngestService {
           }
 
           for (const [kind, batch] of entitiesByKind.entries()) {
-            if (!identifierRegex.test(kind)) {
+            // Validate kind to prevent Cypher injection
+            if (!/^[A-Za-z0-9_]+$/.test(kind)) {
               ingestLogger.error({ kind }, 'Invalid entity kind for Neo4j sync');
               continue;
             }
-
-            try {
-              // UNWIND reduces network round-trips from O(N) to O(1) per kind
-              await session.run(
-                `UNWIND $batch AS item
-                 MERGE (n {id: item.id, tenantId: item.tenantId})
-                 SET n += item.properties, n:\`${kind}\`
-                 RETURN count(n)`,
-                { batch }
-              );
-            } catch (error) {
-              ingestLogger.warn({ kind, error }, 'Batched entity sync failed, falling back to individual updates');
-              // Fallback to row-by-row for this kind's batch
-              for (const item of batch) {
-                try {
-                  await session.run(
-                    `MERGE (n {id: $id, tenantId: $tenantId})
-                     SET n += $properties, n:\`${kind}\``,
-                    item
-                  );
-                } catch (fallbackError) {
-                  ingestLogger.error({ item, error: fallbackError }, 'Individual entity fallback failed');
-                }
-              }
-            }
+            await session.run(
+              `UNWIND $batch AS item
+               MERGE (n {id: item.id, tenantId: item.tenantId})
+               SET n += item.properties, n:\`${kind}\``,
+              { batch },
+            );
           }
 
           offset += entities.length;
@@ -572,18 +555,20 @@ export class IngestService {
             [provenanceId, BATCH_SIZE, offset],
           );
 
-          if (relationships.length === 0) {
+           if (relationships.length === 0) {
             hasMore = false;
             break;
           }
 
-          // BOLT: Batching by relationship type for UNWIND performance
-          // Records must be pre-grouped by relationship 'type' because Cypher does not support
-          // passing relationship types as dynamic parameters within an UNWIND block.
+          // Process relationship batch using UNWIND for performance
+          // Group by relationship_type to allow dynamic typing with backticks
           const relsByType = new Map<string, any[]>();
           for (const rel of relationships) {
-            if (!relsByType.has(rel.relationship_type)) relsByType.set(rel.relationship_type, []);
-            relsByType.get(rel.relationship_type)!.push({
+            const type = rel.relationship_type;
+            if (!relsByType.has(type)) {
+              relsByType.set(type, []);
+            }
+            relsByType.get(type)!.push({
               fromId: rel.from_entity_id,
               toId: rel.to_entity_id,
               tenantId: rel.tenant_id,
@@ -592,49 +577,31 @@ export class IngestService {
                 confidence: rel.confidence,
                 source: rel.source,
                 firstSeen: rel.first_seen.toISOString(),
-                lastSeen: rel.last_seen ? rel.last_seen.toISOString() : new Date().toISOString()
+                lastSeen: rel.last_seen
+                  ? rel.last_seen.toISOString()
+                  : new Date().toISOString(),
               },
             });
           }
 
           for (const [type, batch] of relsByType.entries()) {
-            if (!identifierRegex.test(type)) {
+            // Validate relationship type to prevent Cypher injection
+            if (!/^[A-Za-z0-9_]+$/.test(type)) {
               ingestLogger.error({ type }, 'Invalid relationship type for Neo4j sync');
               continue;
             }
-
-            try {
-              // UNWIND reduces network round-trips from O(N) to O(1) per type
-              await session.run(
-                `UNWIND $batch AS item
-                 MATCH (from {id: item.fromId, tenantId: item.tenantId})
-                 MATCH (to {id: item.toId, tenantId: item.tenantId})
-                 MERGE (from)-[r:\`${type}\`]->(to)
-                 SET r += item.properties
-                 RETURN count(r)`,
-                { batch }
-              );
-            } catch (error) {
-              ingestLogger.warn({ type, error }, 'Batched relationship sync failed, falling back to individual updates');
-              // Fallback to row-by-row for this type's batch
-              for (const item of batch) {
-                try {
-                  await session.run(
-                    `MATCH (from {id: $fromId, tenantId: $tenantId})
-                     MATCH (to {id: $toId, tenantId: $tenantId})
-                     MERGE (from)-[r:\`${type}\`]->(to)
-                     SET r += $properties`,
-                    item
-                  );
-                } catch (fallbackError) {
-                  ingestLogger.error({ item, error: fallbackError }, 'Individual relationship fallback failed');
-                }
-              }
-            }
+            await session.run(
+              `UNWIND $batch AS item
+               MATCH (from {id: item.fromId, tenantId: item.tenantId})
+               MATCH (to {id: item.toId, tenantId: item.tenantId})
+               MERGE (from)-[r:\`${type}\`]->(to)
+               SET r += item.properties`,
+              { batch },
+            );
           }
 
           offset += relationships.length;
-          if (relationships.length < BATCH_SIZE) hasMore = false;
+           if (relationships.length < BATCH_SIZE) hasMore = false;
         }
 
       } finally {
