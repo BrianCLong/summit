@@ -8,9 +8,13 @@ import { createWriteStream } from 'fs';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 import express from 'express';
+import { ensureRole } from '../middleware/auth.js';
 
 export const airgapRouter = Router();
 const service = new AirgapService();
+
+// SEC-Hardening: Enforce RBAC for airgap operations
+airgapRouter.use(ensureRole(['ADMIN', 'ANALYST']));
 
 // Middleware to ensure tenant context
 airgapRouter.use(tenantHeader());
