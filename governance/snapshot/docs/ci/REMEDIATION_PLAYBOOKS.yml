@@ -1,0 +1,391 @@
+# Auto-Remediation Playbooks
+# Defines automated remediation actions for common release blocker patterns
+#
+# This policy file is read by scripts/release/run_remediation.sh
+# See docs/ci/AUTO_REMEDIATION.md for full documentation.
+
+version: "1.0.0"
+
+# Global settings
+settings:
+  # Require manual approval before executing remediation
+  require_approval: true
+
+  # Maximum remediation attempts per issue
+  max_attempts: 3
+
+  # Cooldown between remediation attempts (minutes)
+  cooldown_minutes: 30
+
+  # Post remediation comment to issue
+  post_comment: true
+
+  # Create audit trail
+  audit_enabled: true
+
+# Playbook definitions
+playbooks:
+  # Flaky test remediation
+  flaky-tests:
+    name: "Flaky Test Remediation"
+    description: "Re-run failed tests with retry logic"
+    trigger:
+      labels:
+        - "flaky-test"
+        - "test-failure"
+      keywords:
+        - "flaky"
+        - "intermittent"
+        - "test.*fail"
+        - "retry"
+    severity: P1
+    auto_execute: false
+    steps:
+      - name: "Identify failing tests"
+        action: identify_tests
+        params:
+          source: workflow_logs
+
+      - name: "Re-run with retries"
+        action: rerun_workflow
+        params:
+          workflow: ci.yml
+          retry_count: 3
+          retry_delay: 60
+
+      - name: "Quarantine if still failing"
+        action: add_label
+        condition: "steps.rerun.failed"
+        params:
+          label: "quarantine-candidate"
+
+    success_criteria:
+      - "workflow.conclusion == 'success'"
+
+    failure_actions:
+      - action: add_label
+        params:
+          label: "needs-investigation"
+      - action: escalate
+        params:
+          level: P0
+
+  # Dependency update remediation
+  dependency-update:
+    name: "Dependency Update Remediation"
+    description: "Attempt automated dependency updates"
+    trigger:
+      labels:
+        - "dependency"
+        - "outdated-dependency"
+      keywords:
+        - "dependency"
+        - "package.*outdated"
+        - "vulnerability.*dependency"
+    severity: P1
+    auto_execute: false
+    steps:
+      - name: "Check for Dependabot PR"
+        action: check_dependabot
+        params:
+          look_back_hours: 48
+
+      - name: "Merge if safe"
+        action: merge_dependabot
+        condition: "steps.check_dependabot.found && steps.check_dependabot.safe"
+        params:
+          require_ci_pass: true
+
+      - name: "Create update PR"
+        action: create_update_pr
+        condition: "!steps.check_dependabot.found"
+        params:
+          update_type: minor
+
+    success_criteria:
+      - "dependency.updated == true"
+      - "ci.passing == true"
+
+  # Build cache remediation
+  build-cache:
+    name: "Build Cache Remediation"
+    description: "Clear and rebuild caches"
+    trigger:
+      labels:
+        - "build-failure"
+        - "cache-issue"
+      keywords:
+        - "cache.*corrupt"
+        - "cache.*stale"
+        - "build.*cache"
+        - "node_modules"
+    severity: P1
+    auto_execute: true  # Safe to auto-execute
+    steps:
+      - name: "Clear GitHub Actions cache"
+        action: clear_cache
+        params:
+          cache_keys:
+            - "pnpm-"
+            - "node-modules-"
+            - "build-"
+
+      - name: "Trigger fresh build"
+        action: rerun_workflow
+        params:
+          workflow: ci.yml
+          clean_checkout: true
+
+    success_criteria:
+      - "workflow.conclusion == 'success'"
+
+  # Lock file conflict remediation
+  lockfile-conflict:
+    name: "Lock File Conflict Remediation"
+    description: "Resolve package lock file conflicts"
+    trigger:
+      labels:
+        - "lockfile-conflict"
+        - "merge-conflict"
+      keywords:
+        - "lock.*conflict"
+        - "pnpm-lock"
+        - "package-lock"
+        - "merge conflict.*lock"
+    severity: P2
+    auto_execute: false
+    steps:
+      - name: "Regenerate lock file"
+        action: run_command
+        params:
+          command: "pnpm install --no-frozen-lockfile"
+          commit_message: "fix: regenerate lock file"
+
+      - name: "Verify installation"
+        action: run_command
+        params:
+          command: "pnpm install --frozen-lockfile"
+
+    success_criteria:
+      - "command.exit_code == 0"
+
+  # Type error remediation
+  type-errors:
+    name: "TypeScript Error Remediation"
+    description: "Attempt automated type fixes"
+    trigger:
+      labels:
+        - "type-error"
+        - "typescript"
+      keywords:
+        - "type.*error"
+        - "typescript"
+        - "TS[0-9]+"
+        - "cannot.*type"
+    severity: P1
+    auto_execute: false
+    steps:
+      - name: "Run type check"
+        action: run_command
+        params:
+          command: "pnpm typecheck"
+          capture_output: true
+
+      - name: "Parse type errors"
+        action: parse_typescript_errors
+        params:
+          source: "steps.run_typecheck.output"
+
+      - name: "Suggest fixes"
+        action: suggest_fixes
+        params:
+          max_suggestions: 10
+
+    success_criteria:
+      - "typecheck.errors == 0"
+
+    failure_actions:
+      - action: comment
+        params:
+          body: |
+            **Type Error Analysis**
+
+            Found {{error_count}} type errors. Common patterns:
+            {{#each error_patterns}}
+            - {{this.pattern}}: {{this.count}} occurrences
+            {{/each}}
+
+            Suggested investigation areas:
+            {{#each suggested_files}}
+            - `{{this}}`
+            {{/each}}
+
+  # SBOM generation remediation
+  sbom-failure:
+    name: "SBOM Generation Remediation"
+    description: "Fix SBOM generation issues"
+    trigger:
+      labels:
+        - "sbom-failure"
+        - "compliance"
+      keywords:
+        - "SBOM"
+        - "software bill of materials"
+        - "sbom.*fail"
+        - "cyclonedx"
+    severity: P0
+    auto_execute: false
+    steps:
+      - name: "Check SBOM tooling"
+        action: run_command
+        params:
+          command: "pnpm sbom:check"
+
+      - name: "Regenerate SBOM"
+        action: run_command
+        params:
+          command: "pnpm sbom:generate"
+          timeout: 600
+
+      - name: "Validate SBOM"
+        action: run_command
+        params:
+          command: "pnpm sbom:validate"
+
+    success_criteria:
+      - "sbom.valid == true"
+
+  # CI timeout remediation
+  ci-timeout:
+    name: "CI Timeout Remediation"
+    description: "Address CI timeout issues"
+    trigger:
+      labels:
+        - "timeout"
+        - "ci-slow"
+      keywords:
+        - "timeout"
+        - "timed out"
+        - "exceeded.*limit"
+        - "job.*cancelled"
+    severity: P1
+    auto_execute: false
+    steps:
+      - name: "Analyze workflow timing"
+        action: analyze_workflow
+        params:
+          metrics:
+            - duration
+            - step_times
+            - queue_time
+
+      - name: "Identify slow steps"
+        action: identify_bottlenecks
+        params:
+          threshold_minutes: 10
+
+      - name: "Suggest optimizations"
+        action: suggest_optimizations
+        params:
+          strategies:
+            - caching
+            - parallelization
+            - test_splitting
+
+    success_criteria:
+      - "workflow.duration < workflow.timeout"
+
+    failure_actions:
+      - action: comment
+        params:
+          body: |
+            **Timeout Analysis**
+
+            Workflow duration: {{workflow.duration}}
+            Timeout limit: {{workflow.timeout}}
+
+            Slowest steps:
+            {{#each slow_steps}}
+            - {{this.name}}: {{this.duration}}
+            {{/each}}
+
+            Recommendations:
+            {{#each recommendations}}
+            - {{this}}
+            {{/each}}
+
+  # Security scan remediation
+  security-scan:
+    name: "Security Scan Remediation"
+    description: "Address security scan findings"
+    trigger:
+      labels:
+        - "security"
+        - "vulnerability"
+        - "cve"
+      keywords:
+        - "CVE-"
+        - "vulnerability"
+        - "security.*scan"
+        - "dependabot.*alert"
+    severity: P0
+    auto_execute: false
+    steps:
+      - name: "Fetch vulnerability details"
+        action: fetch_security_alerts
+        params:
+          sources:
+            - dependabot
+            - code_scanning
+
+      - name: "Categorize by severity"
+        action: categorize_vulnerabilities
+        params:
+          priority_order:
+            - critical
+            - high
+            - medium
+            - low
+
+      - name: "Check for patches"
+        action: check_patches
+        params:
+          check_sources:
+            - npm_advisory
+            - github_advisory
+
+      - name: "Apply safe updates"
+        action: apply_patches
+        condition: "patches.safe_to_apply"
+        params:
+          update_type: patch
+
+    success_criteria:
+      - "vulnerabilities.critical == 0"
+      - "vulnerabilities.high == 0"
+
+# Remediation action definitions
+actions:
+  rerun_workflow:
+    type: github_api
+    endpoint: "POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"
+
+  add_label:
+    type: github_api
+    endpoint: "POST /repos/{owner}/{repo}/issues/{issue_number}/labels"
+
+  clear_cache:
+    type: github_api
+    endpoint: "DELETE /repos/{owner}/{repo}/actions/caches"
+
+  run_command:
+    type: shell
+    requires_checkout: true
+
+  comment:
+    type: github_api
+    endpoint: "POST /repos/{owner}/{repo}/issues/{issue_number}/comments"
+
+# State tracking
+state:
+  path: "docs/releases/_state/remediation_state.json"

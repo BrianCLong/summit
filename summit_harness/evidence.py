@@ -1,13 +1,14 @@
 import json
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 
 class EvidenceWriter:
     def __init__(self, output_dir: str):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def write(self, report: Dict[str, Any], metrics: Dict[str, Any]):
+    def write(self, report: dict[str, Any], metrics: dict[str, Any]):
         # Write report.json
         with open(self.output_dir / "report.json", "w", encoding="utf-8") as f:
             json.dump(report, f, sort_keys=True, indent=2)
@@ -40,6 +41,6 @@ class EvidenceWriter:
         with open(self.output_dir / "index.json", "w", encoding="utf-8") as f:
             json.dump(index, f, sort_keys=True, indent=2)
 
-    def write_stamp(self, stamp: Dict[str, Any]):
+    def write_stamp(self, stamp: dict[str, Any]):
         with open(self.output_dir / "stamp.json", "w", encoding="utf-8") as f:
             json.dump(stamp, f, sort_keys=True, indent=2)

@@ -24,7 +24,7 @@ const validateRequest = buildRequestValidator({
 
 const enforceTenant = (req: any, res: any, next: any) => {
   try {
-    const tenantId = req.params.tenantId;
+    const tenantId = (String((req.params.tenantId as string)) as string);
     const context = TenantValidator.validateTenantAccess(
       { user: req.user },
       tenantId,
@@ -92,7 +92,7 @@ router.get('/', ensureAuthenticated, validateRequest, enforceTenant, async (req,
   try {
     let plan: any = null;
     try {
-      const pricing = await PricingEngine.getEffectivePlan(tenantId);
+      const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
       plan = pricing?.plan || null;
     } catch (error: any) {
       plan = null;
@@ -214,7 +214,7 @@ router.get(
       client = await pool.connect();
       let plan: any = null;
       try {
-        const pricing = await PricingEngine.getEffectivePlan(tenantId);
+        const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
         plan = pricing?.plan || null;
       } catch (error: any) {
         plan = null;
@@ -309,7 +309,7 @@ router.get(
       client = await pool.connect();
       let plan: any = null;
       try {
-        const pricing = await PricingEngine.getEffectivePlan(tenantId);
+        const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
         plan = pricing?.plan || null;
       } catch (error: any) {
         plan = null;
