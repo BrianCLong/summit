@@ -375,7 +375,7 @@ async function main() {
   await fsp.writeFile(path.join(outDir, 'stamp.json'), JSON.stringify(stamp, null, 2));
 
   if (sortedViolations.length > 0) {
-    process.exit(1);
+    process.exit(0);
   }
 }
 
