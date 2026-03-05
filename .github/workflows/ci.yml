@@ -37,17 +37,15 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version-file: .nvmrc
-      - run: |
-          pnpm install --frozen-lockfile
-          # Workaround for broken transitive types (documented in docs/ga/MERGE_TRAIN_STATUS.md)
-          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
   typecheck:
@@ -57,18 +55,16 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
-          # Workaround for broken transitive types (documented in docs/ga/MERGE_TRAIN_STATUS.md)
-          rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
+        run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
 
@@ -86,6 +82,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Unit Tests
@@ -119,11 +116,34 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
       - name: Verify TSConfig Inheritance
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
+
+  lineage-stack-lockstep:
+    name: Lineage Stack Lockstep
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [config-guard]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+          node-version-file: .nvmrc
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test lineage lockstep gate
+        run: pnpm test:lineage-stack-lockstep
+      - name: Verify lineage stack lockstep
+        run: pnpm ci:lineage-stack-lockstep
 
   security-compliance:
     name: Security & Compliance
@@ -170,6 +190,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests

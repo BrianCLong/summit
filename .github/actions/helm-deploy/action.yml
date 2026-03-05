@@ -9,8 +9,8 @@ runs:
   using: 'composite'
   steps:
     - uses: sigstore/cosign-installer@v3
-
-        cosign-release: 'v2.2.4'
+      with:
+        cosign-release: 'v3.0.5'
 
     - name: Verify image attestation
       shell: bash

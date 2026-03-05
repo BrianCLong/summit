@@ -9,6 +9,32 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lineage-stack-lockstep:
+    name: Lineage Stack Lockstep
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v6
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: 20
+          cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test lineage lockstep gate
+        run: pnpm test:lineage-stack-lockstep
+
+      - name: Verify lineage stack lockstep
+        run: pnpm ci:lineage-stack-lockstep
+
   validate-release-policy:
     name: Validate Release Policy
     runs-on: ubuntu-latest
@@ -24,6 +50,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -45,6 +72,7 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -58,14 +86,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: 20
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -94,20 +120,8 @@ jobs:
       - name: Install Syft
         uses: anchore/sbom-action/download-syft@v0
 
-            - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
       - name: Generate SBOM artifact
-        run: mkdir -p artifacts/sbom && syft dir:. -o cyclonedx-json --file artifacts/sbom/sbom.json
+        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
