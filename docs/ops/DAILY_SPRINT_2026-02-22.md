@@ -1,94 +1,76 @@
-# Daily Sprint — 2026-02-22
+# DAILY SPRINT 2026-02-22
 
-## Evidence Bundle (UEF)
+## Mode: Sensing (UEF Evidence Bundle)
 
-### Repo Status Snapshot
-
-Command:
-`git status -sb`
-
-Output:
-```
-## HEAD (no branch)
+### Evidence: Open PRs (Top 20 by updated-desc)
+Command: `gh pr list -R BrianCLong/summit --state open --limit 20 --search "sort:updated-desc" --json number,title,author,updatedAt,labels,url`
+```json
+[{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18548,"title":"⚡ Bolt: Optimized AlertsPage rendering performance","updatedAt":"2026-02-22T22:55:52Z","url":"https://github.com/BrianCLong/summit/pull/18548"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18549,"title":"palette: Enhance Cases Page Accessibility and Fix Corrupt Pages","updatedAt":"2026-02-22T22:42:56Z","url":"https://github.com/BrianCLong/summit/pull/18549"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18550,"title":"🛡️ Sentinel: [MEDIUM] Add input validation to AI adversary generation endpoint","updatedAt":"2026-02-22T22:33:51Z","url":"https://github.com/BrianCLong/summit/pull/18550"},{"author":{"id":"U_kgDODzNPJw","is_bot":false,"login":"BrianAtTopicality","name":""},"labels":[],"number":18551,"title":"⚡ Bolt: Optimized input sanitization with Copy-on-Write pattern","updatedAt":"2026-02-22T21:52:57Z","url":"https://github.com/BrianCLong/summit/pull/18551"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18555,"title":"⚡ Bolt: Batched Risk Signal Insertion","updatedAt":"2026-02-22T21:48:17Z","url":"https://github.com/BrianCLong/summit/pull/18555"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18552,"title":"Implement comprehensive Summit monitoring and observability","updatedAt":"2026-02-22T21:30:32Z","url":"https://github.com/BrianCLong/summit/pull/18552"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18553,"title":"Enhance Summit data storage and caching infrastructure","updatedAt":"2026-02-22T21:01:36Z","url":"https://github.com/BrianCLong/summit/pull/18553"},{"author":{"id":"U_kgDODzNPJw","is_bot":false,"login":"BrianAtTopicality","name":""},"labels":[],"number":18554,"title":"Dashboard accessibility and EmptyState icon improvements","updatedAt":"2026-02-22T20:54:08Z","url":"https://github.com/BrianCLong/summit/pull/18554"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[{"id":"LA_kwDOPaNncM8AAAACH2zz8g","name":"codex","description":"","color":"ededed"}],"number":18580,"title":"feat: add council evidence scaffolding (schemas, validator, CI workflow)","updatedAt":"2026-02-22T20:00:25Z","url":"https://github.com/BrianCLong/summit/pull/18580"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[{"id":"LA_kwDOPaNncM8AAAACH2zz8g","name":"codex","description":"","color":"ededed"}],"number":18581,"title":"chore(evidence/ci): add AGENTIC-HYBRID-PROV evidence bundle and SummitEvidenceGate verifier","updatedAt":"2026-02-22T19:42:12Z","url":"https://github.com/BrianCLong/summit/pull/18581"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18557,"title":"🎨 Palette: Enhance GeoInt Pane UX and Accessibility","updatedAt":"2026-02-22T19:28:41Z","url":"https://github.com/BrianCLong/summit/pull/18557"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[{"id":"LA_kwDOPaNncM8AAAACH2zz8g","name":"codex","description":"","color":"ededed"}],"number":18582,"title":"docs: add llama3pure-inspired GGUF standard, data-handling policy, and runbook","updatedAt":"2026-02-22T19:13:58Z","url":"https://github.com/BrianCLong/summit/pull/18582"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18556,"title":"⚡ Bolt: Optimize AlertsPage performance","updatedAt":"2026-02-22T18:48:32Z","url":"https://github.com/BrianCLong/summit/pull/18556"},{"author":{"id":"U_kgDODzNPJw","is_bot":false,"login":"BrianAtTopicality","name":""},"labels":[],"number":18560,"title":"🛡️ Sentinel: [CRITICAL] Harden sensitive operational and analytical routes","updatedAt":"2026-02-22T18:35:36Z","url":"https://github.com/BrianCLong/summit/pull/18560"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18593,"title":"⚡ Bolt: Batched Risk Signal Insertion","updatedAt":"2026-02-22T18:22:53Z","url":"https://github.com/BrianCLong/summit/pull/18593"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[{"id":"LA_kwDOPaNncM8AAAACH2zz8g","name":"codex","description":"","color":"ededed"}],"number":18590,"title":"docs: add GA exit criteria v1 and wire scorecard into GA verification map","updatedAt":"2026-02-22T18:15:27Z","url":"https://github.com/BrianCLong/summit/pull/18590"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[{"id":"LA_kwDOPaNncM8AAAACH2zz8g","name":"codex","description":"","color":"ededed"}],"number":18592,"title":"feat(webmcp): add deterministic browser-session ingestion MWS scaffold","updatedAt":"2026-02-22T18:12:54Z","url":"https://github.com/BrianCLong/summit/pull/18592"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[{"id":"LA_kwDOPaNncM8AAAACH2zz8g","name":"codex","description":"","color":"ededed"}],"number":18591,"title":"feat: add SASS v1 schema, spec linter, example spec, and CI workflow","updatedAt":"2026-02-22T18:12:48Z","url":"https://github.com/BrianCLong/summit/pull/18591"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18563,"title":"feat: Build Summit comprehensive testing suite","updatedAt":"2026-02-22T18:12:43Z","url":"https://github.com/BrianCLong/summit/pull/18563"},{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"labels":[],"number":18562,"title":"Enhance Summit storage, partitioning, and backup systems","updatedAt":"2026-02-22T18:12:24Z","url":"https://github.com/BrianCLong/summit/pull/18562"}]
 ```
 
-### Top Open PRs (Top 20 by recency)
-
-Command:
-`gh pr list -R BrianCLong/summit -L 20`
-
-Output:
-```
-18584	🛡️ Sentinel: Fix incomplete redaction field list	sentinel-fix-redaction-fields-11395297664904210701	OPEN	2026-02-22T03:17:57Z
-18583	fix(ci): unblock GA governance and workflow gate checks	codex/wave0-ga-gate-repair	OPEN	2026-02-22T02:14:41Z
-18582	docs: add llama3pure-inspired GGUF standard, data-handling policy, and runbook	codex/assess-summit-mws-scope-and-pr-inclusion	OPEN	2026-02-21T18:28:25Z
-18581	chore(evidence/ci): add AGENTIC-HYBRID-PROV evidence bundle and SummitEvidenceGate verifier	codex/implement-evidence-system-and-ci-verifier-m9nwx8	OPEN	2026-02-21T18:28:12Z
-18580	feat: add council evidence scaffolding (schemas, validator, CI workflow)	codex/extract-clean-room-council-protocol-v1-spec	OPEN	2026-02-21T18:28:01Z
-18579	docs: add Summit Autonomous Cell file-orchestration reference architecture	codex/map-architecture-to-summit-agent-ecosystem	OPEN	2026-02-21T18:27:51Z
-18578	docs: add IO signal operationalization brief and roadmap entry	codex/develop-hostage-diplomacy-forecast-model	OPEN	2026-02-21T18:27:44Z
-18577	docs(skills): codify judgment-packaging registry doctrine	codex/design-summit-skill-registry-schema	OPEN	2026-02-21T18:27:38Z
-18576	docs: add CATS-inspired ConceptHandle architecture and phased implementation plan	codex/create-summary-of-cats-net-architecture	OPEN	2026-02-21T18:27:25Z
-18575	⚡ Bolt: Batched insertion for risk signals	bolt-risk-repo-batch-insert-5316635507351300043	OPEN	2026-02-21T18:26:36Z
-18574	🛡️ Sentinel: Fix unprotected operational routers	sentinel/fix-unprotected-operational-routers-16782052831634216266	OPEN	2026-02-21T13:53:35Z
-18573	feat(test): Implement comprehensive Summit testing suite	summit-comprehensive-testing-suite-15845473617794001705	OPEN	2026-02-21T11:19:54Z
-18572	Enhance Summit storage, partitioning, and backup systems	feat/server-storage-partitioning-backup-6261027795066038228	OPEN	2026-02-21T10:47:10Z
-18571	Implement Summit Monitoring and Observability	summit-monitoring-observability-9207129870017144176	OPEN	2026-02-21T10:14:09Z
-18570	⚡ Bolt: Batched Risk Signal Insertion	bolt-batched-risk-signals-6092351043654396995	OPEN	2026-02-21T08:20:18Z
-18569	🛡️ Sentinel: [CRITICAL] Fix SQL injection in SemanticSearchService	fix/sql-injection-semantic-search-16297310796254965787	OPEN	2026-02-21T07:10:24Z
-18568	🎨 Palette: Improve EntityDrawer empty states and accessibility	palette/improve-entity-drawer-ux-2043189697445398128	OPEN	2026-02-21T03:30:25Z
-18567	⚡ Bolt: Debounce Global Search	bolt-globalsearch-debounce-14091623737849775621	OPEN	2026-02-21T03:23:43Z
-18566	chore(deps): bump the npm_and_yarn group across 11 directories with 2 updates	dependabot/npm_and_yarn/apps/compliance-console/npm_and_yarn-f07c2547a0	OPEN	2026-02-20T23:05:29Z
-18565	🎨 Palette: Platform-aware keyboard shortcuts and accessibility improvements	palette-platform-aware-shortcuts-157969487984659298	OPEN	2026-02-20T17:30:13Z
+### Evidence: PR 18560 Snapshot
+Command: `gh pr view 18560 -R BrianCLong/summit --json number,title,author,updatedAt,labels,url,body,baseRefName,headRefName`
+```json
+{"author":{"id":"U_kgDODzNPJw","is_bot":false,"login":"BrianAtTopicality","name":""},"baseRefName":"main","body":"🛡️ Sentinel: [CRITICAL] Harden sensitive operational and analytical routes\n\n🚨 Severity: CRITICAL\n💡 Vulnerability: Unauthenticated access to /dr, /airgap, and /analytics routes.\n🎯 Impact: Unauthenticated users could access disaster recovery status, trigger data exports/imports, and run graph analytics.\n🔧 Fix: Applied authenticateToken and ensureRole middleware to these routes in server/src/app.ts.\n✅ Verification: Verified with targeted regression test in server/src/routes/__tests__/security-hardening.test.ts.\n\nAlso recorded learnings in .jules/sentinel.md.\nUnrelated accidental lockfile and metrics mock updates were reverted based on code review.\n\n---\n*PR created automatically by Jules for task [1720822423343874325](https://jules.google.com/task/1720822423343874325) started by @BrianAtTopicality*\n\n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n\n## Summary by CodeRabbit\n\n* **New Features**\n  * Added admin rate-limits endpoint to manage user-specific rate limit configurations.\n\n* **Security**\n  * Secured operational routes (disaster recovery, analytics, airgap) with required authentication.\n  * Implemented role-based access control to restrict access based on user roles (ADMIN, ANALYST, OPERATOR).\n\n<!-- end of auto-generated comment: release notes by coderabbit.ai -->","headRefName":"fix/security/harden-sensitive-routes-1720822423343874325","labels":[],"number":18560,"title":"🛡️ Sentinel: [CRITICAL] Harden sensitive operational and analytical routes","updatedAt":"2026-02-22T18:35:36Z","url":"https://github.com/BrianCLong/summit/pull/18560"}
 ```
 
-### Issue Scan (Labels: security, ga, bolt, osint, governance)
-
-Command:
-`gh issue list -R BrianCLong/summit -S "is:open label:<label> sort:updated-desc" -L 50 --json number,title,author,updatedAt,labels,state,url`
-
-Output:
-```
-security: []
-ga: []
-bolt: []
-osint: #193 "OSINT data integration" (updated 2026-01-16T18:18:04Z)
-governance: #18597 "CI: Golden Path Supply Chain workflow fails before jobs start" (updated 2026-02-23T01:28:07Z)
+### Evidence: PR 18550 Snapshot
+Command: `gh pr view 18550 -R BrianCLong/summit --json number,title,author,updatedAt,labels,url,body,baseRefName,headRefName`
+```json
+{"author":{"id":"MDQ6VXNlcjY0MDQwMzU=","is_bot":false,"login":"BrianCLong","name":""},"baseRefName":"main","body":"🛡️ Sentinel: [MEDIUM] Add input validation to AI adversary generation endpoint\n\n**Vulnerability:**\nThe `/api/ai/adversary/generate` endpoint accepted `context`, `temperature`, and `persistence` directly from `req.body` without any validation. The `context` is passed to a Python script which uses it in an LLM prompt. Lack of validation could lead to unexpected behavior, potential injection (if not handled by `spawn` correctly, though `spawn` is safe from shell injection, the content itself is still unchecked), or DoS via large payloads (though express body parser limits apply).\n\n**Fix:**\nAdded strict input validation using `express-validator`:\n- `context`: Must be an object.\n- `temperature`: Must be a float (0-2).\n- `persistence`: Must be an integer (1-10).\n\n**Verification:**\nCreated a reproduction test `server/src/routes/__tests__/ai.adversary.test.ts` (deleted after verification) which confirmed that invalid inputs (e.g., string context, high temperature) now return 400 Bad Request instead of 200/500.\n\n\n---\n*PR created automatically by Jules for task [10368192448822025796](https://jules.google.com/task/10368192448822025796) started by @BrianCLong*\n\n<!-- This is an auto-generated comment: release notes by coderabbit.ai -->\n## Summary by CodeRabbit\n\n* **Chores**\n  * Standardized code formatting and quote style across AI route code and log/error messages.\n  * Removed stale submodule references and cleaned related worktree metadata.\n  * Removed one workspace package entry.\n\n* **Improvements**\n  * Added and applied enhanced validation for adversary generation requests with consistent error-handling.\n  * Broadened CI Jest-config validation to detect additional legacy configurations.\n<!-- end of auto-generated comment: release notes by coderabbit.ai -->","headRefName":"sentinel-security-fix-ai-adversary-validation-10368192448822025796","labels":[],"number":18550,"title":"🛡️ Sentinel: [MEDIUM] Add input validation to AI adversary generation endpoint","updatedAt":"2026-02-22T22:33:51Z","url":"https://github.com/BrianCLong/summit/pull/18550"}
 ```
 
-Governed Exception cleared: issue scan completed after transient GitHub API recovery.
+### Evidence: PR 18560 Changed Files
+Command: `gh pr diff 18560 -R BrianCLong/summit --name-only`
+```text
+.jules/sentinel.md
+server/src/app.ts
+server/src/routes/__tests__/security-hardening.test.ts
+```
 
-## Daily Sprint Plan (3–6 Tasks)
+### Evidence: Issue Scan Attempt
+Command: `gh issue list -R BrianCLong/summit --state open --limit 50 --label "security,ga,governance,osint,bolt" --json number,title,labels,updatedAt,url`
+```text
+error connecting to api.github.com
+check your internet connection or https://githubstatus.com
+```
 
-1. Record daily sprint evidence bundle and plan for 2026-02-22.
-   Files/subsystems: `docs/ops/DAILY_SPRINT_2026-02-22.md`.
-   Validation: Markdown diff review.
-2. Refresh execution invariant tracking in `docs/roadmap/STATUS.json`.
-   Files/subsystems: `docs/roadmap/STATUS.json`.
-   Validation: JSON diff review.
-3. Register a daily sprint prompt scope to cover `docs/ops/` artifacts.
-   Files/subsystems: `prompts/ops/daily-sprint@v1.md`, `prompts/registry.yaml`.
-   Validation: SHA-256 hash recorded in registry.
-4. Package and open a doc-only PR for the daily sprint artifacts.
-   Files/subsystems: `docs/ops/`, `docs/roadmap/`, `prompts/`.
-   Validation: `git status -sb` and PR metadata check.
+## Mode: Reasoning (Sprint Plan)
 
-## Execution Log
+### MAESTRO Alignment
+- MAESTRO Layers: Foundation, Data, Agents, Tools, Observability, Security
+- Threats Considered: prompt injection via untrusted PR metadata, tool abuse via GH CLI failures, security regressions in operational routes
+- Mitigations: evidence-first capture of GH outputs, Governed Exception logging for GH connectivity, prioritize CRITICAL Sentinel PRs for review
 
-- Task 1: Completed. Evidence bundle and plan recorded in this file.
-- Task 2: Completed. `docs/roadmap/STATUS.json` refreshed.
-- Task 3: Completed. Daily sprint prompt registered in `prompts/registry.yaml`.
-- Task 4: Completed. PR opened: https://github.com/BrianCLong/summit/pull/18600.
+### Sprint Tasks (3–6)
+1. Goal: Produce evidence-first PR/issue snapshot for GA/security triage.
+   - Scope: docs/ops/DAILY_SPRINT_2026-02-22.md
+   - Validation: None (documentation update).
+2. Goal: Triage CRITICAL Sentinel PR #18560 for route hardening scope and changed files.
+   - Scope: Evidence capture only (GH metadata + file list).
+   - Validation: None (metadata capture).
+3. Goal: Triage MEDIUM Sentinel PR #18550 for input validation scope.
+   - Scope: Evidence capture only (GH metadata).
+   - Validation: None (metadata capture).
+4. Goal: Attempt issue scan for security/GA/governance/OSINT backlog.
+   - Scope: GH issue list evidence.
+   - Validation: Deferred pending api.github.com connectivity.
+5. Goal: Refresh roadmap status timestamp per execution invariant.
+   - Scope: docs/roadmap/STATUS.json
+   - Validation: JSON sanity check (manual spot check).
 
-## Commands Run
+### Execution Log
+- Captured top-20 PR evidence via `gh pr list` (completed).
+- Captured PR snapshots for #18560 and #18550 via `gh pr view` (completed).
+- Captured PR #18560 file list via `gh pr diff --name-only` (completed).
+- Attempted issue scan; deferred pending api.github.com connectivity (Governed Exception).
+- Updated docs/roadmap/STATUS.json timestamp + revision note (completed).
 
-- `git status -sb`
-- `gh pr list -R BrianCLong/summit -L 20`
-- `gh issue list -R BrianCLong/summit -S "is:open label:<label> sort:updated-desc" -L 50 --json number,title,author,updatedAt,labels,state,url`
-- `gh pr create -R BrianCLong/summit --title "chore: daily sprint ops log 2026-02-22" --body-file /tmp/pr_body_daily_sprint.md`
+### Governed Exceptions
+- GH issue scan deferred pending api.github.com connectivity.
 
 ## End-of-Day Report
+- Completed: Evidence bundle for PR triage; PR snapshots for #18560 and #18550; STATUS.json refresh.
+- In Progress: None.
+- Blocked: GH issue scan deferred pending api.github.com connectivity.
 
-- Planned: 4 tasks. Completed: 4. In progress: 0.
-- PRs touched: #18600 (daily sprint doc/prompt/roadmap sync).
-- Blockers: none active.
-- Follow-up: prioritize issue #18597 governance CI gate failure in next sprint cycle.
