@@ -1,25 +1,22 @@
 # Repo Assumptions
 
-**Verified vs Assumed paths**
-- Verified: `scripts/ci/governance-meta-gate.mjs` exists.
-- Assumed: `agents/`, `tests/`, `docs/`, `.github/workflows/`, `artifacts/schemas/` exist or are created.
+## Verified Paths
+- `summit/`: Python summit namespace code.
+- `src/summit/`: Alternate python path.
+- `docs/`: Exists
+- `tests/`: Exists
 
-**CI check names**
-- `check_plan_gate`
-- `check_patch_policy`
-- `check_never_log`
-- `check_eval_min_score`
+## Assumed Paths
+- `cmd/summit/`: Created, previously assumed.
+- `internal/`: Created, previously assumed.
+- `pkg/`: Created, previously assumed.
+- `scripts/`: Exists.
+- `.github/workflows/`: Exists.
 
-**Artifact schema**
-- `artifacts/run_plan.json`
-- `artifacts/execution_ledger.json`
-- `artifacts/patch_stack.json`
-- `artifacts/eval_report.json`
-- `artifacts/policy_report.json`
-- `artifacts/metrics.json`
-- `artifacts/stamp.json`
+## Must-not-touch list
+- `cmd/summit/main.*` (N/A yet)
+- `internal/core/**` (N/A yet)
+- existing evidence schemas (e.g., `summit/evidence/schemas/`)
 
-**Must-not-touch list**
-- existing artifact schemas
-- CI workflow names
-- security policy enforcement modules
+## CI Gates & Required Checks
+Assumed: Go or Python testing framework exists. Given instructions used `pkg/` and `internal/`, we will write the core Supermux logic in Go, matching the instructions provided.
