@@ -1,0 +1,210 @@
+# Auto-Triage Routing Policy
+# Configures automatic routing of release blockers to appropriate teams
+#
+# This policy file is read by scripts/release/auto_triage_blockers.sh
+# See docs/ci/AUTO_TRIAGE_ROUTING.md for full documentation.
+
+version: "1.0.0"
+
+# Enable/disable auto-triage
+enabled: true
+
+# Only triage issues with these labels
+trigger_labels:
+  - release-blocker
+  - needs-triage
+
+# Teams and their routing rules
+teams:
+  # Platform/Infrastructure team
+  platform:
+    assignees:
+      - "@org/platform-team"
+    labels:
+      - "team:platform"
+    rules:
+      # Match by labels
+      - type: label
+        patterns:
+          - "area:ci"
+          - "area:infra"
+          - "area:deployment"
+          - "area:kubernetes"
+          - "area:docker"
+
+      # Match by file paths in issue body
+      - type: filepath
+        patterns:
+          - ".github/workflows/*"
+          - "deploy/*"
+          - "infra/*"
+          - "k8s/*"
+          - "Dockerfile*"
+
+      # Match by keywords in title/body
+      - type: keyword
+        patterns:
+          - "CI"
+          - "workflow"
+          - "deployment"
+          - "kubernetes"
+          - "docker"
+          - "infrastructure"
+
+  # Security team
+  security:
+    assignees:
+      - "@org/security-team"
+    labels:
+      - "team:security"
+    priority_boost: true  # Boost priority for security issues
+    rules:
+      - type: label
+        patterns:
+          - "area:security"
+          - "area:auth"
+          - "area:crypto"
+          - "vulnerability"
+
+      - type: filepath
+        patterns:
+          - "server/src/security/*"
+          - "server/src/auth/*"
+          - "server/src/middleware/auth*"
+
+      - type: keyword
+        patterns:
+          - "security"
+          - "vulnerability"
+          - "CVE-"
+          - "authentication"
+          - "authorization"
+          - "injection"
+          - "XSS"
+          - "CSRF"
+
+  # Backend/API team
+  backend:
+    assignees:
+      - "@org/backend-team"
+    labels:
+      - "team:backend"
+    rules:
+      - type: label
+        patterns:
+          - "area:api"
+          - "area:graphql"
+          - "area:database"
+          - "area:services"
+
+      - type: filepath
+        patterns:
+          - "server/src/routes/*"
+          - "server/src/graphql/*"
+          - "server/src/services/*"
+          - "server/src/repos/*"
+
+      - type: keyword
+        patterns:
+          - "API"
+          - "GraphQL"
+          - "endpoint"
+          - "database"
+          - "query"
+          - "mutation"
+
+  # Frontend team
+  frontend:
+    assignees:
+      - "@org/frontend-team"
+    labels:
+      - "team:frontend"
+    rules:
+      - type: label
+        patterns:
+          - "area:ui"
+          - "area:client"
+          - "area:react"
+
+      - type: filepath
+        patterns:
+          - "client/*"
+          - "conductor-ui/*"
+          - "*.tsx"
+          - "*.css"
+          - "*.scss"
+
+      - type: keyword
+        patterns:
+          - "UI"
+          - "frontend"
+          - "React"
+          - "component"
+          - "styling"
+          - "browser"
+
+  # Release engineering
+  release-eng:
+    assignees:
+      - "@org/release-team"
+    labels:
+      - "team:release"
+    rules:
+      - type: label
+        patterns:
+          - "area:release"
+          - "area:versioning"
+          - "area:changelog"
+
+      - type: filepath
+        patterns:
+          - "scripts/release/*"
+          - "CHANGELOG.md"
+          - "package.json"
+          - "pnpm-lock.yaml"
+
+      - type: keyword
+        patterns:
+          - "release"
+          - "version"
+          - "changelog"
+          - "SBOM"
+          - "promotion"
+
+# Default routing when no rules match
+default:
+  assignees:
+    - "@org/oncall-release"
+  labels:
+    - "needs-manual-triage"
+
+# Actions to perform after routing
+post_routing_actions:
+  # Add a comment explaining the routing decision
+  add_routing_comment: true
+
+  # Remove the needs-triage label after routing
+  remove_triage_label: true
+
+  # Set priority based on age
+  auto_priority:
+    enabled: true
+    rules:
+      - age_hours: 0
+        priority: "priority:P2"
+      - age_hours: 4
+        priority: "priority:P1"
+      - age_hours: 12
+        priority: "priority:P0"
+
+# Rate limiting
+rate_limit:
+  # Maximum issues to process per run
+  max_issues_per_run: 20
+
+  # Minimum minutes between processing same issue
+  cooldown_minutes: 30
+
+# State tracking
+state:
+  path: "docs/releases/_state/triage_state.json"

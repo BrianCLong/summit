@@ -1,4 +1,4 @@
-version: '3.9'
+#version: "3.9"
 
 x-common-env: &common-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
@@ -38,7 +38,7 @@ services:
       retries: 10
 
   opa:
-    image: openpolicyagent/opa:0.69.0-rootless
+    image: openpolicyagent/opa:0.69.0
     command:
       [
         'run',
