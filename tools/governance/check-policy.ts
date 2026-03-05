@@ -1,68 +1,74 @@
-#!/usr/bin/env node
 import fs from 'node:fs';
+import path from 'node:path';
+
+import Ajv2020 from 'ajv/dist/2020.js';
 import yaml from 'js-yaml';
-import { verifyBundle } from '../../summit/agents/policy/bundle/verify-bundle';
 
-type CheckResult = { ok: boolean; errors: string[] };
+import {
+  type PolicyDocument,
+  type SkillSpec,
+  validatePolicySemantics,
+} from '../../summit/agents/policy/validate-semantics.ts';
 
-function loadPolicy(): Record<string, unknown> {
-  const raw = fs.readFileSync('summit/agents/policy/policy.yml', 'utf8');
-  const parsed = yaml.load(raw);
-  if (!parsed || typeof parsed !== 'object') {
-    throw new Error('policy.yml must parse to an object');
-  }
-  return parsed as Record<string, unknown>;
+interface SkillRegistryDocument {
+  skills: SkillSpec[];
 }
 
-function validateSemantics(policy: Record<string, unknown>): CheckResult {
-  const errors: string[] = [];
-  const semantics = policy.semantics as Record<string, unknown> | undefined;
-  if (!semantics || !Array.isArray(semantics.allowed_actions)) {
-    errors.push('policy.semantics.allowed_actions must be an array');
-  }
-  return { ok: errors.length === 0, errors };
+function readYamlFile<T>(filePath: string): T {
+  const contents = fs.readFileSync(filePath, 'utf8');
+  return yaml.load(contents) as T;
 }
 
-function validateIntensity(policy: Record<string, unknown>): CheckResult {
-  const errors: string[] = [];
-  const intensity = policy.intensity as Record<string, unknown> | undefined;
-  const min = Number(intensity?.min);
-  const max = Number(intensity?.max);
-  if (!Number.isFinite(min) || !Number.isFinite(max) || min < 0 || max < min) {
-    errors.push('policy.intensity must define numeric min/max with 0 <= min <= max');
-  }
-  return { ok: errors.length === 0, errors };
+function loadSkillRegistry(filePath: string): Record<string, SkillSpec> {
+  const registryDoc = readYamlFile<SkillRegistryDocument>(filePath);
+  return Object.fromEntries(
+    registryDoc.skills.map((skill) => [skill.name, skill]),
+  );
 }
 
-function shouldVerifyProdBundle(changedFiles: string[]): boolean {
-  return changedFiles.some((file) =>
-    file.startsWith('summit/agents/policy/') || file.startsWith('summit/agents/skills/')
+function validateSchema(policy: unknown, schemaPath: string): string[] {
+  const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
+  const ajv = new Ajv2020({ allErrors: true, strict: false });
+  const validate = ajv.compile(schema);
+  const valid = validate(policy);
+
+  if (valid) {
+    return [];
+  }
+
+  return (validate.errors ?? []).map(
+    (error) =>
+      `SCHEMA_VALIDATION_ERROR ${error.instancePath || '/'} ${error.message}`,
   );
 }
 
 function main(): void {
-  const changedFiles = process.argv.slice(2);
-  const policy = loadPolicy();
+  const root = process.cwd();
+  const policyPath = path.join(root, 'summit/agents/policy/policy.yml');
+  const schemaPath = path.join(root, 'summit/agents/policy/schema.json');
+  const skillsPath = path.join(root, 'summit/agents/skills/registry.yml');
 
-  const checks = [validateSemantics(policy), validateIntensity(policy)];
-  const errors = checks.flatMap((check) => check.errors);
+  const policy = readYamlFile<PolicyDocument>(policyPath);
+  const schemaErrors = validateSchema(policy, schemaPath);
+  const skillRegistry = loadSkillRegistry(skillsPath);
+  const semanticResult = validatePolicySemantics(policy, skillRegistry);
 
-  if (shouldVerifyProdBundle(changedFiles)) {
-    const verification = verifyBundle('prod');
-    if (!verification.ok) {
-      errors.push(
-        ...verification.errors,
-        'Update policy-bundle.prod.json and ensure approvals include governance.'
-      );
+  const semanticErrors = semanticResult.errors.map(
+    (error) =>
+      `${error.code}${error.rule_id ? ` (${error.rule_id})` : ''}: ${error.message}`,
+  );
+
+  const allErrors = [...schemaErrors, ...semanticErrors];
+
+  if (allErrors.length > 0) {
+    console.error('Policy validation failed:');
+    for (const error of allErrors) {
+      console.error(` - ${error}`);
     }
-  }
-
-  if (errors.length > 0) {
-    console.error(errors.join('\n'));
     process.exit(1);
   }
 
-  console.log('Policy checks passed.');
+  console.log('Policy validation passed.');
 }
 
 main();
