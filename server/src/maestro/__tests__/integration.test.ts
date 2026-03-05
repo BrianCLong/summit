@@ -10,7 +10,6 @@ describe('Maestro Integration Tests', () => {
   let app: any;
 
   beforeAll(async () => {
-    process.env.ZERO_FOOTPRINT = 'false';
     // Create app
     app = await createApp();
 
@@ -24,6 +23,7 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
+    if (!result.rows[0]) throw new Error("Failed to create test run");
     testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)

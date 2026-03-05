@@ -238,7 +238,7 @@ They are **enforceable** and apply to all code under this repository.
 - DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
 - Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
 
-- **Golden Path**: `make bootstrap && make up && make smoke` - fresh clones must go green
+- **Golden Path**: `make golden-path` - fresh clones must go green
 - **Task Runner**: `Makefile` is the single source of truth. `Justfile` is deprecated and removed.
 - **Deployable-First**: Maintain the workflow: Investigation -> Entities -> Relationships -> Copilot
   -> Results
@@ -460,10 +460,11 @@ npm run summitctl -- test
    pnpm e2e
    ```
 
-4. **Smoke Tests**: Golden path validation
+4. **Golden Path Verification**:
    ```bash
-   make smoke
+   make golden-path
    ```
+   (Aliases: `make smoke`)
 
 ### Test Conventions
 
@@ -564,8 +565,8 @@ docker exec -it <neo4j-container> cypher-shell -u neo4j -p devpassword
 ## Quick Reference
 
 ```bash
-# Full setup and validation
-make bootstrap && make up && make smoke
+# Full setup and validation (Golden Path)
+make golden-path
 
 # Development workflow
 pnpm dev          # Start dev servers
@@ -729,19 +730,3 @@ Every autonomous agent operating in this environment must possess a signed **Age
 - **Pre-Flight**: Orchestrator verifies signature and expiry.
 - **In-Flight**: Budget and Tool usage checked against `authority` and `gates`.
 - **Violation**: Immediate `KILL` signal sent to runtime.
-
-## Recent Architectural Shifts (2025-Q4)
-
-Following the evolution of industry-standard Agent SDKs (OpenAI, Anthropic, GitHub), the Summit platform has adopted the following mandates:
-
-### 1. Telemetry Noise & Data Leakage Prevention
-- **Constraint**: Detailed token usage (`prompt_tokens`, `completion_tokens`, etc.) MUST be removed from trace spans (OpenTelemetry).
-- **Rationale**: Reduces telemetry noise in high-frequency agent runs and prevents potential leakage of sensitive prompt/response metadata into trace logs.
-- **Auditability**: Operational metrics for budget and cost tracking must remain in dedicated metrics systems (e.g., Prometheus) or audit-specific logs, separated from performance traces.
-
-### 2. MCP Version Alignment
-- **Mandate**: All MCP (Model Context Protocol) components must pin against stable schema versions (currently `2025-11-25`) to ensure client/server interoperability.
-- **Enforcement**: Mismatched protocol versions between clients and servers are treated as fatal errors.
-
-### 3. Real-time Response Support
-- **Guideline**: Favor WebSocket-based streaming (Socket.IO) for real-time agent event streams to minimize latency and improve responsiveness in human-in-the-loop workflows.

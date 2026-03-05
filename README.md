@@ -98,9 +98,9 @@ Summit follows a modular microservices architecture:
 
 - [📈 Executive Briefing (2026-01-31)](docs/executive/2026-01-31-summit-platform-briefing.md)
 - [🏛 Architecture Overview](docs/architecture/README.md)
-- [🔌 Data Ingestion](docs/architecture/data-intake-ga-spec.md)
-- [🤖 Agent System](docs/architecture/agent-archetypes.md)
-- [🕸 Knowledge Graphs](docs/architecture/phase1-intelgraph.md)
+- [🔌 Data Ingestion](docs/architecture/ingestion.md)
+- [🤖 Agent System](docs/architecture/agents.md)
+- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
 - [🔒 Security](docs/security/README.md)
 
 ## 📚 Key Components
@@ -125,7 +125,7 @@ Retrieval-augmented generation with knowledge graphs:
 - Vector similarity search
 - LLM-powered synthesis
 
-See: [GraphRAG Guide](docs/architecture/graph-rag-reference.md)
+See: [GraphRAG Guide](docs/graphrag/README.md)
 
 ### Agents
 
@@ -139,11 +139,20 @@ See: [Agent Development](docs/agents/README.md)
 
 ## 📡 API Reference
 
-- [GraphQL Schema](docs/api/overview.md)
-- [REST Endpoints](docs/api/overview.md)
-- [CompanyOS SDK](docs/api/overview.md)
+- [GraphQL Schema](docs/api/graphql.md)
+- [REST Endpoints](docs/api/rest.md)
+- [CompanyOS SDK](docs/api/companyos.md)
 
 ## 🧪 Testing
+
+### Golden Path (Required for PRs)
+
+Run the full verification suite (Lint + Test + E2E):
+
+```bash
+make golden-path
+```
+
 
 ```bash
 # Run all tests
@@ -181,7 +190,7 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
-See: [Deployment Guide](docs/ga/DEPLOYMENT.md)
+See: [Deployment Guide](docs/deployment/README.md)
 
 ## 🤝 Contributing
 
@@ -189,7 +198,7 @@ We welcome contributions! Please see:
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Development Setup](docs/ga/README.md)
+- [Development Setup](docs/development/setup.md)
 
 ## 📄 License
 
