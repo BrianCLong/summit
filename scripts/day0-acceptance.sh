@@ -19,7 +19,7 @@ fi
 
 # SBOM + signature verification (placeholder)
 echo "Verifying container signatures..."
-# cosign verify --key cosign.pub ghcr.io/brianclong/intelgraph/api@<digest>
+# cosign verify --use-signed-timestamps --key cosign.pub ghcr.io/brianclong/intelgraph/api@<digest>
 echo "✅ Container signature verification (simulated)"
 
 # Provenance bundle verification

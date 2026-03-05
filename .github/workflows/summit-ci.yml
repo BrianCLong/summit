@@ -7,6 +7,11 @@ on:
       - 'client/**'
       - '.github/workflows/summit-ci.yml'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'summit/**'
       - 'client/**'
@@ -102,4 +107,4 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: npx playwright test e2e/summit-smoke.spec.ts
+        run: PLAYWRIGHT_USE_WEBSERVER=true npx playwright test e2e/summit-smoke.spec.ts
