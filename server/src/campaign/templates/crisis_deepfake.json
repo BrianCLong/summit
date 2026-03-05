@@ -1,0 +1,46 @@
+{
+  "id": "CAMPAIGN-CRISIS-DF-001",
+  "name": "Domestic Crisis Deepfake Injection",
+  "description": "Hypothetical campaign injecting deepfake audio into a breaking news event.",
+  "actors": [
+    {
+      "id": "ACTOR-UNKNOWN",
+      "name": "Unknown Entity",
+      "type": "cutout"
+    }
+  ],
+  "assets": [
+    {
+      "id": "ASSET-MSG-APP",
+      "type": "channel",
+      "platform": "Telegram"
+    }
+  ],
+  "narratives": [
+    {
+      "id": "NARR-FALSE-ORDER",
+      "type": "claim",
+      "content": "Authorities have issued an evacuation order."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "EVID-DF-AUDIO",
+      "type": "media",
+      "fingerprint": "sha256:aa59800746968038753265002766624564536647668636453623547656835252",
+      "metadata": {
+        "detection_score": 0.98,
+        "modality": "audio"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "ACT-SEED-DF",
+      "type": "seed",
+      "sourceId": "ACTOR-UNKNOWN",
+      "targetId": "ASSET-MSG-APP",
+      "timestamp": "2026-02-07T14:30:00Z"
+    }
+  ]
+}

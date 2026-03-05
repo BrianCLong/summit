@@ -1,5 +1,6 @@
-# (same as in sprint doc)
 package abac.authz
+import rego.v1
+
 import rego.v1
 
 default allow = false
@@ -68,13 +69,13 @@ sensitive_read_basic_ok if {
 
 sensitive_read_privileged_ok if {
   input.action == "read"
-  ("pii" in input.resource.labels)
+  "pii" in input.resource.labels
   input.jwt.roles[_] == "admin"
 }
 
 sensitive_read_officer_ok if {
   input.action == "read"
-  ("pii" in input.resource.labels)
+  "pii" in input.resource.labels
   input.jwt.roles[_] == "privacy-officer"
 }
 
