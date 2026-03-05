@@ -1,1 +1,1 @@
-// jest setup
+module.exports = {};

@@ -3,3 +3,9 @@ export interface AtomicRubric {
   criterion: string;
   weight: number;
 }
+
+export interface RubricEvalResult {
+  score: number;
+  reason: string;
+  matchedRubrics: string[];
+}
