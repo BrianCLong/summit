@@ -23,17 +23,17 @@
 
 ## Workstream Blueprint
 
-| Epic | Goal | Cadence | DRI | Key Artifacts |
-| --- | --- | --- | --- | --- |
-| 1. Messaging System | Define ICPs, use cases, message house, claims library, and approval workflow | Monthly + Q refresh | PMM | ICP one-pager, message house, claims library, approval SOP |
-| 2. Content Production | Template-driven content with proof, SEO, and reuse | Weekly sprint | Content Lead | Templates, editorial standards, reuse plans |
-| 3. Website & Conversion | High-intent landing pages with proof, routing, and A/B | Biweekly | Web Lead | KPI map, landing pages, test plans |
-| 4. Lifecycle & Nurture | Persona/industry nurture with lead scoring | Monthly | Marketing Ops | Nurture maps, scoring model, SLAs |
-| 5. Sales Enablement | Role-based decks, battlecards, demo scripts, MAPs | Weekly | Enablement Lead | Library, certification plan |
-| 6. Pipeline by Channel | Channel playbooks, budgets, attribution, velocity | Weekly | Growth Lead | Channel scorecards, attribution model |
-| 7. Brand & Reputation | Brand system, crisis playbooks, proof pipeline | Monthly | Comms Lead | Voice guide, crisis plan, review posture |
-| 8. Customer Marketing | Advocacy, adoption, expansion motions | Monthly | Customer Marketing | Advocacy pipeline, adoption campaigns |
-| 9. Marketing Ops & Governance | Data model, taxonomy, compliance, dashboards | Monthly | Marketing Ops | Data schema, dashboards, risk register |
+| Epic                          | Goal                                                                         | Cadence             | DRI                | Key Artifacts                                              |
+| ----------------------------- | ---------------------------------------------------------------------------- | ------------------- | ------------------ | ---------------------------------------------------------- |
+| 1. Messaging System           | Define ICPs, use cases, message house, claims library, and approval workflow | Monthly + Q refresh | PMM                | ICP one-pager, message house, claims library, approval SOP |
+| 2. Content Production         | Template-driven content with proof, SEO, and reuse                           | Weekly sprint       | Content Lead       | Templates, editorial standards, reuse plans                |
+| 3. Website & Conversion       | High-intent landing pages with proof, routing, and A/B                       | Biweekly            | Web Lead           | KPI map, landing pages, test plans                         |
+| 4. Lifecycle & Nurture        | Persona/industry nurture with lead scoring                                   | Monthly             | Marketing Ops      | Nurture maps, scoring model, SLAs                          |
+| 5. Sales Enablement           | Role-based decks, battlecards, demo scripts, MAPs                            | Weekly              | Enablement Lead    | Library, certification plan                                |
+| 6. Pipeline by Channel        | Channel playbooks, budgets, attribution, velocity                            | Weekly              | Growth Lead        | Channel scorecards, attribution model                      |
+| 7. Brand & Reputation         | Brand system, crisis playbooks, proof pipeline                               | Monthly             | Comms Lead         | Voice guide, crisis plan, review posture                   |
+| 8. Customer Marketing         | Advocacy, adoption, expansion motions                                        | Monthly             | Customer Marketing | Advocacy pipeline, adoption campaigns                      |
+| 9. Marketing Ops & Governance | Data model, taxonomy, compliance, dashboards                                 | Monthly             | Marketing Ops      | Data schema, dashboards, risk register                     |
 
 ---
 

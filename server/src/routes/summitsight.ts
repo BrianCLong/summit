@@ -50,7 +50,7 @@ router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Re
 router.get('/exec-dashboard/:role', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
     // Return curated list of KPIs based on role
-    const role = req.params.role;
+    const role = (req.params.role as string);
     let kpisOfInterest: string[] = [];
 
     switch (role) {

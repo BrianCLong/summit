@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Health Score Engine
 
 ## Overview

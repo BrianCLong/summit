@@ -255,7 +255,7 @@ router.get(
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Key not found: ${req.params.id}`,
+            message: `Key not found: ${(req.params.id as string)}`,
           },
         });
       }
@@ -322,11 +322,11 @@ router.post(
         'user',
         getTenantId(req),
         'key:sign',
-        { keyId: req.params.id }
+        { keyId: (req.params.id as string) }
       );
 
       res.json(wrapResponse({
-        keyId: req.params.id,
+        keyId: (req.params.id as string),
         signature: signature.toString('base64'),
         algorithm: req.body.algorithm,
         timestamp: new Date().toISOString(),
@@ -384,7 +384,7 @@ router.post(
       const valid = await zeroTrustService!.hsm.verify(req.params.id, data, signature);
 
       res.json(wrapResponse({
-        keyId: req.params.id,
+        keyId: (req.params.id as string),
         valid,
         timestamp: new Date().toISOString(),
       }, req));
@@ -425,7 +425,7 @@ router.post(
       const newKeyHandle = await zeroTrustService!.hsm.rotateKey(req.params.id);
 
       logger.info({
-        oldKeyId: req.params.id,
+        oldKeyId: (req.params.id as string),
         newKeyId: newKeyHandle.id,
         rotatedBy: getUserId(req),
       }, 'HSM key rotated');
@@ -436,7 +436,7 @@ router.post(
         'user',
         getTenantId(req),
         'key:rotate',
-        { oldKeyId: req.params.id, newKeyId: newKeyHandle.id }
+        { oldKeyId: (req.params.id as string), newKeyId: newKeyHandle.id }
       );
 
       res.json(wrapResponse(newKeyHandle, req));
@@ -614,8 +614,8 @@ router.get(
         actorId: req.query.actorId as string,
         resourceType: req.query.resourceType as string,
         resourceId: req.query.resourceId as string,
-        entryTypes: req.query.entryType
-          ? [req.query.entryType as any]
+        entryTypes: (req.query.entryType as string)
+          ? [(req.query.entryType as string) as any]
           : undefined,
         startTime: req.query.startTime as string,
         endTime: req.query.endTime as string,
@@ -672,7 +672,7 @@ router.get(
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Audit entry not found: ${req.params.id}`,
+            message: `Audit entry not found: ${(req.params.id as string)}`,
           },
         });
       }
