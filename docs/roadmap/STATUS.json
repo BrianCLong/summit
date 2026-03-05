@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-03-04T00:00:00Z",
-  "revision_note": "Integrated convergent hierarchical orchestration loop into Maestro runtime and Summit workflow guidance.",
+  "revision_note": "Added autonomous agent runtime minimal winning slice and deterministic evidence artifact scaffolding.",
   "initiatives": [
     {
-      "id": "summit-maestro-convergent-orchestration",
+      "id": "summit-autonomous-agent-runtime-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Implemented artifact-gated hierarchical control loop (plan/architecture/implement/execute/verify/critic) in maestro-conductor and documented Summit adoption path."
+      "notes": "Implemented deterministic autonomous agent runtime slice with planning, ledger, patching, validation loop, and evidence artifacts behind SUMMIT_AUTON_AGENT default-off gating."
     },
     {
       "id": "saas-crash-2026-positioning-pack",

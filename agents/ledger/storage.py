@@ -1,21 +1,19 @@
+from __future__ import annotations
+
+import hashlib
 import json
+from pathlib import Path
+from typing import Any
 
-def save_ledger(ledger, filepath: str):
-    data = {
-        "todos": ledger.todos,
-        "decisions": ledger.decisions,
-        "evidence": ledger.evidence
-    }
-    with open(filepath, 'w') as f:
-        json.dump(data, f)
 
-def load_ledger(filepath: str):
-    with open(filepath, 'r') as f:
-        data = json.load(f)
-    # Instantiate and populate
-    from .ledger import Ledger
-    ledger = Ledger()
-    ledger.todos = data.get("todos", [])
-    ledger.decisions = data.get("decisions", [])
-    ledger.evidence = data.get("evidence", [])
-    return ledger
+class LedgerStorage:
+    """File-backed deterministic storage for execution ledgers."""
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+
+    def save(self, payload: dict[str, Any]) -> str:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        body = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        self.path.write_text(body, encoding="utf-8")
+        return hashlib.sha256(body.encode("utf-8")).hexdigest()
