@@ -65,10 +65,6 @@ on:
         description: "Container registry password/token"
         required: false
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   packages: write
@@ -88,7 +84,7 @@ jobs:
     outputs:
       digest: ${{ steps.build.outputs.digest }}
       image-uri: ${{ steps.image-uri.outputs.uri }}
-      sbom-digest: ${{ steps.sbom.outputs.digest }}
+      sbom-digest: ${{ steps.sbom-spdx.outputs.digest }}
       slsa-level: ${{ steps.slsa-check.outputs.level }}
     steps:
       - name: Checkout
@@ -158,7 +154,7 @@ jobs:
         if: inputs.sign
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
-          cosign-release: v2.2.4
+          cosign-release: v3.0.5
 
       - name: Sign image (OIDC keyless)
         if: inputs.sign && inputs.push
@@ -186,19 +182,22 @@ jobs:
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
-      - name: Generate SBOMs (SPDX + CycloneDX)
+      - name: Generate SBOM (SPDX)
         if: inputs.sbom
-        id: sbom
+        id: sbom-spdx
         uses: anchore/sbom-action@v0
         with:
           image: ${{ steps.image-uri.outputs.uri }}
-          format: spdx-json, cyclonedx-json
+          format: spdx-json
+          output-file: sbom.spdx.json
 
-      - name: Rename SBOMs
+      - name: Generate SBOM (CycloneDX)
         if: inputs.sbom
-        run: |
-          mv syft.spdx.json sbom.spdx.json
-          mv syft.cyclonedx.json sbom.cyclonedx.json
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ steps.image-uri.outputs.uri }}
+          format: cyclonedx-json
+          output-file: sbom.cyclonedx.json
 
       - name: Attest Build Provenance
         if: inputs.push && inputs.sign
@@ -253,8 +252,7 @@ jobs:
       id-token: write
       contents: write
       packages: write
-    # Pin reusable workflow to an immutable commit for workflow policy compliance.
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
     with:
       image: ${{ needs.build.outputs.image-uri }}
       digest: ${{ needs.build.outputs.digest }}

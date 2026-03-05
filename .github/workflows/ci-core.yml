@@ -38,6 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
       - name: Validate Jest & pnpm Configuration
         run: node scripts/ci/validate-jest-config.cjs
 
@@ -47,11 +48,16 @@ jobs:
     needs: [config-preflight]
     steps:
       - uses: actions/checkout@v4 # v6
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version-file: .nvmrc
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -76,6 +82,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -103,6 +110,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -136,6 +144,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Start Test Infrastructure
         run: |
@@ -198,6 +207,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -229,6 +239,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -276,6 +287,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -303,6 +315,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Bootstrap and smoke test
         run: |
@@ -342,6 +355,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -391,6 +405,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -420,6 +435,7 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

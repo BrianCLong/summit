@@ -76,8 +76,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "18"
+          node-version: "20"
           cache: "pnpm"
+          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

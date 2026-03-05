@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@v4 # v3
+      - uses: pnpm/action-setup@v4 # v4
         with:
           version: ${{ env.PNPM_VERSION }}
       
@@ -51,6 +51,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
       
       # Restore or create cache
       - name: Cache dependencies
@@ -100,7 +101,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@v4 # v3
+      - uses: pnpm/action-setup@v4 # v4
         with:
           version: ${{ env.PNPM_VERSION }}
       
@@ -108,6 +109,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
       
       # Restore cached dependencies from setup job
       - name: Restore dependencies
@@ -173,7 +175,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       
-      - uses: pnpm/action-setup@v4 # v3
+      - uses: pnpm/action-setup@v4 # v4
         with:
           version: ${{ env.PNPM_VERSION }}
       
@@ -181,6 +183,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
       
       - name: Restore dependencies
         uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
