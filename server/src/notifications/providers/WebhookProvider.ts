@@ -1,6 +1,6 @@
 import { NotificationProvider, NotificationChannel, NotificationPayload, NotificationResult } from '../types.js';
 import axios from 'axios';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'WebhookProvider' });
 

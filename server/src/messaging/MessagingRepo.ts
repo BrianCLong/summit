@@ -1,6 +1,6 @@
 import { pool } from '../db/pg.js';
 import { Message, SendMessagePayload } from './types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'MessagingRepo' });
 

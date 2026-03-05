@@ -1,5 +1,5 @@
 import { ShardManager } from './ShardManager.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'ReplicationManager' });
 

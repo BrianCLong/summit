@@ -1,7 +1,7 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 
 type AdvancedAuditSystem =
   import('../../audit/advanced-audit-system.js').AdvancedAuditSystem;

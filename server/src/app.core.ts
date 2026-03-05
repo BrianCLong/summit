@@ -5,7 +5,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
-import pino from 'pino';
+import { pino } from 'pino';
 import pinoHttp from 'pino-http';
 
 export async function createAppCore() {

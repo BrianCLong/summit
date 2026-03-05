@@ -7,7 +7,7 @@
  */
 
 import { randomUUID as uuidv4 } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { createSpan, businessMetrics } from '../observability/telemetry.js';
 import {
   registerEvidence,

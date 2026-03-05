@@ -8,7 +8,7 @@ import sharp from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 import type { Upload } from 'graphql-upload-ts';
-import pino from 'pino';
+import { pino } from 'pino';
 import exifReader from 'exif-reader';
 import {
   ImageProcessingPipeline,

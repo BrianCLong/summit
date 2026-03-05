@@ -7,7 +7,7 @@
 
 import { GraphQLError } from 'graphql';
 import { PubSub } from 'graphql-subscriptions';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 import { getStrategicPlanningService } from '../../services/StrategicPlanningService.js';
 import type {

@@ -2,7 +2,7 @@ import { Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { getRedisClient } from '../db/redis.js';
 import { verifyToken } from '../lib/auth.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 /**
  * mountLiveNamespace configures the Socket.IO "/live" namespace. It performs

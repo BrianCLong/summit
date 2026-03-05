@@ -8,7 +8,7 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import { pino } from 'pino';
 import { rateLimiter } from '../../services/RateLimiter.js';
 import { cfg } from '../../config.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';

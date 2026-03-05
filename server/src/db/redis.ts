@@ -1,7 +1,7 @@
 // @ts-nocheck
 import Redis, { Cluster } from 'ioredis';
 import * as dotenv from 'dotenv';
-import pino from 'pino';
+import { pino } from 'pino';
 
 dotenv.config();
 

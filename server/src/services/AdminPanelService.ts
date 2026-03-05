@@ -16,7 +16,7 @@
 
 import { Pool } from 'pg';
 import { getPostgresPool } from '../config/database.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'crypto';
 

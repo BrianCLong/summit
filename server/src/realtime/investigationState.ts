@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 import { randomUUID } from 'node:crypto';
 
 export interface PresenceUser {

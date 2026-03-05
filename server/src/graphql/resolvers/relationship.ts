@@ -1,6 +1,6 @@
 import { getNeo4jDriver } from '../../db/neo4j.js';
 import { randomUUID } from 'node:crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { GraphQLError } from 'graphql';
 import {
   pubsub,

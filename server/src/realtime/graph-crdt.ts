@@ -1,6 +1,6 @@
 import { Namespace, Socket } from 'socket.io';
 import Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)();
 

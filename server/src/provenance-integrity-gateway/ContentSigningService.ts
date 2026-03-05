@@ -11,7 +11,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import pino from 'pino';
+import { pino } from 'pino';
 import { CryptoPipeline, createDefaultCryptoPipeline } from '../security/crypto/pipeline.js';
 import type { SignatureBundle, KeyVersion } from '../security/crypto/types.js';
 import { pool } from '../db/pg.js';

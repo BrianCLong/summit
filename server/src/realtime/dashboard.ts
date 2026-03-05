@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)();
 

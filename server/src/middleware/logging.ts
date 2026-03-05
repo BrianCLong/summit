@@ -1,5 +1,5 @@
 import pinoHttpModule from 'pino-http';
-import pino from 'pino';
+import { pino } from 'pino';
 import { randomUUID } from 'crypto';
 
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;

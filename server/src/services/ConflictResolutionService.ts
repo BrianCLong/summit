@@ -1,5 +1,5 @@
 // @ts-nocheck
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'ConflictResolutionService' });
 

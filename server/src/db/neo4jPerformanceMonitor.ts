@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import {
   neo4jQueryErrorsTotal,
   neo4jQueryLatencyMs,

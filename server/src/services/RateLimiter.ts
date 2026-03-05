@@ -1,6 +1,6 @@
 import { getRedisClient } from '../config/database.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)();
 

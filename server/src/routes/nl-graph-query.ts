@@ -8,7 +8,7 @@
 import express, { Request, Response } from 'express';
 import { body, validationResult } from 'express-validator';
 import rateLimit from 'express-rate-limit';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getNlGraphQueryService } from '../ai/nl-graph-query/index.js';
 import type { CompileRequest, SchemaContext } from '../ai/nl-graph-query/index.js';
 import type { AuthenticatedRequest } from './types.js';

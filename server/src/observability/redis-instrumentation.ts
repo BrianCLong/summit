@@ -13,7 +13,7 @@ import {
   updateCacheHitRatio,
 } from './enhanced-metrics.js';
 import { getTracer } from './tracer.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'redis-instrumentation' });
 

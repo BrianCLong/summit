@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';

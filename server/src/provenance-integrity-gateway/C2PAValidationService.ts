@@ -12,7 +12,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import pino from 'pino';
+import { pino } from 'pino';
 import type {
   C2PAManifest,
   C2PAClaim,

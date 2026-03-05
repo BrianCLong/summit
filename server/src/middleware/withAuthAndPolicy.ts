@@ -7,7 +7,7 @@
 
 import { AuthenticationError, ForbiddenError } from 'apollo-server-express';
 import { z } from 'zod';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger: pino.Logger = (pino as any)({ name: 'authPolicy' });
 

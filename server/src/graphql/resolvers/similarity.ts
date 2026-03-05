@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import pino from 'pino';
+import { pino } from 'pino';
 import { GraphQLError } from 'graphql';
 import { createHash } from 'crypto';
 import { getPostgresPool } from '../../config/database.js';

@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getRedisClient } from '../db/redis.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectsCommand } from '@aws-sdk/client-s3';
 
 const logger = (pino as any)({ name: 'BackupService' });

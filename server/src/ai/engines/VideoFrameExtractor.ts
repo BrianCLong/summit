@@ -1,7 +1,7 @@
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
-import pino from 'pino';
+import { pino } from 'pino';
 import { randomUUID } from 'crypto';
 
 const logger = (pino as any)({ name: 'VideoFrameExtractor' });

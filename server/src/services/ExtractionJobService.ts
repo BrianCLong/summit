@@ -2,7 +2,7 @@
 import { Queue, Worker, Job, QueueEvents } from 'bullmq';
 import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import IORedis from 'ioredis';
 import { ProcessingStatus } from './MultimodalDataService.js';
 import { ExtractionEngine } from '../ai/ExtractionEngine.js';

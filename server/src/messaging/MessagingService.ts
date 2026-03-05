@@ -1,6 +1,6 @@
 import { Message, SendMessagePayload } from './types.js';
 import { MessagingRepo } from './MessagingRepo.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'MessagingService' });
 

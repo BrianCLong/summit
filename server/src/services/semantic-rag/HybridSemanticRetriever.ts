@@ -11,7 +11,7 @@
 
 import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
-import pino from 'pino';
+import { pino } from 'pino';
 import { z } from 'zod/v4';
 import { GraphNode, GraphEdge } from './types.js';
 import logger from '../../utils/logger.js';

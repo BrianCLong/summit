@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import { retentionEngine } from '../retention.js';
 import { JobData } from '../../queue/types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'retention-processor' });
 

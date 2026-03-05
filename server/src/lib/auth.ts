@@ -2,7 +2,7 @@
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import { randomUUID } from 'node:crypto';
 import { createLoaders, Loaders } from '../graphql/loaders.js';
 import { extractTenantContext } from '../security/tenantContext.js';

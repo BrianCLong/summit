@@ -7,7 +7,7 @@
 import type { Driver, Session, Transaction } from 'neo4j-driver';
 import type { Pool, PoolClient } from 'pg';
 import type Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 import type {
   TenantContext,
 } from '../middleware/tenantValidator.js';

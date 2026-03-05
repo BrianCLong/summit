@@ -12,7 +12,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'advanced-rate-limit' });
 

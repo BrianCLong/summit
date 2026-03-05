@@ -36,7 +36,7 @@ import * as otelApi from '@opentelemetry/api';
 const propagation = (otelApi as any).propagation || { inject: () => {}, extract: () => context.active() };
 type Context = OtelContext;
 import { cfg } from '../config.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'otel-tracer' });
 

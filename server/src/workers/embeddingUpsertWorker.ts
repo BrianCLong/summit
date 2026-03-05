@@ -12,7 +12,7 @@ import { getPostgresPool, getRedisClient } from '../config/database.js';
 import EmbeddingService from '../services/EmbeddingService.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 import { context, propagation } from '@opentelemetry/api';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'embeddingUpsertWorker' });
 

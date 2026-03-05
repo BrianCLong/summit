@@ -13,7 +13,7 @@
  */
 
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import { pino } from 'pino';
 import { recordUserSignup } from '../../monitoring/businessMetrics.js';
 import { cache } from '../../lib/cache/index.js';
 import { cfg } from '../../config.js';

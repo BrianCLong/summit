@@ -11,7 +11,7 @@
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import crypto from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { Redis } from 'ioredis';
 import { createCacheClient } from '@packages/cache';
 import type { GraphQLContext } from '../apollo-v5-server.js';

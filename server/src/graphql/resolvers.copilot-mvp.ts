@@ -11,7 +11,7 @@
  */
 
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getNLToCypherService } from '../services/NLToCypherService.js';
 import { GraphRAGService } from '../services/GraphRAGService.js';
 import { llmGuardrails } from '../security/llm-guardrails.js';

@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import { DataRetentionEngine } from './dataRetentionEngine.js';
 import { DataRetentionRepository } from './repository.js';
 import { RetentionPolicyModel } from './policyModel.js';

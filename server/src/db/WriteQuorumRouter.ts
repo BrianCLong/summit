@@ -1,5 +1,5 @@
 import { Driver, Session } from 'neo4j-driver';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getNeo4jDriver } from './neo4j.js';
 import { Histogram, Counter, Gauge } from 'prom-client';
 

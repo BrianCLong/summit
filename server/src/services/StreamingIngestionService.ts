@@ -5,7 +5,7 @@ import { OsintSourceType, OsintRecord, IngestionEvent } from '../connectors/type
 import { provenanceLedger } from '../provenance/ledger.js';
 import { ProvenanceMapping } from '@intelgraph/provenance';
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { Counter, Histogram } from 'prom-client';
 
 const logger = (pino as any)({ name: 'StreamingIngestionService' });

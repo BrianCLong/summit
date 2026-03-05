@@ -2,7 +2,7 @@ import { readFileSync, existsSync } from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import type { NextFunction, Request, Response } from 'express';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'graphqlPersistedAllowlist' });
 

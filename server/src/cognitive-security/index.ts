@@ -76,7 +76,7 @@ export { CascadeDetectionService } from '../services/CascadeDetectionService.js'
 
 // Module initialization
 import type { Driver } from 'neo4j-driver';
-import pino from 'pino';
+import { pino } from 'pino';
 
 import { initializeProvenanceService, type ProvenanceServiceConfig } from './provenance.service.js';
 import { initializeClaimsService, type ClaimsServiceConfig } from './claims.service.js';

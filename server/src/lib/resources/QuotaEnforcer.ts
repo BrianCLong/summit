@@ -3,7 +3,7 @@ import { rateLimiter } from '../../services/RateLimiter.js';
 import { quotaConfigService, DEFAULT_PLANS } from './QuotaConfig.js';
 import { PlanLimits, QuotaCheckResult } from './types.js';
 import { PrometheusMetrics } from '../../utils/metrics.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'QuotaEnforcer' });
 

@@ -6,7 +6,7 @@ import neo4j from 'neo4j-driver';
 
 import { randomUUID as uuidv4 } from 'node:crypto';
 
-import pino from 'pino';
+import { pino } from 'pino';
 
 import {
 

@@ -1,6 +1,6 @@
 import { ShardManager } from './ShardManager.js';
 import { VectorIndexConfig } from './types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'VectorIndexManager' });
 

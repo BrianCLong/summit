@@ -17,7 +17,7 @@ import {
 } from '../metrics/neo4jMetrics.js';
 import { getTracer } from './tracer.js';
 import { SpanKind } from '@opentelemetry/api';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'neo4j-instrumentation' });
 

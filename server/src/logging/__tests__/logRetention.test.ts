@@ -2,7 +2,7 @@ import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll 
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import pino from 'pino';
+import { pino } from 'pino';
 import { enforceRetention } from '../logRetention.js';
 
 describe('log retention', () => {

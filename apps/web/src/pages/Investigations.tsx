@@ -140,6 +140,7 @@ export default function Investigations() {
         <aside
             className="w-full lg:w-96 h-1/3 lg:h-auto border-t lg:border-t-0 lg:border-l bg-white flex flex-col shrink-0 overflow-y-auto"
             aria-label="Intelligence Details"
+            role="complementary"
         >
             {selectedEntity ? (
                 <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">

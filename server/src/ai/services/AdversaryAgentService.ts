@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import pino from 'pino';
+import { pino } from 'pino';
 
 export interface AdversaryAgentOptions {
   temperature?: number;

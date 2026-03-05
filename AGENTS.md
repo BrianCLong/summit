@@ -37,16 +37,27 @@ order:
 - **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
 - **GA Hardening Contract:** Agents must honor the machine-readable contract in [`agent-contract.json`](agent-contract.json) and the Golden Path guardrails described in `docs/ga/TESTING-STRATEGY.md` and `docs/ga/LEGACY-MODE.md`. New GA-critical work must carry Tier A/B/C verification before merge.
 
-## Agent Lattice & Roles
+## Agent Roles & Permissions
 
 The Summit ecosystem operates on a **Lattice Model** (see [`docs/agents/AGENT_LATTICE_V1.md`](docs/agents/AGENT_LATTICE_V1.md)).
 Agents are not unstructured scripts; they are roles within a governed hierarchy.
 
-### Role: Jules (Release Captain)
+### Role: Jules
 *   **Avatar:** 🧑‍✈️
 *   **Rank:** Strategic
 *   **Mandate:** "The Lawmaker". Owns Architecture, Strategy, and Release Gates.
-*   **Permissions:** Full Repo Access, Merge Authority, Policy Definition.
+
+**Permissions**
+Full Repo Access, Merge Authority, Policy Definition.
+
+**Stop Conditions**
+- Detected violation of the Constitution.
+- Resource budget exhaustion.
+- Explicit human kill-signal.
+
+**Escalation**
+- Technical ambiguity: Escalate to Core Architects.
+- Policy conflict: Escalate to Governance Board.
 
 ### Role: Maestro (Orchestrator)
 *   **Avatar:** 🎼

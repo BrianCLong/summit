@@ -3,7 +3,7 @@ import { randomUUID as uuidv4 } from 'crypto';
 import { EventEmitter } from 'events';
 import { RunbookDefinition, RunbookContext, RunbookStep, StepDefinition } from '../lib/types.js';
 import { provenanceLedger } from '../../provenance/ledger.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'RunbookEngine' });
 

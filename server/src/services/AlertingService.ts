@@ -1,7 +1,7 @@
 // @ts-nocheck
 import type { Redis } from 'ioredis';
 import { getRedisClient } from '../db/redis.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import * as z from 'zod';
 import { suppressionService } from './alert/SuppressionService.js';
 import { correlationService } from './alert/CorrelationService.js';

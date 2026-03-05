@@ -5,7 +5,7 @@ import { ValidationService } from './ValidationService.js';
 import { MockMigrationConnector } from './connectors/MockMigrationConnector.js';
 import { MigrationDestination } from './Destination.js';
 import { MockMigrationDestination } from './destinations/MockMigrationDestination.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 // @ts-ignore
 const logger = pino({ name: 'MigrationOrchestrator' });

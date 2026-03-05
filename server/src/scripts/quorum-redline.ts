@@ -1,6 +1,6 @@
 import { writeQuorumRouter } from '../db/WriteQuorumRouter.js';
 import { initializeNeo4jDriver, closeNeo4jDriver } from '../db/neo4j.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const log = (pino as any)({ name: 'QuorumRedline' });
 

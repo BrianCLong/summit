@@ -5,7 +5,7 @@ import {
   OsintRecord
 } from '../types.js';
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 
 export class OsintConnector extends BaseConnector {
   private config: OsintSourceConfig;

@@ -2,7 +2,7 @@
 import { PlanLimits, PlanTier } from './types.js';
 import fs from 'fs/promises';
 import path from 'path';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'QuotaConfig' });
 

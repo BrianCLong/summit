@@ -4,7 +4,7 @@ import { withAuthAndPolicy } from '../../middleware/withAuthAndPolicy.js';
 import { MultimodalDataService } from '../../services/MultimodalDataService.js';
 import { MediaUploadService } from '../../services/MediaUploadService.js';
 import { ExtractionJobService } from '../../services/ExtractionJobService.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import {
   subscriptionEngine,
   type SubscriptionEnvelope,

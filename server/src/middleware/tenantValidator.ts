@@ -4,7 +4,7 @@
  */
 
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import { pino } from 'pino';
 import { TenantContext as CanonicalTenantContext } from '../tenancy/types.js';
 
 const logger = (pino as any)({ name: 'tenantValidator' });

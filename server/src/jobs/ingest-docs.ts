@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Pool } from 'pg';
 import EmbeddingService from '../services/EmbeddingService.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = pino({ name: 'DocsIngestion' });
 

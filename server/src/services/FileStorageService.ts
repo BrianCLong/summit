@@ -3,7 +3,7 @@ import { pipeline } from 'stream/promises';
 import { createHash, randomUUID } from 'crypto';
 import * as path from 'path';
 import type { Readable } from 'stream';
-import pino from 'pino';
+import { pino } from 'pino';
 import { meteringEmitter } from '../metering/emitter.js';
 
 const logger = (pino as any)({ name: 'FileStorageService' });

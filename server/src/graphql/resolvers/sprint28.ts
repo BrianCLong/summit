@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { pg } from '../../db/pg.js';
 import { getContext } from '../auth/context.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'resolvers:sprint28' });
 

@@ -5,7 +5,7 @@
  * and optimization across the Summit/IntelGraph platform.
  */
 
-import pino from 'pino';
+import { pino } from 'pino';
 import { getPostgresPool, type ManagedPostgresPool } from '../db/postgres.js';
 
 const logger = (pino as any)({ name: 'resource-tagging' });

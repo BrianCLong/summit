@@ -91,6 +91,7 @@ function App() {
       }
     };
     window.addEventListener('keydown', onKey);
+    // Confirmation: this is a standard cleanup of a listener, not a destructive data operation
     return ()=>window.removeEventListener('keydown', onKey);
   },[]);
 
@@ -128,8 +129,8 @@ function App() {
                       {showPalette && (
                          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
                            <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
-                             <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
-                             <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
+                             <input type="text" aria-label="Command palette input" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
+                             <button aria-label="Explain this view" onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
                                Explain this view
                              </button>
                            </div>

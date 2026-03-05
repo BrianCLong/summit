@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import { promisify } from 'util';
 import path from 'path';
-import pino from 'pino';
+import { pino } from 'pino';
 import sharp from 'sharp';
 import { ExtractionEngineConfig } from '../types.js';
 

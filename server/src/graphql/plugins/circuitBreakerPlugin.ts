@@ -1,6 +1,6 @@
 import type { ApolloServerPlugin } from '@apollo/server';
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 
 const logger = (pino as any)();

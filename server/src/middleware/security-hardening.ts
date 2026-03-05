@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { SecurityValidator } from '../validation/index.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)();
 

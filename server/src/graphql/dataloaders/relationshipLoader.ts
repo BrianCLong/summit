@@ -5,7 +5,7 @@
  */
 
 import DataLoader from 'dataloader';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { DataLoaderContext } from './index.js';
 
 const logger = (pino as any)();

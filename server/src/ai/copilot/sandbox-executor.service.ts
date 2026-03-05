@@ -9,7 +9,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { z } from 'zod';
 import type { Driver, Session, Result } from 'neo4j-driver';
 

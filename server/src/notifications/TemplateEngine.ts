@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'TemplateEngine' });
 

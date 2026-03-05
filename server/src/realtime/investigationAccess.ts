@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 
 export type InvestigationRole = 'owner' | 'editor' | 'commenter' | 'viewer';
 export type InvestigationAction = 'view' | 'edit' | 'comment' | 'manage';

@@ -5,7 +5,7 @@
  */
 
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { DataLoaders } from '../dataloaders/index.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 

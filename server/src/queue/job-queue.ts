@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events';
 import { JobsOptions, Queue, QueueEvents, QueueScheduler, Worker } from 'bullmq';
 import type { QueueBaseOptions, WorkerOptions, Job } from 'bullmq';
 import type { Redis } from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getRedisClient } from '../db/redis.js';
 
 export interface JobQueueConfig {

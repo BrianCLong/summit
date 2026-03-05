@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { randomUUID } from 'node:crypto';
 import { WebSocket } from 'ws';
-import pino from 'pino';
+import { pino } from 'pino';
 import { PubSub } from 'graphql-subscriptions';
 import type { RedisPubSub } from 'graphql-redis-subscriptions';
 import { makePubSub } from '../subscriptions/pubsub.js';

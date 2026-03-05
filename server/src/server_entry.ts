@@ -5,7 +5,7 @@ import fs from 'fs';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
 import { WebSocketServer } from 'ws';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';

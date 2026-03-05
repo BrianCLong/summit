@@ -12,7 +12,7 @@ import { TemplateEngine } from './TemplateEngine.js';
 import { NotificationPreferenceRepo } from './preferences/NotificationPreferenceRepo.js';
 import { NotificationRepo } from './repo/NotificationRepo.js';
 import { NotificationQueue } from './queue/NotificationQueue.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'NotificationService' });
 

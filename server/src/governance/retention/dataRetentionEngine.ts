@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import pino from 'pino';
+import { pino } from 'pino';
 import { runCypher } from '../../graph/neo4j.js';
 import { DataRetentionRepository } from './repository.js';
 import { RetentionScheduler } from './scheduler.js';

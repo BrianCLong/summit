@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import pino from 'pino';
+import { pino } from 'pino';
 import path from 'path';
 import { createReadStream, promises as fsPromises } from 'fs';
 import { spawn } from 'child_process';

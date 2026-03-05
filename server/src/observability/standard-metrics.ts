@@ -33,7 +33,7 @@
  */
 
 import { Registry, Counter, Histogram, Gauge, Summary } from 'prom-client';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'observability:metrics' });
 

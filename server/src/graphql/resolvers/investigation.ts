@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 import { authGuard } from '../utils/auth.js';

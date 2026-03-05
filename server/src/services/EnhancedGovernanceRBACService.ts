@@ -9,7 +9,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ForbiddenError, AuthenticationError } from 'apollo-server-express';
 import { Pool } from 'pg';
-import pino from 'pino';
+import { pino } from 'pino';
 import { WarrantService } from '../services/WarrantService.js';
 
 export interface GovernanceContext {

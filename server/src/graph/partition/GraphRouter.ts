@@ -2,7 +2,7 @@ import { ShardManager } from './ShardManager.js';
 import { PartitionStrategy } from './types.js';
 import { LocalityAwarePartitionStrategy } from './PartitionStrategy.js';
 import { QueryContext } from './types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'GraphRouter' });
 

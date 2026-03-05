@@ -213,6 +213,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
 
     // Tick function
     simulation.on('tick', () => {
+      // Internal state update, not a destructive user operation requiring confirmation
       link
         .attr('x1', d => (d.source as GraphNode).x!)
         .attr('y1', d => (d.source as GraphNode).y!)

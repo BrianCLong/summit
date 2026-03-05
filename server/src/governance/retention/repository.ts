@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import pino from 'pino';
+import { pino } from 'pino';
 import {
   AppliedRetentionPolicy,
   ArchivalWorkflow,

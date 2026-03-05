@@ -6,7 +6,7 @@
 
 import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server';
 import { GraphQLError } from 'graphql';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 import { getCostCalculator } from '../services/CostCalculator.js';
 import {

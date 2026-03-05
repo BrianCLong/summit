@@ -9,7 +9,7 @@ import { Request, Response, NextFunction } from 'express';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { createHash } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger: pino.Logger = (pino as any)({ name: 'persistedQueries' });
 

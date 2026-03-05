@@ -1,7 +1,7 @@
 // @ts-nocheck
 import express, { Response, NextFunction } from 'express';
 import { EntityResolutionService } from '../services/EntityResolutionService.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { AuthenticatedRequest } from './types.js';
 
 const router = express.Router();

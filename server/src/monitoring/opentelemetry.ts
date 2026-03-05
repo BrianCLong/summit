@@ -19,7 +19,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 // @ts-ignore - OpenTelemetry types not fully resolved
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger: pino.Logger = (pino as any)({ name: 'opentelemetry' });
 

@@ -2,7 +2,7 @@
 import { ApolloServerPlugin } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
-import pino from 'pino';
+import { pino } from 'pino';
 import type { GraphQLSchema } from 'graphql';
 import type { GraphQLContext } from '../apollo-v5-server.js';
 

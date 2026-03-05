@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import { businessMetrics, costTracker } from '../observability/telemetry.js';
 import type { Request, Response, NextFunction } from 'express';
 

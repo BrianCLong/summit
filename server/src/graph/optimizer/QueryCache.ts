@@ -3,7 +3,7 @@ import { QueryAnalysis, CacheStrategy, OptimizationContext } from './types.js';
 import { getRedisClient } from '../../db/redis.js';
 import { CompressionUtils } from '../../utils/compression.js';
 import crypto from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)();
 

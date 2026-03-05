@@ -5,7 +5,7 @@
  * budgets are at risk or unusual spending patterns are detected.
  */
 
-import pino from 'pino';
+import { pino } from 'pino';
 import { getPostgresPool } from '../db/postgres.js';
 import { resourceTagging, TagCategory } from './ResourceTaggingService.js';
 

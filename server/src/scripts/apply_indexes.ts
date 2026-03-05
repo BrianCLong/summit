@@ -2,7 +2,7 @@
 import type { IndexDefinition } from '../db/indexManager.js';
 import { createIndexManager } from '../db/indexManager.js';
 import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'apply-indexes' });
 

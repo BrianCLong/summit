@@ -1,5 +1,5 @@
 import { getIO } from '../realtime/socket.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import { randomUUID } from 'crypto';
 
 const logger = (pino as any)();

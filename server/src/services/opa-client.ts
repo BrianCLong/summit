@@ -1,5 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
-import pino from 'pino';
+import { pino } from 'pino';
 import { setTimeout } from 'timers/promises';
 
 const logger = (pino as any)({ name: 'opa-client' });

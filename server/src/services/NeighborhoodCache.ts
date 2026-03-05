@@ -7,7 +7,7 @@
  */
 
 import type Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 import {
   TenantContext,
   TenantValidator,

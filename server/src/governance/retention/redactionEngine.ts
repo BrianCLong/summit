@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { Pool } from 'pg';
 import { RedactionOperation, RedactionRule, StorageSystem } from './types.js';
 

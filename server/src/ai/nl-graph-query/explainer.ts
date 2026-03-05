@@ -2,7 +2,7 @@
  * Explainer - Generates plain language explanations of Cypher queries
  */
 
-import pino from 'pino';
+import { pino } from 'pino';
 import type { ExplanationEvidence, QueryExplanation } from './types.js';
 
 const logger = (pino as any)({ name: 'cypher-explainer' });

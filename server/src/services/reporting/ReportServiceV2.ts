@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import { DisclosurePackager, EvidenceItem } from './DisclosurePackager.js';
 
 const log = (pino as any)({ name: 'ReportServiceV2' });

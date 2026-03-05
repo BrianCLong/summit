@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const log = (pino as any)({ name: 'SOC2Evidence' });
 

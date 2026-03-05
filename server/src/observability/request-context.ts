@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import type { NextFunction, Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { CORRELATION_ID_HEADER, REQUEST_ID_HEADER } from '../middleware/correlation-id.js';
 import { getTracer } from './tracer.js';
 

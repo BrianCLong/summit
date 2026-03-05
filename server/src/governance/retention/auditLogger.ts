@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import { RetentionAuditEvent } from './types.js';
 
 export interface RetentionAuditLogger {

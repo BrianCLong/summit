@@ -12,7 +12,7 @@
  */
 
 import { randomUUID, createHash } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 
 import type {
   C2PAManifest,

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Socket } from 'socket.io';
-import pino from 'pino';
+import { pino } from 'pino';
 import { emitAuditEvent } from '../audit/emit.js';
 
 const logger = (pino as any)();

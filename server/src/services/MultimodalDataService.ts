@@ -1,7 +1,7 @@
 
 import type { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import {
   MediaUploadService,
   MediaMetadata,

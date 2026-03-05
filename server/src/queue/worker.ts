@@ -2,7 +2,7 @@
 import { Worker, Job, WorkerOptions } from 'bullmq';
 import { cfg } from '../config.js';
 import { QueueName } from './types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'worker-manager' });
 

@@ -1,7 +1,7 @@
 import { Queue, Worker, Job } from 'bullmq';
 import { PipelineOrchestrator } from './PipelineOrchestrator.js';
 import { PipelineConfig } from '../data-model/types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'IngestionQueue' });
 const REDIS_HOST = process.env.REDIS_HOST || 'localhost';

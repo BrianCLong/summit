@@ -13,7 +13,7 @@ import {
 } from 'graphql-query-complexity';
 import type { GraphQLSchema, DocumentNode } from 'graphql';
 import { getRedisClient } from '../../config/database.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

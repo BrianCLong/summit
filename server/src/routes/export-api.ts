@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Router } from 'express';
 import { z } from 'zod';
-import pino from 'pino';
+import { pino } from 'pino';
 import { opaClient } from '../services/opa-client.js';
 import { businessMetrics, addSpanAttributes } from '../observability/telemetry.js';
 import { costGuard } from '../services/cost-guard.js';

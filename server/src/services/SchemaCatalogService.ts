@@ -1,4 +1,4 @@
-import pino from 'pino';
+import { pino } from 'pino';
 import fs from 'fs/promises';
 import path from 'path';
 

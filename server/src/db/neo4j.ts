@@ -1,7 +1,7 @@
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import * as dotenv from 'dotenv';
-import pino from 'pino';
+import { pino } from 'pino';
 
 import {
   dbPoolAcquisitionLatency,

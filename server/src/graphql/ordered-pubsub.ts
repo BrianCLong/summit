@@ -1,5 +1,5 @@
 import { PubSub } from 'graphql-subscriptions';
-import pino from 'pino';
+import { pino } from 'pino';
 
 interface EventEnvelope<T> {
   seq: number;

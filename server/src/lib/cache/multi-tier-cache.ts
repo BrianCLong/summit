@@ -5,7 +5,7 @@
 // to avoid getting blocked by the environment issue.
 
 import Redis from 'ioredis';
-import pino from 'pino';
+import { pino } from 'pino';
 import { cfg } from '../../config.js';
 import { metrics } from '../../observability/metrics.js';
 

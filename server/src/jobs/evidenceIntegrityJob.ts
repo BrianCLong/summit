@@ -1,5 +1,5 @@
 import * as cron from 'node-cron';
-import pino from 'pino';
+import { pino } from 'pino';
 import { evidenceIntegrityService } from '../evidence/integrity-service.js';
 
 const logger = (pino as any)({ name: 'EvidenceIntegrityJob' });

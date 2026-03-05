@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getRedisClient } from '../db/redis.js';
 import { TimeSeriesService } from '../services/TimeSeriesService.js';
 import { getIO } from './socket.js';

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import pino from 'pino';
+import { pino } from 'pino';
 import { logEventBus, type LogLevel } from './logEventBus.js';
 import { LogAlertEngine, defaultAlertRules } from './logAlertEngine.js';
 import { scheduleRetention, type RetentionPolicy } from './logRetention.js';

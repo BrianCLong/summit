@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { provenanceLedger } from '../provenance/ledger.js';
 import { TrustIntelligenceService } from './TrustIntelligenceService.js';
 

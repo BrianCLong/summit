@@ -6,7 +6,7 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import { randomUUID } from 'node:crypto';
 import { VoiceGateway } from './gateways/VoiceGateway.js';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';

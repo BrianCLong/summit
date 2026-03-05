@@ -1,5 +1,5 @@
 // @ts-nocheck
-import pino from 'pino';
+import { pino } from 'pino';
 import OrderedPubSub from './ordered-pubsub.js';
 import { requireTenant } from '../middleware/withTenant.js';
 import type { GraphQLContext } from './apollo-v5-server.js';

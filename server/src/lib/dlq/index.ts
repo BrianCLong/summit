@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import crypto from 'crypto';
-import pino from 'pino';
+import { pino } from 'pino';
 import { getPostgresPool } from '../../config/database.js';
 
 const logger = (pino as any)();

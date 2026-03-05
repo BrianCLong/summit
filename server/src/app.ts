@@ -8,7 +8,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import compression from 'compression';
 import hpp from 'hpp';
-import pino from 'pino';
+import { pino } from 'pino';
 import pinoHttpModule from 'pino-http';
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import { logger as appLogger } from './config/logger.js';

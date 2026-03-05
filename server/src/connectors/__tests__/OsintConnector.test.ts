@@ -1,7 +1,7 @@
 import { describe, it, expect } from '@jest/globals';
 import { OsintConnector } from '../implementations/OsintConnector.js';
 import { OsintSourceType, OsintSourceConfig } from '../types.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 describe('OsintConnector', () => {
   const logger = (pino as any)({ level: 'silent' });

@@ -7,7 +7,7 @@
 import express, { Response, NextFunction } from 'express';
 import type { AuthenticatedRequest } from './types.js';
 import { body, query, validationResult } from 'express-validator';
-import pino from 'pino';
+import { pino } from 'pino';
 import EntityLinkingService from '../services/EntityLinkingService.js';
 import { Queue, Worker } from 'bullmq';
 import { requirePermission } from '../middleware/auth.js';

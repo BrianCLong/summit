@@ -10,7 +10,7 @@ import { ChunkingService } from './ChunkingService.js';
 import { EmbeddingStage } from './EmbeddingStage.js';
 import { DLQService } from './DLQService.js';
 import { ProcessorFactory } from './processors/ProcessorFactory.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)({ name: 'PipelineOrchestrator' });
 

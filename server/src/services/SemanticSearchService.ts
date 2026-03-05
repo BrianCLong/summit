@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import EmbeddingService from './EmbeddingService.js';
 import { synonymService } from './SynonymService.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 // Manual interface to match what search.ts expects if we return raw rows,
 // but we defined SemanticSearchResult.

@@ -8,7 +8,7 @@
 
 import neo4j, { Driver, Session, SessionConfig } from 'neo4j-driver';
 
-import pino from 'pino';
+import { pino } from 'pino';
 import { performance } from 'node:perf_hooks';
 
 const logger = (pino as any)({ name: 'neo4j-connection-manager' });

@@ -1,5 +1,5 @@
 import { Session } from 'neo4j-driver';
-import pino from 'pino';
+import { pino } from 'pino';
 import { createHash, randomUUID } from 'crypto';
 import { soundex } from './soundex.js';
 import { getPostgresPool } from '../../config/database.js';

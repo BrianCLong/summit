@@ -2,7 +2,7 @@
 import DataLoader from 'dataloader';
 import { getPostgresPool } from '../../config/database.js';
 import { getRedisClient } from '../../config/database.js';
-import pino from 'pino';
+import { pino } from 'pino';
 
 const logger = (pino as any)();
 const safeDeleteEnabled = process.env.SAFE_DELETE !== 'false';
