@@ -87,8 +87,9 @@ function checkJestConfig(filePath) {
 
   const content = fs.readFileSync(filePath, 'utf8');
 
-  // Check for deprecated globals syntax
-  if (content.includes("globals:") && content.includes("'ts-jest'")) {
+  // Check for deprecated globals syntax (looking for 'ts-jest': { ... } inside globals)
+  // We use a heuristic regex to avoid parsing full JS/TS
+  if (content.includes("globals:") && /['"]ts-jest['"]\s*:/.test(content)) {
     error(`${filePath}: Using deprecated ts-jest globals syntax. Use transform options instead.`);
   }
 
