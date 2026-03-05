@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, Literal, Sequence
 
-
 NodeType = Literal["narrative_state", "actor", "channel", "event", "artifact"]
 EdgeType = Literal[
     "temporal_precedes",
@@ -20,7 +19,7 @@ Classification = Literal["public", "internal", "restricted"]
 class Node:
     id: str
     type: NodeType
-    attrs: Dict[str, Any]
+    attrs: dict[str, Any]
     lifecycle: Lifecycle
     classification: Classification
 
@@ -30,7 +29,7 @@ class Edge:
     src: str
     dst: str
     type: EdgeType
-    attrs: Dict[str, Any]
+    attrs: dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -40,7 +39,7 @@ class NarrativeOperatingGraph:
     version: str
 
 
-def normalize_nodes(nodes: Iterable[Node]) -> list[Dict[str, Any]]:
+def normalize_nodes(nodes: Iterable[Node]) -> list[dict[str, Any]]:
     return sorted(
         [
             {
@@ -56,7 +55,7 @@ def normalize_nodes(nodes: Iterable[Node]) -> list[Dict[str, Any]]:
     )
 
 
-def normalize_edges(edges: Iterable[Edge]) -> list[Dict[str, Any]]:
+def normalize_edges(edges: Iterable[Edge]) -> list[dict[str, Any]]:
     return sorted(
         [
             {"src": edge.src, "dst": edge.dst, "type": edge.type, "attrs": edge.attrs}
