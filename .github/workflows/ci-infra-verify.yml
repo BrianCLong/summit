@@ -1,0 +1,32 @@
+name: summit-infra-verify
+
+on:
+  pull_request:
+    paths:
+      - 'src/platform/infra/**'
+      - '.github/policies/infra/**'
+      - '.github/scripts/infra-verify.ts'
+      - '.github/workflows/ci-infra-verify.yml'
+
+jobs:
+  verify-infra:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+      - name: Install dependencies
+        run: pnpm install
+      - name: Test
+        run: pnpm test
+      - name: Verify Infrastructure and Emit Evidence
+        run: npx tsx .github/scripts/infra-verify.ts
+      - name: Upload Evidence Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence
+          path: evidence/

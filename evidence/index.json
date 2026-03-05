@@ -1,8 +1,32 @@
 {
-  "EVD-ADIDAS-IAC-001": "evidence/infra/report.json",
-  "evidence": {
-    "EVD-ADIDAS-IAC-001": {
-      "evidence_id": "EVD-ADIDAS-IAC-001",
+  "version": 1,
+  "items": {
+    "EVD-ADIDASCDK-IAC-001": {
+      "evidence_id": "EVD-ADIDASCDK-IAC-001",
+      "files": {
+        "report": "evidence/infra/report.json",
+        "metrics": "evidence/infra/metrics.json",
+        "stamp": "evidence/infra/stamp.json"
+      }
+    },
+    "EVD-ADIDASCDK-POL-001": {
+      "evidence_id": "EVD-ADIDASCDK-POL-001",
+      "files": {
+        "report": "evidence/policy/report.json",
+        "metrics": "evidence/policy/metrics.json",
+        "stamp": "evidence/policy/stamp.json"
+      }
+    },
+    "EVD-ADIDASCDK-SCF-001": {
+      "evidence_id": "EVD-ADIDASCDK-SCF-001",
+      "files": {
+        "report": "evidence/scaffolder/report.json",
+        "metrics": "evidence/scaffolder/metrics.json",
+        "stamp": "evidence/scaffolder/stamp.json"
+      }
+    },
+    "EVD-ADIDASCDK-KG-001": {
+      "evidence_id": "EVD-ADIDASCDK-KG-001",
       "files": {
         "report": "evidence/infra/report.json",
         "metrics": "evidence/infra/metrics.json",
