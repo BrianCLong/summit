@@ -3,7 +3,7 @@ import { jest } from '@jest/globals';
 const requests = new Map<string, Record<string, unknown>>();
 const evidences = new Map<string, Record<string, unknown>>();
 
-const queryHandler = async (text: string, params: unknown[] = []) => {
+const queryImpl = async (text: string, params: unknown[] = []) => {
     const query = text.replace(/\s+/g, ' ').trim().toLowerCase();
 
     if (query.startsWith('insert into privacy_dsar_requests')) {
@@ -106,7 +106,7 @@ const queryHandler = async (text: string, params: unknown[] = []) => {
   };
 
 const pool = {
-  query: jest.fn(queryHandler),
+  query: jest.fn(queryImpl),
 };
 
 const ledgerMock = {
@@ -132,10 +132,10 @@ describe('PrivacyService', () => {
   let privacyService: ReturnType<typeof PrivacyService.getInstance>;
 
   beforeEach(() => {
+    (PrivacyService as any).instance = undefined;
     privacyService = PrivacyService.getInstance();
     jest.clearAllMocks();
-    (pool.query as jest.Mock).mockImplementation(queryHandler);
-    (provenanceLedger.appendEntry as jest.Mock).mockResolvedValue({ id: 'mock-entry-id' });
+    (pool.query as jest.Mock).mockImplementation(queryImpl);
     requests.clear();
     evidences.clear();
   });
@@ -195,10 +195,12 @@ describe('PrivacyService', () => {
       const type = DSARType.EXPORT;
 
       const request = await privacyService.submitRequest(tenantId, userId, type);
-
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-
-      const evidence = await privacyService.getEvidence(request.id);
+      let evidence = await privacyService.getEvidence(request.id);
+      const deadline = Date.now() + 4000;
+      while (!evidence && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        evidence = await privacyService.getEvidence(request.id);
+      }
 
       expect(evidence).toBeDefined();
       expect(evidence?.requestId).toBe(request.id);

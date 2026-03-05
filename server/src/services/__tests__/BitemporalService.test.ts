@@ -1,115 +1,128 @@
-import { beforeEach, describe, expect, it, jest } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-type StoredRow = {
+type StoredFact = {
   id: string;
   tenant_id: string;
   kind: string;
   props: Record<string, unknown>;
-  valid_from: Date;
-  valid_to: Date;
-  transaction_from: Date;
-  transaction_to: Date;
+  valid_from: string;
+  valid_to: string;
+  transaction_from: string;
+  transaction_to: string;
 };
 
-const FAR_FUTURE = new Date('9999-12-31T23:59:59.000Z');
-const rows: StoredRow[] = [];
+const FAR_FUTURE = '9999-12-31 23:59:59+00';
+const store: StoredFact[] = [];
+const getPostgresPoolMock = jest.fn();
 
-const mockQuery = jest.fn(async (sql: string, params: unknown[] = []) => {
-  const normalized = sql.replace(/\s+/g, ' ').trim().toUpperCase();
+function toMs(value: string): number {
+  if (value === FAR_FUTURE) return Number.MAX_SAFE_INTEGER;
+  return new Date(value).getTime();
+}
 
-  if (
-    normalized.startsWith('BEGIN') ||
-    normalized.startsWith('COMMIT') ||
-    normalized.startsWith('ROLLBACK')
-  ) {
-    return { rows: [], rowCount: 0 };
-  }
+const poolMock = {
+  async connect() {
+    return {
+      async query(sql: string, params: any[] = []) {
+        if (sql === 'BEGIN' || sql === 'COMMIT' || sql === 'ROLLBACK') {
+          return { rows: [], rowCount: 0 };
+        }
 
-  if (normalized.startsWith('UPDATE BITEMPORAL_ENTITIES')) {
-    const [id, tenantId, expectedTxTo, validFrom, nextTxTo] = params as string[];
-    let count = 0;
-    for (const row of rows) {
-      if (
-        row.id === id &&
-        row.tenant_id === tenantId &&
-        row.transaction_to.toISOString() === new Date(expectedTxTo).toISOString() &&
-        row.valid_from.toISOString() === new Date(validFrom).toISOString()
-      ) {
-        row.transaction_to = new Date(nextTxTo);
-        count += 1;
-      }
-    }
-    return { rows: [], rowCount: count };
-  }
+        if (sql.includes('UPDATE bitemporal_entities')) {
+          const [id, tenantId, transactionTo, validFrom, transactionFrom] = params;
+          let updated = 0;
+          for (const fact of store) {
+            if (
+              fact.id === id &&
+              fact.tenant_id === tenantId &&
+              fact.transaction_to === transactionTo &&
+              fact.valid_from === validFrom
+            ) {
+              fact.transaction_to = transactionFrom;
+              updated += 1;
+            }
+          }
+          return { rows: [], rowCount: updated };
+        }
 
-  if (normalized.startsWith('INSERT INTO BITEMPORAL_ENTITIES')) {
-    const [id, tenantId, kind, props, validFrom, validTo, transactionFrom] =
-      params as string[];
-    rows.push({
-      id,
-      tenant_id: tenantId,
-      kind,
-      props: JSON.parse(props),
-      valid_from: new Date(validFrom),
-      valid_to: new Date(validTo),
-      transaction_from: new Date(transactionFrom),
-      transaction_to: new Date(FAR_FUTURE),
-    });
-    return { rows: [], rowCount: 1 };
-  }
+        if (sql.includes('INSERT INTO bitemporal_entities')) {
+          const [id, tenantId, kind, props, validFrom, validTo, transactionFrom] = params;
+          store.push({
+            id,
+            tenant_id: tenantId,
+            kind,
+            props: JSON.parse(props),
+            valid_from: validFrom,
+            valid_to: validTo,
+            transaction_from: transactionFrom,
+            transaction_to: FAR_FUTURE,
+          });
+          return { rows: [], rowCount: 1 };
+        }
 
-  if (normalized.startsWith('SELECT * FROM BITEMPORAL_ENTITIES')) {
-    const [id, tenantId, asOfValid, asOfTx] = params as string[];
-    const validAt = new Date(asOfValid).getTime();
-    const txAt = new Date(asOfTx).getTime();
+        return { rows: [], rowCount: 0 };
+      },
+      release() {},
+    };
+  },
+  async query(_sql: string, params: any[] = []) {
+    const [id, tenantId, asOfValid, asOfTransaction] = params;
+    const validMs = toMs(asOfValid);
+    const transactionMs = toMs(asOfTransaction);
 
-    const match = rows
-      .filter((row) => {
+    const match = store
+      .filter((fact) => {
         return (
-          row.id === id &&
-          row.tenant_id === tenantId &&
-          row.valid_from.getTime() <= validAt &&
-          row.valid_to.getTime() > validAt &&
-          row.transaction_from.getTime() <= txAt &&
-          row.transaction_to.getTime() > txAt
+          fact.id === id &&
+          fact.tenant_id === tenantId &&
+          toMs(fact.valid_from) <= validMs &&
+          toMs(fact.valid_to) > validMs &&
+          toMs(fact.transaction_from) <= transactionMs &&
+          toMs(fact.transaction_to) > transactionMs
         );
       })
-      .sort(
-        (a, b) =>
-          b.transaction_from.getTime() - a.transaction_from.getTime(),
-      )[0];
+      .sort((a, b) => toMs(b.transaction_from) - toMs(a.transaction_from))[0];
 
-    return { rows: match ? [match] : [], rowCount: match ? 1 : 0 };
-  }
+    if (!match) return { rows: [], rowCount: 0 };
 
-  return { rows: [], rowCount: 0 };
-});
-
-const mockClient = {
-  query: mockQuery,
-  release: jest.fn(),
-};
-
-const mockPool = {
-  connect: jest.fn(async () => mockClient),
-  query: mockQuery,
+    return {
+      rows: [
+        {
+          ...match,
+          valid_from: new Date(match.valid_from),
+          valid_to:
+            match.valid_to === FAR_FUTURE
+              ? new Date('9999-12-31T23:59:59.000Z')
+              : new Date(match.valid_to),
+          transaction_from: new Date(match.transaction_from),
+          transaction_to:
+            match.transaction_to === FAR_FUTURE
+              ? new Date('9999-12-31T23:59:59.000Z')
+              : new Date(match.transaction_to),
+        },
+      ],
+      rowCount: 1,
+    };
+  },
 };
 
 jest.unstable_mockModule('../../db/postgres.js', () => ({
-  getPostgresPool: jest.fn(() => mockPool),
+  getPostgresPool: getPostgresPoolMock,
 }));
 
-const { bitemporalService } = await import('../BitemporalService.js');
-
 describe('Bitemporal Service (Task #109)', () => {
+  let bitemporalService: any;
   const tenantId = 'test-tenant';
   const entityId = 'target-entity-123';
 
+  beforeAll(async () => {
+    getPostgresPoolMock.mockReturnValue(poolMock);
+    ({ bitemporalService } = await import('../BitemporalService.js'));
+  });
+
   beforeEach(() => {
-    rows.length = 0;
-    mockQuery.mockClear();
-    mockPool.connect.mockClear();
-    mockClient.release.mockClear();
+    store.length = 0;
+    getPostgresPoolMock.mockReturnValue(poolMock);
   });
 
   it('should record a fact and allow point-in-time retrieval', async () => {
@@ -125,7 +138,7 @@ describe('Bitemporal Service (Task #109)', () => {
     });
 
     const current = await bitemporalService.queryAsOf(entityId, tenantId);
-    expect(current).toBeDefined();
+    expect(current).not.toBeNull();
     expect(current?.props.name).toBe('John Doe');
 
     const pastValid = await bitemporalService.queryAsOf(
@@ -138,40 +151,36 @@ describe('Bitemporal Service (Task #109)', () => {
 
   it('should support system correction (transaction time travel)', async () => {
     const validFrom = new Date('2026-01-01T00:00:00Z');
+
     await bitemporalService.recordFact({
       id: entityId,
       tenantId,
       kind: 'Person',
       props: { name: 'John Doe', status: 'Active' },
       validFrom,
-      transactionFrom: new Date('2026-01-01T01:00:00Z'),
-      createdBy: 'test-user',
+      createdBy: 'seed-user',
     });
 
-    const beforeCorrection = new Date('2026-01-01T01:30:00Z');
+    const transactionBeforeCorrection = new Date();
+    await new Promise((resolve) => setTimeout(resolve, 5));
+
     await bitemporalService.recordFact({
       id: entityId,
       tenantId,
       kind: 'Person',
       props: { name: 'Jane Doe', status: 'Active' },
       validFrom,
-      transactionFrom: new Date('2026-01-01T02:00:00Z'),
       createdBy: 'corrector',
     });
 
-    const current = await bitemporalService.queryAsOf(
-      entityId,
-      tenantId,
-      new Date('2026-01-01T03:00:00Z'),
-      new Date('2026-01-01T03:00:00Z'),
-    );
+    const current = await bitemporalService.queryAsOf(entityId, tenantId);
     expect(current?.props.name).toBe('Jane Doe');
 
     const whatWeKnewThen = await bitemporalService.queryAsOf(
       entityId,
       tenantId,
-      new Date('2026-01-01T03:00:00Z'),
-      beforeCorrection,
+      new Date(),
+      transactionBeforeCorrection,
     );
     expect(whatWeKnewThen?.props.name).toBe('John Doe');
   });

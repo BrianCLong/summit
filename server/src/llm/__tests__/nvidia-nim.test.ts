@@ -2,14 +2,10 @@ import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import { NvidiaNimProvider } from '../providers/nvidia-nim.js';
 import { ChatCompletionRequest } from '../types.js';
 import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { join } from 'path';
 
 const nimTextFixture = JSON.parse(
-  readFileSync(join(__dirname, 'fixtures/nim_text.json'), 'utf8')
+  readFileSync(join(process.cwd(), 'src/llm/__tests__/fixtures/nim_text.json'), 'utf8')
 );
 
 describe('NvidiaNimProvider', () => {

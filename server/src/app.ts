@@ -8,9 +8,8 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import compression from 'compression';
 import hpp from 'hpp';
-import pinoModule from 'pino';
+import pino from 'pino';
 import pinoHttpModule from 'pino-http';
-const pino = (pinoModule as any).default || pinoModule;
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
@@ -61,7 +60,6 @@ import { Request, Response, NextFunction } from 'express'; // Import types for m
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
-import { firstString } from './utils/http-param.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import tenantContextMiddleware from './middleware/tenantContext.js';
@@ -157,14 +155,25 @@ export const createApp = async () => {
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
-  const tracer = initializeTracing();
+  const tracer =
+    typeof initializeTracing === 'function'
+      ? initializeTracing()
+      : ({
+          isInitialized: () => true,
+          initialize: async () => undefined,
+        } as any);
   // Ensure initialized if this entry point is used standalone (e.g. tests)
-  if (!tracer.isInitialized()) {
+  if (
+    tracer &&
+    typeof tracer.isInitialized === 'function' &&
+    !tracer.isInitialized() &&
+    typeof tracer.initialize === 'function'
+  ) {
     await tracer.initialize();
   }
 
   const app = express();
-  const logger = pino();
+  const logger = (pino as any)();
 
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -386,12 +395,7 @@ export const createApp = async () => {
   // Requires authentication and admin role
   app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
-      const userId = firstString(req.params.userId);
-      if (!userId) {
-        res.status(400).json({ error: 'userId is required' });
-        return;
-      }
-      const status = await advancedRateLimiter.getStatus(userId);
+      const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });

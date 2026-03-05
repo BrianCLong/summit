@@ -1,26 +1,29 @@
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import type { Entity, Edge } from '../../graph/types.js';
+import { jest, describe, it, expect, beforeAll, beforeEach } from '@jest/globals';
+import type { Entity } from '../../graph/types.js';
 
 // Mock functions declared before mocks
 const mockRunCypher = jest.fn();
 const mockGetDriver = jest.fn();
 
-// ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../graph/neo4j', () => ({
+jest.unstable_mockModule('../../graph/neo4j.js', () => ({
   runCypher: mockRunCypher,
   getDriver: mockGetDriver,
 }));
 
-// Dynamic imports AFTER mocks are set up
-const { Neo4jGraphService } = await import('../GraphService.js');
-const { runCypher } = await import('../../graph/neo4j.js');
-
 describe('Neo4jGraphService', () => {
-  const service = Neo4jGraphService.getInstance();
+  let Neo4jGraphService: any;
+  let service: any;
   const tenantId = 'test-tenant';
+
+  beforeAll(async () => {
+    ({ Neo4jGraphService } = await import('../GraphService.js'));
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // @ts-ignore - reset singleton between tests to ensure mocked module is used.
+    Neo4jGraphService.instance = undefined;
+    service = Neo4jGraphService.getInstance();
   });
 
   describe('getEntity', () => {
@@ -40,7 +43,7 @@ describe('Neo4jGraphService', () => {
 
       const result = await service.getEntity(tenantId, 'e1');
       expect(result).toEqual(mockEntity);
-      expect(runCypher).toHaveBeenCalledWith(expect.stringContaining('MATCH (n:Entity {id: $id, tenantId: $tenantId})'), { id: 'e1', tenantId });
+      expect(mockRunCypher).toHaveBeenCalledWith(expect.stringContaining('MATCH (n:Entity {id: $id, tenantId: $tenantId})'), { id: 'e1', tenantId });
     });
 
     it('should return null if not found', async () => {
@@ -56,7 +59,7 @@ describe('Neo4jGraphService', () => {
        mockRunCypher.mockResolvedValue([{ entity: mockEntity }]);
 
        await service.findEntities(tenantId, { ids: ['e1'] });
-       expect(runCypher).toHaveBeenCalledWith(expect.stringContaining('n.id IN $ids'), expect.objectContaining({ ids: ['e1'] }));
+       expect(mockRunCypher).toHaveBeenCalledWith(expect.stringContaining('n.id IN $ids'), expect.objectContaining({ ids: ['e1'] }));
     });
   });
 
@@ -69,7 +72,7 @@ describe('Neo4jGraphService', () => {
 
           const result = await service.upsertEntity(tenantId, input);
           expect(result).toEqual(output);
-          expect(runCypher).toHaveBeenCalledWith(expect.stringContaining('MERGE (n:Entity'), expect.anything());
+          expect(mockRunCypher).toHaveBeenCalledWith(expect.stringContaining('MERGE (n:Entity'), expect.anything());
       });
   });
 });

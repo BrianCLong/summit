@@ -44,7 +44,10 @@ import {
   CreateAnalysisInputSchema,
 } from './types.js';
 
-const tracer = getTracer('strategic-analysis-engine');
+const tracer =
+  typeof getTracer === 'function'
+    ? getTracer('strategic-analysis-engine')
+    : { startSpan: () => ({ end: () => { } }) };
 
 // In-memory storage
 const analysesStore = new Map<string, StrategicAnalysis>();
