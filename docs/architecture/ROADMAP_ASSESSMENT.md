@@ -8,7 +8,7 @@ Based on the architectural documents (ADR-003, ADR-050, Ontology Engine Referenc
 **Confidence:** High (based on concrete architectural artifacts in the repository)
 
 1. **Ontology & semantic layer — 🟢 (Solid)**
-   - *Evidence:* `docs/architecture/ONTOLOGY_ENGINE.md`, `ADR-003-graph-first-intelligence-engine.md`, `ADR-050-Knowledge-OS-Data-Model.md`.
+   - *Evidence:* `docs/architecture/ONTOLOGY_ENGINE.md`, `docs/architecture/adr/ADR-003-graph-first-intelligence-engine.md`, `ADR-050-Knowledge-OS-Data-Model.md`.
    - *Details:* The platform enforces a hybrid data model (Vector Store + Graph DB). The Neo4j graph uses a strict, canonical data model with 21 entity types, 30 relationship types, and mandatory policy labels. The Ontology Engine handles RDF/XML, Turtle, JSON-LD, and validates against SHACL shapes and OPA.
 
 2. **Entity resolution engine — 🟡 (Partial - Med/High)**
