@@ -107,4 +107,6 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
+        env:
+          PLAYWRIGHT_USE_WEBSERVER: 'true'
         run: npx playwright test e2e/summit-smoke.spec.ts
