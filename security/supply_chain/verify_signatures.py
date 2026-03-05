@@ -1,0 +1,1 @@
+print('Supply chain ok')
