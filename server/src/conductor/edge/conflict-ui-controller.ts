@@ -3,7 +3,6 @@
 import { Request, Response } from 'express';
 import { CRDTConflictResolver } from './crdt-conflict-resolver.js';
 import logger from '../../config/logger.js';
-import { firstString } from '../../utils/http-param.js';
 
 export class ConflictUIController {
   private conflictResolver: CRDTConflictResolver;
@@ -22,13 +21,13 @@ export class ConflictUIController {
    */
   async getConflictDeltas(req: Request, res: Response): Promise<void> {
     try {
-      const entityId = firstString(req.params.entityId);
+      const { entityId } = req.params;
       const tenantId = req.headers['x-tenant-id'] as string;
 
-      if (!entityId || !tenantId) {
+      if (!tenantId) {
         res.status(400).json({
           code: 'MISSING_TENANT',
-          message: 'Tenant ID and entity ID required',
+          message: 'Tenant ID required',
           traceId: res.locals.traceId,
         });
         return;
@@ -88,14 +87,14 @@ export class ConflictUIController {
    */
   async resolveConflicts(req: Request, res: Response): Promise<void> {
     try {
-      const entityId = firstString(req.params.entityId);
+      const { entityId } = req.params;
       const tenantId = req.headers['x-tenant-id'] as string;
       const { manualOverrides, approver, resolutionRationale } = req.body;
 
-      if (!entityId || !tenantId) {
+      if (!tenantId) {
         res.status(400).json({
           code: 'MISSING_TENANT',
-          message: 'Tenant ID and entity ID required',
+          message: 'Tenant ID required',
           traceId: res.locals.traceId,
         });
         return;
@@ -130,8 +129,8 @@ export class ConflictUIController {
         tenantId,
         allFieldConflicts,
         {
-          userId: (req.headers['x-user-id'] as string) || 'system',
-          userRole: (req.headers['x-user-role'] as string) || 'user',
+          userId: (req as any).user?.sub || (req as any).user?.id || 'system',
+          userRole: (req as any).user?.role || 'user',
           manualOverrides,
           approver,
         },
@@ -177,14 +176,14 @@ export class ConflictUIController {
    */
   async getConflictHistory(req: Request, res: Response): Promise<void> {
     try {
-      const entityId = firstString(req.params.entityId);
+      const { entityId } = req.params;
       const tenantId = req.headers['x-tenant-id'] as string;
-      const limit = parseInt(firstString(req.query.limit) || '50', 10) || 50;
+      const limit = parseInt(req.query.limit as string) || 50;
 
-      if (!entityId || !tenantId) {
+      if (!tenantId) {
         res.status(400).json({
           code: 'MISSING_TENANT',
-          message: 'Tenant ID and entity ID required',
+          message: 'Tenant ID required',
           traceId: res.locals.traceId,
         });
         return;
@@ -273,8 +272,11 @@ export class ConflictUIController {
               tenantId,
               allFieldConflicts,
               {
-                userId: (req.headers['x-user-id'] as string) || 'batch-system',
-                userRole: (req.headers['x-user-role'] as string) || 'admin',
+                userId:
+                  (req as any).user?.sub ||
+                  (req as any).user?.id ||
+                  'batch-system',
+                userRole: (req as any).user?.role || 'admin',
                 approver,
               },
             );
