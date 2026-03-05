@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit ROI/TCO Calculator Model
 
 **Purpose:** Framework for calculating return on investment and total cost of ownership for Summit deployments. Use to build business cases and justify pilot/production investments.
