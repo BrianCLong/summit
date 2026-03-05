@@ -1,73 +1,40 @@
 # Summit Evidence Map
-# Source: docs/governance/evidence-map.md
 
-status: Operational
-purpose: Defines the machine-verifiable evidence artifacts required for Governance, Risk, and Compliance (GRC) certification.
-reference: docs/governance/CONTROL_EVIDENCE_INDEX.md
+**Status:** Operational
+**Purpose:** Defines the machine-verifiable evidence artifacts required for Governance, Risk, and Compliance (GRC) certification.
+**Reference:** Extends `docs/governance/CONTROL_EVIDENCE_INDEX.md`.
 
-evidence:
-  # 1. Zero-Trust Data Governance (DT-001)
-  - id: data_access_logs
-    path: logs/audit/data_access_*.json
-    description: Immutable log of policy decisions for data access.
-    producer: PolicyEngine
-    verifier: scripts/audit/verify_logs.ts
+## 1. Zero-Trust Data Governance (DT-001)
 
-  - id: registry_validation_report
-    path: artifacts/evidence/governance/registry_check.json
-    description: Confirmation that all runtime assets exist in registry.
-    producer: scripts/ci/verify_data_registry.mjs
-    verifier: "CI Gate: Data Governance"
+| Evidence ID | Artifact Path | Description | Producer | Verifier |
+| :--- | :--- | :--- | :--- | :--- |
+| `data_access_logs` | `logs/audit/data_access_*.json` | Immutable log of policy decisions for data access. | `PolicyEngine` | `scripts/audit/verify_logs.ts` |
+| `registry_validation_report` | `artifacts/evidence/governance/registry_check.json` | Confirmation that all runtime assets exist in registry. | `scripts/ci/verify_data_registry.mjs` | `CI Gate: Data Governance` |
 
-  # 2. Runtime Assurance (RT-001)
-  - id: drift_metrics
-    path: metrics/model/drift_*.json
-    description: Statistical distance metrics (PSI/KL) vs training baseline.
-    producer: ModelMonitor
-    verifier: scripts/monitor/alert_on_drift.py
+## 2. Runtime Assurance (RT-001)
 
-  - id: intervention_events
-    path: logs/interventions/circuit_breaker_*.json
-    description: Log of automated safety stops triggered by policy.
-    producer: PolicyEngine
-    verifier: scripts/audit/count_interventions.ts
+| Evidence ID | Artifact Path | Description | Producer | Verifier |
+| :--- | :--- | :--- | :--- | :--- |
+| `drift_metrics` | `metrics/model/drift_*.json` | Statistical distance metrics (PSI/KL) vs training baseline. | `ModelMonitor` | `scripts/monitor/alert_on_drift.py` |
+| `intervention_events` | `logs/interventions/circuit_breaker_*.json` | Log of automated safety stops triggered by policy. | `PolicyEngine` | `scripts/audit/count_interventions.ts` |
+| `risk_telemetry` | `metrics/risk/score_*.json` | Real-time risk scores computed for operations. | `PolicyEngine` | `OpsDashboard` |
 
-  - id: risk_telemetry
-    path: metrics/risk/score_*.json
-    description: Real-time risk scores computed for operations.
-    producer: PolicyEngine
-    verifier: OpsDashboard
+## 3. Operational Oversight (OP-001)
 
-  # 3. Operational Oversight (OP-001)
-  - id: council_meeting_minutes
-    path: governance/records/minutes/YYYY-MM-DD.md
-    description: Signed minutes of Governance Council.
-    producer: Governance Secretariat
-    verifier: scripts/governance/verify_quorum.ts
+| Evidence ID | Artifact Path | Description | Producer | Verifier |
+| :--- | :--- | :--- | :--- | :--- |
+| `council_meeting_minutes` | `governance/records/minutes/YYYY-MM-DD.md` | Signed minutes of Governance Council. | Governance Secretariat | `scripts/governance/verify_quorum.ts` |
+| `decision_register` | `governance/records/decisions.yaml` | Ledger of strategic governance approvals. | Governance Secretariat | `scripts/governance/verify_approvals.ts` |
 
-  - id: decision_register
-    path: governance/records/decisions.yaml
-    description: Ledger of strategic governance approvals.
-    producer: Governance Secretariat
-    verifier: scripts/governance/verify_approvals.ts
+## 4. Regulatory Alignment (Core)
 
-  # 4. Regulatory Alignment (Core)
-  - id: system_inventory
-    path: artifacts/evidence/governance/ai-inventory.json
-    description: Complete AI system list.
-    framework_mapping: NIST AI RMF (MAP)
+| Evidence ID | Artifact Path | Description | Framework Mapping |
+| :--- | :--- | :--- | :--- |
+| `system_inventory` | `artifacts/evidence/governance/ai-inventory.json` | Complete AI system list. | NIST AI RMF (MAP) |
+| `provenance_trace` | `.evidence/provenance.json` | SLSA-compliant build/data provenance. | EU AI Act (Art 10) |
+| `model_cards` | `docs/models/*.md` | Transparency disclosures. | EU AI Act (Art 13) |
 
-  - id: provenance_trace
-    path: .evidence/provenance.json
-    description: SLSA-compliant build/data provenance.
-    framework_mapping: EU AI Act (Art 10)
-
-  - id: model_cards
-    path: docs/models/*.md
-    description: Transparency disclosures.
-    framework_mapping: EU AI Act (Art 13)
-
-validation_policy:
-  - All artifacts must be present in the Release Evidence Bundle.
-  - JSON artifacts must satisfy their defined JSON Schemas.
-  - Logs must be cryptographically chained (where applicable).
+## Validation Policy
+*   All artifacts must be present in the **Release Evidence Bundle**.
+*   JSON artifacts must satisfy their defined JSON Schemas.
+*   Logs must be cryptographically chained (where applicable).

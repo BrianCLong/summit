@@ -7,7 +7,6 @@
 #   jobs:
 #     pipeline:
 #       uses: ./.github/workflows/_golden-path-pipeline.yml
-#       with:
 #         service: my-service
 #       secrets: inherit
 
@@ -119,14 +118,11 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
           cache: 'pnpm'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
-        with:
-
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -135,7 +131,6 @@ jobs:
 
       - name: Setup pnpm cache
         uses: actions/cache@v4 # v4
-        with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-store-
@@ -195,14 +190,11 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
           cache: 'pnpm'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
-        with:
-
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -211,7 +203,6 @@ jobs:
 
       - name: Setup pnpm cache
         uses: actions/cache@v4 # v4
-        with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-store-
@@ -234,7 +225,6 @@ jobs:
 
       - name: Upload Coverage
         uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
-        with:
           directory: ${{ inputs.working-directory }}/coverage
           flags: ${{ inputs.service }}
           fail_ci_if_error: false
@@ -264,19 +254,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v4
-        with:
           fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-        with:
           cache: 'pnpm'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
-        with:
-
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -292,7 +278,6 @@ jobs:
 
       - name: Trivy - Filesystem Scan
         uses: aquasecurity/trivy-action@6e7b7d1fd3e4fef0c5fa8cce1229c54b2c9bd0d8 # v0.24.0
-        with:
           scan-type: "fs"
           scan-ref: ${{ inputs.working-directory }}
           format: "sarif"
@@ -301,7 +286,6 @@ jobs:
 
       - name: Upload Trivy Results
         uses: github/codeql-action/upload-sarif@45c373516f557556c15d420e3f5e0aa3d64366bc # v3
-        with:
           sarif_file: "trivy-fs-results.sarif"
 
   # ============================================================================
@@ -331,7 +315,6 @@ jobs:
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
-        with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -339,7 +322,6 @@ jobs:
       - name: Extract Metadata
         id: meta
         uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
-        with:
           images: ghcr.io/${{ github.repository }}/${{ inputs.service }}
           tags: |
             type=sha,prefix=
@@ -350,7 +332,6 @@ jobs:
       - name: Build and Push
         id: build
         uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5
-        with:
           context: ${{ inputs.working-directory }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -362,7 +343,6 @@ jobs:
 
       - name: Generate SBOM
         uses: anchore/sbom-action@0b82b0b1a22399a1c542d4d656f70cd903571b5c # v0
-        with:
           image: ghcr.io/${{ github.repository }}/${{ inputs.service }}@${{ steps.build.outputs.digest }}
           output-file: sbom.spdx.json
 
@@ -378,7 +358,6 @@ jobs:
 
       - name: Upload SBOM
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
           name: sbom-${{ inputs.service }}
           path: sbom.spdx.json
 
@@ -455,7 +434,6 @@ jobs:
     name: Canary + Rollback Guard
     needs: verify
     uses: ./.github/workflows/golden-path/_canary-rollback.yml
-    with:
       service: ${{ inputs.service }}
       environment: ${{ inputs.environment }}
       prometheus-url: ${{ inputs['prometheus-url'] }}
