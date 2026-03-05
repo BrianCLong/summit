@@ -1,47 +1,68 @@
-# Summit Underwriting Intelligence (SUI) Operations Plan
+# SUI Operations Plan
 
-## 1. Overview
-This document details the operational strategy for Summit Underwriting Intelligence (SUI), covering ingestion, storage, SLOs, cost boundaries, runbooks, and CI checks for GA.
+## Operating model
 
-## 2. Ingestion & Storage Strategy
+SUI runs as an ingestion-first, snapshot-centric platform with deterministic scoring jobs and
+policy-gated release controls.
 
-### Offline-First Ingestion
-- Ingestion connectors (OSINT, Attack Surface, CVE Intel) run as controlled batch jobs, not real-time API calls.
-- **Snapshot Storage:** Each scoring run operates against an immutable snapshot of the entity's data. This guarantees determinism for UDR-AC benchmarks and safe multi-tenant isolation.
-- **Residency-aware Deployment:** Data is partitioned by tenant and region, using cryptographic envelopes per tenant.
+## Job orchestration
 
-## 3. SLOs (Service Level Objectives)
+1. Connector ingestion jobs collect external/internal signals.
+2. Data normalization and provenance stamping jobs produce immutable snapshots.
+3. Scoring/evaluation jobs run against snapshot IDs only.
+4. Drift monitors compare current vs baseline snapshots per tenant cadence.
+5. Remediation orchestrators generate ticket/export actions.
 
-- **API Latency (`/score`):** Target p95 latency < 300ms on a warmed cache. (Note: These are initial assumptions and should be adjusted per customer tier).
-- **Portfolio Drift Jobs:** Scheduled execution on a daily/hourly cadence per customer tier, with strict bounded runtimes to prevent resource exhaustion.
-- **UDR-AC Benchmark:** Must achieve a score ≥ 0.99 for all deterministic evaluations.
+## Snapshot storage
 
-## 4. Cost Caps & Boundaries
+- Immutable object storage with content-addressed snapshot IDs.
+- Tenant + region partitioning to enforce residency and legal boundaries.
+- TTL and retention are policy-configured by data class.
 
-- **Hard Caps Per Tenant:**
-  - Maximum entities monitored.
-  - Maximum ingestion bandwidth (GB/day or requests/day to connectors).
-  - Maximum number of drift alerts per day.
+## SLOs (initial targets)
 
-## 5. Rollout & Rollback Strategy
+- `/score` p95 latency: <300ms on warm model cache.
+- Daily drift runs complete within assigned tenant window.
+- Evidence generation success: 99.9% of scheduled eval runs.
+- Alerting MTTA for scoring pipeline incidents: <15 minutes.
 
-- Deployments utilize snapshot-centric scoring, allowing easy reversion to previous model weights or feature extraction logic.
-- Rollbacks are triggered if:
-  - Evidence validation fails.
-  - Unexpected score spikes occur across a large portion of a portfolio.
-  - Connector data schema migrations fail.
+## Cost controls
 
-## 6. Runbooks
+- Per-tenant caps: monitored entities, ingestion throughput, drift alerts/day.
+- Budget alarms on connector and model-compute spend envelopes.
+- Priority tiers for scoring frequency to bound peak compute.
 
-Critical operational runbooks to be developed:
-- `runbooks/bad-score-spike.md`: Handling sudden shifts in portfolio risk scores.
-- `runbooks/connector-outage.md`: Dealing with upstream data feed failures (e.g., CVE intel down).
-- `runbooks/schema-migration-rollback.md`: Reverting failed database/graph schema updates.
-- `runbooks/evidence-verify-fail.md`: Troubleshooting when CI evidence generation or validation fails.
+## Monitoring and alerting
 
-## 7. CI Checks & Software Supply Chain
+- Metrics: ingestion lag, scoring latency, reproducibility drift, alert precision.
+- Traces: request-to-evidence trace IDs across API and pipeline jobs.
+- Logs: structured, tenant-scoped, redacted for sensitive fields.
+- Alerts: SLO burn rate, evidence gate failures, policy denials, connector outages.
 
-- **Evidence First CI:** CI fails if evidence artifacts (`report.json`, `metrics.json`, `stamp.json`) do not validate or if determinism drifts.
-- **SBOM Generation:** A Software Bill of Materials (SBOM) is generated per build using `syft scan` with `--output cyclonedx-json=PATH` to track dependencies, particularly third-party scanners or data feeds.
-- **Provenance:** SLSA-style attestations for builds.
-- **Dependency Management:** Strict version pinning and offline build support to maintain reproducibility.
+## Runbooks
+
+- Connector outage handling and backfill strategy.
+- Unexpected score spike triage.
+- Schema migration rollback.
+- Evidence verification failure handling.
+- Tenant isolation incident containment.
+
+## Rollout and rollback
+
+- Progressive rollout by tenant cohorts.
+- Canary policy: new model versions limited to pilot cohort first.
+- Rollback trigger: calibration degradation, UDR-AC drift, or policy gate failure.
+- Rollback action: pin prior model + prior snapshot baseline and replay.
+
+## Residency-aware deployment
+
+- Regional compute pools with no cross-region raw artifact transfer.
+- Cross-region federation uses derived metrics only.
+- Key management and audit logs remain region-local by default.
+
+## CI/Release checks
+
+- Reproducible build verification.
+- SBOM generation (CycloneDX/SPDX) and artifact signatures.
+- Determinism/evidence gate.
+- Policy gate and security scan bundle.
