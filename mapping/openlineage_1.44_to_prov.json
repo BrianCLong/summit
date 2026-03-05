@@ -1,0 +1,17 @@
+{
+  "openlineage_release": "1.44.0",
+  "prov_version": "PROV-JSONLD-2024-07-04",
+  "mappings": [
+    {
+      "source": "OutputDataset",
+      "versioned_facet": "schemaDataset.v1",
+      "prov": {
+        "type": "Entity",
+        "id": "iri(namespace,name)",
+        "label": "schemaDataset.fields[*].name",
+        "location": "uri(namespace,name)",
+        "derivedFrom": "InputDataset[*].id"
+      }
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 import hashlib
 from typing import Dict, List, Optional
+
+
 class EmbeddingCache:
     def __init__(self, v="all-MiniLM-L6-v2"):
         self.v = v; self.cache = {}
