@@ -118,15 +118,17 @@
     "verify:governance": "npx tsx scripts/compliance/verify_governance.ts",
     "verify:compliance": "npx tsx scripts/compliance/verify_compliance_drift.ts",
     "compliance:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
+    "ga:evidence": "npx tsx scripts/compliance/generate_evidence.ts",
     "regulatory:build": "npx tsx cli/src/cli.ts regulatory build",
     "regulatory:diff": "npx tsx cli/src/cli.ts regulatory diff",
     "generate:sbom": "npx tsx scripts/compliance/generate_sbom.ts",
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot"
   },
   "keywords": [
     "intelligence-analysis",
@@ -275,7 +277,6 @@
       "ignoreCves": []
     },
     "overrides": {
-      "change-case-all": "https://registry.npmjs.org/change-case-all/-/change-case-all-1.0.15.tgz",
       "entities": "^4.5.0",
       "d3-color": ">=3.1.0",
       "node-fetch": ">=2.6.7",
@@ -313,7 +314,9 @@
       "fast-xml-parser": ">=5.3.4",
       "hono": ">=4.11.7",
       "multer": ">=2.0.2",
-      "busboy": ">=1.6.0"
+      "busboy": ">=1.6.0",
+      "@types/hapi__catbox": "npm:typescript@^5.3.3",
+      "@types/hapi__shot": "npm:typescript@^5.3.3"
     }
   }
 }

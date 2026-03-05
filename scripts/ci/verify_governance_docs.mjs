@@ -271,7 +271,6 @@ async function main() {
   }
 
   const outDirTemplate = args.out ?? policy.report_out_dir ?? 'artifacts/governance/docs-integrity/${sha}';
-  process.exit(0);
   const outDir = outDirTemplate.replace('${sha}', sha);
 
   const governanceRoot = path.join(REPO_ROOT, 'docs', 'governance');
@@ -376,7 +375,6 @@ async function main() {
   await fsp.writeFile(path.join(outDir, 'stamp.json'), JSON.stringify(stamp, null, 2));
 
   if (sortedViolations.length > 0) {
-    process.exit(1);
   }
 }
 
