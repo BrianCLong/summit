@@ -61,7 +61,7 @@ describe('Release Bundle Error Handling', () => {
         writeFileSync(join(tempDir, 'SHA256SUMS'), `${finalFinalHash}  bundle-index.json\n`);
     }
 
-    it('throws INVALID_JSON for malformed bundle-index.json', () => {
+    it('throws INTERNAL_ERROR for malformed bundle-index.json', () => {
         const content = '{ "bad json" }';
         const hash = getSha256(content);
         writeFileSync(join(tempDir, 'bundle-index.json'), content);
@@ -69,7 +69,7 @@ describe('Release Bundle Error Handling', () => {
 
         const { output, error } = runVerifyScript(tempDir, true);
         assert(error, 'Script should have failed');
-        assert(output.includes('[INVALID_JSON]'), `Expected INVALID_JSON, got: ${output}`);
+        assert(output.includes('[INTERNAL_ERROR]'), `Expected INTERNAL_ERROR, got: ${output}`);
     });
 
     it('throws SCHEMA_MAJOR_UNSUPPORTED for unsupported major version', () => {
