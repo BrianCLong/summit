@@ -1,0 +1,7 @@
+{
+  "eval_median": 0.9,
+  "missing_artifacts_rate": 0.0,
+  "policy_failure_rate": 0.0,
+  "test_pass_rate": 1.0,
+  "window": "14d"
+}
