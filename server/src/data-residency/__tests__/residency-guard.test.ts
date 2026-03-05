@@ -10,11 +10,10 @@ jest.unstable_mockModule('../../db/postgres.js', () => ({
 const { ResidencyGuard, ResidencyViolationError } = await import('../residency-guard.js');
 
 describe('ResidencyGuard', () => {
-  let guard: ResidencyGuard;
+  let guard: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    guard = ResidencyGuard.getInstance();
   });
 
   it('should allow access when region is allowed', async () => {
