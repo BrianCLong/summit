@@ -1,14 +1,20 @@
-# SHAP-IQ Standards
+# SHAP-IQ Explainability Standard (Deterministic Profile)
 
-## Import
-- Trained sklearn model
-- Feature schema
+## Scope
+This standard defines Summit's deterministic SHAP-IQ-style artifact contract for feature importance,
+pairwise interactions, and per-instance decision breakdown.
 
-## Export
-- JSON explanation artifacts (`report.json`, `metrics.json`, `stamp.json`)
-- Drift summary
+## Inputs
+- Trained model metadata (`model_id`, static coefficients for deterministic fixture path).
+- Feature schema (`feature_names`).
+- Batch rows (`rows`) without direct logging of raw values.
+
+## Outputs
+- `report.json`: evidence ID, feature importance, interaction matrix, decision breakdown.
+- `metrics.json`: mean attribution strength, interaction strength, runtime metrics.
+- `stamp.json`: deterministic SHA256 over canonical artifacts.
 
 ## Non-goals
-- UI dashboards
-- Cross-model comparison framework
-- Multi-run aggregation service
+- UI visualization.
+- Higher-order (>2) interaction decomposition.
+- Streaming explainability.

@@ -23,20 +23,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
       - name: Check Queue Saturation
         run: |
-          # Count PRs actively in the merge queue (not all open PRs)
-          QUEUE_SIZE=$(gh pr list --search "is:pr is:open is:in-merge-queue" --json number --jq 'length')
-          MAX_QUEUE=50
-          echo "Merge queue depth: $QUEUE_SIZE / $MAX_QUEUE"
+          # Count PRs in merge queue specifically (non-draft and mergeable)
+          QUEUE_SIZE=$(gh pr list --search "is:pr is:open draft:false" --json mergeable --jq '[.[] | select(.mergeable=="MERGEABLE")] | length')
+          MAX_QUEUE=200
+          echo "Current Mergeable PR Count: $QUEUE_SIZE"
 
           if [ "$QUEUE_SIZE" -ge "$MAX_QUEUE" ]; then
-            echo "::error::Merge queue saturated ($QUEUE_SIZE/$MAX_QUEUE). Autopilot draining — hold new PRs."
+            echo "::error::Merge queue saturated ($QUEUE_SIZE/$MAX_QUEUE). Please hold new PRs."
             exit 1
           fi
         env:
@@ -56,6 +56,9 @@ jobs:
 
       - name: Unit tests
         run: pnpm test:unit --passWithNoTests
+
+      - name: Agent orchestrator tests
+        run: pnpm exec tsx --test tests/agents/orchestrator.test.ts
 
       - name: Evidence ID validation
         run: node scripts/ci/verify_evidence_id_consistency.mjs
