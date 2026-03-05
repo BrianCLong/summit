@@ -3,6 +3,11 @@ name: RC Lockdown
 on:
   pull_request:
     branches: [main, release/*]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}

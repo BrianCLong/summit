@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { jest } from '@jest/globals';
 
 const axiosGetMock = jest.fn();
@@ -26,10 +27,11 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
     },
 }));
 
-const { FailoverOrchestrator } = await import('../FailoverOrchestrator.js');
+import type { FailoverOrchestrator as FailoverOrchestratorType } from '../FailoverOrchestrator.js';
+const { FailoverOrchestrator } = (await import('../FailoverOrchestrator.js')) as any;
 
 describe('FailoverOrchestrator', () => {
-    let orchestrator: FailoverOrchestrator;
+    let orchestrator: FailoverOrchestratorType;
 
     beforeEach(() => {
         jest.clearAllMocks();

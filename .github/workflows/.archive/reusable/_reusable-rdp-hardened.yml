@@ -23,4 +23,4 @@ jobs:
       - name: Setup Node with SHA pinning
         uses: actions/setup-node@3922559a89f3c5f0f047e7d67ca588b5c467abb2 # v4.1.0
         with:
-          node-version: '18'
+          node-version: '20'
