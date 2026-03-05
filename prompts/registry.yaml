@@ -1,20 +1,21 @@
 version: 1
 prompts:
-  - id: governed-agent-integration-reference
+  - id: govos-1-governed-multi-agent-os
     version: v1
-    path: prompts/architecture/governed-agent-integration-reference@v1.md
-    sha256: b3cc1444eeaf4755f9a7912fb42feeb6f1726cf1212cf50d06b1f0ea49e2bd53
-    description: Publish governed agent integration reference architecture and update roadmap status.
+    path: prompts/epics/govos-1-governed-multi-agent-os@v1.md
+    sha256: eb01ec40753e208354ad52e26d9000528dae5ee92b7f44782eea6513c200b873
+    description: Create GOVOS-1 governed multi-agent OS epic doc and register roadmap status.
     scope:
       paths:
-        - docs/architecture/governed-agent-integration-reference.md
+        - docs/epics/govos-1-governed-multi-agent-os.md
         - docs/roadmap/STATUS.json
-        - prompts/architecture/governed-agent-integration-reference@v1.md
+        - prompts/epics/govos-1-governed-multi-agent-os@v1.md
         - prompts/registry.yaml
+        - agents/examples/GOVOS_1_EPIC_DOC_20260208.json
       domains:
         - documentation
         - governance
-        - architecture
+        - epics
     verification:
       tiers_required:
         - C
@@ -151,33 +152,6 @@ prompts:
         - governance
         - documentation
         - cogwar
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: switchboard-flywheel-epic
-    version: v1
-    path: prompts/strategy/switchboard-flywheel-epic@v1.md
-    sha256: 952c74e698bb63a9b8bf4b654fdd0750ab40ecfb4bd973f595d39df0b2d545b0
-    description: Document Switchboard Flywheel strategy track with epic PR map, gates, and evidence artifacts.
-    scope:
-      paths:
-        - docs/roadmap/strategic/switchboard-flywheel-epic.md
-        - docs/roadmap/STATUS.json
-        - prompts/strategy/switchboard-flywheel-epic@v1.md
-        - prompts/registry.yaml
-        - agents/examples/SWITCHBOARD_FLYWHEEL_EPIC_20260208.json
-        - packages/decision-ledger/decision_ledger.json
-      domains:
-        - strategy
-        - governance
-        - documentation
-        - switchboard
     verification:
       tiers_required:
         - C
@@ -758,36 +732,6 @@ prompts:
         - competitive-intel
         - product-strategy
         - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: front-run-governance-rails
-    version: v1
-    path: prompts/io/front-run-governance-rails@v1.md
-    sha256: 7153ebc2d161ac63eec7e9b6fba2335cf97215b5ff4cd690c90107a0ba227c21
-    description: Establish defensive front-run IO governance rails with policy gates and roadmap update.
-    scope:
-      paths:
-        - docs/io/front_run_bands.md
-        - policy/dual_use_policy.md
-        - policy/segment_governance.yaml
-        - ci/policy_checks/dual_use_policy_gate.py
-        - ci/policy_checks/segment_policy_gate.py
-        - docs/roadmap/STATUS.json
-        - prompts/io/front-run-governance-rails@v1.md
-        - prompts/registry.yaml
-        - agents/examples/FRONT_RUN_GOVERNANCE_RAILS_TASK.json
-      domains:
-        - documentation
-        - governance
-        - policy
-        - ci
     verification:
       tiers_required:
         - C

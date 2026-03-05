@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:10:00Z",
-  "revision_note": "Added defensive front-run IO governance scope, dual-use policy, and segment governance gates.",
+  "last_updated": "2026-02-08T00:45:00Z",
+  "revision_note": "Added GOVOS-1 epic program entry with governed multi-agent OS scope and evidence-first guardrails.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -59,6 +59,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+    },
+    {
+      "id": "govos-1-governed-multi-agent-os",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Moat Epic Program for governed multi-agent OS: policy graph, provenance, evidence resolver, approvals, and audit SLOs."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
@@ -159,12 +165,6 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
-      "id": "io-front-run-defensive-rails",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Defensive front-run IO scope, dual-use prohibitions, and segment governance policy gates."
-    },
-    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -218,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
