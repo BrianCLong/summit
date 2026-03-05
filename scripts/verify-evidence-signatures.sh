@@ -42,9 +42,9 @@ verify_signature() {
 
   if command -v cosign &> /dev/null; then
     if [ -f "$COSIGN_PUB" ] && [ -s "$COSIGN_PUB" ]; then
-      cosign verify-blob --key "$COSIGN_PUB" --signature "$signature_path" "$file" >/dev/null
+      cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB" --signature "$signature_path" "$file" >/dev/null
     elif [ -f "$certificate_path" ] && [ -s "$certificate_path" ]; then
-      cosign verify-blob \
+      cosign verify-blob --use-signed-timestamps \
         --certificate "$certificate_path" \
         --signature "$signature_path" \
         --certificate-identity-regexp=".*" \
