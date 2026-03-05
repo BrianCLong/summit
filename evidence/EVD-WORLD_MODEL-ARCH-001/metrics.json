@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-WORLD_MODEL-ARCH-001",
+  "metrics": {
+    "modules_scaffolded": 10,
+    "new_public_types": 6,
+    "new_public_functions": 8,
+    "loc_delta": 420,
+    "dependency_delta": 0,
+    "feature_flag": "WORLD_MODEL_ENABLED=false"
+  }
+}
