@@ -12,6 +12,6 @@
 
 ## Access Control (AC)
 
-| ID         | Control Name           | Description                                                                            | Enforcement                     |
+| Control ID | Control Name           | Description                                                                            | Enforcement                     |
 | ---------- | ---------------------- | -------------------------------------------------------------------------------------- | ------------------------------- |
 | **AC-001** | **Least Privilege CI** | CI jobs MUST use short-lived OIDC tokens instead of long-lived secrets where possible. | GitHub Actions OIDC Integration |
