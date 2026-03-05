@@ -401,6 +401,7 @@
         "stamp": "evidence/EVD-INTSUM-2026-THREAT-HORIZON-001/stamp.json"
       }
     },
+
     "EVD-NARRATIVE-CI-METRICS-001": {
       "evidence_id": "EVD-NARRATIVE-CI-METRICS-001",
       "files": {

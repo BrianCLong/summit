@@ -61,6 +61,7 @@ AI can iterate and merge autonomously for:
 - **Config tweaks** - Non-sensitive configuration adjustments
 
 **Safeguards:**
+
 - CI must pass
 - No changes to security-critical files
 - No new dependencies
@@ -79,6 +80,7 @@ Human must approve before merge:
 - **Performance changes** - Query optimizations, caching
 
 **Review Guidelines:**
+
 - Check for security implications
 - Verify test coverage
 - Ensure documentation updated
@@ -101,7 +103,7 @@ Human drives with AI support:
 
 ### Wave 0: Baseline Stabilization
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     WAVE 0 WORKFLOW                         │
 ├─────────────────────────────────────────────────────────────┤
@@ -125,11 +127,12 @@ Human drives with AI support:
 │     └─ Auto-merge CI config                                 │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Wave 1: Council-Grade Core
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     WAVE 1 WORKFLOW                         │
 ├─────────────────────────────────────────────────────────────┤
@@ -150,11 +153,12 @@ Human drives with AI support:
 │     └─ Human reviews manifest format                        │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Wave 2: Production Hardening
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     WAVE 2 WORKFLOW                         │
 ├─────────────────────────────────────────────────────────────┤
@@ -175,11 +179,12 @@ Human drives with AI support:
 │     └─ Auto-merge documentation                             │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ### Wave 3: Experience & Adoption
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                     WAVE 3 WORKFLOW                         │
 ├─────────────────────────────────────────────────────────────┤
@@ -200,7 +205,8 @@ Human drives with AI support:
 │     └─ AI generates component library                       │
 │                                                              │
 └─────────────────────────────────────────────────────────────┘
-```
+
+```text
 
 ---
 
@@ -209,6 +215,7 @@ Human drives with AI support:
 ### AI → Human
 
 **When to escalate:**
+
 - Security implications detected
 - Breaking changes required
 - Multiple valid approaches exist
@@ -217,43 +224,53 @@ Human drives with AI support:
 - Performance trade-offs
 
 **How to escalate:**
+
 ```markdown
+
 ## Decision Required
 
 **Context:** [Brief description of the situation]
 
 **Options:**
+
 1. [Option A] - Pros: ... Cons: ...
 2. [Option B] - Pros: ... Cons: ...
 
 **Recommendation:** [AI's suggested approach]
 
 **Questions for Human:**
+
 - [Specific question 1]
 - [Specific question 2]
-```
+
+```text
 
 ### Human → AI
 
 **Clear task specification:**
+
 ```markdown
+
 ## Task: [Clear title]
 
 **Objective:** [What should be accomplished]
 
 **Constraints:**
+
 - [Must do X]
 - [Must not do Y]
 - [Should consider Z]
 
 **Acceptance Criteria:**
+
 - [ ] Criterion 1
 - [ ] Criterion 2
 
 **Autonomy Level:** [1/2/3]
 
 **Review Requirements:** [Who reviews, what to check]
-```
+
+```text
 
 ---
 

@@ -105,4 +105,4 @@ MCB,Sub-task,[Provenance] Evidence bundle builder,"Create TAR.GZ via `tar-stream
 1. Move all stories into sprint **Sep 2–Sep 13, 2025**.
 2. Assign owners.
 3. Create dashboards: _Sprint burndown_, _Runtime RED_, _Policy decision rate_.
-4. Link stories to runbooks in `RUNBOOKS/` and ADRs.
+4. Link stories to runbooks in `runbooks/` and ADRs.

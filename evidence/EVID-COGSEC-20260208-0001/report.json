@@ -1,0 +1,12 @@
+{
+  "items": [
+    {
+      "id": "node-1",
+      "properties": {
+        "confidence": 0.95,
+        "name": "Test Incident"
+      },
+      "type": "Incident"
+    }
+  ]
+}

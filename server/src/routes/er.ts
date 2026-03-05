@@ -61,7 +61,7 @@ router.post('/merge', async (req, res) => {
 // Returns guardrail evaluation metrics for current fixtures
 router.get('/guardrails', async (req, res) => {
   try {
-    const datasetId = req.query.datasetId as string | undefined;
+    const datasetId = (((req.query.datasetId as string) as string) as string) as string | undefined;
     const guardrails = erService.evaluateGuardrails(datasetId);
     res.json(guardrails);
   } catch (error: any) {

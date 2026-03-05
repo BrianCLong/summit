@@ -148,7 +148,7 @@ router.post('/ga/config', express.json(), async (req, res) => {
 });
 
 router.get('/config', (req, res) => {
-  const tenantId = (req.query.tenantId as string) || '';
+  const tenantId = ((((req.query.tenantId as string) as string) as string) as string) || '';
   if (
     tenantId &&
     memConfig.TENANT_OVERRIDES &&
@@ -160,7 +160,7 @@ router.get('/config', (req, res) => {
 });
 
 router.post('/config', express.json(), (req, res) => {
-  const tenantId = (req.query.tenantId as string) || '';
+  const tenantId = ((((req.query.tenantId as string) as string) as string) as string) || '';
   const allowed = Object.keys(memConfig).filter(
     (k) => !['TENANT_OVERRIDES', 'TENANT_DEFAULTS'].includes(k),
   );

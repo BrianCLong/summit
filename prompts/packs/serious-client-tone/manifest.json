@@ -1,0 +1,8 @@
+{
+  "id": "serious-client-tone@v1",
+  "version": "1.0.0",
+  "description": "Serious client tone prompt pack for transformation-first positioning with availability-signal checks.",
+  "guardrails": {
+    "tags": ["positioning", "tone", "clean-room", "summit-original"]
+  }
+}

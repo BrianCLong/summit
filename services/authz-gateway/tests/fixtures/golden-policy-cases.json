@@ -1,0 +1,215 @@
+[
+  {
+    "name": "allow tenant aligned treatment",
+    "input": {
+      "user": {
+        "sub": "alice",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA",
+        "attributes": {
+          "needToKnow": "reader"
+        }
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": true,
+      "policyId": "policy.tenant-allow"
+    }
+  },
+  {
+    "name": "deny missing purpose",
+    "input": {
+      "user": {
+        "sub": "alice",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA"
+      },
+      "action": "read",
+      "purpose": "",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.require-purpose"
+    }
+  },
+  {
+    "name": "deny missing authority",
+    "input": {
+      "user": {
+        "sub": "alice",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA"
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": ""
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.require-authority"
+    }
+  },
+  {
+    "name": "deny sandbox environment",
+    "input": {
+      "user": {
+        "sub": "sandboxUser",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "environment": "sandbox",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA"
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.block-sandbox"
+    }
+  },
+  {
+    "name": "deny suspended status",
+    "input": {
+      "user": {
+        "sub": "suspendedUser",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "status": "suspended"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA"
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.block-suspended"
+    }
+  },
+  {
+    "name": "deny missing clearance",
+    "input": {
+      "user": {
+        "sub": "noclearance",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA"
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.require-clearance-claim"
+    }
+  },
+  {
+    "name": "deny missing need to know role",
+    "input": {
+      "user": {
+        "sub": "bob",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantA",
+        "attributes": {
+          "needToKnow": "clinical"
+        }
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.need-to-know"
+    }
+  },
+  {
+    "name": "allow compliance override",
+    "input": {
+      "user": {
+        "sub": "carol",
+        "tenantId": "tenantA",
+        "roles": ["compliance"],
+        "clearance": "confidential",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/investigation",
+        "tenantId": "tenantB"
+      },
+      "action": "read",
+      "purpose": "investigation",
+      "authority": "fraud-investigation"
+    },
+    "expected": {
+      "allowed": true,
+      "policyId": "policy.compliance-override"
+    }
+  },
+  {
+    "name": "deny cross tenant without override",
+    "input": {
+      "user": {
+        "sub": "alice",
+        "tenantId": "tenantA",
+        "roles": ["reader"],
+        "clearance": "confidential",
+        "status": "active"
+      },
+      "resource": {
+        "path": "/protected/resource",
+        "tenantId": "tenantB"
+      },
+      "action": "read",
+      "purpose": "treatment",
+      "authority": "hipaa"
+    },
+    "expected": {
+      "allowed": false,
+      "policyId": "policy.tenant-isolation"
+    }
+  }
+]

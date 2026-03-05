@@ -1,9 +1,11 @@
 # High-Risk Ops & Security Approvals Pack
 
 ## 1. Capability Overview
+
 **Goal:** Ensure every high-risk operation (prod data access, permission changes, key rotation, destructive actions) is discoverable in the graph, gated by policy, executed through orchestrated workflows, and automatically emits receipts and evidence bundles surfaced in Switchboard.
 
 ### 1.1 Core user stories
+
 - **Engineer:** Request a risky action (e.g., temporary prod DB read), see required approvals and policy evaluation, and receive an auditable record after execution.
 - **Security/Infra owner:** Define which actions are high-risk, set policies (who can request/approve, conditions, expiry), and review/audit all high-risk operations centrally.
 - **CISO/Compliance auditor:** Export an audit-ready bundle across a time range with evidence that policy and dual control were enforced.
@@ -11,6 +13,7 @@
 ## 2. Domain Model & Graph
 
 ### 2.1 Key entities
+
 - `User`, `Team`, `Tenant`, `Environment`
 - `System` (e.g., Postgres cluster, S3 bucket, IAM, internal app)
 - `HighRiskOperationType` (e.g., `DB_READ_ACCESS`, `ROLE_ELEVATION`, `BULK_DELETE`)
@@ -21,6 +24,7 @@
 - `EvidenceBundle`
 
 ### 2.2 Relationships (high level)
+
 - `User` —(MEMBER_OF)→ `Team`
 - `User` —(HAS_ROLE)→ `Role` (attributes used in ABAC)
 - `HighRiskOperationRequest` —(REQUESTED_BY)→ `User`
@@ -34,6 +38,7 @@
 ## 3. End-to-end Workflow (happy path)
 
 ### 3.1 Steps
+
 1. **Initiation (Switchboard or API)**
    - User selects target system, operation type, scope, timebound, and justification.
    - Frontend calls `POST /high-risk-ops/requests`.
@@ -57,12 +62,14 @@
 ## 4. Policy Bundle (OPA/ABAC sketch)
 
 ### 4.1 Attributes
+
 - **Subject (user):** `id`, `teams`, `roles`, `clearance_level`, `oncall_status`, `employment_type`.
 - **Resource (system/env):** `system_type`, `environment`, `tenant_id`, `data_classification`.
 - **Action (operation_type):** `risk_score`, `category`, `max_duration`.
 - **Context:** `time_of_day`, `request_origin`, `change_ticket_id`, `incident_id`.
 
 ### 4.2 Example Rego (pseudocode)
+
 ```rego
 package high_risk.operations
 
@@ -71,6 +78,7 @@ default allow = false
 required_approvals := {"levels": []}
 
 # Only engineers/oncall can request certain ops in prod
+
 allow {
   input.subject.roles[_] == "engineer"
   input.resource.environment == "prod"
@@ -109,13 +117,15 @@ required_approvals := {"levels": ["team_lead", "security_officer"]} {
 required_approvals := {"levels": ["team_lead"]} {
   input.action.risk_score < 7
 }
-```
+
+```text
 
 Ship policy modules for request eligibility, approval requirements, and conditional controls, plus a simulation harness that returns allow/deny, required approvals, and constraints for any user/system/operation tuple.
 
 ## 5. Tests
 
 ### 5.1 Acceptance tests (behavioral)
+
 - `engineer_can_request_temp_prod_read_with_team_lead_and_sec_approval`
 - `contractor_cannot_request_restricted_data_access`
 - `expired_request_cannot_be_executed_even_if_approved`
@@ -123,16 +133,19 @@ Ship policy modules for request eligibility, approval requirements, and conditio
 - `policy_update_changes_required_approvals_without_deploy`
 
 ### 5.2 Policy regression tests
+
 - Table-driven cases per `HighRiskOperationType` covering inputs → `allow/deny`, `required_approvals`, `max_duration`.
 - Golden policy decision snapshots rerun in CI on every change.
 
 ### 5.3 Integration tests
+
 - Stand up policy engine, workflow engine, and mock adapter (e.g., IAM).
 - Validate request → approval → execution → revert lifecycle, provenance events, and denial/expiry/failure paths.
 
 ## 6. Evidence & Receipts
 
 ### 6.1 Receipt schema (simplified)
+
 ```json
 {
   "id": "receipt_123",
@@ -156,9 +169,11 @@ Ship policy modules for request eligibility, approval requirements, and conditio
   "hash": "…",
   "notary_txn_id": "…"
 }
-```
+
+```text
 
 ### 6.2 Evidence bundle contents
+
 - Initial request payload (normalized, redacted).
 - Policy input + decision + trace.
 - Approval trail (who, when, rationale).
@@ -171,26 +186,31 @@ Provide an export format for auditors: `GET /evidence/high-risk-ops?from=…&to=
 ## 7. Dashboards & Alerts (Observability Pack)
 
 ### 7.1 SLOs
+
 - **High-Risk Request Latency:** p95 creation → first decision < **10 minutes** (business hours).
 - **Execution Safety:** 100% executed high-risk ops have a `Receipt`, at least one `PolicyDecision`, and required `Approval`s linked.
 - **Policy Coverage:** 100% of `HighRiskOperationType`s mapped to at least one active policy rule.
 
 ### 7.2 Metrics
+
 - `high_risk_ops.requests_total{type, env, tenant, status}`
 - `high_risk_ops.approval_latency_seconds{type, env, approver_role}`
 - `high_risk_ops.missing_receipt_total`
 - `high_risk_ops.policy_denies_total{reason}`
 
 ### 7.3 Dashboards
+
 - **Security Ops View:** Volume by type/env; top requesters/systems; approvals by role; average latency.
 - **Risk & Compliance View:** Trend over time; deny reasons; % time-bound ops that properly reverted.
 
 ### 7.4 Alerts
+
 - `missing_receipt_total > 0` over 5 minutes → page SRE/SecOps (possible side door).
 - `status=pending_approval` > X hours in `prod` → notify owner.
 - Sudden spike on one system/tenant → anomaly alert → incident hook.
 
 ## 8. Runbook Snippet: Investigate high-risk operation anomaly
+
 1. **Trigger:** Alert on `high_risk_ops.requests_total` spike or `missing_receipt_total > 0`.
 2. **Immediate steps:** Open Switchboard → Incident & Runbook Hub → “High-Risk Ops Anomaly”; filter last N minutes by type/env/system.
 3. **Triage:** Check user/team clustering, incident/change ticket links, and approval completeness.
@@ -200,8 +220,10 @@ Provide an export format for auditors: `GET /evidence/high-risk-ops?from=…&to=
 ## 9. Packaging (Helm/Terraform + Seed Data)
 
 ### 9.1 Helm/Terraform modules
+
 - `high-risk-ops` chart/module enabling workflows/APIs, deploying policy bundles, configuring adapters, and wiring metrics to observability.
 - Example values:
+
   ```yaml
   highRiskOps:
     enabled: true
@@ -212,17 +234,21 @@ Provide an export format for auditors: `GET /evidence/high-risk-ops?from=…&to=
       postgres:
         enabled: true
         instances:
+
           - name: "pg-prod-1"
             connectionRef: "secret://pg-prod-1"
             environment: "prod"
             tenantTag: "primary"
-  ```
+
+```text
 
 ### 9.2 Seed data & templates
+
 - Seed high-risk operation types, internal vs. strict policy sets, dashboards, runbook templates, and demo users/systems.
 - Provide a quick-start script to create sample high-risk ops to populate dashboards.
 
 ## 10. Changelog (perf, cost, security)
+
 - **Feature:** High-Risk Ops & Security Approvals Pack (v0.1).
 - **Perf impact:** +1–2 low-latency policy calls per high-risk op; additional provenance writes (1 receipt + ~5 evidence docs/op).
 - **Cost impact:** More compute/storage from evidence volume and dashboard queries, mitigated by evidence compaction and configurable retention per tenant/tier.

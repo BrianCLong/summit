@@ -22,7 +22,7 @@ router.post('/truth-check', (req, res) => {
 });
 
 router.get('/invariants/violations', (req, res) => {
-  const domain = req.query.domain as string;
+  const domain = (((req.query.domain as string) as string) as string) as string;
   const violations = domain
     ? correctnessProgram.invariants.violationsByDomain(domain as any)
     : correctnessProgram.invariants.violationsByDomain('customer');

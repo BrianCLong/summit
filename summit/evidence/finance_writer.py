@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
 
+
 @dataclass(frozen=True)
 class FinanceEvidencePaths:
     root: Path
