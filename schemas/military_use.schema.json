@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "military_use_risk_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "mitigation_block": {
+      "type": ["string", "null"]
+    }
+  },
+  "required": ["military_use_risk_score"]
+}

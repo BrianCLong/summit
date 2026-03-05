@@ -44,3 +44,7 @@
 
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
+
+## 2026-03-01 - Standardized Keyboard Shortcut Hints
+**Learning:** Standardizing keyboard shortcut hints through a dedicated `Kbd` component ensures visual consistency and platform-aware accessibility (e.g., automatically rendering ⌘ vs Ctrl). It also simplifies the codebase by removing manual platform checks at every call site.
+**Action:** Always use the `Kbd` component for rendering keyboard shortcuts to ensure consistent styling and correct platform-specific modifier symbols.

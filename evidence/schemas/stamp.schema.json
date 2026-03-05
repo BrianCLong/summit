@@ -6,9 +6,10 @@
       "type": "object",
       "properties": {
         "evidence_id": { "type": "string" },
-        "timestamp": { "type": "number" },
+        "timestamp": { "type": ["number", "string"] },
         "version": { "type": "string" },
-        "created_at": { "type": "string" }
+        "created_at": { "type": "string" },
+        "actor": { "type": "string" }
       },
       "required": [],
       "additionalProperties": true

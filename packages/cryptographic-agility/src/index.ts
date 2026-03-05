@@ -13,4 +13,7 @@ export * from './framework/algorithm-registry';
 export * from './inventory/crypto-inventory';
 
 // Migration
-export * from './migration/migration-planner';
+export { MigrationPlanner, createMigrationPlanner } from './migration/migration-planner';
+
+// FIPS Compliance
+export * from './fips-compliance';
