@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Capability Statement — Government / Defense / Intelligence
 
 **Prime Contractor:** Summit Intelligence Systems
@@ -12,7 +13,7 @@
 
 ## Core Capability
 
-**Provenance-First Analyst Workbench with Policy-Gated AI**
+### Provenance-First Analyst Workbench with Policy-Gated AI
 
 Summit delivers a unified intelligence analysis platform that fuses OSINT and all-source data into a verifiable graph with timeline and map views. Analysts accelerate time-to-insight while maintaining full chain-of-custody, audit trails, and data-handling compliance.
 
@@ -38,31 +39,46 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 | [Reference A - Details Pending] | OSINT Fusion | 2024–Present | Cut time-to-insight by 45%; full provenance on 98% of ingested items |
 | [Reference B - Details Pending] | Threat Intel | 2024–Present | Consolidated 6 feeds into unified graph; reduced analyst duplication |
 
-**Reference Contacts:**
+### Reference Contacts
+
 - Col. Steve Lawlor, USAF (ret.) — [Contact Info Pending Approval]
+
 - John Price — [Contact Info Pending Approval]
 
 ---
 
 ## Technical Environment
 
-**Architecture:**
+### Architecture
+
 - Graph Database: Neo4j 5.x (cypher queries, provenance relationships)
+
 - Relational: PostgreSQL 15+ (case metadata, audit, reporting)
+
 - Cache/Queue: Redis, Kafka/Redpanda
+
 - Orchestration: Kubernetes, Helm, Terraform
 
-**Security Posture:**
+### Security Posture
+
 - SBOM/SLSA attestations
+
 - ABAC via Open Policy Agent (OPA)
+
 - DLP hooks and classification tagging
+
 - Audit logs with export capability
+
 - CMMC readiness (Level 2 controls mapped)
+
 - FedRAMP trajectory (High baseline path)
 
-**Deployment Options:**
+### Deployment Options
+
 - GovCloud (AWS/Azure)
+
 - On-premises (customer-managed or managed service)
+
 - Air-gapped (fully disconnected operations)
 
 ---
@@ -79,43 +95,64 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 | Tier 2 | Up to 25 | Up to 6 | $125,000 |
 | Strategic Mission (by approval) | Varies | Varies | $40,000–$60,000 |
 
-**Includes:**
+### Includes
+
 - 1–2 discovery workshops
+
 - Environment provisioning (deployment pattern to be agreed)
+
 - Data source connectors (OSINT APIs, document repos, sensor feeds)
+
 - Analyst onboarding and training
+
 - Weekly working sessions
+
 - Final readout with production roadmap
 
 ### Production Deployment
 
 - Per-user or per-mission licensing
+
 - Multi-year terms with ramp schedules
+
 - Managed service or self-hosted options
+
 - Annual support and maintenance
 
 ---
 
 ## Mission Use Cases
 
-**OSINT + All-Source Fusion**
+### OSINT + All-Source Fusion
+
 - Unify documents, web sources, sensor feeds, and classified reporting into a single graph
+
 - Trace provenance from raw source to analytic conclusion
+
 - Enforce classification and data-handling rules at every step
 
-**Threat / Incident Investigation**
+### Threat / Incident Investigation
+
 - Link entities across cases and time
+
 - Timeline analysis for pattern detection
+
 - Rapid hypothesis generation with AI-assisted queries
 
-**Disinformation & Influence Operations**
+### Disinformation & Influence Operations
+
 - Track narratives, actors, and amplification networks
+
 - Map coordinated behavior across platforms
+
 - Exportable evidence packages for reporting
 
-**Supply Chain / Vendor Risk**
+### Supply Chain / Vendor Risk
+
 - Graph-based third-party relationships
+
 - Risk propagation analysis
+
 - Audit-ready documentation
 
 ---
@@ -136,20 +173,26 @@ Summit delivers a unified intelligence analysis platform that fuses OSINT and al
 ## Procurement Paths
 
 - **GSA MAS:** Schedule pending; available through teaming partner
+
 - **SEWP V:** Pending; available through teaming partner
+
 - **OTA:** Eligible for prototyping and production awards
+
 - **CSO/BAA:** Responsive to R&D solicitations
+
 - **Direct/Teaming:** Contract directly or through prime/SI partner
 
 ---
 
 ## Company Information
 
-**Summit Intelligence Systems**
+### Summit Intelligence Systems
+
 [Address Pending]
 [City, State ZIP]
 
-**Point of Contact:**
+### Point of Contact
+
 [Name], [Title]
 [Email]
 [Phone]

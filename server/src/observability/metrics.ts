@@ -60,7 +60,8 @@ import {
   narrativeSimulationActiveSimulations,
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds
+  narrativeSimulationDurationSeconds,
+  summitHealthChecksTotal
 } from '../monitoring/metrics.js';
 
 export { registry };
@@ -116,7 +117,8 @@ export {
   narrativeSimulationActiveSimulations,
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds
+  narrativeSimulationDurationSeconds,
+  summitHealthChecksTotal
 };
 
 export const metrics = {
@@ -170,5 +172,6 @@ export const metrics = {
   narrativeSimulationActiveSimulations,
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
-  narrativeSimulationDurationSeconds
+  narrativeSimulationDurationSeconds,
+  summitHealthChecksTotal
 };

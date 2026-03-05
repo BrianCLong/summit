@@ -15,8 +15,11 @@ import {
   PiiRule,
   ProvenanceRecord,
   SchemaDefinition,
+  PolicyDecisionInput,
+  PolicyProfileName,
 } from './types.js';
 import { SchemaRegistry } from './schemaRegistry.js';
+import { defaultPolicyProfiles, PolicyEngine } from './policyEngine.js';
 
 export interface ControlPlaneConfig {
   piiRules: PiiRule[];
@@ -32,6 +35,7 @@ export class AIReadinessControlPlane {
   private readonly piiGuard: PiiGuard;
   private readonly provenance = new ProvenanceTracker();
   private readonly models = new ModelRegistry();
+  private readonly policyEngine = new PolicyEngine(defaultPolicyProfiles);
 
   constructor(config: ControlPlaneConfig, bus: InMemoryEventBus<IntentEvent> = new InMemoryEventBus()) {
     this.telemetry = new IntentTelemetry(bus);
@@ -100,6 +104,22 @@ export class AIReadinessControlPlane {
 
   rollbackModel(modelId: string, version: string, reason: string): void {
     this.models.rollback(modelId, version, reason);
+  }
+
+
+  evaluatePolicy(input: PolicyDecisionInput) {
+    return this.policyEngine.evaluate(input);
+  }
+
+  listPolicyAudits() {
+    return this.policyEngine.listAudits();
+  }
+
+  updatePolicyProfile(
+    name: PolicyProfileName,
+    updater: Parameters<PolicyEngine['updateProfile']>[1],
+  ) {
+    return this.policyEngine.updateProfile(name, updater);
   }
 
   snapshot(): {
