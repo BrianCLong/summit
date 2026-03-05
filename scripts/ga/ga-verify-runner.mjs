@@ -3,6 +3,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 const steps = [
+  {
+    name: 'sanitize:type-stubs',
+    command: 'bash',
+    args: [
+      '-lc',
+      'find node_modules -name "hapi__catbox" -type d -path "*/@types/*" -exec rm -rf {} + && find node_modules -name "hapi__shot" -type d -path "*/@types/*" -exec rm -rf {} + && find node_modules -name "react-native" -type d -path "*/@types/*" -exec rm -rf {} +',
+    ],
+  },
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
   { name: 'build', command: 'pnpm', args: ['build'] },
