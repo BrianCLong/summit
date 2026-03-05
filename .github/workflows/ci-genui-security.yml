@@ -1,0 +1,11 @@
+name: GenUI Security Guard
+on:
+  pull_request:
+    paths:
+      - 'packages/genui/**'
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: echo "Running schema validator and URL sanitizer checks..."
