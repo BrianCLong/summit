@@ -41,11 +41,11 @@ export interface ToolCallContext {
 export interface ToolCallHooks {
   onBeforeCall?: (
     context: ToolCallContext,
-  ) => ToolCallContext | Promise<ToolCallContext> | undefined | void;
+  ) => ToolCallContext | Promise<ToolCallContext>;
   onAfterCall?: (
     context: ToolCallContext,
     output: ContextShellOutput,
-  ) => ContextShellOutput | Promise<ContextShellOutput> | undefined | void;
+  ) => ContextShellOutput | Promise<ContextShellOutput>;
 }
 
 export interface EvidenceEvent {
