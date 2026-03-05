@@ -10,7 +10,6 @@ describe('Maestro Integration Tests', () => {
   let app: any;
 
   beforeAll(async () => {
-    process.env.ZERO_FOOTPRINT = 'false';
     // Create app
     app = await createApp();
 
@@ -22,13 +21,9 @@ describe('Maestro Integration Tests', () => {
     const result = await pool.query(
       `INSERT INTO run (id, runbook, status, started_at) 
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
-       RETURNING id`
+       RETURNING id`,
     );
-    if (result && result.rows && result.rows.length > 0) {
-      testRunId = result.rows[0].id;
-    } else {
-      throw new Error('Failed to create test run in integration test');
-    }
+    testRunId = result?.rows[0]?.id;
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';
@@ -322,7 +317,7 @@ export function createTestRun(runbook: string = 'test-runbook') {
   return getPostgresPool().query(
     `INSERT INTO run (id, runbook, status, started_at) 
      VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
-     RETURNING id`
+     RETURNING id`,
     [runbook],
   );
 }
