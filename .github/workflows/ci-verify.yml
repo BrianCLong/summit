@@ -1,8 +1,10 @@
-name: ci-verify
-on: [pull_request]
+name: CI Verify
+on: [push, pull_request]
+
 jobs:
- verify:
-   runs-on: ubuntu-latest
-   steps:
-    - name: Verify self flow
-      run: npx tsx .github/scripts/verify_self_flow.ts
+  hygiene-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Runnability Audit Hygiene Drift Check
+        run: ./scripts/monitoring/runnability-audit-2026-02-26-drift.sh
