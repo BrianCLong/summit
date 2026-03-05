@@ -1,8 +1,4 @@
 name: 🛠️ Reusable Toolchain Setup (Node + PNPM)
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 
 # Reusable workflow to detect Node version and set up toolchain
 # Auto-detects from .nvmrc or package.json engines, with fallback to Node 20
@@ -18,7 +14,7 @@ on:
         description: "PNPM version (optional, defaults to repo pin)"
         required: false
         type: string
-        default: "10.0.0"
+        default: 10.0.0
       install-deps:
         description: "Whether to install dependencies (defaults to true)"
         required: false

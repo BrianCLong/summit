@@ -36,6 +36,11 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
+## 2026-03-02 - [CRITICAL] Unauthenticated DR and Analytics Routers
+**Vulnerability:** The `/dr` and `/analytics` routers were mounted directly in `app.ts` without any authentication or authorization middleware, exposing sensitive disaster recovery and graph analytics data to the public internet.
+**Learning:** Routers mounted outside the global `/api` or `/graphql` prefix (which had authentication guards) are easily overlooked and default to being public.
+**Prevention:** Enforce a "deny-by-default" posture by placing `ensureAuthenticated` and `ensureRole` middleware directly at the top of every administrative or sensitive router file, regardless of where it is mounted.
+
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.

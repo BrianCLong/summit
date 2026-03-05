@@ -1,7 +1,9 @@
 from typing import List, Set
+
 from summit.vuln.types import Aliases
 
-def stitch_aliases(existing: Aliases, new_aliases: List[str]) -> Aliases:
+
+def stitch_aliases(existing: Aliases, new_aliases: list[str]) -> Aliases:
     """Stitches new aliases into an existing Aliases object, ensuring uniqueness."""
 
     # We use sets for de-duplication
