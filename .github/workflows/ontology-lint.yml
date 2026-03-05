@@ -1,0 +1,27 @@
+name: Ontology Schema Linting
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-ontology:
+    name: Lint Ontology and Schemas
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Lint Markdown Files
+        run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules'
