@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { Search, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { Kbd } from '@/components/ui/Kbd'
+import { cn, MODIFIER_KEY } from '@/lib/utils'
 
 interface SearchBarProps {
   placeholder?: string
@@ -85,7 +84,9 @@ export function SearchBar({
             </button>
           )}
           {showShortcut && !internalValue && (
-            <Kbd>mod+K</Kbd>
+            <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100 sm:flex">
+              <span className="text-xs">{MODIFIER_KEY}</span>K
+            </kbd>
           )}
         </div>
       </div>
