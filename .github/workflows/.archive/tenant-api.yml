@@ -20,11 +20,6 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-<<<<<<< HEAD
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - uses: actions/setup-node@v4
         with:
@@ -48,11 +43,6 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-<<<<<<< HEAD
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - uses: actions/setup-node@v4
         with:
@@ -74,11 +64,6 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-<<<<<<< HEAD
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - uses: actions/setup-node@v4
         with:
@@ -99,11 +84,6 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-<<<<<<< HEAD
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - uses: actions/setup-node@v4
         with:
@@ -136,11 +116,6 @@ jobs:
 
       - uses: pnpm/action-setup@v2
         with:
-<<<<<<< HEAD
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 
       - uses: actions/setup-node@v4
         with:

@@ -1,8 +1,4 @@
 name: Reproducible Docker Build
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 
 on:
   push:
@@ -17,20 +13,9 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-<<<<<<<< HEAD:.github/workflows/.archive/repro-docker.yml
-<<<<<<< HEAD:.github/workflows/.archive/repro-docker.yml
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps):.github/workflows/repro-docker.yml
-========
-          version: 10.0.0
->>>>>>>> origin/main:.github/workflows/repro-docker.yml
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
           node-version: 20
           cache: 'pnpm'
 

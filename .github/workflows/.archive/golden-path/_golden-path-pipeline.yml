@@ -126,11 +126,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-<<<<<<< HEAD:.github/workflows/.archive/golden-path/_golden-path-pipeline.yml
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps):.github/workflows/golden-path/_golden-path-pipeline.yml
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -206,11 +201,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-<<<<<<< HEAD:.github/workflows/.archive/golden-path/_golden-path-pipeline.yml
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps):.github/workflows/golden-path/_golden-path-pipeline.yml
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -264,7 +254,7 @@ jobs:
     name: Security
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: (${{ !inputs.skip-security }}) && (always())
+    if: (!inputs.skip-security) && always()
     permissions:
       security-events: write
       contents: read
@@ -284,11 +274,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-<<<<<<< HEAD:.github/workflows/.archive/golden-path/_golden-path-pipeline.yml
-
-=======
-          version: 10.0.0
->>>>>>> eb5c989f9 (chore: complete pre-commit steps):.github/workflows/golden-path/_golden-path-pipeline.yml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -324,7 +309,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [lint, test, security]
-    if: ((((always() && !contains(needs.*.result, 'failure')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')
+    if: always() && !contains(needs.*.result, 'failure') && github.event_name != 'pull_request'
     permissions:
       contents: read
       packages: write
@@ -435,7 +420,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: deploy
-    if: (${{ !inputs.skip-deploy && github.event_name != 'pull_request' }}) && (${{ inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name != 'pull_request' }})
+    if: (!inputs.skip-deploy && github.event_name != 'pull_request') && (inputs['canary-enabled'] && !inputs.skip-deploy && github.event_name != 'pull_request')
 
     outputs:
       success: ${{ steps.verify.outputs.healthy }}
