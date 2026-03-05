@@ -1,0 +1,24 @@
+{
+  "keywords": {
+    "ga_blocker": ["GA blocker", "release blocker", "CI gate", "reproducibility", "manifest", "run_id", "supply chain", "deterministic", "security regression"]
+  },
+  "scoring": {
+    "label_prio_p0": 40,
+    "text_ga_blocker": 30,
+    "label_ga_blocker": 20,
+    "label_ci_repro_sec": 15,
+    "text_failing_workflow": 10,
+    "label_needs_info_blocked": -20
+  },
+  "confidence": {
+    "high": { "min": 70 },
+    "medium": { "min": 50, "max": 69 },
+    "low": { "max": 49 }
+  },
+  "categories": {
+    "integrity": ["manifest", "run_id"],
+    "reproducibility": ["deterministic", "reproducibility"],
+    "ci": ["workflow", "actions", "CI"],
+    "security": ["vuln", "CVE", "RCE"]
+  }
+}

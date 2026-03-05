@@ -32,12 +32,12 @@ Make evidence and policy non-optional: enforce gates, enable verify-attestation 
 
 ## Definition of Done
 
-- Tag pipeline fails without SBOM+provenance; cosign verify-attestation succeeds for main artifacts.
+- Tag pipeline fails without SBOM+provenance; cosign verify-attestation --use-signed-timestamps succeeds for main artifacts.
 - Prometheus alert rules active; Grafana alerts configured; runbook links in on-call.
 - SLOs trending towards targets for 7 continuous days.
 
 ## Deliverables
 
-- PRs: OPA gate integration, cosign verify job, make targets.
+- PRs: OPA gate integration, cosign verify --use-signed-timestamps job, make targets.
 - Artifacts: alert rules loaded; runbook updates.
 - Docs: updated security evidence and on-call procedures.
