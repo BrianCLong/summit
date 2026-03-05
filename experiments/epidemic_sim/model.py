@@ -3,6 +3,7 @@
 
 import json
 
+
 class EpidemicSim:
     def __init__(self, agents, infection_rate=0.2):
         self.agents = agents

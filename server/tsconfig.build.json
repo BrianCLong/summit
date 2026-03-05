@@ -11,7 +11,8 @@
     "noImplicitThis": false,
     "skipLibCheck": true,
     "noEmitOnError": false,
-    "strict": false
+    "strict": false,
+    "rootDir": ".."
   },
   "exclude": [
     "node_modules",
@@ -26,7 +27,6 @@
     "../tests/**",
     "src/tests/**",
     "src/routes/geoint.js",
-    "src/maestro/tools/context-shell.ts",
     "src/routes/osint.ts"
   ]
 }

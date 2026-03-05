@@ -3,12 +3,13 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
+
 @dataclass(frozen=True)
 class OperabilityResult:
     ok: bool
-    violations: List[str]
+    violations: list[str]
 
-def evaluate_operability(event_log: List[Dict[str, Any]]) -> OperabilityResult:
+def evaluate_operability(event_log: list[dict[str, Any]]) -> OperabilityResult:
     """
     Evaluates a pipeline run log against operability expectations derived from:
     - late-arriving data handling
@@ -16,7 +17,7 @@ def evaluate_operability(event_log: List[Dict[str, Any]]) -> OperabilityResult:
     - file-format correctness (esp. JSON silent failures)
     - cost budget constraints
     """
-    violations: List[str] = []
+    violations: list[str] = []
     # Require explicit markers for each policy area.
     required_markers = ["late_data_policy", "schema_contract", "file_format_checks", "cost_budget"]
     present = {m: False for m in required_markers}
