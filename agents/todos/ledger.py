@@ -18,7 +18,7 @@ class TodoLedger:
         self._todos = todos or []
 
     @classmethod
-    def empty(cls) -> "TodoLedger":
+    def empty(cls) -> TodoLedger:
         return cls([])
 
     @property
@@ -42,7 +42,7 @@ class TodoLedger:
         return {"todos": [asdict(todo) for todo in self._todos]}
 
     @classmethod
-    def from_dict(cls, payload: dict[str, object]) -> "TodoLedger":
+    def from_dict(cls, payload: dict[str, object]) -> TodoLedger:
         raw_todos = payload.get("todos", [])
         todos = [TodoItem(**todo) for todo in raw_todos if isinstance(todo, dict)]
         return cls(todos)

@@ -1,8 +1,10 @@
-import pytest
 import numpy as np
+import pytest
+
 from summit.xai.shapiq.estimator import ShapIQEstimator
 from summit.xai.shapiq.interactions import InteractionManager
 from summit.xai.shapiq.pipeline import ShapIQPipeline, redact_pii
+
 
 def test_estimator_determinism():
     estimator1 = ShapIQEstimator(None, seed=42)

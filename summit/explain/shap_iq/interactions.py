@@ -1,8 +1,10 @@
 """
 SHAP-IQ Pairwise Interaction Aggregation
 """
+from typing import Any, List
+
 import numpy as np
-from typing import List, Any
+
 
 class InteractionMatrix:
     def __init__(self, matrix: np.ndarray):
@@ -40,5 +42,5 @@ class InteractionMatrix:
     def is_symmetric(self) -> bool:
         return np.allclose(self.matrix, self.matrix.T)
 
-    def to_list(self) -> List[List[float]]:
+    def to_list(self) -> list[list[float]]:
         return self.matrix.tolist()

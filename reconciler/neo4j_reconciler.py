@@ -1,11 +1,11 @@
-import json
 import hashlib
-import time
+import json
 import random
-from pathlib import Path
-from typing import Iterable, Dict, Any
+import time
 from contextlib import contextmanager
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, Iterable
 
 from neo4j import GraphDatabase
 
@@ -36,7 +36,7 @@ class Metrics:
     def convergence_seconds(self) -> float:
         return time.time() - self.start
 
-    def snapshot(self) -> Dict[str, Any]:
+    def snapshot(self) -> dict[str, Any]:
         return {
             "reconcile.total": self.total,
             "reconcile.applied": self.applied,
@@ -51,14 +51,14 @@ class Metrics:
 class Event:
     pk: str
     lsn: int
-    props: Dict[str, Any]
+    props: dict[str, Any]
 
 
 def _sha256_hex(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
 
-def _pk_digest(pk_fields: Dict[str, Any]) -> str:
+def _pk_digest(pk_fields: dict[str, Any]) -> str:
     blob = json.dumps(pk_fields, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return _sha256_hex(blob)
 
@@ -123,7 +123,7 @@ def replay_jsonl(
     pwd: str,
     jsonl_path: str,
     cypher_path: str,
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     metrics = Metrics()
     cypher = Path(cypher_path).read_text()
     events = list(parse_jsonl(Path(jsonl_path)))

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-import sys
 import json
-import os
 import logging
-from typing import Dict, Any
+import os
+import sys
+from typing import Any, Dict
 
 # Ensure summit path is accessible
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from summit.intent.validator import IntentValidator
 from summit.intent.report import ReportGenerator
+from summit.intent.validator import IntentValidator
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 def main(spec_path: str, execution_context_path: str):
     logger.info(f"Validating intent spec at: {spec_path}")
 
-    with open(spec_path, "r") as f:
+    with open(spec_path) as f:
         spec_data = json.load(f)
 
-    with open(execution_context_path, "r") as f:
+    with open(execution_context_path) as f:
         exec_ctx = json.load(f)
 
     validator = IntentValidator(schema_path="schemas/intent_spec.schema.json")
@@ -51,7 +51,7 @@ def main(spec_path: str, execution_context_path: str):
     with open("artifacts/intent/stamp.json", "w") as f:
         json.dump(stamp, f, indent=2)
 
-    logger.info(f"Wrote artifacts to artifacts/intent/ directory.")
+    logger.info("Wrote artifacts to artifacts/intent/ directory.")
 
     # Apply fail condition based on validation
     if not evaluation["passed"]:

@@ -2,8 +2,9 @@
 import json
 import sys
 
+
 def validate_relay_config(config_path):
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         config = json.load(f)
 
     if config.get('discovery_enabled', False):

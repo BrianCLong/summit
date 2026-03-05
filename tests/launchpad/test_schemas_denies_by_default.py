@@ -2,7 +2,6 @@ import pytest
 
 from modules.launchpad.validate import validate_agent, validate_project
 
-
 VALID_AGENT = {
     "agent_id": "agent-1",
     "display_name": "Agent One",

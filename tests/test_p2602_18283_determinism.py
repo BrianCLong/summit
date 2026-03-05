@@ -1,7 +1,10 @@
 import json
 import os
+
 import pytest
+
 from summit.experiments.p2602_18283.evaluator import run_evaluation, write_artifacts
+
 
 def test_determinism():
     config = {"fixture": "fixed_dataset", "learning_rate": 0.01}

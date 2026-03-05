@@ -1,5 +1,6 @@
 import time
 
+
 def profile():
     start_time = time.time()
     # Dummy profiling

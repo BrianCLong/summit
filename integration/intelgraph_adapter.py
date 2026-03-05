@@ -1,6 +1,7 @@
 # IntelGraph Adapter
 import json
 
+
 class GraphReasoningAdapter:
     def __init__(self, storage_uri: str):
         self.uri = storage_uri

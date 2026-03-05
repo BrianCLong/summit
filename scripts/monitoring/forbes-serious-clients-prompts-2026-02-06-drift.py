@@ -4,11 +4,11 @@ from pathlib import Path
 from typing import Dict, List
 
 
-def load_json(path: Path) -> Dict:
+def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def summarize(metrics: List[Dict]) -> Dict[str, float]:
+def summarize(metrics: list[dict]) -> dict[str, float]:
     total = len(metrics)
     if total == 0:
         return {

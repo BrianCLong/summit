@@ -1,5 +1,7 @@
 import pytest
+
 from summit.metrics.hf_2602_18283_metrics import HF2602Metrics
+
 
 def test_hit_rate():
     predictions = [

@@ -4,7 +4,6 @@ from pathlib import Path
 from summit.promptpacks.serious_client_tone.evaluator import TRANSFORMATION_TEMPLATE
 from summit.promptpacks.serious_client_tone.runner import run_fixtures
 
-
 FIXTURE_DIR = Path("fixtures/serious_client_tone")
 GOLDEN_DIR = Path("tests/golden/serious_client_tone")
 

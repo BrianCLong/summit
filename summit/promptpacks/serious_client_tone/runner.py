@@ -5,18 +5,17 @@ from typing import Any, Dict, Iterable, List, Tuple
 
 from summit.promptpacks.serious_client_tone.evaluator import evaluate_payload
 
-
 VERSION = "0.1.0"
 
 
-def load_fixture(path: Path) -> Dict[str, Any]:
+def load_fixture(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def evaluate_fixtures(fixtures: Iterable[Dict[str, Any]]) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
-    reports: List[Dict[str, Any]] = []
-    metrics: List[Dict[str, Any]] = []
-    profiles: List[Dict[str, Any]] = []
+def evaluate_fixtures(fixtures: Iterable[dict[str, Any]]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    reports: list[dict[str, Any]] = []
+    metrics: list[dict[str, Any]] = []
+    profiles: list[dict[str, Any]] = []
 
     for fixture in fixtures:
         report, metric = evaluate_payload(fixture)
@@ -58,12 +57,12 @@ def evaluate_fixtures(fixtures: Iterable[Dict[str, Any]]) -> Tuple[Dict[str, Any
     return report_bundle, metrics_bundle, profile_bundle
 
 
-def run_fixtures(paths: Iterable[Path]) -> Tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any]]:
+def run_fixtures(paths: Iterable[Path]) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     fixtures = [load_fixture(path) for path in paths]
     return evaluate_fixtures(fixtures)
 
 
-def write_bundle(path: Path, payload: Dict[str, Any]) -> None:
+def write_bundle(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, sort_keys=True) + "\n", encoding="utf-8")
 
 

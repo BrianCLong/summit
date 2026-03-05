@@ -1,12 +1,14 @@
-import json
 import hashlib
-from typing import List, Dict, Any
+import json
+from typing import Any, Dict, List
+
 from .schema import DocumentEvent
+
 
 def _hash_string(s: str) -> str:
     return hashlib.sha256(s.encode('utf-8')).hexdigest()[:12]
 
-def score_data_voids(events: List[DocumentEvent], topic: str, locale: str, run_date: str = "20240101") -> Dict[str, Any]:
+def score_data_voids(events: list[DocumentEvent], topic: str, locale: str, run_date: str = "20240101") -> dict[str, Any]:
     """
     Given document events, score topic-locale authority density.
     A low density means high data void risk (few authoritative sources).
@@ -34,6 +36,6 @@ def score_data_voids(events: List[DocumentEvent], topic: str, locale: str, run_d
         "scores": scores
     }
 
-def write_void_score_artifact(score_data: Dict[str, Any], output_path: str):
+def write_void_score_artifact(score_data: dict[str, Any], output_path: str):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(score_data, f, indent=2, sort_keys=True)

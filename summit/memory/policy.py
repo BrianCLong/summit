@@ -1,5 +1,6 @@
 import re
-from typing import Set, List
+from typing import List, Set
+
 
 class AmbientPolicy:
     """Policy controls for the ambient capture memory plane.
@@ -7,11 +8,11 @@ class AmbientPolicy:
     """
     def __init__(self):
         # Default exclusions
-        self.excluded_apps: Set[str] = {"incognito", "private", "1password", "keychain", "bank", "wallet"}
-        self.excluded_domains: Set[str] = {"bank.com", "secure.com", "login", "auth"}
+        self.excluded_apps: set[str] = {"incognito", "private", "1password", "keychain", "bank", "wallet"}
+        self.excluded_domains: set[str] = {"bank.com", "secure.com", "login", "auth"}
 
         # Simple regex patterns for basic redaction (credit cards, ssn, typical password patterns)
-        self.sensitive_patterns: List[re.Pattern] = [
+        self.sensitive_patterns: list[re.Pattern] = [
             # Dummy credit card pattern
             re.compile(r'\b(?:\d{4}[-\s]?){3}\d{4}\b'),
             # Dummy SSN pattern

@@ -1,11 +1,13 @@
-import json
 import hashlib
-from typing import List, Dict, Any
-from .lookalike_detector import detect_typosquat
-from .slopsquat_guard import analyze_slopsquat
-from .propagation_risk import calculate_propagation_risk
+import json
+from typing import Any, Dict, List
 
-def evaluate_dependencies(dependencies: List[str], policy_config: Dict[str, Any]) -> Dict[str, Any]:
+from .lookalike_detector import detect_typosquat
+from .propagation_risk import calculate_propagation_risk
+from .slopsquat_guard import analyze_slopsquat
+
+
+def evaluate_dependencies(dependencies: list[str], policy_config: dict[str, Any]) -> dict[str, Any]:
     """
     Evaluates dependencies against the configured policy.
     Returns the evidence report dictionary.
@@ -54,7 +56,7 @@ def evaluate_dependencies(dependencies: List[str], policy_config: Dict[str, Any]
 
     return report
 
-def enforce_gate(report: Dict[str, Any], block_threshold: float = 0.75) -> bool:
+def enforce_gate(report: dict[str, Any], block_threshold: float = 0.75) -> bool:
     """
     Determines if the PR should fail based on the report.
     Returns True if passed (allow), False if failed (block).
@@ -64,7 +66,7 @@ def enforce_gate(report: Dict[str, Any], block_threshold: float = 0.75) -> bool:
             return False
     return True
 
-def generate_stamp(report: Dict[str, Any], policy_version: str = "v1.0") -> Dict[str, Any]:
+def generate_stamp(report: dict[str, Any], policy_version: str = "v1.0") -> dict[str, Any]:
     """Generates a deterministic stamp without timestamps."""
     content_hash = hashlib.sha256(json.dumps(report, sort_keys=True).encode('utf-8')).hexdigest()
     return {
@@ -73,7 +75,7 @@ def generate_stamp(report: Dict[str, Any], policy_version: str = "v1.0") -> Dict
         "status": "sealed"
     }
 
-def generate_metrics(report: Dict[str, Any]) -> Dict[str, Any]:
+def generate_metrics(report: dict[str, Any]) -> dict[str, Any]:
     """Generates aggregate metrics from the report."""
     total = len(report["assessments"])
     blocked = sum(1 for a in report["assessments"] if a["risk_score"] >= 0.75)

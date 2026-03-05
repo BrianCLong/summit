@@ -1,5 +1,11 @@
-import json, glob, collections, statistics, sys
+import collections
+import glob
+import json
+import statistics
+import sys
+
 from tools.plan_heatmap import summarize
+
 rows = summarize()
 failures = []
 BASELINE_ENTROPY = float(0)  # TODO: replace with stored baseline value

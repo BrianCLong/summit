@@ -1,6 +1,7 @@
 import json
 import sys
 
+
 def check_spans(docgraph):
     # Verify no spans are negative or end before they start
     for seg in docgraph.get('segments', []):

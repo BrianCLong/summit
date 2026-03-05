@@ -1,4 +1,4 @@
-with open('.github/workflows/pr-quality-gate.yml', 'r') as f:
+with open('.github/workflows/pr-quality-gate.yml') as f:
     content = f.read()
 
 # Fix pnpm lint:release-policy -> pnpm test:release-scripts

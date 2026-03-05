@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-import time
 import json
 import os
 import sys
+import time
 
 # Ensure the parent directory of agents is in PYTHONPATH
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from agents.ai_supply_chain_firewall.policy_gate import evaluate_dependencies
+
 
 def main():
     start_time = time.time()

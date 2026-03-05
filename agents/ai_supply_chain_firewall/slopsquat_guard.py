@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Mock registry for the prototype. In reality, this would be backed by an allowlist/registry check API.
 # But for the prototype, we assume if it's not in the 'known' set, it might be a hallucination.
@@ -16,7 +16,7 @@ KNOWN_REGISTRY = {
     "jest"
 }
 
-def analyze_slopsquat(dependency: str, enable_network_check: bool = False) -> Dict[str, Any]:
+def analyze_slopsquat(dependency: str, enable_network_check: bool = False) -> dict[str, Any]:
     """
     Analyzes hallucination risk heuristics:
     1. Does the package exist in known registries?

@@ -3,9 +3,10 @@
 Drift detector script that trends metrics and alerts on regression for the fusion sklearn pipeline.
 """
 import json
+import os
 import sys
 from pathlib import Path
-import os
+
 
 def main():
     metrics_path = Path("artifacts/fusion_demo/metrics.json")
@@ -18,7 +19,7 @@ def main():
         print("No metrics.json found. Run the CLI tool first.")
         sys.exit(0)
 
-    with open(metrics_path, "r") as f:
+    with open(metrics_path) as f:
         metrics = json.load(f)
 
     # Dummy drift logic: in a real world, we'd compare against previous runs

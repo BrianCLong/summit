@@ -1,6 +1,8 @@
 import pytest
-from summit.cbm.coordination import detect_coordination, SignalLedger
+
+from summit.cbm.coordination import SignalLedger, detect_coordination
 from summit.cbm.schema import DocumentEvent
+
 
 def test_coordination_determinism():
     events = [

@@ -1,4 +1,5 @@
 import os
+
 from .replay_harness import replay_suite
 
 DATASET = os.getenv("DEBEZIUM_TOPIC_JSON", "tests/fixtures/debezium_topic_sample.json")

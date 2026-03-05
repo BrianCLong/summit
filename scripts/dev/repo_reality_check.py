@@ -4,7 +4,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-
 ASSUMED_DIRS = ["src", "tests", "docs", "scripts", "ci", ".github"]
 ASSUMED_CI = [".github/workflows/*.yml", "ci/*.yml"]
 ASSUMED_TEST_RUNNERS = ["pytest", "pnpm test", "make smoke"]

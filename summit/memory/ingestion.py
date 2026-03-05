@@ -1,12 +1,13 @@
 import hashlib
 import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from .moment import Moment
 from .policy import AmbientPolicy
 
-def ingest_moment(raw_data: Dict[str, Any], policy: AmbientPolicy) -> Optional[Moment]:
+
+def ingest_moment(raw_data: dict[str, Any], policy: AmbientPolicy) -> Optional[Moment]:
     """
     Ingests raw capture data, normalizes into Moment, applies policy exclusions and redactions,
     and assigns id/hash.

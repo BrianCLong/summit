@@ -1,6 +1,7 @@
 from summit.audit.events import PromptEvent
 from summit.audit.policy import evaluate_event_with_redaction
 
+
 def test_policy_missing_purpose():
     event = PromptEvent(
         event_id="1", tenant="t1", actor="user", purpose="",

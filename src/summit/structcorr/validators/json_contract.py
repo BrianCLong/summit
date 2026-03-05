@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from typing import Any
 
-
 _ALLOWED_TYPES = {"object": dict, "array": list, "string": str, "number": (int, float), "boolean": bool}
 
 

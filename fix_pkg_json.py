@@ -1,6 +1,6 @@
 import json
 
-with open('package.json', 'r') as f:
+with open('package.json') as f:
     pkg = json.load(f)
 
 pkg['scripts']['ga:evidence'] = 'pnpm compliance:evidence'

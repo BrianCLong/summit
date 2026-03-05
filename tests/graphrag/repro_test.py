@@ -1,5 +1,8 @@
-import json, pathlib, numpy as np
+import json
+import pathlib
+
 import faiss
+import numpy as np
 from sentence_transformers import SentenceTransformer
 
 SEED = 1337

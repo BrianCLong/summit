@@ -1,7 +1,9 @@
 import json
 import re
 from pathlib import Path
+
 from summit_harness.evidence import EvidenceWriter
+
 
 def test_harness_evidence_writer_deterministic(tmp_path):
     writer = EvidenceWriter(tmp_path)

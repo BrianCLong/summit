@@ -1,6 +1,6 @@
 import json
 
-with open('agent-contract.json', 'r') as f:
+with open('agent-contract.json') as f:
     data = json.load(f)
 
 for pattern in data['piiPatterns']:

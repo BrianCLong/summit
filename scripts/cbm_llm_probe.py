@@ -1,6 +1,7 @@
 import argparse
 import sys
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--prompts", required=True)

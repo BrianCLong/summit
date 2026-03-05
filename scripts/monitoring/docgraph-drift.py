@@ -1,5 +1,6 @@
-import os
 import json
+import os
+
 
 def check_drift():
     # In a real environment, this would run over a historical corpus of tests

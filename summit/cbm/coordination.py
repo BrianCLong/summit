@@ -1,13 +1,15 @@
-import json
 import hashlib
-from typing import List, Dict, Any
+import json
+from typing import Any, Dict, List
+
 from .schema import DocumentEvent
 from .signal_ledger import SignalLedger
+
 
 def _hash_string(s: str) -> str:
     return hashlib.sha256(s.encode('utf-8')).hexdigest()[:12]
 
-def detect_coordination(events: List[DocumentEvent], ledger: SignalLedger, run_date: str = "20240101") -> Dict[str, Any]:
+def detect_coordination(events: list[DocumentEvent], ledger: SignalLedger, run_date: str = "20240101") -> dict[str, Any]:
     """
     Given a list of document events, identify coordinated amplification
     based on timing synchronicity and content similarity heuristics.
@@ -49,6 +51,6 @@ def detect_coordination(events: List[DocumentEvent], ledger: SignalLedger, run_d
         "signals": ledger.get_ledger()
     }
 
-def write_influence_graph_artifact(graph_data: Dict[str, Any], output_path: str):
+def write_influence_graph_artifact(graph_data: dict[str, Any], output_path: str):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(graph_data, f, indent=2, sort_keys=True)

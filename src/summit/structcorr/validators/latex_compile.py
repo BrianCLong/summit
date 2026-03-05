@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 _BLOCKED_PATTERNS = ["\\write18", "\\input", "\\include", "\\openout", "\\read"]
 
 

@@ -1,5 +1,6 @@
 from summit.influence.llm_monitor import analyze_narrative_overlap
 
+
 class DummyModel:
     def generate(self, prompt):
         return "This is a dummy response echoing narrative A."

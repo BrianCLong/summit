@@ -1,5 +1,6 @@
 import json
 
+
 def detect_drift():
     print("Detecting AI Code Firewall drift...")
     report = {

@@ -1,4 +1,4 @@
-with open('.github/workflows/parity-check.yml', 'r') as f:
+with open('.github/workflows/parity-check.yml') as f:
     content = f.read()
 
 content = content.replace("${{ secrets.AWS_OIDC_ROLE_ARN != \\'\\' && matrix.cloud == \\'aws\\' }}", "${{ secrets.AWS_OIDC_ROLE_ARN != '' && matrix.cloud == 'aws' }}")

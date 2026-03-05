@@ -1,6 +1,7 @@
 import hashlib
 import json
 
+
 def _stable_pk_digest(pk_dict: dict) -> str:
     # Deterministic JSON of sorted PK fields → sha256
     stable = json.dumps({k: pk_dict[k] for k in sorted(pk_dict)}, separators=(',', ':'), ensure_ascii=False)

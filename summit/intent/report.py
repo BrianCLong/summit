@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -8,7 +8,7 @@ class ReportGenerator:
     def __init__(self, output_dir: str = "artifacts/intent"):
         self.output_dir = output_dir
 
-    def generate_report(self, spec_data: Dict[str, Any], evaluation: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_report(self, spec_data: dict[str, Any], evaluation: dict[str, Any]) -> dict[str, Any]:
         """
         Generates the intent_report.json based on validation and evaluation context.
         """
@@ -24,7 +24,7 @@ class ReportGenerator:
         }
         return report
 
-    def generate_metrics(self, execution_context: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_metrics(self, execution_context: dict[str, Any]) -> dict[str, Any]:
         """
         Generates performance metrics based on execution run.
         """
@@ -34,7 +34,7 @@ class ReportGenerator:
             "token_reduction_ratio": execution_context.get("token_reduction_ratio", 0.0)
         }
 
-    def generate_stamp(self, spec_data: Dict[str, Any], evaluation: Dict[str, Any]) -> Dict[str, Any]:
+    def generate_stamp(self, spec_data: dict[str, Any], evaluation: dict[str, Any]) -> dict[str, Any]:
         """
         Produces deterministic approved stamp.
         """

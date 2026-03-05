@@ -1,6 +1,6 @@
-import sys
-import os
 import json
+import os
+import sys
 
 if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
     sys.exit(0)

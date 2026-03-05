@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-import json, random, hashlib, pathlib
-from dataclasses import dataclass, asdict
+import hashlib
+import json
+import pathlib
+import random
+from dataclasses import asdict, dataclass
 
 SEED = 1337
 DOCS_OUT = pathlib.Path("artifacts/graphrag/corpus.jsonl")

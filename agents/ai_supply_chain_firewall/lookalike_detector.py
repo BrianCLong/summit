@@ -37,7 +37,7 @@ def normalize_confusables(name: str) -> str:
     """Normalize simple homoglyphs/confusables."""
     return name.replace('1', 'l').replace('0', 'o').lower()
 
-def detect_typosquat(dependency: str, threshold: int = 1) -> Tuple[bool, List[str]]:
+def detect_typosquat(dependency: str, threshold: int = 1) -> tuple[bool, list[str]]:
     """
     Checks if a dependency name is a lookalike of a popular package.
     Returns (is_typosquat, list of similar packages).

@@ -6,7 +6,6 @@ from summit.promptpacks.serious_client_tone.rules import (
     redact_text,
 )
 
-
 TRANSFORMATION_TEMPLATE = (
     "I help {target} go from {before} to {after} by {method}."
 )
@@ -20,7 +19,7 @@ def _score(availability_count: int, transformation_present: bool) -> int:
     return max(score, 0)
 
 
-def evaluate_payload(payload: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+def evaluate_payload(payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
     input_id = str(payload.get("id", "unknown"))
     profile = str(payload.get("profile", ""))
     offer = str(payload.get("offer", ""))
@@ -32,7 +31,7 @@ def evaluate_payload(payload: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str,
     transformation_hits = find_transformation_signals(draft_message)
     transformation_present = bool(transformation_hits)
 
-    report: Dict[str, Any] = {
+    report: dict[str, Any] = {
         "input_id": input_id,
         "availability_signals": {
             "matches": availability_hits,
@@ -57,7 +56,7 @@ def evaluate_payload(payload: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str,
             TRANSFORMATION_TEMPLATE
         )
 
-    metrics: Dict[str, Any] = {
+    metrics: dict[str, Any] = {
         "input_id": input_id,
         "availability_signal_count": len(availability_hits),
         "transformation_first_present": transformation_present,

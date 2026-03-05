@@ -1,16 +1,17 @@
-import json
 import hashlib
-from typing import List, Dict, Any
+import json
+from typing import Any, Dict, List
+
 
 class HF2602DatasetAdapter:
     def __init__(self, data_path: str):
         self.data_path = data_path
 
-    def load_canonicalized(self) -> List[Dict[str, Any]]:
+    def load_canonicalized(self) -> list[dict[str, Any]]:
         # Deterministically read and parse
         # If file doesn't exist, we return a mock dataset for CI testing
         try:
-            with open(self.data_path, "r", encoding="utf-8") as f:
+            with open(self.data_path, encoding="utf-8") as f:
                 data = [json.loads(line) for line in f if line.strip()]
         except FileNotFoundError:
             # Mock dataset for CI

@@ -1,7 +1,9 @@
-import time
-import os
 import json
+import os
+import time
+
 from pipelines.docgraph.graph_builder import build_graph
+
 
 def run_bench():
     os.environ["SUMMIT_ENABLE_DOCGRAPH"] = "ON"

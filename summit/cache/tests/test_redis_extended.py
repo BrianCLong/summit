@@ -1,7 +1,9 @@
-import unittest
-from unittest.mock import MagicMock, patch, call
 import json
+import unittest
+from unittest.mock import MagicMock, call, patch
+
 from summit.cache.redis_client import RedisClient
+
 
 class TestRedisClientExtended(unittest.TestCase):
     def setUp(self):

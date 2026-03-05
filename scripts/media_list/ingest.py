@@ -1,7 +1,7 @@
-import json
 import argparse
-import sys
+import json
 import os
+import sys
 
 MEDIA_AI_LIST_ENABLED = os.getenv("MEDIA_AI_LIST_ENABLED", "false").lower() == "true"
 

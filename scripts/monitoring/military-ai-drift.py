@@ -1,6 +1,7 @@
 import json
 import os
 
+
 def run():
     trends = {
         "4_week_rolling_mean": 0.5,

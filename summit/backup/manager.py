@@ -1,9 +1,11 @@
-from typing import Dict, Any, Type
-from .core import BackupProvider
-from .redis_provider import RedisBackupProvider
-from summit.cache.redis_client import RedisClient
 import logging
 import os
+from typing import Any, Dict, Type
+
+from summit.cache.redis_client import RedisClient
+
+from .core import BackupProvider
+from .redis_provider import RedisBackupProvider
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ class BackupManager:
         if not os.path.exists(self.backup_dir):
             os.makedirs(self.backup_dir)
 
-        self.providers: Dict[str, BackupProvider] = {}
+        self.providers: dict[str, BackupProvider] = {}
 
         # Register default providers
         self.register_provider("redis", RedisBackupProvider(RedisClient()))
@@ -21,7 +23,7 @@ class BackupManager:
     def register_provider(self, name: str, provider: BackupProvider):
         self.providers[name] = provider
 
-    def execute_backup(self, provider_name: str) -> Dict[str, Any]:
+    def execute_backup(self, provider_name: str) -> dict[str, Any]:
         provider = self.providers.get(provider_name)
         if not provider:
             logger.error(f"Provider {provider_name} not found")

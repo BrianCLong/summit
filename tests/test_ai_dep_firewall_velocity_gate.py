@@ -1,5 +1,7 @@
 import pytest
+
 from agents.ai_supply_chain_firewall.propagation_risk import calculate_propagation_risk
+
 
 def test_propagation_high_risk():
     result = calculate_propagation_risk("malicious-pkg-001")

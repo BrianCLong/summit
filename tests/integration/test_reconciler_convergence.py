@@ -1,9 +1,8 @@
-import os
 import json
+import os
 from pathlib import Path
 
-from reconciler.neo4j_reconciler import replay_jsonl, compute_final_hash
-
+from reconciler.neo4j_reconciler import compute_final_hash, replay_jsonl
 
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")

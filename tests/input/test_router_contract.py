@@ -3,7 +3,6 @@ import pytest
 from summit.input.router import PolicyViolation, route_intents
 from summit.input.types import IntentFrame
 
-
 POLICY = {
     "enabled": True,
     "classes": {

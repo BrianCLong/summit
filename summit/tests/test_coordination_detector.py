@@ -1,5 +1,6 @@
 from summit.influence.coordination_detector import detect_coordination
 
+
 def test_coordination_detector():
     events = [
         {'narrative': 'A', 'account': 'user1'},

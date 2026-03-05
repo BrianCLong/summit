@@ -1,6 +1,6 @@
 import json
 
-with open("evidence/schemas/report.schema.json", "r") as f:
+with open("evidence/schemas/report.schema.json") as f:
     schema = json.load(f)
 
 # Handle cases where report is a list!

@@ -7,7 +7,7 @@ for root, _, files in os.walk("evidence"):
         if file.endswith(".json"):
             path = Path(root) / file
             try:
-                with open(path, "r", encoding="utf-8") as f:
+                with open(path, encoding="utf-8") as f:
                     data = json.load(f)
             except:
                 continue

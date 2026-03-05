@@ -1,11 +1,12 @@
-from typing import Dict, List, Any
 import hashlib
+from typing import Any, Dict, List
+
 
 class IncidentFusion:
     def __init__(self):
         self.graph = {"nodes": [], "edges": []}
 
-    def add_incident(self, incident: Dict[str, Any]):
+    def add_incident(self, incident: dict[str, Any]):
         node = {
             "id": incident["id"],
             "type": "Incident",

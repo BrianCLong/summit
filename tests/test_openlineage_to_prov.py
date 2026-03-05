@@ -1,17 +1,19 @@
-import pytest
-import json
 import hashlib
+import json
 import os
+
+import pytest
+
 
 def test_mapping_exists():
     mapping_path = os.path.join(os.path.dirname(__file__), '../mapping/openlineage_1.44_to_prov.json')
-    with open(mapping_path, 'r') as f:
+    with open(mapping_path) as f:
         mapping = json.load(f)
     assert mapping["version"] == "1.44.1"
 
 def test_extraction_error_facet():
     mapping_path = os.path.join(os.path.dirname(__file__), '../mapping/openlineage_1.44_to_prov.json')
-    with open(mapping_path, 'r') as f:
+    with open(mapping_path) as f:
         mapping = json.load(f)
 
     has_extraction_error = False

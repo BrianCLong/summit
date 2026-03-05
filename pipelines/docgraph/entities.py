@@ -1,5 +1,6 @@
-import uuid
 import re
+import uuid
+
 
 def extract_entities(text, segments):
     # Minimal deterministic entity extraction (Capitalized words > 3 chars)

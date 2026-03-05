@@ -22,7 +22,6 @@ import pytest
 from summit.cbm import CBMConfig, DocumentEvent, run_cbm
 from summit.cbm.schema import compute_run_hash, make_evidence_id
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------

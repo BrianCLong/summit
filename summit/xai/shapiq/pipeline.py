@@ -1,10 +1,12 @@
+import hashlib
 import json
 import os
-import hashlib
-import time
 import re
+import time
+from typing import Any, Dict, List, Tuple
+
 import numpy as np
-from typing import List, Dict, Any, Tuple
+
 from .estimator import ShapIQEstimator
 from .interactions import InteractionManager
 
@@ -20,7 +22,7 @@ def redact_pii(text: str) -> str:
         text = re.sub(pattern, "[REDACTED]", text)
     return text
 
-def apply_feature_filter(features: Dict[str, Any], allowed_features: List[str]) -> Dict[str, Any]:
+def apply_feature_filter(features: dict[str, Any], allowed_features: list[str]) -> dict[str, Any]:
     # Deny by default
     filtered = {}
     for k, v in features.items():
@@ -38,7 +40,7 @@ class ShapIQPipeline:
         self.interactions = InteractionManager(max_order=max_order, seed=seed)
         self.allowed_features = allowed_features or []
 
-    def run(self, instance: Dict[str, Any], model_id: str, run_id: str) -> Tuple[Dict, Dict, Dict, np.ndarray]:
+    def run(self, instance: dict[str, Any], model_id: str, run_id: str) -> tuple[dict, dict, dict, np.ndarray]:
         start_time = time.time()
 
         # Security: Input sanitization + deny-by-default feature filter
@@ -88,7 +90,7 @@ class ShapIQPipeline:
 
         return report, metrics, stamp, interaction_matrix
 
-    def save_artifacts(self, output_dir: str, report: Dict, metrics: Dict, stamp: Dict, interaction_matrix: np.ndarray):
+    def save_artifacts(self, output_dir: str, report: dict, metrics: dict, stamp: dict, interaction_matrix: np.ndarray):
         os.makedirs(output_dir, exist_ok=True)
 
         with open(os.path.join(output_dir, "report.json"), "w") as f:

@@ -1,21 +1,21 @@
-import os
-import json
 import glob
+import json
+import os
 
 # 1. CHANGELOG
-with open("CHANGELOG.md", "r") as f:
+with open("CHANGELOG.md") as f:
     content = f.read()
 new_changelog = content.replace("### Added", "### Added\n- Added Agentic Runtime, deterministic RAG eval harness, and Governance components.\n", 1)
 with open("CHANGELOG.md", "w") as f:
     f.write(new_changelog)
 
 # 2. Package.json Versions
-with open("package.json", "r") as f:
+with open("package.json") as f:
     root_pkg = json.load(f)
     version = root_pkg["version"]
 
 for path in ["client/package.json", "server/package.json"]:
-    with open(path, "r") as f:
+    with open(path) as f:
         pkg = json.load(f)
     pkg["version"] = version
     with open(path, "w") as f:
@@ -23,7 +23,7 @@ for path in ["client/package.json", "server/package.json"]:
 
 # 3. Workflows Node Version & Docker Compose Path
 for filename in glob.glob(".github/workflows/*.yml"):
-    with open(filename, "r") as f:
+    with open(filename) as f:
         content = f.read()
 
     # node version

@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # MIT License — tiny converter: evidence.json -> evidence.dot (and .svg if dot present)
-import json, sys
+import json
+import sys
+
 from graphviz import Digraph
+
 
 def node_id(x:str)->str:
     return str(x).replace(' ','_').replace(':','_').replace('/','_')

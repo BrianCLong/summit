@@ -1,6 +1,11 @@
 from __future__ import annotations
-import hashlib, json, requests
+
+import hashlib
+import json
 import typing
+
+import requests
+
 
 class OllamaProvider:
     def __init__(self, base_url: str = "http://localhost:11434", timeout_s: float = 60.0):

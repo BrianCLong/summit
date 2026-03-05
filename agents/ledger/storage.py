@@ -1,5 +1,6 @@
 import json
 
+
 def save_ledger(ledger, filepath: str):
     data = {
         "todos": ledger.todos,
@@ -10,7 +11,7 @@ def save_ledger(ledger, filepath: str):
         json.dump(data, f)
 
 def load_ledger(filepath: str):
-    with open(filepath, 'r') as f:
+    with open(filepath) as f:
         data = json.load(f)
     # Instantiate and populate
     from .ledger import Ledger

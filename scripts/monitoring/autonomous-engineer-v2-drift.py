@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import json
 
+
 def analyze_drift():
     # TODO: Implement reading metrics and comparing to baseline
     print("Drift analysis passed")

@@ -1,6 +1,7 @@
 import json
 import sys
 
+
 def main():
     print("Running AI Code Firewall...")
     # Dummy execution logic

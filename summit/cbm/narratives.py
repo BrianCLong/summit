@@ -1,12 +1,14 @@
-import json
 import hashlib
-from typing import List, Dict, Any
+import json
+from typing import Any, Dict, List
+
 from .schema import DocumentEvent
+
 
 def _hash_string(s: str) -> str:
     return hashlib.sha256(s.encode('utf-8')).hexdigest()[:12]
 
-def extract_and_cluster(events: List[DocumentEvent], run_date: str = "20240101") -> Dict[str, Any]:
+def extract_and_cluster(events: list[DocumentEvent], run_date: str = "20240101") -> dict[str, Any]:
     """
     Given a list of document events, extracts claims and clusters them into narratives.
     Returns deterministic narratives list sorted by ID.
@@ -40,6 +42,6 @@ def extract_and_cluster(events: List[DocumentEvent], run_date: str = "20240101")
         "narratives": narratives
     }
 
-def write_narratives_artifact(narratives_data: Dict[str, Any], output_path: str):
+def write_narratives_artifact(narratives_data: dict[str, Any], output_path: str):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(narratives_data, f, indent=2, sort_keys=True)

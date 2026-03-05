@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class InteractionManager:
     def __init__(self, max_order=2, seed=42):
         self.max_order = max_order

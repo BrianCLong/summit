@@ -1,5 +1,6 @@
 import pytest
 
+
 class MockPGClient:
     def __init__(self):
         self.state = {}

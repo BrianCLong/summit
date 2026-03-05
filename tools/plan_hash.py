@@ -1,5 +1,6 @@
 # tools/plan_hash.py
-import hashlib, json
+import hashlib
+import json
 
 CANON_KEYS = {"operatorType","planner","arguments","details","identifiers"}
 

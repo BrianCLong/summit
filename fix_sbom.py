@@ -1,4 +1,4 @@
-with open('scripts/generate-sbom.sh', 'r') as f:
+with open('scripts/generate-sbom.sh') as f:
     content = f.read()
 
 content = content.replace('syft packages dir:. -o "cyclonedx-json@$CYCLONEDX_VERSION" --file "$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"', 'syft scan dir:. -o "cyclonedx-json@$CYCLONEDX_VERSION=$OUTPUT_DIR/${ARTIFACT_NAME}-${service_name}-${VERSION}.cdx.json"')

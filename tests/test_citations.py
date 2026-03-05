@@ -1,5 +1,6 @@
 from summit.slopguard.citations import verify_citations
 
+
 def test_valid_citations():
     citations = [
         {"doi": "10.1000/182", "url": "https://doi.org/10.1000/182"},

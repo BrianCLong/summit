@@ -1,13 +1,14 @@
-import json
 import argparse
-import sys
 import hashlib
+import json
 import os
+import sys
+
 
 def detect_drift(current_report_path, new_report_path):
-    with open(current_report_path, "r") as f:
+    with open(current_report_path) as f:
         current = json.load(f)
-    with open(new_report_path, "r") as f:
+    with open(new_report_path) as f:
         new = json.load(f)
 
     current_hash = hashlib.sha256(json.dumps(current, sort_keys=True).encode()).hexdigest()

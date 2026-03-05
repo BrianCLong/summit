@@ -1,6 +1,8 @@
 import pytest
+
 from summit.partitioning.router import NoopRouter
 from summit.partitioning.shard_plan import ShardPlan
+
 
 def test_noop_router_returns_default():
     router = NoopRouter()

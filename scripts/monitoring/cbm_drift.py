@@ -1,6 +1,7 @@
 import argparse
-import json
 import hashlib
+import json
+
 
 def main():
     parser = argparse.ArgumentParser()

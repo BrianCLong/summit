@@ -1,8 +1,9 @@
 import json
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
-def detect_drift(current_metrics: Dict[str, Any], baseline_metrics: Dict[str, Any]) -> Dict[str, Any]:
+
+def detect_drift(current_metrics: dict[str, Any], baseline_metrics: dict[str, Any]) -> dict[str, Any]:
     threshold = 0.1 # 10% tolerance
 
     current_mean_abs_shap = current_metrics["metrics"].get("mean_abs_shap", 0.0)

@@ -1,12 +1,13 @@
 import json
 import os
 
+
 def fix_workflows():
     for root, _, files in os.walk(".github/workflows"):
         for file in files:
             if file.endswith(".yml"):
                 p = os.path.join(root, file)
-                with open(p, "r") as f:
+                with open(p) as f:
                     c = f.read()
 
                 changed = False
@@ -38,7 +39,7 @@ def fix_workflows():
 def fix_provenance():
     identities_file = "governance/identities.yaml"
     if os.path.exists(identities_file):
-        with open(identities_file, "r") as f:
+        with open(identities_file) as f:
             content = f.read()
         if "BrianCLong" not in content:
             with open(identities_file, "a") as f:
@@ -47,7 +48,7 @@ def fix_provenance():
 def fix_sbom():
     script_path = "scripts/generate-sbom.sh"
     if os.path.exists(script_path):
-        with open(script_path, "r") as f:
+        with open(script_path) as f:
             content = f.read()
         if "mkdir -p ./sboms/" not in content:
             content = "mkdir -p ./sboms/\n" + content
@@ -73,7 +74,7 @@ def fix_reason_codes():
         "INVALID_JSON"
     ]
     if os.path.exists(reason_codes_file):
-        with open(reason_codes_file, "r") as f:
+        with open(reason_codes_file) as f:
             content = f.read()
         for code in missing_codes:
             if code not in content:
@@ -86,7 +87,7 @@ def fix_mock_scan():
         f.write("console.log('Mock scan successful!');\nprocess.exit(0);\n")
 
 def fix_package_json():
-    with open("package.json", "r") as f:
+    with open("package.json") as f:
         pkg = json.load(f)
     if "lint:release-policy" not in pkg.get("scripts", {}):
         if "scripts" not in pkg: pkg["scripts"] = {}

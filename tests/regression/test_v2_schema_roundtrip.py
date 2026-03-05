@@ -1,7 +1,9 @@
-import subprocess
 import os
+import subprocess
 import sys
+
 import pytest
+
 
 def test_v2_schema_roundtrip():
     # Run the eval script

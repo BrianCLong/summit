@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
-import json, os, sys, hashlib, datetime, re
-from typing import Dict, Any, List
+import datetime
+import hashlib
+import json
+import os
+import re
+import sys
+from typing import Any, Dict, List
+
 from neo4j import GraphDatabase
 
 NEO4J_URI = os.environ.get("NEO4J_URI", "bolt://localhost:7687") or "bolt://localhost:7687"
@@ -16,14 +22,14 @@ VOLATILE_KEYS = {
     "version","cost","operatorId"
 }
 
-def load_seeds(path:str)->List[str]:
+def load_seeds(path:str)->list[str]:
     if not os.path.exists(path):
         print(f"[plan-sampler] No seeds file found at {path}", file=sys.stderr)
         return []
-    with open(path, "r") as f:
+    with open(path) as f:
         return [q.strip() for q in f.read().split("\n\n") if q.strip()]
 
-def normalize_plan(node:Dict[str,Any])->Dict[str,Any]:
+def normalize_plan(node:dict[str,Any])->dict[str,Any]:
     if node is None:
         return {}
     # keep 'name' and children; drop volatile stuff; scrub numbers/addresses in texts
@@ -52,11 +58,11 @@ def normalize_plan(node:Dict[str,Any])->Dict[str,Any]:
             keep[k] = {"_keys": sorted([kk for kk in v.keys() if kk not in VOLATILE_KEYS])}
     return keep
 
-def stable_fingerprint(obj:Dict[str,Any])->str:
+def stable_fingerprint(obj:dict[str,Any])->str:
     payload = json.dumps(obj, sort_keys=True, separators=(",",":"))
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-def explain_query(tx, q:str)->Dict[str,Any]:
+def explain_query(tx, q:str)->dict[str,Any]:
     # Use CYPHER runtime default; EXPLAIN returns plan in summary
     res = tx.run("EXPLAIN " + q)
     _ = list(res)  # exhaust

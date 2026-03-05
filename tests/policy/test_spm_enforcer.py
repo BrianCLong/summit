@@ -1,6 +1,8 @@
 import pytest
+
 from summit.policy.router import PolicyDecision
 from summit.policy.spm_enforcer import SPMEnforcer
+
 
 def test_spm_enforcer_baseline():
     enforcer = SPMEnforcer()

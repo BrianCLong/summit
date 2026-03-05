@@ -1,4 +1,5 @@
-from summit_harness.redaction import redact_secrets, is_field_sensitive
+from summit_harness.redaction import is_field_sensitive, redact_secrets
+
 
 def test_harness_redact_secrets_key_value():
     input_text = "Connecting with api_key=sk-12345 and token=abcde"

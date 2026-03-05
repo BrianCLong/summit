@@ -7,7 +7,7 @@ import csv
 import fnmatch
 import json
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -75,7 +75,7 @@ def parse_inline_json_config(path: Path) -> Config:
 def parse_ts(ts: str) -> datetime:
     if ts.endswith("Z"):
         ts = ts[:-1] + "+00:00"
-    return datetime.fromisoformat(ts).astimezone(timezone.utc)
+    return datetime.fromisoformat(ts).astimezone(UTC)
 
 
 def ci_state(pr: dict[str, Any]) -> str:

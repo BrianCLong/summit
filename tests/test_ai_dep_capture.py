@@ -1,9 +1,12 @@
-import os
-import json
-import pytest
-import tempfile
 import hashlib
+import json
+import os
+import tempfile
+
+import pytest
+
 from agents.ai_supply_chain_firewall.dependency_interceptor import intercept_dependencies
+
 
 def test_intercept_dependencies():
     suggestions = [
@@ -18,7 +21,7 @@ def test_intercept_dependencies():
     try:
         intercept_dependencies(suggestions, output_path)
 
-        with open(output_path, "r") as f:
+        with open(output_path) as f:
             lines = f.readlines()
 
         assert len(lines) == 2

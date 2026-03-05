@@ -1,13 +1,18 @@
-import sys
 import os
+import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from summit.agents.ai_firewall.generation_monitor import detect_sql_injection, detect_vulnerabilities
-from summit.agents.ai_firewall.exploit_path_engine import ExploitPathEngine
-from summit.agents.ai_firewall.dependency_guard import verify_dependency
-from summit.agents.ai_firewall.model_policy_engine import enforce_model_policy
 from summit.agents.ai_firewall.code_context_graph import CodeContextGraph
+from summit.agents.ai_firewall.dependency_guard import verify_dependency
+from summit.agents.ai_firewall.exploit_path_engine import ExploitPathEngine
+from summit.agents.ai_firewall.generation_monitor import (
+    detect_sql_injection,
+    detect_vulnerabilities,
+)
 from summit.agents.ai_firewall.mcp_adapter import MCPAdapter
+from summit.agents.ai_firewall.model_policy_engine import enforce_model_policy
+
 
 def test_generation_monitor():
     assert detect_sql_injection(["user_input", "raw_sql_query"]) == True

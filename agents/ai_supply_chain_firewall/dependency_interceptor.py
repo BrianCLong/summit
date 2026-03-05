@@ -1,7 +1,8 @@
-import json
 import hashlib
+import json
 import re
 from typing import List
+
 
 def is_secret(dependency: str) -> bool:
     """Basic check to avoid logging things that look like secrets/tokens."""
@@ -10,7 +11,7 @@ def is_secret(dependency: str) -> bool:
         return True
     return False
 
-def intercept_dependencies(suggestions: List[str], output_path: str = "suggestions.jsonl"):
+def intercept_dependencies(suggestions: list[str], output_path: str = "suggestions.jsonl"):
     """
     Takes a list of raw AI suggested dependencies, filters out potential secrets,
     hashes the dependency names, and writes them to a JSONL file.

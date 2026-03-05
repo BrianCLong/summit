@@ -1,5 +1,6 @@
 from summit.influence.hybrid_correlation import correlate_events
 
+
 def test_hybrid_correlation():
     sabotage_events = [{'id': 's1', 'timestamp': 1000}]
     info_events = [

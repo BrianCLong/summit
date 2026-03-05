@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import sys
 import json
 import os
+import sys
+
 
 def check_policy():
     if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
@@ -9,7 +10,7 @@ def check_policy():
         sys.exit(0)
 
     try:
-        with open("artifacts/patch_stack.json", "r") as f:
+        with open("artifacts/patch_stack.json") as f:
             patches = json.load(f)
         # TODO: call agents.policy.diff_policy.check_diff_policy
         print("Patch policy passed")

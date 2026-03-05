@@ -1,7 +1,8 @@
 import argparse
+import hashlib
 import json
 import os
-import hashlib
+
 
 def main():
     parser = argparse.ArgumentParser(description="CBM Deterministic Replay")

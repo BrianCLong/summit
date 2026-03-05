@@ -1,6 +1,7 @@
-import os
 import json
+import os
 import sys
+
 
 def check_schema():
     schema_path = "schemas/docgraph.schema.json"

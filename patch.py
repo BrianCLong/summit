@@ -1,6 +1,6 @@
 import re
 
-with open('.github/workflows/comprehensive-test.yml', 'r') as f:
+with open('.github/workflows/comprehensive-test.yml') as f:
     content = f.read()
 
 content = re.sub(r"python-version: '3.10'", "python-version: '3.11'", content)

@@ -1,5 +1,7 @@
 import pytest
+
 from summit.intent.validator import IntentValidator
+
 
 def test_deterministic_validation():
     """

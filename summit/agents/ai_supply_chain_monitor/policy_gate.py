@@ -1,7 +1,9 @@
+import datetime
 import json
 import os
-import datetime
-from summit.agents.ai_supply_chain_monitor.propagation_analyzer import PropagationAnalyzer, Package
+
+from summit.agents.ai_supply_chain_monitor.propagation_analyzer import Package, PropagationAnalyzer
+
 
 class PolicyGate:
     def __init__(self, evidence_dir="evidence/ai-supply-chain"):
@@ -27,7 +29,7 @@ class PolicyGate:
         }
 
     def _generate_evidence(self, package, is_high_risk, status):
-        evidence_id = f"SUMMIT-AISCM-001"
+        evidence_id = "SUMMIT-AISCM-001"
 
         report = {
             "evidence_id": evidence_id,
@@ -39,7 +41,7 @@ class PolicyGate:
                 "trust_score": package.trust_score,
                 "ai_recommendations": package.ai_recommendations
             },
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
         }
 
         metrics = {
@@ -50,7 +52,7 @@ class PolicyGate:
 
         stamp = {
             "id": evidence_id,
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             "signature": "VALID"
         }
 

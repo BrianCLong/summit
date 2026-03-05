@@ -125,27 +125,27 @@ def main():
 
     # Summary
     print(f"\n{'='*60}")
-    print(f"Optimization Complete")
+    print("Optimization Complete")
     print(f"{'='*60}")
     print(f"✅ Optimized: {len(optimized)} workflows")
     print(f"⏭️  Skipped: {len(skipped)} workflows")
     print(f"❌ Errors: {len(errors)} workflows")
 
     if optimized:
-        print(f"\nOptimized workflows:")
+        print("\nOptimized workflows:")
         for name in optimized[:20]:  # Show first 20
             print(f"  - {name}")
         if len(optimized) > 20:
             print(f"  ... and {len(optimized) - 20} more")
 
     if errors:
-        print(f"\nErrors:")
+        print("\nErrors:")
         for error in errors:
             print(f"  - {error}")
 
-    print(f"\nNext steps:")
-    print(f"  1. Review changes: git diff .github/workflows/")
-    print(f"  2. Test a sample workflow: act pull_request")
+    print("\nNext steps:")
+    print("  1. Review changes: git diff .github/workflows/")
+    print("  2. Test a sample workflow: act pull_request")
     print(f"  3. Commit: git commit -am 'feat(ci): batch optimize {len(optimized)} workflows'")
 
     return 0

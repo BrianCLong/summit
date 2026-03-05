@@ -1,6 +1,9 @@
 import json
+
 import pytest
+
 from summit.intent.validator import IntentValidator
+
 
 def test_valid_intent_schema():
     validator = IntentValidator("schemas/intent_spec.schema.json")
