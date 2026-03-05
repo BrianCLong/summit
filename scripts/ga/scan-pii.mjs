@@ -37,7 +37,12 @@ function scanFile(filePath) {
     const content = readFileSync(filePath, 'utf8');
     let found = false;
     for (const p of piiPatterns) {
-      if (p.regex.test(content)) {
+      let match;
+      while ((match = p.regex.exec(content)) !== null) {
+        const m = match[0];
+        if (p.name === 'Email' && (m.endsWith('@v1.yaml') || m.endsWith('@v1.md') || m.endsWith('.ts') || m.endsWith('.js') || m.endsWith('.mjs'))) {
+           continue; // skip version tags like saas-crash-2026@v1.md
+        }
         console.error(`[PII DETECTED] ${p.name} found in ${filePath}`);
         found = true;
       }
