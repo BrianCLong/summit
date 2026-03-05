@@ -1,162 +1,284 @@
-import crypto from "node:crypto";
-import path from "node:path";
+import { randomUUID } from 'node:crypto';
 
-import type { SkillInvocation } from "../skills/types.js";
-import type { SkillPolicy } from "../policy/load-policy.js";
-import { loadPolicyFromFile } from "../policy/load-policy.js";
-import { evaluate } from "../policy/evaluate.js";
+import { EventLogWriter } from '../logging/event-log.js';
+import { hashInputs, hashOutputs } from '../provenance/hash.js';
+import type {
+  Agent,
+  AgentEvent,
+  AgentResult,
+  AgentTask,
+  OrchestratorRunSummary,
+} from '../types.js';
 
-export type SkillHandler = (invocation: SkillInvocation) => Promise<unknown>;
+const sortTasksDeterministically = (tasks: AgentTask[]): AgentTask[] =>
+  [...tasks].sort((left, right) => {
+    if (right.priority !== left.priority) {
+      return right.priority - left.priority;
+    }
 
-export interface AgentEvent {
-  type: "SKILL_ALLOWED" | "SKILL_DENIED" | "SKILL_EXEC_STARTED" | "SKILL_EXEC_FINISHED";
-  run_id: string;
-  task_id: string;
-  agent_name: string;
-  skill: string;
-  decision: "allow" | "deny";
-  reason: string;
-  inputs_hash: string;
-  outputs_hash: string | null;
-  matched_rules?: string[];
-  ts: string;
-}
+    const createdComparison =
+      new Date(left.created_at).getTime() - new Date(right.created_at).getTime();
+    if (createdComparison !== 0) {
+      return createdComparison;
+    }
 
-export interface AgentOrchestratorOptions {
-  policy?: SkillPolicy;
-  policyPath?: string;
-  eventSink?: (event: AgentEvent) => void;
-  provenanceSink?: (event: AgentEvent) => void;
-}
+    return left.id.localeCompare(right.id);
+  });
 
 export class AgentOrchestrator {
-  private readonly policy: SkillPolicy;
-  private readonly handlers = new Map<string, SkillHandler>();
-  private readonly eventSink?: (event: AgentEvent) => void;
-  private readonly provenanceSink?: (event: AgentEvent) => void;
+  constructor(
+    private readonly agents: Agent[],
+    private readonly eventLog = new EventLogWriter(),
+  ) {}
 
-  constructor(options: AgentOrchestratorOptions = {}) {
-    this.policy =
-      options.policy ??
-      loadPolicyFromFile(
-        options.policyPath ?? path.resolve(process.cwd(), "summit/agents/policy/policy.example.yml")
-      );
-    this.eventSink = options.eventSink;
-    this.provenanceSink = options.provenanceSink;
-  }
+  async run(tasks: AgentTask[]): Promise<OrchestratorRunSummary> {
+    const run_id = randomUUID();
+    const started_at = new Date().toISOString();
+    const orderedTasks = sortTasksDeterministically(tasks);
+    const results: AgentResult[] = [];
 
-  registerSkill(name: string, handler: SkillHandler): void {
-    this.handlers.set(name, handler);
-  }
+    this.emit({
+      run_id,
+      task_id: null,
+      agent_name: null,
+      ts: started_at,
+      type: 'RUN_STARTED',
+      inputs_hash: null,
+      outputs_hash: null,
+      attempt: null,
+      status: 'started',
+      metadata: { total_tasks: orderedTasks.length },
+    });
 
-  async invokeSkill(invocation: SkillInvocation): Promise<unknown> {
-    const decision = evaluate(invocation, this.policy);
-    const inputsHash = stableHash(invocation.inputs);
-
-    if (decision.decision === "deny") {
+    for (const task of orderedTasks) {
+      const inputsHash = hashInputs(task.inputs);
       this.emit({
-        type: "SKILL_DENIED",
-        run_id: invocation.run_id,
-        task_id: invocation.task_id,
-        agent_name: invocation.agent_name,
-        skill: invocation.skill,
-        decision: "deny",
-        reason: decision.reason,
+        run_id,
+        task_id: task.id,
+        agent_name: null,
+        ts: new Date().toISOString(),
+        type: 'TASK_ENQUEUED',
         inputs_hash: inputsHash,
         outputs_hash: null,
-        matched_rules: decision.matched_rules,
-        ts: new Date().toISOString(),
+        attempt: 1,
+        status: 'started',
+        metadata: { priority: task.priority, created_at: task.created_at },
       });
-      throw new Error(`Skill invocation denied: ${decision.reason}`);
-    }
 
-    const handler = this.handlers.get(invocation.skill);
-    if (!handler) {
-      const reason = `Skill handler is not registered: ${invocation.skill}`;
       this.emit({
-        type: "SKILL_DENIED",
-        run_id: invocation.run_id,
-        task_id: invocation.task_id,
-        agent_name: invocation.agent_name,
-        skill: invocation.skill,
-        decision: "deny",
-        reason,
+        run_id,
+        task_id: task.id,
+        agent_name: null,
+        ts: new Date().toISOString(),
+        type: 'TASK_DEQUEUED',
         inputs_hash: inputsHash,
         outputs_hash: null,
-        matched_rules: decision.matched_rules,
-        ts: new Date().toISOString(),
+        attempt: 1,
+        status: 'started',
+        metadata: {},
       });
-      throw new Error(reason);
+
+      const selectedAgent = this.agents.find((agent) => agent.canHandle(task));
+      if (!selectedAgent) {
+        this.emit({
+          run_id,
+          task_id: task.id,
+          agent_name: null,
+          ts: new Date().toISOString(),
+          type: 'TASK_FAILED',
+          inputs_hash: inputsHash,
+          outputs_hash: null,
+          attempt: 1,
+          status: 'failed',
+          metadata: { reason: 'No suitable agent found' },
+        });
+        results.push({
+          task_id: task.id,
+          status: 'failed',
+          outputs: {},
+          error: 'No suitable agent found',
+          attempt: 1,
+          started_at: new Date().toISOString(),
+          finished_at: new Date().toISOString(),
+        });
+        continue;
+      }
+
+      this.emit({
+        run_id,
+        task_id: task.id,
+        agent_name: selectedAgent.name,
+        ts: new Date().toISOString(),
+        type: 'AGENT_SELECTED',
+        inputs_hash: inputsHash,
+        outputs_hash: null,
+        attempt: 1,
+        status: 'started',
+        metadata: {},
+      });
+
+      const maxAttempts = Math.max(1, task.max_attempts ?? 1);
+      let attempt = 1;
+      let finalResult: AgentResult | null = null;
+
+      while (attempt <= maxAttempts) {
+        this.emit({
+          run_id,
+          task_id: task.id,
+          agent_name: selectedAgent.name,
+          ts: new Date().toISOString(),
+          type: 'AGENT_EXEC_STARTED',
+          inputs_hash: inputsHash,
+          outputs_hash: null,
+          attempt,
+          status: 'started',
+          metadata: {},
+        });
+
+        try {
+          const result = await selectedAgent.execute(task);
+          finalResult = { ...result, attempt };
+
+          this.emit({
+            run_id,
+            task_id: task.id,
+            agent_name: selectedAgent.name,
+            ts: new Date().toISOString(),
+            type: 'AGENT_EXEC_FINISHED',
+            inputs_hash: inputsHash,
+            outputs_hash: hashOutputs(result.outputs),
+            attempt,
+            status: result.status,
+            metadata: {
+              error: result.error ?? null,
+            },
+          });
+
+          if (result.status === 'success') {
+            break;
+          }
+
+          if (attempt < maxAttempts) {
+            this.emit({
+              run_id,
+              task_id: task.id,
+              agent_name: selectedAgent.name,
+              ts: new Date().toISOString(),
+              type: 'TASK_RETRIED',
+              inputs_hash: inputsHash,
+              outputs_hash: hashOutputs(result.outputs),
+              attempt,
+              status: 'retrying',
+              metadata: {},
+            });
+          }
+        } catch (error) {
+          const failureResult: AgentResult = {
+            task_id: task.id,
+            status: 'failed',
+            outputs: {},
+            error: error instanceof Error ? error.message : String(error),
+            attempt,
+            started_at: new Date().toISOString(),
+            finished_at: new Date().toISOString(),
+          };
+          finalResult = failureResult;
+          this.emit({
+            run_id,
+            task_id: task.id,
+            agent_name: selectedAgent.name,
+            ts: new Date().toISOString(),
+            type: 'AGENT_EXEC_FINISHED',
+            inputs_hash: inputsHash,
+            outputs_hash: hashOutputs(failureResult.outputs),
+            attempt,
+            status: 'failed',
+            metadata: {
+              error: failureResult.error,
+            },
+          });
+
+          if (attempt < maxAttempts) {
+            this.emit({
+              run_id,
+              task_id: task.id,
+              agent_name: selectedAgent.name,
+              ts: new Date().toISOString(),
+              type: 'TASK_RETRIED',
+              inputs_hash: inputsHash,
+              outputs_hash: hashOutputs(failureResult.outputs),
+              attempt,
+              status: 'retrying',
+              metadata: {
+                reason: 'Execution error',
+              },
+            });
+          }
+        }
+
+        attempt += 1;
+      }
+
+      if (!finalResult) {
+        continue;
+      }
+
+      if (finalResult.status === 'failed') {
+        this.emit({
+          run_id,
+          task_id: task.id,
+          agent_name: selectedAgent.name,
+          ts: new Date().toISOString(),
+          type: 'TASK_FAILED',
+          inputs_hash: inputsHash,
+          outputs_hash: hashOutputs(finalResult.outputs),
+          attempt: finalResult.attempt,
+          status: 'failed',
+          metadata: {
+            error: finalResult.error ?? null,
+          },
+        });
+      }
+
+      results.push(finalResult);
     }
 
+    const finished_at = new Date().toISOString();
     this.emit({
-      type: "SKILL_ALLOWED",
-      run_id: invocation.run_id,
-      task_id: invocation.task_id,
-      agent_name: invocation.agent_name,
-      skill: invocation.skill,
-      decision: "allow",
-      reason: decision.reason,
-      inputs_hash: inputsHash,
+      run_id,
+      task_id: null,
+      agent_name: null,
+      ts: finished_at,
+      type: 'RUN_FINISHED',
+      inputs_hash: null,
       outputs_hash: null,
-      matched_rules: decision.matched_rules,
-      ts: new Date().toISOString(),
+      attempt: null,
+      status: 'finished',
+      metadata: {
+        succeeded_tasks: results.filter((result) => result.status === 'success').length,
+        failed_tasks: results.filter((result) => result.status === 'failed').length,
+      },
     });
 
-    this.emit({
-      type: "SKILL_EXEC_STARTED",
-      run_id: invocation.run_id,
-      task_id: invocation.task_id,
-      agent_name: invocation.agent_name,
-      skill: invocation.skill,
-      decision: "allow",
-      reason: decision.reason,
-      inputs_hash: inputsHash,
-      outputs_hash: null,
-      matched_rules: decision.matched_rules,
-      ts: new Date().toISOString(),
-    });
+    return {
+      run_id,
+      started_at,
+      finished_at,
+      total_tasks: orderedTasks.length,
+      succeeded_tasks: results.filter((result) => result.status === 'success').length,
+      failed_tasks: results.filter((result) => result.status === 'failed').length,
+      results,
+      events_emitted: this.eventLog.getEvents().length,
+    };
+  }
 
-    const result = await handler(invocation);
-    this.emit({
-      type: "SKILL_EXEC_FINISHED",
-      run_id: invocation.run_id,
-      task_id: invocation.task_id,
-      agent_name: invocation.agent_name,
-      skill: invocation.skill,
-      decision: "allow",
-      reason: decision.reason,
-      inputs_hash: inputsHash,
-      outputs_hash: stableHash(result),
-      matched_rules: decision.matched_rules,
-      ts: new Date().toISOString(),
-    });
-
-    return result;
+  getEvents(): AgentEvent[] {
+    return this.eventLog.getEvents();
   }
 
   private emit(event: AgentEvent): void {
-    this.eventSink?.(event);
-    this.provenanceSink?.(event);
+    this.eventLog.append(event);
   }
 }
 
-function stableHash(input: unknown): string {
-  const normalized = stableStringify(input);
-  return crypto.createHash("sha256").update(normalized).digest("hex");
-}
-
-function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value);
-  }
-
-  if (Array.isArray(value)) {
-    return `[${value.map((entry) => stableStringify(entry)).join(",")}]`;
-  }
-
-  const entries = Object.entries(value as Record<string, unknown>)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`);
-  return `{${entries.join(",")}}`;
-}
+export { sortTasksDeterministically };
