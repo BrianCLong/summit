@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class BackupProvider(ABC):
     @abstractmethod
-    def backup(self, destination: str) -> Dict[str, Any]:
+    def backup(self, destination: str) -> dict[str, Any]:
         """Perform backup to destination. Returns metadata dict."""
         pass
 

@@ -1,6 +1,8 @@
 import pytest
-from summit.cbm.void_score import score_data_voids
+
 from summit.cbm.schema import DocumentEvent
+from summit.cbm.void_score import score_data_voids
+
 
 def test_void_score_determinism():
     events = [

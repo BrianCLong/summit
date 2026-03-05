@@ -1,6 +1,8 @@
 import pytest
+
 from summit.partitioning.region_policy import RegionPolicy
 from summit.partitioning.shard_plan import ShardPlan
+
 
 def test_default_region_selection():
     policy = RegionPolicy()

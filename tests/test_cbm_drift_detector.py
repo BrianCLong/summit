@@ -1,7 +1,9 @@
-import pytest
 import os
-import tempfile
 import subprocess
+import tempfile
+
+import pytest
+
 
 def test_drift_detector_cli():
     with tempfile.NamedTemporaryFile(delete=False) as tmp_old:
@@ -18,7 +20,7 @@ def test_drift_detector_cli():
     try:
         subprocess.check_call(["python3", "scripts/monitoring/cbm_drift.py", "--old", old_path, "--new", new_path, "--out", out_path])
         assert os.path.exists(out_path)
-        with open(out_path, "r") as f:
+        with open(out_path) as f:
             content = f.read()
             assert "drift_analyzed" in content
     finally:

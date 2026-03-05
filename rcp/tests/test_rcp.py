@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import unittest
 
+
 class TestRCP(unittest.TestCase):
     def setUp(self):
         self.script = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'bin', 'rcp'))

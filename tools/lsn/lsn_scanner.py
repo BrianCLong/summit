@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple
 
 Event = namedtuple("Event", ["pk", "lsn", "op", "ts_ms", "raw"])
 
-def _extract_pk(payload: dict) -> Tuple:
+def _extract_pk(payload: dict) -> tuple:
     key_obj = payload.get("key") or {}
     if isinstance(key_obj, dict) and key_obj:
         return tuple((k, key_obj[k]) for k in sorted(key_obj.keys()))
@@ -20,7 +20,7 @@ def _extract_pk(payload: dict) -> Tuple:
             return tuple(sorted(candidate.items()))[:2]
     return (("unknown", None),)
 
-def _extract_meta(payload: dict) -> Tuple[Optional[int], Optional[int], Optional[str]]:
+def _extract_meta(payload: dict) -> tuple[Optional[int], Optional[int], Optional[str]]:
     val = payload.get("value") or {}
     src = val.get("source") or {}
     lsn = src.get("lsn")
@@ -29,7 +29,7 @@ def _extract_meta(payload: dict) -> Tuple[Optional[int], Optional[int], Optional
     return lsn, ts_ms, op
 
 def stream_jsonl(path: str):
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for line in f:
             line = line.strip()
             if not line:
@@ -44,7 +44,7 @@ def to_event(obj: dict) -> Event:
     pk = _extract_pk(obj)
     return Event(pk=pk, lsn=lsn, op=op, ts_ms=ts_ms, raw=obj)
 
-def assert_monotonic_lsn(events: List[Event]) -> int:
+def assert_monotonic_lsn(events: list[Event]) -> int:
     violations = 0
     last_lsn = -1
     for ev in events:
@@ -58,7 +58,7 @@ def assert_monotonic_lsn(events: List[Event]) -> int:
         last_lsn = max(last_lsn, ev.lsn if ev.lsn is not None else last_lsn)
     return violations
 
-def assert_tombstone_rules(events: List[Event]) -> int:
+def assert_tombstone_rules(events: list[Event]) -> int:
     if not events:
         return 0
     has_delete = any(e.op == "d" for e in events)
@@ -77,7 +77,7 @@ def assert_tombstone_rules(events: List[Event]) -> int:
     return 0
 
 def scan(window_file: str):
-    groups: Dict[Tuple, List[Event]] = defaultdict(list)
+    groups: dict[tuple, list[Event]] = defaultdict(list)
     total = 0
     noop = 0
     for rec in stream_jsonl(window_file):

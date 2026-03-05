@@ -1,9 +1,12 @@
-import pytest
 import os
 import uuid
-from pipelines.docgraph.segmenter import segment_document
+
+import pytest
+
 from pipelines.docgraph.entities import extract_entities
 from pipelines.docgraph.graph_builder import build_graph
+from pipelines.docgraph.segmenter import segment_document
+
 
 def test_segment_document():
     text = "Paragraph 1\n\nParagraph 2\n\nParagraph 3"

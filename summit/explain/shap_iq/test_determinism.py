@@ -1,10 +1,13 @@
-import pytest
-import numpy as np
-import os
 import json
+import os
+
+import numpy as np
+import pytest
+
 from .engine import ShapIQEngine
 from .interactions import InteractionMatrix
-from .report import generate_report, generate_metrics, generate_stamp
+from .report import generate_metrics, generate_report, generate_stamp
+
 
 def test_engine_determinism():
     engine1 = ShapIQEngine(model=None, seed=42)

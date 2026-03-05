@@ -1,6 +1,6 @@
 import re
 
-with open('.github/workflows/comprehensive-test.yml', 'r') as f:
+with open('.github/workflows/comprehensive-test.yml') as f:
     content = f.read()
 
 # Add corepack

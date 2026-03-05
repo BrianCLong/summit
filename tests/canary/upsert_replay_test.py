@@ -1,4 +1,8 @@
-import itertools, random, pytest
+import itertools
+import random
+
+import pytest
+
 
 def gen_events(pk, values, base_lsn):
     # make dupes, tombstones, and out-of-order permutations

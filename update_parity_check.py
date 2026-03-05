@@ -1,6 +1,6 @@
 import re
 
-with open('.github/workflows/parity-check.yml', 'r') as f:
+with open('.github/workflows/parity-check.yml') as f:
     content = f.read()
 
 # AWS

@@ -2,8 +2,9 @@
 import json
 import sys
 
+
 def verify_artifact(artifact_path):
-    with open(artifact_path, 'r') as f:
+    with open(artifact_path) as f:
         data = json.load(f)
 
     if not data.get('signature'):

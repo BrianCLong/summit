@@ -1,13 +1,16 @@
+from typing import List
+
 import pytest
+
 from summit.partitioning.neo4j_shard_exec import Neo4jShardExecutor
 from summit.partitioning.router import ShardRouter
 from summit.partitioning.shard_plan import ShardPlan
-from typing import List
+
 
 class MockRouter(ShardRouter):
     def __init__(self, shards):
         self.shards = shards
-    def select_graph_shards(self, plan: ShardPlan) -> List[str]:
+    def select_graph_shards(self, plan: ShardPlan) -> list[str]:
         return self.shards
 
 def test_execution_success():

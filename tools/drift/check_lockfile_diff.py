@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-import json, subprocess, sys, pathlib, math
+import json
+import math
+import pathlib
+import subprocess
+import sys
 
 # Simple heuristic: compare committed lockfile deps vs freshly resolved list.
 # Fail if >2% delta (new, removed, or version-changed), but print granular diff.

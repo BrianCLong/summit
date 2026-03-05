@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 class IntentValidator:
     def __init__(self, schema_path="schemas/intent_spec.schema.json"):
         self.schema_path = schema_path
-        with open(schema_path, "r") as f:
+        with open(schema_path) as f:
             self.schema = json.load(f)
 
     def validate_spec(self, spec_data: dict) -> dict:

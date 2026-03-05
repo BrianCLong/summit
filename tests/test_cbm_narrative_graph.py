@@ -1,8 +1,11 @@
-import pytest
 import os
 import tempfile
+
+import pytest
+
 from summit.cbm.narratives import extract_and_cluster, write_narratives_artifact
 from summit.cbm.schema import DocumentEvent
+
 
 def test_narrative_clustering_determinism():
     events = [
@@ -26,7 +29,7 @@ def test_write_narrative_artifact():
     try:
         write_narratives_artifact(data, path)
         assert os.path.exists(path)
-        with open(path, "r") as f:
+        with open(path) as f:
             content = f.read()
             assert "cluster_count" in content
     finally:

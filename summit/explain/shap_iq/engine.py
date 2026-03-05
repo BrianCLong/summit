@@ -1,8 +1,10 @@
 """
 SHAP-IQ Compute Engine
 """
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 import numpy as np
+
 
 class ShapIQEngine:
     def __init__(self, model: Any, seed: int = 42):
@@ -10,7 +12,7 @@ class ShapIQEngine:
         self.seed = seed
         np.random.seed(self.seed)
 
-    def compute_feature_importance(self, inputs: np.ndarray, feature_names: List[str]) -> List[Dict[str, Any]]:
+    def compute_feature_importance(self, inputs: np.ndarray, feature_names: list[str]) -> list[dict[str, Any]]:
         # For MWS, if model evaluates inputs, use simple deterministic attribution logic based on input variance.
         # Here we simulate deterministic logic without relying solely on np.random.rand for mocked values.
 

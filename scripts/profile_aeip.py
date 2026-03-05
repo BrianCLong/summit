@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import time
 import json
 import os
+import time
+
 
 def profile_validation():
     # Mock profiling an action validation

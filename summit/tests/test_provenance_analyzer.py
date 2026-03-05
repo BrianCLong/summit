@@ -1,5 +1,6 @@
 from summit.influence.provenance_analyzer import analyze_provenance
 
+
 def test_provenance_analyzer():
     media_metadata = {
         'compression_artifacts': 0.9,

@@ -4,7 +4,7 @@ import re
 workflows = glob.glob('.github/workflows/**/*.yml', recursive=True)
 
 for wf in workflows:
-    with open(wf, 'r') as f:
+    with open(wf) as f:
         content = f.read()
 
     # The previous script might have accidentally removed `version: ...` that wasn't `9.12.0` because we had some buggy regexes

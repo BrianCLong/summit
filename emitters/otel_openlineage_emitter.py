@@ -1,6 +1,10 @@
 from __future__ import annotations
-import os, json, time, uuid
-from typing import Dict, Any, Iterable, Optional
+
+import json
+import os
+import time
+import uuid
+from typing import Any, Dict, Iterable, Optional
 
 # Minimal, dependency-light emitter (can swap to official client later if desired)
 # Expected OTEL span format (dict-like) with attributes under "attributes".
@@ -23,12 +27,12 @@ def _stable_run_id(trace_id: str) -> str:
     # Use standard UUID namespace to avoid hardcoded zeros matching PII scanners
     return str(uuid.uuid5(uuid.NAMESPACE_OID, trace_id))
 
-def _job_name(span: Dict[str, Any]) -> str:
+def _job_name(span: dict[str, Any]) -> str:
     svc = span.get("resource", {}).get("service.name") or "unknown-service"
     name = span.get("name") or "unknown-op"
     return f"{svc}.{name}"
 
-def _dataset_from_attrs(attrs: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+def _dataset_from_attrs(attrs: dict[str, Any]) -> Optional[dict[str, Any]]:
     # db → dataset
     if attrs.get("db.system") and (attrs.get("db.name") or attrs.get("db.statement")):
         name = attrs.get("db.name") or "adhoc"
@@ -67,7 +71,7 @@ def _dataset_from_attrs(attrs: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         }
     return None
 
-def _event(event_type: str, run_id: str, job_name: str, inputs=None, outputs=None) -> Dict[str, Any]:
+def _event(event_type: str, run_id: str, job_name: str, inputs=None, outputs=None) -> dict[str, Any]:
     return {
         "eventType": event_type,  # START|COMPLETE
         "eventTime": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -78,7 +82,7 @@ def _event(event_type: str, run_id: str, job_name: str, inputs=None, outputs=Non
         "producer": OL_PRODUCER,
     }
 
-def emit_from_spans(spans: Iterable[Dict[str, Any]]) -> None:
+def emit_from_spans(spans: Iterable[dict[str, Any]]) -> None:
     os.makedirs(os.path.dirname(OL_SINK_PATH), exist_ok=True)
     with open(OL_SINK_PATH, "a", encoding="utf-8") as fh:
         for s in spans:

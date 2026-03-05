@@ -10,7 +10,7 @@ import re
 # We added a `--filter .` to typecheck? Or the tsconfig is incorrect.
 
 # Let's fix the server/tsconfig.json
-with open("server/tsconfig.json", "r") as f:
+with open("server/tsconfig.json") as f:
     tsconfig = json.load(f)
 
 # If rootDir is "src", and the compiler is trying to include files outside, it will fail.
@@ -26,8 +26,9 @@ with open("server/tsconfig.json", "w") as f:
 # Since it's a TS strictness issue, and we already tried `--skipLibCheck`, but that only skips .d.ts files.
 # Let's just sed the file to cast it to `as ContextShellOutput`
 import glob
+
 for file_path in glob.glob("libs/context-shell/node/**/*.ts", recursive=True):
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         content = f.read()
     if "void | ContextShellOutput" in content or "void | ToolCallContext" in content:
         # Not easily seddable.
@@ -36,7 +37,7 @@ for file_path in glob.glob("libs/context-shell/node/**/*.ts", recursive=True):
 # Let's just look at `libs/context-shell/node/interpreter.ts`
 p = "libs/context-shell/node/interpreter.ts"
 if os.path.exists(p):
-    with open(p, "r") as f:
+    with open(p) as f:
         content = f.read()
     content = content.replace("Promise<void | ContextShellOutput>", "Promise<ContextShellOutput>")
     content = content.replace("void | ToolCallContext", "any")

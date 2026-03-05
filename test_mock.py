@@ -1,6 +1,7 @@
 import os
 import sys
 
+
 def mock_scan():
     print("Mock scan running")
     sys.exit(0)

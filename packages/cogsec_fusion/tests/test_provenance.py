@@ -1,6 +1,7 @@
 import pytest
 from cogsec_fusion.provenance.provenance_score import ProvenanceScorer
 
+
 def test_provenance_score():
     scorer = ProvenanceScorer()
 

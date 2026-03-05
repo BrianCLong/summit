@@ -1,12 +1,14 @@
-import unittest
-import os
-import json
 import base64
-import tempfile
+import json
+import os
 import shutil
-from unittest.mock import MagicMock, patch, call
-from summit.backup.redis_provider import RedisBackupProvider
+import tempfile
+import unittest
+from unittest.mock import MagicMock, call, patch
+
 from summit.backup.manager import BackupManager
+from summit.backup.redis_provider import RedisBackupProvider
+
 
 class TestRedisBackupProvider(unittest.TestCase):
     def setUp(self):
@@ -33,7 +35,7 @@ class TestRedisBackupProvider(unittest.TestCase):
         self.assertEqual(result["count"], 2)
 
         # Verify file content
-        with open(result["file"], 'r') as f:
+        with open(result["file"]) as f:
             lines = f.readlines()
             r1 = json.loads(lines[0])
             self.assertEqual(r1["k"], "key1")

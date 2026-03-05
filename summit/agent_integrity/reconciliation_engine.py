@@ -4,14 +4,14 @@ from typing import Any, Dict
 
 
 class ReconciliationEngine:
-    def _hash_record(self, record: Dict[str, Any]) -> str:
+    def _hash_record(self, record: dict[str, Any]) -> str:
         """
         Generate a deterministic hash for a given record.
         """
         serialized = json.dumps(record, sort_keys=True)
         return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
-    def reconcile(self, record1: Dict[str, Any], record2: Dict[str, Any]) -> bool:
+    def reconcile(self, record1: dict[str, Any], record2: dict[str, Any]) -> bool:
         """
         Reconcile two entities by comparing their deterministic hashes.
         In reality, this would normalize schemas before hashing.
@@ -25,5 +25,5 @@ class ReconciliationEngine:
 
         return id1 == id2
 
-    def generate_reconciliation_hash(self, record: Dict[str, Any]) -> str:
+    def generate_reconciliation_hash(self, record: dict[str, Any]) -> str:
         return self._hash_record(record)

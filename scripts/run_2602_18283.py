@@ -3,9 +3,10 @@ import hashlib
 import json
 import os
 import sys
-import yaml
 from pathlib import Path
 from typing import Any
+
+import yaml
 
 # Ensure summit is in the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -13,8 +14,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from summit.datasets.hf_2602_18283_adapter import HF2602DatasetAdapter
 from summit.metrics.hf_2602_18283_metrics import HF2602Metrics
 
+
 def load_config(path: str) -> dict[str, Any]:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 def write_json(path: Path, data: Any):

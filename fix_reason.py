@@ -1,7 +1,7 @@
 import re
 
 path = 'docs/releases/reason-codes.yml'
-with open(path, 'r') as f:
+with open(path) as f:
     text = f.read()
 
 to_add = """  - code: SCHEMA_MAJOR_UNSUPPORTED

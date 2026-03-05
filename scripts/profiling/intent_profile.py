@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import time
 import json
-import psutil
 import logging
-from typing import Dict, Any
+import time
+from typing import Any, Dict
+
+import psutil
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ class IntentProfiler:
     def __init__(self, metrics_path: str = "artifacts/intent/metrics.json"):
         self.metrics_path = metrics_path
 
-    def profile(self, execution_context: Dict[str, Any], budget: Dict[str, Any]) -> Dict[str, Any]:
+    def profile(self, execution_context: dict[str, Any], budget: dict[str, Any]) -> dict[str, Any]:
         """
         Profiles the performance metrics and returns a report
         """

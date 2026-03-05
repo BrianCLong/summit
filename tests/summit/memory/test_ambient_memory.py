@@ -1,10 +1,12 @@
 from datetime import datetime
+
 import pytest
 
-from summit.memory.policy import AmbientPolicy
 from summit.memory.ingestion import ingest_moment
-from summit.memory.retrieval import MemoryRetriever
 from summit.memory.moment import Moment
+from summit.memory.policy import AmbientPolicy
+from summit.memory.retrieval import MemoryRetriever
+
 
 def test_policy_exclusion():
     policy = AmbientPolicy()

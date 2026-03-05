@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-import json, pathlib, random, os
+import json
+import os
+import pathlib
+import random
+
+import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
-import faiss
 
 SEED = 1337
 random.seed(SEED); np.random.seed(SEED)
@@ -15,7 +19,7 @@ model = SentenceTransformer(MODEL_NAME)  # version-pin in requirements
 
 def load_texts():
     ids, texts = [], []
-    with open(CORPUS, "r", encoding="utf-8") as f:
+    with open(CORPUS, encoding="utf-8") as f:
         for line in f:
             obj = json.loads(line)
             ids.append(obj["id"])

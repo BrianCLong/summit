@@ -1,6 +1,7 @@
 import os
 import re
 
+
 def fix_files():
     files_to_fix = [
         'docs/gtm/demo-runbook.md',
@@ -17,7 +18,7 @@ def fix_files():
     ]
     for file in files_to_fix:
         if not os.path.exists(file): continue
-        with open(file, 'r') as f:
+        with open(file) as f:
             content = f.read()
 
         # Fix MD036: emphasis as heading (e.g. **Heading**) -> ### Heading

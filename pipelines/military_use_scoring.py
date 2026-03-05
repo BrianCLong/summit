@@ -1,12 +1,14 @@
 import json
 import os
+
 import yaml
+
 
 def run():
     policy_path = os.path.join("policies", "military_use.yaml")
     threshold = 0.65
     if os.path.exists(policy_path):
-        with open(policy_path, "r") as f:
+        with open(policy_path) as f:
             policy = yaml.safe_load(f)
             threshold = policy.get("threshold_default", 0.65)
 

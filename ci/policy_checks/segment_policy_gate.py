@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """CI gate to enforce presence of segment governance policy guardrails."""
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 REQUIRED_FIELDS = [
     "allowed_features:",

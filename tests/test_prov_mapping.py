@@ -1,6 +1,9 @@
 from __future__ import annotations
+
 import json
+
 from emitters.otel_prov_mapper import to_prov
+
 
 def test_namespace_name_canonical():
     ev = [{

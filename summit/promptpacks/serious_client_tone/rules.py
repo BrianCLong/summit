@@ -1,8 +1,7 @@
 import re
 from typing import Iterable, List, Tuple
 
-
-AVAILABILITY_PATTERNS: List[Tuple[str, re.Pattern[str]]] = [
+AVAILABILITY_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("dm_anytime", re.compile(r"\bdm me (anytime|any time)\b", re.IGNORECASE)),
     ("available_24_7", re.compile(r"\bavailable\s+(24/7|anytime|any time)\b", re.IGNORECASE)),
     ("inbox_open", re.compile(r"\bmy inbox is open\b", re.IGNORECASE)),
@@ -11,7 +10,7 @@ AVAILABILITY_PATTERNS: List[Tuple[str, re.Pattern[str]]] = [
     ("always_on_call", re.compile(r"\bon call\b|\balways on\b", re.IGNORECASE)),
 ]
 
-TRANSFORMATION_PATTERNS: List[Tuple[str, re.Pattern[str]]] = [
+TRANSFORMATION_PATTERNS: list[tuple[str, re.Pattern[str]]] = [
     ("go_from_to", re.compile(r"\b(go|move) from\b.+?\bto\b", re.IGNORECASE | re.DOTALL)),
     ("from_to", re.compile(r"\bfrom\b.+?\bto\b", re.IGNORECASE | re.DOTALL)),
     ("transform", re.compile(r"\btransform(s|ing|ation)?\b", re.IGNORECASE)),
@@ -19,16 +18,16 @@ TRANSFORMATION_PATTERNS: List[Tuple[str, re.Pattern[str]]] = [
 ]
 
 
-def find_availability_signals(text: str) -> List[str]:
-    matches: List[str] = []
+def find_availability_signals(text: str) -> list[str]:
+    matches: list[str] = []
     for label, pattern in AVAILABILITY_PATTERNS:
         if pattern.search(text):
             matches.append(label)
     return matches
 
 
-def find_transformation_signals(text: str) -> List[str]:
-    matches: List[str] = []
+def find_transformation_signals(text: str) -> list[str]:
+    matches: list[str] = []
     for label, pattern in TRANSFORMATION_PATTERNS:
         if pattern.search(text):
             matches.append(label)
@@ -51,5 +50,5 @@ def redact_text(text: str) -> str:
     return redacted
 
 
-def redact_fields(values: Iterable[str]) -> List[str]:
+def redact_fields(values: Iterable[str]) -> list[str]:
     return [redact_text(value) for value in values]

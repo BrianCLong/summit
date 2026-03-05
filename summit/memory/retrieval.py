@@ -1,5 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from .moment import Moment
+
 
 class MemoryRetriever:
     """
@@ -8,7 +10,7 @@ class MemoryRetriever:
     """
     def __init__(self):
         # In-memory mock storage
-        self._moments: List[Moment] = []
+        self._moments: list[Moment] = []
 
     def insert(self, moment: Moment) -> None:
         """
@@ -19,7 +21,7 @@ class MemoryRetriever:
         # self.vector_index.add(moment.content_hash, moment.text)
         # self.graph_index.add_node("Moment", moment.id, timestamp=moment.timestamp)
 
-    def search(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def search(self, query: str, limit: int = 5) -> list[dict[str, Any]]:
         """
         Hybrid search across vector and graph to retrieve relevant moments.
         Returns formatted moments with citations.

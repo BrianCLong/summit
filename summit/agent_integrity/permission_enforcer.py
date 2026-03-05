@@ -7,7 +7,7 @@ class PermissionEnforcer:
         # In a real system, we'd load the YAML and parse the policy.
         # For the minimal slice, we simply assume loading is successful.
 
-    def enforce(self, action: Dict[str, Any], context: Dict[str, Any]) -> bool:
+    def enforce(self, action: dict[str, Any], context: dict[str, Any]) -> bool:
         """
         Enforce permission policy for a given action and context.
         """

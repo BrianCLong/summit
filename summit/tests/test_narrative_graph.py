@@ -1,5 +1,6 @@
 from summit.influence.narrative_graph import NarrativeGraph
 
+
 def test_narrative_graph():
     graph = NarrativeGraph()
     graph.add_document("doc1", ["a", "b", "c"])

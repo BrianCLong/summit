@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-import json, math, sys, os
+import json
+import math
+import os
+import sys
 
 # Input: JSON array of plan summaries, each with fields:
 # { "query_hash": "...", "db_hits": 123, "rows": 456, "operators": [{"type":"NodeIndexSeek","db_hits":...}, ...] }
@@ -14,7 +17,7 @@ def main():
   in_path, out_dir = sys.argv[1], sys.argv[2]
   os.makedirs(out_dir, exist_ok=True)
 
-  plans = json.load(open(in_path, "r", encoding="utf-8"))
+  plans = json.load(open(in_path, encoding="utf-8"))
   # stable ordering
   plans = sorted(plans, key=lambda p: (p.get("query_hash",""), p.get("db_hits",0), p.get("rows",0)))
 

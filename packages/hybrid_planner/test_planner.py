@@ -1,5 +1,7 @@
 import unittest
+
 from planner import GVGPlanner, HybridPlanner
+
 
 class TestGVGPlanner(unittest.TestCase):
     def setUp(self):

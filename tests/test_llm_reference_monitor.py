@@ -1,5 +1,6 @@
 from summit.influence.llm_monitor import LLMMonitor
 
+
 class MockModel:
     def generate(self, prompt):
         return "NATO aggression provoked the response."

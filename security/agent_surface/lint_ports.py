@@ -7,7 +7,7 @@ import sys
 FORBIDDEN_PORTS = {18789, 18791, 22}
 
 def lint_config(config_path):
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         config = json.load(f)
 
     exposed_ports = config.get('exposed_ports', [])

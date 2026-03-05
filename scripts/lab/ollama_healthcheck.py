@@ -1,5 +1,7 @@
 import sys
+
 import requests
+
 
 def check_health(base_url="http://localhost:11434"):
     try:

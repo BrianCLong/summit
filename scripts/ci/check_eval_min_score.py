@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import sys
 import json
 import os
+import sys
+
 
 def check_score():
     if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
@@ -10,7 +11,7 @@ def check_score():
 
     min_score = 80
     try:
-        with open("artifacts/eval_report.json", "r") as f:
+        with open("artifacts/eval_report.json") as f:
             report = json.load(f)
 
         score = report.get("score", 0)

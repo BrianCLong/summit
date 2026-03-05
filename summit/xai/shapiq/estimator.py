@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class ShapIQEstimator:
     def __init__(self, model, max_order=2, seed=42):
         self.model = model

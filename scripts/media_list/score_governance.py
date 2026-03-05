@@ -1,5 +1,6 @@
-import json
 import argparse
+import json
+
 
 def apply_risk_overlay(evidence_items):
     metrics = {
@@ -30,7 +31,7 @@ def main():
     parser.add_argument("--flags_out", type=str, required=True, help="Path to output policy_flags.json")
     args = parser.parse_args()
 
-    with open(args.input, "r") as f:
+    with open(args.input) as f:
         evidence_items = json.load(f)
 
     metrics, flags = apply_risk_overlay(evidence_items)

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
+
 @dataclass
 class EntityAlias:
     alias_id: str
@@ -10,7 +11,7 @@ class EntityAlias:
 
 class AliasTable:
     def __init__(self):
-        self._table: List[EntityAlias] = []
+        self._table: list[EntityAlias] = []
 
     def add_alias(self, alias: EntityAlias) -> None:
         self._table.append(alias)

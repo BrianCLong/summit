@@ -1,12 +1,13 @@
 """
 SHAP-IQ Report Emission
 """
-import json
 import hashlib
+import json
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
-def generate_report(evidence_id: str, feature_importance: List[Dict[str, Any]], interaction_matrix: List[List[float]], output_dir: str):
+
+def generate_report(evidence_id: str, feature_importance: list[dict[str, Any]], interaction_matrix: list[list[float]], output_dir: str):
     report_data = {
         "evidence_id": evidence_id,
         "feature_importance": feature_importance,
@@ -19,7 +20,7 @@ def generate_report(evidence_id: str, feature_importance: List[Dict[str, Any]], 
 
     return report_data
 
-def generate_metrics(evidence_id: str, feature_importance: List[Dict[str, Any]], interaction_matrix: List[List[float]], latency_ms: float, output_dir: str):
+def generate_metrics(evidence_id: str, feature_importance: list[dict[str, Any]], interaction_matrix: list[list[float]], latency_ms: float, output_dir: str):
     import numpy as np
 
     mean_abs_shap = np.mean([f["importance"] for f in feature_importance])
@@ -43,7 +44,7 @@ def generate_metrics(evidence_id: str, feature_importance: List[Dict[str, Any]],
 
     return metrics_data
 
-def generate_stamp(evidence_id: str, report_data: Dict[str, Any], output_dir: str):
+def generate_stamp(evidence_id: str, report_data: dict[str, Any], output_dir: str):
     report_json = json.dumps(report_data, sort_keys=True)
     report_hash = hashlib.sha256(report_json.encode()).hexdigest()
 

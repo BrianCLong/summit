@@ -2,8 +2,10 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
 from summit.cache.redis_client import RedisClient
+
 from .core import BackupProvider
 
 logger = logging.getLogger(__name__)
@@ -12,7 +14,7 @@ class RedisBackupProvider(BackupProvider):
     def __init__(self, redis_client: RedisClient):
         self.client = redis_client
 
-    def backup(self, destination: str) -> Dict[str, Any]:
+    def backup(self, destination: str) -> dict[str, Any]:
         """
         Performs logical backup using SCAN and DUMP to a JSONL file.
         Format: {"key": "key_name", "value": "base64_dump", "ttl": milliseconds}
@@ -83,7 +85,7 @@ class RedisBackupProvider(BackupProvider):
         import base64
         count = 0
         try:
-            with open(source, 'r') as f:
+            with open(source) as f:
                 pipe = self.client.pipeline()
                 for i, line in enumerate(f):
                     try:

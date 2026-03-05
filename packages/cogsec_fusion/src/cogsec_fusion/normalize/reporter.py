@@ -1,19 +1,20 @@
-import json
-import os
 import datetime
 import hashlib
-from typing import Dict, List, Any
+import json
+import os
+from typing import Any, Dict, List
+
 
 class EvidenceReporter:
     def __init__(self, evidence_root: str, evidence_id: str):
         self.evidence_root = evidence_root
         self.evidence_id = evidence_id
-        self.report_items: List[Dict[str, Any]] = []
-        self.metrics: Dict[str, Any] = {}
+        self.report_items: list[dict[str, Any]] = []
+        self.metrics: dict[str, Any] = {}
         self.evidence_dir = os.path.join(evidence_root, evidence_id)
         os.makedirs(self.evidence_dir, exist_ok=True)
 
-    def add_item(self, item: Dict[str, Any]):
+    def add_item(self, item: dict[str, Any]):
         self.report_items.append(item)
 
     def set_metric(self, key: str, value: Any):

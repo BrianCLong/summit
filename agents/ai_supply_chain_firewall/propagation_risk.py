@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Mock velocity database tracking recommendation spikes
 # Key: dependency name, Value: { "recent_recommendations": count, "trust_score": float }
@@ -8,7 +8,7 @@ MOCK_VELOCITY_DB = {
     "react": {"recent_recommendations": 1000, "trust_score": 1.0}
 }
 
-def calculate_propagation_risk(dependency: str) -> Dict[str, Any]:
+def calculate_propagation_risk(dependency: str) -> dict[str, Any]:
     """
     Scores recommendation velocity anomalies and cross-model consensus anomalies.
     """

@@ -1,6 +1,7 @@
-import json
 import argparse
 import hashlib
+import json
+
 
 def generate_evidence_id(slug, claim_idx):
     return f"MEDIA-{slug}-CLAIM-{claim_idx:03d}"
@@ -31,7 +32,7 @@ def main():
     parser.add_argument("--slug", type=str, required=True, help="Media list slug")
     args = parser.parse_args()
 
-    with open(args.input, "r") as f:
+    with open(args.input) as f:
         extracted = json.load(f)
 
     evidence_items = map_to_evidence_schema(extracted, args.slug)

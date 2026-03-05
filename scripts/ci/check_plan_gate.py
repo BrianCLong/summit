@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import sys
 import json
 import os
+import sys
+
 
 def check_plan():
     if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
@@ -9,7 +10,7 @@ def check_plan():
         sys.exit(0)
 
     try:
-        with open("artifacts/run_plan.json", "r") as f:
+        with open("artifacts/run_plan.json") as f:
             plan = json.load(f)
         # TODO: Add schema validation logic
         print("Plan gate passed")

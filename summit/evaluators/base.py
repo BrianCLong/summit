@@ -1,5 +1,6 @@
 import abc
 
+
 class BaseEvaluator(abc.ABC):
     @property
     @abc.abstractmethod

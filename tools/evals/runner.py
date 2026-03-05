@@ -3,6 +3,7 @@ import json
 import os
 import sys
 
+
 def main():
     print("Running evals and calculating Provable Action Latency (PAL)...")
     print("Mock evaluation run completed.")

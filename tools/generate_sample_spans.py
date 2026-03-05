@@ -1,6 +1,11 @@
 from __future__ import annotations
-import os, time, uuid
+
+import os
+import time
+import uuid
+
 from emitters.otel_openlineage_emitter import emit_from_spans
+
 
 def generate_spans():
     trace_id = str(uuid.uuid4())

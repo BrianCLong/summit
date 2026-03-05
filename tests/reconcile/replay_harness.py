@@ -1,10 +1,14 @@
-import json, random, hashlib, time
-from typing import List, Dict, Any, Tuple
+import hashlib
+import json
+import random
+import time
+from typing import Any, Dict, List, Tuple
+
 import requests
 
 # ---- Domain helpers --------------------------------------------------------
 
-def event_lsn(e: Dict[str, Any]) -> Tuple[int, int]:
+def event_lsn(e: dict[str, Any]) -> tuple[int, int]:
     # PostgreSQL LSN as (hi, lo) or parse "segment/offset" -> comparable tuple
     src = e.get("source", {})
     lsn = src.get("lsn") or src.get("lsn_hi_lo")
@@ -15,7 +19,7 @@ def event_lsn(e: Dict[str, Any]) -> Tuple[int, int]:
         return (lsn >> 32, lsn & 0xFFFFFFFF)
     return (0, 0)
 
-def is_tombstone(e: Dict[str, Any]) -> bool:
+def is_tombstone(e: dict[str, Any]) -> bool:
     # Debezium tombstone: record with key only and null value (here normalized as {"op":"t"})
     # Your recorder should normalize tombstones as {"op":"t"} if value null.
     return e.get("op") == "t"
@@ -29,13 +33,13 @@ class ReconcilerClient:
     def __init__(self, base_url: str):
         self.base_url = base_url.rstrip("/")
 
-    def apply(self, evt: Dict[str, Any]) -> Dict[str, Any]:
+    def apply(self, evt: dict[str, Any]) -> dict[str, Any]:
         # POST one event; reconciler must enforce "only newer LSN mutates"
         r = requests.post(f"{self.base_url}/reconcile/apply", json=evt, timeout=30)
         r.raise_for_status()
         return r.json()
 
-    def graph_digest(self) -> Dict[str, Any]:
+    def graph_digest(self) -> dict[str, Any]:
         # Returns {"final_graph_state_hash": "...", "node_count": N, "pk_digest": "..."} for parity checks
         r = requests.get(f"{self.base_url}/reconcile/graph_digest", timeout=30)
         r.raise_for_status()
@@ -43,11 +47,11 @@ class ReconcilerClient:
 
 # ---- Replay engine ---------------------------------------------------------
 
-def load_topic(path: str) -> List[Dict[str, Any]]:
-    with open(path, "r", encoding="utf-8") as f:
+def load_topic(path: str) -> list[dict[str, Any]]:
+    with open(path, encoding="utf-8") as f:
         return [json.loads(line) for line in f if line.strip()]
 
-def randomized_orders(events: List[Dict[str, Any]], runs: int, seed: int) -> List[List[Dict[str, Any]]]:
+def randomized_orders(events: list[dict[str, Any]], runs: int, seed: int) -> list[list[dict[str, Any]]]:
     rnd = random.Random(seed)
     orders = []
     for i in range(runs):
@@ -57,7 +61,7 @@ def randomized_orders(events: List[Dict[str, Any]], runs: int, seed: int) -> Lis
         orders.append(order)
     return orders
 
-def run_replay(reconciler: ReconcilerClient, events: List[Dict[str, Any]]) -> Dict[str, Any]:
+def run_replay(reconciler: ReconcilerClient, events: list[dict[str, Any]]) -> dict[str, Any]:
     noop, mutated = 0, 0
     for e in events:
         if is_tombstone(e):

@@ -1,5 +1,6 @@
 import uuid
 
+
 def segment_document(text):
     # Minimal deterministic segmentation by double newline (paragraphs)
     segments = []

@@ -1,6 +1,7 @@
+import datetime
 import json
 import os
-import datetime
+
 
 def main():
     evid_id = "EVID-COGSEC-20260208-0001"
@@ -31,7 +32,7 @@ def main():
     # Stamp (timestamps allowed here)
     stamp = {
         "id": evid_id,
-        "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
         "version": "1.0.0"
     }
 

@@ -1,5 +1,7 @@
 import os
+
 from summit.evaluators.base import BaseEvaluator
+
 
 class HF2602Evaluator(BaseEvaluator):
     @property

@@ -141,7 +141,7 @@ import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
 import adminGateway from './routes/admin/gateway.js';
-import onboardingRouter from './routes/onboarding.js';
+import onboardingRouter from './routes/v1/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
 import supportBundlesRouter from './routes/support-bundles.js';
 import i18nRouter from './routes/i18n.js';
@@ -520,7 +520,7 @@ export const createApp = async () => {
   app.use('/api/security', authenticateToken, ensureRole(['ADMIN', 'admin']), securityAdminRouter);
   app.use('/api/compliance', authenticateToken, ensureRole(['ADMIN', 'admin']), complianceAdminRouter);
   app.use('/api/sandbox', authenticateToken, ensureRole(['ADMIN', 'admin']), sandboxAdminRouter);
-  app.use('/api/v1/onboarding', onboardingRouter);
+  app.use('/api/v1/onboarding', authenticateToken, onboardingRouter);
   app.use('/api/v1/support', supportCenterRouter);
   app.use('/api/v1/i18n', i18nRouter);
   app.use('/api/v1/experiments', experimentationRouter);

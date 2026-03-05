@@ -1,5 +1,7 @@
 import pytest
+
 from summit.cbm.ai_exposure import map_ai_exposure
+
 
 def test_ai_exposure_determinism():
     prompts = ["Is the moon made of cheese?"]

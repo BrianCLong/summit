@@ -1,7 +1,10 @@
+from unittest.mock import Mock, patch
+
 import pytest
 import requests
-from unittest.mock import Mock, patch
+
 from summit.providers.ollama import OllamaProvider
+
 
 def test_ollama_generate_success():
     provider = OllamaProvider()

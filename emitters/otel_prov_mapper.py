@@ -1,6 +1,8 @@
 from __future__ import annotations
-import json, uuid
-from typing import Dict, Any, Iterable, Tuple
+
+import json
+import uuid
+from typing import Any, Dict, Iterable, Tuple
 
 # Maps OpenLineage events (json lines) → PROV-JSON / PROV-JSONLD
 # Entity   ← Dataset
@@ -13,7 +15,7 @@ def _key(ns: str, name: str) -> str:
 def _activity_id(run_id: str) -> str:
     return f"run:{run_id}"
 
-def to_prov(openlineage_events: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
+def to_prov(openlineage_events: Iterable[dict[str, Any]]) -> dict[str, Any]:
     entities, activities, agents = {}, {}, {}
     wasAssociatedWith, used, wasGeneratedBy = [], [], []
 
@@ -46,7 +48,7 @@ def to_prov(openlineage_events: Iterable[Dict[str, Any]]) -> Dict[str, Any]:
         "wasGeneratedBy": wasGeneratedBy,
     }
 
-def to_prov_jsonld(prov_json: Dict[str, Any]) -> Dict[str, Any]:
+def to_prov_jsonld(prov_json: dict[str, Any]) -> dict[str, Any]:
     return {
         "@context": "https://www.w3.org/ns/prov.jsonld",
         **prov_json

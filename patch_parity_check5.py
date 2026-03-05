@@ -1,4 +1,4 @@
-with open("scripts/ci/parity_check.sh", "r") as f:
+with open("scripts/ci/parity_check.sh") as f:
     content = f.read()
 
 # Replace set -euo pipefail with our patch

@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-import json
-import sys
-import os
 import argparse
+import json
+import os
+import sys
 from typing import List
 
 # Ensure the parent directory of agents is in PYTHONPATH
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from agents.ai_supply_chain_firewall.policy_gate import evaluate_dependencies, enforce_gate, generate_stamp, generate_metrics
+from agents.ai_supply_chain_firewall.policy_gate import (
+    enforce_gate,
+    evaluate_dependencies,
+    generate_metrics,
+    generate_stamp,
+)
+
 
 def main():
     parser = argparse.ArgumentParser(description="Run the AI Supply Chain Firewall.")

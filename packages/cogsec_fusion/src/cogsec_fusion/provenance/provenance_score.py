@@ -1,10 +1,11 @@
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 
 class ProvenanceScorer:
     def __init__(self):
         pass
 
-    def calculate_score(self, artifact: Dict[str, Any]) -> float:
+    def calculate_score(self, artifact: dict[str, Any]) -> float:
         """
         Calculates a provenance score (0.0 - 1.0) based on metadata.
         """
@@ -31,7 +32,7 @@ class ProvenanceScorer:
 
         return min(score, 1.0)
 
-    def generate_checklist(self, artifact_id: str) -> List[str]:
+    def generate_checklist(self, artifact_id: str) -> list[str]:
          return [
              "Verify source domain",
              "Check C2PA signature",

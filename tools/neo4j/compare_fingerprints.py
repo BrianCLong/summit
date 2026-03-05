@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-import sys, json, argparse, collections
+import argparse
+import collections
+import json
+import sys
+
 
 def load_jsonl(path):
     fps = []
-    with open(path, "r") as f:
+    with open(path) as f:
         for line in f:
             try:
                 fps.append(json.loads(line))

@@ -6,10 +6,11 @@ import sys
 # Assume we run from project root, add path to sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
-from summit.agents.ai_supply_chain_monitor.propagation_analyzer import PropagationAnalyzer, Package
+from summit.agents.ai_supply_chain_monitor.propagation_analyzer import Package, PropagationAnalyzer
+
 
 def run_drift_analysis():
-    print(f"[{datetime.datetime.now(datetime.timezone.utc).isoformat()}] Starting AI Supply Chain Drift Analysis")
+    print(f"[{datetime.datetime.now(datetime.UTC).isoformat()}] Starting AI Supply Chain Drift Analysis")
 
     # In a real system, this would query the graph database
     # For now, we mock some packages that might be drifting
@@ -40,7 +41,7 @@ def run_drift_analysis():
     os.makedirs("evidence/monitoring", exist_ok=True)
     with open("evidence/monitoring/drift_metrics.json", "w") as f:
         json.dump({
-            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
             "packages_scanned": len(monitored_packages),
             "anomalies_detected": len(anomalies),
             "anomalies": anomalies

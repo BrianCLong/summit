@@ -1,5 +1,6 @@
 from analysis.domain_cluster_detector import detect_clusters
 
+
 def test_domain_cluster_detector():
     domains = [
         {'name': 'd1', 'hosting': 'h1'},

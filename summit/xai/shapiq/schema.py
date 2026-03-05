@@ -1,13 +1,15 @@
-from pydantic import BaseModel, Field
-from typing import Dict, Any, List, Optional
 import datetime
+from typing import Any, Dict, List, Optional
+
+from pydantic import BaseModel, Field
+
 
 class ShapIQReport(BaseModel):
     version: str = "1.0.0"
     model_id: str
     instance_id: Optional[str] = None
-    attributions: Dict[str, float]
-    interactions: Optional[Dict[str, float]] = None
+    attributions: dict[str, float]
+    interactions: Optional[dict[str, float]] = None
 
 class ShapIQMetrics(BaseModel):
     latency_ms: float

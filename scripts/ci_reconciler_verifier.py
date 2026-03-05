@@ -1,4 +1,9 @@
-import sys, json, requests, statistics, time
+import json
+import statistics
+import sys
+import time
+
+import requests
 
 URL = "http://localhost:8080"
 DATASET = sys.argv[1]  # path to debezium_topic_sample.json

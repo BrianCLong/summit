@@ -1,9 +1,15 @@
 # tools/plan_heatmap.py
-import sys, json, glob, collections, statistics, html
+import collections
+import glob
+import html
+import json
+import statistics
+import sys
+
 
 def load_samples(pattern=".plan-samples/samples-*.jsonl"):
     for p in glob.glob(pattern):
-        with open(p, "r", encoding="utf-8") as f:
+        with open(p, encoding="utf-8") as f:
             for line in f:
                 yield json.loads(line)
 

@@ -1,10 +1,12 @@
-import yaml
 import os
+
+import yaml
+
 
 def test_agent_tools_deny_by_default():
     policy_path = os.path.join(os.path.dirname(__file__), "..", "policies", "agent_tools_deny_by_default.yaml")
 
-    with open(policy_path, "r") as f:
+    with open(policy_path) as f:
         policy = yaml.safe_load(f)
 
     assert policy["default_policy"] == "deny"

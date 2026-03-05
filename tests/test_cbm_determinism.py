@@ -1,5 +1,7 @@
 import pytest
-from summit.cbm.pipeline import run_cbm, CBMConfig
+
+from summit.cbm.pipeline import CBMConfig, run_cbm
+
 
 def test_cbm_disabled_by_default():
     cfg = CBMConfig()

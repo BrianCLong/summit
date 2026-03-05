@@ -43,7 +43,9 @@ def test_dataset_card_markdown():
     assert "**License**: Proprietary" in md
 
 
-from summit_harness.redaction import redact_dict, redact_text as harness_redact_text
+from summit_harness.redaction import redact_dict
+from summit_harness.redaction import redact_text as harness_redact_text
+
 
 def test_harness_redact_dict_secrets():
     data = {"api_key": "secret123", "user": "alice", "nested": {"password": "p1"}}

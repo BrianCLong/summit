@@ -1,13 +1,15 @@
-import sys
-import os
 import json
-import pytest
+import os
+import sys
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add scripts directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../scripts'))
 
 import evidence_validate
+
 
 class TestEvidenceValidate:
     def test_check_timestamps_location(self):

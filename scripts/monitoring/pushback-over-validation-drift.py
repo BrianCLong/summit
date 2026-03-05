@@ -1,12 +1,13 @@
 import json
 import os
 
+
 def check_drift():
     if not os.path.exists("metrics.json"):
         print("No metrics.json found. Skipping drift check.")
         return
 
-    with open("metrics.json", "r") as f:
+    with open("metrics.json") as f:
         metrics = json.load(f)
 
     score = metrics.get("ValidationBiasRisk", 0.0)

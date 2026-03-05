@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 FEATURE_CDA = os.environ.get("FEATURE_CDA", "OFF").upper() == "ON"
 

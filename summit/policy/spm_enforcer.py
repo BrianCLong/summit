@@ -1,5 +1,6 @@
 import logging
 from typing import List, Optional
+
 from .router import PolicyDecision
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ class SPMEnforcer:
         "Explain the 'why' behind your suggestions to ensure the user maintains mastery of the domain."
     )
 
-    def get_prompt_augmentations(self, decision: PolicyDecision) -> List[str]:
+    def get_prompt_augmentations(self, decision: PolicyDecision) -> list[str]:
         """
         Returns a list of prompt augmentations based on the policy decision.
         """

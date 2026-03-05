@@ -1,11 +1,12 @@
-import json
 import hashlib
-from typing import List, Dict, Any
+import json
+from typing import Any, Dict, List
+
 
 def _hash_string(s: str) -> str:
     return hashlib.sha256(s.encode('utf-8')).hexdigest()[:12]
 
-def map_ai_exposure(prompts: List[str], responses: List[Dict[str, Any]], run_date: str = "20240101") -> Dict[str, Any]:
+def map_ai_exposure(prompts: list[str], responses: list[dict[str, Any]], run_date: str = "20240101") -> dict[str, Any]:
     """
     Map AI exposure by analyzing LLM responses to prompts.
     Detects if model outputs repeat specific narratives (laundering).
@@ -51,6 +52,6 @@ def map_ai_exposure(prompts: List[str], responses: List[Dict[str, Any]], run_dat
         "edges": sorted_edges
     }
 
-def write_ai_exposure_artifact(exposure_data: Dict[str, Any], output_path: str):
+def write_ai_exposure_artifact(exposure_data: dict[str, Any], output_path: str):
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(exposure_data, f, indent=2, sort_keys=True)

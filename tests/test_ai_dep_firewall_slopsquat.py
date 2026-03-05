@@ -1,5 +1,7 @@
 import pytest
+
 from agents.ai_supply_chain_firewall.slopsquat_guard import analyze_slopsquat
+
 
 def test_slopsquat_safe():
     result = analyze_slopsquat("requests")

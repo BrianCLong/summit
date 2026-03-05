@@ -1,5 +1,5 @@
-import os
 import json
+import os
 
 files_to_create = {
     "spec/provenance_layer.md": "# Provenance-Native Execution Layer (PNEL) Spec\n\n## Overview\nThe PNEL enforces strict tracking of AI model reasoning, capturing structured reasoning traces (as directed acyclic graphs), data lineage vectors, and policy compliance certificates for every invocation.\n\n## Architecture\n- **Microkernel**: Rust-based, WebAssembly-compatible for edge deployment.\n- **Bindings**: Python bindings to integrate seamlessly with standard ML stacks.\n- **Storage**: Immutable append-only log backed by IntelGraph storage engine.\n",

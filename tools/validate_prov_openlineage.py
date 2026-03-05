@@ -1,6 +1,10 @@
 from __future__ import annotations
-import sys, json, time
+
+import json
+import sys
+import time
 from pathlib import Path
+
 from emitters.otel_prov_mapper import to_prov
 
 EVENTS_PATH = Path("artifacts/lineage/openlineage_events.jsonl")

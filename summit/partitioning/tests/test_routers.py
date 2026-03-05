@@ -1,7 +1,9 @@
 import unittest
 from datetime import datetime
+
+from summit.partitioning.router import CategoryRouter, TimeRangeRouter
 from summit.partitioning.shard_plan import ShardPlan
-from summit.partitioning.router import TimeRangeRouter, CategoryRouter
+
 
 class TestRouters(unittest.TestCase):
     def test_time_range_router_month(self):

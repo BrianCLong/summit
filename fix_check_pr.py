@@ -1,7 +1,8 @@
 import re
 
+
 def fix_check_pr():
-    with open('scripts/ga/check-pr-metadata.mjs', 'r') as f:
+    with open('scripts/ga/check-pr-metadata.mjs') as f:
         content = f.read()
 
     # Disable PR check

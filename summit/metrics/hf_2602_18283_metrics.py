@@ -1,5 +1,6 @@
 import math
 
+
 class HF2602Metrics:
     @staticmethod
     def hit_rate(predictions: list[list[int]], targets: list[int], k: int = 10) -> float:

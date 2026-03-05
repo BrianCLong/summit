@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
-
 SUITE_VERSION = "1.0.0"
 
 

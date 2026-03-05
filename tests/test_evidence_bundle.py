@@ -1,10 +1,13 @@
-import tempfile
-import shutil
-import os
 import json
+import os
+import shutil
+import tempfile
+
+import pytest
+
 from summit.evidence import write_bundle
 from summit.evidence.verify import verify_bundle
-import pytest
+
 
 def test_determinism():
     ctx = {
@@ -72,7 +75,7 @@ def test_verifier_failure_tamper():
 
         try:
             verify_bundle(tmp_dir)
-            assert False, "Should have failed"
+            raise AssertionError("Should have failed")
         except RuntimeError as e:
             assert "Hash mismatch" in str(e)
 

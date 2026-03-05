@@ -1,6 +1,7 @@
 import pytest
-from cogsec_fusion.policy.norm_nodes import get_active_norms
 import yaml
+from cogsec_fusion.policy.norm_nodes import get_active_norms
+
 
 def test_norms_loaded():
     norms = get_active_norms()
@@ -8,7 +9,7 @@ def test_norms_loaded():
     assert any(n["id"] == "NORM-ICRC-COGWAR-2026" for n in norms)
 
 def test_constraints_loaded():
-    with open("packages/cogsec_fusion/src/cogsec_fusion/policy/constraints.yaml", 'r') as f:
+    with open("packages/cogsec_fusion/src/cogsec_fusion/policy/constraints.yaml") as f:
         data = yaml.safe_load(f)
 
     constraints = data["constraints"]

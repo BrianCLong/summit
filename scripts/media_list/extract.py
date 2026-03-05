@@ -1,6 +1,7 @@
-import json
 import argparse
+import json
 import sys
+
 
 def extract_claims(parsed_items):
     """
@@ -38,7 +39,7 @@ def main():
     parser.add_argument("--tools_out", type=str, required=True, help="Path to output tools.yaml")
     args = parser.parse_args()
 
-    with open(args.input_json, "r") as f:
+    with open(args.input_json) as f:
         parsed_items = json.load(f)
 
     extracted = extract_claims(parsed_items)

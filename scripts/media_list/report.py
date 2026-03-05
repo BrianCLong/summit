@@ -1,6 +1,7 @@
-import json
 import argparse
 import hashlib
+import json
+
 
 def generate_report(slug, evidence, metrics, flags):
     report = {
@@ -40,11 +41,11 @@ def main():
     parser.add_argument("--input_hash", type=str, default="sha256:0000", help="Hash of original input")
     args = parser.parse_args()
 
-    with open(args.evidence, "r") as f:
+    with open(args.evidence) as f:
         evidence = json.load(f)
-    with open(args.metrics, "r") as f:
+    with open(args.metrics) as f:
         metrics = json.load(f)
-    with open(args.flags, "r") as f:
+    with open(args.flags) as f:
         flags = json.load(f)
 
     report = generate_report(args.slug, evidence, metrics, flags)

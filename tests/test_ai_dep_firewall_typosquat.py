@@ -1,5 +1,7 @@
 import pytest
+
 from agents.ai_supply_chain_firewall.lookalike_detector import detect_typosquat
+
 
 def test_detect_typosquat_requests():
     is_typosquat, similar = detect_typosquat("requezts", threshold=1)

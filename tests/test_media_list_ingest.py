@@ -1,9 +1,11 @@
-import unittest
-import sys
 import os
+import sys
+import unittest
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'scripts'))
-from media_list.ingest import parse_input
 from media_list.extract import extract_claims
+from media_list.ingest import parse_input
+
 
 class TestMediaListIngest(unittest.TestCase):
     def setUp(self):

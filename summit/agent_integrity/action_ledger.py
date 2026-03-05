@@ -11,9 +11,9 @@ class ActionLedger:
     def write_evidence(
         self,
         evidence_id: str,
-        report: Dict[str, Any],
-        metrics: Dict[str, Any],
-    ) -> Dict[str, str]:
+        report: dict[str, Any],
+        metrics: dict[str, Any],
+    ) -> dict[str, str]:
         """
         Write deterministic AEIP artifacts.
         """

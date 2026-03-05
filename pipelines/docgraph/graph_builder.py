@@ -1,8 +1,10 @@
-import os
-import json
 import hashlib
-from .segmenter import segment_document
+import json
+import os
+
 from .entities import extract_entities
+from .segmenter import segment_document
+
 
 def build_graph(text):
     if os.environ.get("SUMMIT_ENABLE_DOCGRAPH", "OFF") != "ON":

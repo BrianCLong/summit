@@ -2,6 +2,7 @@
 import json
 import os
 
+
 def main():
     print("Running Drift Monitor...")
     # Mock trend data for prototype

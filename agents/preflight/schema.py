@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from typing import List
 
+
 @dataclass(frozen=True)
 class RunPlan:
     goal: str
-    constraints: List[str]
-    acceptance_criteria: List[str]
-    risks: List[str]
-    non_goals: List[str]
+    constraints: list[str]
+    acceptance_criteria: list[str]
+    risks: list[str]
+    non_goals: list[str]
