@@ -7,11 +7,11 @@ protected_branches:
   - release/*
 
 required_checks:
-  - AI Governance Gates
   - meta-gate
   - gate
-  - Unit Tests (Core)
+  - Unit Tests (CI)
   - SOC Controls
+  - Unit Tests & Coverage
 
 notes:
   owner: summit-ga

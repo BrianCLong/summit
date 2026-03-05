@@ -141,8 +141,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: ${{ inputs.platforms }}
-          sbom: ${{ inputs.sbom }}
-          provenance: mode=max
+          # Disable built-in SBOM and provenance due to buildx bugs
+          sbom: false
+          provenance: false
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ inputs.image_name }},push=${{ inputs.push }}
           build-args: |
             SOURCE_DATE_EPOCH=${{ env.SOURCE_DATE_EPOCH }}
             GIT_COMMIT=${{ github.sha }}

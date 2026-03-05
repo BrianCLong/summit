@@ -384,7 +384,7 @@ evidence/skills/
 .worktrees/
 _worktrees/
 
-# AI tool / agent bloat
+# === AI TOOL / IDE BLOAT (all committed — remove forever) ===
 .claude/
 .grok/
 .gemini/
@@ -398,8 +398,14 @@ _worktrees/
 .zap/
 .agent-guidance/
 .agentic-prompts/
+.archive/
 .disabled/
 .quarantine/
 .venv*/
-.venv_*/
-.archive/
+.venv_312/
+.summit/
+.mc/
+.merge-captain/
+.prbodies/
+.githooks/
+.husky/
