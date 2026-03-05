@@ -7,7 +7,6 @@ import { Socket } from 'socket.io';
 import { UserClaims } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { WebSocketConfig } from '../types/index.js';
-import * as metrics from '../metrics/prometheus.js';
 
 export function createAuthMiddleware(config: WebSocketConfig) {
   return async (socket: Socket, next: (err?: Error) => void) => {
@@ -19,8 +18,6 @@ export function createAuthMiddleware(config: WebSocketConfig) {
 
       if (!token) {
         logger.warn({ socketId: socket.id }, 'Connection attempt without token');
-        metrics.recordAuthFailure('no_token');
-        metrics.recordSecurityAuthDenial('no_token', 'unknown');
         return next(new Error('Authentication token required'));
       }
 
@@ -36,8 +33,6 @@ export function createAuthMiddleware(config: WebSocketConfig) {
           { socketId: socket.id, exp: decoded.exp },
           'Connection attempt with expired token'
         );
-        metrics.recordAuthFailure('token_expired');
-        metrics.recordSecurityAuthDenial('token_expired', decoded.tenantId || 'unknown');
         return next(new Error('Token expired'));
       }
 
@@ -64,19 +59,13 @@ export function createAuthMiddleware(config: WebSocketConfig) {
       );
 
       if (error instanceof jwt.JsonWebTokenError) {
-        metrics.recordAuthFailure('invalid_token');
-        metrics.recordSecurityAuthDenial('invalid_token', 'unknown');
         return next(new Error('Invalid token'));
       }
 
       if (error instanceof jwt.TokenExpiredError) {
-        metrics.recordAuthFailure('token_expired');
-        metrics.recordSecurityAuthDenial('token_expired', 'unknown');
         return next(new Error('Token expired'));
       }
 
-      metrics.recordAuthFailure('unknown');
-      metrics.recordSecurityAuthDenial('unknown', 'unknown');
       return next(new Error('Authentication failed'));
     }
   };
@@ -93,7 +82,6 @@ export function requirePermission(permission: string) {
         },
         'Permission denied'
       );
-      metrics.recordSecurityPermissionDenial(permission, socket.data.tenantId || 'unknown');
       return next(new Error(`Permission denied: ${permission}`));
     }
     next();
@@ -111,7 +99,6 @@ export function requireRole(role: string) {
         },
         'Role required'
       );
-      metrics.recordSecurityPermissionDenial(`role:${role}`, socket.data.tenantId || 'unknown');
       return next(new Error(`Role required: ${role}`));
     }
     next();

@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://schemas.summit.io/io/campaign_phase.json",
+  "title": "Campaign Phase",
+  "description": "Schema for an Influence Operation Campaign Phase",
+  "type": "object",
+  "properties": {
+    "phase_id": {
+      "type": "string",
+      "description": "Unique identifier for the campaign phase."
+    },
+    "campaign_id": {
+      "type": "string",
+      "description": "Identifier of the parent campaign."
+    },
+    "phase_name": {
+      "type": "string",
+      "enum": ["Shaping", "Seeding", "Amplification", "Consolidation", "Reactivation"],
+      "description": "The name of the phase."
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the phase objectives and activities."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["Planned", "Active", "Completed", "Suspended"],
+      "default": "Planned"
+    },
+    "tactics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of tactics employed in this phase."
+    },
+    "target_segments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of audience segment IDs targeted."
+    },
+    "vulnerabilities_targeted": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of cognitive or structural vulnerabilities targeted."
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      },
+      "description": "Key performance indicators for the phase."
+    },
+    "provenance_id": {
+      "type": "string",
+      "description": "Reference to the provenance record for this phase definition."
+    }
+  },
+  "required": ["phase_id", "campaign_id", "phase_name", "status"],
+  "additionalProperties": false
+}

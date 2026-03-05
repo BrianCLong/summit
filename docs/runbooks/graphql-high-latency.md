@@ -220,7 +220,7 @@ If latency remains above threshold after 30 minutes:
 
 ## Post-Incident
 
-1. **Create Postmortem**: Use template at `RUNBOOKS/postmortem_template.md`
+1. **Create Postmortem**: Use template at `runbooks/postmortem_template.md`
 2. **File Bugs**: For each action item
 3. **Update Runbook**: With lessons learned
 4. **Review SLOs**: Adjust if needed
@@ -232,4 +232,4 @@ If latency remains above threshold after 30 minutes:
 - **Dashboard**: http://localhost:3001/d/graphql-api-comprehensive
 - **Traces**: http://localhost:16686
 - **Alerts**: http://localhost:9093
-- **Playbook**: RUNBOOKS/INCIDENT_RESPONSE_PLAYBOOK.md
+- **Playbook**: runbooks/INCIDENT_RESPONSE_PLAYBOOK.md

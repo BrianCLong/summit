@@ -4,9 +4,9 @@
 # ============================================================================
 
 package intelgraph.abac
+import rego.v1
 
-import future.keywords.if
-import future.keywords.in
+import rego.v1
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION

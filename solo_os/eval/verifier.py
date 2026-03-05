@@ -1,6 +1,7 @@
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
+
 
 def main() -> int:
     root = Path("solo_os")
