@@ -1,5 +1,6 @@
-from summit.security.pii import PIIRedactor
 import re
+
+from summit.security.pii import PIIRedactor
 
 NEVER_LOG_KEYS = {"auth", "token", "password", "secret", "key", "credential"}
 
