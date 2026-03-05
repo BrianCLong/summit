@@ -28,14 +28,20 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2      - name: Install dependencies
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.0.0
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Generate CycloneDX SBOMs
         run: pnpm sbom:gen
 
       - name: Upload SBOMs
-        uses: actions/upload-artifact@v4          name: sboms
+        uses: actions/upload-artifact@v4
+        with:
+          name: sboms
           path: |
             server/sbom.server.cdx.json
             client/sbom.client.cdx.json
@@ -78,7 +84,9 @@ jobs:
           echo "Attesting SBOM..."
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v4          name: summit-app-tar
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-app-tar
           path: summit-app.tar
 
   provenance:
