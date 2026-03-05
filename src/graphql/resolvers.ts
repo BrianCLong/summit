@@ -25,7 +25,7 @@ import { globalSynergyVortex } from '../insights/globalSynergyVortex';
 
 export const resolvers = {
   Mutation: {
-    deployCollaborative: async (_, { ids, config }) => {
+    deployCollaborative: async (_, { ids, config, evidence_ref }) => {
       const plan = {
         harmonizedInsight: harmonizedInsight(config),
         dynamicCoordination: dynamicCoordination(config),

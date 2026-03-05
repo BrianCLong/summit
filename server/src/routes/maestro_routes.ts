@@ -221,7 +221,7 @@ export function buildMaestroRouter(
   router.get('/runs/:runId', enforceRunReadPolicy, async (req, res, next) => {
     try {
       const { runId } = req.params;
-      const response = await queries.getRunResponse(runId);
+      const response = await queries.getRunResponse((runId as string));
       if (!response) {
         return res.status(404).json({ error: 'Run not found' });
       }
@@ -235,7 +235,7 @@ export function buildMaestroRouter(
   router.get('/runs/:runId/tasks', enforceRunReadPolicy, async (req, res, next) => {
     try {
       const { runId } = req.params;
-      const run = await queries.getRunResponse(runId);
+      const run = await queries.getRunResponse((runId as string));
       if (!run) return res.status(404).json({ error: 'Run not found' });
       return res.json(run.tasks);
     } catch (e: any) {
@@ -247,7 +247,7 @@ export function buildMaestroRouter(
   router.get('/tasks/:taskId', enforceTaskReadPolicy, async (req, res, next) => {
     try {
       const { taskId } = req.params;
-      const result = await queries.getTaskWithArtifacts(taskId);
+      const result = await queries.getTaskWithArtifacts((taskId as string));
       if (!result) return res.status(404).json({ error: 'Task not found' });
       return res.json(result);
     } catch (e: any) {
