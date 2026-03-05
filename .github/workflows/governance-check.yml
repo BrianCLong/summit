@@ -33,6 +33,8 @@ jobs:
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
+              console.log('Title: ', title);
+              console.log('Labels: ', labels);
               core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
             }
 

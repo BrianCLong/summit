@@ -19,11 +19,11 @@ describe('Maestro Integration Tests', () => {
 
     // Create test run
     const result = await pool.query(
-      `INSERT INTO run (id, runbook, status, started_at) 
-       VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
+      `INSERT INTO run (id, pipeline_id, pipeline_name, status, started_at)
+       VALUES (gen_random_uuid(), gen_random_uuid(), 'test-pipeline', 'RUNNING', now())
        RETURNING id`,
     );
-    testRunId = result?.rows?.[0]?.id || 'mock-id-for-tests';
+    testRunId = result.rows[0]?.id || result.rows[0]?.id; // Ensure we get it
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';
@@ -315,7 +315,7 @@ describe('Maestro Integration Tests', () => {
 // Additional test utilities
 export function createTestRun(runbook: string = 'test-runbook') {
   return getPostgresPool().query(
-    `INSERT INTO run (id, runbook, status, started_at) 
+    `INSERT INTO run (id, pipeline_id, pipeline_name, status, started_at)
      VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
      RETURNING id`,
     [runbook],
