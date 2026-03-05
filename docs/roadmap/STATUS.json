@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-24T07:07:46Z",
-  "revision_note": "Daily sprint 2026-02-24 evidence capture and status refresh.",
+  "last_updated": "2026-02-25T00:00:00Z",
+  "revision_note": "Added AI company operating model comparison briefing and linked it in executive briefing index.",
   "initiatives": [
+    {
+      "id": "ai-company-operating-model-comparison-brief",
+      "status": "complete",
+      "owner": "codex",
+      "notes": "Published side-by-side operating model briefing for Anthropic, OpenAI, and Google with adoption guidance for Summit teams."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -24,10 +30,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -36,9 +39,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -47,9 +48,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
