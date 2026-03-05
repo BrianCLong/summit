@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-26",
-  "revision_note": "Added coordination OS foundation lane tracking and evidence scaffolding.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added golden-main stabilization and PR conveyor governance artifacts for CI-first backlog reduction.",
   "initiatives": [
+    {
+      "id": "golden-main-pr-conveyor",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Defined golden-main stabilization playbook and automated stale PR triage plan generation (close >180d, warn 90-180d, keep <90d)."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -24,7 +30,10 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
+          "blockers": [
+            "Need connector registry",
+            "Missing connector lifecycle management"
+          ],
           "target_completion": "Sprint N+2"
         },
         {
@@ -33,7 +42,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         },
         {
@@ -42,7 +53,9 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": ["No implementation exists"],
+          "blockers": [
+            "No implementation exists"
+          ],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -210,20 +223,14 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "coordination-os-foundation-lane",
-      "status": "partial",
-      "owner": "codex",
-      "notes": "Added coordination event schema/types, KPI computation scaffolding, and initial evidence bundle (EVD-HBR-AI-COORD-001)."
     }
   ],
   "summary": {
     "rc_ready": 8,
-    "partial": 3,
+    "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 17,
     "ga_blockers": []
   }
 }
