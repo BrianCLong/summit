@@ -42,6 +42,6 @@ export const schema = gql`
   }
 
   type Mutation {
-    deployCollaborative(ids: [ID]!, config: ConfigInput): EngagementPlan
+    deployCollaborative(ids: [ID]!, config: ConfigInput, evidence_ref: String!): EngagementPlan
   }
 `;
