@@ -20,8 +20,8 @@ import { configCommands } from './commands/config.js';
 import { pluginCommands } from './commands/plugin.js';
 import { agentsCommands } from './commands/agents.js';
 import { doctor } from './commands/doctor.js';
-import { mediaCommands } from './commands/media.js';
 import { orchCommands } from './commands/orch.js';
+import { replayCommand } from './commands/replay.js';
 import { loadConfig, getConfig } from './config.js';
 
 const program = new Command();
@@ -100,6 +100,12 @@ program
 
 // Agent registry commands
 program.addCommand(agentsCommands);
+
+// Orchestration commands
+program.addCommand(orchCommands.root);
+
+// Replay command
+program.addCommand(replayCommand);
 
 // Login command
 program

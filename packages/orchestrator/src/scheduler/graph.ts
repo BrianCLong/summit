@@ -1,4 +1,5 @@
 import { Task } from '../types.js';
+import crypto from 'crypto';
 
 export class TaskGraph {
   private tasks: Map<string, Task> = new Map();
@@ -45,5 +46,14 @@ export class TaskGraph {
           task.owner = owner;
           task.timestamps.started = timestamp;
       }
+  }
+
+  /**
+   * Calculate a deterministic hash of the current graph state.
+   */
+  getHash(): string {
+    const sortedTasks = Array.from(this.tasks.values()).sort((a, b) => a.id.localeCompare(b.id));
+    const content = JSON.stringify(sortedTasks);
+    return crypto.createHash('sha256').update(content).digest('hex');
   }
 }

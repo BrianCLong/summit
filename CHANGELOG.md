@@ -3,6 +3,7 @@
 <!--
 POLICY:
 1. Always maintain an [Unreleased] section at the top.
+- Chore: Release preparation and dependency updates
 2. Use subsections: Added, Changed, Deprecated, Removed, Fixed, Security.
 3. Every PR must add an entry here unless labeled 'skip-changelog'.
 -->
@@ -13,7 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- CI: Enforced golden path execution for all PRs and main branch merges.
+- Chore: Release preparation and dependency updates
 
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
@@ -196,8 +197,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Migration Guide](./docs/migration-guide.md)
 - [API Documentation](./docs/api/README.md)
 
-[Unreleased]
-- CI: Enforced golden path execution for all PRs and main branch merges.: https://github.com/org/summit/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/org/summit/compare/v3.0.0...HEAD
+- Chore: Release preparation and dependency updates
 [3.0.1]: https://github.com/org/summit/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/org/summit/releases/tag/v3.0.0
 ## v2.0.0-rc.1 (2025-10-07)
