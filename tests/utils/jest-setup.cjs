@@ -1,1 +1,1 @@
-console.log("Empty setup");
+// jest setup
