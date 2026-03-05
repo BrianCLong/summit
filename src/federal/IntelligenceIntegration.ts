@@ -50,6 +50,7 @@ export interface IntelligenceReport {
   credibility: 1 | 2 | 3 | 4 | 5 | 6;
   timestamp: Date;
   validUntil?: Date;
+  isSimulated: boolean;
   geolocation?: GeoLocation;
   entities: IntelligenceEntity[];
   relationships: EntityRelationship[];
@@ -83,6 +84,7 @@ export interface IntelligenceEntity {
   sources: string[];
   firstSeen: Date;
   lastSeen: Date;
+  isSimulated: boolean;
 }
 
 export interface EntityRelationship {
@@ -108,6 +110,7 @@ export interface ThreatIndicator {
   lastSeen: Date;
   sources: string[];
   context: string;
+  isSimulated: boolean;
 }
 
 export interface AnalyticsQuery {
@@ -433,6 +436,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
         reliability: record.data.reliability,
         credibility: (Math.floor(rand(itemSeed + '-cred') * 3) + 4) as any, // 4-6 range
         timestamp: record.timestamp,
+        isSimulated: true, // Mark all current reports as simulated
         entities: [],
         relationships: [],
         indicators: [],
@@ -479,6 +483,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
       sources: [dataSource.id],
       firstSeen: new Date(Date.now() - 86400000),
       lastSeen: new Date(),
+      isSimulated: true,
     };
   }
 
@@ -514,6 +519,7 @@ export class FederalIntelligenceIntegration extends EventEmitter {
       lastSeen: new Date(),
       sources: [dataSource.id],
       context: `Formal detection by ${dataSource.agency}`,
+      isSimulated: true,
     };
   }
 
