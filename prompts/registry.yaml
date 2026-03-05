@@ -1,48 +1,22 @@
 version: 1
 prompts:
-  - id: codex-desktop-ga-control-room
-    version: v2
-    path: prompts/docs/codex-desktop-ga-control-room@v2.md
-    sha256: 96f766c47da605b19b239f709a4332c4ab2fb7816ea2f70171f66e08c439e8c1
-    description: Stand up Codex Desktop GA Control Room and Architecture Lab artifacts with UEF outputs and MAESTRO alignment.
-    scope:
-      paths:
-        - docs/codex-desktop/
-        - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/docs/codex-desktop-ga-control-room@v2.md
-        - prompts/registry.yaml
-        - agents/examples/CODEX_DESKTOP_GA_CONTROL_ROOM_20260208.json
-      domains:
-        - documentation
-        - governance
-        - ops
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: codex-desktop-ga-control-room
+  - id: saas-crash-2026-positioning-pack
     version: v1
-    path: prompts/docs/codex-desktop-ga-control-room@v1.md
-    sha256: d7778db4447cdb78b5bd5b6c4b3d265b8625e21820e5eacc7461c9efde23b4d8
-    description: Stand up Codex Desktop GA Control Room and Architecture Lab artifacts with evidence-first run outputs.
+    path: prompts/positioning/saas-crash-2026@v1.md
+    sha256: 1acce34de92a05653ef32c23fed94b971bf06b529c6d76fcb9c8ad43c7d48ed8
+    description: Create the saas-crash-2026 positioning pack, claim registry, and repo validation alignment.
     scope:
       paths:
-        - docs/codex-desktop/
+        - docs/positioning/saas-crash-2026.md
+        - docs/positioning/claim-registry.md
+        - repo_assumptions.md
         - docs/roadmap/STATUS.json
-        - packages/decision-ledger/decision_ledger.json
-        - prompts/docs/codex-desktop-ga-control-room@v1.md
+        - prompts/positioning/saas-crash-2026@v1.md
         - prompts/registry.yaml
-        - agents/examples/CODEX_DESKTOP_GA_CONTROL_ROOM_20260208.json
       domains:
         - documentation
+        - positioning
         - governance
-        - ops
     verification:
       tiers_required:
         - C
@@ -948,62 +922,40 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: implement.predictive-risk-posture-engine@v1
+  - id: switchboard-approvals-command-palette
     version: v1
-    path: prompts/implement.predictive-risk-posture-engine@v1.yaml
-    sha256: 824a1edb6efbd493dbe1ebcb404a85d1d7b985b3961ef7f9159e11b650ff09a4
-    description: Implement Summit Predictive Risk Posture Engine (PRPE)
+    path: prompts/switchboard/switchboard-approvals-command-palette@v1.md
+    sha256: 79b4df8f5a869097218a931b2aac1de7e2b538f62637a4ee6d5cca4c856cd9f1
+    description: Deliver the Switchboard approvals + command palette delivery pack with policy, receipts, and operability artifacts.
     scope:
       paths:
-        - services/prpe/
-        - prompts/implement.predictive-risk-posture-engine@v1.yaml
+        - sprint/sprint-next-switchboard-approvals-command-palette.md
+        - openapi/switchboard-approvals-command-palette.yaml
+        - opa/policies/switchboard.rego
+        - opa/policies/switchboard_test.rego
+        - packages/decision-policy/policy.switchboard.v1.yaml
+        - provenance/receipt_schema_switchboard_v0_1.json
+        - provenance/examples/switchboard-receipt.example.json
+        - docs/switchboard/
+        - grafana/dashboards/switchboard-approvals.json
+        - grafana/alerts/switchboard-approvals-alerts.yaml
+        - RUNBOOKS/switchboard-*.md
+        - docs/roadmap/STATUS.json
+        - prompts/switchboard/switchboard-approvals-command-palette@v1.md
         - prompts/registry.yaml
+        - agents/examples/SWITCHBOARD_APPROVALS_COMMAND_PALETTE_SPRINT_NEXT_20260206.json
       domains:
-        - risk
-        - predictive
+        - switchboard
+        - policy
+        - provenance
+        - observability
+        - governance
     verification:
-
-  - id: implement.ftx-protocol@v1
-    version: v1
-    path: prompts/implement.ftx-protocol@v1.yaml
-    sha256: 670a18404ec98d9e0a09ae880304c1173761fae2be50a4e553b9a85afea9912d
-    description: Implement FTX Protocol Spec for Wire Format & Crypto
-    scope:
-      paths:
-        - services/ftx-protocol/
-        - prompts/implement.ftx-protocol@v1.yaml
-        - prompts/registry.yaml
-      domains:
-        - ftx
-        - protocol
-    verification:
-
-  - id: implement.aia-simulation@v1
-    version: v1
-    path: prompts/implement.aia-simulation@v1.yaml
-    sha256: c498f6b9d6087d68dd1f3daaa475570a39801a549eaacc5d81997f852ff8e865
-    description: Implement AIA Simulation Environment
-    scope:
-      paths:
-        - sim/
-        - prompts/implement.aia-simulation@v1.yaml
-        - prompts/registry.yaml
-      domains:
-        - aia
-        - simulation
-    verification:
-
-  - id: implement.dal-scoring@v1
-    version: v1
-    path: prompts/implement.dal-scoring@v1.yaml
-    sha256: 1ef38a042e5d08781cb1015cc29786ce2c6367880bf75ecabc4da536b028244d
-    description: Implement DAL Impact Scoring Formulas
-    scope:
-      paths:
-        - services/dal-scoring/
-        - prompts/implement.dal-scoring@v1.yaml
-        - prompts/registry.yaml
-      domains:
-        - dal
-        - scoring
-    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

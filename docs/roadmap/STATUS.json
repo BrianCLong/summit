@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T03:32:03Z",
-  "revision_note": "Refined Codex Desktop GA Control Room + Architecture Lab artifacts with UEF outputs and MAESTRO alignment.",
+  "last_updated": "2026-02-06T21:10:00Z",
+  "revision_note": "Expanded Switchboard approvals + command palette delivery pack with architecture, operability, alerts, dashboards, and policy versioning.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "switchboard-approvals-command-palette-sprint-next",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Delivery pack: sprint backlog, architecture, OAS3, OPA policy + tests, decision-policy versioning, receipt schema + example, dashboards, alerts, and runbooks."
     },
     {
       "id": "B",
@@ -175,18 +181,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
-    },
-    {
-      "id": "codex-desktop-ga-control-room",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Codex Desktop GA Control Room project definition, thread checklists, and initial run outputs."
-    },
-    {
-      "id": "codex-desktop-architecture-lab",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Codex Desktop Architecture Lab project definition and non-GA blocking operating rules."
     }
   ],
   "summary": {
@@ -194,7 +188,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 16,
     "ga_blockers": []
   }
 }
