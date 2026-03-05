@@ -1,9 +1,9 @@
 import re
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class PIIRedactor:
-    def __init__(self, additional_patterns: List[str] = None):
+    def __init__(self, additional_patterns: list[str] = None):
         self.patterns = {
             "email": r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
             "phone": r"\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}",
@@ -20,7 +20,7 @@ class PIIRedactor:
             redacted = re.sub(pattern, f"[REDACTED_{name.upper()}]", redacted)
         return redacted
 
-    def redact_structured(self, data: Dict[str, Any], sensitive_keys: List[str] = None) -> Dict[str, Any]:
+    def redact_structured(self, data: dict[str, Any], sensitive_keys: list[str] = None) -> dict[str, Any]:
         sensitive_keys = sensitive_keys or ["password", "secret", "token", "ssn"]
 
         def _redact_recursive(obj):
@@ -38,6 +38,6 @@ class PIIRedactor:
 
         return _redact_recursive(data)
 
-def enforce_never_embed(data: Dict[str, Any], never_embed_keys: List[str]) -> Dict[str, Any]:
+def enforce_never_embed(data: dict[str, Any], never_embed_keys: list[str]) -> dict[str, Any]:
     """Strictly removes keys that should never even be considered for embedding."""
     return {k: v for k, v in data.items() if k not in never_embed_keys}
