@@ -10,6 +10,9 @@ import {
   ProvenanceTracker,
   RetrievalIndex,
   SchemaRegistry,
+  PolicyEngine,
+  createDefaultPolicyContext,
+  defaultPolicyProfiles,
 } from '../src/index.js';
 
 const now = new Date().toISOString();
@@ -66,8 +69,8 @@ describe('DataQualityGate', () => {
 
     const records = [
       { id: '1', updatedAt: new Date(Date.now() - 1000 * 60 * 120).toISOString(), email: 'a@example.com' },
-      { id: '2', updatedAt: now, email: null },
-      { id: '2', updatedAt: now, email: 'b@example.com' },
+      { id: '2', updatedAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(), email: null },
+      { id: '2', updatedAt: new Date(Date.now() - 1000 * 60 * 61).toISOString(), email: 'b@example.com' },
     ];
 
     const report = gate.evaluate('users', records, {
@@ -79,7 +82,7 @@ describe('DataQualityGate', () => {
     expect(report.freshnessViolation).toBeDefined();
     expect(report.nullViolations).toHaveLength(1);
     expect(report.duplicateViolations).toHaveLength(1);
-    expect(report.quarantined).toHaveLength(2);
+    expect(report.quarantined).toHaveLength(3);
     expect(alerts.length).toBeGreaterThan(0);
   });
 });
@@ -302,9 +305,60 @@ describe('AIReadinessControlPlane', () => {
 
     plane.recordModel({ modelId: 'assist', version: '1.0.0', release: '2024.12', metrics: { precision: 0.93 } });
 
+    const policyDecision = plane.evaluatePolicy({
+      profile: 'defense_restricted',
+      intent: 'decision_support',
+      actorType: 'gov_operator',
+      modelTier: 'frontier',
+      context: createDefaultPolicyContext('req-3', 'tenant-1'),
+    });
+
+    expect(policyDecision.allowed).toBe(true);
+    expect(plane.listPolicyAudits().length).toBeGreaterThan(0);
+
     const snapshot = plane.snapshot();
     expect(snapshot.models).toHaveLength(1);
     expect(snapshot.pendingFeatures.length).toBeGreaterThanOrEqual(0);
     expect(snapshot.provenance[0].feedback?.helpful).toBe(true);
+  });
+});
+
+
+describe('PolicyEngine', () => {
+  it('enforces immutable red lines and deny-by-default semantics', () => {
+    const engine = new PolicyEngine(defaultPolicyProfiles);
+
+    const denied = engine.evaluate({
+      profile: 'civilian_safe',
+      intent: 'autonomous_targeting',
+      actorType: 'gov_operator',
+      modelTier: 'frontier',
+      context: createDefaultPolicyContext('req-1', 'tenant-1'),
+    });
+
+    expect(denied.allowed).toBe(false);
+    expect(denied.reason).toContain('Immutable red line');
+
+    const fallbackDenied = engine.evaluate({
+      profile: 'defense_restricted',
+      intent: 'research',
+      actorType: 'researcher',
+      modelTier: 'baseline',
+      context: createDefaultPolicyContext('req-2', 'tenant-1'),
+    });
+
+    expect(fallbackDenied.allowed).toBe(false);
+    expect(fallbackDenied.reason).toContain('Deny-by-default');
+  });
+
+  it('rejects profile updates that attempt to remove immutable red lines', () => {
+    const engine = new PolicyEngine(defaultPolicyProfiles);
+
+    expect(() =>
+      engine.updateProfile('civilian_safe', (profile) => ({
+        ...profile,
+        rules: profile.rules.filter((rule) => rule.id !== 'ban_autonomous_targeting'),
+      })),
+    ).toThrowError('Immutable red line cannot be removed or changed: ban_autonomous_targeting');
   });
 });

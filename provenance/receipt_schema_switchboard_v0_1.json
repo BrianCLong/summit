@@ -1,0 +1,147 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Switchboard Receipt Schema v0.1",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "id",
+    "timestamp",
+    "correlation_id",
+    "tenant_id",
+    "actor",
+    "command",
+    "inputs_hash",
+    "outputs_hash",
+    "policy_decision",
+    "approvals",
+    "result",
+    "signatures"
+  ],
+  "properties": {
+    "spec_version": {
+      "type": "string",
+      "const": "0.1"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this receipt"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "Workflow or trace correlation identifier"
+    },
+    "tenant_id": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["user", "service_account", "system"] },
+        "email": { "type": "string" },
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "ip_address": { "type": "string" }
+      }
+    },
+    "command": {
+      "type": "object",
+      "required": ["name", "parameters"],
+      "properties": {
+        "name": { "type": "string" },
+        "parameters": { "type": "object", "additionalProperties": true },
+        "role_scope": { "type": "array", "items": { "type": "string" } },
+        "privileged": { "type": "boolean" }
+      }
+    },
+    "inputs_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the canonicalized inputs"
+    },
+    "outputs_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the canonicalized outputs"
+    },
+    "policy_decision": {
+      "type": "object",
+      "required": ["decision_id", "outcome", "policy_bundle", "evaluated_at"],
+      "properties": {
+        "decision_id": { "type": "string" },
+        "outcome": { "type": "string", "enum": ["allow", "deny", "require_approval"] },
+        "policy_bundle": { "type": "string" },
+        "risk_level": { "type": "string", "enum": ["low", "medium", "high"] },
+        "evaluated_at": { "type": "string", "format": "date-time" },
+        "required_approver_roles": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["approval_id", "decision", "actor_id", "rationale_hash"],
+        "properties": {
+          "approval_id": { "type": "string" },
+          "decision": { "type": "string", "enum": ["approve", "deny"] },
+          "actor_id": { "type": "string" },
+          "rationale_hash": { "type": "string" },
+          "decided_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "result": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["success", "failure", "denied"] },
+        "details": { "type": "string" }
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "uri"],
+        "properties": {
+          "type": { "type": "string" },
+          "uri": { "type": "string" }
+        }
+      }
+    },
+    "notary": {
+      "type": "object",
+      "required": ["provider", "key_id"],
+      "properties": {
+        "provider": { "type": "string" },
+        "key_id": { "type": "string" },
+        "attested_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "signatures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key_id", "algorithm", "value"],
+        "properties": {
+          "key_id": { "type": "string" },
+          "algorithm": { "type": "string", "default": "RS256" },
+          "value": { "type": "string" }
+        }
+      }
+    },
+    "redactions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "reason"],
+        "properties": {
+          "field": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    }
+  }
+}

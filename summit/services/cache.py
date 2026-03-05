@@ -1,5 +1,7 @@
 from typing import Any, Optional
+
 from summit.cache.redis_client import RedisClient
+
 
 class CacheService:
     def __init__(self):
