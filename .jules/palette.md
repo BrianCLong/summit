@@ -39,12 +39,3 @@
 ## 2026-02-07 - Accessibility for Loading States
 **Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
 **Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
-
-## 2025-02-20 - Platform-Aware Keyboard Shortcuts
-
-**Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
-**Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
-
-## 2026-03-01 - Search Interaction Polish
-**Learning:** Users often click "clear" on a search bar and expect to immediately type a new query, but default implementations often leave focus on the clear button or blur it.
-**Action:** Always programmatically focus the input element after a "clear" action to maintain user flow.
