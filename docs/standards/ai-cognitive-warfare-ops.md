@@ -1,8 +1,8 @@
-# Interop & Standards: AI Cognitive Warfare Ops
+# AI Cognitive Warfare Ops - Standards
 
 ## Import
 | Source | Format |
-| --- | --- |
+|---|---|
 | news feeds | RSS |
 | social media | JSON |
 | OSINT feeds | CSV |

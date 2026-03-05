@@ -1,21 +1,19 @@
-# AI Cognitive Warfare Ops Data Handling Policy
+# AI Cognitive Warfare Ops - Data Handling Policy
 
 ## Classification
 
 | Data | Level |
-| --- | --- |
+|---|---|
 | social media | public |
 | news content | public |
 | LLM responses | internal |
 | analysis artifacts | internal |
 
-## Never log:
-
+## Never Log
 - user identifiers
 - private communications
 - API keys
 
-## Retention:
-
+## Retention
 - analysis artifacts: 90 days
 - metrics: 1 year
