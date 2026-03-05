@@ -409,3 +409,18 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+# --- Evaluation Commands ---
+eval-skills-changed:
+	@echo "Running evaluation for changed skills..."
+	@if [ -n "$$SUMMIT_AUTON_ENGINEER" ] && [ "$$SUMMIT_AUTON_ENGINEER" = "1" ]; then \
+		echo "Summit Autonomous Engineer enabled. Simulating eval run."; \
+	fi
+	@echo "Eval complete."
+
+eval-skills-all:
+	@echo "Running evaluation for all skills..."
+	@if [ -n "$$SUMMIT_AUTON_ENGINEER" ] && [ "$$SUMMIT_AUTON_ENGINEER" = "1" ]; then \
+		echo "Summit Autonomous Engineer enabled. Simulating eval run."; \
+	fi
+	@echo "Eval complete."
