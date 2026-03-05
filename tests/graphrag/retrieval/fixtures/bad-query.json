@@ -1,0 +1,4 @@
+{
+  "query": "DROP TABLE users; --",
+  "expected": "no results"
+}

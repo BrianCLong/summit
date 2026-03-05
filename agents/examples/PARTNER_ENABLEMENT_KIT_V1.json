@@ -1,0 +1,46 @@
+{
+  "task_id": "PARTNER_ENABLEMENT_KIT_V1",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "partner-enablement-kit-v1",
+    "version": "v1",
+    "sha256": "1557c823b4eecb0fb603d2697205ac153f070fee8c3867e37363ed32031310f8",
+    "path": "prompts/partners/partner-enablement-kit-v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/partners/partner-enablement-kit-v1.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/partners/partner-enablement-kit-v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/PARTNER_ENABLEMENT_KIT_V1.json"
+    ],
+    "domains": [
+      "documentation",
+      "partners",
+      "governance"
+    ]
+  },
+  "allowed_operations": [
+    "create",
+    "edit"
+  ],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/partners/partner-enablement-kit-v1.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Partner enablement kit v1 documentation published with governance references and troubleshooting links.",
+    "Roadmap status updated to record Sprint N+7 partner enablement kit milestone."
+  ],
+  "stop_conditions": [
+    "Governance references missing or inconsistent with canonical sources.",
+    "Documentation introduces policy changes or runtime behavior changes."
+  ]
+}

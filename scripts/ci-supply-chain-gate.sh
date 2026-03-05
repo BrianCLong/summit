@@ -52,7 +52,7 @@ run_check() {
 
 # 1. Check Build Reproducibility
 if [ "$CHECK_REPRODUCIBILITY" = true ]; then
-    run_check "Build Reproducibility" "bash scripts/check-reproducibility.sh $ARTIFACT_NAME 'npm run build' $BUILD_ENV 2 ./build-test"
+    run_check "Build Reproducibility" "bash scripts/check-reproducibility.sh $ARTIFACT_NAME 'npm run build' $BUILD_ENV 2 /tmp/build-test"
 fi
 
 # 2. Generate and Verify SBOM
