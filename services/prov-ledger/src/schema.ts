@@ -6,12 +6,12 @@ export const typeDefs = gql`
   type Evidence { id: ID!, sha256: String!, contentType: String!, createdAt: String! }
   type Claim { id: ID!, hashRoot: String!, transformChain: [String!]! }
   type Manifest { data: String! }
-  
-  type Query { 
-    _health: String! 
+
+  type Query {
+    _health: String!
     getManifest(caseId: String!): Manifest!
   }
-  
+
   type Mutation {
     registerEvidence(sha256: String!, contentType: String!): Evidence!
     registerClaim(evidenceIds: [ID!]!, transformChain: [String!]!): Claim!

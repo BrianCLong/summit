@@ -3,7 +3,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
@@ -23,7 +23,7 @@ FROM node:20-alpine AS production
 WORKDIR /app
 
 # Install pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.0.0 --activate
 
 # Copy package files and install production deps only
 COPY package.json pnpm-lock.yaml* ./

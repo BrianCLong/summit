@@ -1,0 +1,82 @@
+name: merge-engine
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 5 * * *'
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+
+jobs:
+  inventory-and-triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Generate PR inventory
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./.github/scripts/merge-engine/gh_pr_inventory.sh
+
+      - name: Triage and queue
+        run: python3 .github/scripts/merge-engine/triage_prs.py
+
+      - name: Upload merge-engine artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: merge-engine-artifacts
+          path: |
+            artifacts/pr_inventory.json
+            artifacts/pr_inventory.csv
+            artifacts/pr_triage.csv
+            artifacts/pr_queue.md
+
+      - name: Optional dashboard comment
+        if: ${{ vars.MERGE_ENGINE_DASHBOARD_ISSUE != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ vars.MERGE_ENGINE_DASHBOARD_ISSUE }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f artifacts/pr_triage.csv ]]; then
+            exit 0
+          fi
+
+          summary_file="artifacts/merge_engine_summary.md"
+          {
+            echo "## Merge Engine Dashboard Update"
+            echo
+            echo "Generated: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            echo
+            echo "### Lane Counts"
+            python3 - <<'PY'
+import csv
+from collections import Counter
+with open('artifacts/pr_triage.csv', newline='', encoding='utf-8') as fh:
+    rows = list(csv.DictReader(fh))
+counts = Counter(r['lane'] for r in rows)
+for lane, count in sorted(counts.items()):
+    print(f"- {lane}: {count}")
+print()
+print("### Top 10 Queue")
+for row in rows[:10]:
+    print(f"- #{row['number']} {row['title']} ({row['lane']}, ci={row['ci_status']}, conflicts={row['conflicts']})")
+print()
+print("### Top Blockers")
+blockers = [r for r in rows if r['lane'] in {'conflicts', 'quarantine', 'capture-close'}][:10]
+for row in blockers:
+    print(f"- #{row['number']} {row['title']} ({row['lane']}: {row['lane_reason']})")
+PY
+          } > "${summary_file}"
+
+          gh issue comment "${ISSUE_NUMBER}" --body-file "${summary_file}"

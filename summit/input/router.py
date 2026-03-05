@@ -8,7 +8,7 @@ class PolicyViolation(ValueError):
     pass
 
 
-def _ensure_no_banned_fields(frame: IntentFrame, policy: Dict) -> None:
+def _ensure_no_banned_fields(frame: IntentFrame, policy: dict) -> None:
     banned = policy.get("logging", {}).get("never_log_fields", [])
     banned_keys = set(banned)
     present = banned_keys.intersection(frame.meta.keys())
@@ -18,9 +18,9 @@ def _ensure_no_banned_fields(frame: IntentFrame, policy: Dict) -> None:
 
 def route_intents(
     frames: Iterable[IntentFrame],
-    policy: Dict,
-) -> List[IntentFrame]:
-    allowed_frames: List[IntentFrame] = []
+    policy: dict,
+) -> list[IntentFrame]:
+    allowed_frames: list[IntentFrame] = []
     for frame in frames:
         _ensure_no_banned_fields(frame, policy)
         decision: GateDecision = evaluate(

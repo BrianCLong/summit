@@ -8,3 +8,4 @@ export * from './pii.js';
 export * from './provenance.js';
 export * from './modelRegistry.js';
 export * from './controlPlane.js';
+export * from './policyEngine.js';
