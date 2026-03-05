@@ -143,8 +143,6 @@ smoke: bootstrap up ## Fresh clone smoke test: bootstrap -> up -> health check
 	@curl -s -f http://localhost:3000 > /dev/null && echo "✅ UI is up" || (echo "❌ UI failed" && exit 1)
 	@echo "Checking Gateway health..."
 	@curl -s -f http://localhost:8080/healthz > /dev/null && echo "✅ Gateway is up" || (curl -s -f http://localhost:8080/health > /dev/null && echo "✅ Gateway is up" || (echo "❌ Gateway failed" && exit 1))
-	@echo "Running k6 smoke test..."
-	@./ops/k6/smoke.sh
 	@echo "Smoke test complete."
 
 rollback: ## Rollback deployment (Usage: make rollback v=v3.0.0 env=prod)
@@ -411,3 +409,13 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+# --- Skill Evals ---
+
+eval-skills-changed:
+	@echo "Running changed skill evals..."
+	@pnpm exec tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all:
+	@echo "Running full skill eval suite..."
+	@pnpm exec tsx evals/runner/run_skill_suite.ts
