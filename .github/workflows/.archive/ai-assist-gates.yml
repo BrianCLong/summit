@@ -1,6 +1,11 @@
 name: ai-assist-gates
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   push:
     branches: [ main ]
 
