@@ -1,4 +1,5 @@
 package export.v2
+import rego.v1
 
 default allow := false
 

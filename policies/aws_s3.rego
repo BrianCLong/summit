@@ -1,5 +1,6 @@
 
 package maestro.governance
+import rego.v1
 
 # Deny public S3 buckets
 deny[msg] {

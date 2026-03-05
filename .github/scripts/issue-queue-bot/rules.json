@@ -1,0 +1,45 @@
+{
+  "version": "v1",
+  "candidateLabels": ["P0-candidate"],
+  "candidateKeywords": [
+    "ga blocker",
+    "release blocker",
+    "ci gate",
+    "reproducibility",
+    "manifest",
+    "run_id",
+    "supply chain",
+    "deterministic",
+    "security regression"
+  ],
+  "gaBlockerKeywords": [
+    "ga blocker",
+    "release blocker",
+    "ci gate",
+    "security regression"
+  ],
+  "categoryRules": [
+    { "category": "integrity", "keywords": ["manifest", "run_id"] },
+    { "category": "reproducibility", "keywords": ["deterministic", "reproducibility"] },
+    { "category": "ci", "keywords": ["workflow", "actions", "ci"] },
+    { "category": "security", "keywords": ["vuln", "cve", "rce"] }
+  ],
+  "labelSignals": {
+    "p0": "prio:P0",
+    "gaBlocker": "ga:blocker",
+    "domain": ["ci", "reproducibility", "security", "integrity", "deps"],
+    "negative": ["needs-info", "blocked"]
+  },
+  "weights": {
+    "p0Label": 40,
+    "gaKeyword": 30,
+    "gaLabel": 20,
+    "domainLabel": 15,
+    "failingCheckReference": 10,
+    "negativeLabel": -20
+  },
+  "confidence": {
+    "high": 70,
+    "medium": 50
+  }
+}
