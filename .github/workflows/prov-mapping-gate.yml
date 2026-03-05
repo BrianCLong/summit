@@ -1,0 +1,23 @@
+name: prov-mapping-gate
+on:
+  pull_request:
+    paths:
+      - "events/**.json"
+      - "mapping/**"
+      - "schemas/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install pytest jsonschema prov
+      - name: Run provenance validator
+        run: |
+          pytest tests/test_openlineage_to_prov.py -q --maxfail=1

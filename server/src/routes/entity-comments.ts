@@ -22,15 +22,24 @@ function getRequestContext(req: any): {
   tenantId: string | null;
   userId: string | null;
 } {
-  const tenantId = String(
-    req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
-  );
+  // SEC-2025-002: Prioritize identity and tenant context from authenticated user object
+  // populated by middleware, rather than untrusted headers to prevent spoofing.
+  const tenantId =
+    req.user?.tenantId ||
+    req.user?.tenant_id ||
+    req.tenant_id ||
+    req.tenantContext?.tenantId ||
+    (process.env.NODE_ENV === 'test' ? (req.headers['x-tenant-id'] || req.headers['x-tenant']) : null);
+
   const userId =
-    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
+    req.user?.id ||
+    req.user?.sub ||
+    req.user?.email ||
+    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : null);
 
   return {
-    tenantId: tenantId || null,
-    userId: userId || null,
+    tenantId: tenantId ? String(tenantId) : null,
+    userId: userId ? String(userId) : null,
   };
 }
 

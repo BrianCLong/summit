@@ -40,6 +40,8 @@ export interface BudgetLedgerEntry {
   estimationMethod: 'precise' | 'heuristic' | 'cached';
   accuracyRatio?: number;
   status: 'estimated' | 'reconciled' | 'failed' | 'rolled_back';
+  agentId?: string;
+  agentVersion?: string;
   reconciledAt?: Date;
   failedReason?: string;
   createdAt: Date;
@@ -157,10 +159,12 @@ export class BudgetLedgerManager {
     estCompletionTokens: number;
     estTotalUsd: number;
     estimationMethod?: 'precise' | 'heuristic' | 'cached';
+    agentId?: string;
+    agentVersion?: string;
   }): Promise<string> {
     try {
       const result = await this.pool.query(
-        `SELECT record_spending($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+        `SELECT record_spending($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
         [
           entry.tenantId,
           entry.correlationId,
@@ -173,6 +177,8 @@ export class BudgetLedgerManager {
           entry.estCompletionTokens,
           entry.estTotalUsd,
           entry.estimationMethod || 'heuristic',
+          entry.agentId,
+          entry.agentVersion,
         ],
       );
 
@@ -611,6 +617,8 @@ export class BudgetLedgerManager {
           ? parseFloat(row.accuracy_ratio)
           : undefined,
         status: row.status,
+        agentId: row.agent_id,
+        agentVersion: row.agent_version,
         reconciledAt: row.reconciled_at,
         failedReason: row.failed_reason,
         createdAt: row.created_at,
