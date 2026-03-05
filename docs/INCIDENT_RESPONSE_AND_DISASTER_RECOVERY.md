@@ -32,6 +32,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
           - **Communication**: Every 5 minutes until mitigation
          
           - ### 1.2 P2 - High (Page immediately)
+
          
           - **Definition**: Major service degradation or significant feature unavailable
          
@@ -48,6 +49,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                       - **Communication**: Every 15 minutes until resolution
                      
                       - ### 1.3 P3 - Medium (Alert only)
+
                      
                       - **Definition**: Partial service degradation, workaround exists
                      
@@ -63,6 +65,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                 - **Communication**: Status page update
                                
                                 - ### 1.4 P4 - Low (No page)
+
                                
                                 - **Definition**: Minor issues, cosmetic, or edge cases
                                
@@ -101,6 +104,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ] - P4: During business hours
                                        
                                         - [ ] ### 2.2 Initial Response (Phase 2)
+
                                        
                                         - [ ] **Timeline**: P1: < 5 min, P2: < 15 min, P3: < 1 hour
                                        
@@ -126,6 +130,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]  - P3: "Investigating reports of issues"
                                        
                                         - [ ]  ### 2.3 Triage (Phase 3)
+
                                        
                                         - [ ]  **Timeline**: P1: < 10 min, P2: < 30 min, P3: < 2 hours
                                        
@@ -149,6 +154,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    5. [ ] Document findings in incident channel
                                        
                                         - [ ]    ### 2.4 Mitigation (Phase 4)
+
                                        
                                         - [ ]    **Timeline**: P1: < 15 min, P2: < 30 min, P3: < 4 hours
                                        
@@ -188,6 +194,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]      - Time: varies
                                        
                                         - [ ]  ### 2.5 Verification (Phase 5)
+
                                        
                                         - [ ]  **Timeline**: P1: < 2 min after mitigation, P2: < 5 min, P3: < 15 min
                                        
@@ -206,6 +213,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]  - [ ] Customer-reported issues resolved
                                        
                                         - [ ]  ### 2.6 Recovery (Phase 6)
+
                                        
                                         - [ ]  **Timeline**: Varies based on impact
                                        
@@ -219,8 +227,10 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]  ---
                                        
                                         - [ ]  ## 3. Disaster Recovery Procedures
+
                                        
                                         - [ ]  ### 3.1 Recovery Scenarios
+
                                        
                                         - [ ]  **Scenario 1: Single Component Failure**
                                         - [ ]  - RTO: < 15 minutes
@@ -250,6 +260,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]  - Process: [See Security Incident Response Guide]
                                        
                                         - [ ]  ### 3.2 Backup and Recovery Strategy
+
                                        
                                         - [ ]  **Backup Schedule**:
                                         - [ ]  - Database: Hourly snapshots (last 24 hours), Daily snapshots (last 30 days)
@@ -270,6 +281,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]  - [ ] Every deployment: Rollback procedure validation
                                        
                                         - [ ]  ### 3.3 Geographic Redundancy
+
                                        
                                         - [ ]  **Current Deployment**:
                                         - [ ]  - Primary region: US-East
@@ -297,8 +309,10 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 4. Communication During Incidents
+
                                        
                                         - [ ]    ### 4.1 Communication Channels
+
                                        
                                         - [ ]    **Internal**:
                                         - [ ]    - Slack: `#incident-{date}-{severity}` (incident discussion)
@@ -311,6 +325,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    - Twitter: @SummitStatus (P1 only)
                                        
                                         - [ ]    ### 4.2 Update Frequency
+
                                        
                                         - [ ]    | Severity | Frequency | Channel |
                                         - [ ]    |----------|-----------|---------|
@@ -320,9 +335,11 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    | P4 | Next business day | Email |
                                        
                                         - [ ]    ### 4.3 Communication Template
+
                                        
                                         - [ ]    **Initial Impact (0-5 min)**:
                                         - [ ]    ```
+
                                         - [ ]    [INCIDENT] {Service} - {Impact}
                                        
                                         - [ ]    Status: Investigating
@@ -331,18 +348,22 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    Started: {Time}
                                         - [ ]    Latest Update: {Time}
                                         - [ ]    ```
+
                                        
                                         - [ ]    **Mitigation In Progress (5-15 min)**:
                                         - [ ]    ```
+
                                         - [ ]    [INCIDENT] {Service} - {Impact}
                                        
                                         - [ ]    Status: Mitigation underway
                                         - [ ]    Progress: {What we're doing}
                                         - [ ]    ETA: {Recovery time estimate}
                                         - [ ]    ```
+
                                        
                                         - [ ]    **Resolved**:
                                         - [ ]    ```
+
                                         - [ ]    [RESOLVED] {Service} - {Impact}
                                        
                                         - [ ]    Status: Service restored
@@ -350,12 +371,15 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    Cause: {Brief explanation}
                                         - [ ]    Next: Postmortem scheduled for {date/time}
                                         - [ ]    ```
+
                                        
                                         - [ ]    ---
                                        
                                         - [ ]    ## 5. Incident Command System
+
                                        
                                         - [ ]    ### 5.1 Roles
+
                                        
                                         - [ ]    **Incident Commander** (IC)
                                         - [ ]    - Final authority on incident decisions
@@ -386,6 +410,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    - Infrastructure: Capacity, region failover
                                        
                                         - [ ]    ### 5.2 Incident Commander Decision Matrix
+
                                        
                                         - [ ]    | Scenario | Action | Approval |
                                         - [ ]    |----------|--------|----------|
@@ -401,8 +426,10 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 6. Post-Incident Process
+
                                        
                                         - [ ]    ### 6.1 Postmortem Timeline
+
                                        
                                         - [ ]    **Immediately after resolution**:
                                         - [ ]    - [ ] Close incident channel
@@ -420,15 +447,18 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    - [ ] Public summary (for customers)
                                        
                                         - [ ]    ### 6.2 Postmortem Template
+
                                        
                                         - [ ]    ```markdown
                                         - [ ]    # Incident Postmortem: {Incident Name}
+
                                        
                                         - [ ]    **Date**: {Date}
                                         - [ ]    **Duration**: {X minutes}
                                         - [ ]    **Impact**: {Description}
                                        
                                         - [ ]    ## Timeline
+
                                        
                                         - [ ]    | Time | Event | Actor |
                                         - [ ]    |------|-------|-------|
@@ -440,22 +470,26 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    | 14:50 | All-clear status | IC |
                                        
                                         - [ ]    ## Root Cause
+
                                        
                                         - [ ]    {Description of what went wrong}
                                        
                                         - [ ]    ## Factors That Helped
+
                                        
                                         - [ ]    - Automated rollback capability
                                         - [ ]    - Comprehensive monitoring
                                         - [ ]    - Clear on-call process
                                        
                                         - [ ]    ## Factors That Hindered
+
                                        
                                         - [ ]    - Missing test case for specific scenario
                                         - [ ]    - Unclear error message in logs
                                         - [ ]    - Deployment tool missing validation
                                        
                                         - [ ]    ## Action Items
+
                                        
                                         - [ ]    | Item | Owner | Due Date | Priority |
                                         - [ ]    |------|-------|----------|----------|
@@ -464,13 +498,16 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    | Add pre-deployment validation | DevOps | 1 week | P2 |
                                        
                                         - [ ]    ## Lessons Learned
+
                                        
                                         - [ ]    1. Always validate {specific thing}
                                         - [ ]    2. Consider {edge case} in design
                                         - [ ]    3. Improve {monitoring/testing/documentation}
                                         - [ ]    ```
+
                                        
                                         - [ ]    ### 6.3 Action Item Tracking
+
                                        
                                         - [ ]    - [ ] Create GitHub issue for each action item
                                         - [ ]    - [ ] Assign to engineer
@@ -482,8 +519,10 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 7. On-Call Procedures
+
                                        
                                         - [ ]    ### 7.1 On-Call Rotation
+
                                        
                                         - [ ]    **Schedule**: 1 week rotations
                                         - [ ]    **Role**: Primary on-call (pages) + backup (secondary)
@@ -501,6 +540,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    - P3: Escalate to manager
                                        
                                         - [ ]    ### 7.2 On-Call Checklist
+
                                        
                                         - [ ]    **Before shift**:
                                         - [ ]    - [ ] Verify PagerDuty access
@@ -523,6 +563,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    - [ ] Provide feedback to team
                                        
                                         - [ ]    ### 7.3 On-Call Load
+
                                        
                                         - [ ]    **Monthly Review**:
                                         - [ ]    - [ ] Page frequency (target: < 2x per week)
@@ -538,6 +579,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 8. Runbooks by Service
+
                                        
                                         - [ ]    Location: `/docs/runbooks/{service}/`
                                        
@@ -557,8 +599,10 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 9. Security Incident Response
+
                                        
                                         - [ ]    ### 9.1 Suspected Security Incident
+
                                        
                                         - [ ]    **Immediate Actions** (< 5 minutes):
                                         - [ ]    1. [ ] Notify security team immediately
@@ -582,8 +626,10 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 10. Incident Metrics
+
                                        
                                         - [ ]    ### 10.1 Key Metrics
+
                                        
                                         - [ ]    **MTTR** (Mean Time To Recovery)
                                         - [ ]    - P1 target: < 15 minutes
@@ -607,6 +653,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    - P3: < 5 per month
                                        
                                         - [ ]    ### 10.2 Tracking & Reporting
+
                                        
                                         - [ ]    **Monthly Report**:
                                         - [ ]    - Incident count by severity
@@ -625,6 +672,7 @@ This guide establishes Summit's incident response and disaster recovery procedur
                                         - [ ]    ---
                                        
                                         - [ ]    ## 11. Document History
+
                                        
                                         - [ ]    | Version | Date | Author | Changes |
                                         - [ ]    |---------|------|--------|---------|

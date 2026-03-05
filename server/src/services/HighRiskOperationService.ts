@@ -59,7 +59,7 @@ export class HighRiskOperationService {
             throw new Error('Trust Intelligence Failure: Operation generation is non-deterministic');
         }
 
-        const request: HighRiskOperationRequest = {
+        const request: any = {
             id: `hro_${randomUUID()}`,
             tenantId,
             actorId,
@@ -158,7 +158,7 @@ export class HighRiskOperationService {
             resourceId: request.id,
             actorId: 'system',
             actorType: 'system',
-            payload: { execution: true },
+            payload: { execution: true as any as any },
             metadata: {
                 operationType: request.operationType,
                 executionTime: new Date()
