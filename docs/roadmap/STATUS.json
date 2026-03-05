@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-05T00:00:00Z",
+  "revision_note": "Added Palantir-class readiness assessment + ordered execution roadmap artifact and tracked initiative for evidence-first delivery sequencing.",
   "initiatives": [
+    {
+      "id": "palantir-class-readiness-roadmap",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published current-state 12-component assessment and 10-phase execution roadmap centered on graph-first/evidence-first sequencing."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
