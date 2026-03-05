@@ -1,6 +1,6 @@
 import torch
 
-from libs.attn_lab.bench import _quality_proxy, SuiteConfig
+from libs.attn_lab.bench import SuiteConfig, _quality_proxy
 from libs.attn_lab.config import AttnLabConfig, AttnType
 from libs.attn_lab.mhla import linear_attention, mhla_linear_attention, softmax_attention
 

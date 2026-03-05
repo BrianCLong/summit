@@ -244,7 +244,7 @@ deny if {
 - [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html)
 - [JWT Security Best Practices](https://datatracker.ietf.org/doc/html/rfc8725)
 - [IntelGraph Security Guidelines](../SECURITY_GUIDELINES.md)
-- [Multi-Tenant ABAC Policy](../../../SECURITY/policy/opa/multi-tenant-abac.rego)
+- Multi-Tenant ABAC Policy
 - [AI Agent Risk Audit](../../../security/ai-agent-risk-audit.md)
 
 ---

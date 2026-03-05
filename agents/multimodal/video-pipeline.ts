@@ -393,7 +393,7 @@ export class VideoPipeline {
 
       const batchResults = await Promise.all(batchPromises);
       keyFrames.push(
-        ...batchResults.filter((r): r is KeyFrame => r !== null),
+        ...batchResults.filter((r) => r !== null) as KeyFrame[],
       );
     }
 
