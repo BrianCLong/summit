@@ -47,12 +47,11 @@ export interface TracingConfig {
   jaegerEndpoint?: string;
   otlpTracesEndpoint?: string;
   otlpMetricsEndpoint?: string;
-  otlpHeaders?: Record<string, string>;
   enableAutoInstrumentation?: boolean;
   sampleRate?: number;
 }
 
-export class IntelGraphTracer {
+export class SummitTracer {
   private sdk: InstanceType<typeof NodeSDK> | null = null;
   private tracer: ReturnType<typeof trace.getTracer>;
   private initialized = false;
@@ -76,7 +75,7 @@ export class IntelGraphTracer {
         [SEMRESATTRS_SERVICE_NAME]: this.config.serviceName,
         [SEMRESATTRS_SERVICE_VERSION]: this.config.serviceVersion,
         [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: this.config.environment,
-        [SEMRESATTRS_SERVICE_NAMESPACE]: 'intelgraph',
+        [SEMRESATTRS_SERVICE_NAMESPACE]: 'summit',
       });
 
       // Configure Exporters
@@ -85,7 +84,6 @@ export class IntelGraphTracer {
       if (this.config.otlpTracesEndpoint) {
           traceExporter = new OTLPTraceExporter({
               url: this.config.otlpTracesEndpoint,
-              headers: this.config.otlpHeaders,
           });
           logger.info(`OTLP Trace exporter configured: ${this.config.otlpTracesEndpoint}`);
       } else if (this.config.jaegerEndpoint) {
@@ -100,7 +98,6 @@ export class IntelGraphTracer {
           metricReader = new PeriodicExportingMetricReader({
               exporter: new OTLPMetricExporter({
                   url: this.config.otlpMetricsEndpoint,
-                  headers: this.config.otlpHeaders,
               }),
               exportIntervalMillis: 15000,
           });
@@ -341,39 +338,29 @@ export class IntelGraphTracer {
 }
 
 // Singleton instance
-let tracerInstance: IntelGraphTracer | null = null;
+let tracerInstance: SummitTracer | null = null;
 
-export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTracer {
+export function initializeTracing(config?: Partial<TracingConfig>): SummitTracer {
   if (tracerInstance) {
     return tracerInstance;
   }
 
   const defaultConfig: TracingConfig = {
-    serviceName: 'intelgraph-server',
+    serviceName: 'summit-server',
     serviceVersion: (cfg.APP_VERSION as string) || '1.0.0',
     environment: cfg.NODE_ENV || 'development',
     jaegerEndpoint: process.env.JAEGER_ENDPOINT,
     otlpTracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
     otlpMetricsEndpoint: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
-    otlpHeaders: process.env.OTEL_EXPORTER_OTLP_HEADERS ?
-      process.env.OTEL_EXPORTER_OTLP_HEADERS.split(',').reduce((acc, curr) => {
-        const idx = curr.indexOf('=');
-        if (idx !== -1) {
-          const key = curr.substring(0, idx).trim();
-          const value = curr.substring(idx + 1).trim();
-          if (key) acc[key] = value;
-        }
-        return acc;
-      }, {} as Record<string, string>) : undefined,
     enableAutoInstrumentation: process.env.OTEL_AUTO_INSTRUMENT !== 'false',
     sampleRate: parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
   };
 
-  tracerInstance = new IntelGraphTracer({ ...defaultConfig, ...config });
+  tracerInstance = new SummitTracer({ ...defaultConfig, ...config });
   return tracerInstance;
 }
 
-export function getTracer(): IntelGraphTracer {
+export function getTracer(): SummitTracer {
   if (!tracerInstance) {
     // Auto-initialize with defaults if not initialized
     return initializeTracing();

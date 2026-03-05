@@ -1,0 +1,20 @@
+# Benchmark Job CI definition
+name: Benchmark Workloads
+on:
+  pull_request:
+    paths:
+      - 'packages/**'
+      - 'benchmarks/**'
+jobs:
+  run-bench:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run bench
+        run: make bench
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-artifacts
+          path: artifacts/bench/
