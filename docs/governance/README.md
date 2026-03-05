@@ -1,9 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: deprecated
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: deprecated
 
-Deprecated as of 2026-01-14. Authoritative source: docs/governance/INDEX.md.
 
 # Governance Library
 

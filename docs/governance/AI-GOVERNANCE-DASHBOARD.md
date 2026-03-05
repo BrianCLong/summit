@@ -1,7 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-14
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 # AI Governance Metrics Dashboard
 
@@ -385,7 +386,7 @@ DEBUG=governance:* pnpm start
 ## Support
 
 - **Documentation**: https://docs.intelgraph.io/governance
-- **Runbooks**: `/runbooks/governance/`
+- **Runbooks**: `/RUNBOOKS/governance/`
 - **On-call**: #governance-oncall Slack channel
 - **Issues**: https://github.com/BrianCLong/summit/issues
 

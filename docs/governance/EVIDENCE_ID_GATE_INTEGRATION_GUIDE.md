@@ -1,30 +1,8 @@
-# Evidence ID Consistency Gate - Integration Guide
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-## For Platform Teams
-
-### Adding to Your Repo
-
-To integrate the Evidence ID Consistency gate into your repository:
-
-1. **Install the dependency** (if using as package):
-```bash
-npm install @summit/evidence-id-gate --save-dev
-```
-
-OR
-
-**Copy the script directly** (recommended for monorepos):
-```bash
-# Copy the scripts to your project
-cp -r scripts/ci/verify_evidence_id_consistency.mjs scripts/ci/evidence-id-consistency.mjs
-cp -r scripts/ci/ai-providers/ scripts/ci/ai-providers/
-```
-
-2. **Update package.json**:
-```json
-{
-  "scripts": {
-    "ci:evidence-id-consistency": "node scripts/ci/verify_evidence_id_consistency.mjs"
   }
 }
 ```

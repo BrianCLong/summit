@@ -1,11 +1,8 @@
-# Toolchain Controls Map (v1)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-This document maps Summit’s devstation toolchain and evidence artifacts to SOC 2, ISO 27001, and SLSA objectives.
-
-## Evidence artifacts (canonical)
-
-- `scripts/devstation/tools.lock.yaml`
-  Purpose: version pinning (determinism), change control
 
 - `scripts/devstation/verify-tools.sh` → `devstation.evidence.json`
   Purpose: auditable proof of tool versions/hashes used for work

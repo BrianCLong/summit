@@ -1,8 +1,8 @@
-# Summit Succession Readiness & Institutional Memory
+> Owner: Governance (Jules)
+> Last-Reviewed: 2026-01-14
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Status:** SUCCESSION-READY WITH GAPS
-**Last-Reviewed:** 2026-01-14
-**Owner:** Governance (Jules)
 
 This document serves as the **Institutional Memory Lock**. It is designed to ensure continuity of operations in the event of sudden leadership or maintainer changes. It captures the "how" and "why" of Summit's safety and governance mechanisms.
 
