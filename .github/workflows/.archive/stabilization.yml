@@ -21,7 +21,7 @@ jobs:
         with:
           version: 10.0.0
       - uses: actions/setup-node@v4
-        with: { node-version: '18' , cache: 'pnpm' }
+        with: { node-version: '20' , cache: 'pnpm' }
       - name: Install (top-level only)
         run: |
           corepack enable
@@ -41,7 +41,7 @@ jobs:
         with:
           version: 10.0.0
       - uses: actions/setup-node@v4
-        with: { node-version: '18' , cache: 'pnpm' }
+        with: { node-version: '20' , cache: 'pnpm' }
       - name: Unit tests (non-flaky subset)
         run: |
           npm run -ws --if-present test:ci:min || true

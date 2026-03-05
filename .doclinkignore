@@ -382,3 +382,14 @@ docs/warehouse/GUIDE.md:../packages/etl-pipelines/README.md
 docs/warehouse/GUIDE.md:../packages/query-optimizer/README.md
 README.md:CHANGELOG-v2.0.0.md
 README.md:docs/MIGRATION-v0.1-to-v2.0.md
+docs/ops/runbooks/intent-engine.md:./determinism-incident.md
+docs/ops/runbooks/intent-engine.md:./perf-budget.md
+docs/ops/runbooks/intent-engine.md:../../tests/intent/test_determinism.py
+docs/ops/runbooks/intent-engine.md:../../.github/required-checks.yml
+docs/standards/intent-engineering.md:../../schemas/intent_spec.schema.json
+docs/standards/intent-engineering.md:../../pipelines/markdown_agent_ingest.py
+docs/standards/intent-engineering.md:../../summit/intent/validator.py
+docs/standards/intent-engineering.md:../../scripts/ci/intent_gate.py
+docs/security/data-handling/intent-engineering.md:../../artifacts/intent/intent_report.json
+docs/security/data-handling/intent-engineering.md:../../artifacts/intent/metrics.json
+docs/security/data-handling/intent-engineering.md:../../artifacts/intent/stamp.json

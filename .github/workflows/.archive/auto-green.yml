@@ -18,7 +18,7 @@ jobs:
         with:
           version: 10.0.0
       - uses: actions/setup-node@v4
-        with: { node-version: '18' , cache: 'pnpm' }
+        with: { node-version: '20' , cache: 'pnpm' }
       - name: Install (no scripts)
         run: |
           corepack enable
