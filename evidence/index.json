@@ -408,6 +408,30 @@
         "metrics": "evidence/EVD-NARRATIVE-CI-METRICS-001/metrics.json",
         "stamp": "evidence/EVD-NARRATIVE-CI-METRICS-001/stamp.json"
       }
+    },
+    "EVD-ADIDASCDK-IAC-001": {
+      "evidence_id": "EVD-ADIDASCDK-IAC-001",
+      "files": {
+        "report": "evidence/infra/report.json",
+        "metrics": "evidence/infra/metrics.json",
+        "stamp": "evidence/infra/stamp.json"
+      }
+    },
+    "EVD-ADIDASCDK-POL-001": {
+      "evidence_id": "EVD-ADIDASCDK-POL-001",
+      "files": {
+        "report": "evidence/policy/report.json",
+        "metrics": "evidence/policy/metrics.json",
+        "stamp": "evidence/policy/stamp.json"
+      }
+    },
+    "EVD-ADIDASCDK-SCF-001": {
+      "evidence_id": "EVD-ADIDASCDK-SCF-001",
+      "files": {
+        "report": "evidence/scaffolder/report.json",
+        "metrics": "evidence/scaffolder/metrics.json",
+        "stamp": "evidence/scaffolder/stamp.json"
+      }
     }
   }
 }
