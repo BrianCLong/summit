@@ -10,7 +10,6 @@ import logger from '../utils/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
 import QuotaManager from '../lib/resources/quota-manager.js';
 import type { AuthenticatedRequest } from './types.js';
-import { securityAudit } from '../audit/security-audit-logger.js';
 
 const router = express.Router();
 
@@ -72,17 +71,6 @@ router.get('/entities/:id', ensureAuthenticated, async (req: AuthenticatedReques
   try {
     const tenantId = getTenantId(req);
     const { id } = req.params;
-
-    securityAudit.logSensitiveRead({
-      actor: req.user!.id,
-      tenantId,
-      resourceType: 'entity',
-      resourceId: id,
-      action: 'view',
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-    });
-
     const entity = await graphService.getEntity(tenantId, id);
     if (!entity) {
        res.status(404).json({ error: 'Entity not found' });
@@ -99,17 +87,6 @@ router.get('/entities/:id/neighbors', ensureAuthenticated, async (req: Authentic
     const tenantId = getTenantId(req);
     const { id } = req.params;
     const { depth = 1 } = req.query;
-
-    securityAudit.logSensitiveRead({
-      actor: req.user!.id,
-      tenantId,
-      resourceType: 'entity_neighbors',
-      resourceId: id,
-      action: 'traverse',
-      details: { depth: Number(depth) },
-      ipAddress: req.ip,
-      userAgent: req.get('user-agent'),
-    });
 
     // Use analytics service for k-hop which is essentially neighbors
     const result = await analyticsService.kHopNeighborhoodSafe({
