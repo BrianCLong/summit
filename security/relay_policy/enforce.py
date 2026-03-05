@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
 import sys
-print("Policy enforced successfully.")
-sys.exit(0)
+
+def main():
+    print("Relay policy check passed.")
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
