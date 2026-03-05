@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-03-03T00:00:00Z",
-  "revision_note": "Added minimal MCP orchestration stack architecture brief and linked roadmap initiative status.",
+  "last_updated": "2026-02-28T01:38:26Z",
+  "revision_note": "Added governed brief for Google ADK integrations ecosystem announcement and tracked initiative status.",
   "initiatives": [
+    {
+      "id": "google-adk-integrations-ecosystem-brief-2026-02-27",
+      "area": "docs/briefs",
+      "status": "complete",
+      "summary": "Published governed brief summarizing Google ADK integrations ecosystem expansion and Summit implications."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -24,10 +30,7 @@
           "status": "partial",
           "owner": "Jules",
           "evidence": "Only CSVConnector.ts found; SDK framework incomplete",
-          "blockers": [
-            "Need connector registry",
-            "Missing connector lifecycle management"
-          ],
+          "blockers": ["Need connector registry", "Missing connector lifecycle management"],
           "target_completion": "Sprint N+2"
         },
         {
@@ -36,9 +39,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No RSS/Atom connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         },
         {
@@ -47,9 +48,7 @@
           "status": "not-started",
           "owner": "Jules",
           "evidence": "No STIX/TAXII connector implementation found",
-          "blockers": [
-            "No implementation exists"
-          ],
+          "blockers": ["No implementation exists"],
           "target_completion": "Sprint N+3"
         }
       ]
@@ -217,12 +216,6 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "mcp-orchestration-stack-minimal",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published minimal spec-to-code MCP orchestration architecture with DAG scheduling, blocker escalation, guardrails, and MAESTRO threat alignment."
     }
   ],
   "summary": {
