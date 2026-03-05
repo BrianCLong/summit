@@ -7,6 +7,7 @@ marked.setOptions({
 })
 
 export function renderMarkdown(content: string): string {
-  const html = marked.parse(content ?? '') as string
-  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } })
+  const html = marked.parse(content ?? '')
+  const rendered = typeof html === 'string' ? html : ''
+  return DOMPurify.sanitize(rendered, { USE_PROFILES: { html: true } })
 }

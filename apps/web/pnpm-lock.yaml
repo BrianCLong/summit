@@ -211,7 +211,7 @@ importers:
         version: 3.4.0
       tailwindcss-animate:
         specifier: 1.0.7
-        version: 1.0.7(tailwindcss@4.1.17)
+        version: 1.0.7
       web-vitals:
         specifier: ^5.1.0
         version: 5.1.0
@@ -363,9 +363,6 @@ importers:
       storybook:
         specifier: 10.1.10
         version: 10.1.10(@testing-library/dom@10.4.1)(prettier@3.7.4)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      tailwindcss:
-        specifier: 4.1.17
-        version: 4.1.17
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -11951,9 +11948,7 @@ snapshots:
 
   tailwind-merge@3.4.0: {}
 
-  tailwindcss-animate@1.0.7(tailwindcss@4.1.17):
-    dependencies:
-      tailwindcss: 4.1.17
+  tailwindcss-animate@1.0.7: {}
 
   tailwindcss@4.1.17: {}
 
