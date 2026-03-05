@@ -2,6 +2,11 @@ name: CI — intelgraph-server
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "server/**"
       - "packages/**"
