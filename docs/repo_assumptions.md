@@ -1,27 +1,27 @@
-# Repository Assumptions and Validation Checklist for SWE-rebench Subsumption
+# Repo Reality Check — HF 2602.20093 Subsumption Lane
 
-## Verified Facts (as of this change)
-- Repository root contains a global `AGENTS.md` with governance-first operating constraints.
-- `docs/roadmap/STATUS.json` exists and is treated as an execution invariant for agent work tracking.
-- `docs/` contains architecture/ops/planning materials suitable for adding design guidance.
+## Verified
 
-## Assumptions Requiring Confirmation Before Implementation PR Stack
-1. Canonical location for SWE dataset loader module.
-2. Canonical evaluation artifact schema path and naming convention.
-3. Preferred runtime boundary for containerized task execution.
-4. Existing GraphRAG retrieval interfaces to attach SWE scope builder.
-5. CI workflow ownership boundaries for adding benchmark/drift jobs.
+- Repository contains a root `AGENTS.md` with governance and execution invariants requiring `docs/roadmap/STATUS.json` inspection and update per implementation PR.
+- `docs/roadmap/STATUS.json` exists and tracks in-progress initiatives.
+- `docs/` is present and suitable for planning, standards, and runbook documentation.
 
-## Must-Validate Before PR1
-- Confirm dataset ingestion location and package ownership.
-- Confirm test runner abstraction and environment handoff points.
-- Confirm container runtime strategy and image policy constraints.
-- Confirm result artifact schema contract (`report/metrics/stamp`).
+## Assumed
 
-## Guardrail Notes
-- No dataset blob replication in repository.
-- Feature flags default OFF for new SWE-lab capabilities.
-- Deterministic outputs for benchmark evidence artifacts.
+- Future ITEM implementation files will live under paths such as `summit/items/`, `summit/pipelines/`, and `tests/items/`.
+- A CI workflow for item-specific reproducibility can be introduced without colliding with protected release workflows.
+- Evidence artifacts for this lane will use deterministic JSON triplets (`report.json`, `metrics.json`, `stamp.json`) compatible with existing evidence conventions.
 
-## Finality
-Proceed with implementation only after assumption closure is documented in PR evidence, with links to validated paths and responsible module owners.
+## Validation Checklist
+
+- [ ] Confirm exact evidence schema keys and EvidenceID pattern in active validators.
+- [ ] Confirm canonical CI workflow/check names for reproducibility gates.
+- [ ] Confirm preferred item slug/location conventions for new capability packs.
+- [ ] Confirm profiling harness location and budget enforcement utilities.
+- [ ] Confirm whether feature flag source-of-truth is YAML, JSON, or code-defined.
+
+## Constraints
+
+- No policy gate weakening.
+- No direct modification of protected release/tagging workflows.
+- No claim assertion without source excerpt mapping.
