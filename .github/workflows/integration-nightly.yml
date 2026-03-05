@@ -1,0 +1,87 @@
+name: integration-nightly
+
+on:
+  schedule:
+    - cron: "17 07 * * *"   # 07:17 UTC nightly
+  workflow_dispatch:
+
+concurrency:
+  group: integration-nightly-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  docker-integration:
+    if: github.repository == 'BrianCLong/summit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DOCKER_AVAILABLE: "1"
+      NODE_OPTIONS: "--max-old-space-size=4096"
+    services:
+      docker:
+        image: docker:dind
+        options: >-
+          --privileged
+          --dns 8.8.8.8
+        ports:
+          - 2375:2375
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 18.20.4 (cache npm)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.20.4'
+          cache: 'npm'
+
+      - name: Install deps (no scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Start integration stack
+        run: |
+          if [ -f docker-compose.integration.yml ]; then
+            docker compose -f docker-compose.integration.yml up -d --build
+          elif [ -f docker-compose.yml ]; then
+            docker compose up -d --build
+          else
+            echo "No docker-compose file found; skipping stack bring-up."
+          fi
+
+      - name: Run integration tests
+        run: |
+          if npm run | grep -q "test:integration"; then
+            npm run test:integration
+          else
+            echo "No test:integration script defined; falling back to jest --runInBand"
+            npx jest --runInBand --logHeapUsage
+          fi
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-nightly-artifacts
+          path: |
+            junit*.xml
+            coverage/**
+            test-results/**
+
+      - name: Teardown
+        if: always()
+        run: |
+          if docker ps -q; then docker ps -q | xargs -r docker logs --tail=200; fi
+          if [ -f docker-compose.integration.yml ]; then
+            docker compose -f docker-compose.integration.yml down -v || true
+          elif [ -f docker-compose.yml ]; then
+            docker compose down -v || true
+          fi
+
