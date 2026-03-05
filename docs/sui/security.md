@@ -1,44 +1,79 @@
-# Summit Underwriting Intelligence (SUI) Security & Threat Model
+# SUI Security, Privacy, and Abuse-Resistance
 
-## 1. Overview
-The Summit Underwriting Intelligence (SUI) system handles sensitive data related to insurer portfolio risk, leaked credentials, and vulnerability data. This document outlines the threat model, security controls, and operational gates required for General Availability (GA).
+## Security objective
 
-## 2. Threat Model
+Protect insurer portfolio intelligence, leaked-info derived signals, and underwriting decisions while
+preserving deterministic replay and auditability.
 
-### Key Risks
-- **Sensitive Leaked Information:** Mishandling of PII, credentials, or breach data.
-- **Customer Misuse:** Surveillance or targeting using platform intelligence.
-- **Model Manipulation:** Adversaries seeding false leaks or poisoning signals to alter scores.
-- **Tenant Data Bleed:** Failure of multi-tenant isolation, leading to cross-portfolio exposure.
-- **Regulatory Exposure:** Non-compliance with purpose limitation, data retention, or explainability standards.
+## MAESTRO alignment
 
-## 3. Security Controls
+- **MAESTRO Layers:** Data, Agents, Tools, Infra, Observability, Security.
+- **Threats Considered:** data exfiltration, OSINT poisoning, prompt injection in analyst copilots,
+  privilege escalation, supply-chain compromise, evidence tampering.
+- **Mitigations:** tenant envelope encryption, policy-as-code checks, source reputation weighting,
+  immutable evidence bundles, signed SBOM/provenance, scoped agent tool permissions.
 
-### 3.1 Tenant Isolation
-- **Residency-aware Storage:** Data partitioned by tenant and region.
-- **Cryptographic Envelopes:** Per-tenant encryption keys.
-- **Access Control:** Strict purpose-based access control for leak artifacts (viewing raw vs. derived features).
+## Trust boundaries
 
-### 3.2 PII Minimization
-- **Encryption:** Raw artifacts are stored encrypted.
-- **Exposure Limits:** Only hashed or derived features are exposed by default, minimizing the risk of PII leakage in reports or UI.
+1. External connectors (untrusted ingestion boundary).
+2. Tenant-isolated storage and compute domains.
+3. Model execution and feature generation boundary.
+4. Human/agent action boundary for underwriting decisions.
+5. Evidence artifact publication boundary.
 
-### 3.3 Audit & Logging
-- **Tamper-evident Logs:** Append-only audit logs for all underwriting decisions.
-- **Evidence Framework:** Every decision is backed by deterministically generated artifacts (`report.json`, `metrics.json`, `stamp.json`).
+## Control requirements
 
-### 3.4 Anti-Poisoning Defenses
-- **Source Reputation:** Heuristics to weigh the reliability of OSINT sources.
-- **Cross-Source Corroboration:** Requiring multiple signals before impacting a risk score significantly.
-- **Deterministic Pipelines:** Canonicalization, stable sorting, and pinned dependencies prevent hidden manipulation.
+### Tenant isolation
 
-### 3.5 Abuse Prevention
-- **Rate Limiting & Cost Caps:** Hard caps per tenant on entities monitored, ingestion bandwidth, and daily drift alerts.
-- **Purpose Limitation Policies:** Strict enforcement of acceptable use cases.
+- Hard tenancy partitioning by `tenantId` at storage, queue, and compute layers.
+- Dedicated KMS data keys per tenant and region.
+- Policy rule: cross-tenant joins are denied by default and audited.
 
-## 4. GA Readiness Gates (Must Pass)
-1. **Determinism Gate:** UDR-AC benchmark must be ≥ 0.99 on reference suites.
-2. **Security Gate:** Comprehensive tenant isolation tests passing, PII minimization verified, and audit log integrity confirmed.
-3. **Model Governance Gate:** Model cards created, drift monitoring active, and rollback capabilities tested.
-4. **Operational Gate:** SLOs met under load; bounded ingestion costs verified.
-5. **Evidence Gate:** `report.json`, `metrics.json`, and `stamp.json` validate successfully in CI for every release.
+### PII minimization for leak artifacts
+
+- Raw leak artifacts stored encrypted and restricted to high-trust roles.
+- Default model features consume only derived, hashed, and severity-normalized signals.
+- Artifact retention windows are policy-bound and auto-expired.
+
+### Audit logging and decision reversibility
+
+- Append-only audit stream for score requests, policy decisions, and agent actions.
+- Every autonomous recommendation must include rollback trigger + rollback runbook pointer.
+- Decision ledger entries link to evidence bundles and model versions.
+
+### Anti-poisoning and data quality defenses
+
+- Source reputation scoring and corroboration threshold across independent feeds.
+- Duplicate and replay detection for leaked artifacts and exploit chatter.
+- Confidence downgrades when source diversity or temporal consistency drops.
+
+### Abuse prevention
+
+- Purpose-based access control (underwriting, monitoring, remediation contexts).
+- Action throttles and anomaly detection on export/API scraping patterns.
+- Explicit denial for unsupported use-cases (surveillance/profiling abuse).
+
+## CI security checks (required)
+
+1. Policy lint + policy unit tests.
+2. Secret scanning and dependency vulnerability scanning.
+3. SBOM generation and signature verification.
+4. Determinism/evidence integrity checks.
+5. Tenant isolation integration tests.
+
+## GA security gates
+
+- **Gate 1:** tenant isolation test pass with no cross-tenant data bleed.
+- **Gate 2:** leak artifact encryption + key rotation verified.
+- **Gate 3:** audit log tamper-evidence verified.
+- **Gate 4:** abuse controls validated (rate limiting + policy denials).
+- **Gate 5:** SBOM and provenance attestations present per release artifact.
+
+## `docs/sui/security.md` operational outline
+
+- Threat model + abuse cases
+- Data classification and handling matrix
+- Identity/access model and RBAC/ABAC policies
+- Crypto/key management standards
+- Incident response and forensic evidence workflow
+- GA control checklist and evidence mapping
