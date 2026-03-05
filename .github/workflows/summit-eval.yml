@@ -1,0 +1,57 @@
+name: Summit Eval Gates
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'summit/eval_harness/**'
+      - 'summit/evidence/**'
+  pull_request:
+    paths:
+      - 'summit/eval_harness/**'
+      - 'summit/evidence/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install jsonschema
+      - name: Validate Datasets
+        run: |
+          python3 summit/scripts/validate_schemas.py \
+            --instance summit/eval_harness/fixtures/policy_rag_small.jsonl \
+            --schema summit/eval_harness/dataset.schema.json \
+            --jsonl
+
+  run-eval-harness:
+    runs-on: ubuntu-latest
+    needs: validate-schemas
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Run Eval (Mock)
+        env:
+          PYTHONPATH: .
+        run: |
+          python3 summit/eval_harness/run.py \
+            --dataset summit/eval_harness/fixtures/policy_rag_small.jsonl \
+            --out-dir evidence \
+            --run-id EVD-CI-TEST-001
+      - name: Verify Artifacts
+        run: |
+          ls -l evidence/EVD-CI-TEST-001/report.json
+          ls -l evidence/EVD-CI-TEST-001/metrics.json
+          ls -l evidence/EVD-CI-TEST-001/stamp.json

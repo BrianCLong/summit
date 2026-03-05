@@ -25,13 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --ignore-scripts
+          node-version: '20'
 
       - name: Run Governance Meta-Gate
         run: node scripts/ci/governance-meta-gate.mjs
