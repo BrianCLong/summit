@@ -1,9 +1,15 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Added locked MWS bellingcat workflow/toolkit deterministic evidence lane.",
+  "last_updated": "2026-03-05T02:04:12Z",
+  "revision_note": "Added WorkOS-to-Summit identity subsumption architecture brief and governance-aligned roadmap entry.",
   "initiatives": [
     {
-      "id": "bellingcat-mws-media-verify",
+      "id": "workos-identity-subsumption-brief",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published clean-room architecture brief defining WorkOS baseline and Summit identity-graph subsumption roadmap."
+    },
+    {
+      "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Implemented locked MWS single-media verification workflow, deterministic evidence bundle outputs, toolkit normalization schema/output, and offline fixtures/tests."
