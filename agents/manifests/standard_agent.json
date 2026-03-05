@@ -1,0 +1,10 @@
+{
+  "name": "standard-agent",
+  "version": "1.0.0",
+  "capabilities": ["web-search", "data-aggregation"],
+  "api_scopes": ["read:public"],
+  "interaction_intents": [
+    {"target": "search-engine", "action": "search", "purpose": "market research"}
+  ],
+  "data_classifications": ["public"]
+}
