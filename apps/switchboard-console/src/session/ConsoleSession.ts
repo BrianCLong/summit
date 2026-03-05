@@ -7,8 +7,6 @@ import { adapterById, defaultAdapters } from '../adapters';
 import { EventLogger } from '../logging/EventLogger';
 import { TranscriptWriter } from '../logging/TranscriptWriter';
 import { PolicyGate } from '../policy/PolicyGate';
-import { checkCompanyOSPolicy } from '../policy/companyosMiddleware';
-import { emitEvidenceToIntelGraph } from '../policy/intelgraphEvidence';
 import { SkillsetStore } from '../skillsets/SkillsetStore';
 import {
   EventRecord,
@@ -154,31 +152,6 @@ export class ConsoleSession {
   }
 
   private async sendMessage(message: string): Promise<string> {
-    const companyOSRes = await checkCompanyOSPolicy(
-      'default-tenant',
-      'default-actor',
-      'FlowStart',
-      'chat-message',
-    );
-
-    if (!companyOSRes.allowed) {
-      return `Denied by companyOS policy: ${companyOSRes.reason} (Audit: ${companyOSRes.auditEventId})`;
-    }
-
-    // Emit evidence
-    await emitEvidenceToIntelGraph({
-      evidenceId: `EVID:default-tenant:FlowStart:${companyOSRes.auditEventId}`,
-      timestamp: new Date().toISOString(),
-      tenantId: 'default-tenant',
-      actorId: 'default-actor',
-      kind: 'FlowStart',
-      resource: 'chat-message',
-      decision: 'allow',
-      reasons: [],
-      policyVersion: 'v1.0.0',
-      auditEventId: companyOSRes.auditEventId!,
-    });
-
     if (!this.provider) {
       await this.switchAgent('codex');
     }
@@ -216,43 +189,16 @@ export class ConsoleSession {
 
   private async runCommand(command: string): Promise<string> {
     const decision = this.policyGate.evaluate(command);
-    const companyOSRes = await checkCompanyOSPolicy(
-      'default-tenant',
-      'default-actor',
-      'ToolInvoke',
-      command,
-    );
-
     await this.logEvent('tool_exec', {
       command,
-      allowed: decision.allowed && companyOSRes.allowed,
+      allowed: decision.allowed,
       reason: decision.reason,
-      companyOSReason: companyOSRes.reason,
       mode: decision.mode,
-      auditEventId: companyOSRes.auditEventId,
     });
 
     if (!decision.allowed) {
-      return `Denied by local policy: ${decision.reason}`;
+      return `Denied by policy: ${decision.reason}`;
     }
-
-    if (!companyOSRes.allowed) {
-      return `Denied by companyOS policy: ${companyOSRes.reason} (Audit: ${companyOSRes.auditEventId})`;
-    }
-
-    // Emit evidence
-    await emitEvidenceToIntelGraph({
-      evidenceId: `EVID:default-tenant:ToolInvoke:${companyOSRes.auditEventId}`,
-      timestamp: new Date().toISOString(),
-      tenantId: 'default-tenant',
-      actorId: 'default-actor',
-      kind: 'ToolInvoke',
-      resource: command,
-      decision: 'allow',
-      reasons: [],
-      policyVersion: 'v1.0.0',
-      auditEventId: companyOSRes.auditEventId!,
-    });
 
     const output = await execAsync(command, { cwd: process.cwd() });
     const commandDir = path.join(this.sessionDir, 'commands');

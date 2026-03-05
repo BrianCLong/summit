@@ -1,4 +1,5 @@
 package intelgraph.sku
+import rego.v1
 
 default allow_feature := false
 

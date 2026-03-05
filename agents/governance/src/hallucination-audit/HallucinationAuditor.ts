@@ -199,7 +199,7 @@ export class HallucinationAuditor {
         for (const pattern of patterns) {
           if (pattern.test(output)) {
             // Would verify against knowledge base in production
-            return {
+            return <any>{
               detected: true,
               type: 'citation_fabrication' as HallucinationType,
               confidence: 0.7,
@@ -213,7 +213,7 @@ export class HallucinationAuditor {
           }
         }
 
-        return { detected: false, confidence: 0 };
+        return <any>{ detected: false, confidence: 0 };
       },
     });
 
@@ -223,14 +223,14 @@ export class HallucinationAuditor {
       name: 'Self-Consistency Check',
       async detect(input, output, context) {
         if (!context.previousOutputs || context.previousOutputs.length === 0) {
-          return { detected: false, confidence: 0 };
+          return <any>{ detected: false, confidence: 0 };
         }
 
         // Simple keyword extraction and comparison
         const extractKeyFacts = (text: string) => {
           const numbers = text.match(/\d+(\.\d+)?/g) || [];
           const dates = text.match(/\b\d{4}\b/g) || [];
-          return { numbers, dates };
+          return <any>{ numbers, dates };
         };
 
         const currentFacts = extractKeyFacts(output);
@@ -243,7 +243,7 @@ export class HallucinationAuditor {
           );
 
           if (contradictingNumbers.length > 0 && prev.numbers.length > 0) {
-            return {
+            return <any>{
               detected: true,
               type: 'self_contradiction' as HallucinationType,
               confidence: 0.6,
@@ -257,7 +257,7 @@ export class HallucinationAuditor {
           }
         }
 
-        return { detected: false, confidence: 0 };
+        return <any>{ detected: false, confidence: 0 };
       },
     });
 
@@ -267,7 +267,7 @@ export class HallucinationAuditor {
       name: 'Source Verification Check',
       async detect(input, output, context) {
         if (!context.sources || context.sources.length === 0) {
-          return { detected: false, confidence: 0 };
+          return <any>{ detected: false, confidence: 0 };
         }
 
         // Check if output makes claims not supported by sources
@@ -281,7 +281,7 @@ export class HallucinationAuditor {
         for (const claim of claims) {
           const cleanClaim = claim.replace(/"/g, '').toLowerCase();
           if (!sourcesLower.includes(cleanClaim.substring(0, 20))) {
-            return {
+            return <any>{
               detected: true,
               type: 'unsupported_claim' as HallucinationType,
               confidence: 0.65,
@@ -296,7 +296,7 @@ export class HallucinationAuditor {
           }
         }
 
-        return { detected: false, confidence: 0 };
+        return <any>{ detected: false, confidence: 0 };
       },
     });
 
@@ -310,7 +310,7 @@ export class HallucinationAuditor {
         // Check for future dates presented as past
         const futurePattern = new RegExp(`in (${currentYear + 1}|${currentYear + 2}|\\d{4}).*happened`, 'i');
         if (futurePattern.test(output)) {
-          return {
+          return <any>{
             detected: true,
             type: 'temporal_confusion' as HallucinationType,
             confidence: 0.8,
@@ -322,7 +322,7 @@ export class HallucinationAuditor {
           };
         }
 
-        return { detected: false, confidence: 0 };
+        return <any>{ detected: false, confidence: 0 };
       },
     });
   }
@@ -342,7 +342,7 @@ export class HallucinationAuditor {
     // Take the highest confidence detection
     const primary = results.reduce((a, b) => (a.confidence > b.confidence ? a : b));
 
-    return {
+    return <any>{
       id: `HAL-${Date.now()}-${crypto.randomUUID().substring(0, 8)}`,
       sessionId: params.sessionId,
       agentId: params.agentId,
@@ -505,7 +505,7 @@ export class HallucinationAuditor {
     // Identify patterns
     const patterns = this.identifyPatterns(detectionsInPeriod);
 
-    return {
+    return <any>{
       period,
       totalGenerations: 0, // Would track from orchestrator
       totalDetections: detectionsInPeriod.length,

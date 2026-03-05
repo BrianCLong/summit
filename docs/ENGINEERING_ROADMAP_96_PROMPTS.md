@@ -335,7 +335,7 @@ Comprehensive documentation refresh including README, API docs, architecture gui
 #### Scaffolds
 - Doc generation pipelines (TypeDoc, GraphQL Docs)
 - ADR templates in `docs/ADR/template.md`
-- Runbook templates in `RUNBOOKS/template.md`
+- Runbook templates in `runbooks/template.md`
 - Documentation CI validation
 
 #### Acceptance Criteria

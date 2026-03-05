@@ -14,7 +14,7 @@ r.get('/replay/manifest/:runId', async (req: AuthenticatedRequest, res: Response
   res.json(m);
 });
 r.get('/replay/diff', async (req: AuthenticatedRequest, res: Response) => {
-  const d = await diffRuns(String(req.query.a), String(req.query.b));
+  const d = await diffRuns(String((((req.query.a as string) as string) as string)), String((((req.query.b as string) as string) as string)));
   res.json(d);
 });
 export default r;

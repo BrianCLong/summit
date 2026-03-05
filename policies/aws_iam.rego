@@ -1,5 +1,6 @@
 
 package maestro.governance
+import rego.v1
 
 # Deny overly permissive IAM roles
 deny[msg] {
