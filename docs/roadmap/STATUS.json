@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-25T00:00:00Z",
-  "revision_note": "Added nimble-response-strategy initiative with governed build-vs-partner execution plan and MAESTRO risk controls.",
+  "last_updated": "2026-02-22T00:00:00Z",
+  "revision_note": "Added Microsoft AutoDev strategic brief and mapped implications to Summit governed autonomy posture.",
   "initiatives": [
     {
-      "id": "nimble-response-strategy",
-      "status": "in_progress",
+      "id": "microsoft-autodev-strategic-brief",
+      "status": "completed",
       "owner": "codex",
-      "notes": "Published Summit response strategy for Nimble market signal, including architecture mapping, build-vs-partner matrix, and MAESTRO-aligned mitigations."
+      "notes": "Published strategic brief mapping AutoDev lifecycle autonomy model to Summit orchestration, governance gates, and MAESTRO-aligned mitigations."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
