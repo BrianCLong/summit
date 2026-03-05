@@ -1,0 +1,104 @@
+# Blocker Escalation Policy
+# Defines thresholds, labels, and actions for release blocker escalation
+#
+# This policy file is read by scripts/release/escalate_release_blockers.sh
+# See docs/ci/BLOCKER_ESCALATION.md for full documentation.
+
+version: "1.0.0"
+
+# Escalation thresholds (in minutes)
+thresholds:
+  # P0 (Blocked) - Critical blockers preventing release
+  p0:
+    warn: 60           # 1 hour: add initial escalation label
+    escalate: 240      # 4 hours: escalate with stronger labels
+    page: 480          # 8 hours: (optional) trigger paging/alerting
+
+  # P1 (Queued/Pending) - Non-critical but attention needed
+  p1:
+    warn: 240          # 4 hours: add initial escalation label
+    escalate: 720      # 12 hours: escalate with stronger labels
+
+# Update cadence to prevent spam
+update_cadence:
+  min_minutes_between_updates: 60    # Don't update more than once per hour
+  force_update_on_escalation: true   # Always update when escalation level changes
+
+# Labels applied at each escalation level
+labels:
+  # Base labels (always applied)
+  base:
+    - "release-blocker"
+
+  # P0 escalation labels
+  p0_warn:
+    - "escalation:warn"
+    - "needs-triage"
+
+  p0_escalate:
+    - "escalation:P0"
+    - "escalation:4h+"
+    - "needs-attention"
+
+  p0_page:
+    - "escalation:P0"
+    - "escalation:8h+"
+    - "needs-immediate-attention"
+    - "on-call"
+
+  # P1 escalation labels
+  p1_warn:
+    - "escalation:warn"
+
+  p1_escalate:
+    - "escalation:P1"
+    - "escalation:12h+"
+    - "needs-attention"
+
+# Notification settings (disabled by default to avoid noise)
+notifications:
+  enabled: false
+  # Uncomment to enable team mentions at escalation levels:
+  # p0_escalate_notify:
+  #   - "@org/release-engineering"
+  # p0_page_notify:
+  #   - "@org/on-call"
+  #   - "@org/platform-leads"
+
+# Fingerprint fields for deduplication
+# Must match the fingerprint scheme in raise_blocked_release_issues
+fingerprint:
+  fields:
+    - "release_line"       # e.g., "main", "release/v4.1.2"
+    - "blocking_sha"       # commit SHA that is blocked
+    - "blocking_workflow"  # workflow name that is failing/queued
+    - "blocking_job"       # job name within the workflow
+    - "blocker_category"   # "failed" | "queued" | "pending"
+
+# Auto-resolution settings
+resolution:
+  # Automatically close issues when blocker is resolved
+  auto_close: false        # Set to true to enable auto-close
+  # Comment to add when auto-closing
+  close_comment: "Blocker resolved. Release line is now promotable."
+  # Labels to add when resolved (before closing)
+  resolved_labels:
+    - "resolved"
+
+# Optional: GitHub Project integration
+# Uncomment and configure to track blockers in a GitHub Project
+# project:
+#   enabled: false
+#   project_id: ""           # GitHub Project number or URL
+#   create_item: true        # Create project item for escalated blockers
+#   fields:
+#     severity: "Severity"
+#     release_line: "Release Line"
+#     status: "Status"
+#     age: "Age"
+
+# State file location
+state:
+  path: "docs/releases/_state/blockers_state.json"
+  # Committed state file vs artifact-based (committed is simpler)
+  storage: "committed"
