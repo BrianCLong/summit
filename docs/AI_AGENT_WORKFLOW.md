@@ -163,6 +163,37 @@ claude code "Generate integration tests for copilot service"
 
 ---
 
+
+## Convergent Hierarchical Control Loop (Summit + Maestro)
+
+Summit now standardizes on the same control-loop architecture used by modern autonomous coding systems and BMAD-style workflows:
+
+1. **Plan** (goal decomposition and scope lock)
+2. **Architecture** (interfaces, boundaries, risk model)
+3. **Implement** (code + test intent)
+4. **Execute** (runtime validation in CI/dev env)
+5. **Verify** (policy + QA gate checks)
+6. **Critic** (release recommendation + rollback posture)
+
+### Why this is now the default
+
+- **Reduced cognitive load:** each role receives only the context needed for its layer.
+- **Search-space compression:** global tasks are transformed into deterministic local tasks.
+- **Artifact memory:** every stage publishes durable artifacts (`PRD.md`, `architecture.md`, `execution.log`, `policy-evidence.json`).
+- **Feedback-first reliability:** no stage advances without external verification signals.
+
+### Maestro runtime implementation
+
+The runtime embodiment of this model is published in `ga-graphai/packages/maestro-conductor` as `HierarchicalOrchestrationLoop`. It provides:
+
+- canonical stage definitions for Planner → Architect → Engineer → Executor → QA → Critic;
+- graph edges for iterative loops (e.g. critic-driven rework);
+- artifact-gated stage advancement for deterministic progression.
+
+Use this loop as the baseline orchestration primitive when adding autonomous workflows across Summit services.
+
+---
+
 ## Multi-Agent Workflow
 
 ### Standard Development Flow

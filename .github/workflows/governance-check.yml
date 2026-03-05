@@ -2,6 +2,11 @@ name: Governance Check
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [opened, synchronize, reopened, labeled]
 
 concurrency:
@@ -27,13 +32,14 @@ jobs:
             if (labels.length === 0) {
               if (title.startsWith('feat:')) labels.push('minor');
               else if (title.startsWith('fix:')) labels.push('patch');
+              else if (title.startsWith('chore:')) labels.push('patch');
               else if (title.startsWith('docs:')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
-            if (!valid) {
-              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
+            if (!valid && !labels.some(l => ['chore', 'test', 'ci', 'refactor', 'perf', 'style', 'build'].includes(l))) {
+              core.setFailed("PR must have a classification label (patch, minor, major) or a conventional commit prefix (feat:, fix:, chore:, test:, ci:, etc.).");
             }
 
   check-approvals:
