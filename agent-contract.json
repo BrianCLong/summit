@@ -81,6 +81,7 @@
     },
     {
       "name": "CreditCard",
+      "ignorePath": "\.sh$",
       "pattern": "\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}",
       "description": "Credit Card Number"
     }
