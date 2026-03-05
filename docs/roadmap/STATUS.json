@@ -1,7 +1,13 @@
 {
   "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Added evening standup note for BrianCLong/summit on 2026-02-07.",
+  "revision_note": "Added locked MWS bellingcat workflow/toolkit deterministic evidence lane.",
   "initiatives": [
+    {
+      "id": "bellingcat-mws-media-verify",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented locked MWS single-media verification workflow, deterministic evidence bundle outputs, toolkit normalization schema/output, and offline fixtures/tests."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",

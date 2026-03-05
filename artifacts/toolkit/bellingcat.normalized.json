@@ -1,0 +1,108 @@
+[
+  {
+    "access": {
+      "api_available": true,
+      "auth_required": false,
+      "cost": "free",
+      "network_required": true,
+      "rate_limits_known": false
+    },
+    "capabilities": [
+      "archiving",
+      "web_archive_lookup"
+    ],
+    "categories": [
+      "archiving",
+      "web_archive"
+    ],
+    "inputs": [
+      "url"
+    ],
+    "limitations": [
+      "Archived snapshots may be delayed or unavailable."
+    ],
+    "name": "Wayback Machine",
+    "outputs": [
+      "archive_url",
+      "snapshot_status"
+    ],
+    "primary_url": "https://web.archive.org/",
+    "risk": {
+      "abuse_risk": "low",
+      "pii_risk": "low",
+      "tos_sensitivity": "low"
+    },
+    "tool_id": "archive-org-wayback"
+  },
+  {
+    "access": {
+      "api_available": false,
+      "auth_required": false,
+      "cost": "free",
+      "network_required": true,
+      "rate_limits_known": false
+    },
+    "capabilities": [
+      "reverse_image_search"
+    ],
+    "categories": [
+      "reverse-image"
+    ],
+    "inputs": [
+      "image_url"
+    ],
+    "limitations": [
+      "Automated scraping may violate terms."
+    ],
+    "name": "Google Images",
+    "outputs": [
+      "matching_pages",
+      "similar_images"
+    ],
+    "primary_url": "https://images.google.com/",
+    "risk": {
+      "abuse_risk": "medium",
+      "notes": "Manual use recommended in MWS mode.",
+      "pii_risk": "medium",
+      "tos_sensitivity": "high"
+    },
+    "tool_id": "google-images"
+  },
+  {
+    "access": {
+      "api_available": false,
+      "auth_required": false,
+      "cost": "free",
+      "network_required": true,
+      "rate_limits_known": false
+    },
+    "capabilities": [
+      "chronolocation_solar"
+    ],
+    "categories": [
+      "chronolocation",
+      "geolocation"
+    ],
+    "inputs": [
+      "date_time",
+      "lat",
+      "lon"
+    ],
+    "limitations": [
+      "Requires approximate location; results depend on accurate coordinates."
+    ],
+    "name": "SunCalc",
+    "outputs": [
+      "sun_altitude",
+      "sun_azimuth"
+    ],
+    "primary_url": "https://suncalc.org/",
+    "risk": {
+      "abuse_risk": "low",
+      "notes": "User-supplied location/time.",
+      "pii_risk": "low",
+      "tos_sensitivity": "low"
+    },
+    "tool_id": "suncalc"
+  }
+]
