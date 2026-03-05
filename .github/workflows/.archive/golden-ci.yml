@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
           cache-dependency-path: server/package-lock.json
 
@@ -66,7 +66,5 @@ jobs:
           output-file: server-sbom.json
 
       - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
+        uses: actions/upload-artifact@v4          name: sbom
           path: server-sbom.json

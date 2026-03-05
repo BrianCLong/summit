@@ -22,10 +22,7 @@ jobs:
         run: test -f docs/audit/control-mapping.md
 
       - name: Setup Node.js
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
@@ -57,9 +54,7 @@ jobs:
           jq -e '.status=="pass"' ga-gate-report.json >/dev/null
 
       - name: Upload evidence bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence-bundle-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: evidence-bundle-${{ github.sha }}
           path: ${{ steps.bundle.outputs.bundle-path }}
           retention-days: 14
 

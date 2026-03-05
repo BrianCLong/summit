@@ -6,10 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node & deps
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with: { node-version: '20' , cache: 'pnpm' }
       - run: npm i -g graphql-cli graphql-schema-linter @redhat-developer/depcheck@latest @playwright/test
       - name: Validate SDL
@@ -40,9 +37,7 @@ jobs:
         run: |
           npx playwright install --with-deps
           npx playwright test -c tests/e2e || true # smoke only (no app)
-      - uses: actions/upload-artifact@v4
-        with:
-          name: contract-verify-artifacts
+      - uses: actions/upload-artifact@v4          name: contract-verify-artifacts
           path: |
             out/persisted-manifest.resolved.json
             graphql/schema/mc-admin.graphql

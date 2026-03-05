@@ -55,9 +55,7 @@ jobs:
           } > copilot-context-delta.md
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: copilot-context-delta
+        uses: actions/upload-artifact@v4          name: copilot-context-delta
           path: copilot-context-delta.md
           retention-days: 14
 
