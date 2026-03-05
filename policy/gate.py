@@ -3,8 +3,8 @@ from typing import List
 BANNED_PHRASES = ["guaranteed $", "guarantee income", "risk-free profits"]
 
 
-def check(text: str) -> List[str]:
-    findings: List[str] = []
+def check(text: str) -> list[str]:
+    findings: list[str] = []
     lowered = text.lower()
     for phrase in BANNED_PHRASES:
         if phrase in lowered:

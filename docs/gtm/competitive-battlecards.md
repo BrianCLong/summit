@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Competitive Battlecards
 
 **Purpose:** Positioning guidance against key competitors. Use for sales prep, objection handling, and RFP responses.
@@ -68,8 +69,11 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Where Palantir Wins
 
 - **Established IC presence** — incumbency in major programs
+
 - **Massive feature set** — broad platform capabilities
+
 - **Forward deployed engineers** — high-touch delivery model
+
 - **Brand recognition** — known quantity in government
 
 ### Where Summit Wins
@@ -120,8 +124,11 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Where i2 Wins
 
 - **Established training base** — analysts know the interface
+
 - **Incumbency** — deployed in many agencies for 20+ years
+
 - **Offline capability** — desktop works disconnected
+
 - **Visualization** — strong link chart visualization
 
 ### Where Summit Wins
@@ -172,8 +179,11 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Where Custom Builds Win
 
 - **Perfect fit** — built exactly to requirements (in theory)
+
 - **Full control** — no vendor dependency
+
 - **IP ownership** — customer owns everything
+
 - **Integration** — can wire into anything
 
 ### Where Summit Wins
@@ -225,8 +235,11 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Where Maltego Wins
 
 - **Transform ecosystem** — large library of OSINT transforms
+
 - **Reconnaissance focus** — purpose-built for initial recon
+
 - **Price point** — lower entry cost
+
 - **Community** — active user community
 
 ### Where Summit Wins
@@ -275,7 +288,9 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Where Neo4j + Custom Wins
 
 - **Flexibility** — unlimited customization
+
 - **Neo4j expertise** — leverage existing skills
+
 - **Control** — no platform constraints
 
 ### Where Summit Wins
@@ -323,8 +338,11 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Where Elastic/Splunk Win
 
 - **Log/SIEM dominance** — standard for security ops
+
 - **Scale** — massive data volumes
+
 - **Ecosystem** — integrations, apps, community
+
 - **Alerting** — real-time detection and alerting
 
 ### Where Summit Wins
@@ -360,16 +378,23 @@ Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 ### Do's
 
 - **Lead with Summit strengths** — provenance, policy-gated AI, time-to-value
+
 - **Ask questions** — let the prospect discover competitor gaps
+
 - **Acknowledge competitor strengths** — builds credibility
+
 - **Focus on fit** — "right tool for the job" positioning
+
 - **Use proof points** — demos, references, documentation
 
 ### Don'ts
 
 - **Don't attack competitors** — it looks desperate
+
 - **Don't claim features you don't have** — it backfires
+
 - **Don't oversimplify** — competitors have real strengths
+
 - **Don't ignore incumbency** — understand switching costs
 
 ### Universal Differentiators (Use Against Any Competitor)
