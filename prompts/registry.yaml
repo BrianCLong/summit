@@ -922,18 +922,18 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: daily-sprint-automation
+  - id: daily-sprint
     version: v1
     path: prompts/automation/daily-sprint@v1.md
-    sha256: 87c76ac951bde59b7df0a3e16a227b179085b825426aeb3bb201624bd568e42a
-    description: Daily sprint automation prompt for Summit repo operations.
+    sha256: 1c3be7c6b79e4bc6f3c2bec38313bd05327d20b957f65b2df454bdfad54043e7
+    description: Daily sprint orchestration prompt for evidence-first ops runs.
     scope:
       paths:
-        - docs/ops/DAILY_SPRINT_*.md
+        - docs/ops/DAILY_SPRINT_2026-02-23.md
         - docs/roadmap/STATUS.json
         - prompts/automation/daily-sprint@v1.md
         - prompts/registry.yaml
-        - agents/examples/DAILY_SPRINT_*.json
+        - agents/examples/DAILY_SPRINT_20260223_RUN8.json
       domains:
         - operations
         - governance
