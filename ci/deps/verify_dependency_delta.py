@@ -2,8 +2,10 @@
 Fail CI if lockfile/requirements changed without updating ci/deps/dependency_delta.md.
 """
 from __future__ import annotations
+
 import sys
 from pathlib import Path
+
 
 def main() -> int:
     delta = Path("ci/deps/dependency_delta.md")

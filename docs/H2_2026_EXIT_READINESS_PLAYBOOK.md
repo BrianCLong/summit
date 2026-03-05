@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # 2026 H2 Exit Readiness Playbook
 
 This playbook operationalizes the H2 goal of reaching $10M ARR across 100+ customers while preparing for a $100M+ acquisition or $25M Series B. It translates the GTM plan, technical exit gates, and risk controls into execution-ready tracks with measurable checkpoints.
