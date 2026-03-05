@@ -17,8 +17,14 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["ES2022", "DOM"],
-    "types": ["node", "jest"],
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "types": [
+      "node",
+      "jest"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true
@@ -26,7 +32,9 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
@@ -157,5 +165,6 @@
     "src/workers/cacheWarmupWorker.ts",
     "src/dr/**",
     "src/bootstrap/**"
-  ]
+  ],
+  "extends": "../tsconfig.json"
 }
