@@ -31,18 +31,22 @@ branch_protection:
     contexts:
       - "meta-gate"
       - "CI Core Gate ✅"
-      - "Unit Tests"
+      - "Unit Tests (Core)"
       - "gate"
       - "Release Readiness Gate"
       - "SOC Controls"
       - "test (20.x)"
-      - "Workflow Validity Check"
+      - "Workflow Validity Gate"
 
 # Always Required Checks
 # ----------------------
 # These checks MUST pass for every commit, regardless of what changed.
 # They are blocking for both RC and GA promotion.
 always_required:
+  - name: "AI Governance Gates"
+    workflow: "ci-ai-governance.yml"
+    rationale: "Ensures AI Governance documentation and policy mechanisms are intact"
+
   - name: "meta-gate"
     workflow: "governance-meta-gate.yml"
     rationale: "Unified governance verification (drift, determinism, policy)"
@@ -51,8 +55,8 @@ always_required:
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
-  - name: "Unit Tests"
-    workflow: "ci-pr.yml"
+  - name: "Unit Tests (Core)"
+    workflow: "ci-core.yml"
     rationale: "Primary PR test gate status required by branch protection"
 
   - name: "gate"
@@ -71,7 +75,7 @@ always_required:
     workflow: "soc-controls.yml"
     rationale: "SOC control verification is required for audit readiness"
 
-  - name: "Workflow Validity Check"
+  - name: "Workflow Validity Gate"
     workflow: "workflow-validity.yml"
     rationale: "Workflow syntax validity is required by protected-branch checks"
 

@@ -821,7 +821,7 @@ istioctl analyze -n summit
 ## Related Documentation
 
 - [Service Mesh Best Practices](./service-mesh-best-practices.md)
-- [Service Mesh Operations Runbook](../../RUNBOOKS/service-mesh-operations.md)
+- Service Mesh Operations Runbook
 - [ADR-0006: mTLS via SPIFFE/SPIRE](../ADR/0006-mtls-mesh-layout.md)
 - [Multi-Cluster Setup](../../infrastructure/kubernetes/multi-cluster/README.md)
 
