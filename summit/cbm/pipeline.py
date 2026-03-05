@@ -1,14 +1,17 @@
-from dataclasses import dataclass
-from typing import Iterable, Dict, Any
+class CBMPipeline:
+    def __init__(self, config=None):
+        self.config = config or {}
+        self.cbm_enabled = self.config.get("cbm_enabled", False)
+        self.cbm_live_stream_enabled = self.config.get("cbm_live_stream_enabled", False)
+        self.cbm_llm_probe_enabled = self.config.get("cbm_llm_probe_enabled", False)
+        self.cbm_counterfactual_enabled = self.config.get("cbm_counterfactual_enabled", False)
 
-@dataclass(frozen=True)
-class CBMConfig:
-    enabled: bool = False
-    llm_probe_enabled: bool = False
-    hybrid_correlation_enabled: bool = False
+    def run(self, input_data):
+        if not self.cbm_enabled:
+            return {}
 
-def run_cbm(events: Iterable[Dict[str, Any]], cfg: CBMConfig) -> Dict[str, Any]:
-    if not cfg.enabled:
-        return {"status": "disabled", "artifacts": {}}
-    # TODO: normalize → extract → cluster → coordinate → score → emit
-    return {"status": "ok", "artifacts": {"cbm/stamp.json": {"run_hash": "TODO"}}}
+        # Skeleton run pipeline
+        return {
+            "status": "success",
+            "message": "CBM pipeline executed."
+        }

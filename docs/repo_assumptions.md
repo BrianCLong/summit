@@ -1,28 +1,31 @@
-# AI Supply Chain Firewall: Repository Assumptions
+# Repo Assumptions & Reality Check
 
-This document tracks the directory paths and assumptions for the AI Supply Chain Firewall integration.
+## Verified vs Assumed paths
+- Assumed `agents/` runtime
+- Assumed `scripts/`
+- Assumed `tests/`
+- Assumed `docs/`
+- Assumed `.github/workflows/`
 
-## Verified Paths
-* `.github/workflows/`
-* `agents/`
-* `docs/`
-* `docs/security/`
-* `evidence/`
-* `policies/`
-* `scripts/`
-* `tests/`
+## Artifact schemas
+- `run_plan.json`
+- `execution_ledger.json`
+- `patch_stack.json`
+- `eval_report.json`
+- `policy_report.json`
 
-## Assumed Paths
-* `agents/ai_supply_chain_firewall/` (Created for this integration)
-* `docs/standards/`
-* `docs/perf/`
-* `docs/ops/runbooks/`
-* `docs/security/data-handling/`
-* `evidence/schema/`
-* `scripts/monitoring/`
+## Must-not-touch list
+- existing artifact schemas
+- CI workflow names
+- security policy enforcement modules
 
-## Must-not-touch Paths
-* `core/`
-* `orchestrator/`
-* Release automation scripts
-* Any vendored dependencies
+## CBM Must-not-touch (ASSUMPTION until audit)
+- graph core engine internals
+- ingestion connectors already stable
+- infra stateful components (db, queues)
+
+## CBM Validation checklist (before PR1 merge)
+- enumerate existing pipelines + artifact conventions
+- locate any existing graph schema types / serialization format
+- confirm test runner and CI gate naming
+- confirm current “Evidence ID” style (or introduce CBM’s in isolated namespace)

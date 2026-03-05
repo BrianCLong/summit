@@ -1,6 +1,6 @@
-# CBM Alerts Configuration
-- CBM_NARRATIVE_SURGE
-- CBM_COORDINATION_CLUSTER
-- CBM_AI_LAUNDERING_RISK
-- CBM_DATA_VOID_SPIKE
-- CBM_DRIFT_DETECTED
+# CBM Alerts
+
+1. Narrative surge + coordination confidence
+2. Void spike on sensitive topic/locale
+3. AI laundering risk spike
+4. Drift: "model/answering surface changed"

@@ -1,11 +1,10 @@
-# Cognitive Battlespace Map Standards Interop
+# CBM Interop & Standards
 
-## Import Matrix
-- News/RSS (JSON)
-- OSINT dumps (JSONL)
+## The Surface Node
+To ensure CBM can model curation without needing platform internals, we define the `Surface` concept:
+`Surface(type=search|feed|recommender|rag_retrieval|chatbot)`
 
-## Export Matrix
-- Narratives (JSON)
-- Influence Graph (JSON)
-- AI Exposure (JSON)
-- Drift (JSON)
+## Non-goals
+- attribution
+- takedown automation
+- offensive IO tooling
