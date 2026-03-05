@@ -1,5 +1,4 @@
 import pino from 'pino';
-import { trace } from '@opentelemetry/api';
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
@@ -49,24 +48,16 @@ export const logger = pino({
   },
   mixin() {
     const store = correlationStorage.getStore();
-    const spanContext = trace.getActiveSpan()?.spanContext();
-    const traceId = spanContext?.traceId;
-    const spanId = spanContext?.spanId;
-
     if (store) {
       return {
         correlationId: store.get('correlationId'),
         tenantId: store.get('tenantId'),
         principalId: store.get('principalId'),
         requestId: store.get('requestId'),
-        traceId: store.get('traceId') || traceId,
-        spanId: spanId,
+        traceId: store.get('traceId'),
       };
     }
-    return {
-      traceId,
-      spanId,
-    };
+    return {};
   },
   formatters: {
     level: (label: string) => ({ level: label.toUpperCase() }),
