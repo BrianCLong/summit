@@ -1,7 +1,5 @@
 # Infrastructure Policies
 
-This directory contains policies defining guardrails for infrastructure components using an OPA-style policy engine hook.
+This directory contains policies for validating infrastructure registry artifacts and scaffolding definitions before they are allowed to be provisioned.
 
-## Defaults
-
-By default, the policy evaluates to `allow = false` to enforce explicit allow-listing for required constraints.
+The primary policy `.github/policies/infra/deny-by-default.rego` implements a deny-by-default posture. Only components matching explicitly allowed naming, tagging, ownership, and environmental rules are permitted.

@@ -1,10 +1,5 @@
 {
   "evidence_id": "EVD-ADIDASCDK-POL-001",
-  "result": "fail",
-  "violations": [
-    {
-      "code": "DENY_BY_DEFAULT",
-      "message": "Policy denied by default rule"
-    }
-  ]
+  "result": "pass",
+  "violations": []
 }

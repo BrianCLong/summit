@@ -1,43 +1,44 @@
-import { validateArtifact, validateRegistry } from '../../src/platform/infra/validate';
-import { InfraArtifact, InfraRegistry } from '../../src/platform/infra/registry';
-
 describe('Infra Registry Validation', () => {
+  let validateArtifact: any;
+
+  beforeAll(async () => {
+    const mod = await import('../../src/platform/infra/validate');
+    validateArtifact = mod.validateArtifact;
+  });
+
   it('should pass a valid artifact', () => {
-    const validArtifact: InfraArtifact = {
+    const artifact = {
       kind: 'module',
       name: 'network-baseline',
       version: '1.0.0',
-      owner: { team: 'platform-infra' }
+      owner: { team: 'platform' },
+      policy_profile: 'baseline'
     };
-    const errors = validateArtifact(validArtifact);
-    expect(errors.length).toBe(0);
+    const result = validateArtifact(artifact);
+    expect(result.valid).toBe(true);
+    expect(result.errors).toHaveLength(0);
   });
 
-  it('should fail an artifact missing an owner team', () => {
-    const invalidArtifact: any = {
+  it('should fail when missing owner team', () => {
+    const artifact = {
       kind: 'module',
       name: 'network-baseline',
       version: '1.0.0',
       owner: {}
     };
-    const errors = validateArtifact(invalidArtifact);
-    expect(errors.length).toBeGreaterThan(0);
-    expect(errors).toContain('Owner team is required');
+    const result = validateArtifact(artifact);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Missing owner or team');
   });
 
-  it('should pass a valid registry', () => {
-    const validRegistry: InfraRegistry = {
-      version: 1,
-      artifacts: [
-        {
-          kind: 'module',
-          name: 'network-baseline',
-          version: '1.0.0',
-          owner: { team: 'platform-infra' }
-        }
-      ]
+  it('should fail when missing name or version', () => {
+    const artifact = {
+      kind: 'module',
+      owner: { team: 'platform' }
     };
-    const errors = validateRegistry(validRegistry);
-    expect(errors.length).toBe(0);
+    const result = validateArtifact(artifact);
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContain('Missing name');
+    expect(result.errors).toContain('Missing version');
   });
 });

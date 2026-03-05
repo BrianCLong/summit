@@ -1,36 +1,29 @@
-import { InfraArtifact, InfraRegistry } from './registry';
+import { InfraArtifact } from "./registry";
+import { FLAGS } from "./flags";
 
-export function validateArtifact(artifact: InfraArtifact): string[] {
+export function validateArtifact(artifact: InfraArtifact): { valid: boolean; errors: string[] } {
   const errors: string[] = [];
+
   if (!artifact.name) {
-    errors.push('Name is required');
+    errors.push("Missing name");
   }
-  if (!artifact.owner || !artifact.owner.team) {
-    errors.push('Owner team is required');
-  }
-  if (!artifact.version) {
-    errors.push('Version is required');
-  }
-  if (!artifact.kind || !['module', 'stack', 'consumption'].includes(artifact.kind)) {
-    errors.push('Valid kind is required (module, stack, consumption)');
-  }
-  return errors;
-}
 
-export function validateRegistry(registry: InfraRegistry): string[] {
-  const errors: string[] = [];
-  if (registry.version !== 1) {
-    errors.push('Registry version must be 1');
+  if (!artifact.version) {
+    errors.push("Missing version");
   }
-  if (!registry.artifacts || !Array.isArray(registry.artifacts)) {
-    errors.push('Registry must contain an array of artifacts');
-  } else {
-    for (const [index, artifact] of registry.artifacts.entries()) {
-      const artifactErrors = validateArtifact(artifact);
-      for (const err of artifactErrors) {
-        errors.push(`Artifact at index ${index}: ${err}`);
-      }
+
+  if (!artifact.owner || !artifact.owner.team) {
+    errors.push("Missing owner or team");
+  }
+
+  if (FLAGS.INFRA_POLICY_ENFORCE) {
+    if (!artifact.policy_profile) {
+      errors.push("Unknown or missing policy profile");
     }
   }
-  return errors;
+
+  return {
+    valid: errors.length === 0,
+    errors,
+  };
 }

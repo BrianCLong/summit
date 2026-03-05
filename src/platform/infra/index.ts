@@ -1,3 +1,3 @@
-export * from './registry';
-export * from './validate';
-export * from './flags';
+export * from "./registry";
+export * from "./validate";
+export * from "./flags";

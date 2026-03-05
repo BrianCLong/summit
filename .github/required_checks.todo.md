@@ -1,9 +1,13 @@
-# Required Checks for Infrastructure Governance
+# Required Checks Configuration
 
-The following checks are expected to be enforced in GitHub Actions (or the CI provider) for all PRs modifying infrastructure or policy configurations:
+These checks need to be configured as required status checks in the GitHub repository branch protection rules for `main`:
 
-1. `summit-infra-verify` - Verifies the infrastructure registry model and metadata.
-2. `summit-policy-verify` - Verifies that proposed configurations conform to defined OPA policies (currently deny-by-default).
-3. `summit-scaffolder-verify` - Verifies that new components scaffolded from templates meet the minimum metadata requirements.
+* `summit-infra-verify`
+* `summit-policy-verify`
+* `summit-scaffolder-verify`
 
-**Action Required for GA:** Setup these branch protection required checks in the repository settings.
+Steps:
+1. Go to repository Settings -> Branches.
+2. Edit the branch protection rule for `main`.
+3. Under "Require status checks to pass before merging", search for and add the above checks.
+4. Save changes.
