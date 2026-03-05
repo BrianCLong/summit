@@ -2,6 +2,11 @@ name: "GA Gate: Accessibility lint + keyboard smoke"
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "web/**"
       - "packages/ui/**"
