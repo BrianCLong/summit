@@ -18,3 +18,14 @@
 - existing artifact schemas
 - CI workflow names
 - security policy enforcement modules
+
+## CBM Must-not-touch (ASSUMPTION until audit)
+- graph core engine internals
+- ingestion connectors already stable
+- infra stateful components (db, queues)
+
+## CBM Validation checklist (before PR1 merge)
+- enumerate existing pipelines + artifact conventions
+- locate any existing graph schema types / serialization format
+- confirm test runner and CI gate naming
+- confirm current “Evidence ID” style (or introduce CBM’s in isolated namespace)
