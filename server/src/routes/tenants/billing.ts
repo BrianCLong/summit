@@ -14,12 +14,12 @@ const BillingExportQuery = z.object({
 });
 
 function attachTenantToBody(req: any, _res: any, next: any) {
-  req.body = { ...req.body, tenantId: req.params.tenantId };
+  req.body = { ...req.body, tenantId: (req.params.tenantId as string) };
   return next();
 }
 
 function ensureTenantScope(req: any, res: any, next: any) {
-  const tenantId = req.params.tenantId;
+  const tenantId = (req.params.tenantId as string);
   const userTenant = req.user?.tenantId || req.user?.tenant_id;
   const isSuper = ['SUPER_ADMIN', 'ADMIN', 'admin'].includes(req.user?.role);
   if (!isSuper && userTenant && userTenant !== tenantId) {
@@ -37,7 +37,7 @@ router.get(
   async (req, res) => {
     try {
       const { start, end, format } = BillingExportQuery.parse(req.query);
-      const tenantId = req.params.tenantId;
+      const tenantId = (req.params.tenantId as string);
 
       const report = await finopsReportService.buildReport((tenantId as string), start, end);
 
