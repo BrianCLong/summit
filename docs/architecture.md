@@ -1,61 +1,104 @@
-# Summit Day-1 Architecture Overview
+# Detailed architectural diagram
 
-## System Topology
+## Runtime / platform architecture (C4-ish, Mermaid)
+
 ```mermaid
-graph LR
-  subgraph Edge
-    CDN[Global CDN]
-  end
+flowchart LR
+  %% Users
+  U[Analyst / Operator] -->|Browser| FE[Frontend UI
+(client/)
+React 18 + Vite + MUI]
+  U -->|Browser| CU[Conductor UI
+(conductor-ui/)
+Ops/Admin UX]
 
-  subgraph AppTier
-    APIGW[API/GraphQL Gateway]
-    OPA[OPA Policy Service]
-    OTel[OTel Collector]
-    Redis[(Redis Cache)]
-    Kafka[(Kafka Cluster)]
-  end
+  %% Edge/API
+  FE -->|HTTPS| API[API Tier
+(Node.js + Express + Apollo GraphQL)
+GraphQL + REST]
+  CU -->|HTTPS| API
 
-  subgraph DataTier
-    Postgres[(Postgres Primary/Replica Set)]
-    Neo4j[(Neo4j Cluster)]
-  end
+  %% Core services
+  API -->|AuthZ / Policy checks| POL[Policy & Guardrails
+(Policy fetcher + enforcement points)
+clients/cos-policy-fetcher/ + policy artifacts]
+  API -->|Cache / rate limit / pubsub| REDIS[(Redis)]
+  API -->|Relational + audit + vectors| PG[(PostgreSQL)]
+  API -->|Graph relationships| NEO[(Neo4j)]
+  API -->|Telemetry time-series| TS[(TimescaleDB)]
 
-  CDN --> APIGW
-  APIGW -->|mTLS| OPA
-  APIGW -->|mTLS| Redis
-  APIGW -->|mTLS| Kafka
-  APIGW -->|mTLS| Postgres
-  APIGW -->|mTLS| Neo4j
+  %% Background orchestration
+  API -->|enqueue jobs| MQ[BullMQ / Maestro
+(.maestro/ + orchestration)
+Queue + workers]
+  MQ -->|uses| REDIS
+  MQ -->|read/write| PG
+  MQ -->|read/write| NEO
+  MQ -->|pipelines| AIMS[AI/ML + Pipelines
+(ai-ml-suite/ + domain modules)]
 
-  OPA -->|policy decisions| APIGW
-  APIGW -->|traces| OTel
-  Kafka -->|change events| Redis
-  Kafka -->|CDC| Postgres
-  Kafka -->|graph projections| Neo4j
-  OTel -->|export| Observability[(Observability Backend)]
+  %% Observability
+  API -->|metrics/logs| OBS[Observability Stack
+(Grafana + alerting)]
+  MQ -->|metrics/logs| OBS
+  TS -->|dashboards| OBS
+
+  %% Ops / Runbooks / Governance
+  OBS --> RUN[Runbooks & Operator Playbooks
+(RUNBOOKS/)]
+  API --> SEC[Security & Compliance
+(SECURITY/ + compliance/ + audit/)]
+  MQ --> SEC
+
+  %% CI / gates
+  DEV[Developer Workstation] -->|make bootstrap| BOOT[Bootstrap + Tooling
+(make targets, pnpm, Docker)]
+  DEV -->|make ga| GA[GA Gate
+Lint + Verify + Tests + Smoke + Security]
+  GA --> API
+  GA --> MQ
+  GA --> FE
+
+  %% Notes
+  classDef store fill:#f6f6f6,stroke:#999,stroke-width:1px;
+  class PG,NEO,TS,REDIS store;
 ```
 
-## Day-1 Deployment Topology
-- **Tenancy**: SaaS multi-tenant control plane with logical separation at the data layer and OPA-enforced ABAC policies. Regulated customers can graduate to **ST-DED pods** (single-tenant dedicated) in the same control plane via namespace isolation.
-- **Network**: All service-to-service communication is mutually authenticated TLS using SPIFFE identities. Private subnets host stateful services; stateless gateways scale in an autoscaled front tier.
-- **Data Stores**:
-  - **Postgres** for transactional metadata and compliance records with read replicas per region.
-  - **Neo4j** for relationship intelligence enriched from Kafka streams.
-  - **Redis** for query caching, policy memoization, and rate-limit counters.
-  - **Kafka** as the primary event backbone shared by control plane and data plane workloads.
-- **Control Services**: OPA enforces ABAC policies for GraphQL resolvers, Kafka consumers, and administrative APIs. OpenTelemetry collectors export traces, logs, and metrics to the observability backend with tenant-aware attributes.
+## Repository “codemap” architecture (what lives where)
 
-## Failure Domains and Resiliency
-- **Front Door**: API/GraphQL gateway replicas distribute across at least two availability zones per region. Failures isolate to AZ; global DNS failover provides cross-region continuity for critical workloads.
-- **Stateful Stores**: Postgres uses primary + synchronous replica in-zone with asynchronous cross-region replicas. Neo4j cluster members distribute across AZs with raft leader pinning for locality. Redis deploys with active-primary and read replicas; auto-failover is controlled to avoid split-brain.
-- **Event Mesh**: Kafka brokers span AZs with rack-awareness. Kafka Connect and stream processors run in dedicated node groups, limiting blast radius to event ingestion if they fail.
-- **Policy Plane**: OPA instances are stateless, horizontal pods behind the gateway. Policy bundles are served from signed artifacts; failure to fetch triggers deny-by-default for privileged mutations.
-- **Observability**: OTel collectors batch tenant-tagged telemetry and buffer locally when exporters degrade. Backpressure thresholds and circuit breakers prevent telemetry issues from cascading to request path.
+This is the view that helps new contributors answer “where is the thing?” quickly, based on real top-level directories in the repo:
 
-## Offline and Air-Gapped Viability
-- Deployment bundles include container images, OPA policies, and schema migrations that can be mirrored into a disconnected registry. Kafka brokers and Postgres/Neo4j nodes support snapshot export/import for air-gapped sites. CI pipelines provide manifest checksums for integrity verification.
+```mermaid
+flowchart TB
+  ROOT[Repo Root: summit] --> GOV[Governance & Ops]
+  ROOT --> PLAT[Platform (Runtime)]
+  ROOT --> AI[AI/ML + Domain Modules]
+  ROOT --> AG[Agentic Development Tooling]
 
-## Rollback & Recovery Alignment
-- **Runtime**: Canary rollouts with automated health gates (HTTP SLO <200 ms p95, GraphQL error rate <1%) determine promotion. Failure triggers rollback automation (see `runbooks/rollback.md`).
-- **Schema/Data**: Migrations use forward-only scripts with reversible companions; Kafka topics retain 72 hours of change events for replay. Redis caches can be flushed and rebuilt from Postgres/Neo4j without data loss.
-- **Policy**: Policy bundles are versioned and signed; previous bundle kept hot for immediate revert if new policies breach access SLOs or violate regulatory guardrails.
+  GOV --> RUNBOOKS[RUNBOOKS/]
+  GOV --> SECURITY[SECURITY/ + .security/]
+  GOV --> COMPLIANCE[compliance/]
+  GOV --> AUDIT[audit/]
+  GOV --> CI[.ci/ + ci/ + .ga-check/ + .github/]
+  GOV --> QA[__tests__/ + __mocks__/ + GOLDEN/ datasets + .evidence/]
+
+  PLAT --> CLIENT[client/]
+  PLAT --> CONDUCTOR[conductor-ui/]
+  PLAT --> CLI[cli/]
+  PLAT --> BACKEND[backend/]
+  PLAT --> API[api/ + apis/ + api-schemas/]
+  PLAT --> ORCH[.maestro/ + .orchestrator/]
+  PLAT --> CFG[config/ + configs/ data-plane + compose/ + charts/]
+
+  AG --> CLAUDE[.claude/]
+  AG --> GEMINI[.gemini/]
+  AG --> JULES[.jules/ + .Jules/]
+  AG --> QWEN[.qwen/]
+  AG --> PROMPTS[.agentic-prompts/ + .agent-guidance/]
+  AG --> DEVCONTAINER[.devcontainer/]
+
+  AI --> AIML[ai-ml-suite/]
+  AI --> COG[cognitive-* modules]
+  AI --> AM[active-measures-module/]
+  AI --> OTHER[additional vertical modules (numerous)]
+```
