@@ -1,28 +1,26 @@
-# Maestro Spec Interview Runbook
 
-## Execution Flow
+# Runbook: Maestro Spec Generation
 
-1. Prepare structured interview input JSON.
-2. Run `scripts/maestro/emit_spec_bundle.py` with target mode.
-3. Validate emitted artifacts against Maestro schemas.
-4. Route `jules_tasks` and `codex_tasks` into planning lanes.
+This runbook covers the operation and troubleshooting of the Maestro Spec Interview Engine.
 
-## Failure Escalation
+## Operational Flow
 
-- Schema validation failure: block merge, open governance issue.
-- Missing requirement IDs: block merge, rerun ID assignment.
-- Blocking open questions in non-MVS mode: escalate to requirements owner.
+1. **Initiation**: Run the interview engine with `python3 agents/maestro/interview_engine.py <output_path>`.
+2. **Review**: Review the generated `spec_bundle.json`.
+3. **Validation**: Run the GA gate locally: `node scripts/ga/verify-maestro-spec.mjs <bundle_path>`.
 
-## Retry Policy
+## Troubleshooting
 
-- Retry once for malformed input after correction.
-- Do not retry unchanged input for determinism failures; treat as defect.
+### Failure: Score below 20
 
-## Monitoring
+- **Cause**: Missing sections or open questions.
+- **Fix**: Resolve all open questions and ensure scope is defined.
 
-- Weekly drift check over schema compatibility and required fields.
-- Alert when requirement count or open question count regresses unexpectedly.
+### Failure: Missing IDs
 
-## SLO
+- **Cause**: Requirement added without ID generator.
+- **Fix**: Re-run the engine to ensure ID assignment logic is applied.
 
-- Target: 99% successful spec bundle generation for valid inputs.
+## Escalation
+
+Contact the Engineering Team for any persistent failures in the interview engine.

@@ -1,21 +1,19 @@
-# Decentralized AI MWS Repo Assumptions
+# Repo Reality Check: Maestro Integration Assumptions
 
-## Verified
+This document validates the assumptions made during the planning of the Maestro Spec Interview Orchestrator integration.
 
-- `summit/` exists and is a Python package with test coverage under `summit/tests`.
-- `pipelines/` exists and supports Python entrypoints.
-- `scripts/` exists with CI and operational utilities.
-- `docs/` exists and contains standards, security, and runbook conventions.
+## Validation Status
 
-## Assumed
+- [x] **Prompt registry path exists**: Verified at `prompts/`. Sub-directory `prompts/maestro/` also exists.
+- [x] **CI gate names**: Verified authoritative gate name as `GA Gate` in `.github/workflows/ga-gate.yml`. Entrypoint is `pnpm ga:verify` which runs `scripts/ga/ga-verify-runner.mjs`.
+- [x] **Evidence ID schema format**: Verified in `evidence/index.json`. IDs follow `EVD-` pattern or `evidence.<name>.v<version>`.
+- [x] **Jules task metadata schema**: Verified in `agents/task-spec.schema.json`.
+- [x] **Codex module naming conventions**: Checked `agents/codex/`. Follows `type/scope/short-desc` branch naming and uses `flows.yaml` for logic.
+- [x] **report.json determinism requirements**: Verified `scripts/ci/check_determinism_extortion.sh` and general "evidence-pack-first" posture.
+- [x] **stamp.json timestamp rules**: Verified in `schemas/evidence.stamp.schema.json`. Requires `generated_at_utc`.
 
-- New decentralized AI assurance logic can be safely isolated under `summit/subsumption/decentralized_ai/`.
-- Deterministic artifact generation requires sorted keys, stable ordering, and timestamp-free outputs.
-- CI gates can consume `report.json`, `metrics.json`, and `stamp.json` without modifying baseline release gates.
-- Policy regression harnesses can validate threshold-based checks in later PRs.
+## Additional Context
 
-## Must-Not-Touch
-
-- `LICENSE`
-- Existing core scoring engines outside the new `summit/subsumption/decentralized_ai/` namespace.
-- Existing CI baseline checks unrelated to decentralized AI.
+- **Runtimes**: Both Node.js and Python are supported for agents.
+- **Governance**: All changes must align with `AGENTS.md` and include the `AGENT-METADATA` block in PRs.
+- **Threat Modeling**: Must align with MAESTRO layers and threats.

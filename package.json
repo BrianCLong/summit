@@ -1,12 +1,11 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.15",
+  "version": "4.2.3",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@9.12.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "ga:evidence": "echo \"Evidence collection placeholder\"",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",
@@ -52,6 +51,7 @@
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && (ruff check . || true)",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
+    "lint:release-policy": "node scripts/release/validate-release-policy.mjs",
     "lint:strict": "eslint . && (ruff check . || true)",
     "security:check": "node scripts/security-check.js",
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",

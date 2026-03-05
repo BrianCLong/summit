@@ -922,25 +922,33 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: daily-sprint
+  - id: maestro-spec-interview
     version: v1
-    path: prompts/automation/daily-sprint@v1.md
-    sha256: 1c3be7c6b79e4bc6f3c2bec38313bd05327d20b957f65b2df454bdfad54043e7
-    description: Daily sprint orchestration prompt for evidence-first ops runs.
+    path: prompts/maestro/maestro_spec_interview_v1.md
+    sha256: 86bdbd027bb5c18254210330bf4b1648274abf7744e9c10978094a00d71100e6
+    description: Structured requirements engineering interview engine with deterministic spec artifacts.
     scope:
       paths:
-        - docs/ops/DAILY_SPRINT_2026-02-23.md
+        - agents/maestro/
+        - prompts/maestro/
+        - scripts/emit_spec_bundle.py
+        - schemas/maestro_spec.schema.json
+        - schemas/spec_bundle.schema.json
+        - scripts/ga/verify-maestro-spec.mjs
+        - docs/standards/maestro_spec.md
+        - docs/ops/runbooks/maestro_spec.md
+        - docs/security/data-handling/maestro_spec.md
+        - scripts/monitoring/maestro_spec-drift.py
         - docs/roadmap/STATUS.json
-        - prompts/automation/daily-sprint@v1.md
         - prompts/registry.yaml
-        - agents/examples/DAILY_SPRINT_20260223_RUN8.json
       domains:
-        - operations
+        - requirements-engineering
+        - orchestration
         - governance
         - documentation
     verification:
       tiers_required:
-        - C
+        - A
       debt_budget:
         permitted: 0
         retirement_target: 0

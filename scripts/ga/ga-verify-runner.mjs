@@ -6,10 +6,7 @@ const steps = [
   {
     name: 'sanitize:type-stubs',
     command: 'bash',
-    args: [
-      '-lc',
-      'find node_modules -name "hapi__catbox" -type d -path "*/@types/*" -exec rm -rf {} + && find node_modules -name "hapi__shot" -type d -path "*/@types/*" -exec rm -rf {} + && find node_modules -name "react-native" -type d -path "*/@types/*" -exec rm -rf {} +',
-    ],
+    args: ['-lc', 'rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot'],
   },
   { name: 'typecheck', command: 'pnpm', args: ['typecheck'] },
   { name: 'lint', command: 'pnpm', args: ['lint'] },
@@ -21,6 +18,11 @@ const steps = [
     env: { GA_VERIFY_MODE: 'true' },
   },
   { name: 'ga:smoke', command: 'pnpm', args: ['ga:smoke'] },
+  {
+    name: 'ga:maestro-spec',
+    command: 'node',
+    args: ['scripts/ga/verify-maestro-spec.mjs', 'artifacts/maestro/sample/spec_bundle.json'],
+  },
 ];
 
 const gitSha = spawnSync('git', ['rev-parse', 'HEAD'], {
