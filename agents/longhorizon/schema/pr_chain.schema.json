@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PR-Chain Schema",
+  "type": "object",
+  "required": ["id", "goal", "steps", "verdict"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the PR-chain"
+    },
+    "goal": {
+      "type": "string",
+      "description": "The high-level goal of the agent"
+    },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "thought", "action", "observation"],
+        "properties": {
+          "step": {
+            "type": "integer"
+          },
+          "thought": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "observation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["success", "failure", "partial"],
+      "description": "The outcome of the chain"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}
