@@ -14,7 +14,7 @@ describe('Bitemporal Service (Task #109)', () => {
       tenantId,
       kind: 'Person',
       props: { name: 'John Doe', status: 'Active' },
-      validFrom: validFrom.toISOString(),
+      validFrom: validFrom,
       createdBy: 'test-user'
     });
 
@@ -41,7 +41,7 @@ describe('Bitemporal Service (Task #109)', () => {
       tenantId,
       kind: 'Person',
       props: { name: 'Jane Doe', status: 'Active' },
-      validFrom: validFrom.toISOString(),
+      validFrom: validFrom,
       createdBy: 'corrector'
     });
 

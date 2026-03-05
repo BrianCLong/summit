@@ -66,32 +66,32 @@ evidence_check:
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
 
-bundle_verification:
+integrity_check:
   - code: SCHEMA_MAJOR_UNSUPPORTED
-    description: Bundle schema major version is not supported
+    description: Bundle schema major version unsupported
   - code: SCHEMA_VERSION_INVALID
-    description: Bundle schema version is invalid or missing
+    description: Bundle schema version format invalid
   - code: JSON_PARSE_ERROR
-    description: Failed to parse JSON artifact
+    description: Failed to parse JSON content
   - code: MISSING_FIELD
     description: Required field missing in artifact
   - code: INVALID_ENUM
     description: Invalid enum value encountered
   - code: DRIFT_DETECTED
-    description: Drift detected between expected and actual state
+    description: Configuration drift detected
   - code: DRIFT_ERROR
-    description: Error occurred during drift detection
+    description: Error checking for drift
   - code: SIG_ORPHAN
-    description: Signature found without corresponding artifact
+    description: Signature file without corresponding artifact
   - code: SIG_INVALID
     description: Signature verification failed
   - code: COSIGN_MISSING
-    description: Cosign bundle missing for image
+    description: Cosign tool missing
   - code: SIG_MISSING
-    description: Signature file missing for artifact
+    description: Missing required signature
   - code: ATTESTATION_MISSING
-    description: Provenance attestation missing
+    description: Missing required attestation
   - code: SHA256SUMS_INVALID_FORMAT
-    description: SHA256SUMS file has invalid format
+    description: SHA256SUMS file format invalid
   - code: INVALID_JSON
-    description: Generic invalid JSON error
+    description: Content is not valid JSON
