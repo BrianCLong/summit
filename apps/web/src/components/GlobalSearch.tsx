@@ -118,16 +118,35 @@ export function GlobalSearch() {
   }
 
   useEffect(() => {
-    if (!debouncedQuery || !debouncedQuery.trim()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+    // If query is cleared, clear results immediately without waiting for debounce
+    if (!query || !query.trim()) {
       setResults([])
       return
     }
+  }, [query])
 
+  useEffect(() => {
+    if (!debouncedQuery || !debouncedQuery.trim()) {
+      return
+    }
+
+    let active = true
     setLoading(true)
     searchFunction(debouncedQuery)
-      .then(setResults)
-      .finally(() => setLoading(false))
+      .then(results => {
+        if (active) {
+          setResults(results)
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false)
+        }
+      })
+
+    return () => {
+      active = false
+    }
   }, [debouncedQuery, isDemoMode])
 
   const handleSelect = (result: SearchResult) => {
