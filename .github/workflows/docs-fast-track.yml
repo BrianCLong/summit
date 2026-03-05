@@ -9,7 +9,7 @@ on:
       - 'docs/**'
       - '**.md'
       - 'prompts/**'
-      
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
