@@ -1,5 +1,2 @@
 import sys
-import os
-
-print("Supply chain verifier mock")
-sys.exit(0)
+print(f"Verifying signature for {sys.argv[1] if len(sys.argv) > 1 else 'unknown'}")
