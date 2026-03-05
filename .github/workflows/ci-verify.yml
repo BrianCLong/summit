@@ -1,17 +1,29 @@
-name: CI Verify
-on: [push, pull_request]
+name: CI Verify Evidence
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
-  agent-benchmark:
+  verify-evidence:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v2
         with:
-          version: 10.0.0
+          version: 9.x
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '20'
           cache: 'pnpm'
-      - run: pnpm install
-      - run: pnpm run agent-benchmark
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate Schemas
+        run: npx tsx scripts/verify-evidence-schemas.ts
+
+      - name: Run Evidence Unit Tests
+        run: pnpm --filter intelgraph-server test src/graphrag/evidence/__tests__/evidence.test.ts
