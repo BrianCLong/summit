@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added offline-local runtime profile initiative with backend adapter, determinism evidence, network guard, and drift monitor scaffolding.",
+  "last_updated": "2026-02-21T19:25:43Z",
+  "revision_note": "Introduced SASS v1.0 schema, lint CLI, CI workflow, and seeded Maestro conductor spec example.",
   "initiatives": [
     {
-      "id": "offline-local-runtime-profile",
+      "id": "sass-v1-foundation",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Offline-first local OpenAI-compatible backend adapter, offline profile, CI egress guard, determinism stamp helper, benchmark harness, and weekly drift workflow scaffold."
+      "notes": "Added Summit Agent Specification Standard schema, spec lint CLI, CI workflow, and a baseline Maestro conductor SASS example for deterministic governance checks."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
