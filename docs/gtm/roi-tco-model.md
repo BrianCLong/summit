@@ -3,7 +3,7 @@
 
 **Purpose:** Framework for calculating return on investment and total cost of ownership for Summit deployments. Use to build business cases and justify pilot/production investments.
 
-## Version: 2025-11-27
+_Version: 2025-11-27_
 
 ---
 
@@ -61,7 +61,7 @@
 
 **Driver:** Reduced time searching, correlating, and context-switching
 
-**Calculation:**
+### Calculation
 
 ```text
 Current weekly hours on inefficient tasks = {{A}} hours/analyst/week
@@ -74,8 +74,7 @@ Total annual value = Annual value per analyst × Number of analysts
 
 Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 ```text
-
-**Example:**
+### Example:
 
 | Variable | Value | Calculation |
 |----------|-------|-------------|
@@ -93,7 +92,7 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 
 **Driver:** Analysts handle more cases without adding headcount
 
-**Calculation:**
+### Calculation:
 
 ```text
 Current cases per analyst per year = {{A}}
@@ -102,8 +101,7 @@ Additional cases per analyst = A × B
 Value per case = {{C}} (depends on mission; may be revenue, cost avoidance, or strategic)
 Total annual value = Additional cases × Number of analysts × Value per case
 ```text
-
-**Example:**
+### Example:
 
 | Variable | Value | Calculation |
 |----------|-------|-------------|
@@ -119,7 +117,7 @@ Total annual value = Additional cases × Number of analysts × Value per case
 
 **Driver:** Provenance and audit trails built into workflow
 
-**Calculation:**
+### Calculation:
 
 ```text
 Current compliance hours per analyst per year = {{A}}
@@ -133,8 +131,7 @@ Current annual remediation cost = {{C}}
 Expected reduction = {{D}}%
 Remediation savings = C × D
 ```text
-
-**Example:**
+### Example:
 
 | Variable | Value | Calculation |
 |----------|-------|-------------|
@@ -154,7 +151,7 @@ Remediation savings = C × D
 
 **Driver:** Retire or reduce spend on redundant tools
 
-**Calculation:**
+### Calculation:
 
 ```text
 Current annual spend on tools Summit can replace/reduce = {{A}}
@@ -162,8 +159,7 @@ Tools fully retired = {{B}}% of spend
 Tools reduced (fewer seats) = {{C}}% of spend
 Total savings = A × (B + C)
 ```text
-
-**Example:**
+### Example:
 
 | Variable | Value | Calculation |
 |----------|-------|-------------|
@@ -178,7 +174,7 @@ Total savings = A × (B + C)
 
 **Driver:** Reduce risk of missed threats, compliance failures, reputational damage
 
-**Calculation:**
+### Calculation:
 
 ```text
 Probability of significant incident per year = {{A}}%
@@ -187,8 +183,7 @@ Expected annual cost = A × B
 Risk reduction with Summit = {{C}}%
 Avoided cost = Expected annual cost × C
 ```text
-
-**Example:**
+### Example:
 
 | Variable | Value | Calculation |
 |----------|-------|-------------|
@@ -204,7 +199,7 @@ Avoided cost = Expected annual cost × C
 
 **Driver:** Handle growth without proportional analyst hiring
 
-**Calculation:**
+### Calculation:
 
 ```text
 Projected case volume growth = {{A}}% per year
@@ -213,8 +208,7 @@ With Summit: New analysts needed = Current analysts × A × (1 - Throughput incr
 Avoided hires = Without Summit hires - With Summit hires
 Avoided cost = Avoided hires × Fully-loaded analyst cost
 ```text
-
-**Example:**
+### Example:
 
 | Variable | Value | Calculation |
 |----------|-------|-------------|
@@ -279,8 +273,7 @@ ROI = (Net Benefit ÷ Total Cost) × 100
 
 Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
 ```text
-
-**Example Summary:**
+### Example Summary:
 
 | Metric | Value |
 |--------|-------|
@@ -315,31 +308,42 @@ Use this format for business case presentations:
 **For:** {{Customer Name}}
 **Date:** {{Date}}
 
-**Current State:**
+### Current State:
 
 - {{N}} analysts spending {{X}} hours/week on inefficient search and correlation
+
 - {{N}} cases per year; growth of {{X}}% expected
+
 - {{$X}} annual spend on fragmented tools
+
 - {{N}} audit findings related to provenance/documentation
 
-**With Summit:**
+### With Summit:
 
 - Reduce analyst inefficiency by **{{X}}%**
+
 - Increase case throughput by **{{X}}%**
+
 - Consolidate tools, saving **{{$X}}** annually
+
 - Eliminate provenance-related audit findings
 
-**Investment:**
+### Investment:
 
 - Pilot: **${{X}}** ({{N}} weeks)
+
 - Production (Year 1): **${{X}}**
+
 - 3-Year TCO: **${{X}}**
 
-**Returns:**
+### Returns:
 
 - Annual value: **${{X}}**
+
 - 3-Year net benefit: **${{X}}**
+
 - **ROI: {{X}}%**
+
 - **Payback: {{X}} months**
 
 **Recommendation:** Proceed with {{N}}-week pilot to validate assumptions and success criteria.
@@ -350,33 +354,33 @@ Use this format for business case presentations:
 
 Use these questions to gather data during sales discovery:
 
-**Productivity:**
+### Productivity:
 
 1. "How many hours per week do analysts spend searching for and correlating data across tools?"
 2. "How many different tools/systems do analysts access in a typical investigation?"
 3. "What's the average time to complete a case from assignment to close?"
 
-**Throughput:**
+### Throughput:
 4. "How many cases does each analyst handle per month/quarter/year?"
 5. "What's your case backlog look like? Are you keeping up with volume?"
 6. "If you could handle 30% more cases, what would that be worth?"
 
-**Compliance:**
+### Compliance:
 7. "How much time do analysts spend on documentation and audit preparation?"
 8. "Have you had any audit findings related to data provenance or chain-of-custody?"
 9. "What does remediating an audit finding cost you (time, money, reputation)?"
 
-**Tools:**
+### Tools:
 10. "What tools are you currently using for this work? What do they cost?"
 11. "Are there tools you could retire or reduce if you had better consolidation?"
 12. "What's your annual spend on analyst tooling?"
 
-**Risk:**
+### Risk:
 13. "Have you had any incidents where you couldn't trace how a conclusion was reached?"
 14. "What would a significant missed threat cost you (financial, reputational, mission)?"
 15. "How confident are you in your current audit posture?"
 
-**Growth:**
+### Growth:
 16. "Is your case volume growing? By how much?"
 17. "Are you planning to hire more analysts to handle growth?"
 18. "What does it cost to hire and onboard a new analyst?"

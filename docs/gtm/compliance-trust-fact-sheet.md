@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Compliance & Trust Fact Sheet
 
 **For Security Reviewers, Compliance Officers, and Procurement Teams**
@@ -51,7 +52,9 @@ This document provides a concise reference for security and compliance reviewers
 **Policy Packs Available:**
 
 - Government Baseline (classification, need-to-know, compartments)
+
 - Enterprise Standard (role + department + data sensitivity)
+
 - Custom (built to customer requirements during pilot)
 
 ### Role-Based Presets
@@ -263,9 +266,13 @@ Responsible disclosure policy published; security contact available.
 ### Repository Locations
 
 - `SECURITY/` — Security policies, SBOM, SLSA attestations
+
 - `docs/COMPLIANCE.md` — Compliance overview
+
 - `docs/privacy/` — Privacy and data handling documentation
+
 - `docs/THREAT_MODEL_STRIDE.md` — Threat model
+
 - `docs/SOC2_AUDITOR_PACKET.md` — SOC 2 evidence index
 
 ---

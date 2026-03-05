@@ -1,6 +1,7 @@
+<!-- markdownlint-disable -->
 # Better Together: Summit + [Prime/SI Partner]
 
-**Reusable Graph + AI Substrate for Intel & Analytics Programs**
+### Reusable Graph + AI Substrate for Intel & Analytics Programs
 
 ---
 
@@ -9,9 +10,13 @@
 Every intel/analytics program requires the same foundational components:
 
 - **Graph substrate** for entity-relationship modeling
+
 - **Provenance layer** for chain-of-custody and audit
+
 - **Policy enforcement** for classification, access control, and DLP
+
 - **AI/ML orchestration** with guardrails and explainability
+
 - **Analyst UX** (graph, timeline, map views)
 
 Your teams rebuild these components program-by-program—driving cost, risk, and time-to-delivery.
@@ -55,20 +60,27 @@ When your proposals need to demonstrate:
 ### Option A: Referral Partner (Lightest Touch)
 
 - You identify opportunities; we close and deliver
+
 - **20% referral fee** on Year 1 TCV
+
 - No delivery responsibility on your side
 
 ### Option B: Resell Partner
 
 - You contract with customer; we deliver through you
+
 - **10–25% margin** (based on volume and commitment)
+
 - Joint delivery support available
 
 ### Option C: Co-Delivery / OEM
 
 - Summit embedded in your solution stack
+
 - Per-program or per-seat licensing
+
 - Joint go-to-market on specific pursuits
+
 - Training and enablement for your delivery teams
 
 ---
@@ -79,11 +91,14 @@ When your proposals need to demonstrate:
 
 **Objective:** Prove fit for a specific pursuit or program.
 
-**Scope:**
+### Scope
 
 - Discovery session with your capture/solution team
+
 - Reference architecture aligned to pursuit requirements
+
 - Demo environment with sample data
+
 - Technical brief for proposal input
 
 **Outcome:** Artifacts ready for proposal insertion; go/no-go on partnership for that pursuit.
@@ -94,18 +109,24 @@ When your proposals need to demonstrate:
 
 ### Joint Pursuit Motion
 
-**Phase 1: Capture Support**
+### Phase 1: Capture Support
 
 - Technical discriminators language
+
 - Architecture diagrams for proposals
+
 - Compliance/security documentation
+
 - Demo support for orals/tech evals
 
-**Phase 2: Delivery (Post-Award)**
+### Phase 2: Delivery (Post-Award)
 
 - Summit platform deployment
+
 - Data source integration
+
 - Training and enablement
+
 - Ongoing platform support
 
 ---
@@ -115,16 +136,23 @@ When your proposals need to demonstrate:
 Summit is strongest on pursuits involving:
 
 - **OSINT / All-Source Fusion** — unifying multiple intelligence feeds
+
 - **Graph Analytics** — entity resolution, link analysis, pattern detection
+
 - **AI/ML with Guardrails** — need for explainability and policy enforcement
+
 - **Compliance-Heavy** — FedRAMP, CMMC, IL4/5, audit requirements
+
 - **Analyst Modernization** — replacing legacy tools, reducing swivel-chair
 
-**Example Agencies/Programs:**
+### Example Agencies/Programs
 
 - DHS I&A, CISA JCDC, FBI Cyber, USSOCOM J2, Service intel (A2/G2/N2)
+
 - Intel community modernization programs
+
 - State/local fusion centers
+
 - Critical infrastructure security programs
 
 ---
@@ -152,13 +180,14 @@ Summit is strongest on pursuits involving:
 
 ## Contact
 
-**Summit Partnership Team**
+### Summit Partnership Team
 
 [Partner Lead Name]
 [Email]
 [Phone]
 
-**Technical Questions:**
+### Technical Questions
+
 [Solutions Architect Name]
 [Email]
 
