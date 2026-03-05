@@ -1,0 +1,41 @@
+name: RAG Data Pipeline Integrity Gate
+
+on:
+  pull_request:
+    paths:
+      - 'src/data-pipeline/**'
+      - 'src/ingest/**'
+      - 'src/graphrag/**'
+
+jobs:
+  rag-data-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci || pnpm install || yarn install
+
+      - name: Create tsconfig
+        run: |
+          cat << 'TSCONF' > tsconfig.rag-pipeline.json
+          {
+            "compilerOptions": {
+              "target": "es2022",
+              "module": "commonjs",
+              "strict": true,
+              "skipLibCheck": true,
+              "types": ["node", "jest"]
+            },
+            "include": ["src/data-pipeline/rag-data-pipeline/*.ts", "src/ingest/*.ts", "src/graphrag/*.ts", "tests/rag_pipeline.test.ts"]
+          }
+          TSCONF
+
+      - name: Build and Type Check
+        run: npx tsc -p tsconfig.rag-pipeline.json --noEmit
+
+      - name: Verify Artifact Generation (RAG test)
+        run: npx jest tests/rag_pipeline.test.ts

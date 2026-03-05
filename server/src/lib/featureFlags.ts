@@ -79,6 +79,11 @@ const FLAG_CATALOG: Record<string, FeatureFlagDefinition> = {
     defaultValue: false,
     description: 'Enables export of tenant health bundles with redaction.',
   },
+  'support.bundle': {
+    type: 'boolean',
+    defaultValue: false,
+    description: 'Enables generation of support diagnostic bundles.',
+  },
   'SUSPICIOUS_DETECT_ENABLED': {
     type: 'boolean',
     defaultValue: false,
