@@ -1,0 +1,66 @@
+name: Schema compatibility guard
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+    paths:
+      - "scripts/schema-compat/**"
+      - ".github/workflows/schema-compat.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  schema-compat:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v6
+      - uses: pnpm/action-setup@v4 # v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "22"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate schema compatibility fixtures
+        run: pnpm exec node scripts/schema-compat/check-fixtures.mjs
+
+      - name: Generate additive compatibility report
+        run: |
+          mkdir -p schema-compat-artifacts
+          pnpm exec node scripts/schema-compat/cli.mjs \
+            --baseline scripts/schema-compat/fixtures/baseline \
+            --current scripts/schema-compat/fixtures/additive \
+            --report schema-compat-artifacts/additive.md
+
+      - name: Generate breaking compatibility report (expected failure)
+        run: |
+          mkdir -p schema-compat-artifacts
+          set +e
+          pnpm exec node scripts/schema-compat/cli.mjs \
+            --baseline scripts/schema-compat/fixtures/baseline \
+            --current scripts/schema-compat/fixtures/breaking \
+            --report schema-compat-artifacts/breaking.md
+          status=$?
+          if [ "$status" -eq 0 ]; then
+            echo "Expected breaking scenario to fail without version bump or allow-list"
+            exit 1
+          fi
+
+      - name: Upload schema compatibility reports
+        uses: actions/upload-artifact@v4 # v6
+        with:
+          name: schema-compatibility-reports
+          path: schema-compat-artifacts/*.md
+          retention-days: 14
