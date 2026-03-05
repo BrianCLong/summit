@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import { jest } from '@jest/globals';
 
 const getResidencyConfigMock = jest.fn();
@@ -32,16 +31,15 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
 // Set default resolveTargetRegion to avoid undefined during module initialization if it were used there
 resolveTargetRegionMock.mockReturnValue('us-east-1');
 
-import type { GlobalTrafficSteering as GlobalTrafficSteeringType } from '../GlobalTrafficSteering.js';
-const { GlobalTrafficSteering } = (await import('../GlobalTrafficSteering.js')) as any;
+const { any } = await import('../any.js');
 
-describe('GlobalTrafficSteering', () => {
-    let steering: GlobalTrafficSteeringType;
+describe('any', () => {
+    let steering: any;
 
     beforeEach(() => {
         jest.clearAllMocks();
         // Reset singleton if possible, or just use the existing one
-        steering = GlobalTrafficSteering.getInstance();
+        steering = any.getInstance();
     });
 
     it('should ALLOW traffic if current region matches primary region', async () => {

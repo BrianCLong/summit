@@ -8,13 +8,13 @@ This document defines the standard organization for locale resource files in Com
 
 We split translations into **namespaces** to keep bundle sizes small and allow lazy loading.
 
-| Namespace | Purpose |
-| :--- | :--- |
-| `common.json` | Reusable terms (Save, Cancel), error messages, date formats. |
-| `auth.json` | Login, Signup, Password Reset, MFA screens. |
-| `dashboard.json` | Main dashboard widgets, charts, and summaries. |
-| `settings.json` | User profile, preferences, organization settings. |
-| `legal.json` | Short legal disclaimers (not full documents). |
+| Namespace        | Purpose                                                      |
+| :--------------- | :----------------------------------------------------------- |
+| `common.json`    | Reusable terms (Save, Cancel), error messages, date formats. |
+| `auth.json`      | Login, Signup, Password Reset, MFA screens.                  |
+| `dashboard.json` | Main dashboard widgets, charts, and summaries.               |
+| `settings.json`  | User profile, preferences, organization settings.            |
+| `legal.json`     | Short legal disclaimers (not full documents).                |
 
 ## JSON Structure Example
 
@@ -40,8 +40,7 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
     "archived": "Archived"
   }
 }
-
-```text
+```
 
 ### `dashboard.json`
 
@@ -63,8 +62,7 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
     "project_limit_reached": "You have reached the project limit of {limit, number} projects."
   }
 }
-
-```text
+```
 
 ### `auth.json`
 
@@ -82,19 +80,16 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
     "resend": "Resend Code"
   }
 }
-
-```text
+```
 
 ## Key Guidelines
 
-1. **Nesting**: Use nesting up to 3 levels max for readability.
-2. **Parameters**: Use `{paramName}` for interpolation.
-3. **ICU Format**: Use ICU syntax for formatting within strings.
-  * `{count, number}`
-  * `{date, date, short}`
-4. **Plurals**:
-
+1.  **Nesting**: Use nesting up to 3 levels max for readability.
+2.  **Parameters**: Use `{paramName}` for interpolation.
+3.  **ICU Format**: Use ICU syntax for formatting within strings.
+    - `{count, number}`
+    - `{date, date, short}`
+4.  **Plurals**:
     ```json
     "itemsSelected": "{count, plural, =0 {No items selected} one {# item selected} other {# items selected}}"
-
-```text
+    ```
