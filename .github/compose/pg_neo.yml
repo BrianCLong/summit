@@ -1,19 +1,34 @@
 version: '3.8'
-
 services:
   postgres:
-    image: postgres:15
+    image: pgvector/pgvector:pg16
+    container_name: maestro-postgres-sync
     environment:
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_password
-      POSTGRES_DB: dev_db
+      POSTGRES_DB: maestro
+      POSTGRES_USER: maestro
+      POSTGRES_PASSWORD: maestro-dev-secret
+      POSTGRES_INITDB_ARGS: '--auth-host=scram-sha-256'
     ports:
-      - "5432:5432"
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U maestro -d maestro']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  neo4j:
-    image: neo4j:5.12
+  neo4j-ephemeral:
+    image: neo4j:2025.01
+    container_name: neo4j-ephemeral-sync
     environment:
-      NEO4J_AUTH: neo4j/dev_password
+      - NEO4J_AUTH=neo4j/testtest1
+      - NEO4J_server_memory_heap_initial__size=256m
+      - NEO4J_server_memory_heap_max__size=512m
+      - NEO4J_dbms_memory_pagecache_size=256m
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
+    healthcheck:
+      test: ['CMD-SHELL', "cypher-shell -a bolt://localhost:7687 -u neo4j -p testtest1 'RETURN 1' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 60
