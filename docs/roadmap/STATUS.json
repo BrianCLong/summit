@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-05T00:00:00Z",
+  "revision_note": "Added graph-native AI 90-day execution plan and PR stack for evidence-native subsystem rollout.",
   "initiatives": [
+    {
+      "id": "graph-native-ai-90-day-execution",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Execution plan published in docs/roadmap/GRAPH_NATIVE_AI_90_DAY_EXECUTION_PLAN.md with six subsystems and 20-PR sequencing."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
