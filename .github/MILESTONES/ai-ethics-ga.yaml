@@ -1,0 +1,25 @@
+name: "AI Ethics & Governance General Availability (GA)"
+description: "Ensure Summit is positioned as an auditable AI Control Plane with enforced runtime policy and audit guarantees."
+state: "open"
+due_on: "2025-12-31T00:00:00Z"
+criteria:
+  - id: policy_engine_core
+    title: "Policy Engine as Core Module"
+    description: "Policy engine implemented under `src/agents/policies/` with intent classification and hard-coded red lines."
+    status: "completed"
+  - id: api_middleware_enforcement
+    title: "API Middleware Enforcement"
+    description: "REST and GraphQL middleware implemented to intercept inference requests and enforce policies."
+    status: "completed"
+  - id: governance_documentation
+    title: "Explicit Governance Documentation"
+    description: "Published red lines, human-in-the-loop requirements, and GA readiness modules."
+    status: "completed"
+  - id: ci_governance_gates
+    title: "CI Governance Gates"
+    description: "GitHub Actions workflow implemented to enforce the presence of governance mechanisms and validate OPA policies."
+    status: "completed"
+  - id: auditable_trails
+    title: "Verifiable Audit Trails"
+    description: "Audit emitter implemented to log all policy decisions for compliance and regulatory review."
+    status: "completed"

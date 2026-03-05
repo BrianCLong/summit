@@ -1,12 +1,14 @@
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from .router import ShardRouter
 from .shard_plan import ShardPlan
+
 
 class Neo4jShardExecutor:
     def __init__(self, router: ShardRouter):
         self.router = router
 
-    def execute_retrieval(self, query: str, plan: ShardPlan) -> Dict[str, Any]:
+    def execute_retrieval(self, query: str, plan: ShardPlan) -> dict[str, Any]:
         shards = self.router.select_graph_shards(plan)
         results = []
         errors = []
