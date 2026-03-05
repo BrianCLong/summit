@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-03-03T00:00:00Z",
+  "revision_note": "Added minimal MCP orchestration stack architecture brief and linked roadmap initiative status.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -217,6 +217,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "mcp-orchestration-stack-minimal",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published minimal spec-to-code MCP orchestration architecture with DAG scheduling, blocker escalation, guardrails, and MAESTRO threat alignment."
     }
   ],
   "summary": {
