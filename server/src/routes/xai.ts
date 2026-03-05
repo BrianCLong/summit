@@ -99,7 +99,7 @@ router.post(
         message: 'XAI explanation generation failed',
         error: error instanceof Error ? error.message : String(error),
         user_id: req.user?.id,
-        explanation_type: req.body.explanation_type,
+        explanation_type: (req.body.explanation_type as string),
       });
 
       res.status(500).json({
