@@ -51,7 +51,7 @@ export interface TracingConfig {
   sampleRate?: number;
 }
 
-export class IntelGraphTracer {
+export class SummitTracer {
   private sdk: InstanceType<typeof NodeSDK> | null = null;
   private tracer: ReturnType<typeof trace.getTracer>;
   private initialized = false;
@@ -75,7 +75,7 @@ export class IntelGraphTracer {
         [SEMRESATTRS_SERVICE_NAME]: this.config.serviceName,
         [SEMRESATTRS_SERVICE_VERSION]: this.config.serviceVersion,
         [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: this.config.environment,
-        [SEMRESATTRS_SERVICE_NAMESPACE]: 'intelgraph',
+        [SEMRESATTRS_SERVICE_NAMESPACE]: 'summit',
       });
 
       // Configure Exporters
@@ -338,15 +338,15 @@ export class IntelGraphTracer {
 }
 
 // Singleton instance
-let tracerInstance: IntelGraphTracer | null = null;
+let tracerInstance: SummitTracer | null = null;
 
-export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTracer {
+export function initializeTracing(config?: Partial<TracingConfig>): SummitTracer {
   if (tracerInstance) {
     return tracerInstance;
   }
 
   const defaultConfig: TracingConfig = {
-    serviceName: 'intelgraph-server',
+    serviceName: 'summit-server',
     serviceVersion: (cfg.APP_VERSION as string) || '1.0.0',
     environment: cfg.NODE_ENV || 'development',
     jaegerEndpoint: process.env.JAEGER_ENDPOINT,
@@ -356,11 +356,11 @@ export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTr
     sampleRate: parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
   };
 
-  tracerInstance = new IntelGraphTracer({ ...defaultConfig, ...config });
+  tracerInstance = new SummitTracer({ ...defaultConfig, ...config });
   return tracerInstance;
 }
 
-export function getTracer(): IntelGraphTracer {
+export function getTracer(): SummitTracer {
   if (!tracerInstance) {
     // Auto-initialize with defaults if not initialized
     return initializeTracing();

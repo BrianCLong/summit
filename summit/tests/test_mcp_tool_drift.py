@@ -1,5 +1,6 @@
 from summit.tools.mcp_bridge import MCPBridge
 
+
 def test_mcp_drift_detection():
     bridge = MCPBridge()
     tools_v1 = [{"name": "tool1", "type": "function"}]

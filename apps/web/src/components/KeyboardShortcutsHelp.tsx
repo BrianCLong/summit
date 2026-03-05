@@ -8,6 +8,7 @@ import {
 import { useKeyboardShortcuts, Shortcut } from '@/contexts/KeyboardShortcutsContext'
 import { Badge } from '@/components/ui/Badge'
 import { Command } from 'lucide-react'
+import { Kbd } from '@/components/ui/Kbd'
 
 export function KeyboardShortcutsHelp(): React.ReactElement {
   const { isHelpOpen, closeHelp, shortcuts } = useKeyboardShortcuts()
@@ -50,15 +51,7 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
                       {shortcut.keys.map((keyGroup, idx) => (
                         <div key={idx} className="flex gap-1">
                           {idx > 0 && <span className="text-muted-foreground text-xs mx-1">or</span>}
-                          {keyGroup.split('+').map((key) => (
-                            <Badge
-                              key={key}
-                              variant="secondary"
-                              className="font-mono text-xs px-1.5 min-w-[20px] justify-center capitalize"
-                            >
-                              {key === 'mod' ? '⌘' : key === 'shift' ? '⇧' : key}
-                            </Badge>
-                          ))}
+                          <Kbd>{keyGroup}</Kbd>
                         </div>
                       ))}
                     </div>
@@ -75,20 +68,11 @@ export function KeyboardShortcutsHelp(): React.ReactElement {
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm">Show this help</span>
-                <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
-                  ?
-                </Badge>
+                <Kbd>?</Kbd>
               </div>
               <div className="flex items-center justify-between gap-4">
                 <span className="text-sm">Command Palette</span>
-                <div className="flex gap-1">
-                  <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
-                    ⌘
-                  </Badge>
-                  <Badge variant="secondary" className="font-mono text-xs px-1.5 min-w-[20px] justify-center">
-                    K
-                  </Badge>
-                </div>
+                <Kbd>mod+K</Kbd>
               </div>
             </div>
           </div>
