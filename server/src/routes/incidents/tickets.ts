@@ -5,6 +5,7 @@ import { ensureAuthenticated as requireAuth } from '../../middleware/auth.js';
 import { eventService } from '../../events/EventService.js';
 import { EventType } from '../../integrations/foundation/contracts.js';
 import { randomUUID } from 'crypto';
+import { firstStringOr } from '../../utils/http-param.js';
 
 const router = express.Router();
 
@@ -21,10 +22,10 @@ const getJiraConfig = async (tenantId: string) => {
 
 router.post('/incidents/:id/tickets', requireAuth, async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = firstStringOr(req.params.id, '');
         const tenantId = req.user!.tenantId!;
 
-        const incident = await IncidentService.get((tenantId as string), (id as string));
+        const incident = await IncidentService.get(tenantId, id);
         if (!incident) {
             return res.status(404).json({ error: 'Incident not found' });
         }
@@ -40,7 +41,7 @@ router.post('/incidents/:id/tickets', requireAuth, async (req, res) => {
         const ticket = await jira.createTicket(incident);
 
         // Update incident
-        const updatedIncident = await IncidentService.updateTicketRef((tenantId as string), (id as string), {
+        const updatedIncident = await IncidentService.updateTicketRef(tenantId, id, {
             id: ticket.id,
             key: ticket.key,
             url: ticket.url

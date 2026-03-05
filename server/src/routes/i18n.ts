@@ -12,6 +12,7 @@ import { i18nService } from '../i18n/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
+import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -187,9 +188,9 @@ router.get(
   requireFeatureFlag('i18n.enabled'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const key = (((req.query.key as string) as string) as string) as string;
-      const locale = ((((req.query.locale as string) as string) as string) as string) || 'en-US';
-      const namespace = ((((req.query.namespace as string) as string) as string) as string) || 'common';
+      const key = req.query.key as string;
+      const locale = (req.query.locale as string) || 'en-US';
+      const namespace = (req.query.namespace as string) || 'common';
 
       if (!key) {
         res.status(400).json({ error: 'Translation key is required' });
@@ -320,7 +321,7 @@ router.get(
   requireFeatureFlag('i18n.regionalCompliance'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { region } = req.params;
+      const region = firstStringOr(req.params.region, '');
       const result = i18nService.getRegionalCompliance(region);
 
       if (!result.data) {

@@ -4,6 +4,7 @@ import { FeatureFlagService } from '../featureFlags/FeatureFlagService.js';
 import { ConfigService } from '../featureFlags/ConfigService.js';
 import { EvaluationContext } from '../featureFlags/types.js';
 import { ensureAuthenticated, ensureRole, requirePermission } from '../middleware/auth.js';
+import { firstString } from '../utils/http-param.js';
 
 export interface FeatureFlagApiDependencies {
   featureFlagService: FeatureFlagService;
@@ -58,10 +59,12 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.get('/', async (req: Request, res: Response) => {
     try {
       // Extract context from request
+      const groupsRaw = firstString(req.query.groups);
+      const attributesRaw = firstString(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: firstString(req.query.userId) || req.user?.id,
+        groups: groupsRaw ? groupsRaw.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesRaw ? JSON.parse(attributesRaw) : (req.user as any)?.attributes || {}
       };
 
       // Get all flags with their evaluation status
@@ -85,20 +88,25 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       res.json(response);
     } catch (error: any) {
       console.error('Error fetching feature flags:', error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
   // Get a specific feature flag evaluation
   router.get('/:flagKey', async (req: Request, res: Response) => {
     try {
-      const { flagKey } = req.params;
+      const flagKey = firstString(req.params.flagKey);
+      if (!flagKey) {
+        return res.status(400).json({ error: 'flagKey is required' });
+      }
 
       // Extract context from request
+      const groupsRaw = firstString(req.query.groups);
+      const attributesRaw = firstString(req.query.attributes);
       const context: EvaluationContext = {
-        userId: req.query.userId as string || req.user?.id,
-        groups: req.query.groups ? (req.query.groups as string).split(',') : (req.user as any)?.groups || [],
-        attributes: req.query.attributes ? JSON.parse(req.query.attributes as string) : (req.user as any)?.attributes || {}
+        userId: firstString(req.query.userId) || req.user?.id,
+        groups: groupsRaw ? groupsRaw.split(',') : (req.user as any)?.groups || [],
+        attributes: attributesRaw ? JSON.parse(attributesRaw) : (req.user as any)?.attributes || {}
       };
 
       // Get the flag evaluation
@@ -113,7 +121,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error fetching feature flag ${req.params.flagKey}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -150,7 +158,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error('Error creating feature flag:', error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -172,7 +180,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error updating feature flag ${req.params.flagKey}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -192,15 +200,19 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error deleting feature flag ${req.params.flagKey}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
   // Get configuration values
   router.get('/config/:key', async (req: Request, res: Response) => {
     try {
-      const { key } = req.params;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const key = firstString(req.params.key);
+      if (!key) {
+        return res.status(400).json({ error: 'key is required' });
+      }
+      const environment =
+        firstString(req.query.env) || process.env.NODE_ENV || 'development';
 
       const value = await deps.configService.getConfig(key, environment);
 
@@ -212,7 +224,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error fetching config ${req.params.key}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -220,7 +232,8 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   router.post('/config/batch', async (req: Request, res: Response) => {
     try {
       const { keys } = req.body;
-      const environment = req.query.env as string || process.env.NODE_ENV || 'development';
+      const environment =
+        firstString(req.query.env) || process.env.NODE_ENV || 'development';
 
       if (!Array.isArray(keys)) {
         return res.status(400).json({ error: 'Keys must be an array' });
@@ -235,7 +248,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error('Error fetching multiple configs:', error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 

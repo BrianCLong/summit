@@ -19,6 +19,7 @@ import {
 } from '../../services/RoleManagementService.js';
 import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
+import { firstStringOr } from '../../utils/http-param.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
@@ -120,11 +121,11 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
 
       const envelope = await roleService.getRole(
         principal.tenantId,
-        (id as string),
+        id,
         principal.id
       );
 
@@ -195,7 +196,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
 
       // Validate input
       const parseResult = updateRoleSchema.safeParse(req.body);
@@ -209,7 +210,7 @@ router.patch(
 
       const envelope = await roleService.updateRole(
         principal.tenantId,
-        (id as string),
+        id,
         parseResult.data,
         principal.id
       );
@@ -239,11 +240,11 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
 
       const envelope = await roleService.deleteRole(
         principal.tenantId,
-        (id as string),
+        id,
         principal.id
       );
 
@@ -303,7 +304,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { userId } = req.params;
+      const userId = firstStringOr(req.params.userId, '');
 
       const envelope = await roleService.getUserRoles(
         principal.tenantId,
