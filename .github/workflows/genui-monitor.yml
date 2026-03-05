@@ -1,0 +1,11 @@
+name: GenUI Monitor
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Drift Script
+        run: npx tsx scripts/monitoring/genui-drift.ts

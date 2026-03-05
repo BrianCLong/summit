@@ -1,40 +1,39 @@
-# Repo Assumptions & Validation
+# Repo Assumptions & Validation Baseline
 
-## Verified vs Assumed Directory List
+## Status
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+This file captures **current verified facts** and **deferred validations** for intent-engineering integration work.
 
-## CI Check Names (Exact)
+## Verified Paths
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+Validated from repository root:
 
-## Evidence Schema Conventions (Exact)
+- `.github/workflows/`
+- `docs/`
+- `docs/standards/`
+- `docs/security/data-handling/`
+- `docs/ops/runbooks/`
+- `scripts/`
+- `schemas/`
+- `tests/`
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+## Deferred Pending Validation (Before Merge-Critical Changes)
 
-## Must-Not-Touch List (Guardrails)
+1. Existing evidence ID schema format and naming rules.
+2. Canonical CI job/check names enforced by branch protection.
+3. Current JSON output conventions for deterministic artifacts.
+4. Deterministic artifact stamping rules (what may vary and where).
+5. Feature-flag framework and authoritative config source.
 
-Deferred pending validation. Baseline expectations:
+## Must-Not-Touch Until Explicitly Confirmed
 
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
+- Core evaluation engine internals.
+- Existing CI matrix topology and required-check wiring.
+- Security policy files and governance gates.
 
-## Validation Checklist
+## Working Guardrails
 
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+- Keep scope to validation-first intent integration.
+- Default feature flag posture: `INTENT_ENGINE_V1=OFF`.
+- No autonomous runtime behavior in this phase.
+- No unrelated refactors while establishing baseline gates.

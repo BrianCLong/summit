@@ -387,7 +387,7 @@ cyclonedx-cli analyze sbom/bundle.cdx.json
 
 - [CycloneDX 1.5 Specification](https://cyclonedx.org/docs/1.5/json/)
 - [SBOM Unification](SBOM_UNIFICATION.md)
-- [Bundle Index Schema](BUNDLE_INDEX_SCHEMA.md)
+- Bundle Index Schema
 - [Required Checks Policy](../ci/REQUIRED_CHECKS_POLICY.json)
 
 ---
