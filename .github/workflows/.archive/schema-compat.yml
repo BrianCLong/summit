@@ -18,6 +18,7 @@ concurrency:
 
 jobs:
   schema-compat:
+    name: Schema compatibility guard / schema-compat
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
