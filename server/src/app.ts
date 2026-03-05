@@ -155,20 +155,9 @@ export const createApp = async () => {
   // Initialize OpenTelemetry tracing
   // Tracer is already initialized in index.ts, but we ensure it's available here
   // Verified usage for comprehensive observability
-  const tracer =
-    typeof initializeTracing === 'function'
-      ? initializeTracing()
-      : ({
-          isInitialized: () => true,
-          initialize: async () => undefined,
-        } as any);
+  const tracer = initializeTracing();
   // Ensure initialized if this entry point is used standalone (e.g. tests)
-  if (
-    tracer &&
-    typeof tracer.isInitialized === 'function' &&
-    !tracer.isInitialized() &&
-    typeof tracer.initialize === 'function'
-  ) {
+  if (!tracer.isInitialized()) {
     await tracer.initialize();
   }
 
@@ -490,8 +479,8 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
-  app.use('/airgap', airgapRouter);
-  app.use('/analytics', analyticsRouter);
+  app.use('/airgap', authenticateToken, ensureRole(['ADMIN', 'admin']), airgapRouter);
+  app.use('/analytics', authenticateToken, ensureRole(['ADMIN', 'admin', 'analyst']), analyticsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
@@ -501,7 +490,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', drRouter);
+  app.use('/dr', authenticateToken, ensureRole(['ADMIN', 'admin', 'OPERATOR']), drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
