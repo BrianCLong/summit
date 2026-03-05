@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-05T00:07:01Z",
+  "revision_note": "Added palantir-class readiness assessment and sequenced implementation roadmap with governed phase gates.",
   "initiatives": [
+    {
+      "id": "palantir-class-readiness-plan",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published 12-component readiness assessment and phased delivery plan in docs/roadmap/palantir-class-readiness-plan.md."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
