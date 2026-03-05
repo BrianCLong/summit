@@ -1,44 +1,36 @@
-import { AtomicRubric } from './schema';
+import crypto from 'crypto';
+import { RubricComposite, EvalRun } from './types.js';
 
-/**
- * Scores an output string against a set of atomic rubrics.
- * In a real implementation, this would likely invoke an LLM or specific regexes.
- * This mock uses deterministic scoring to ensure repeatable tests.
- */
-export function scoreOutput(rubrics: AtomicRubric[], output: string): number {
-  if (rubrics.length === 0) return 0;
+export class RubricEvaluator {
+  static evaluate(composite: RubricComposite, output: string, model: string, evidenceId: string): EvalRun {
+    const scores: { [key: string]: number } = {};
+    let totalScore = 0;
 
-  let totalScore = 0;
-  let totalWeight = 0;
+    for (const criterion of composite.atomicCriteria) {
+      // Split the criterion into words and check if any word exists in the output
+      const words = criterion.criterion.toLowerCase().split(' ').filter(w => w.length > 3); // ignoring small words
+      const match = words.some(w => output.toLowerCase().includes(w));
+      const score = match ? 1 : 0;
+      scores[criterion.id] = score * criterion.weight;
+      totalScore += score * criterion.weight;
+    }
 
-  for (const rubric of rubrics) {
-    const criterionMatch = simulateMatch(rubric.criterion, output);
-    totalScore += rubric.weight * criterionMatch;
-    totalWeight += rubric.weight;
+    const maxScore = composite.atomicCriteria.reduce((sum, c) => sum + c.weight, 0);
+    const normalizedScore = maxScore > 0 ? totalScore / maxScore : 0;
+
+    // Create deterministic hash for run
+    const runData = JSON.stringify({ evidenceId, model, output, scores, totalScore: normalizedScore });
+    const timestampHash = crypto.createHash('sha256').update(runData).digest('hex');
+
+    return {
+      evidenceId,
+      model,
+      instruction: composite.instruction,
+      output,
+      rubricId: composite.id,
+      scores,
+      totalScore: normalizedScore,
+      timestampHash
+    };
   }
-
-  return totalWeight > 0 ? totalScore / totalWeight : 0;
-}
-
-function simulateMatch(criterion: string, output: string): number {
-  const lowerOutput = output.toLowerCase();
-
-  // Base mock score to simulate LLM partial matching, using deterministic logic
-  // based on the length of the output string modulo 3 to provide some variation.
-  let matchScore = 0.5 + (output.length % 3) * 0.1;
-
-  // Specific mock checks for the dataset examples
-  if (criterion.includes("standard libraries") && lowerOutput.includes("import numpy")) {
-    matchScore += 0.3;
-  }
-
-  if (criterion.includes("dates") && /\d{4}/.test(lowerOutput)) {
-    matchScore += 0.3;
-  }
-
-  if (criterion.includes("Reign of Terror") && lowerOutput.includes("reign of terror")) {
-    matchScore += 0.3;
-  }
-
-  return Math.min(1.0, Math.max(0.0, matchScore));
 }

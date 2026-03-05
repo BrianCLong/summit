@@ -1,31 +1,9 @@
-# Repo Reality Check
+# Repo Assumptions
 
-## Verified conventions
-* Node.js 18+
-* TypeScript
-* pnpm
-* GitHub Actions
-* GraphRAG pipeline
-* Neo4j + Qdrant
-* ingestion connectors
-
-## Expected directories
-```
-summit/
- ├ src/ingest/
- ├ src/graphrag/
- ├ src/agents/
- ├ src/sdk/
- ├ src/data-pipeline/
- ├ scripts/
- ├ docs/
- └ .github/
-```
-
-## Must-not-touch
-```
-.github/workflows/codeql.yml
-.github/workflows/ci-security.yml
-package-lock / pnpm lock
-core auth modules
-```
+| Assumption | Verified? | Notes |
+| :--- | :--- | :--- |
+| Node/TS or Python modules for agents | Yes | Repo contains Node/TS files (src/) and Python files. |
+| Evaluation runner paths exist | Yes | `src/evals` exists. |
+| Artifacts are stored in `artifacts/` | Yes | `artifacts` directory exists. |
+| Existing GraphRAG schema location | Yes | `src/graph` or `src/summit` likely contain it. |
+| CI workflows | Yes | `.github/workflows` exists. |
