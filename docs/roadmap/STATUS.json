@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-26T16:35:17Z",
-  "revision_note": "Added Docker Gordon subsumption planning artifacts and repo assumption checklist.",
+  "last_updated": "2026-02-24T04:07:37Z",
+  "revision_note": "Daily sprint continuation: opened CI remediation PR #18632 for pnpm gate blocker issue #18631.",
   "initiatives": [
-    {
-      "id": "docker-gordon-subsumption-plan",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Added governed Docker agent subsumption artifacts, repository assumption checklist, and deterministic MWS rollout plan."
-    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -180,7 +174,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -204,7 +198,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
