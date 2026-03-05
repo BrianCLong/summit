@@ -11,13 +11,13 @@
 
 Summit competes in the emerging **"Company OS"** category alongside Notion, Finna, Dotwork, Leapsome, and Soom. Summit's unique positioning is **AI-First + Governance-First**, combining intelligent automation with enterprise-grade controls that enterprise buyers demand.
 
-**Core Differentiators:**
+Core Differentiators:
 
 1. **AI Agent Archetypes:** Named, pre-trained agents (COO, Chief of Staff, RevOps) vs "build your own"
-2. **Policy-Driven Architecture:** OPA-based governance built-in, not bolted-on
-3. **Complete Provenance:** Every action has auditable proof (who, what, when, why, with what evidence)
-4. **Self-Hostable:** True data sovereignty for regulated industries (Notion, Finna, Soom are SaaS-only)
-5. **Graph-Native:** Neo4j knowledge graph enables semantic queries and entity linking
+1. **Policy-Driven Architecture:** OPA-based governance built-in, not bolted-on
+1. **Complete Provenance:** Every action has auditable proof (who, what, when, why, with what evidence)
+1. **Self-Hostable:** True data sovereignty for regulated industries (Notion, Finna, Soom are SaaS-only)
+1. **Graph-Native:** Neo4j knowledge graph enables semantic queries and entity linking
 
 ---
 
@@ -39,7 +39,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### Market Map
 
-```
+```text
                     ┌────────────────────────────────┐
                     │     HORIZONTAL (Wide)          │
                     │  Notion, Finna                 │
@@ -68,7 +68,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 1. **Notion** (Most Direct Competitor)
 
-**What They Do Well:**
+What They Do Well:
 
 - Ubiquitous adoption (94% of Forbes AI 50 use Notion)
 
@@ -80,7 +80,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - Strong template ecosystem
 
-**Where They Fall Short:**
+Where They Fall Short:
 
 - **No Pre-Built Agents:** You build your own automations (complex for non-technical users)
 
@@ -92,7 +92,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Shallow Graph:** Relational DB, not knowledge graph (limited entity linking)
 
-**Summit's Advantage vs Notion:**
+Summit's Advantage vs Notion:
 
 - **Pre-Built Agents:** Chief of Staff, COO, RevOps work out-of-the-box
 
@@ -102,7 +102,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Knowledge Graph:** Semantic queries, entity linking, provenance
 
-**When to Choose Summit Over Notion:**
+When to Choose Summit Over Notion:
 
 - Regulated industries (finance, healthcare, government)
 
@@ -116,7 +116,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 2. **Finna** (Closest to Summit's Vision)
 
-**What They Do Well:**
+What They Do Well:
 
 - "All-in-one with AI agent": docs, CRM, product mgmt, ATS
 
@@ -126,7 +126,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - Modern, fast UI
 
-**Where They Fall Short:**
+Where They Fall Short:
 
 - **SaaS-Only:** No self-hosted
 
@@ -138,7 +138,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Early Stage:** Limited integrations (Summit has 17+)
 
-**Summit's Advantage vs Finna:**
+Summit's Advantage vs Finna:
 
 - **Named Agent Archetypes:** COO, Chief of Staff, RevOps (vs generic assistant)
 
@@ -150,7 +150,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **More Integrations:** 17+ connectors vs Finna's handful
 
-**When to Choose Summit Over Finna:**
+When to Choose Summit Over Finna:
 
 - Need specialized agents (COO, RevOps, etc.) not just generic AI
 
@@ -164,7 +164,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 3. **Dotwork** (Enterprise Focus)
 
-**What They Do Well:**
+What They Do Well:
 
 - Enterprise-grade: SOC 2, SSO, RBAC
 
@@ -176,7 +176,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - Reference architectures (SAFe, LeSS, etc.)
 
-**Where They Fall Short:**
+Where They Fall Short:
 
 - **Sales-Led Only:** Hard to try before buying
 
@@ -186,7 +186,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Narrow Use Cases:** Strategy/product/portfolio (not broad Company OS)
 
-**Summit's Advantage vs Dotwork:**
+Summit's Advantage vs Dotwork:
 
 - **Broader Platform:** Not just strategy/product (also ops, revenue, people)
 
@@ -198,7 +198,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Flexible Deployment:** Internal, white-label, SaaS (Dotwork is SaaS-only)
 
-**When to Choose Summit Over Dotwork:**
+When to Choose Summit Over Dotwork:
 
 - Want broader company OS (not just product/strategy)
 
@@ -212,7 +212,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 4. **Leapsome** (People Ops Specialist)
 
-**What They Do Well:**
+What They Do Well:
 
 - Deep verticalization around People/HR
 
@@ -222,7 +222,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - AI meeting assistant and copilot
 
-**Where They Fall Short:**
+Where They Fall Short:
 
 - **Single Vertical:** People/HR only (not full Company OS)
 
@@ -232,7 +232,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **No Knowledge Graph:** Siloed from rest of company data
 
-**Summit's Advantage vs Leapsome:**
+Summit's Advantage vs Leapsome:
 
 - **Full Company OS:** Ops, revenue, product, people (not just HR)
 
@@ -242,7 +242,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Policy-Driven:** ABAC and multi-stage approvals
 
-**When to Choose Summit Over Leapsome:**
+When to Choose Summit Over Leapsome:
 
 - Need more than People Ops (want full Company OS)
 
@@ -256,7 +256,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 5. **Soom** (Project Management Specialist)
 
-**What They Do Well:**
+What They Do Well:
 
 - AI COO agent for project management
 
@@ -264,7 +264,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - Simple, focused UX
 
-**Where They Fall Short:**
+Where They Fall Short:
 
 - **Single Use Case:** Project management only
 
@@ -274,7 +274,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **No Governance:** No policy engine or approvals
 
-**Summit's Advantage vs Soom:**
+Summit's Advantage vs Soom:
 
 - **Full Company OS:** Beyond just project management
 
@@ -284,7 +284,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - **Policy Engine:** ABAC, approvals, audit trail
 
-**When to Choose Summit Over Soom:**
+When to Choose Summit Over Soom:
 
 - Need more than project management
 
@@ -317,7 +317,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 1. **Mid-Market Tech Companies (50-500 employees)**
 
-**Decision Criteria:**
+Decision Criteria:
 
 - Fast time-to-value
 
@@ -329,7 +329,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 **Top Competitors:** Notion, Finna
 
-**Summit's Pitch:**
+Summit's Pitch:
 
 - "Notion with AI agents that actually do work (not just answer questions)"
 
@@ -339,7 +339,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - "Self-hostable when you need data sovereignty"
 
-**Winning Factors:**
+Winning Factors:
 
 - Agent archetypes (vs generic AI)
 
@@ -351,7 +351,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 2. **Regulated Industries (Finance, Healthcare, Government)**
 
-**Decision Criteria:**
+Decision Criteria:
 
 - Self-hostable (data sovereignty)
 
@@ -363,7 +363,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 **Top Competitors:** Dotwork
 
-**Summit's Pitch:**
+Summit's Pitch:
 
 - "Self-hosted Company OS with AI agents that respect your policies"
 
@@ -373,7 +373,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - "Deploy in your VPC or on-prem"
 
-**Winning Factors:**
+Winning Factors:
 
 - Self-hostable (vs SaaS-only)
 
@@ -387,7 +387,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 ### 3. **Systems Integrators & Consulting Firms (White-Label)**
 
-**Decision Criteria:**
+Decision Criteria:
 
 - Multi-tenant architecture
 
@@ -399,7 +399,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 **Top Competitors:** Dotwork (has partner program), others don't
 
-**Summit's Pitch:**
+Summit's Pitch:
 
 - "White-label Company OS you can sell to your clients"
 
@@ -409,7 +409,7 @@ This positioning turns compliance into a feature, not friction—reducing due-di
 
 - "Revenue share or per-tenant pricing"
 
-**Winning Factors:**
+Winning Factors:
 
 - White-label edition (vs SaaS-only)
 
@@ -551,23 +551,23 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 
 ### **Messaging Pillars**
 
-**1. AI-First Company Operating System**
+1. AI-First Company Operating System
 
 - Not just docs or tasks—a full platform with AI agents that automate work
 
-**2. Pre-Built Agent Archetypes**
+1. Pre-Built Agent Archetypes
 
 - COO, Chief of Staff, RevOps work out-of-box (vs building your own)
 
-**3. Governance & Provenance Built-In**
+1. Governance & Provenance Built-In
 
 - ABAC policies, multi-stage approvals, complete audit trail
 
-**4. Self-Hostable for Data Sovereignty**
+1. Self-Hostable for Data Sovereignty
 
 - Deploy in your VPC or on-prem (not SaaS-only)
 
-**5. Knowledge Graph Connects Everything**
+1. Knowledge Graph Connects Everything
 
 - Unified view across all tools with semantic queries
 
@@ -575,7 +575,7 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 
 **Primary:** "The AI-First Company Operating System"
 
-**Secondary Options:**
+Secondary Options:
 
 - "Notion + AI Agents That Actually Do Work"
 
@@ -587,7 +587,7 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 
 ### **Content Strategy**
 
-**Q4 2025:**
+Q4 2025:
 
 - Launch website with pricing, trust center, reference architecture
 
@@ -597,7 +597,7 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 
 - Technical docs: Deployment guides, API reference
 
-**Q1 2026:**
+Q1 2026:
 
 - Design partner case studies (white-label)
 
@@ -607,7 +607,7 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 
 - Community Slack channel
 
-**Q2 2026:**
+Q2 2026:
 
 - Hosted SaaS launch content
 
@@ -712,11 +712,11 @@ For regulated industries, self-hosted is **non-negotiable** (Notion doesn't offe
 ## Next Steps
 
 1. **Sales Enablement:** Share this positioning doc with sales team
-2. **Website Updates:** Update homepage, pricing, product pages with positioning
-3. **Competitive Battle Cards:** Create 1-pagers for each competitor
-4. **Win/Loss Tracking:** Set up framework to track competitive outcomes
-5. **Customer Feedback:** Regularly update based on customer conversations
+1. **Website Updates:** Update homepage, pricing, product pages with positioning
+1. **Competitive Battle Cards:** Create 1-pagers for each competitor
+1. **Win/Loss Tracking:** Set up framework to track competitive outcomes
+1. **Customer Feedback:** Regularly update based on customer conversations
 
 ---
 
-_This competitive positioning doc should be reviewed and updated quarterly as the market evolves._
+This competitive positioning doc should be reviewed and updated quarterly as the market evolves.

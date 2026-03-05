@@ -2,7 +2,7 @@
 
 **Purpose:** Guide for delivering compelling, consistent product demonstrations. Use for sales demos, partner enablement, and trade shows.
 
-_Version: 2025-11-27_
+Version: 2025-11-27
 
 ---
 
@@ -31,30 +31,30 @@ _Version: 2025-11-27_
 
 ### Pre-Demo Checklist
 
-| Item | Check | Notes |
-|------|-------|-------|
-| Environment accessible | [ ] | Test URL, login |
-| Data loaded | [ ] | Golden path dataset |
-| Browser clean | [ ] | No bookmarks bar, clear history |
-| Screen resolution | [ ] | 1920x1080 or adjust for projector |
-| Notifications off | [ ] | Do Not Disturb mode |
-| Backup browser ready | [ ] | In case of issues |
-| Demo script printed/visible | [ ] | Reference without screen share |
-| Water nearby | [ ] | Stay hydrated |
+| Item                        | Check | Notes                             |
+| --------------------------- | ----- | --------------------------------- |
+| Environment accessible      | [ ]   | Test URL, login                   |
+| Data loaded                 | [ ]   | Golden path dataset               |
+| Browser clean               | [ ]   | No bookmarks bar, clear history   |
+| Screen resolution           | [ ]   | 1920x1080 or adjust for projector |
+| Notifications off           | [ ]   | Do Not Disturb mode               |
+| Backup browser ready        | [ ]   | In case of issues                 |
+| Demo script printed/visible | [ ]   | Reference without screen share    |
+| Water nearby                | [ ]   | Stay hydrated                     |
 
 ### Demo Environment Details
 
-| Environment | URL | Credentials | Dataset |
-|-------------|-----|-------------|---------|
-| Production Demo | {{URL}} | {{user/pass}} | Golden Path v2 |
-| Sandbox | {{URL}} | {{user/pass}} | Clean for live data |
-| Offline/Air-Gap | {{local}} | {{user/pass}} | Portable dataset |
+| Environment     | URL       | Credentials   | Dataset             |
+| --------------- | --------- | ------------- | ------------------- |
+| Production Demo | {{URL}}   | {{user/pass}} | Golden Path v2      |
+| Sandbox         | {{URL}}   | {{user/pass}} | Clean for live data |
+| Offline/Air-Gap | {{local}} | {{user/pass}} | Portable dataset    |
 
 ### Golden Path Dataset
 
 **Scenario:** Investigate a foreign influence operation targeting critical infrastructure.
 
-**Entities:**
+Entities:
 
 - 15 Person entities (actors, targets, intermediaries)
 - 8 Organization entities (threat groups, companies, agencies)
@@ -62,13 +62,13 @@ _Version: 2025-11-27_
 - 25 Digital artifacts (social accounts, domains, IPs)
 - 50+ relationships connecting entities
 
-**Data Sources:**
+Data Sources:
 
 - OSINT feeds (social media, news, domain registrations)
 - Internal reports (analyst assessments)
 - External intel (STIX/TAXII feed)
 
-**Pre-built Views:**
+Pre-built Views:
 
 - Overview graph (all entities)
 - Actor network (threat group + associates)
@@ -87,67 +87,67 @@ _Version: 2025-11-27_
 
 #### Script
 
-**[0:00-2:00] Opening Hook**
+[0:00-2:00] Opening Hook
 
 > "Let me show you what your analysts see every day—and why they're frustrated."
 
-_Show: Diagram or verbal description of current state (multiple tools, swivel-chair, no audit trail)_
+Show: Diagram or verbal description of current state (multiple tools, swivel-chair, no audit trail)
 
 > "Now let me show you what it looks like when you bring that together."
 
-_Show: Summit overview graph—the "wow" moment_
+Show: Summit overview graph—the "wow" moment
 
 ---
 
-**[2:00-5:00] The Story**
+[2:00-5:00] The Story
 
 > "This is an investigation into a foreign influence operation. Your analysts started with a single tip—a suspicious social media account."
 
-_Click on seed entity_
+Click on seed entity
 
 > "From that single data point, Summit automatically pulled in related accounts, domains, and historical activity from your OSINT feeds."
 
-_Expand graph to show connected entities_
+Expand graph to show connected entities
 
 > "In minutes, not hours, they had a map of the network."
 
 ---
 
-**[5:00-8:00] The Differentiator: Provenance**
+[5:00-8:00] The Differentiator: Provenance
 
 > "Here's what makes Summit different. Every single data point—every node, every relationship—has full provenance."
 
-_Click on entity → Show provenance panel_
+Click on entity → Show provenance panel
 
 > "You can see exactly where this came from, when it was added, and who's touched it. When oversight asks 'how do you know this?', you have an answer."
 
 ---
 
-**[8:00-11:00] The Differentiator: Policy-Gated AI**
+[8:00-11:00] The Differentiator: Policy-Gated AI
 
 > "Your analysts can ask natural-language questions."
 
-_Type: "Who are the key actors connected to [Entity]?"_
+Type: "Who are the key actors connected to [Entity]?"
 
 > "Summit's AI generates the query and returns the answer. But notice—it's running through your policy layer. Classification rules, access controls, redaction—all enforced automatically."
 
-_Show: Policy badge or redacted field_
+Show: Policy badge or redacted field
 
 > "This isn't a black box. It's AI your compliance team can trust."
 
 ---
 
-**[11:00-14:00] The Outcome**
+[11:00-14:00] The Outcome
 
 > "What used to take your team days now takes hours. And when they're done, they have an evidence package that stands up to scrutiny."
 
-_Show: Export menu or evidence package_
+Show: Export menu or evidence package
 
 > "That's the difference: faster analysis, full audit trail, AI that plays by the rules."
 
 ---
 
-**[14:00-15:00] Close**
+[14:00-15:00] Close
 
 > "What questions do you have? And where would you want to see this applied in your organization?"
 
@@ -161,95 +161,95 @@ _Show: Export menu or evidence package_
 
 #### Script
 
-**[0:00-3:00] Opening**
+[0:00-3:00] Opening
 
 > "I'm going to walk through an actual investigation workflow—the kind of thing your analysts do every day. Feel free to interrupt with questions."
 
-_Open empty workbench_
+Open empty workbench
 
 ---
 
-**[3:00-8:00] Data Ingestion**
+[3:00-8:00] Data Ingestion
 
 > "Let's start with raw data. I've got a STIX bundle from a threat intel feed."
 
-_Demonstrate: Import STIX file or connect to feed_
+Demonstrate: Import STIX file or connect to feed
 
 > "Summit normalizes this into our graph model, applies your ontology, and tags provenance automatically."
 
-_Show: Ingested entities with source attribution_
+Show: Ingested entities with source attribution
 
 > "Notice every entity has a source tag. We didn't lose anything—we gained structure."
 
 ---
 
-**[8:00-15:00] Graph Exploration**
+[8:00-15:00] Graph Exploration
 
 > "Now let's explore. I'll start with this actor and see what's connected."
 
-_Expand entity → Show relationships_
+Expand entity → Show relationships
 
 > "I can filter by relationship type, time range, or confidence level."
 
-_Apply filter_
+Apply filter
 
 > "Let me switch to timeline view to see when these connections formed."
 
-_Switch to timeline_
+Switch to timeline
 
 > "And map view to see geographic distribution."
 
-_Switch to map_
+Switch to map
 
 > "Same data, three perspectives. Your analysts don't have to context-switch to different tools."
 
 ---
 
-**[15:00-20:00] Natural Language Queries**
+[15:00-20:00] Natural Language Queries
 
 > "Let's say I want to find something specific. Instead of writing Cypher, I can just ask."
 
-_Type: "Show me all organizations connected to [Actor] through financial relationships"_
+Type: "Show me all organizations connected to [Actor] through financial relationships"
 
 > "Summit translates that to a graph query, runs it, and shows results."
 
-_Show: Results with query translation visible_
+Show: Results with query translation visible
 
 > "If I want to see the actual Cypher, I can. But most analysts won't need to."
 
 ---
 
-**[20:00-25:00] Provenance & Audit**
+[20:00-25:00] Provenance & Audit
 
 > "Let's look at provenance in detail."
 
-_Click entity → Open provenance panel_
+Click entity → Open provenance panel
 
 > "Here's the full chain: original source, transformations, who's viewed it, any modifications."
 
-_Show: Provenance graph or timeline_
+Show: Provenance graph or timeline
 
 > "If I export this entity or any conclusion built on it, the provenance comes with it."
 
-_Demonstrate: Export to evidence package_
+Demonstrate: Export to evidence package
 
 ---
 
-**[25:00-28:00] Policy & Access Control**
+[25:00-28:00] Policy & Access Control
 
 > "Let me show how policies work."
 
-_Navigate to policy or show redacted content_
+Navigate to policy or show redacted content
 
 > "This entity has classification labels. If I'm an analyst without the right clearance, I see a redacted version."
 
-_Show: Different user view or policy rule_
+Show: Different user view or policy rule
 
 > "Policies are code—OPA/Rego. They're version-controlled, auditable, and dynamic."
 
 ---
 
-**[28:00-30:00] Close**
+[28:00-30:00] Close
 
 > "That's the core workflow: ingest, explore, query, prove provenance, enforce policy. What would you want to try yourself?"
 
@@ -263,13 +263,13 @@ _Show: Different user view or policy rule_
 
 #### Script
 
-**[0:00-3:00] Architecture Overview**
+[0:00-3:00] Architecture Overview
 
 > "Let me walk through the architecture. This is how Summit works under the hood."
 
-_Show: Architecture diagram_
+Show: Architecture diagram
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                         API Gateway                          │
 │                     (GraphQL / REST)                        │
@@ -290,7 +290,7 @@ _Show: Architecture diagram_
 
 ---
 
-**[3:00-8:00] Data Layer**
+[3:00-8:00] Data Layer
 
 > "Graph data lives in Neo4j. We're on version 5.x, enterprise edition for clustering."
 
@@ -298,15 +298,15 @@ _Show: Architecture diagram_
 
 > "Redis for caching and pub/sub."
 
-_Discuss: Why this split, trade-offs, alternatives considered_
+Discuss: Why this split, trade-offs, alternatives considered
 
 ---
 
-**[8:00-12:00] Policy Layer**
+[8:00-12:00] Policy Layer
 
 > "Access control is ABAC via Open Policy Agent."
 
-_Show: Sample Rego policy_
+Show: Sample Rego policy
 
 ```rego
 package summit.authz
@@ -323,11 +323,11 @@ allow {
 
 ---
 
-**[12:00-16:00] Integration Points**
+[12:00-16:00] Integration Points
 
 > "We're API-first. GraphQL for rich queries, REST for simple integrations."
 
-_Show: API documentation or sample calls_
+Show: API documentation or sample calls
 
 > "Data ingestion supports: STIX/TAXII, REST webhooks, file import (CSV, JSON, documents), custom connectors."
 
@@ -335,19 +335,19 @@ _Show: API documentation or sample calls_
 
 ---
 
-**[16:00-18:00] Deployment Patterns**
+[16:00-18:00] Deployment Patterns
 
 > "We support three deployment patterns:"
 
-| Pattern | Description | Use Case |
-|---------|-------------|----------|
-| Cloud | AWS GovCloud / Azure Gov | Standard; fastest deployment |
-| On-Prem | K8s on customer infrastructure | Data residency requirements |
-| Air-Gap | Fully disconnected; offline updates | Classified environments |
+| Pattern | Description                         | Use Case                     |
+| ------- | ----------------------------------- | ---------------------------- |
+| Cloud   | AWS GovCloud / Azure Gov            | Standard; fastest deployment |
+| On-Prem | K8s on customer infrastructure      | Data residency requirements  |
+| Air-Gap | Fully disconnected; offline updates | Classified environments      |
 
 ---
 
-**[18:00-20:00] Security & Compliance**
+[18:00-20:00] Security & Compliance
 
 > "Quick hits on security:"
 >
@@ -364,13 +364,13 @@ _Show: API documentation or sample calls_
 
 Customize based on customer use case. Common variants:
 
-| Use Case | Focus Areas | Dataset Twist |
-|----------|-------------|---------------|
-| OSINT Fusion | Multi-source ingestion, deduplication | Multiple overlapping feeds |
-| Threat Intel | STIX/TAXII, TTP mapping, IOC correlation | APT campaign data |
-| Fraud Investigation | Entity resolution, transaction networks | Financial flow data |
-| Disinformation | Social graph, narrative tracking, temporal | Influence op data |
-| Supply Chain Risk | Vendor networks, risk propagation | Supplier relationship data |
+| Use Case            | Focus Areas                                | Dataset Twist              |
+| ------------------- | ------------------------------------------ | -------------------------- |
+| OSINT Fusion        | Multi-source ingestion, deduplication      | Multiple overlapping feeds |
+| Threat Intel        | STIX/TAXII, TTP mapping, IOC correlation   | APT campaign data          |
+| Fraud Investigation | Entity resolution, transaction networks    | Financial flow data        |
+| Disinformation      | Social graph, narrative tracking, temporal | Influence op data          |
+| Supply Chain Risk   | Vendor networks, risk propagation          | Supplier relationship data |
 
 ---
 
@@ -378,23 +378,26 @@ Customize based on customer use case. Common variants:
 
 ### Common Issues
 
-| Issue | Quick Fix | Root Cause |
-|-------|-----------|------------|
-| Slow graph render | Reduce visible nodes; apply filter | Too many nodes on screen |
-| Login fails | Check credentials; clear cache | Session expired |
-| Data missing | Verify dataset loaded; check filters | Wrong environment |
-| NL query fails | Simplify query; use keywords | Query too complex |
-| Export hangs | Reduce selection; check permissions | Large export |
+| Issue             | Quick Fix                            | Root Cause               |
+| ----------------- | ------------------------------------ | ------------------------ |
+| Slow graph render | Reduce visible nodes; apply filter   | Too many nodes on screen |
+| Login fails       | Check credentials; clear cache       | Session expired          |
+| Data missing      | Verify dataset loaded; check filters | Wrong environment        |
+| NL query fails    | Simplify query; use keywords         | Query too complex        |
+| Export hangs      | Reduce selection; check permissions  | Large export             |
 
 ### Recovery Scripts
 
-**Environment Down:**
+Environment Down:
+
 > "Looks like we're having a technical hiccup. While we sort that out, let me walk you through this on slides and then follow up with a recorded demo."
 
-**Feature Bug:**
+Feature Bug:
+
 > "That's not behaving as expected—I'll flag that for the team. Let me show you the intended behavior and we'll follow up with a fix."
 
-**Question You Can't Answer:**
+Question You Can't Answer:
+
 > "Great question—I want to give you an accurate answer rather than guess. I'll follow up with our team and get back to you by [specific time]."
 
 ---
@@ -403,12 +406,12 @@ Customize based on customer use case. Common variants:
 
 ### Immediately After Demo
 
-| Action | Owner | Timing |
-|--------|-------|--------|
-| Send thank you email | AE | Same day |
-| Share demo recording (if recorded) | AE | Same day |
-| Answer open questions | SE | 24 hours |
-| Send relevant collateral | AE | 24 hours |
+| Action                             | Owner | Timing   |
+| ---------------------------------- | ----- | -------- |
+| Send thank you email               | AE    | Same day |
+| Share demo recording (if recorded) | AE    | Same day |
+| Answer open questions              | SE    | 24 hours |
+| Send relevant collateral           | AE    | 24 hours |
 
 ### Thank You Email Template
 
@@ -470,26 +473,26 @@ To be demo-certified, team members must:
 
 ### Key Phrases
 
-| Moment | Say This |
-|--------|----------|
-| Opening | "Let me show you what this looks like for your team..." |
-| Transition | "Now here's where it gets interesting..." |
+| Moment     | Say This                                                  |
+| ---------- | --------------------------------------------------------- |
+| Opening    | "Let me show you what this looks like for your team..."   |
+| Transition | "Now here's where it gets interesting..."                 |
 | Provenance | "Every fact has a source. Here's the chain-of-custody..." |
-| AI | "AI that plays by your rules, not a black box..." |
-| Policy | "Your policies, enforced automatically..." |
-| Objection | "That's a great question. Let me show you..." |
-| Close | "Where would you want to see this applied first?" |
+| AI         | "AI that plays by your rules, not a black box..."         |
+| Policy     | "Your policies, enforced automatically..."                |
+| Objection  | "That's a great question. Let me show you..."             |
+| Close      | "Where would you want to see this applied first?"         |
 
 ### Numbers to Remember
 
-| Metric | Value | Context |
-|--------|-------|---------|
-| Time-to-insight reduction | 30-50% | Conservative; validated in pilots |
-| Provenance coverage | 95%+ | Default; configurable |
-| Pilot duration | 8-12 weeks | Standard scope |
-| Users in pilot | 10-25 | Typical range |
-| Data sources in pilot | 3-6 | P1 + P2 |
+| Metric                    | Value      | Context                           |
+| ------------------------- | ---------- | --------------------------------- |
+| Time-to-insight reduction | 30-50%     | Conservative; validated in pilots |
+| Provenance coverage       | 95%+       | Default; configurable             |
+| Pilot duration            | 8-12 weeks | Standard scope                    |
+| Users in pilot            | 10-25      | Typical range                     |
+| Data sources in pilot     | 3-6        | P1 + P2                           |
 
 ---
 
-_Version: 2025-11-27 | Update after each major release_
+Version: 2025-11-27 | Update after each major release

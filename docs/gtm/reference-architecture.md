@@ -141,7 +141,7 @@ White-label edition supports multiple isolated tenants:
 │  • Google       │  • Jira        │  • Azure OpenAI │  • Slack           │
 │  • LDAP         │  • Salesforce  │  • AWS Bedrock  │  • Teams           │
 └─────────────────┴────────────────┴─────────────────┴────────────────────┘
-```text
+```
 
 ---
 
@@ -202,9 +202,9 @@ White-label edition supports multiple isolated tenants:
 │  └───────────────────────────────────────────────────┘    │
 │                                                            │
 └────────────────────────────────────────────────────────────┘
-```text
+```
 
-**Specifications:**
+Specifications:
 
 - **Compute:** 16 vCPU, 64GB RAM (Kubernetes cluster)
 - **Database:** Neo4j 3-node cluster, PostgreSQL primary + 2 read replicas
@@ -212,7 +212,7 @@ White-label edition supports multiple isolated tenants:
 - **Network:** VPC with private subnets, NAT gateway, VPN
 - **HA:** Multi-AZ deployment, auto-scaling, automated backups
 
-**Cost Estimate (AWS):**
+Cost Estimate (AWS):
 
 - Compute (EKS): ~$500/month
 - Database (RDS, Neo4j): ~$800/month
@@ -265,9 +265,9 @@ White-label edition supports multiple isolated tenants:
                             │  • Analytics          │
                             │  • Cross-region sync  │
                             └───────────────────────┘
-```text
+```
 
-**Tenant Isolation:**
+Tenant Isolation:
 
 - Separate database instances per tenant
 - Separate encryption keys (AWS KMS per tenant)
@@ -275,14 +275,14 @@ White-label edition supports multiple isolated tenants:
 - Row-level security (PostgreSQL RLS)
 - Graph-level isolation (Neo4j multi-database)
 
-**Specifications (per region):**
+Specifications (per region):
 
 - **Compute:** 32 vCPU, 128GB RAM (K8s cluster)
 - **Database:** 1 Neo4j + 1 PostgreSQL instance per tenant (up to 20 tenants per region)
 - **Storage:** 2TB SSD (databases), 5TB S3 (backups/artifacts)
 - **Network:** VPC peering, Transit Gateway, CloudFront CDN
 
-**Cost Estimate (3 regions, 30 tenants):**
+Cost Estimate (3 regions, 30 tenants):
 
 - Compute: ~$4,500/month
 - Database: ~$15,000/month (30 tenant DBs)
@@ -344,9 +344,9 @@ White-label edition supports multiple isolated tenants:
 │  • Read-only queries (reduce load on primary)                           │
 │  • Failover target (<4 hours RTO)                                       │
 └─────────────────────────────────────────────────────────────────────────┘
-```text
+```
 
-**High Availability Features:**
+High Availability Features:
 
 - Multi-AZ deployment (3 availability zones)
 - Auto-scaling (CPU/memory thresholds)
@@ -355,21 +355,21 @@ White-label edition supports multiple isolated tenants:
 - Circuit breakers and rate limiting
 - CDN (CloudFront) for static assets
 
-**Disaster Recovery:**
+Disaster Recovery:
 
 - Continuous replication to DR region
 - Point-in-time recovery (PITR)
 - Automated failover testing (monthly)
 - RTO: 4 hours, RPO: 1 hour
 
-**Specifications:**
+Specifications:
 
 - **Compute:** 64 vCPU, 256GB RAM (K8s cluster)
 - **Database:** Neo4j 3-node cluster, PostgreSQL Multi-AZ
 - **Storage:** 5TB SSD, 20TB S3 (multi-region replication)
 - **Network:** CloudFront CDN, WAF, DDoS protection
 
-**Cost Estimate:**
+Cost Estimate:
 
 - Compute: ~$3,000/month
 - Database: ~$2,500/month
@@ -434,7 +434,7 @@ White-label edition supports multiple isolated tenants:
 │ • Cloud provider data centers (SOC 2, ISO 27001)                        │
 │ • Access controls, surveillance                                         │
 └─────────────────────────────────────────────────────────────────────────┘
-```text
+```
 
 ---
 
@@ -488,7 +488,7 @@ White-label edition supports multiple isolated tenants:
 │  • Relationships (works_for, participated_in, etc.)           │
 │  • Provenance (source, timestamp, confidence)                 │
 └────────────────────────────────────────────────────────────────┘
-```text
+```
 
 ---
 
@@ -524,9 +524,9 @@ White-label edition supports multiple isolated tenants:
 │  • Business KPIs │  │   • Routing      │  │   • Escalation  │
 │  • Agent metrics │  │   • Grouping     │  │                 │
 └──────────────────┘  └──────────────────┘  └─────────────────┘
-```text
+```
 
-**Key Metrics:**
+Key Metrics:
 
 - Request latency (p50, p95, p99)
 - Error rate (HTTP 4xx, 5xx)
@@ -535,7 +535,7 @@ White-label edition supports multiple isolated tenants:
 - Policy evaluation time
 - Workflow success rate
 
-**Alerting:**
+Alerting:
 
 - High error rate (>1%)
 - High latency (p95 >500ms)
@@ -550,13 +550,13 @@ White-label edition supports multiple isolated tenants:
 
 ### Horizontal Scaling
 
-**Application Layer:**
+Application Layer:
 
 - API Gateway: 1 replica per 1000 concurrent users
 - Agents: 1 replica per 500 concurrent requests
 - Workflow Engine: 1 replica per 100 concurrent workflows
 
-**Database Layer:**
+Database Layer:
 
 - Neo4j: Read replicas for query load distribution
 - PostgreSQL: Read replicas for reporting queries
@@ -564,14 +564,14 @@ White-label edition supports multiple isolated tenants:
 
 ### Vertical Scaling
 
-**When to scale up:**
+When to scale up:
 
 - CPU >70% sustained
 - Memory >80% sustained
 - Database query time increasing
 - Agent execution time increasing
 
-**Recommended instance types (AWS):**
+Recommended instance types (AWS):
 
 - Small deployment (<100 users): t3.xlarge (4 vCPU, 16GB RAM)
 - Medium deployment (<500 users): m5.2xlarge (8 vCPU, 32GB RAM)
@@ -584,20 +584,20 @@ White-label edition supports multiple isolated tenants:
 
 ### Backup Strategy
 
-**Database Backups:**
+Database Backups:
 
 - Automated daily backups (Neo4j, PostgreSQL)
 - Point-in-time recovery (PITR) enabled
 - Retention: 30 days (daily), 90 days (weekly), 1 year (monthly)
 - Geo-redundant storage (multi-region replication)
 
-**Application Backups:**
+Application Backups:
 
 - Configuration as code (Helm charts, Terraform)
 - GitOps for deployment state (ArgoCD)
 - Container image registry backups
 
-**Testing:**
+Testing:
 
 - Monthly restore tests
 - Quarterly disaster recovery drills

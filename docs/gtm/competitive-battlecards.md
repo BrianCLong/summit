@@ -3,7 +3,7 @@
 
 **Purpose:** Positioning guidance against key competitors. Use for sales prep, objection handling, and RFP responses.
 
-_Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
+Version: 2025-11-27 | Update quarterly or when competitive landscape shifts
 
 ---
 
@@ -19,7 +19,7 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ## Competitive Landscape Overview
 
-```
+```text
                     ┌─────────────────────────────────────────────┐
                     │              ANALYST PRODUCTIVITY            │
                     │                     HIGH                     │
@@ -58,13 +58,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Overview
 
-| Attribute | Palantir | Summit |
-|-----------|----------|--------|
-| **Primary Products** | Gotham (Gov), Foundry (Enterprise) | Analyst Workbench |
-| **Target Market** | IC, DoD, large enterprise | Mission teams, primes, regulated enterprise |
-| **Deployment** | On-prem, cloud, classified | Cloud, on-prem, air-gap |
-| **Typical Deal Size** | $5M-$50M+ | $200k-$2M (land), expand from there |
-| **Sales Cycle** | 12-24 months | 3-6 months |
+| Attribute             | Palantir                           | Summit                                      |
+| --------------------- | ---------------------------------- | ------------------------------------------- |
+| **Primary Products**  | Gotham (Gov), Foundry (Enterprise) | Analyst Workbench                           |
+| **Target Market**     | IC, DoD, large enterprise          | Mission teams, primes, regulated enterprise |
+| **Deployment**        | On-prem, cloud, classified         | Cloud, on-prem, air-gap                     |
+| **Typical Deal Size** | $5M-$50M+                          | $200k-$2M (land), expand from there         |
+| **Sales Cycle**       | 12-24 months                       | 3-6 months                                  |
 
 ### Where Palantir Wins
 
@@ -78,14 +78,14 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Where Summit Wins
 
-| Dimension | Summit Advantage | Proof Points |
-|-----------|-----------------|--------------|
-| **Provenance-first** | Every fact traced to source; built-in, not bolted-on | Chain-of-custody export, audit logs |
-| **Policy-gated AI** | ABAC/OPA enforcement on AI outputs | Classification, redaction, DLP |
-| **Total cost** | 5-10x lower TCO; no FDE dependency | Pricing comparison |
-| **Time to value** | 8-12 week pilots vs. 12+ month deployments | Pilot timeline |
-| **Open architecture** | GraphQL, REST, STIX/TAXII; no lock-in | API documentation |
-| **Mission team scale** | Right-sized for teams, not enterprises | Customer references |
+| Dimension              | Summit Advantage                                     | Proof Points                        |
+| ---------------------- | ---------------------------------------------------- | ----------------------------------- |
+| **Provenance-first**   | Every fact traced to source; built-in, not bolted-on | Chain-of-custody export, audit logs |
+| **Policy-gated AI**    | ABAC/OPA enforcement on AI outputs                   | Classification, redaction, DLP      |
+| **Total cost**         | 5-10x lower TCO; no FDE dependency                   | Pricing comparison                  |
+| **Time to value**      | 8-12 week pilots vs. 12+ month deployments           | Pilot timeline                      |
+| **Open architecture**  | GraphQL, REST, STIX/TAXII; no lock-in                | API documentation                   |
+| **Mission team scale** | Right-sized for teams, not enterprises               | Customer references                 |
 
 ### Trap Questions (Expose Palantir Weaknesses)
 
@@ -97,10 +97,10 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Objection Handling
 
-| Objection | Response |
-|-----------|----------|
-| "We're already using Palantir" | "Got it. What we hear is that Palantir is great for big enterprise analytics but can be heavy for mission team workflows. Are all your analysts actually using it daily, or is it more of a reporting layer?" |
-| "Palantir is the gold standard" | "They've done great work in the IC. The question is whether you need an enterprise analytics platform or a mission-focused analyst workbench. Summit is built for the analysts, not the enterprise." |
+| Objection                             | Response                                                                                                                                                                                                                         |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "We're already using Palantir"        | "Got it. What we hear is that Palantir is great for big enterprise analytics but can be heavy for mission team workflows. Are all your analysts actually using it daily, or is it more of a reporting layer?"                    |
+| "Palantir is the gold standard"       | "They've done great work in the IC. The question is whether you need an enterprise analytics platform or a mission-focused analyst workbench. Summit is built for the analysts, not the enterprise."                             |
 | "We can't introduce another platform" | "Understood. Summit can actually complement Palantir—we've seen teams use Summit for day-to-day analyst work while Palantir handles enterprise reporting. Or Summit can be a lower-cost alternative for specific mission teams." |
 
 ### Competitive Positioning Statement
@@ -113,13 +113,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Overview
 
-| Attribute | i2 Analyst's Notebook | Summit |
-|-----------|----------------------|--------|
-| **Architecture** | Desktop application | Web-based, cloud-native |
-| **Data Model** | Link analysis focused | Full graph + timeline + map |
-| **Collaboration** | Limited (file-based) | Real-time, multi-user |
-| **AI/ML** | Minimal native | Policy-gated AI, NL queries |
-| **Provenance** | Manual documentation | Built-in, automated |
+| Attribute         | i2 Analyst's Notebook | Summit                      |
+| ----------------- | --------------------- | --------------------------- |
+| **Architecture**  | Desktop application   | Web-based, cloud-native     |
+| **Data Model**    | Link analysis focused | Full graph + timeline + map |
+| **Collaboration** | Limited (file-based)  | Real-time, multi-user       |
+| **AI/ML**         | Minimal native        | Policy-gated AI, NL queries |
+| **Provenance**    | Manual documentation  | Built-in, automated         |
 
 ### Where i2 Wins
 
@@ -133,14 +133,14 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Where Summit Wins
 
-| Dimension | Summit Advantage | Proof Points |
-|-----------|-----------------|--------------|
-| **Modern architecture** | Web-based, collaborative, scalable | No desktop installs |
-| **Real-time collaboration** | Multiple analysts on same graph | Live updates |
-| **Provenance automation** | Built-in, not manual | Export demo |
-| **AI-assisted analysis** | NL queries, hypothesis generation | NL→Cypher demo |
-| **API-first** | Integrate with any system | GraphQL/REST |
-| **Timeline + Map** | Tri-pane, not just link charts | UI demo |
+| Dimension                   | Summit Advantage                   | Proof Points        |
+| --------------------------- | ---------------------------------- | ------------------- |
+| **Modern architecture**     | Web-based, collaborative, scalable | No desktop installs |
+| **Real-time collaboration** | Multiple analysts on same graph    | Live updates        |
+| **Provenance automation**   | Built-in, not manual               | Export demo         |
+| **AI-assisted analysis**    | NL queries, hypothesis generation  | NL→Cypher demo      |
+| **API-first**               | Integrate with any system          | GraphQL/REST        |
+| **Timeline + Map**          | Tri-pane, not just link charts     | UI demo             |
 
 ### Trap Questions
 
@@ -152,11 +152,11 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Objection Handling
 
-| Objection | Response |
-|-----------|----------|
-| "Our analysts know i2" | "That's valuable institutional knowledge. Summit's graph visualization will feel familiar, but adds real-time collaboration, automated provenance, and AI assistance. Analysts typically get productive in a few hours." |
-| "We just renewed our i2 license" | "That's fine—Summit can run alongside i2. Teams often start with Summit for new workflows while maintaining i2 for legacy. Over time, you can consolidate if it makes sense." |
-| "We need offline capability" | "Summit supports disconnected operations in air-gapped deployments. What specific offline scenarios are you solving for?" |
+| Objection                        | Response                                                                                                                                                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| "Our analysts know i2"           | "That's valuable institutional knowledge. Summit's graph visualization will feel familiar, but adds real-time collaboration, automated provenance, and AI assistance. Analysts typically get productive in a few hours." |
+| "We just renewed our i2 license" | "That's fine—Summit can run alongside i2. Teams often start with Summit for new workflows while maintaining i2 for legacy. Over time, you can consolidate if it makes sense."                                            |
+| "We need offline capability"     | "Summit supports disconnected operations in air-gapped deployments. What specific offline scenarios are you solving for?"                                                                                                |
 
 ### Competitive Positioning Statement
 
@@ -168,13 +168,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Overview
 
-| Attribute | Custom Build | Summit |
-|-----------|--------------|--------|
-| **Development Time** | 12-24+ months | 8-12 week pilot |
-| **Cost** | $2-10M+ initial; ongoing maintenance | $100k pilot; $200k+ production |
-| **Risk** | High (scope creep, staff turnover) | Low (proven platform) |
-| **Maintenance** | Customer responsibility | Summit responsibility |
-| **Compliance** | Build from scratch | Pre-built, documented |
+| Attribute            | Custom Build                         | Summit                         |
+| -------------------- | ------------------------------------ | ------------------------------ |
+| **Development Time** | 12-24+ months                        | 8-12 week pilot                |
+| **Cost**             | $2-10M+ initial; ongoing maintenance | $100k pilot; $200k+ production |
+| **Risk**             | High (scope creep, staff turnover)   | Low (proven platform)          |
+| **Maintenance**      | Customer responsibility              | Summit responsibility          |
+| **Compliance**       | Build from scratch                   | Pre-built, documented          |
 
 ### Where Custom Builds Win
 
@@ -188,14 +188,14 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Where Summit Wins
 
-| Dimension | Summit Advantage | Proof Points |
-|-----------|-----------------|--------------|
-| **Time to value** | Weeks, not years | Pilot timeline |
-| **Cost** | 5-10x lower initial; predictable ongoing | TCO comparison |
-| **Risk reduction** | Proven, not prototype | Customer references |
-| **Compliance-ready** | SBOM, SLSA, audit logs built-in | Compliance pack |
-| **Maintained** | Continuous updates; no staff dependency | Release notes |
-| **Focus** | Customer focuses on mission, not platform | Resource allocation |
+| Dimension            | Summit Advantage                          | Proof Points        |
+| -------------------- | ----------------------------------------- | ------------------- |
+| **Time to value**    | Weeks, not years                          | Pilot timeline      |
+| **Cost**             | 5-10x lower initial; predictable ongoing  | TCO comparison      |
+| **Risk reduction**   | Proven, not prototype                     | Customer references |
+| **Compliance-ready** | SBOM, SLSA, audit logs built-in           | Compliance pack     |
+| **Maintained**       | Continuous updates; no staff dependency   | Release notes       |
+| **Focus**            | Customer focuses on mission, not platform | Resource allocation |
 
 ### Trap Questions
 
@@ -207,12 +207,12 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Objection Handling
 
-| Objection | Response |
-|-----------|----------|
-| "We want to own the IP" | "Understood. With Summit, you own your data and configurations. You can also extend the platform with custom components. What specific IP are you trying to create?" |
+| Objection                        | Response                                                                                                                                                                                          |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "We want to own the IP"          | "Understood. With Summit, you own your data and configurations. You can also extend the platform with custom components. What specific IP are you trying to create?"                              |
 | "We've already started building" | "Got it. How far along are you? We've seen teams use Summit as the substrate to accelerate their build—keep the mission-specific parts custom, use Summit for the graph/provenance/policy layer." |
-| "Our requirements are unique" | "That's what everyone says, and sometimes it's true. What specifically is unique? We've likely seen similar requirements and can show how Summit handles them." |
-| "We don't want vendor lock-in" | "Completely fair. Summit is API-first—GraphQL, REST, STIX/TAXII. Your data is always exportable. We're the opposite of lock-in; we're designed to integrate." |
+| "Our requirements are unique"    | "That's what everyone says, and sometimes it's true. What specifically is unique? We've likely seen similar requirements and can show how Summit handles them."                                   |
+| "We don't want vendor lock-in"   | "Completely fair. Summit is API-first—GraphQL, REST, STIX/TAXII. Your data is always exportable. We're the opposite of lock-in; we're designed to integrate."                                     |
 
 ### Competitive Positioning Statement
 
@@ -224,13 +224,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Overview
 
-| Attribute | Maltego | Summit |
-|-----------|---------|--------|
-| **Primary Use** | OSINT reconnaissance | Full analyst workbench |
-| **Data Model** | Transform-based | Persistent graph |
-| **Collaboration** | Limited | Full multi-user |
-| **Enterprise Features** | Maltego Enterprise | Built-in |
-| **Provenance** | Transform history | Full chain-of-custody |
+| Attribute               | Maltego              | Summit                 |
+| ----------------------- | -------------------- | ---------------------- |
+| **Primary Use**         | OSINT reconnaissance | Full analyst workbench |
+| **Data Model**          | Transform-based      | Persistent graph       |
+| **Collaboration**       | Limited              | Full multi-user        |
+| **Enterprise Features** | Maltego Enterprise   | Built-in               |
+| **Provenance**          | Transform history    | Full chain-of-custody  |
 
 ### Where Maltego Wins
 
@@ -244,14 +244,14 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Where Summit Wins
 
-| Dimension | Summit Advantage | Proof Points |
-|-----------|-----------------|--------------|
-| **Full analyst workflow** | Not just recon; case management, collaboration | UI demo |
-| **Persistent graph** | Data stays; not just session-based | Data model |
-| **Enterprise-ready** | ABAC, audit, compliance | Security review |
-| **AI-assisted** | NL queries, not just transforms | NL→Cypher demo |
-| **Timeline + Map** | Tri-pane, not just graph | UI demo |
-| **Provenance** | Full chain-of-custody, not just history | Export demo |
+| Dimension                 | Summit Advantage                               | Proof Points    |
+| ------------------------- | ---------------------------------------------- | --------------- |
+| **Full analyst workflow** | Not just recon; case management, collaboration | UI demo         |
+| **Persistent graph**      | Data stays; not just session-based             | Data model      |
+| **Enterprise-ready**      | ABAC, audit, compliance                        | Security review |
+| **AI-assisted**           | NL queries, not just transforms                | NL→Cypher demo  |
+| **Timeline + Map**        | Tri-pane, not just graph                       | UI demo         |
+| **Provenance**            | Full chain-of-custody, not just history        | Export demo     |
 
 ### Trap Questions
 
@@ -262,10 +262,10 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Objection Handling
 
-| Objection | Response |
-|-----------|----------|
+| Objection                | Response                                                                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | "We already use Maltego" | "Maltego is great for recon. Summit is for the full analyst workflow—when you need to manage investigations, collaborate, and produce auditable products. They can complement each other." |
-| "Maltego is cheaper" | "For individual recon work, yes. For team-based, compliant, enterprise investigation work, Summit is actually lower TCO when you factor in collaboration, audit, and management overhead." |
+| "Maltego is cheaper"     | "For individual recon work, yes. For team-based, compliant, enterprise investigation work, Summit is actually lower TCO when you factor in collaboration, audit, and management overhead." |
 
 ### Competitive Positioning Statement
 
@@ -277,13 +277,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Overview
 
-| Attribute | Neo4j + Custom | Summit |
-|-----------|----------------|--------|
-| **Foundation** | Neo4j database | Neo4j + PostgreSQL + full stack |
-| **UI** | Custom built | Production-ready workbench |
-| **Features** | Whatever you build | Graph + Timeline + Map + AI + Provenance |
-| **Compliance** | Build yourself | Built-in |
-| **Time to Value** | 6-12+ months | 8-12 weeks |
+| Attribute         | Neo4j + Custom     | Summit                                   |
+| ----------------- | ------------------ | ---------------------------------------- |
+| **Foundation**    | Neo4j database     | Neo4j + PostgreSQL + full stack          |
+| **UI**            | Custom built       | Production-ready workbench               |
+| **Features**      | Whatever you build | Graph + Timeline + Map + AI + Provenance |
+| **Compliance**    | Build yourself     | Built-in                                 |
+| **Time to Value** | 6-12+ months       | 8-12 weeks                               |
 
 ### Where Neo4j + Custom Wins
 
@@ -295,13 +295,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Where Summit Wins
 
-| Dimension | Summit Advantage | Proof Points |
-|-----------|-----------------|--------------|
-| **Complete solution** | Not just database; full analyst UX | Demo |
-| **Provenance layer** | Not in Neo4j; built into Summit | Architecture |
-| **Policy layer** | ABAC/OPA not in Neo4j | Policy demo |
-| **Time to value** | Weeks, not months | Pilot timeline |
-| **Maintained** | We handle updates; you focus on mission | Release cadence |
+| Dimension             | Summit Advantage                        | Proof Points    |
+| --------------------- | --------------------------------------- | --------------- |
+| **Complete solution** | Not just database; full analyst UX      | Demo            |
+| **Provenance layer**  | Not in Neo4j; built into Summit         | Architecture    |
+| **Policy layer**      | ABAC/OPA not in Neo4j                   | Policy demo     |
+| **Time to value**     | Weeks, not months                       | Pilot timeline  |
+| **Maintained**        | We handle updates; you focus on mission | Release cadence |
 
 ### Trap Questions
 
@@ -312,9 +312,9 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Objection Handling
 
-| Objection | Response |
-|-----------|----------|
-| "We already have Neo4j skills" | "Perfect—Summit runs on Neo4j. Your team's Cypher skills are directly applicable. Summit adds the analyst UX, provenance, and policy layers your team won't have to build." |
+| Objection                      | Response                                                                                                                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "We already have Neo4j skills" | "Perfect—Summit runs on Neo4j. Your team's Cypher skills are directly applicable. Summit adds the analyst UX, provenance, and policy layers your team won't have to build."     |
 | "We want raw database control" | "You still have it. Summit exposes Neo4j for advanced queries. But analysts shouldn't need to write Cypher—Summit gives them NL queries while power users can still go direct." |
 
 ### Competitive Positioning Statement
@@ -327,13 +327,13 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Overview
 
-| Attribute | Elastic/Splunk | Summit |
-|-----------|----------------|--------|
-| **Core Model** | Document/log search | Graph relationships |
-| **Primary Use** | SIEM, log analytics | Investigation, analysis |
-| **Relationship Handling** | Limited (joins, lookups) | Native graph |
-| **AI/ML** | ML modules, anomaly detection | Policy-gated AI, NL queries |
-| **Provenance** | Log retention | Chain-of-custody |
+| Attribute                 | Elastic/Splunk                | Summit                      |
+| ------------------------- | ----------------------------- | --------------------------- |
+| **Core Model**            | Document/log search           | Graph relationships         |
+| **Primary Use**           | SIEM, log analytics           | Investigation, analysis     |
+| **Relationship Handling** | Limited (joins, lookups)      | Native graph                |
+| **AI/ML**                 | ML modules, anomaly detection | Policy-gated AI, NL queries |
+| **Provenance**            | Log retention                 | Chain-of-custody            |
 
 ### Where Elastic/Splunk Win
 
@@ -347,12 +347,12 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Where Summit Wins
 
-| Dimension | Summit Advantage | Proof Points |
-|-----------|-----------------|--------------|
-| **Relationship-first** | Graph native; not retrofitted | Data model |
-| **Investigation workflow** | Built for analysts, not ops | UI demo |
-| **Provenance** | Chain-of-custody, not just logs | Export demo |
-| **Policy-gated AI** | Classification-aware | Policy demo |
+| Dimension                  | Summit Advantage                | Proof Points |
+| -------------------------- | ------------------------------- | ------------ |
+| **Relationship-first**     | Graph native; not retrofitted   | Data model   |
+| **Investigation workflow** | Built for analysts, not ops     | UI demo      |
+| **Provenance**             | Chain-of-custody, not just logs | Export demo  |
+| **Policy-gated AI**        | Classification-aware            | Policy demo  |
 
 ### Trap Questions
 
@@ -362,10 +362,10 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ### Objection Handling
 
-| Objection | Response |
-|-----------|----------|
+| Objection                        | Response                                                                                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | "We already have Elastic/Splunk" | "Those are great for log search and SIEM. Summit is for the next step—when analysts need to investigate relationships, build cases, and produce auditable products. We integrate with your existing stack." |
-| "We can do graphs in Elastic" | "You can visualize some relationships, yes. But true graph queries—multi-hop traversals, relationship-centric analysis—require a graph-native platform. That's what Summit provides." |
+| "We can do graphs in Elastic"    | "You can visualize some relationships, yes. But true graph queries—multi-hop traversals, relationship-centric analysis—require a graph-native platform. That's what Summit provides."                       |
 
 ### Competitive Positioning Statement
 
@@ -407,4 +407,4 @@ _Version: 2025-11-27 | Update quarterly or when competitive landscape shifts_
 
 ---
 
-_Version: 2025-11-27 | Confidential — Internal Use Only_
+Version: 2025-11-27 | Confidential — Internal Use Only
