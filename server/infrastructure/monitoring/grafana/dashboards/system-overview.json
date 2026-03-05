@@ -1,97 +1,41 @@
 {
-  "annotations": {
-    "list": [
-      {
-        "builtIn": 1,
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "hide": true,
-        "iconColor": "rgba(0, 211, 255, 1)",
-        "name": "Annotations & Alerts",
-        "type": "dashboard"
-      }
-    ]
-  },
-  "editable": true,
-  "gnetId": null,
-  "graphTooltip": 0,
-  "id": null,
-  "links": [],
+  "title": "System Overview",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
   "panels": [
     {
-      "title": "HTTP Request Rate",
       "type": "timeseries",
+      "title": "CPU Usage",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
-        {
-          "expr": "sum(rate(http_requests_total[1m])) by (status_code)",
-          "legendFormat": "{{status_code}}"
-        }
+        { "expr": "rate(process_cpu_seconds_total[1m])", "legendFormat": "CPU Usage" }
       ]
     },
     {
-      "title": "HTTP Latency (p95)",
       "type": "timeseries",
+      "title": "Memory Usage",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-          "legendFormat": "p95"
-        }
+        { "expr": "process_resident_memory_bytes", "legendFormat": "RSS Memory" },
+        { "expr": "nodejs_heap_size_used_bytes", "legendFormat": "Heap Used" }
       ]
     },
     {
-      "title": "Node.js Event Loop Lag",
       "type": "timeseries",
+      "title": "Event Loop Lag",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
       "targets": [
-        {
-          "expr": "nodejs_eventloop_lag_seconds",
-          "legendFormat": "lag"
-        }
+        { "expr": "nodejs_eventloop_lag_seconds", "legendFormat": "Lag" }
       ]
     },
     {
-      "title": "Heap Memory Usage",
       "type": "timeseries",
+      "title": "Active Handles",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
       "targets": [
-        {
-          "expr": "nodejs_heap_size_used_bytes",
-          "legendFormat": "Used"
-        },
-         {
-          "expr": "nodejs_heap_size_total_bytes",
-          "legendFormat": "Total"
-        }
-      ]
-    },
-    {
-      "title": "Active DB Connections",
-      "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
-      "targets": [
-        {
-          "expr": "db_connections_active",
-          "legendFormat": "{{database}}"
-        }
+        { "expr": "nodejs_active_handles", "legendFormat": "Handles" }
       ]
     }
-  ],
-  "schemaVersion": 38,
-  "style": "dark",
-  "tags": ["intelgraph", "system"],
-  "templating": {
-    "list": []
-  },
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "timepicker": {},
-  "timezone": "",
-  "title": "System Overview",
-  "uid": "system-overview",
-  "version": 1,
-  "weekStart": ""
+  ]
 }

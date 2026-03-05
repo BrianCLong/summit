@@ -23,14 +23,6 @@ if (process.env.NODE_ENV !== 'test' && process.env.ZERO_FOOTPRINT !== 'true') {
 }
 
 // Cleanup function to stop metrics collection
-// Health check metric
-export const summitHealthChecksTotal = new client.Counter({
-  name: 'summit_health_checks_total',
-  help: 'Total number of health checks performed',
-  labelNames: ['status'],
-  registers: [register],
-});
-
 export function stopMetricsCollection() {
   if (defaultMetricsInterval && typeof defaultMetricsInterval.clear === 'function') {
     defaultMetricsInterval.clear();
@@ -601,9 +593,9 @@ export const breakerState = createGauge({
   labelNames: ['service'],
 });
 
-export const summitJobQueueDepth = createGauge({
+export const intelgraphJobQueueDepth = createGauge({
   registers: [],
-  name: 'summit_job_queue_depth',
+  name: 'intelgraph_job_queue_depth',
   help: 'Current depth of the job queue',
   labelNames: ['queue'],
 });
@@ -679,7 +671,7 @@ try {
   register.registerMetric(maestroChangeFailureRate);
   register.registerMetric(maestroMttrHours);
   register.registerMetric(breakerState);
-  register.registerMetric(summitJobQueueDepth);
+  register.registerMetric(intelgraphJobQueueDepth);
 } catch (e) { }
 
 // Narrative Simulation Metrics
@@ -714,6 +706,34 @@ try {
   register.registerMetric(narrativeSimulationDurationSeconds);
 } catch (e) { }
 
+// Agent Metrics
+export const agentExecutionsTotal = createCounter({
+  registers: [],
+  name: 'agent_executions_total',
+  help: 'Total number of agent executions',
+  labelNames: ['tenant', 'status'],
+});
+
+export const agentExecutionDuration = createHistogram({
+  registers: [],
+  name: 'agent_execution_duration_seconds',
+  help: 'Duration of agent execution in seconds',
+  labelNames: ['tenant', 'status'],
+  buckets: [1, 5, 10, 30, 60, 120, 300],
+});
+
+export const policyDecisionsTotal = createCounter({
+  registers: [],
+  name: 'policy_decisions_total',
+  help: 'Total number of policy decisions',
+  labelNames: ['policy', 'decision', 'signal_type'],
+});
+
+try {
+  register.registerMetric(agentExecutionsTotal);
+  register.registerMetric(agentExecutionDuration);
+  register.registerMetric(policyDecisionsTotal);
+} catch (e) { }
 
 // Update memory usage periodically (skip in test to avoid open handles)
 const shouldCollectMemory =
@@ -731,105 +751,105 @@ if (shouldCollectMemory) {
 }
 
 // Legacy IntelGraph metrics (merged from observability/metrics.ts)
-export const summitJobsProcessed = createCounter({
-  name: 'summit_jobs_processed_total',
+export const intelgraphJobsProcessed = createCounter({
+  name: 'intelgraph_jobs_processed_total',
   help: 'Total jobs processed by the system',
   labelNames: ['queue', 'status'],
 });
 
-export const summitOutboxSyncLatency = createHistogram({
-  name: 'summit_outbox_sync_latency_seconds',
+export const intelgraphOutboxSyncLatency = createHistogram({
+  name: 'intelgraph_outbox_sync_latency_seconds',
   help: 'Latency of outbox to Neo4j sync operations',
   labelNames: ['operation'],
   buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
 });
 
-export const summitActiveConnections = createGauge({
-  name: 'summit_active_connections',
+export const intelgraphActiveConnections = createGauge({
+  name: 'intelgraph_active_connections',
   help: 'Number of active WebSocket connections',
   labelNames: ['tenant'],
 });
 
-export const summitDatabaseQueryDuration = createHistogram({
-  name: 'summit_database_query_duration_seconds',
+export const intelgraphDatabaseQueryDuration = createHistogram({
+  name: 'intelgraph_database_query_duration_seconds',
   help: 'Database query execution time',
   labelNames: ['database', 'operation'],
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
 });
 
-export const summitHttpRequestDuration = createHistogram({
-  name: 'summit_http_request_duration_seconds',
+export const intelgraphHttpRequestDuration = createHistogram({
+  name: 'intelgraph_http_request_duration_seconds',
   help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status'],
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
 });
 
 // GraphRAG Query Preview metrics
-export const summitGraphragQueryTotal = createCounter({
-  name: 'summit_graphrag_query_total',
+export const intelgraphGraphragQueryTotal = createCounter({
+  name: 'intelgraph_graphrag_query_total',
   help: 'Total GraphRAG queries executed',
   labelNames: ['status', 'hasPreview', 'redactionEnabled', 'provenanceEnabled'],
 });
 
-export const summitGraphragQueryDurationMs = createHistogram({
-  name: 'summit_graphrag_query_duration_ms',
+export const intelgraphGraphragQueryDurationMs = createHistogram({
+  name: 'intelgraph_graphrag_query_duration_ms',
   help: 'GraphRAG query execution duration in milliseconds',
   labelNames: ['hasPreview'],
   buckets: [100, 500, 1000, 2000, 5000, 10000, 30000],
 });
 
-export const summitQueryPreviewsTotal = createCounter({
-  name: 'summit_query_previews_total',
+export const intelgraphQueryPreviewsTotal = createCounter({
+  name: 'intelgraph_query_previews_total',
   help: 'Total query previews generated',
   labelNames: ['language', 'status'],
 });
 
-export const summitQueryPreviewLatencyMs = createHistogram({
-  name: 'summit_query_preview_latency_ms',
+export const intelgraphQueryPreviewLatencyMs = createHistogram({
+  name: 'intelgraph_query_preview_latency_ms',
   help: 'Query preview generation latency in milliseconds',
   labelNames: ['language'],
   buckets: [50, 100, 250, 500, 1000, 2000, 5000],
 });
 
-export const summitQueryPreviewErrorsTotal = createCounter({
-  name: 'summit_query_preview_errors_total',
+export const intelgraphQueryPreviewErrorsTotal = createCounter({
+  name: 'intelgraph_query_preview_errors_total',
   help: 'Total query preview errors',
   labelNames: ['language'],
 });
 
-export const summitQueryPreviewExecutionsTotal = createCounter({
-  name: 'summit_query_preview_executions_total',
+export const intelgraphQueryPreviewExecutionsTotal = createCounter({
+  name: 'intelgraph_query_preview_executions_total',
   help: 'Total query preview executions',
   labelNames: ['language', 'dryRun', 'status'],
 });
 
-export const summitGlassBoxRunsTotal = createCounter({
-  name: 'summit_glass_box_runs_total',
+export const intelgraphGlassBoxRunsTotal = createCounter({
+  name: 'intelgraph_glass_box_runs_total',
   help: 'Total glass-box runs created',
   labelNames: ['type', 'status'],
 });
 
-export const summitGlassBoxRunDurationMs = createHistogram({
-  name: 'summit_glass_box_run_duration_ms',
+export const intelgraphGlassBoxRunDurationMs = createHistogram({
+  name: 'intelgraph_glass_box_run_duration_ms',
   help: 'Glass-box run duration in milliseconds',
   labelNames: ['type'],
   buckets: [100, 500, 1000, 2000, 5000, 10000, 30000, 60000],
 });
 
-export const summitGlassBoxCacheHits = createCounter({
-  name: 'summit_glass_box_cache_hits_total',
+export const intelgraphGlassBoxCacheHits = createCounter({
+  name: 'intelgraph_glass_box_cache_hits_total',
   help: 'Total glass-box cache hits',
   labelNames: ['operation'],
 });
 
-export const summitCacheHits = createCounter({
-  name: 'summit_cache_hits_total',
+export const intelgraphCacheHits = createCounter({
+  name: 'intelgraph_cache_hits_total',
   help: 'Total cache hits',
   labelNames: ['level'],
 });
 
-export const summitCacheMisses = createCounter({
-  name: 'summit_cache_misses_total',
+export const intelgraphCacheMisses = createCounter({
+  name: 'intelgraph_cache_misses_total',
   help: 'Total cache misses',
 });
 
@@ -907,22 +927,22 @@ try {
   register.registerMetric(graphqlTenantCostUsage);
   register.registerMetric(graphqlCostRateLimitHits);
   register.registerMetric(graphqlPerTenantOverageCount);
-  register.registerMetric(summitJobsProcessed);
-  register.registerMetric(summitOutboxSyncLatency);
-  register.registerMetric(summitActiveConnections);
-  register.registerMetric(summitDatabaseQueryDuration);
-  register.registerMetric(summitHttpRequestDuration);
-  register.registerMetric(summitGraphragQueryTotal);
-  register.registerMetric(summitGraphragQueryDurationMs);
-  register.registerMetric(summitQueryPreviewsTotal);
-  register.registerMetric(summitQueryPreviewLatencyMs);
-  register.registerMetric(summitQueryPreviewErrorsTotal);
-  register.registerMetric(summitQueryPreviewExecutionsTotal);
-  register.registerMetric(summitGlassBoxRunsTotal);
-  register.registerMetric(summitGlassBoxRunDurationMs);
-  register.registerMetric(summitGlassBoxCacheHits);
-  register.registerMetric(summitCacheHits);
-  register.registerMetric(summitCacheMisses);
+  register.registerMetric(intelgraphJobsProcessed);
+  register.registerMetric(intelgraphOutboxSyncLatency);
+  register.registerMetric(intelgraphActiveConnections);
+  register.registerMetric(intelgraphDatabaseQueryDuration);
+  register.registerMetric(intelgraphHttpRequestDuration);
+  register.registerMetric(intelgraphGraphragQueryTotal);
+  register.registerMetric(intelgraphGraphragQueryDurationMs);
+  register.registerMetric(intelgraphQueryPreviewsTotal);
+  register.registerMetric(intelgraphQueryPreviewLatencyMs);
+  register.registerMetric(intelgraphQueryPreviewErrorsTotal);
+  register.registerMetric(intelgraphQueryPreviewExecutionsTotal);
+  register.registerMetric(intelgraphGlassBoxRunsTotal);
+  register.registerMetric(intelgraphGlassBoxRunDurationMs);
+  register.registerMetric(intelgraphGlassBoxCacheHits);
+  register.registerMetric(intelgraphCacheHits);
+  register.registerMetric(intelgraphCacheMisses);
   register.registerMetric(copilotApiRequestTotal);
   register.registerMetric(copilotApiRequestDurationMs);
 } catch (e) { }
@@ -1108,13 +1128,6 @@ export const maestroSynthesisOperations = createCounter({
   help: 'Data synthesis operations',
 });
 
-export const summitHealthChecksTotal = createCounter({
-  registers: [],
-  name: 'summit_health_checks_total',
-  help: 'Total health checks performed',
-  labelNames: ['status', 'component'],
-});
-
 // Register new metrics
 try {
   register.registerMetric(maestroOrchestrationRequests);
@@ -1143,7 +1156,6 @@ try {
   register.registerMetric(maestroDataSourcesActive);
   register.registerMetric(maestroWebScrapingRequests);
   register.registerMetric(maestroSynthesisOperations);
-  register.registerMetric(summitHealthChecksTotal);
 } catch (e) { }
 
 // Debug log to verify metrics loading
@@ -1156,23 +1168,7 @@ export const metrics = {
   aiRequestTotal,
   resolverLatencyMs,
   breakerState,
-  summitJobQueueDepth,
-  summitJobsProcessed,
-  summitOutboxSyncLatency,
-  summitActiveConnections,
-  summitDatabaseQueryDuration,
-  summitHttpRequestDuration,
-  summitGraphragQueryTotal,
-  summitGraphragQueryDurationMs,
-  summitQueryPreviewsTotal,
-  summitQueryPreviewLatencyMs,
-  summitQueryPreviewErrorsTotal,
-  summitQueryPreviewExecutionsTotal,
-  summitGlassBoxRunsTotal,
-  summitGlassBoxRunDurationMs,
-  summitGlassBoxCacheHits,
-  summitCacheHits,
-  summitCacheMisses,
+  intelgraphJobQueueDepth,
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
   neighborhoodCacheHitRatio,
@@ -1250,7 +1246,9 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  summitHealthChecksTotal,
+  agentExecutionsTotal,
+  agentExecutionDuration,
+  policyDecisionsTotal,
 };
 
 export default metrics;

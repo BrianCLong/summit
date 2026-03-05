@@ -14,22 +14,22 @@ groups:
           description: 'IntelGraph application has been down for more than 1 minute.'
 
       - alert: IntelGraphHighErrorRate
-        expr: sum(rate(http_requests_total{job="intelgraph-app",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="intelgraph-app"}[5m])) > 0.01
+        expr: rate(http_requests_total{job="intelgraph-app",status=~"5.."}[5m]) > 0.1
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: 'High error rate in IntelGraph'
-          description: 'IntelGraph is experiencing a high error rate (> 1%). Current: {{ $value | humanizePercentage }}.'
+          description: 'IntelGraph is experiencing a high error rate ({{ $value }} errors/sec).'
 
       - alert: IntelGraphHighLatency
-        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-app"}[5m])) > 0.5
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-app"}[5m])) > 2
         for: 5m
         labels:
           severity: warning
         annotations:
           summary: 'High latency in IntelGraph'
-          description: '95th percentile latency is {{ $value }}s, which is above the 500ms threshold.'
+          description: '95th percentile latency is {{ $value }}s, which is above the 2s threshold.'
 
   - name: database.rules
     rules:
@@ -179,6 +179,26 @@ groups:
         annotations:
           summary: 'ML model accuracy degraded'
           description: 'ML model accuracy has dropped to {{ $value }}, below 85% threshold.'
+
+      - alert: HighAIJobQueue
+        expr: sum(ai_jobs_queued) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High AI job queue'
+          description: 'AI job queue has {{ $value }} jobs.'
+
+  - name: agent.rules
+    rules:
+      - alert: HighAgentFailureRate
+        expr: sum(rate(agent_executions_total{status="failed"}[5m])) / sum(rate(agent_executions_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'High agent execution failure rate'
+          description: 'Agent execution failure rate is {{ $value | humanizePercentage }}.'
 
   - name: security.rules
     rules:

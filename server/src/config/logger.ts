@@ -1,5 +1,6 @@
 import pino from 'pino';
-import { trace } from '@opentelemetry/api';
+import fs from 'fs';
+import path from 'path';
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
@@ -23,6 +24,19 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
+let fileStream: fs.WriteStream | null = null;
+if (process.env.LOG_FILE_PATH) {
+  try {
+    const logDir = path.dirname(process.env.LOG_FILE_PATH);
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+    fileStream = fs.createWriteStream(process.env.LOG_FILE_PATH, { flags: 'a' });
+  } catch (err) {
+    console.error('Failed to create log file stream:', err);
+  }
+}
+
 const stream = {
   write: (msg: string) => {
     if (msg.trim().startsWith('{')) {
@@ -32,6 +46,9 @@ const stream = {
       } catch (e: any) {}
     }
     process.stdout.write(msg);
+    if (fileStream) {
+      fileStream.write(msg);
+    }
   },
 };
 
@@ -49,24 +66,16 @@ export const logger = pino({
   },
   mixin() {
     const store = correlationStorage.getStore();
-    const spanContext = trace.getActiveSpan()?.spanContext();
-    const traceId = spanContext?.traceId;
-    const spanId = spanContext?.spanId;
-
     if (store) {
       return {
         correlationId: store.get('correlationId'),
         tenantId: store.get('tenantId'),
         principalId: store.get('principalId'),
         requestId: store.get('requestId'),
-        traceId: store.get('traceId') || traceId,
-        spanId: spanId,
+        traceId: store.get('traceId'),
       };
     }
-    return {
-      traceId,
-      spanId,
-    };
+    return {};
   },
   formatters: {
     level: (label: string) => ({ level: label.toUpperCase() }),
