@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Defense in Depth**: Hardened sensitive administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control (RBAC) directly within the router files.
 
 ### Added
+- Added standardized `Kbd` component to `@intelgraph/web` for platform-aware keyboard shortcut hints (⌘/Ctrl and ⇧/Shift).
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
