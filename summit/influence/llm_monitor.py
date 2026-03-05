@@ -1,15 +1,19 @@
-import json
+def analyze_narrative_overlap(response_text, narratives):
+    """
+    Test if LLM outputs echo narratives.
+    """
+    overlap_score = 0.0
+    matched_narratives = []
+    response_lower = response_text.lower()
+    for narrative in narratives:
+        if narrative.lower() in response_lower:
+            overlap_score += 1.0
+            matched_narratives.append(narrative)
 
-def analyze_narrative_overlap(response, narrative_tokens):
-    response_tokens = set(response.lower().split())
-    overlap = len(response_tokens.intersection(set(narrative_tokens)))
-    return overlap > 2
+    if len(narratives) > 0:
+        overlap_score /= len(narratives)
 
-class LLMMonitor:
-    def probe_model(self, model_mock, prompt):
-        response = model_mock.generate(prompt)
-        return analyze_narrative_overlap(response, ["nato", "aggression", "provoked"])
-
-    def save_metrics(self, path):
-        with open(path, 'w') as f:
-            json.dump({"llm_reference_metrics": 0.33}, f)
+    return {
+        'overlap_score': overlap_score,
+        'matched_narratives': matched_narratives
+    }

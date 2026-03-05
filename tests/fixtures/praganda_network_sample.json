@@ -1,10 +1,6 @@
 {
-  "network_id": "pravda-01",
-  "domains": [
-    "news-local.xyz",
-    "global-truth.net"
-  ],
-  "articles": [
-    {"title": "The truth about the conflict", "content": "..."}
-  ]
+    "domains": [
+        {"name": "pravda-en.com", "hosting": "192.168.1.1", "cross_citation_score": 0.9},
+        {"name": "truth-news.org", "hosting": "192.168.1.1", "cross_citation_score": 0.95}
+    ]
 }
