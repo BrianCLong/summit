@@ -95,12 +95,12 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh summit-platform latest artifacts/sbom
+        run: bash scripts/generate-sbom.sh summit-platform ${{ github.sha }} artifacts/sbom
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
         env:
-          SBOM_FILE: artifacts/sbom/summit-platform-main-latest.cdx.json
+          SBOM_FILE: artifacts/sbom/summit-platform-main-${{ github.sha }}.cdx.json
         run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
