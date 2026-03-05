@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-05T00:00:00Z",
-  "revision_note": "Added graph-native AI 90-day execution plan and PR stack for evidence-native subsystem rollout.",
+  "last_updated": "2026-03-05T09:26:00Z",
+  "revision_note": "Added GA launch conversion playbook covering PR explosion structural fixes, deterministic CI/merge queue stabilization, and launch gating.",
   "initiatives": [
     {
-      "id": "graph-native-ai-90-day-execution",
+      "id": "ga-launch-conversion-playbook",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Execution plan published in docs/roadmap/GRAPH_NATIVE_AI_90_DAY_EXECUTION_PLAN.md with six subsystems and 20-PR sequencing."
+      "notes": "Documented integration-to-launch execution plan with required-check stabilization, CI tiering, merge queue enforcement, evidence lock, and GA gate criteria."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
