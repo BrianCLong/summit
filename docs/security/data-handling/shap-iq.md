@@ -1,17 +1,21 @@
-# SHAP-IQ Data Handling Policy
+# SHAP-IQ Data Handling Controls
 
 ## Classification
-- Inputs: Sensitive
-- SHAP outputs: Derived sensitive
-- Interaction matrix: Derived sensitive
-- Drift metrics: Safe aggregate
+- Model inputs: **Sensitive**.
+- SHAP feature attributions: **Derived sensitive**.
+- Interaction matrix: **Derived sensitive**.
+- Drift summary metrics: **Aggregate safe**.
+
+## Logging Restrictions
+Never log:
+- Raw feature vectors.
+- Decision inputs.
+- Raw sample identifiers.
 
 ## Retention
-- Raw explanations: 30 days
-- Drift aggregates: 1 year
+- Raw explanation artifacts: 30 days (pending governance confirmation).
+- Drift aggregates: 1 year.
 
-## Never Log
-- Feature vectors
-- Decision inputs
-- Raw sample IDs
-- PII
+## Operational Guardrails
+- Feature flag default is OFF (`scripts/explain_run.py` requires `--enable`).
+- No external network calls in explainability scripts.
