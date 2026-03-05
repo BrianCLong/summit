@@ -1,0 +1,38 @@
+name: RDP Security Gates
+on:
+  pull_request:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  rdp-gates:
+    name: Run RDP Security Gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Python
+        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
+        with:
+          python-version: "3.11"
+      - name: Run RDP Gates
+        run: |
+          if [[ ! -x ./security/gates/run_all_gates.sh ]]; then
+            echo "security/gates/run_all_gates.sh not found; skipping RDP gates."
+            exit 0
+          fi
+          ./security/gates/run_all_gates.sh
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_HEAD_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ github.job }}
+      cancel-in-progress: true
