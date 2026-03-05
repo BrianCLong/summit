@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T04:57:13Z",
-  "revision_note": "Added governed personal-agent integration reference architecture spec in docs/integrations/REFERENCE_ARCH_v0.1.md.",
+  "last_updated": "2026-02-08T04:40:42Z",
+  "revision_note": "Added Switchboard Flywheel strategy track with PR-1..PR-8 epic map and governance gates.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "switchboard-flywheel",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Switchboard Flywheel strategy track: consumer wedge + white-label plan with PR-1..PR-8 epic gates and evidence artifacts in docs/roadmap/strategic/switchboard-flywheel-epic.md."
     },
     {
       "id": "B",
@@ -204,7 +210,7 @@
       "id": "summit-architecture-brief",
       "status": "completed",
       "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, acceptance criteria, and the governed personal-agent integration reference architecture."
+      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     }
   ],
   "summary": {
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 23,
     "ga_blockers": []
   }
 }
