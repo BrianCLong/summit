@@ -36,12 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Provide fallback .env for compose validation
-        run: |
-          if [ ! -f .env ]; then
-            cp .env.example .env 2>/dev/null || touch .env
-          fi
-
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 

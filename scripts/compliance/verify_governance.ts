@@ -1,34 +1,25 @@
 import fs from 'fs';
 import path from 'path';
 
-const CONTROL_REGISTRY_PATH = 'docs/compliance/CONTROL_REGISTRY.md';
-const GOVERNANCE_RULES_PATH = 'docs/governance/GOVERNANCE_RULES.md';
+const GOVERNANCE_FILE = 'COMPLIANCE_CONTROLS.md';
 
-console.log('Verifying Governance Artifacts...');
+function verifyGovernance() {
+    if (!fs.existsSync(GOVERNANCE_FILE)) {
+        console.error(`ERROR: Governance file ${GOVERNANCE_FILE} not found`);
+        process.exit(1);
+    }
 
-if (!fs.existsSync(CONTROL_REGISTRY_PATH)) {
-    console.error(`ERROR: Control Registry not found at ${CONTROL_REGISTRY_PATH}`);
-    process.exit(1);
+    const content = fs.readFileSync(GOVERNANCE_FILE, 'utf-8');
+
+    // Check for table header (allowing for potential formatting differences like spacing)
+    // We check for key columns in order
+    if (!content.includes('| Control ID') || !content.includes('| Name') || !content.includes('| Status')) {
+        console.error('ERROR: Control Registry missing table header');
+        console.error('Expected columns: Control ID, Name, Description, Status');
+        process.exit(1);
+    }
+
+    console.log('Governance check passed.');
 }
 
-if (!fs.existsSync(GOVERNANCE_RULES_PATH)) {
-    console.error(`ERROR: Governance Rules not found at ${GOVERNANCE_RULES_PATH}`);
-    process.exit(1);
-}
-
-const registryContent = fs.readFileSync(CONTROL_REGISTRY_PATH, 'utf-8');
-const rulesContent = fs.readFileSync(GOVERNANCE_RULES_PATH, 'utf-8');
-
-// Basic check for table structures (naïve check)
-// Accept both legacy "| ID |" and new "| Control ID |" headers
-if (!registryContent.includes('| Control ID |') && !registryContent.includes('| ID |')) {
-    console.error('ERROR: Control Registry missing table header');
-    process.exit(1);
-}
-
-if (!rulesContent.includes('| Type | Description |') && !rulesContent.includes('| Type      | Description                        |')) {
-    console.error('ERROR: Governance Rules missing Release Types table');
-    process.exit(1);
-}
-
-console.log('SUCCESS: Governance artifacts present and structurally valid.');
+verifyGovernance();

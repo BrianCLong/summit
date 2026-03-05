@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { GraphAnalysisService } from '../analysis/GraphAnalysisService.js';
 import { GraphAlgorithmKey } from '../analysis/graphTypes.js';
-import { firstString, firstStringOr } from '../utils/http-param.js';
 
 const router = express.Router();
 const service = GraphAnalysisService.getInstance();
@@ -41,7 +40,7 @@ router.post('/run', async (req: Request, res: Response, next: NextFunction) => {
     const job = await service.createJob(tenantId, algorithm as GraphAlgorithmKey, params || {});
 
     // For MVP synchronous execution if requested or short jobs
-    if (firstString(req.query.async) === 'true') {
+    if ((req.query.async as string) === 'true') {
          // Fire and forget (or rather, run in background)
          service.runJob(job.id).catch(err => console.error(err));
          res.json({ jobId: job.id, status: 'pending' });
@@ -62,7 +61,7 @@ router.post('/run', async (req: Request, res: Response, next: NextFunction) => {
 router.get('/:jobId', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tenantId = getTenantId(req);
-    const jobId = firstStringOr(req.params.jobId, '');
+    const { jobId } = req.params;
 
     const job = service.getJob(jobId, tenantId);
     if (!job) {
