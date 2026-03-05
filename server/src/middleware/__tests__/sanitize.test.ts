@@ -31,7 +31,7 @@ const sanitizeValue = (input: any): any => {
 };
 
 // ESM-compatible mocking using unstable_mockModule
-jest.unstable_mockModule('../../validation/index.js', () => ({
+jest.unstable_mockModule('../../utils/validation/index.js', () => ({
   SanitizationUtils: {
     sanitizeHTML: (input: string) => escapeHtml(String(input)),
     sanitizeUserInput: (input: any): any => sanitizeValue(input),

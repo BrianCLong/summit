@@ -1,47 +1,62 @@
-# IO Data Contracts
+# IO Data Contracts v1
 
-## Canonical IDs
+This document defines the IO canonical schemas, identifiers, and provenance envelope. It is
+intentionally constrained to deterministic, auditable processing.
 
-Stable identifiers are essential for cross-platform tracking and fusion.
+## Canonical identifiers
 
--   **`entity_id`**: Unique identifier for an actor, organization, or persona.
--   **`content_id`**: Unique identifier for a piece of content (post, article, video).
--   **`campaign_id`**: Unique identifier for a coordinated influence campaign.
--   **`evidence_id`**: Unique identifier for a specific evidence artifact.
+All IO data must use stable IDs that are deterministic and tenant-scoped.
 
-## Provenance Envelope
+- `entity_id` (people, orgs, assets)
+- `content_id` (posts, media, documents)
+- `campaign_id` (coordinated activity)
+- `evidence_id` (artifacts, evaluations, reports)
 
-All data entering the IO pipeline must be wrapped in a provenance envelope.
-
-Fields:
--   `source`: Origin of the data (platform, feed).
--   `collection_method`: How the data was acquired (API, scrape, partner).
--   `timestamp`: When the data was collected.
--   `hash`: Cryptographic hash of the raw content.
--   `license`: Usage rights and restrictions.
--   `retention_class`: Data retention policy tag.
--   `tenant_id`: Owner of the data.
--   `chain_of_custody`: List of systems/processes that handled the data.
-
-## Evidence ID Pattern
-
-All evidence artifacts must use the following deterministic ID pattern:
+### Evidence ID pattern (non-negotiable)
 
 `EVID::<tenant>::<domain>::<artifact>::<yyyy-mm-dd>::<gitsha7>::<runid8>`
 
-**Components:**
--   `<tenant>`: Tenant identifier (e.g., `acme`).
--   `<domain>`: Domain area (e.g., `io`).
--   `<artifact>`: Type of artifact (e.g., `cib_eval`, `attrib_report`).
--   `<yyyy-mm-dd>`: Date of generation.
--   `<gitsha7>`: Short Git commit SHA of the code used.
--   `<runid8>`: Unique run identifier (deterministic or random depending on context).
+Examples:
 
-**Examples:**
--   `EVID::acme::io::cib_eval::2026-02-07::a1b2c3d::9f2a1c0b`
--   `EVID::acme::io::attrib_report::2026-02-07::a1b2c3d::f0e1d2c3`
+- `EVID::acme::io::cib_eval::2026-02-07::a1b2c3d::9f2a1c0b`
+- `EVID::acme::io::attrib_report::2026-02-07::a1b2c3d::f0e1d2c3`
 
-Every pipeline run must generate:
--   `report.json` (Human-readable summary + artifact links)
--   `metrics.json` (Machine-readable KPIs)
--   `stamp.json` (Provenance metadata: code hash, config hash, dataset hash)
+## Provenance envelope (required)
+
+Every IO record must include the following fields:
+
+- `source` (platform/partner/feed identifier)
+- `collection_method` (API/export/partner/approved capture)
+- `timestamp` (RFC3339)
+- `hash` (sha256 of normalized payload)
+- `license` (license/ToS reference)
+- `retention_class` (policy-defined class)
+- `tenant_id` (tenant scope)
+- `chain_of_custody[]` (ordered list of custody events)
+
+## Canonical schema inventory
+
+Schemas are located in `schemas/io/`:
+
+- `content.schema.json` (content assets)
+- `account.schema.json` (accounts/actors)
+- `post.schema.json` (platform posts)
+- `engagement.schema.json` (engagement events)
+- `campaign.schema.json` (coordination/campaign metadata)
+- `provenance.schema.json` (required provenance envelope)
+
+## Determinism requirements
+
+- Deterministic transforms only: fixed seeds, pinned models, immutable configs.
+- Schema validation is mandatory at IO boundaries (ingest, normalize, detect, export).
+- `metrics.json` and `stamp.json` must be emitted for all evaluation suites and exports.
+
+## Retention & privacy policy alignment
+
+Retention classes and PII handling must align with:
+
+- `policy/retention.yaml`
+- `policy/collection_matrix.yaml`
+- `policy/provenance.rego`
+
+All deviations are **Governed Exceptions** and require evidence-backed approval.
