@@ -641,7 +641,7 @@ docker restart summit-dr-orchestrator
 ### Documentation
 
 - Main docs: `/home/user/summit/docs/disaster-recovery/`
-- Runbooks: `/home/user/summit/RUNBOOKS/`
+- Runbooks: `/home/user/summit/runbooks/`
 - API docs: `http://dr-service:9000/api/docs`
 
 ---

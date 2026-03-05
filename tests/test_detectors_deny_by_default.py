@@ -1,11 +1,8 @@
 import pytest
-pytest.importorskip("torch")
-import pytest
-pytest.importorskip("torch")
-import pytest
-pytest.importorskip("torch")
-import pytest
-pytest.importorskip("torch")
+
+# Skip this test module if torch is not installed
+torch = pytest.importorskip("torch")
+
 from summit.precision.detectors import MismatchReport, compute_mismatch_metrics
 
 
