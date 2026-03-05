@@ -67,8 +67,8 @@ export class PrivacyService extends EventEmitter {
   private static instance: PrivacyService;
   private isInitialized: boolean = false;
   private initPromise: Promise<void> | null = null;
-  private requestCache: Map<string, DSARRequest> = new Map();
-  private evidenceCache: Map<string, PrivacyEvidence> = new Map();
+  private requestCache = new Map<string, DSARRequest>();
+  private evidenceCache = new Map<string, PrivacyEvidence>();
 
   private constructor() {
     super();
@@ -81,22 +81,10 @@ export class PrivacyService extends EventEmitter {
   }
 
   public static getInstance(): PrivacyService {
-    if (process.env.NODE_ENV === 'test') {
-      return new PrivacyService();
-    }
-
     if (!PrivacyService.instance) {
       PrivacyService.instance = new PrivacyService();
     }
     return PrivacyService.instance;
-  }
-
-  private async runQuery(text: string, params: unknown[] = []): Promise<{ rows: any[] }> {
-    const result = await pool.query(text, params);
-    if (result && Array.isArray((result as any).rows)) {
-      return result as { rows: any[] };
-    }
-    return { rows: [] };
   }
 
   private ensureInitialized(): Promise<void> {
@@ -146,8 +134,8 @@ export class PrivacyService extends EventEmitter {
     `;
 
     try {
-        await this.runQuery(createRequestsTable);
-        await this.runQuery(createEvidenceTable);
+        await pool.query(createRequestsTable);
+        await pool.query(createEvidenceTable);
     } catch (error: any) {
         logger.warn('Failed to initialize privacy tables (might already exist or permission issue)', {
             error: error instanceof Error ? error.message : String(error)
@@ -180,7 +168,6 @@ export class PrivacyService extends EventEmitter {
       submittedAt: new Date(),
       deadline,
     };
-    this.requestCache.set(request.id, request);
 
     // Persist to DB
     const query = `
@@ -189,7 +176,7 @@ export class PrivacyService extends EventEmitter {
       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     `;
 
-    await this.runQuery(query, [
+    await pool.query(query, [
         request.id,
         request.tenantId,
         request.userId,
@@ -200,6 +187,7 @@ export class PrivacyService extends EventEmitter {
         request.submittedAt,
         request.deadline
     ]);
+    this.requestCache.set(request.id, request);
 
     // Audit the request submission
     await provenanceLedger.appendEntry({
@@ -216,7 +204,7 @@ export class PrivacyService extends EventEmitter {
     this.emit('requestSubmitted', request);
 
     // Auto-start verification if possible
-    await this.verifyRequest(id, request);
+    await this.verifyRequest(id);
 
     return request;
   }
@@ -227,14 +215,15 @@ export class PrivacyService extends EventEmitter {
   async getRequestStatus(requestId: string): Promise<DSARRequest | undefined> {
     await this.ensureInitialized();
     const query = `SELECT * FROM privacy_dsar_requests WHERE id = $1`;
-    const result = await this.runQuery(query, [requestId]);
+    const result = await pool.query(query, [requestId]);
 
     if (result.rows.length === 0) {
       return this.requestCache.get(requestId);
     }
-    const mapped = this.mapRowToRequest(result.rows[0]);
-    this.requestCache.set(mapped.id, mapped);
-    return mapped;
+
+    const request = this.mapRowToRequest(result.rows[0]);
+    this.requestCache.set(requestId, request);
+    return request;
   }
 
   private mapRowToRequest(row: Record<string, unknown>): DSARRequest {
@@ -261,16 +250,8 @@ export class PrivacyService extends EventEmitter {
   async listRequests(tenantId: string): Promise<DSARRequest[]> {
     await this.ensureInitialized();
     const query = `SELECT * FROM privacy_dsar_requests WHERE tenant_id = $1 ORDER BY submitted_at DESC`;
-    const result = await this.runQuery(query, [tenantId]);
-    if (result.rows.length > 0) {
-      const rows = result.rows.map(row => this.mapRowToRequest(row));
-      rows.forEach((row) => this.requestCache.set(row.id, row));
-      return rows;
-    }
-
-    return Array.from(this.requestCache.values()).filter(
-      (request) => request.tenantId === tenantId,
-    );
+    const result = await pool.query(query, [tenantId]);
+    return result.rows.map(row => this.mapRowToRequest(row));
   }
 
   /**
@@ -295,7 +276,7 @@ export class PrivacyService extends EventEmitter {
       }
 
       query += ` WHERE id = $1`;
-      await this.runQuery(query, params);
+      await pool.query(query, params);
 
       const cached = this.requestCache.get(id);
       if (cached) {
@@ -309,8 +290,8 @@ export class PrivacyService extends EventEmitter {
   /**
    * Verify the identity of the requester
    */
-  async verifyRequest(requestId: string, existingRequest?: DSARRequest): Promise<void> {
-    const request = existingRequest ?? await this.getRequestStatus(requestId);
+  async verifyRequest(requestId: string): Promise<void> {
+    const request = await this.getRequestStatus(requestId);
     if (!request) throw new Error('Request not found');
 
     await this.updateRequestStatus(requestId, DSARStatus.VERIFYING);
@@ -409,7 +390,7 @@ export class PrivacyService extends EventEmitter {
         INSERT INTO privacy_evidence (id, request_id, summary, actions, generated_at)
         VALUES ($1, $2, $3, $4, $5)
       `;
-      await this.runQuery(query, [
+      await pool.query(query, [
           id,
           evidence.requestId,
           evidence.summary,
@@ -512,11 +493,9 @@ export class PrivacyService extends EventEmitter {
   async getEvidence(requestId: string): Promise<PrivacyEvidence | undefined> {
     await this.ensureInitialized();
     const query = `SELECT * FROM privacy_evidence WHERE request_id = $1`;
-    const result = await this.runQuery(query, [requestId]);
+    const result = await pool.query(query, [requestId]);
 
-    if (result.rows.length === 0) {
-      return this.evidenceCache.get(requestId);
-    }
+    if (result.rows.length === 0) return this.evidenceCache.get(requestId);
 
     const row = result.rows[0] as Record<string, unknown>;
     const evidence = {
@@ -525,7 +504,7 @@ export class PrivacyService extends EventEmitter {
         actions: row.actions as PrivacyEvidence['actions'],
         generatedAt: new Date(row.generated_at as string)
     };
-    this.evidenceCache.set(evidence.requestId, evidence);
+    this.evidenceCache.set(requestId, evidence);
     return evidence;
   }
 }

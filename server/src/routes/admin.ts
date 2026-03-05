@@ -1,7 +1,6 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
@@ -148,7 +147,7 @@ router.post('/ga/config', express.json(), async (req, res) => {
 });
 
 router.get('/config', (req, res) => {
-  const tenantId = ((((req.query.tenantId as string) as string) as string) as string) || '';
+  const tenantId = (req.query.tenantId as string) || '';
   if (
     tenantId &&
     memConfig.TENANT_OVERRIDES &&
@@ -160,7 +159,7 @@ router.get('/config', (req, res) => {
 });
 
 router.post('/config', express.json(), (req, res) => {
-  const tenantId = ((((req.query.tenantId as string) as string) as string) as string) || '';
+  const tenantId = (req.query.tenantId as string) || '';
   const allowed = Object.keys(memConfig).filter(
     (k) => !['TENANT_OVERRIDES', 'TENANT_DEFAULTS'].includes(k),
   );
@@ -337,12 +336,10 @@ router.delete('/shadow/configs/:tenantId', async (req, res) => {
 
 export default router;
 
-// ESM __dirname shim
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 // n8n flows admin (read/write server/config/n8n-flows.json)
-const n8nCfgPath = path.resolve(__dirname, '../../config/n8n-flows.json');
+const n8nCfgPath = process.cwd().endsWith('/server')
+  ? path.resolve(process.cwd(), 'config/n8n-flows.json')
+  : path.resolve(process.cwd(), 'server/config/n8n-flows.json');
 
 router.get('/n8n-flows', (_req, res) => {
   try {
@@ -680,4 +677,3 @@ router.post('/opa/sync-n8n-prefixes', async (_req, res) => {
       .json({ ok: false, message: e?.message || 'sync prefixes failed' });
   }
 });
-

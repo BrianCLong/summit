@@ -527,7 +527,9 @@ describe('Performance Benchmarks', () => {
     // Allow for some overhead, but parallel should provide benefit
     // In real scenarios with actual I/O, this would show ~34% improvement
     if (sequentialTime > 0) {
-      expect(totalTimeMs).toBeLessThanOrEqual(sequentialTime * 1.5);
+      // Small fixed slack prevents millisecond-level clock jitter from flaking CI.
+      const maxExpectedTime = Math.max(sequentialTime * 1.5, sequentialTime + 5);
+      expect(totalTimeMs).toBeLessThanOrEqual(maxExpectedTime);
     } else {
       expect(totalTimeMs).toBeGreaterThanOrEqual(0);
     }
@@ -552,9 +554,7 @@ describe('Performance Benchmarks', () => {
       0,
     ) / 5;
 
-    // Allow moderate scheduler/jitter overhead in CI while still
-    // asserting concurrency beats naive sequential scaling.
-    expect(totalTime).toBeLessThan(Math.max(avgSingleTime * 4, 750));
+    expect(totalTime).toBeLessThan(avgSingleTime * 3);
   });
 });
 

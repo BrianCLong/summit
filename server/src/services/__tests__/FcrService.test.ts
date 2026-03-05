@@ -1,5 +1,12 @@
-import { FcrService } from '../fcr/fcr-service.js';
-import { FcrSignal } from '../fcr/types.js';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import type { FcrSignal } from '../fcr/types.js';
+import { provenanceLedger } from '../../provenance/ledger.js';
+
+let FcrService: typeof import('../fcr/fcr-service.js').FcrService;
+
+beforeAll(async () => {
+  ({ FcrService } = await import('../fcr/fcr-service.js'));
+});
 
 const baseSignal = (overrides: Partial<FcrSignal> = {}): FcrSignal => ({
   entity_id: '11111111-1111-1111-1111-111111111111',
@@ -14,6 +21,12 @@ const baseSignal = (overrides: Partial<FcrSignal> = {}): FcrSignal => ({
 });
 
 describe('FcrService', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(provenanceLedger, 'appendEntry')
+      .mockResolvedValue({ id: 'prov-fcr-test' } as any);
+  });
+
   it('enforces privacy budgets', async () => {
     const service = new FcrService();
     service.configureTenantBudget('tenant-a', 0.1, 0.001);

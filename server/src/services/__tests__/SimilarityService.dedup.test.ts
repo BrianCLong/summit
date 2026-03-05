@@ -9,51 +9,64 @@ import type { DuplicateCandidate } from '../SimilarityService.js';
 
 // Mock dependencies
 jest.unstable_mockModule('../../config/database.js', () => ({
-  __esModule: true,
-  getPostgresPool: jest.fn(),
+  getPostgresPool: () => null,
 }));
 jest.unstable_mockModule('../../monitoring/opentelemetry.js', () => ({
-  __esModule: true,
   otelService: {
-    wrapNeo4jOperation: jest.fn(async (_name: string, fn: () => any) => fn()),
-    addSpanAttributes: jest.fn(),
+    wrapNeo4jOperation: (_name: string, fn: () => any) => fn(),
+    addSpanAttributes: () => {},
   },
 }));
-jest.unstable_mockModule('../../monitoring/metrics.js', () => ({
-  __esModule: true,
-  vectorQueriesTotal: {
-    labels: jest.fn(() => ({ inc: jest.fn() })),
-  },
-  vectorQueryDurationSeconds: {
-    startTimer: jest.fn(() => jest.fn()),
-  },
-  applicationErrors: {
-    labels: jest.fn(() => ({ inc: jest.fn() })),
-  },
-}));
-jest.unstable_mockModule('../../utils/logger.js', () => {
-  const stubLogger = {
-    info: jest.fn(),
-    debug: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
-    child: jest.fn(function () {
-      return stubLogger;
-    }),
+jest.unstable_mockModule('../../monitoring/metrics.js', () => {
+  const counter = {
+    labels: () => ({ inc: () => {} }),
+    inc: () => {},
+    reset: () => {},
+    get: () => ({ values: [] }),
   };
+  const histogram = {
+    startTimer: () => () => {},
+    labels: () => ({ observe: () => {} }),
+    observe: () => {},
+    reset: () => {},
+    get: () => ({ values: [] }),
+  };
+
   return {
-    __esModule: true,
-    logger: stubLogger,
-    default: stubLogger,
+    applicationErrors: counter,
+    vectorQueriesTotal: counter,
+    vectorQueryDurationSeconds: histogram,
   };
 });
+jest.unstable_mockModule('../../utils/logger.js', () => ({
+  logger: {
+    child: () => ({
+      info: () => {},
+      debug: () => {},
+      warn: () => {},
+      error: () => {},
+    }),
+    info: () => {},
+    debug: () => {},
+    warn: () => {},
+    error: () => {},
+  },
+  default: {
+    child: () => ({
+      info: () => {},
+      debug: () => {},
+      warn: () => {},
+      error: () => {},
+    }),
+    info: () => {},
+    debug: () => {},
+    warn: () => {},
+    error: () => {},
+  },
+}));
 
 describe('SimilarityService - Duplicate Detection', () => {
   let SimilarityService: typeof import('../SimilarityService.js').SimilarityService;
-  let mockOtelService: {
-    wrapNeo4jOperation: jest.Mock;
-    addSpanAttributes: jest.Mock;
-  };
   let service: InstanceType<typeof SimilarityService>;
   let mockPool: any;
   let mockClient: any;
@@ -61,18 +74,11 @@ describe('SimilarityService - Duplicate Detection', () => {
   beforeAll(async () => {
     const module = await import('../SimilarityService.js');
     SimilarityService = module.SimilarityService;
-    const otelModule = await import('../../monitoring/opentelemetry.js');
-    mockOtelService = otelModule.otelService as typeof mockOtelService;
   });
 
   beforeEach(() => {
     // Reset mocks
     jest.clearAllMocks();
-    if (mockOtelService?.wrapNeo4jOperation) {
-      mockOtelService.wrapNeo4jOperation.mockImplementation(
-        async (_name: string, fn: () => any) => fn(),
-      );
-    }
 
     // Create mock client
     mockClient = {

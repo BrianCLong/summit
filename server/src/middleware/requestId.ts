@@ -1,20 +1,25 @@
-import type { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
+import { NextFunction, Request, Response } from 'express';
 
-/**
- * Assigns a stable request ID for downstream logging and trace correlation.
- */
-export function requestId() {
+declare global {
+  namespace Express {
+    interface Request {
+      reqId?: string;
+    }
+  }
+}
+
+export function requestId(headerName = 'x-request-id') {
   return (req: Request, res: Response, next: NextFunction): void => {
-    const existing = req.headers['x-request-id'];
-    const value = typeof existing === 'string' && existing.length > 0
-      ? existing
-      : randomUUID();
+    const headerValue = req.headers[headerName];
+    const existingRequestId = Array.isArray(headerValue)
+      ? headerValue[0]
+      : headerValue;
+    const reqId = existingRequestId || randomUUID();
 
-    (req as Request & { reqId?: string }).reqId = value;
-    res.setHeader('x-request-id', value);
+    req.reqId = reqId;
+    res.setHeader(headerName, reqId);
     next();
   };
 }
 
-export default requestId;

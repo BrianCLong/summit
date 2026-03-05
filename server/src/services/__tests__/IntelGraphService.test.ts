@@ -1,83 +1,53 @@
-// ESM-compatible test for IntelGraphService
-import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, it, jest } from '@jest/globals';
 
-// Mock functions declared before mocks
-const mockGetNeo4jDriver = jest.fn();
-const mockAppendEntry = jest.fn();
+const getNeo4jDriverMock = jest.fn();
+const appendEntryMock = jest.fn();
 
-// ESM-compatible mocking using unstable_mockModule
 jest.unstable_mockModule('../../config/database.js', () => ({
-  getNeo4jDriver: mockGetNeo4jDriver,
+  getNeo4jDriver: getNeo4jDriverMock,
 }));
 
 jest.unstable_mockModule('../../provenance/ledger.js', () => ({
   provenanceLedger: {
-    appendEntry: mockAppendEntry,
+    appendEntry: appendEntryMock,
   },
-}));
-
-// Mock crypto.randomUUID
-jest.unstable_mockModule('crypto', () => ({
-  randomUUID: jest.fn(() => 'generated-uuid'),
+  ProvenanceLedgerV2: class ProvenanceLedgerV2 {},
 }));
 
 describe('IntelGraphService', () => {
+  let IntelGraphService: any;
   let mockSession: { run: jest.Mock; close: jest.Mock };
   let service: any;
-  let IntelGraphServiceClass: any;
-  let provenanceLedgerMock: any;
 
-  beforeEach(async () => {
-    jest.resetModules();
+  beforeAll(async () => {
+    ({ IntelGraphService } = await import('../IntelGraphService.js'));
+  });
+
+  beforeEach(() => {
     jest.clearAllMocks();
 
     mockSession = {
-      run: jest.fn(),
+      run: jest.fn((query: string) => {
+        if (query.includes('CREATE (c:Claim')) {
+          return {
+            records: [{ get: () => ({ properties: { id: 'claim-1' } }) }],
+          };
+        }
+
+        return {
+          records: [{ get: () => ({ properties: { id: 'decision-1' } }) }],
+        };
+      }),
       close: jest.fn(),
     };
 
-    mockSession.run.mockImplementation((query: string) => {
-      if (query.includes('CREATE (d:Decision')) {
-        return {
-          records: [
-            {
-              get: () => ({ properties: { id: 'decision-1' } }),
-            },
-          ],
-        };
-      }
-      if (query.includes('CREATE (c:Claim')) {
-        return {
-          records: [
-            {
-              get: () => ({ properties: { id: 'claim-1' } }),
-            },
-          ],
-        };
-      }
-      return { records: [] };
-    });
-
-    const promClient = await import('prom-client');
-    (promClient.Histogram as any).prototype.startTimer = jest.fn(() => jest.fn());
-    (promClient.Counter as any).prototype.inc = jest.fn();
-
-    mockGetNeo4jDriver.mockReturnValue({
+    getNeo4jDriverMock.mockReturnValue({
       session: jest.fn(() => mockSession),
     });
+    appendEntryMock.mockResolvedValue({ id: 'ledger-123', currentHash: 'hash-abc' });
 
-    mockAppendEntry.mockResolvedValue({
-      id: 'ledger-123',
-      currentHash: 'hash-abc',
-    });
-
-    const ledgerModule = await import('../../provenance/ledger.js');
-    provenanceLedgerMock = ledgerModule.provenanceLedger;
-
-    const module = await import('../IntelGraphService.js');
-    IntelGraphServiceClass = module.IntelGraphService;
-    IntelGraphServiceClass._resetForTesting();
-    service = IntelGraphServiceClass.getInstance();
+    IntelGraphService._resetForTesting();
+    service = IntelGraphService.getInstance();
   });
 
   describe('createDecision', () => {
@@ -96,8 +66,7 @@ describe('IntelGraphService', () => {
         'tenant-1',
       );
 
-      // Verify Ledger Call
-      expect(provenanceLedgerMock.appendEntry).toHaveBeenCalledWith(
+      expect(appendEntryMock).toHaveBeenCalledWith(
         expect.objectContaining({
           tenantId: 'tenant-1',
           actionType: 'CREATE',
@@ -107,19 +76,15 @@ describe('IntelGraphService', () => {
             recommendation: 'Approve',
             informedByClaimIds: claimIds,
           }),
-        })
+        }),
       );
 
-      // Verify Neo4j Calls
-      expect(mockSession.run).toHaveBeenCalled();
-
-      // Check Decision Node Creation
       expect(mockSession.run).toHaveBeenCalledWith(
         expect.stringContaining('CREATE (d:Decision $props)'),
         expect.objectContaining({
           tenantId: 'tenant-1',
           informedByClaimIds: claimIds,
-        })
+        }),
       );
       expect(result).toEqual(
         expect.objectContaining({
@@ -157,14 +122,16 @@ describe('IntelGraphService', () => {
         'tenant-1',
       );
 
-      expect(provenanceLedgerMock.appendEntry).toHaveBeenCalledWith(
+      expect(appendEntryMock).toHaveBeenCalledWith(
         expect.objectContaining({
           actionType: 'CREATE',
           resourceType: 'Claim',
-        })
+        }),
       );
 
-      const createCall = mockSession.run.mock.calls.find((call: any[]) => call[0].includes('CREATE (c:Claim'));
+      const createCall = mockSession.run.mock.calls.find((call: any[]) =>
+        call[0].includes('CREATE (c:Claim'),
+      );
       expect(createCall).toBeDefined();
       expect(result).toEqual(
         expect.objectContaining({

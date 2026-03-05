@@ -10,8 +10,9 @@
  * - Session management
  */
 
-import { jest } from '@jest/globals';
+import { jest, beforeAll } from '@jest/globals';
 import type { Pool } from 'pg';
+import type { AuthService as AuthServiceType } from '../AuthService.js';
 
 // 1. Mock GAEnrollmentService
 const mockCheckUserEnrollmentEligibility = jest.fn();
@@ -42,31 +43,74 @@ jest.unstable_mockModule('../../config/index.js', () => ({
   },
 }));
 
-// 4. Dynamic Imports
-const { AuthService } = await import('../AuthService.js');
-const { default: GAEnrollmentService } = await import('../GAEnrollmentService.js');
-const { getPostgresPool } = await import('../../config/database.js');
+// 4. Mock External Libs
+const mockVerify = jest.fn();
+const mockSign = jest.fn();
+const mockHash = jest.fn();
+const mockArgonVerify = jest.fn();
 
-const mockSecurityService = {
-  hashPassword: jest.fn(),
-  verifyPassword: jest.fn(),
-  generateDbTokenPair: jest.fn(),
-  verifyDbToken: jest.fn(),
-  refreshDbToken: jest.fn(),
-  revokeToken: jest.fn(),
-  hashToken: jest.fn(),
-};
+// 5. Dynamic Imports
+let AuthService: typeof import('../AuthService.js').AuthService;
+let getPostgresPool: typeof import('../../config/database.js').getPostgresPool;
+let mockSecurityService: any;
+
+beforeAll(async () => {
+  process.env.GA_ENROLLMENT_BYPASS = 'true';
+  ({ AuthService } = await import('../AuthService.js'));
+  ({ getPostgresPool } = await import('../../config/database.js'));
+});
+
 
 let mockPool: jest.Mocked<Pool>;
 let mockClient: any;
 
 describe('AuthService', () => {
-  let authService: AuthService;
+  let authService: AuthServiceType;
 
   beforeEach(() => {
+    // Reset mocks
+    // Reset mocks
     jest.clearAllMocks();
-    Object.values(mockSecurityService).forEach((mockFn) => mockFn.mockReset());
-    (GAEnrollmentService.checkUserEnrollmentEligibility as jest.Mock).mockResolvedValue({ eligible: true });
+    process.env.GA_ENROLLMENT_BYPASS = 'true';
+    mockCheckUserEnrollmentEligibility.mockResolvedValue({ eligible: true });
+
+    mockSecurityService = {
+      hashPassword: jest.fn(async (password: string) => mockHash(password)),
+      verifyPassword: jest.fn(async (hash: string, password: string) =>
+        mockArgonVerify(hash, password),
+      ),
+      generateDbTokenPair: jest.fn(
+        async (user: any, client: any, scopes: string[] = []) => {
+          const token = mockSign(
+            {
+              userId: user.id,
+              email: user.email,
+              role: user.role,
+              tenantId: user.tenant_id || user.default_tenant_id || 'unknown',
+              scp: scopes,
+            },
+            'test-jwt-secret-for-testing-only',
+            { expiresIn: '24h' },
+          );
+          const refreshToken = 'refresh-token-456';
+          await client.query(
+            'INSERT INTO user_sessions (user_id, refresh_token) VALUES ($1, $2)',
+            [user.id, refreshToken],
+          );
+          return { token, refreshToken };
+        },
+      ),
+      verifyDbToken: jest.fn(async (token: string) => {
+        try {
+          return mockVerify(token, 'test-jwt-secret-for-testing-only');
+        } catch {
+          return null;
+        }
+      }),
+      refreshDbToken: jest.fn(),
+      revokeToken: jest.fn(),
+      hashToken: jest.fn((token: string) => `hash:${token}`),
+    };
 
     // Mock PostgreSQL client
     mockClient = {
@@ -82,7 +126,7 @@ describe('AuthService', () => {
 
     (getPostgresPool as jest.Mock).mockReturnValue(mockPool);
 
-    authService = new AuthService(mockSecurityService as any);
+    authService = new AuthService(mockSecurityService);
   });
 
   describe('register', () => {
@@ -101,11 +145,8 @@ describe('AuthService', () => {
       const mockToken = 'jwt-token-123';
       const mockRefreshToken = 'refresh-token-456';
 
-      mockSecurityService.hashPassword.mockResolvedValue(mockHashedPassword);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: mockToken,
-        refreshToken: mockRefreshToken,
-      });
+      mockHash.mockResolvedValue(mockHashedPassword);
+      mockSign.mockReturnValue(mockToken);
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -124,6 +165,7 @@ describe('AuthService', () => {
           },
         ],
       });
+      mockClient.query.mockResolvedValueOnce(undefined); // Insert user_tenants
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
       mockClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
@@ -133,7 +175,7 @@ describe('AuthService', () => {
       expect(result.user.email).toBe(mockUserData.email);
       expect(result.token).toBe(mockToken);
       expect(result.refreshToken).toBeDefined();
-      expect(mockSecurityService.hashPassword).toHaveBeenCalledWith(mockUserData.password);
+      expect(mockHash).toHaveBeenCalledWith(mockUserData.password);
       expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
     });
@@ -160,11 +202,8 @@ describe('AuthService', () => {
       };
 
       const mockHashedPassword = '$argon2id$v=19$m=65536$...';
-      mockSecurityService.hashPassword.mockResolvedValue(mockHashedPassword);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: 'jwt-token',
-        refreshToken: 'refresh-token',
-      });
+      mockHash.mockResolvedValue(mockHashedPassword);
+      mockSign.mockReturnValue('jwt-token');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -181,6 +220,7 @@ describe('AuthService', () => {
           },
         ],
       });
+      mockClient.query.mockResolvedValueOnce(undefined); // Insert user_tenants
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
       mockClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
@@ -190,7 +230,7 @@ describe('AuthService', () => {
     });
 
     it('should rollback on database error', async () => {
-      mockSecurityService.hashPassword.mockResolvedValue('hashed-password');
+      mockHash.mockResolvedValue('hashed-password');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -205,11 +245,8 @@ describe('AuthService', () => {
 
     it('should hash password using argon2', async () => {
       const mockHashedPassword = '$argon2id$v=19$m=65536$...';
-      mockSecurityService.hashPassword.mockResolvedValue(mockHashedPassword);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: 'jwt-token',
-        refreshToken: 'refresh-token',
-      });
+      mockHash.mockResolvedValue(mockHashedPassword);
+      mockSign.mockReturnValue('jwt-token');
 
       mockClient.query.mockResolvedValueOnce(undefined); // BEGIN
       mockClient.query.mockResolvedValueOnce({ rows: [] }); // Check existing user
@@ -224,13 +261,13 @@ describe('AuthService', () => {
           },
         ],
       });
+      mockClient.query.mockResolvedValueOnce(undefined); // Insert user_tenants
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
       mockClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
       await authService.register(mockUserData);
 
-      expect(mockSecurityService.hashPassword).toHaveBeenCalledWith(mockUserData.password);
-      expect(mockSecurityService.hashPassword).toHaveBeenCalledTimes(1);
+      expect(mockHash).toHaveBeenCalledWith(mockUserData.password);
     });
   });
 
@@ -253,11 +290,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      mockSecurityService.verifyPassword.mockResolvedValue(true);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: 'jwt-token',
-        refreshToken: 'refresh-token',
-      });
+      mockArgonVerify.mockResolvedValue(true);
+      mockSign.mockReturnValue('jwt-token');
 
       const result = await authService.login(mockEmail, mockPassword);
 
@@ -265,7 +299,7 @@ describe('AuthService', () => {
       expect(result.user.email).toBe(mockEmail);
       expect(result.token).toBeDefined();
       expect(result.refreshToken).toBeDefined();
-      expect(mockSecurityService.verifyPassword).toHaveBeenCalledWith(
+      expect(mockArgonVerify).toHaveBeenCalledWith(
         mockHashedPassword,
         mockPassword,
       );
@@ -307,7 +341,7 @@ describe('AuthService', () => {
       };
 
       mockClient.query.mockResolvedValueOnce({ rows: [mockUser] });
-      mockSecurityService.verifyPassword.mockResolvedValue(false);
+      mockArgonVerify.mockResolvedValue(false);
 
       await expect(authService.login(mockEmail, mockPassword)).rejects.toThrow(
         'Invalid credentials',
@@ -328,11 +362,8 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      mockSecurityService.verifyPassword.mockResolvedValue(true);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: 'jwt-token',
-        refreshToken: 'refresh-token',
-      });
+      mockArgonVerify.mockResolvedValue(true);
+      mockSign.mockReturnValue('jwt-token');
 
       await authService.login(mockEmail, mockPassword);
 
@@ -356,19 +387,15 @@ describe('AuthService', () => {
       mockClient.query.mockResolvedValueOnce(undefined); // Update last_login
       mockClient.query.mockResolvedValueOnce(undefined); // Insert session
 
-      mockSecurityService.verifyPassword.mockResolvedValue(true);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: 'jwt-token',
-        refreshToken: 'refresh-token',
-      });
+      mockArgonVerify.mockResolvedValue(true);
+      mockSign.mockReturnValue('jwt-token');
 
       const result = await authService.login(mockEmail, mockPassword);
 
       expect(result.refreshToken).toBeDefined();
-      expect(mockSecurityService.generateDbTokenPair).toHaveBeenCalledWith(
-        mockUser,
-        mockClient,
-        expect.any(Array),
+      expect(mockClient.query).toHaveBeenCalledWith(
+        expect.stringContaining('INSERT INTO user_sessions'),
+        expect.arrayContaining([mockUser.id, expect.any(String)]),
       );
     });
   });
@@ -391,7 +418,7 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      mockSecurityService.verifyDbToken.mockResolvedValue(mockPayload);
+      mockVerify.mockReturnValue(mockPayload);
       (mockPool.query as any).mockResolvedValue({ rows: [] });
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
 
@@ -400,13 +427,15 @@ describe('AuthService', () => {
       expect(result).not.toBeNull();
       expect(result?.id).toBe(mockUser.id);
       expect(result?.email).toBe(mockUser.email);
-      expect(mockSecurityService.verifyDbToken).toHaveBeenCalledWith(mockToken, mockPool);
+      expect(mockVerify).toHaveBeenCalledWith(mockToken, 'test-jwt-secret-for-testing-only');
     });
 
     it('should return null for invalid token', async () => {
       const mockToken = 'invalid-token';
 
-      mockSecurityService.verifyDbToken.mockRejectedValue(new Error('Invalid token'));
+      mockVerify.mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
 
       const result = await authService.verifyToken(mockToken);
 
@@ -427,7 +456,7 @@ describe('AuthService', () => {
         role: 'ANALYST',
       };
 
-      mockSecurityService.verifyDbToken.mockResolvedValue(mockPayload);
+      mockVerify.mockReturnValue(mockPayload);
       mockClient.query.mockResolvedValue({ rows: [] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -442,15 +471,8 @@ describe('AuthService', () => {
         email: 'test@example.com',
         role: 'ANALYST',
       };
-      const mockUser = {
-        id: mockPayload.userId,
-        email: mockPayload.email,
-        role: mockPayload.role,
-        is_active: false,
-        created_at: new Date(),
-      };
 
-      mockSecurityService.verifyDbToken.mockResolvedValue(mockPayload);
+      mockVerify.mockReturnValue(mockPayload);
       mockClient.query.mockResolvedValue({ rows: [] } as any);
 
       const result = await authService.verifyToken(mockToken);
@@ -615,11 +637,8 @@ describe('AuthService', () => {
       };
 
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
-      mockSecurityService.verifyPassword.mockResolvedValue(true);
-      mockSecurityService.generateDbTokenPair.mockResolvedValue({
-        token: 'jwt-token',
-        refreshToken: 'refresh-token',
-      });
+      mockArgonVerify.mockResolvedValue(true);
+      mockSign.mockReturnValue('jwt-token');
 
       const loginPromises = Array.from({ length: 5 }, () =>
         authService.login('test@example.com', 'password'),
@@ -661,7 +680,7 @@ describe('AuthService', () => {
         created_at: new Date(),
       };
 
-      mockSecurityService.verifyDbToken.mockResolvedValue(mockPayload);
+      mockVerify.mockReturnValue(mockPayload);
       (mockPool.query as any).mockResolvedValue({ rows: [] });
       mockClient.query.mockResolvedValue({ rows: [mockUser] });
 

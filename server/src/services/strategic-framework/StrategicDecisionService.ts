@@ -33,7 +33,10 @@ import {
   CreateDecisionInputSchema,
 } from './types.js';
 
-const tracer = getTracer('strategic-decision-service');
+const tracer =
+  typeof getTracer === 'function'
+    ? getTracer('strategic-decision-service')
+    : { startSpan: () => ({ end: () => { } }) };
 
 // In-memory storage
 const decisionsStore = new Map<string, StrategicDecision>();
