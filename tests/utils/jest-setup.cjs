@@ -1,1 +1,1 @@
-// Dummy setup to satisfy the repo configuration
+console.log("Empty setup");
