@@ -380,5 +380,3 @@ evidence/skills/
 *.js.map
 .worktrees/
 _worktrees/
-.worktrees/
-.gitmodules
