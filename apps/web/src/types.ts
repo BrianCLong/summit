@@ -198,6 +198,15 @@ export interface TimelineEvent {
   metadata: Record<string, any>
 }
 
+export type {
+  CaseTask,
+  Watchlist,
+  CaseComment,
+  EntityComment,
+  EntityCommentAttachment,
+  EntityCommentMention,
+} from './types/index'
+
 export interface GeoLocation {
   id: string
   name: string

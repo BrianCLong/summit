@@ -461,7 +461,7 @@ export function TriPaneShell({
   }, [emitPresenceUpdate])
 
   useEffect(() => {
-    const selection = syncState.graph.selectedEntityId
+    const selection: PresenceChannelSelection | undefined = syncState.graph.selectedEntityId
       ? {
           pane: 'graph',
           id: syncState.graph.selectedEntityId,
