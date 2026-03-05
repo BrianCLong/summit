@@ -4,6 +4,10 @@ const isDev = process.env.NODE_ENV === 'development';
 
 export const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || (isDev ? 'debug' : 'info'),
+  defaultMeta: {
+    service: '@intelgraph/api-gateway',
+    env: process.env.NODE_ENV || 'development',
+  },
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.errors({ stack: true }),
