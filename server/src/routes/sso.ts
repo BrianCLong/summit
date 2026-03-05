@@ -52,7 +52,7 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
   // Must be ADMIN role
   // Must be associated with the tenant ID (or be a system-wide admin if that concept exists, here we stick to tenant admin)
 
-  if ((req.user as any)!.role !== 'ADMIN') {
+  if ((req.user as any)!.role.toUpperCase() !== 'ADMIN') {
     return res.status(403).json({ error: 'Unauthorized: Admin role required' });
   }
 
