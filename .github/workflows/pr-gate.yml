@@ -62,3 +62,21 @@ jobs:
 
       - name: Timestamp scan
         run: node scripts/scan_timestamp_keys.mjs
+
+
+      - name: Detect governance policy changes
+        id: governance_changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            governance_policy:
+              - 'summit/agents/policy/**'
+              - 'summit/agents/skills/**'
+              - 'tools/governance/**'
+              - 'docs/governance/**'
+
+      - name: Governance policy bundle gate
+        if: steps.governance_changes.outputs.governance_policy == 'true'
+        run: |
+          CHANGED_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}" "${{ github.sha }}")
+          pnpm exec tsx tools/governance/check-policy.ts $CHANGED_FILES
