@@ -1,12 +1,13 @@
 {
-  "last_updated": "2026-02-26T16:30:12Z",
-  "revision_note": "Added MIT Sloan five heavy lifts crosswalk and Summit enforcement mapping for agentic GA governance.",
+  "last_updated": "2026-02-26T16:42:56Z",
+  "revision_note": "Added OpenClaw incident brief with MAESTRO-layered threat and mitigation posture.",
   "initiatives": [
     {
-      "id": "mit-sloan-heavy-lifts-crosswalk",
-      "status": "completed",
+      "id": "openclaw-incident-brief-2026-02-26",
+      "area": "docs/runbooks",
+      "status": "complete",
       "owner": "codex",
-      "notes": "Published MIT Sloan 5 heavy lifts translation to Summit GraphRAG + multi-agent + GA gate enforcement model."
+      "summary": "Published governed OpenClaw incident brief documenting autonomy risk patterns, MAESTRO threat layers, and mitigation controls."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
