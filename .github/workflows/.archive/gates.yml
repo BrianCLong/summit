@@ -3,6 +3,11 @@ name: "Gates (GA + Evidence + Determinism)"
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   merge_group:
   workflow_dispatch: {}
 

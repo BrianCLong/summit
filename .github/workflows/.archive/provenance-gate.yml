@@ -3,6 +3,11 @@ name: Provenance Gate
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'policy/supply_chain.rego'
       - 'scripts/ci/enforce-provenance.sh'
