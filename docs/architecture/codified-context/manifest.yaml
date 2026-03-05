@@ -1,0 +1,24 @@
+version: "1.0"
+metadata:
+  name: "Codified Context Implementation Manifest"
+  status: "proposed"
+  description: "Deployment strategy for the three-tier Codified Context model."
+
+components:
+  - id: "hot-memory"
+    type: "prompt-core"
+    location: "prompts/sys/CONSTITUTION.md"
+    description: "The primary agent constitution."
+    validation: "Must pass governance-meta-gate CI checks."
+
+  - id: "domain-memory-agents"
+    type: "prompt-domain"
+    location: "prompts/agents/domain/"
+    description: "Domain-specific instruction sets."
+    validation: "Must be registered in prompts/registry.yaml with SHA-256 hashes."
+
+  - id: "cold-memory-kb"
+    type: "knowledge-base"
+    location: "docs/, evals/, subsumption/"
+    description: "Cold storage for retrieval operations."
+    validation: "Schemas must validate against Draft 2020-12 using Ajv2020."

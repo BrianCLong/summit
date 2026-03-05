@@ -36,6 +36,11 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
+## 2026-03-02 - [CRITICAL] Unauthenticated DR and Analytics Routers
+**Vulnerability:** The `/dr` and `/analytics` routers were mounted directly in `app.ts` without any authentication or authorization middleware, exposing sensitive disaster recovery and graph analytics data to the public internet.
+**Learning:** Routers mounted outside the global `/api` or `/graphql` prefix (which had authentication guards) are easily overlooked and default to being public.
+**Prevention:** Enforce a "deny-by-default" posture by placing `ensureAuthenticated` and `ensureRole` middleware directly at the top of every administrative or sensitive router file, regardless of where it is mounted.
+
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
@@ -75,3 +80,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-03-01 - [XAI PII Leakage Prevention]
+**Vulnerability:** Instance-level explanations could leak PII if models are passed raw text featuring SSNs, emails, or credit card numbers, exposing them in plaintext within evidence files like `report.json`.
+**Learning:** Hard-coded regular expressions acting as a deny-by-default filter for features provides a strong fallback guardrail against emitting unintended PII in deterministic artifact logging in offline-first XAI pipelines.
+**Prevention:** Implemented a `redact_pii` step applying rigorous regex replacements before the calculation and output writing stage inside the SHAP-IQ feature filtering logic.
