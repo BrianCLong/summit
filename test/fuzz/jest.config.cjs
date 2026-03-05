@@ -10,11 +10,13 @@ module.exports = {
       'ts-jest',
       {
         tsconfig: path.join(__dirname, '../../tsconfig.test.json'),
+        useESM: true,
       },
     ],
   },
   moduleNameMapper: {
-    '^(.*)\\.js$': '$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 };

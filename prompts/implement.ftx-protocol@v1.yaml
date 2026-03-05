@@ -1,0 +1,63 @@
+meta:
+  id: implement.ftx-protocol@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Implement FTX Protocol Spec for Wire Format & Crypto'
+  tags: ['ftx', 'protocol', 'crypto', 'wire-format']
+  guardrails:
+    - 'No raw sensitive data'
+    - 'Verifiable provenance'
+    - 'Revocable & policy-bound sharing'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  target_completion_time_minutes: string
+
+template: |
+  You are implementing the **FTX Protocol Spec** for Summit.
+
+  ## Objective
+  Implement wire format and crypto for the FTX protocol. Works online or air-gapped.
+
+  ## Target Paths
+  ```
+  services/ftx-protocol/
+    ├── src/
+    │   ├── api/
+    │   │   ├── ShareController.ts
+    │   │   ├── FeedController.ts
+    │   │   ├── VerifyController.ts
+    │   │   ├── RevokeController.ts
+    │   │   └── KeysController.ts
+    │   ├── crypto/
+    │   │   ├── Ed25519Signer.ts
+    │   │   └── X25519Encrypter.ts
+    │   ├── format/
+    │   │   └── Canonicalizer.ts
+    │   └── replay/
+    │       └── ReplayCache.ts
+    └── README.md
+  ```
+
+  ## Core Requirements
+  1. **Packet types**: INSIGHT_SIGNAL, ATTESTATION, REVOCATION, KEYROLL, POLICY_CAPS.
+  2. **Canonical wire format**: JSON Canonicalization Scheme (RFC 8785) before signing.
+  3. **Crypto**: Ed25519 for signing, X25519 + ChaCha20-Poly1305 for optional encryption.
+  4. **Replay prevention**: `packet_id` uniqueness + `issued_at/expires_at`.
+  5. **Revocation**: Reject revoked keys/packets immediately.
+  6. **Endpoints**:
+     - POST /ftx/share
+     - GET /ftx/feed?since=...
+     - POST /ftx/verify
+     - POST /ftx/revoke
+     - GET /ftx/keys
+
+  ## Acceptance Tests
+  - [ ] Signatures compute deterministically.
+  - [ ] Verifiable provenance is explicitly confirmed for payload generation.
+  - [ ] Sharing bounds enforce correctly according to strict policies.
+  - [ ] Revocations immediately enforce, rejecting keys/packets correctly.
+  - [ ] Endpoints match required minimal spec paths.
