@@ -20,46 +20,33 @@
 - **📈 CompanyOS SDK**: Enterprise intelligence APIs
 - **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
-## 🚀 Quickstart
-
-### Prerequisites
-
-- Node.js 18+
-- Docker & Docker Compose
-- Neo4j 5.x (via Docker)
-
-### Install & Run
+## 🚀 ONE-COMMAND QUICKSTART (Feb 26 2026 — tested)
 
 ```bash
-# Clone repository
-git clone https://github.com/BrianCLong/summit.git
+git clone --depth 1 https://github.com/BrianCLong/summit.git
 cd summit
 
-# Install dependencies
-pnpm install
+pnpm run cleanup          # removes bloat
+pnpm run setup            # bootstrap + permissions
+pnpm run bootstrap        # extra safety
 
-# Start infrastructure (Neo4j, Postgres, Redis)
-docker-compose up -d
+cp .env.example .env      # ← edit secrets + AI keys NOW
 
-# Run migrations
+# Docker network (dev.yml uses 'summit')
+docker network create summit 2>/dev/null || true
+
+pnpm run docker:dev       # full stack + observability + healthchecks
+
+# Wait for healthy (docker compose ps)
+
 pnpm db:migrate
+pnpm db:seed
 
-# Start dev server
 pnpm dev
-```
-
-Server runs at `http://localhost:4000`
-
-### First Query
-
-```bash
-# GraphQL playground
-curl -X POST http://localhost:4000/api/graphql \
-  -H "Content-Type: application/json" \
-  -d '{"query": "{ health { status version } }"}'
-
-# Or use the web UI
-open http://localhost:3000
+→ API: http://localhost:4000/health/ready
+→ Web: http://localhost:3000
+→ Grafana: http://localhost:3001 (admin/admin)
+→ Jaeger: http://localhost:16687
 ```
 
 ## 🏛 Architecture
