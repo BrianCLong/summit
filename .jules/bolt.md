@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2026-08-10 - [Batching Inside PostgreSQL Transactions]
-**Learning:** When batching inserts inside an existing PostgreSQL transaction, avoid using try-catch fallback to individual inserts for that batch. Any query failure within a transaction immediately aborts the entire transaction, making subsequent "fallback" queries fail with 'current transaction is aborted'.
-**Action:** Use batching without individual fallback when already inside a `pg.transaction` block to maintain atomicity and avoid 'current transaction is aborted' errors.
+## 2026-09-02 - [High-Frequency Middleware Copy-on-Write Optimization]
+**Learning:** Middleware that runs on every request (like input sanitization) is a massive performance bottleneck if it performs unconditional deep cloning of large objects (body, query, params). Most requests are "clean" and don't need modification.
+**Action:** Implement a Copy-on-Write (CoW) pattern in recursive object processors. Return the original reference immediately if no modifications are needed, use O(1) property checks (like `key[0]`), and short-circuit recursion for immutable/special types (Date, Buffer, RegExp).
