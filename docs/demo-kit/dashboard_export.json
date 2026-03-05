@@ -1,0 +1,42 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Summit GA Performance & Scale",
+    "tags": ["ga", "summit", "performance"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "API Throughput",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{path}}"
+          }
+        ]
+      },
+      {
+        "title": "P95 Response Time",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+            "legendFormat": "P95 Latency"
+          }
+        ]
+      },
+      {
+        "title": "Drift Detection Accuracy",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "sum(drift_detections_verified) / sum(drift_detections_total)",
+            "legendFormat": "Accuracy"
+          }
+        ]
+      }
+    ],
+    "schemaVersion": 21,
+    "version": 1
+  }
+}
