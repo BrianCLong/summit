@@ -1,4 +1,5 @@
-# Control Registry
+| Control ID | Control Name | Description | Enforcement |
+| --- | --- | --- | --- |
 
 ## Supply Chain Integrity (SCI)
 
