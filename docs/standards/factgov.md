@@ -32,15 +32,14 @@ The following fields must **NEVER** appear in application logs (use redaction):
 - API Keys
 - Payment Instrument Details
 
-## Auditability & Determinism
+## Auditability
 
 - All state changes (status transitions) must emit an immutable audit event.
 - Audit packs must be deterministic (same input = same output bytes).
-- Timestamps in audit packs must be isolated to `stamp.json` or a `runtime_meta` field/file, not embedded in the hashable content.
+- Timestamps in audit packs must be isolated to `stamp.json`.
 
-## Technical Implementation (FactGov Module)
-
-### Import/Export Matrix
+## Technical Implementation Standards
+## Import/Export Matrix
 
 | Direction | Component | Description |
 | :--- | :--- | :--- |
@@ -50,7 +49,7 @@ The following fields must **NEVER** appear in application logs (use redaction):
 | **Exports** | Marketplace Entities | Agencies, Vendors, Validators exposed via GraphQL. |
 | **Exports** | Artifacts | deterministic award recommendation JSONs. |
 
-### Module Structure (`server/src/modules/factgov/`)
+## Module Structure (`server/src/modules/factgov/`)
 
 *   `types.ts`: TypeScript interfaces mirroring the DB schema.
 *   `repo.ts`: Data access layer. SQL queries reside here.
@@ -62,3 +61,7 @@ The following fields must **NEVER** appear in application logs (use redaction):
 *   No full Stripe billing implementation.
 *   No cooperative contract API sync.
 *   No real-time "chat" features (use standard Summit messaging if needed).
+
+## Determinism
+*   All artifacts (award recommendations, audit trails) must be generated deterministically.
+*   Timestamps in artifacts must be separated into a `runtime_meta` field or file, not embedded in the hashable content.

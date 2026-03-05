@@ -13,12 +13,31 @@ from .validator import validate_output
 
 
 def _stable_hash(payload: dict[str, Any]) -> str:
+    """Compute a deterministic SHA-256 hash of the payload.
+
+    Args:
+        payload: Dictionary to hash.
+
+    Returns:
+        Hex digest of the SHA-256 hash.
+    """
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def run(input_data: dict[str, Any]) -> dict[str, Any]:
-    """Deterministic route planning entrypoint."""
+    """Execute deterministic route planning using input data.
+
+    Orchestrates the route optimization process by validating inputs,
+    solving the route constraints, generating artifacts, and validating
+    the final report schema.
+
+    Args:
+        input_data: Dictionary containing 'stops' and 'constraints'.
+
+    Returns:
+        The generated route plan report.
+    """
     evidence_id = str(input_data.get("evidence_id", "EVID-ROUTE-OPT-0001"))
     constraints = input_data.get("constraints", {})
 

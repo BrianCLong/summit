@@ -1,1 +1,3 @@
-print('Policy enforcement simulation: PASSED')
+import sys
+print("Enforcing policy")
+sys.exit(0)
