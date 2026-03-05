@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-05T00:19:01Z",
-  "revision_note": "Published strategic dominance stack architecture with phased execution controls and platform-killer risk guardrails.",
+  "last_updated": "2026-03-05T00:00:00Z",
+  "revision_note": "Added summit-threat-map V2 package scaffold with ingestion, risk materialization contracts, tile/drilldown endpoints, and aggregate-only map UI defaults.",
   "initiatives": [
     {
-      "id": "strategic-dominance-stack",
+      "id": "summit-threat-map-v2",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published docs/strategy/STRATEGIC_DOMINANCE_STACK.md covering 12 capability layers, reference architecture, and three failure-mode controls."
+      "notes": "Implemented Shodan/Shadowserver normalization pipeline, H3 risk rollup contracts, tile/drilldown API surface, and aggregate-only map component with evidence sidebar."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
