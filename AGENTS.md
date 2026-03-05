@@ -730,15 +730,18 @@ Every autonomous agent operating in this environment must possess a signed **Age
 - **In-Flight**: Budget and Tool usage checked against `authority` and `gates`.
 - **Violation**: Immediate `KILL` signal sent to runtime.
 
-## Agent Roles & Permissions
+## Recent Architectural Shifts (2025-Q4)
 
-**Permissions**
-- Agents must operate with least-privilege.
-- Default to DENY for all operations not explicitly allowed.
+Following the evolution of industry-standard Agent SDKs (OpenAI, Anthropic, GitHub), the Summit platform has adopted the following mandates:
 
-**Stop Conditions**
-- Stop on any unexpected failure or security alert.
-- Do not retry indefinitely.
+### 1. Telemetry Noise & Data Leakage Prevention
+- **Constraint**: Detailed token usage (`prompt_tokens`, `completion_tokens`, etc.) MUST be removed from trace spans (OpenTelemetry).
+- **Rationale**: Reduces telemetry noise in high-frequency agent runs and prevents potential leakage of sensitive prompt/response metadata into trace logs.
+- **Auditability**: Operational metrics for budget and cost tracking must remain in dedicated metrics systems (e.g., Prometheus) or audit-specific logs, separated from performance traces.
 
-**Escalation**
-- Escalate to human operator for any blocking issues.
+### 2. MCP Version Alignment
+- **Mandate**: All MCP (Model Context Protocol) components must pin against stable schema versions (currently `2025-11-25`) to ensure client/server interoperability.
+- **Enforcement**: Mismatched protocol versions between clients and servers are treated as fatal errors.
+
+### 3. Real-time Response Support
+- **Guideline**: Favor WebSocket-based streaming (Socket.IO) for real-time agent event streams to minimize latency and improve responsiveness in human-in-the-loop workflows.
