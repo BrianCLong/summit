@@ -29,7 +29,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Tabs } from '@/components/ui/Tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs'
 import {
   Tooltip,
   TooltipContent,
@@ -439,53 +439,37 @@ export default function CaseDetailPage() {
           className="h-full flex flex-col"
         >
           <div className="flex-shrink-0 border-b px-6">
-            <div className="flex gap-4">
-              <button
-                onClick={() => setActiveTab('overview')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'overview'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+            <TabsList className="flex w-full justify-start gap-4 bg-transparent p-0 h-auto">
+              <TabsTrigger
+                value="overview"
+                className="px-4 py-3 text-sm font-medium rounded-none border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
               >
                 Overview
-              </button>
-              <button
-                onClick={() => setActiveTab('tasks')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'tasks'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger
+                value="tasks"
+                className="px-4 py-3 text-sm font-medium rounded-none border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
               >
                 Tasks ({taskStats.total})
-              </button>
-              <button
-                onClick={() => setActiveTab('explorer')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'explorer'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger
+                value="explorer"
+                className="px-4 py-3 text-sm font-medium rounded-none border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
               >
                 Graph Explorer
-              </button>
-              <button
-                onClick={() => setActiveTab('watchlists')}
-                className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === 'watchlists'
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+              </TabsTrigger>
+              <TabsTrigger
+                value="watchlists"
+                className="px-4 py-3 text-sm font-medium rounded-none border-b-2 border-transparent text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
               >
                 Watchlists ({watchlists.length})
-              </button>
-            </div>
+              </TabsTrigger>
+            </TabsList>
           </div>
 
           <div className="flex-1 min-h-0 overflow-auto">
             {/* Overview Tab */}
-            {activeTab === 'overview' && (
+            <TabsContent value="overview" className="mt-0 h-full">
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* Left: Tasks Summary */}
@@ -513,6 +497,7 @@ export default function CaseDetailPage() {
                               <button
                                 onClick={() => handleToggleTaskStatus(task.id)}
                                 className="mt-0.5"
+                                aria-label={task.status === 'completed' ? "Mark task as pending" : "Mark task as completed"}
                               >
                                 {task.status === 'completed' ? (
                                   <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -692,10 +677,10 @@ export default function CaseDetailPage() {
                   </div>
                 </div>
               </div>
-            )}
+            </TabsContent>
 
             {/* Tasks Tab */}
-            {activeTab === 'tasks' && (
+            <TabsContent value="tasks" className="mt-0 h-full">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">All Tasks</h2>
@@ -713,6 +698,7 @@ export default function CaseDetailPage() {
                           <button
                             onClick={() => handleToggleTaskStatus(task.id)}
                             className="mt-1"
+                            aria-label={task.status === 'completed' ? "Mark task as pending" : "Mark task as completed"}
                           >
                             {task.status === 'completed' ? (
                               <CheckCircle2 className="h-6 w-6 text-green-600" />
@@ -763,10 +749,10 @@ export default function CaseDetailPage() {
                   ))}
                 </div>
               </div>
-            )}
+            </TabsContent>
 
             {/* Graph Explorer Tab */}
-            {activeTab === 'explorer' && (
+            <TabsContent value="explorer" className="mt-0 h-full">
               <div className="h-full p-6">
                 <TriPaneShell
                   {...triPaneData}
@@ -775,10 +761,10 @@ export default function CaseDetailPage() {
                   }}
                 />
               </div>
-            )}
+            </TabsContent>
 
             {/* Watchlists Tab */}
-            {activeTab === 'watchlists' && (
+            <TabsContent value="watchlists" className="mt-0 h-full">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Watchlists</h2>
@@ -821,7 +807,7 @@ export default function CaseDetailPage() {
                   ))}
                 </div>
               </div>
-            )}
+            </TabsContent>
           </div>
         </Tabs>
       </div>
