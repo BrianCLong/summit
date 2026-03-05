@@ -7,11 +7,6 @@ on:
       - 'openapi/**'
       - '.github/workflows/api-lint.yml'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'docs/api-spec.yaml'
       - 'openapi/**'

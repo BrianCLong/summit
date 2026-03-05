@@ -2,11 +2,6 @@ name: Infra Parity
 on:
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths: [ "infra/**", ".github/workflows/infra-parity.yml" ]
   merge_group:
 

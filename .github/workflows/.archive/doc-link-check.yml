@@ -38,4 +38,4 @@ jobs:
         run: npm install -g tsx
 
       - name: Run link checker
-        run: npx tsx scripts/check-doc-links.ts || true
+        run: npx tsx scripts/check-doc-links.ts

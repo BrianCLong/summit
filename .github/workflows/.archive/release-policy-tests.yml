@@ -12,11 +12,6 @@ name: Release Policy Tests
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
       - "docs/ci/REQUIRED_CHECKS_POLICY.json"
@@ -43,8 +38,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: release-policy-tests-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   policy-tests:
     name: Policy Engine Tests

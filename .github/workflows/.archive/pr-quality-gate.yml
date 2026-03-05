@@ -8,14 +8,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
-<<<<<<< HEAD
-=======
-env:
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
-  NODE_VERSION: '20.x'
-  PNPM_VERSION: '10.0.0'
-
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
 jobs:
   validate-release-policy:
     name: Validate Release Policy

@@ -9,11 +9,6 @@ on:
   # Check on PRs that modify schema files
   pull_request:
     branches: [main, release/*]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "graphql/schema.graphql"
       - "**/schema.graphql"

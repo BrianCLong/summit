@@ -6,11 +6,6 @@ on:
     paths:
       - 'ci/graphci/**'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'ci/graphci/**'
 

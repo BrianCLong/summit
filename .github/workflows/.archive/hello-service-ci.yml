@@ -9,11 +9,6 @@ on:
       - '.github/workflows/reusable-golden-path.yml'
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'services/hello-service/**'
       - '.github/workflows/hello-service-ci.yml'

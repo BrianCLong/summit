@@ -11,11 +11,6 @@ name: "[info] CI Legacy (Non-Blocking)"
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
   push:
     branches: [main]
 
@@ -26,7 +21,7 @@ concurrency:
 jobs:
   quarantine-tests:
     name: Quarantine Tests (Flaky)
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -59,7 +54,7 @@ jobs:
 
   jest-legacy-suite:
     name: Jest/ts-jest Suite (ESM Issues)
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING (ESM loader issues)
     steps:
@@ -91,7 +86,7 @@ jobs:
 
   experimental-checks:
     name: Experimental Checks
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -131,7 +126,7 @@ jobs:
 
   deprecated-checks:
     name: Deprecated Checks (Migration in Progress)
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -170,7 +165,7 @@ jobs:
 
   performance-regression:
     name: Performance Regression Tests
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:
@@ -203,7 +198,7 @@ jobs:
 
   accessibility-audit:
     name: Web Accessibility Audit
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     continue-on-error: true  # NON-BLOCKING
     steps:

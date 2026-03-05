@@ -5,16 +5,12 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
   merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Global environment for all jobs - prevents V8 heap exhaustion
 env:
   NODE_OPTIONS: --max-old-space-size=8192

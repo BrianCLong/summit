@@ -48,7 +48,7 @@ env:
 jobs:
   test:
     name: ${{ inputs.test-type }} tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: ${{ inputs.timeout-minutes }}
     steps:
       - name: Checkout

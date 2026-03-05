@@ -2,11 +2,6 @@ name: Evidence Bundle Check
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, synchronize, labeled, reopened]
 
 concurrency:

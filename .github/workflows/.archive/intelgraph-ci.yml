@@ -3,11 +3,6 @@ name: IntelGraph CI
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "server/**"
       - "policy/**"

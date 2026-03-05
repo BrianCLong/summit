@@ -15,11 +15,6 @@ on:
 
   # On policy changes
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "docs/ci/REQUIRED_CHECKS_POLICY.yml"
 
@@ -97,16 +92,6 @@ jobs:
             echo "⚠️ Fell back to GITHUB_TOKEN." >> $GITHUB_STEP_SUMMARY
           fi
 
-      - name: Enforce App Authentication
-        if: steps.auth.outputs.auth_source != 'github-app'
-        run: |
-          if [[ "${{ github.event_name }}" == "schedule" ]]; then
-            echo "::warning::Running in advisory mode due to missing App configuration."
-          else
-            echo "::error::GitHub App authentication is REQUIRED for this workflow trigger."
-            exit 1
-          fi
-
       - name: Verify GitHub App installation
         if: steps.auth.outputs.auth_source == 'github-app'
         env:
@@ -114,17 +99,6 @@ jobs:
         run: |
           gh api "/repos/${{ github.repository }}/installation" >/dev/null
           echo "✅ GitHub App installation verified." >> $GITHUB_STEP_SUMMARY
-
-      - name: Configure Execution Mode
-        id: flags
-        run: |
-          if [[ "${{ github.event_name }}" != "schedule" ]]; then
-            echo "fail_flag=--fail-on-drift" >> $GITHUB_OUTPUT
-            echo "Running in STRICT mode (fail on drift/auth)."
-          else
-            echo "fail_flag=" >> $GITHUB_OUTPUT
-            echo "Running in ADVISORY mode."
-          fi
 
       - name: Run Drift Detection
         id: check
@@ -144,7 +118,7 @@ jobs:
             --repo "${{ github.repository }}" \
             --branch "${{ steps.branch.outputs.branch }}" \
             --out-dir "${{ env.OUT_DIR }}" \
-            ${{ steps.flags.outputs.fail_flag }} \
+            --fail-on-drift \
             --verbose; then
             echo "❌ Step 1 FAILED"
             EXIT_CODE=1

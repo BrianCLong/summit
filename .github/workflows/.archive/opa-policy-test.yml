@@ -11,11 +11,6 @@ name: OPA Policy Tests
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "policy/**/*.rego"
       - "policy/**/*.json"
@@ -54,7 +49,7 @@ jobs:
 
       - name: Setup OPA
         run: |
-          curl -L -o opa-bin-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v${{ env.OPA_VERSION }}/opa_linux_amd64_static
           chmod 755 opa-bin
           sudo mv opa-bin /usr/local/bin/opa
           opa version
@@ -77,7 +72,7 @@ jobs:
 
           # Run tests with JUnit output for ABAC
           opa test policy/abac policy/tests/abac_test.rego \
-            --format pretty \
+            --format junit \
             --coverage \
             > test-results/abac-junit.xml 2>&1 || true
 
@@ -163,3 +158,12 @@ jobs:
             test-results/
           retention-days: 30
           if-no-files-found: warn
+
+      - name: Publish JUnit Results
+        if: always()
+        uses: mikepenz/action-junit-report@db71d41eb79864e25ab0337e395c352e84523afe # v4
+        with:
+          report_paths: test-results/*-junit.xml
+          fail_on_failure: true
+          include_passed: true
+          check_name: OPA Policy Tests

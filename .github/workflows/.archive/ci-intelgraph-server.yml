@@ -2,11 +2,6 @@ name: CI — intelgraph-server
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "server/**"
       - "packages/**"
@@ -19,8 +14,9 @@ on:
       - "scripts/ci/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: intelgraph-server-${{ github.ref || github.head_ref }}
   cancel-in-progress: true
+
 jobs:
   ci:
     uses: ./.github/workflows/_reusable-ci.yml

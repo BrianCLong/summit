@@ -2,11 +2,6 @@ name: Infra Diff Check
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'terraform/**'
 

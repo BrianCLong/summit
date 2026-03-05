@@ -3,11 +3,6 @@ name: RDP Security Gates
 on:
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

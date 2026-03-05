@@ -2,16 +2,12 @@ name: PR Preview
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, reopened, synchronize]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: preview-pr-${{ github.event.pull_request.number }}
   cancel-in-progress: true
+
 permissions:
   id-token: write
   contents: read

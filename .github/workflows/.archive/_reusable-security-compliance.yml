@@ -75,6 +75,7 @@ jobs:
       # 1. Antigravity Governance
       # ═══════════════════════════════════════════════════════════════════════════
       - name: Antigravity Compliance
+        run: npm run compliance:antigravity
 
       # ═══════════════════════════════════════════════════════════════════════════
       # 2. Security Scans

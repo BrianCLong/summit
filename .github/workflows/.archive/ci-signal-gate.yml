@@ -3,11 +3,6 @@ on:
   workflow_dispatch:
   schedule: [{cron: "*/30 * * * *"}]
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

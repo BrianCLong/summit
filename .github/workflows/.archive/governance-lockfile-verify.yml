@@ -9,11 +9,6 @@ on:
   # Run on PRs that affect governance
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "docs/ci/*.yml"
       - "docs/ci/*.yaml"

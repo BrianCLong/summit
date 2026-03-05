@@ -7,11 +7,6 @@ on:
       - 'summit/eval_harness/**'
       - 'summit/evidence/**'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'summit/eval_harness/**'
       - 'summit/evidence/**'

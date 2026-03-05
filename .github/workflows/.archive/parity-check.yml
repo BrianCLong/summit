@@ -2,11 +2,6 @@ name: parity-check
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, synchronize, reopened]
   workflow_dispatch:
   merge_group:
@@ -28,10 +23,6 @@ jobs:
       fail-fast: false
       matrix:
         cloud: [aws, gcp, azure]
-    env:
-      AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
-      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,30 +41,22 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Configure AWS Credentials
-        if: matrix.cloud == 'aws' && env.AWS_OIDC_ROLE_ARN != ''
+        if: matrix.cloud == 'aws'
         uses: aws-actions/configure-aws-credentials@v4
-        env:
-          AWS_OIDC_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
           aws-region: us-east-1
       - name: Setup gcloud
-        if: matrix.cloud == 'gcp' && env.GCP_PROJECT_ID != ''
+        if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v3
-        env:
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
-        if: matrix.cloud == 'azure' && env.AZURE_CLIENT_ID != ''
+        if: matrix.cloud == 'azure'
         uses: azure/login@v2
-        env:
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
@@ -90,24 +73,7 @@ jobs:
           AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID }}
           PARITY_ENV1: prodlike
           PARITY_ENV2: canary
-        run: |
-          SKIP=0
-          if [ "$CLOUD" == "aws" ] && [ -z "$AWS_ROLE_ARN" ]; then
-            SKIP=1
-          fi
-          if [ "$CLOUD" == "gcp" ] && [ -z "$GCP_WORKLOAD_POOL" ]; then
-            SKIP=1
-          fi
-          if [ "$CLOUD" == "azure" ] && [ -z "$AZURE_FEDERATED_ID" ]; then
-            SKIP=1
-          fi
-
-          if [ "$SKIP" == "1" ]; then
-            echo "Skipping parity check for $CLOUD due to missing secrets."
-            echo "{}" > parity_result.json
-          else
-            bash scripts/ci/parity_check.sh
-          fi
+        run: bash scripts/ci/parity_check.sh
 
       - name: Upload parity artifact
         uses: actions/upload-artifact@v4

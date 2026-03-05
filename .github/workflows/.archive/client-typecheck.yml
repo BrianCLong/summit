@@ -3,11 +3,6 @@ name: Client TypeScript Gate
 on:
   pull_request:
     branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "client/**/*.ts"
       - "client/**/*.tsx"

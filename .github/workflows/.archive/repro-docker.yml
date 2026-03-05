@@ -1,14 +1,13 @@
 name: Reproducible Docker Build
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 
 on:
   push:
     branches: [ main ]
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
 
 jobs:
   build-and-verify:
@@ -18,9 +17,12 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
+        with:
           node-version: 20
           cache: 'pnpm'
 

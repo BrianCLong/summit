@@ -55,20 +55,20 @@ jobs:
       - name: Verify container signature
         run: |
           set -euo pipefail
-          cosign verify --use-signed-timestamps "${{ inputs.image_uri }}" \
+          cosign verify "${{ inputs.image_uri }}" \
             --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
       - name: Verify SBOM attestations
         run: |
           set -euo pipefail
-          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type cyclonedx --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
-          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type spdxjson --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation "${{ inputs.image_uri }}" --type cyclonedx --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation "${{ inputs.image_uri }}" --type spdxjson --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Verify SLSA provenance attestation
         run: |
           set -euo pipefail
-          cosign verify-attestation --use-signed-timestamps "${{ inputs.image_uri }}" --type slsaprovenance --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
+          cosign verify-attestation "${{ inputs.image_uri }}" --type slsaprovenance --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}" --certificate-identity-regexp "${{ env.EXPECTED_IDENTITY_REGEX }}"
 
       - name: Install grype
         uses: anchore/scan-action/download-grype@3343887d815d7b07465f6fdcd395bd66508d486a # v3

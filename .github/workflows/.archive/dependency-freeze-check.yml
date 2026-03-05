@@ -9,11 +9,6 @@ on:
   # Check on PRs to main during stabilization
   pull_request:
     branches: [main, release/*]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - "pnpm-lock.yaml"
       - "package.json"

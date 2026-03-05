@@ -2,11 +2,6 @@ name: nds-ci
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
   push:
 
 concurrency:

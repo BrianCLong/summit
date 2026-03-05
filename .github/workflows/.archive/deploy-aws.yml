@@ -27,7 +27,7 @@ jobs:
 
   build-and-push:
     needs: pre-deploy-gate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [maestro, prov-ledger, policy-lac]
@@ -47,12 +47,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Docker Preflight Checks
-        run: |
-          docker --version
-          docker compose version
-          uname -r
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -96,15 +90,9 @@ jobs:
 
   deploy-infra:
     needs: [build-and-push, pre-deploy-gate]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Docker Preflight Checks
-        run: |
-          docker --version
-          docker compose version
-          uname -r
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -117,15 +105,9 @@ jobs:
 
   deploy-k8s:
     needs: deploy-infra
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Docker Preflight Checks
-        run: |
-          docker --version
-          docker compose version
-          uname -r
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4

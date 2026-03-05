@@ -38,7 +38,7 @@ permissions:
 jobs:
   supply-chain-integrity:
     if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     outputs:
       release-version: ${{ steps.vars.outputs.release_version }}
 
@@ -66,7 +66,6 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5.0.1
         with:
-          cache: false
           go-version: "1.21"
 
       # Install supply chain tools with strict pinning
@@ -109,7 +108,7 @@ jobs:
       - name: Generate SBOM
         run: |
           chmod +x scripts/generate-sbom.sh
-          ./scripts/generate-sbom.sh summit-platform ${{ env.VERSION }} sboms
+          ./scripts/generate-sbom.sh summit-platform ${{ env.VERSION }} ./sboms
           ls -la ./sboms/
 
       # Run vulnerability scan
@@ -196,7 +195,7 @@ jobs:
             fi
 
             # Verify the signature
-            cosign verify --use-signed-timestamps $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
+            cosign verify $DOCKER_IMAGE:$DOCKER_TAG --certificate-identity-regexp=".*" --certificate-oidc-issuer-regexp=".*"
           fi
 
           # Sign SBOMs (Sign the artifacts themselves as well)
@@ -244,7 +243,7 @@ jobs:
   # CI Gate: Final verification of all supply chain integrity
   ci-gate:
     needs: supply-chain-integrity
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event_name == 'pull_request'
 
     steps:
@@ -278,7 +277,7 @@ jobs:
   # Create GitHub Release (only for tags)
   release:
     needs: [supply-chain-integrity, ci-gate]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref_type == 'tag'
     permissions:
       contents: write

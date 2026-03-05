@@ -47,7 +47,7 @@ env:
 jobs:
   slo-smoke-gate:
     name: SLO Smoke Gate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:

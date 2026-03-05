@@ -6,11 +6,6 @@ on:
       - 'prompts/**'
       - 'tools/promptpack_lint/**'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'prompts/**'
       - 'tools/promptpack_lint/**'

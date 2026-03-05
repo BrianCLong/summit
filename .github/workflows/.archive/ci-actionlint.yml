@@ -7,11 +7,6 @@ on:
       - '.github/workflows/**'
   pull_request:
     branches: ["main"]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - '.github/workflows/**'
 

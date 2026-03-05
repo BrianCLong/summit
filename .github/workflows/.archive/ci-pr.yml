@@ -2,11 +2,6 @@ name: ci-pr
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, synchronize, reopened, ready_for_review]
     branches: [main]
   push:
@@ -16,7 +11,7 @@ on:
 # ensure only one active CI per PR/Ref
 concurrency:
   group: ci-pr-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  cancel-in-progress: true
 
 env:
   CI: true
@@ -264,7 +259,7 @@ jobs:
       - name: Install dependencies (for governance docs)
         run: pnpm install --frozen-lockfile
       - name: Verify governance docs
-        run: pnpm ci:docs-governance || true
+        run: pnpm ci:docs-governance
 
   soc-controls:
     name: SOC Controls (ci-pr)

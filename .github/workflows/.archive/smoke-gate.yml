@@ -14,11 +14,6 @@ name: Smoke Gate
 on:
   pull_request:
     branches: [main, release/*]
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
   push:
     branches: [main, release/*]
   workflow_dispatch:
@@ -29,8 +24,9 @@ on:
         default: '120'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: smoke-gate-${{ github.ref }}
   cancel-in-progress: true
+
 env:
   SMOKE_TIMEOUT: ${{ github.event.inputs.smoke_timeout || '120' }}
   POSTGRES_DB: intelgraph
@@ -110,7 +106,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build server
-        run: pnpm -r run build
+        run: pnpm -C server run build
         env:
           NODE_ENV: production
 
@@ -131,7 +127,7 @@ jobs:
         working-directory: server
         run: |
           echo "Starting server in background..."
-          nohup node dist/src/index.js > server.log 2>&1 &
+          nohup node dist/server/src/index.js > server.log 2>&1 &
           echo $! > server.pid
           echo "Server PID: $(cat server.pid)"
         env:
