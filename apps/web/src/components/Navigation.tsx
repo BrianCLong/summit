@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
-import { Kbd } from '@/components/ui/Kbd'
 import {
   Tooltip,
   TooltipContent,
@@ -27,6 +26,7 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
 import { cn, isMac } from '@/lib/utils'
+import { Kbd } from '@/components/ui/Kbd'
 
 interface NavigationProps {
   user: User | null
@@ -206,7 +206,7 @@ export function Navigation({ user }: NavigationProps) {
         >
           <Command className="h-4 w-4 mr-2" />
           Search...
-          <Kbd keys={['mod', 'K']} className="ml-auto" />
+          <Kbd className="ml-auto">mod+K</Kbd>
         </Button>
       </div>
 
