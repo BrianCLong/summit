@@ -3,7 +3,7 @@ import { Router } from 'express';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { SSOService } from '../services/SSOService.js';
 import { tenantService } from '../services/TenantService.js';
-import { rateLimitMiddleware } from '../middleware/rateLimit.js';
+import { createRateLimiter, EndpointClass } from '../middleware/rateLimit.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { z } from 'zod';
 import logger from '../utils/logger.js';
@@ -44,8 +44,8 @@ const ssoConfigSchema = z.object({
  * @desc Configure SSO for a tenant
  * @access Private (Admin of Tenant or System Admin)
  */
-router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { id } = req.params;
+router.post('/tenants/:id/sso', ensureAuthenticated, createRateLimiter(), asyncHandler(async (req, res) => {
+  const id = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
 
   // Strict Access Control:
   // Must be logged in (ensureAuthenticated handles this)
@@ -66,7 +66,7 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
   const validated = ssoConfigSchema.parse(req.body);
 
   // Get current tenant config
-  const tenant = await tenantService.getTenant(id);
+  const tenant = await tenantService.getTenant((id as string));
   if (!tenant) return res.status(404).json({ error: 'Tenant not found' });
 
   const newConfig = {
@@ -88,12 +88,12 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
  * @desc Initiate SSO login
  * @access Public
  */
-router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+router.get('/auth/sso/:tenantId/login', createRateLimiter(EndpointClass.AUTH), asyncHandler(async (req, res) => {
+  const tenantId = Array.isArray(req.params.tenantId) ? req.params.tenantId[0] : req.params.tenantId;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   try {
-    const { url, state } = await ssoService.getAuthUrl(tenantId, config.baseUrl || baseUrl);
+    const { url, state } = await ssoService.getAuthUrl((tenantId as string), config.baseUrl || baseUrl);
 
     // Set state cookie for CSRF protection
     res.cookie('sso_state', state, {
@@ -115,13 +115,14 @@ router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async 
  * @desc Handle SSO callback
  * @access Public
  */
-router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+router.post('/auth/sso/:tenantId/callback', createRateLimiter(EndpointClass.AUTH), asyncHandler(async (req, res) => {
+  const tenantId = Array.isArray(req.params.tenantId) ? req.params.tenantId[0] : req.params.tenantId;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   // CSRF / State Validation
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.body.RelayState || req.body.state || req.query.state || req.query.RelayState;
+  const stateParamRaw = req.body.RelayState || req.body.state || req.query.state || req.query.RelayState;
+  const stateParam = Array.isArray(stateParamRaw) ? stateParamRaw[0] : stateParamRaw;
 
   // In SAML, RelayState is passed back. In OIDC, state is passed back.
   // Note: Some IdPs might not preserve RelayState perfectly in all flows (e.g. IdP initiated),
@@ -136,7 +137,7 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
   res.clearCookie('sso_state');
 
   try {
-    const { user, token, refreshToken } = await ssoService.handleCallback(tenantId, config.baseUrl || baseUrl, req.body, req.query);
+    const { user, token, refreshToken } = await ssoService.handleCallback((tenantId as string), config.baseUrl || baseUrl, req.body, req.query);
 
     // Set session cookies
     res.cookie('access_token', token, {
@@ -162,12 +163,13 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
 }));
 
 // Handle GET callback (OIDC implicit/code flow sometimes uses GET)
-router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+router.get('/auth/sso/:tenantId/callback', createRateLimiter(EndpointClass.AUTH), asyncHandler(async (req, res) => {
+  const tenantId = Array.isArray(req.params.tenantId) ? req.params.tenantId[0] : req.params.tenantId;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];
-  const stateParam = req.query.state || req.query.RelayState;
+  const stateParamRaw = req.query.state || req.query.RelayState;
+  const stateParam = Array.isArray(stateParamRaw) ? stateParamRaw[0] : stateParamRaw;
 
   if (!stateCookie || !stateParam || stateCookie !== stateParam) {
     logger.warn(`SSO State mismatch or missing. Cookie: ${stateCookie ? 'present' : 'missing'}, Param: ${stateParam ? 'present' : 'missing'}`);
@@ -177,7 +179,7 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   res.clearCookie('sso_state');
 
   try {
-    const { user, token, refreshToken } = await ssoService.handleCallback(tenantId, config.baseUrl || baseUrl, req.body, req.query);
+    const { user, token, refreshToken } = await ssoService.handleCallback((tenantId as string), config.baseUrl || baseUrl, req.body, req.query);
 
     res.cookie('access_token', token, {
       httpOnly: true,

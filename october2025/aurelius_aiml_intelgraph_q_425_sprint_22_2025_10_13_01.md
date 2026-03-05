@@ -323,7 +323,7 @@ jobs:
       - name: Verify attestation
         uses: sigstore/cosign-installer@v3
       - run: |
-          cosign verify-attestation --type slsaprovenance --certificate-oidc-issuer-regexp 'https://github.com/login/oauth' \
+          cosign verify-attestation --use-signed-timestamps --type slsaprovenance --certificate-oidc-issuer-regexp 'https://github.com/login/oauth' \
             --certificate-identity-regexp 'https://github.com/.+/.+/.github/workflows/.+@.+' ghcr.io/org/app:tag
 ```
 
