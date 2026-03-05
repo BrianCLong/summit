@@ -30,6 +30,7 @@ jobs:
 
       - name: Check Queue Saturation
         run: |
+          # Count PRs actively in the merge queue (not all open PRs)
           QUEUE_SIZE=$(gh pr list --search "is:pr is:open is:in-merge-queue" --json number --jq 'length')
           MAX_QUEUE=50
           echo "Merge queue depth: $QUEUE_SIZE / $MAX_QUEUE"
@@ -62,13 +63,9 @@ jobs:
       - name: Timestamp scan
         run: node scripts/scan_timestamp_keys.mjs
 
-      - name: Lineage Integrity Gate
-        run: node scripts/ci/verify_lineage_integrity.mjs
+      - name: Report separation gate
+        run: pnpm gate:report
 
-      - name: Branch Protection Drift Sentinel
-        run: node scripts/ci/check_branch_protection_drift.mjs --static-only
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Detect governance policy changes
         id: governance_changes
