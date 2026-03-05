@@ -39,6 +39,46 @@ export const typeDefs = gql`
     createdAt: DateTime!
   }
 
+  type AuthUser {
+    id: ID!
+    email: String!
+    username: String
+    firstName: String
+    lastName: String
+    fullName: String
+    role: String!
+    isActive: Boolean!
+    lastLogin: DateTime
+    createdAt: DateTime!
+    updatedAt: DateTime
+  }
+
+  type Investigation {
+    id: ID!
+    name: String!
+    description: String
+    createdAt: DateTime!
+    updatedAt: DateTime
+    entities: [Entity!]
+    relationships: [Relationship!]
+    status: InvestigationStatus
+    priority: Int
+  }
+
+  enum InvestigationStatus {
+    ACTIVE
+    ARCHIVED
+    COMPLETED
+    ON_HOLD
+  }
+
+  input InvestigationInput {
+    name: String!
+    description: String
+    status: InvestigationStatus
+    priority: Int
+  }
+
   # XAI Types
   type Explanation {
     id: ID!
@@ -51,18 +91,6 @@ export const typeDefs = gql`
     fairnessScore: Float
     robustnessScore: Float
     createdAt: DateTime!
-  }
-
-  type FeatureContribution {
-    name: String!
-    contribution: Float!
-  }
-
-  type AnomalyExplanation {
-    id: ID!
-    score: Float!
-    explanation: String!
-    features: [FeatureContribution!]!
   }
 
   # Provenance Types
@@ -218,6 +246,11 @@ export const typeDefs = gql`
     entities(filter: JSON, limit: Int = 10): [Entity!]!
     relationship(id: ID!): Relationship
     relationships(filter: JSON, limit: Int = 10): [Relationship!]!
+    investigation(id: ID!): Investigation
+    investigations(limit: Int = 25, offset: Int = 0): [Investigation!]!
+
+    # Auth Queries
+    me: AuthUser
 
     # XAI Queries
     explanation(id: ID!): Explanation
@@ -227,7 +260,6 @@ export const typeDefs = gql`
       model: String!
       version: String!
     ): Explanation!
-    explainAnomaly(id: ID!): AnomalyExplanation!
 
     # Provenance Queries
     claim(id: ID!): Claim
@@ -251,6 +283,9 @@ export const typeDefs = gql`
 
   # Mutation Root
   type Mutation {
+    # Graph Mutations
+    createInvestigation(input: InvestigationInput!): Investigation!
+
     # Provenance Mutations
     createClaim(input: CreateClaimInput!): Claim!
 

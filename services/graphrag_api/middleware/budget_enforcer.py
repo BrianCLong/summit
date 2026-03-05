@@ -1,6 +1,8 @@
 import uuid
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from services.graphrag_api.models.reasoning_budget import ReasoningBudget
+
 
 class TraceContext:
     def __init__(self, tenant_id: str, budget: ReasoningBudget, trace_id: Optional[str] = None):
@@ -9,7 +11,7 @@ class TraceContext:
         self.trace_id = trace_id or str(uuid.uuid4())
 
 class BudgetEnforcer:
-    def __init__(self, tenant_policies: Optional[Dict[str, Any]] = None):
+    def __init__(self, tenant_policies: Optional[dict[str, Any]] = None):
         # In a real app, this would load from a DB or config service
         self.tenant_policies = tenant_policies or {
             "default": {"max_allowed_hops": 5, "max_allowed_nodes": 1000},

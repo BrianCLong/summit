@@ -15,6 +15,34 @@ release_status_blocked:
     description: Unclassified failure
 
 maestro_nogo:
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Schema major version is not supported.
+  - code: SCHEMA_VERSION_INVALID
+    description: Schema version is invalid.
+  - code: JSON_PARSE_ERROR
+    description: Failed to parse JSON.
+  - code: MISSING_FIELD
+    description: Missing required field.
+  - code: INVALID_ENUM
+    description: Invalid enum value.
+  - code: DRIFT_DETECTED
+    description: Drift detected.
+  - code: DRIFT_ERROR
+    description: Error detecting drift.
+  - code: SIG_ORPHAN
+    description: Orphaned signature.
+  - code: SIG_INVALID
+    description: Invalid signature.
+  - code: COSIGN_MISSING
+    description: Cosign is missing.
+  - code: SIG_MISSING
+    description: Missing signature.
+  - code: ATTESTATION_MISSING
+    description: Missing attestation.
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Invalid SHA256 sums format.
+  - code: INVALID_JSON
+    description: Invalid JSON format.
   - code: BUNDLE_SCHEMA_INCOMPATIBLE
     description: Bundle schema major unsupported
   - code: BUNDLE_SCHEMA_INVALID
@@ -65,31 +93,32 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
+
   - code: SCHEMA_MAJOR_UNSUPPORTED
-    description: Thrown when the schemaVersion of a bundle is a major version that is not supported by the script.
+    description: Schema major version is not supported
   - code: SCHEMA_VERSION_INVALID
-    description: Bundle schema version is invalid.
+    description: Schema version is invalid
   - code: JSON_PARSE_ERROR
-    description: Could not parse bundle JSON.
+    description: Failed to parse JSON
   - code: MISSING_FIELD
-    description: A required field is missing from the bundle.
+    description: Required field is missing
   - code: INVALID_ENUM
-    description: A field has an invalid enum value.
+    description: Invalid enum value
   - code: DRIFT_DETECTED
-    description: Drift detected in release artifacts.
+    description: Configuration drift detected
   - code: DRIFT_ERROR
-    description: Error calculating artifact drift.
+    description: Error checking for drift
   - code: SIG_ORPHAN
-    description: Orphaned signature file found.
+    description: Signature without corresponding artifact
   - code: SIG_INVALID
-    description: Invalid signature.
+    description: Signature verification failed
   - code: COSIGN_MISSING
-    description: Cosign missing or not available.
+    description: Cosign binary missing
   - code: SIG_MISSING
-    description: Signature file is missing.
+    description: Required signature missing
   - code: ATTESTATION_MISSING
-    description: Attestation file is missing.
+    description: Required attestation missing
   - code: SHA256SUMS_INVALID_FORMAT
-    description: sha256sums file is improperly formatted.
+    description: Invalid SHA256SUMS format
   - code: INVALID_JSON
-    description: Invalid JSON file.
+    description: Invalid JSON format
