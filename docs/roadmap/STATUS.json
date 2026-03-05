@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added AI front door minimal winning slice (policy gateway, deterministic evidence artifacts, abuse fixture tests).",
+  "last_updated": "2026-02-22T00:00:00Z",
+  "revision_note": "Added WebMCP subsumption MWS initiative with adapter, policy gate, replay harness, and docs evidence contracts.",
   "initiatives": [
     {
-      "id": "ai-front-door-mws",
+      "id": "webmcp-subsumption-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Deterministic AI front door policy gateway with allow/deny decisions, evidence IDs, and regression tests."
+      "notes": "WebMCP browser-session ingestion, policy gate, deterministic replay artifacts, and operational/data-handling standards."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
