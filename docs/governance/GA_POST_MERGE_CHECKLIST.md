@@ -25,7 +25,7 @@
 ## 3. Evidence Collection
 
 - [ ] **Snapshot**: Capture the "Clean Run" URL for the `ga-risk-gate` workflow.
-- [ ] **Record**: Log this run in the [Release Evidence Index](../evidence/EVIDENCE_INDEX.md) (or equivalent tracker).
+- [ ] **Record**: Log this run in the Release Evidence Index (or equivalent tracker).
 
 ## 4. Troubleshooting (If Red)
 
