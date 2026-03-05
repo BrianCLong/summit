@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-23T00:00:00Z",
-  "revision_note": "Added deterministic short-term memory MWS scaffolding, evidence artifacts, and validation tests.",
+  "last_updated": "2026-02-25T00:00:00Z",
+  "revision_note": "Added Summit Trust & Safety Proof Pack v0.1 artifact for pre-GA evidence hardening and scorecard gating.",
   "initiatives": [
     {
-      "id": "memory-layer-mws-short-term",
+      "id": "summit-trust-safety-proof-pack-v0-1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Deterministic short-term memory module under runtime/memory with default-OFF posture and machine-verifiable artifacts."
+      "notes": "Published docs/SUMMIT_TRUST_SAFETY_PROOF_PACK_V0_1.md to define proof modules, scorecard gates, and evidence contract for GA readiness."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -230,7 +230,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 25,
+    "total": 17,
     "ga_blockers": []
   }
 }
