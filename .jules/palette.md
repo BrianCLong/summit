@@ -35,3 +35,20 @@
 ## 2025-12-05 - Tailwind Content Resolution for Mixed-Extension Codebases
 **Learning:** In projects with a mix of JS/JSX and TS/TSX, Tailwind configurations may only target TS/TSX files. This causes utility classes in JS/JSX files to be purged, breaking accessibility features (like `sr-only`) or layout styles.
 **Action:** Always verify `tailwind.config.cjs` includes all relevant file extensions (js, jsx, ts, tsx) when implementing utility-based styles.
+
+## 2026-02-07 - Accessibility for Loading States
+**Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
+**Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
+
+## 2025-02-20 - Platform-Aware Keyboard Shortcuts
+
+**Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
+**Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
+
+## 2025-10-29 - Semantic Headings vs Forms
+**Learning:** Using `<label>` tags to visually style section headings (like an "Answer" section) confuses screen readers as it expects an associated form input.
+**Action:** Use proper heading tags (like `<h4>`) for structural sections and reserve `<label>` exclusively for form input association. Always use `id` and `htmlFor` to bind them explicitly.
+
+## 2026-03-05 - Accessible Status Badges
+**Learning:** Color-only status indicators (e.g., success/warning/error badges) are insufficient for accessibility. Adding semantic icons (CheckCircle, AlertTriangle) provides redundant cues that assist color-blind users and improve overall scanability.
+**Action:** Always provide an 'icon' prop for status-related UI components and use it to reinforce visual states.
