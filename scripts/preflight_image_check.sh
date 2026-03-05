@@ -60,7 +60,7 @@ fi
 if command -v cosign >/dev/null 2>&1; then
     echo "Verifying Cosign signature..."
     PINNED_IMAGE="${IMAGE_REPO}@${DIGEST}"
-    if cosign verify "${PINNED_IMAGE}" \
+    if cosign verify --use-signed-timestamps "${PINNED_IMAGE}" \
         --certificate-identity-regexp ".*" \
         --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
         >/dev/null 2>&1; then
