@@ -1,0 +1,11 @@
+--- .github/workflows/_reusable-slsa-build.yml
++++ .github/workflows/_reusable-slsa-build.yml
+@@ -122,6 +122,8 @@
+       - name: Build and push
+         id: build
+         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
++        with:
++          context: ${{ inputs.context }}
+           file: ${{ inputs.dockerfile }}
+           push: ${{ inputs.push }}
+           tags: ${{ steps.meta.outputs.tags }}

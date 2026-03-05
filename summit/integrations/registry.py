@@ -6,12 +6,12 @@ from typing import Dict, Optional, Tuple
 class IntegrationSpec:
   name: str
   kind: str
-  never_log_fields: Tuple[str, ...] = ()
+  never_log_fields: tuple[str, ...] = ()
 
 
 class IntegrationRegistry:
   def __init__(self) -> None:
-    self._specs: Dict[str, IntegrationSpec] = {}
+    self._specs: dict[str, IntegrationSpec] = {}
 
   def register(self, spec: IntegrationSpec) -> None:
     self._specs[spec.name] = spec
