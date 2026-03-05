@@ -1,9 +1,18 @@
-export interface AgentTask {
-  task: string
-  context: string
+import { AgentContext } from './AgentContext';
+
+export interface AgentInput {
+  prompt: string;
+  [key: string]: any;
 }
 
-export async function runAgentTask(task: AgentTask) {
-  // runtime stub
-  return { result: "" }
+export interface AgentOutput {
+  result: string;
+  [key: string]: any;
 }
+
+export interface AgentRuntime {
+  id: string;
+  run(input: AgentInput, ctx: AgentContext): Promise<AgentOutput>;
+}
+
+export type { AgentContext };

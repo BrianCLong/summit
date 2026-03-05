@@ -1,0 +1,12 @@
+extends: substitution
+message: "Prefer '%s' over '%s'."
+level: warning
+ignorecase: true
+swap:
+  log-in: login
+  sign into: sign in
+  e-mail: email
+  multi cloud: multi-cloud
+  cloud native: cloud-native
+  onprem: on-premises
+  on-prem: on-premises
