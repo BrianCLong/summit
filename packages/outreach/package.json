@@ -1,0 +1,16 @@
+{
+  "name": "@intelgraph/outreach",
+  "version": "1.0.0",
+  "description": "Outreach tracking and automation for Summit",
+  "main": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ioredis": "^5.8.2",
+    "neo4j-driver": "^5.28.1"
+  }
+}
