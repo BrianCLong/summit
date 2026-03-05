@@ -1,5 +1,6 @@
 from graph_shape_guardrail.sampling import bottom_k_sample
 
+
 def test_bottom_k_sample_determinism():
     node_degree_map = {f"node_{i}": i for i in range(100)}
     sample1 = bottom_k_sample(node_degree_map, 10, seed="v1")

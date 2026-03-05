@@ -1,0 +1,13 @@
+{
+  "findings": [
+    {
+      "id": "fnd-001",
+      "type": "typosquat",
+      "severity": "high",
+      "domain": "acmecorp-login.com",
+      "evidence_refs": [
+        "artifact-hash-xyz"
+      ]
+    }
+  ]
+}

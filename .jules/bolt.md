@@ -22,3 +22,7 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
+
+## 2026-03-01 - [Narrative Shift: The Proof Moat]
+**Learning:** The competitive landscape is shifting from raw agent capability ("vibe coding") to governed autonomous execution. Institutional procurement now prioritizes trust posture, determinism, and auditability over pure benchmark scores.
+**Action:** When creating investor-facing materials or strategic documentation for Summit, always anchor the value proposition in "Actionability + Provability" (The Proof Moat), deterministic replay, and policy-gated execution. Avoid terms like "vibe coding" and lean into "Agentic Engineering."
