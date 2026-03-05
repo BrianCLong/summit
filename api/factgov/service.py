@@ -3,27 +3,28 @@ import uuid
 from datetime import datetime
 from typing import List, Optional
 
-from api.llm_provider import llm_provider
 from api.factgov.models import (
+    RFP,
     Agency,
     AuditReport,
     Contract,
     ContractInitiateRequest,
     Requirements,
-    RFP,
     Vendor,
     VendorCreate,
     VendorMatch,
 )
+from api.llm_provider import llm_provider
+
 
 class FactGovService:
     def __init__(self):
         # TODO: Replace in-memory storage with Database connections (see factgov_schema.sql)
         # In a real deployment, these would be repositories accessing Postgres.
-        self.vendors: List[Vendor] = []
-        self.agencies: List[Agency] = []
-        self.contracts: List[Contract] = []
-        self.rfps: List[RFP] = []
+        self.vendors: list[Vendor] = []
+        self.agencies: list[Agency] = []
+        self.contracts: list[Contract] = []
+        self.rfps: list[RFP] = []
 
     async def register_vendor(self, vendor_create: VendorCreate) -> Vendor:
         """
@@ -65,7 +66,7 @@ class FactGovService:
         self.vendors.append(vendor)
         return vendor
 
-    async def search_vendors(self, query: str) -> List[Vendor]:
+    async def search_vendors(self, query: str) -> list[Vendor]:
         """
         Simple text search for vendors.
         TODO: Implement full-text search using Postgres or ElasticSearch.
@@ -77,7 +78,7 @@ class FactGovService:
             any(query in p.name.lower() for p in v.products)
         ]
 
-    async def match_rfp(self, rfp_text: str, agency_id: str) -> List[VendorMatch]:
+    async def match_rfp(self, rfp_text: str, agency_id: str) -> list[VendorMatch]:
         """
         Matches RFP text to vendors using 'AI'.
         Uses LLM to extract requirements and score vendors.
