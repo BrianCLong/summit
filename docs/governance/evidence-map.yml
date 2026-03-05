@@ -1,0 +1,14 @@
+version: 1.0.0
+gates:
+  - id: security
+    checks:
+      - id: sast
+        required: true
+      - id: secret-scan
+        required: true
+  - id: compliance
+    checks:
+      - id: license-check
+        required: true
+      - id: drift-check
+        required: true

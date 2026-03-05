@@ -1,0 +1,53 @@
+{
+  "id": "CAMPAIGN-ESPIONAGE-EU-001",
+  "name": "Starlink Data Exfiltration Attempt",
+  "description": "Alleged attempt by Chinese nationals to acquire Starlink satellite data in France.",
+  "actors": [
+    {
+      "id": "ACTOR-MSS-01",
+      "name": "Ministry of State Security (China)",
+      "type": "state"
+    },
+    {
+      "id": "ACTOR-OPS-FR-01",
+      "name": "Operative Team France",
+      "type": "individual",
+      "metadata": {
+        "arrested": true,
+        "count": 4
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "ASSET-SAT-DATA",
+      "type": "channel",
+      "metadata": {
+        "target": "Starlink"
+      }
+    }
+  ],
+  "narratives": [
+    {
+      "id": "NARR-TECH-ACQ",
+      "type": "target",
+      "content": "Acquisition of sensitive satellite telemetry and configuration data."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "EVID-ARREST-RPT",
+      "type": "report",
+      "url": "https://www.reuters.com/world/china/four-people-including-two-chinese-nationals-arrested-france-suspicion-spying-2026-02-04/"
+    }
+  ],
+  "actions": [
+    {
+      "id": "ACT-COLLECT-01",
+      "type": "monitor",
+      "sourceId": "ACTOR-OPS-FR-01",
+      "targetId": "ASSET-SAT-DATA",
+      "timestamp": "2026-02-04T12:00:00Z"
+    }
+  ]
+}

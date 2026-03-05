@@ -7,11 +7,12 @@ protected_branches:
   - release/*
 
 required_checks:
-  - meta-gate
-  - gate
-  - Unit Tests
-  - SOC Controls
-  - test (20.x)
+  - ci / install
+  - ci / lint
+  - ci / test
+  - ci / build
+  - governance / required-checks
+  - governance / branch-protection
 
 notes:
   owner: summit-ga

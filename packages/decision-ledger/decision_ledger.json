@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "agentic-orch-context-rag-20260208",
+    "timestamp": "2026-02-08T01:05:00Z",
+    "agentId": "codex",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJ0YXNrIjoiYWdlbnRpYy1vcmNoLWNvbnRleHQtcmFnIiwic2NvcGUiOiJzcmMsdGVzdHMsZG9jcyJ9",
+    "decision": {
+      "action": "introduce_agentic_orchestration_context_rag_scaffold",
+      "rule": {
+        "condition": "feature_scaffolding_with_tests_and_docs",
+        "action": "add_selector_context_manager_rag_modules",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Implemented predictive orchestration selection, hybrid context management, and agentic RAG scaffolding with tests and documentation to align with Summit readiness guidance. Rollback: revert the commit that introduces the new modules, tests, and docs.",
+    "reverted": false
   }
 ]

@@ -90,10 +90,7 @@ function resolveTemplate(template, matrixCombo) {
   let result = template;
   for (const [key, value] of Object.entries(matrixCombo)) {
     const escapedKey = String(key).replace(/\./g, '\\.');
-    const regex = new RegExp(
-      '\\$\\{\\{\\s*matrix\\.' + escapedKey + '\\s*\\}\\}',
-      'g'
-    );
+    const regex = new RegExp('\$\s*\{\{\s*matrix\.' + escapedKey + '\s*\}\}', 'g');
     result = result.replace(regex, String(value));
   }
   return result;
@@ -103,10 +100,7 @@ export function expandMatrix(matrix) {
   if (!matrix || typeof matrix !== 'object') return [];
   const { include = [], exclude = [], ...dimensions } = matrix;
   const keys = Object.keys(dimensions).filter(k => Array.isArray(dimensions[k]));
-  if (keys.length === 0) {
-    if (include.length === 0) return [];
-    return include.map(entry => ({ ...entry }));
-  }
+  if (keys.length === 0 && include.length === 0) return [];
   let combinations = [{}];
   for (const key of keys) {
     const next = [];

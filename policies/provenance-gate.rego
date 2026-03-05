@@ -1,4 +1,5 @@
 package summit.provenance.gate
+import rego.v1
 
 # Default deny
 default allow = false
