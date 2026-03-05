@@ -156,7 +156,7 @@ helm registry login ghcr.io -u <gh-username> -p <gh-token>   # if private
 helm pull oci://ghcr.io/$ORG/charts/$CHART --version $VERSION -d ./charts
 
 # 2) Verify chart signature with cosign keyless
-cosign verify ghcr.io/$ORG/charts/$CHART:$VERSION \
+cosign verify --use-signed-timestamps ghcr.io/$ORG/charts/$CHART:$VERSION \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   --certificate-identity-regexp ".*github.com/$ORG.*"
 
@@ -173,7 +173,7 @@ helm upgrade --install intelgraph ./charts/$CHART-$VERSION.tgz \
 
 ### 3.3 Air‑gapped environments
 
-- Export chart + SBOM: `helm pull …; cosign verify …; crane copy ghcr.io/$ORG/charts/$CHART:$VERSION oci://registry.local/$CHART:$VERSION`
+- Export chart + SBOM: `helm pull …; cosign verify --use-signed-timestamps …; crane copy ghcr.io/$ORG/charts/$CHART:$VERSION oci://registry.local/$CHART:$VERSION`
 - Mirror to internal registry and re‑sign with org’s Fulcio/rekor or offline key if required.
 
 ### 3.4 Values to set
@@ -231,7 +231,7 @@ statuspage-test-open:
 	  -d '{"incident":{"name":"Test incident","status":"investigating","body":"Test","components":{}}}'
 
 helm-verify:
-	cosign verify ghcr.io/$(ORG)/charts/$(CHART):$(VERSION) \
+	cosign verify --use-signed-timestamps ghcr.io/$(ORG)/charts/$(CHART):$(VERSION) \
 	  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
 	  --certificate-identity-regexp ".*github.com/$(ORG).*"
 ```
