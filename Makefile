@@ -167,7 +167,7 @@ STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
 STACK_SERVER      ?= stack/express5-eslint9
 STACK_CLIENT      ?= stack/client-vite7-leaflet5
 STACK_REBRAND     ?= stack/rebrand-docs
-PR_TARGETS        ?= 1279 1261 1260
+PR_TARGETS        ?= 1279 1261 1260 1259
 STATE_DIR         ?= .merge-evidence
 STATE_FILE        ?= $(STATE_DIR)/state.json
 NODE_VERSION      ?= 20
@@ -409,6 +409,13 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+# --- Skill Evals ---
+
 eval-skills-changed:
-	@echo "Checking for changed skills..."
-	@echo "Skipped"
+	@echo "Running changed skill evals..."
+	@pnpm exec tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all:
+	@echo "Running full skill eval suite..."
+	@pnpm exec tsx evals/runner/run_skill_suite.ts
