@@ -157,6 +157,7 @@ async function main() {
   const results = [];
   results.push({ gate: 'Required Checks Policy', ...await runPolicyGate(sha) });
   results.push({ gate: 'Determinism Scan', ...await runDeterminismGate(sha) });
+  results.push({ gate: 'CDA Requirement', verdict: (() => { try { execSync('python3 scripts/ci/gates/cda_required.py'); return 'PASS'; } catch (e) { return 'FAIL'; } })() });
   results.push({ gate: 'Branch Protection', ...await runBranchProtectionGate(sha) });
   results.push({ gate: 'Prompt Injection Gate', ...await runPromptInjection(sha) });
   results.push({ gate: 'Tool Boundary Gate', ...await runToolBoundary(sha) });
