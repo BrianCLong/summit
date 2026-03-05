@@ -51,7 +51,8 @@ function MyComponent() {
     </div>
   );
 }
-```
+
+```text
 
 ### Translation with Parameters
 
@@ -64,7 +65,8 @@ function MyComponent() {
 // Component:
 <p>{t('dashboard.entitiesPlural', { count: 42 })}</p>
 // Output: "42 entities"
-```
+
+```text
 
 ### Loading State
 
@@ -76,7 +78,8 @@ const { t, isLoading } = useI18n();
 if (isLoading) {
   return <div>{t('common.loading')}</div>;
 }
-```
+
+```text
 
 ### Adding the Locale Selector
 
@@ -91,7 +94,8 @@ function Header() {
     </Box>
   );
 }
-```
+
+```text
 
 ## Message Catalog Structure
 
@@ -119,7 +123,8 @@ Message catalogs are organized into logical namespaces:
     }
   }
 }
-```
+
+```text
 
 ## Adding a New Language
 
@@ -131,7 +136,8 @@ Example for French (fr-FR):
 
 ```bash
 cp client/src/locales/en-US.json client/src/locales/fr-FR.json
-```
+
+```text
 
 ### 2. Translate Messages
 
@@ -146,7 +152,8 @@ Edit the new file and translate all strings:
   },
   ...
 }
-```
+
+```text
 
 ### 3. Test
 
@@ -182,7 +189,8 @@ function getLocalizedResponses(t) {
     ],
   };
 }
-```
+
+```text
 
 ## User Preference Storage
 
@@ -204,7 +212,8 @@ mutation UpdateLocale {
     preferences
   }
 }
-```
+
+```text
 
 ## Locale Detection
 
@@ -237,7 +246,8 @@ formatCurrency(1234.56, 'EUR');
 // en-US: "€1,234.56"
 // es-ES: "1.234,56 €"
 // de-DE: "1.234,56 €"
-```
+
+```text
 
 ## Components Updated with i18n
 
@@ -257,14 +267,18 @@ formatCurrency(1234.56, 'EUR');
 ### 1. Always Use Translation Keys
 
 ❌ **Bad:**
+
 ```tsx
 <Button>Sign In</Button>
-```
+
+```text
 
 ✅ **Good:**
+
 ```tsx
 <Button>{t('auth.signIn')}</Button>
-```
+
+```text
 
 ### 2. Use Namespaces
 
@@ -276,37 +290,47 @@ Organize translations logically:
 ### 3. Parameterize Dynamic Content
 
 ❌ **Bad:**
+
 ```tsx
 t('message') + userName + t('suffix')
-```
+
+```text
 
 ✅ **Good:**
+
 ```json
 {
   "greeting": "Welcome, {name}!"
 }
-```
+
+```text
+
 ```tsx
 t('greeting', { name: userName })
-```
+
+```text
 
 ### 4. Keep Keys Descriptive
 
 ❌ **Bad:**
+
 ```json
 {
   "btn1": "Save",
   "msg": "Success"
 }
-```
+
+```text
 
 ✅ **Good:**
+
 ```json
 {
   "common.save": "Save",
   "notifications.success": "Success"
 }
-```
+
+```text
 
 ### 5. Preserve Technical Terms
 
@@ -344,7 +368,8 @@ test('component renders in Spanish', async () => {
   const { getByText } = render(<MyComponent />);
   expect(getByText('Panel de Control')).toBeInTheDocument();
 });
-```
+
+```text
 
 ## Performance
 

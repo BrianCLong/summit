@@ -2,6 +2,11 @@ name: PR Preview
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [opened, reopened, synchronize]
 
 concurrency:

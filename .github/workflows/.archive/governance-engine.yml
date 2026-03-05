@@ -3,6 +3,11 @@ name: Governance Engine
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   push:
     branches: [main]
 

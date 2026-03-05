@@ -10,11 +10,24 @@ POLICY:
 All notable changes to Summit MVP-3 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+- Fixed CI drift
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+n### Added
+- **Governance:** Implemented Required Checks Contract (`REQUIRED_CHECKS_CONTRACT.yml`) to enforce deterministic CI validation for protected branches.
+
+### Security
+- **Defense in Depth**: Hardened sensitive administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control (RBAC) directly within the router files.
+
+### Security
+- SEC-2025-002: Hardened identity and tenant context resolution in API routes to prevent spoofing by prioritizing authenticated user objects over untrusted headers.
+
+### Security
+- SEC-2025-002: Hardened identity and tenant context resolution in API routes to prevent spoofing by prioritizing authenticated user objects over untrusted headers.
 
 ### Added
+- Added standardized `Kbd` component to `@intelgraph/web` for platform-aware keyboard shortcut hints (⌘/Ctrl and ⇧/Shift).
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
@@ -24,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
 ### Fixed
+- Add missing aria-labels to close buttons in `EntityPanel.tsx`.
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
@@ -83,7 +97,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - (Bug fixes)
 
 ### Security
-- **Defense in Depth**: Hardened administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control directly within the routers.
+- (Security-related changes)
 
 ---
 
@@ -203,3 +217,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
+
+## [Unreleased]
+- Added idempotent Neo4j reconciliation logic
