@@ -37,7 +37,6 @@ export class RiskRepository {
       if (input.signals && input.signals.length > 0) {
         // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
         const chunkSize = 100;
-
         for (let i = 0; i < input.signals.length; i += chunkSize) {
           const chunk = input.signals.slice(i, i + chunkSize);
           const values: any[] = [];
@@ -48,11 +47,11 @@ export class RiskRepository {
             values.push(
               savedScore.id,
               sig.type,
-              sig.source,
+              sig.source || null,
               sig.value,
               sig.weight,
               sig.contributionScore,
-              sig.description,
+              sig.description || null,
               sig.detectedAt || new Date(),
             );
             placeholders.push(
@@ -67,10 +66,38 @@ export class RiskRepository {
             ) VALUES ${placeholders.join(', ')}
             RETURNING *`;
 
-          const batchRows = await tx.query(batchSql, values);
-          batchRows.forEach((row: any) =>
-            savedSignals.push(this.mapSignal(row)),
-          );
+          try {
+            const result = await tx.query(batchSql, values);
+            for (const row of result) {
+              savedSignals.push(this.mapSignal(row));
+            }
+          } catch (e: any) {
+            // BOLT: Fallback to individual inserts if batch fails to ensure reliability.
+            for (const sig of chunk) {
+              try {
+                const sigRows = await tx.query(
+                  `INSERT INTO risk_signals (
+                    risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+                  ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                  RETURNING *`,
+                  [
+                    savedScore.id,
+                    sig.type,
+                    sig.source || null,
+                    sig.value,
+                    sig.weight,
+                    sig.contributionScore,
+                    sig.description || null,
+                    sig.detectedAt || new Date(),
+                  ]
+                );
+                savedSignals.push(this.mapSignal(sigRows[0]));
+              } catch (innerErr: any) {
+                // If even individual fails, we rethrow to rollback the transaction
+                throw innerErr;
+              }
+            }
+          }
         }
       }
 

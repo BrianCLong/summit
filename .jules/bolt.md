@@ -15,6 +15,10 @@
 **Learning:** Inserting many records individually in a loop is a major performance bottleneck. Using multi-row `INSERT INTO ... VALUES (), (), ...` reduces round-trips from N to 1. However, PostgreSQL has a parameter limit (65,535), so large batches must be chunked (e.g., 100 records per batch) to avoid runtime errors.
 **Action:** Use multi-row `VALUES` for batched PostgreSQL inserts and always implement chunking to handle arbitrarily large input arrays safely.
 
+## 2026-10-14 - [PostgreSQL Transaction Abort on Error]
+**Learning:** In PostgreSQL, any query failure within a transaction block (BEGIN...COMMIT) immediately marks the entire transaction as aborted. Subsequent queries (even valid ones) will fail with 'current transaction is aborted, commands ignored until end of transaction block' until a ROLLBACK or COMMIT is issued. This means in-transaction try-catch blocks that attempt to "continue" with other queries will fail unless SAVEPOINTs are used.
+**Action:** When implementing fallback logic within a transaction (like batch -> individual), ensure that you either use SAVEPOINTs or accept that a failure might require a full transaction rollback if the state becomes inconsistent. In simple cases like batched inserts, if the fallback queries also fail, rethrow to trigger a full rollback.
+
 ## 2026-05-22 - [Optimized Supernode Detection]
 **Learning:** Nested loops of O(N*E) for supernode detection in large graphs (>10k nodes, >50k edges) cause severe latency (~6s). Pre-calculating connection Maps in O(E) reduces this to O(N+E), improving performance by >100x (~33ms).
 **Action:** Always pre-calculate frequency/connection maps when iterating over edges for multiple nodes to avoid N*E complexity.
@@ -22,7 +26,3 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
-
-## 2026-08-10 - [Transactional Batching in PostgreSQL]
-**Learning:** Fallback logic (batch to individual) is functionally useless inside a PostgreSQL transaction block if the failure is a database-level error (e.g., constraint violation). Any error immediately aborts the transaction, making subsequent queries in the `catch` block fail.
-**Action:** For transactional operations, prioritize batching for performance but avoid complex fallbacks unless using `SAVEPOINT`s. Ensure all data is validated before the batch insert to minimize failures.
