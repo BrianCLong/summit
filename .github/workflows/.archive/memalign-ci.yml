@@ -7,6 +7,11 @@ on:
       - 'src/evals/memalign/**'
       - 'src/cli/judge_align.ts'
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'src/evals/memalign/**'
       - 'src/cli/judge_align.ts'
@@ -24,7 +29,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
         run: npm install -g pnpm && pnpm install

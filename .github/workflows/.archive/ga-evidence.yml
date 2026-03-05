@@ -3,6 +3,11 @@ name: GA Evidence Collection
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "server/**"
       - "apps/**"
@@ -57,7 +62,7 @@ jobs:
           version: v0.61.0
 
       - name: Generate Evidence Bundle
-        run: pnpm ga:evidence
+        run: pnpm compliance:evidence
         env:
           VERSION: ${{ github.event.inputs.version || '5.3.1' }}
 

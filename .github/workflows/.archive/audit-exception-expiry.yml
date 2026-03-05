@@ -2,6 +2,11 @@ name: audit-exception-expiry
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "audit/exceptions.yaml"
       - "scripts/audit/check-exceptions.js"
