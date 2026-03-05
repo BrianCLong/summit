@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:45:00Z",
-  "revision_note": "Added GOVOS-1 epic program entry with governed multi-agent OS scope and evidence-first guardrails.",
+  "last_updated": "2026-02-08T12:30:00Z",
+  "revision_note": "Added IO specialization and forward generalization documentation track with schemas and collection policy matrix.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -59,12 +59,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
-    },
-    {
-      "id": "govos-1-governed-multi-agent-os",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Moat Epic Program for governed multi-agent OS: policy graph, provenance, evidence resolver, approvals, and audit SLOs."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
@@ -181,6 +175,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "One-pager mapping IO/CogWar radar scope to Summit/IntelGraph defensive capabilities."
+    },
+    {
+      "id": "io-specialization-docs-v1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "IO specialization overview, data contracts, forward generalization framework, IO schemas, and collection policy matrix."
     },
     {
       "id": "runbook-cognitive-security-defense",
