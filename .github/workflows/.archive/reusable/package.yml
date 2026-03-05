@@ -12,14 +12,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4 # v4
       - uses: actions/setup-node@v4 # v4
+        with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
           run_install: false
       - name: Cache pnpm store
         uses: actions/cache@v4 # v4
+        with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-
@@ -27,6 +30,7 @@ jobs:
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Cache Turbo
         uses: actions/cache@v4 # v4
+        with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
@@ -37,6 +41,7 @@ jobs:
         run: pnpm -w run build
       - name: Upload build artifacts for golden path
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
           name: build-artifacts
           path: |
             .turbo
@@ -68,6 +73,7 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4 # v4
+        with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
@@ -75,10 +81,12 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@c5ba7f7862a0f64c1b1a05fbac13e0b8e86ba08c # v4
+        with:
           run_install: false
 
       - name: Cache pnpm store
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: ${{ runner.os }}-pnpm-
@@ -88,6 +96,7 @@ jobs:
 
       - name: Cache Turbo
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
           path: .turbo
           key: ${{ runner.os }}-turbo-${{ github.sha }}
           restore-keys: |
@@ -113,6 +122,7 @@ jobs:
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
           name: package-artifacts
           path: artifacts
           retention-days: 7

@@ -1,40 +1,65 @@
-# Summit Evidence Map
+version: 1.0
+evidence:
+  - id: EVID-NARR-001
+    name: Narrative Snapshot Integrity
+    description: Verification that narrative snapshots are generated and hashed correctly.
+    source:
+      type: file
+      path: artifacts/narrative/snapshots/*.json
+    criteria:
+      - rule: schema_validation
+        schema: schemas/narrative-snapshot.schema.json
+      - rule: integrity_check
+        algorithm: sha256
 
-**Status:** Operational
-**Purpose:** Defines the machine-verifiable evidence artifacts required for Governance, Risk, and Compliance (GRC) certification.
-**Reference:** Extends `docs/governance/CONTROL_EVIDENCE_INDEX.md`.
+  - id: EVID-NARR-002
+    name: Model Governance Compliance
+    description: Audit logs proving narrative models passed ethical checks.
+    source:
+      type: database
+      query: "SELECT * FROM model_governance_log WHERE status = 'PASSED'"
+    criteria:
+      - rule: existence
+      - rule: recency
+        threshold: 7d
 
-## 1. Zero-Trust Data Governance (DT-001)
+  - id: EVID-IO-001
+    name: Influence Operation Detection Rate
+    description: Metrics showing detection efficacy against the Golden Dataset.
+    source:
+      type: metric
+      name: io_detection_f1_score
+    criteria:
+      - rule: threshold
+        min: 0.85
 
-| Evidence ID | Artifact Path | Description | Producer | Verifier |
-| :--- | :--- | :--- | :--- | :--- |
-| `data_access_logs` | `logs/audit/data_access_*.json` | Immutable log of policy decisions for data access. | `PolicyEngine` | `scripts/audit/verify_logs.ts` |
-| `registry_validation_report` | `artifacts/evidence/governance/registry_check.json` | Confirmation that all runtime assets exist in registry. | `scripts/ci/verify_data_registry.mjs` | `CI Gate: Data Governance` |
+  - id: EVID-OSINT-TURN-003
+    name: OSINT Platform Development Update - Turn 3
+    description: Periodic update on Maltego, i2 Analyst's Notebook, and emerging OSINT platforms.
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-3.md
+    criteria:
+      - rule: existence
+      - rule: header_validation
+        headers: [ILSA-Level, IBOM-Verified]
 
-## 2. Runtime Assurance (RT-001)
+  - id: EVID-OSINT-TURN-004
+    name: Regulatory Intelligence Update (Turn 4)
+    description: AI governance, FedRAMP, CMMC, and GDPR enforcement updates (Jan 2026).
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-4.md
+    criteria:
+      - rule: existence
 
-| Evidence ID | Artifact Path | Description | Producer | Verifier |
-| :--- | :--- | :--- | :--- | :--- |
-| `drift_metrics` | `metrics/model/drift_*.json` | Statistical distance metrics (PSI/KL) vs training baseline. | `ModelMonitor` | `scripts/monitor/alert_on_drift.py` |
-| `intervention_events` | `logs/interventions/circuit_breaker_*.json` | Log of automated safety stops triggered by policy. | `PolicyEngine` | `scripts/audit/count_interventions.ts` |
-| `risk_telemetry` | `metrics/risk/score_*.json` | Real-time risk scores computed for operations. | `PolicyEngine` | `OpsDashboard` |
-
-## 3. Operational Oversight (OP-001)
-
-| Evidence ID | Artifact Path | Description | Producer | Verifier |
-| :--- | :--- | :--- | :--- | :--- |
-| `council_meeting_minutes` | `governance/records/minutes/YYYY-MM-DD.md` | Signed minutes of Governance Council. | Governance Secretariat | `scripts/governance/verify_quorum.ts` |
-| `decision_register` | `governance/records/decisions.yaml` | Ledger of strategic governance approvals. | Governance Secretariat | `scripts/governance/verify_approvals.ts` |
-
-## 4. Regulatory Alignment (Core)
-
-| Evidence ID | Artifact Path | Description | Framework Mapping |
-| :--- | :--- | :--- | :--- |
-| `system_inventory` | `artifacts/evidence/governance/ai-inventory.json` | Complete AI system list. | NIST AI RMF (MAP) |
-| `provenance_trace` | `.evidence/provenance.json` | SLSA-compliant build/data provenance. | EU AI Act (Art 10) |
-| `model_cards` | `docs/models/*.md` | Transparency disclosures. | EU AI Act (Art 13) |
-
-## Validation Policy
-*   All artifacts must be present in the **Release Evidence Bundle**.
-*   JSON artifacts must satisfy their defined JSON Schemas.
-*   Logs must be cryptographically chained (where applicable).
+  - id: EVID-OSINT-TURN-005
+    name: OSINT Platform Development Update - Turn 5
+    description: Periodic update on Maltego, i2 Analyst's Notebook, and emerging OSINT platforms (Jan 29, 2026).
+    source:
+      type: file
+      path: docs/osint/updates/automation-turn-5.md
+    criteria:
+      - rule: existence
+      - rule: header_validation
+        headers: [ILSA-Level, IBOM-Verified]
