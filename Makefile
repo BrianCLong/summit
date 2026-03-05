@@ -411,5 +411,4 @@ copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
 
 eval-skills-changed:
-	@echo "Evaluating skills changed..."
-	@exit 0
+	@echo "Skills evaluation skipped."
