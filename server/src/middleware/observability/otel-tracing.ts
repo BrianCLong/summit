@@ -262,11 +262,6 @@ export class OTelTracingService {
     // no-op
   }
 
-  // Alias for OpenTelemetry compatibility
-  setAttributes(attributes: Record<string, any>) {
-    this.addSpanAttributes(attributes);
-  }
-
   // Get service configuration
   getConfig(): TracingConfig {
     return { ...this.config };
