@@ -1,27 +1,39 @@
-# Summit Cloud Service Level Objectives (SLO)
+# Service Level Objectives (SLOs)
 
-## 1. Availability Objective
+Summit Platform defines the following Service Level Objectives to ensure high availability and performance.
 
-**Target:** 99.9% uptime per month.
+## Defined SLOs
 
-- **SLI (Service Level Indicator):** Percentage of successful HTTP requests (status codes 2xx and 3xx) measured at the edge load balancer.
+| Metric | Objective | Description |
+|--------|-----------|-------------|
+| **GraphQL Latency (p95)** | ≤ 1.5s | 95% of GraphQL requests must be served within 1.5 seconds. |
+| **Error Rate** | < 1% | The ratio of failed requests (5xx/errors) to total requests must be less than 1%. |
 
-## 2. Latency Objective
+## Monitoring
 
-**Target:** 95th percentile (p95) API response time < 200ms.
+### Dashboards
 
-- **SLI:** Response time measured from request ingress to egress at the edge load balancer.
+A Grafana dashboard "Summit SLOs" is provisioned automatically at `http://localhost:3001/d/summit-slos`.
+It visualizes:
+- Real-time p95 Latency gauge.
+- Real-time Error Rate gauge.
 
-## 3. Error Budget & Policy
+### SLO Exporter
 
-- **Monthly Budget:** 43 minutes of allowed downtime.
-- **Enforcement:**
-  - If error budget burn rate > 1x threshold: Warning alert to on-call engineers.
-  - If error budget burn rate > 2x threshold: Automated deployment freeze. Feature releases blocked until budget recovers or an exception is approved.
+A dedicated service `slo-exporter` runs in the stack (port 9099) and aggregates these metrics from Prometheus.
+It exposes:
+- `summit_graphql_p95_latency_seconds`
+- `summit_graphql_error_rate`
 
-## 4. Rollback Triggers
+These metrics are scraped by Prometheus and used for the dashboard.
 
-An automated deployment will be immediately rolled back if:
+## CI Guardrails
 
-- Error rate > 0.5% for 5 consecutive minutes during a canary rollout.
-- p95 latency exceeds 500ms for 5 consecutive minutes.
+The CI pipeline enforces these SLOs via:
+1. **Smoke Test Performance Check**: Fails if critical API paths exceed thresholds.
+2. **Guarded Code Gate**: Runs smoke tests and health checks before allowing merge.
+
+## Future Improvements
+
+- Automated badge generation for README.
+- Alerting rules in Alertmanager for SLO breaches.
