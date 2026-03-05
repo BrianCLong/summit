@@ -490,7 +490,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', authenticateToken, ensureRole(['ADMIN', 'admin', 'OPERATOR']), drRouter);
+  app.use('/dr', authenticateToken, ensureRole(['ADMIN', 'admin']), drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
