@@ -1,0 +1,51 @@
+name: Render evidence graph
+on:
+  workflow_run:
+    workflows: [ "CI" ]
+    types: [ completed ]
+jobs:
+  render-evidence-graph:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # Ensure evidence.json exists (adapt paths to your pipeline)
+      - name: Locate evidence.json
+        id: locate
+        run: |
+          set -e
+          mkdir -p build
+          if [ -f build/evidence.json ]; then
+            echo "found=build/evidence.json" >> $GITHUB_OUTPUT
+          elif [ -f evidence.json ]; then
+            cp evidence.json build/evidence.json
+            echo "found=build/evidence.json" >> $GITHUB_OUTPUT
+          else
+            echo "::warning::No evidence.json found (expected build/evidence.json)."
+            echo "found=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Python + Graphviz
+        run: |
+          sudo apt-get update && sudo apt-get install -y graphviz
+          python -m pip install --upgrade pip
+          pip install graphviz
+
+      - name: Render evidence graph
+        if: ${{ steps.locate.outputs.found != '' }}
+        run: |
+          python scripts/evidence_to_dot.py ${{ steps.locate.outputs.found }} build/evidence.dot || true
+          if [ -f build/evidence.svg ]; then echo 'svg rendered'; else dot -Tsvg build/evidence.dot -o build/evidence.svg || true; fi
+
+      - name: Upload evidence SVG artifact
+        if: ${{ steps.locate.outputs.found != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-graph-svg
+          path: build/evidence.svg
+          if-no-files-found: warn
