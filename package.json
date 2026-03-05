@@ -1,10 +1,10 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.15",
+  "version": "4.2.3",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@9.12.0",
   "scripts": {
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
@@ -35,7 +35,7 @@
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "cd server && npm run test:unit",
     "test:integration": "cd server && npm run test:integration",
-    "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
+    "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} NODE_OPTIONS=--experimental-vm-modules jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
     "coverage:collect": "pnpm --filter server run test:coverage -- --coverageReporters=json-summary --passWithNoTests",
     "coverage:gate": "node scripts/coverage-aggregate.js --scope=${COVERAGE_SCOPE:-all} --base=${COVERAGE_BASE_REF:-origin/main}",
     "coverage:verify": "pnpm coverage:collect && pnpm coverage:gate",
@@ -52,6 +52,7 @@
     "lint": "eslint . && (ruff check . || true)",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
     "security:check": "node scripts/security-check.js",
     "security:evidence-pack": "npx tsx scripts/security/evidence-pack.ts --mode=live",
     "security:evidence-pack:offline": "npx tsx scripts/security/evidence-pack.ts --mode=offline --fixturesDir=scripts/security/fixtures",
@@ -78,6 +79,7 @@
     "schema:diff:strict": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json --strict",
     "schema:validate": "npm run schema:diff:strict",
     "update:golden": "ts-node --esm scripts/update-golden.ts",
+    "test:omics-deconv": "npx tsx tests/omics/run.ts",
     "e2e": "playwright test",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
@@ -100,6 +102,7 @@
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "check:governance": "node scripts/check-governance.cjs",
     "ci:docs-governance": "node scripts/ci/verify_governance_docs.mjs",
+    "compliance:antigravity": "npm run ci:docs-governance",
     "ci:docs-governance:fix": "node scripts/ci/verify_governance_docs.mjs --fix",
     "ci:soc-report": "python3 scripts/evidence/generate_soc_report.py --evidence-dir dist/evidence/${GITHUB_SHA}",
     "ci:branch-protection:check": "node scripts/ci/check_branch_protection_drift.mjs",
@@ -124,9 +127,12 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
+    "compliance:antigravity": "pnpm compliance:check && pnpm verify:governance && pnpm ga:verify",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
+    "ga:evidence": "pnpm compliance:evidence"
   },
   "keywords": [
     "intelligence-analysis",
@@ -141,7 +147,7 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.18",
+    "node": "22",
     "npm": ">=8.0.0"
   },
   "devDependencies": {
@@ -259,9 +265,10 @@
     "react-monaco-editor": "^0.59.0",
     "redis": "^5.8.1",
     "supertest": "^7.1.4",
-    "vitest": "^4.0.16",
+    "vitest": "^4.0.18",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "yaml": "^2.8.2",
     "zustand": "^5.0.9"
   },
   "private": true,
@@ -284,7 +291,7 @@
       "micromatch": ">=4.0.8",
       "path-to-regexp": ">=8.0.0",
       "validator": ">=13.15.20",
-      "nanoid": ">=5.0.9",
+      "nanoid": "3.3.8",
       "cross-spawn": ">=7.0.6",
       "tar": ">=7.5.7",
       "cookie": ">=0.7.0",

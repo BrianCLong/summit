@@ -4,16 +4,17 @@ Validates evidence bundles against Summit schemas.
 Deterministic: no network, no timestamps, stable exit codes.
 """
 import json
-import sys
 import pathlib
-from jsonschema import validate, ValidationError
+import sys
+
+from jsonschema import ValidationError, validate
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCHEMAS = ROOT / "evidence" / "schemas"
 BUNDLES_DIR = ROOT / "evidence" / "bundles"
 
 def load_json(path):
-    with open(path, 'r') as f:
+    with open(path) as f:
         return json.load(f)
 
 def validate_bundle(bundle_path):

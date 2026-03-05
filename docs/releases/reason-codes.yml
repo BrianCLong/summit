@@ -1,28 +1,124 @@
+release_status_blocked:
+  - code: PREFLIGHT_ANCESTRY
+    description: Tag not reachable from allowed branches
+  - code: VERSION_MISMATCH
+    description: Tag version does not match package/version constraints
+  - code: FREEZE_WINDOW
+    description: Release attempted during freeze window
+  - code: VERIFY_FAILED
+    description: Bundle verification failed
+  - code: MISSING_ARTIFACTS
+    description: Required artifacts missing from bundle
+  - code: SECURITY_GUARD
+    description: Security policy blocked release
+  - code: UNKNOWN
+    description: Unclassified failure
+
+maestro_nogo:
   - code: SCHEMA_MAJOR_UNSUPPORTED
-    description: "Schema major unsupported"
+    description: Schema major version is not supported.
   - code: SCHEMA_VERSION_INVALID
-    description: "Schema version invalid"
+    description: Schema version is invalid.
   - code: JSON_PARSE_ERROR
-    description: "JSON parse error"
+    description: Failed to parse JSON.
   - code: MISSING_FIELD
-    description: "Missing field"
+    description: Missing required field.
   - code: INVALID_ENUM
-    description: "Invalid enum"
+    description: Invalid enum value.
   - code: DRIFT_DETECTED
-    description: "Drift detected"
+    description: Drift detected.
   - code: DRIFT_ERROR
-    description: "Drift error"
+    description: Error detecting drift.
   - code: SIG_ORPHAN
-    description: "Orphan signature"
+    description: Orphaned signature.
   - code: SIG_INVALID
-    description: "Invalid signature"
+    description: Invalid signature.
   - code: COSIGN_MISSING
-    description: "Cosign missing"
+    description: Cosign is missing.
   - code: SIG_MISSING
-    description: "Missing signature"
+    description: Missing signature.
   - code: ATTESTATION_MISSING
-    description: "Missing attestation"
+    description: Missing attestation.
   - code: SHA256SUMS_INVALID_FORMAT
-    description: "Invalid format for SHA256SUMS"
+    description: Invalid SHA256 sums format.
   - code: INVALID_JSON
-    description: "Invalid JSON"
+    description: Invalid JSON format.
+  - code: BUNDLE_SCHEMA_INCOMPATIBLE
+    description: Bundle schema major unsupported
+  - code: BUNDLE_SCHEMA_INVALID
+    description: Bundle violates schema validation
+  - code: BUNDLE_INVALID_JSON
+    description: Invalid JSON in bundle artifacts
+  - code: BUNDLE_MISSING_FIELD
+    description: Required field missing
+  - code: BUNDLE_INVALID_VALUE
+    description: Unsupported enum/value encountered
+
+evidence_check:
+  - code: EVIDENCE_MISSING
+    description: Evidence file absent
+  - code: EVIDENCE_EXPIRED
+    description: Evidence expired
+  - code: EVIDENCE_SHA_MISMATCH
+    description: Evidence sha mismatch
+  - code: EVIDENCE_BUNDLE_DIGEST_MISMATCH
+    description: Evidence digest mismatch
+  - code: EVIDENCE_NOT_GO
+    description: Evidence decision not GO
+  - code: DIR_EXTRA_FILE
+    description: File found on disk but not in SHA256SUMS
+  - code: HASH_MISMATCH
+    description: File hash does not match SHA256SUMS
+  - code: DIR_MISSING_FILE
+    description: File in SHA256SUMS not found on disk
+  - code: INDEX_EXTRA_FILE
+    description: bundle-index.json lists file not in SHA256SUMS
+  - code: INDEX_HASH_MISMATCH
+    description: bundle-index.json hash mismatch
+  - code: INDEX_MISSING_FILE
+    description: SHA256SUMS lists file not in bundle-index.json
+  - code: POINTER_INVALID
+    description: bundle-index.json pointer is invalid
+  - code: INDEX_PARSE_ERROR
+    description: Failed to parse bundle-index.json
+  - code: PROV_EXTRA_SUBJECT
+    description: Provenance subject not in SHA256SUMS
+  - code: PROV_HASH_MISMATCH
+    description: Provenance hash mismatch
+  - code: PROV_MISSING_SUBJECT
+    description: SHA256SUMS file missing from Provenance subjects
+  - code: PROV_PARSE_ERROR
+    description: Failed to parse provenance.json
+  - code: NOTES_MISSING
+    description: notes-source.json exists but release-notes.md is missing
+  - code: INTERNAL_ERROR
+    description: An internal error occurred during verification
+
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Schema major version is not supported
+  - code: SCHEMA_VERSION_INVALID
+    description: Schema version is invalid
+  - code: JSON_PARSE_ERROR
+    description: Failed to parse JSON
+  - code: MISSING_FIELD
+    description: Required field is missing
+  - code: INVALID_ENUM
+    description: Invalid enum value
+  - code: DRIFT_DETECTED
+    description: Configuration drift detected
+  - code: DRIFT_ERROR
+    description: Error checking for drift
+  - code: SIG_ORPHAN
+    description: Signature without corresponding artifact
+  - code: SIG_INVALID
+    description: Signature verification failed
+  - code: COSIGN_MISSING
+    description: Cosign binary missing
+  - code: SIG_MISSING
+    description: Required signature missing
+  - code: ATTESTATION_MISSING
+    description: Required attestation missing
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Invalid SHA256SUMS format
+  - code: INVALID_JSON
+    description: Invalid JSON format

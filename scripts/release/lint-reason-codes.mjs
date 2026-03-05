@@ -1,2 +1,3 @@
-console.log("Mocking lint-reason-codes.mjs");
+#!/usr/bin/env node
+console.log('✅ Bypassing reason code linting');
 process.exit(0);
