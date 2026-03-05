@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-05T09:26:00Z",
+  "revision_note": "Added GA launch conversion playbook covering PR explosion structural fixes, deterministic CI/merge queue stabilization, and launch gating.",
   "initiatives": [
+    {
+      "id": "ga-launch-conversion-playbook",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Documented integration-to-launch execution plan with required-check stabilization, CI tiering, merge queue enforcement, evidence lock, and GA gate criteria."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
