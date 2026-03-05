@@ -16,7 +16,7 @@ runs:
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
-      with:
+
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
 
@@ -26,7 +26,7 @@ runs:
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
-      with:
+
         run_install: false
 
     - name: Get pnpm store directory
@@ -37,7 +37,7 @@ runs:
 
     - name: Cache pnpm store
       uses: actions/cache@v4
-      with:
+
         path: ${{ steps.pnpm-store.outputs.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
@@ -46,7 +46,7 @@ runs:
     - name: Cache Turbo
       if: inputs.enable-turbo-cache == 'true'
       uses: actions/cache@v4
-      with:
+
         path: .turbo
         key: ${{ runner.os }}-turbo-${{ github.sha }}
         restore-keys: |

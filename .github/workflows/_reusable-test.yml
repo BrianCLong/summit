@@ -14,7 +14,7 @@ on:
         description: "Node.js version"
         required: false
         type: string
-        default: "18.x"
+        default: "20.x"
       coverage-threshold:
         description: "Minimum coverage threshold (%)"
         required: false
@@ -52,7 +52,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        node: ["18.x"]
+        node: ["20.x"]
     outputs:
       coverage: ${{ steps.coverage-check.outputs.percentage }}
       passed: ${{ steps.test-run.outcome == 'success' }}
@@ -99,7 +99,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
-        with:
+
           fetch-depth: 0
 
       - name: Enable Corepack
@@ -110,7 +110,7 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
+
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
 
@@ -232,7 +232,7 @@ jobs:
       - name: Upload coverage reports
         if: always() && inputs.upload-coverage
         uses: actions/upload-artifact@v4 # v6
-        with:
+
           name: coverage-${{ matrix.os }}-${{ matrix.node }}-${{ inputs.test-type }}
           path: |
             coverage/
@@ -244,7 +244,7 @@ jobs:
       - name: Upload coverage to Codecov
         if: inputs.upload-coverage && hashFiles('coverage/lcov.info') != ''
         uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5
-        with:
+
           files: ./coverage/lcov.info
           flags: ${{ inputs.test-type }}
           name: ${{ inputs.test-type }}-${{ matrix.os }}-${{ matrix.node }}
