@@ -30,7 +30,7 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
       actions: read
@@ -59,7 +59,7 @@ jobs:
         if: matrix.language == 'javascript-typescript'
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: 20
+          node-version: 18
           cache: "pnpm"
 
       - name: Install dependencies (monorepo workspaces)

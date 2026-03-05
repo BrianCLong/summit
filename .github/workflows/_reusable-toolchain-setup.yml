@@ -1,7 +1,7 @@
 name: 🛠️ Reusable Toolchain Setup (Node + PNPM)
 
 # Reusable workflow to detect Node version and set up toolchain
-# Auto-detects from .nvmrc or package.json engines, with fallback to Node 20
+# Auto-detects from .nvmrc or package.json engines, with fallback to Node 18
 
 on:
   workflow_call:
@@ -14,7 +14,7 @@ on:
         description: "PNPM version (optional, defaults to repo pin)"
         required: false
         type: string
-        default: "10.0.0"
+        # Removed default to respect package.json "packageManager"
       install-deps:
         description: "Whether to install dependencies (defaults to true)"
         required: false
@@ -78,9 +78,9 @@ jobs:
             v=$(jq -r '.engines.node' package.json | sed 's/[^0-9.]*//' | sed 's/\.x$//' | xargs)
             echo "✅ Detected from package.json engines: $v"
 
-          # Priority 3: Fallback to Node 20 (LTS)
+          # Priority 3: Fallback to Node 18 (LTS)
           else
-            v=20
+            v=18
             echo "⚠️  No .nvmrc or engines.node found, using fallback: Node $v"
           fi
 
@@ -106,13 +106,13 @@ jobs:
             fi
           fi
 
-          echo "pnpm=10.0.0" >> "$GITHUB_OUTPUT"
-          echo "⚠️  Falling back to pinned pnpm 10.0.0"
+          echo "pnpm=" >> "$GITHUB_OUTPUT"
+          echo "⚠️  Falling back to package.json packageManager"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
-          version: ${{ steps.resolve-pnpm.outputs.pnpm }}
+          ${{ steps.resolve-pnpm.outputs.pnpm && format('version: {0}', steps.resolve-pnpm.outputs.pnpm) || '' }}
           run_install: ${{ inputs.install-deps }}
 
       - name: Setup Node.js
