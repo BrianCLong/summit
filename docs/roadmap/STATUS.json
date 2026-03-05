@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-01T23:00:00Z",
-  "revision_note": "Added March 1 GA safety sweep automation script and deterministic GA readiness report artifacts.",
+  "last_updated": "2026-03-05T00:07:01Z",
+  "revision_note": "Added palantir-class readiness assessment and sequenced implementation roadmap with governed phase gates.",
   "initiatives": [
     {
-      "id": "ga-safety-sweep-2026-03-01",
+      "id": "palantir-class-readiness-plan",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Automated deterministic GA sweep report generation for merge-health, P0 normalization, reproducibility, and CI guardrail signals."
+      "notes": "Published 12-component readiness assessment and phased delivery plan in docs/roadmap/palantir-class-readiness-plan.md."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
