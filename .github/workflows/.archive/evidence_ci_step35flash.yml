@@ -8,6 +8,11 @@ on:
       - 'summit/evidence/step35flash_index.example.json'
   pull_request:
     branches: [ "main", "develop" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'summit/evidence/schemas/step35flash_*.json'
       - 'summit/evidence/step35flash_index.example.json'

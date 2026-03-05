@@ -3,6 +3,11 @@ name: "MVP-4-GA Hard Gate"
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   merge_group:
 
 concurrency:

@@ -23,6 +23,17 @@ on:
 
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+    paths:
+      - "Dockerfile*"
+      - "docker-compose*"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "server/package.json"
 
   workflow_dispatch:
 
@@ -41,7 +52,7 @@ permissions:
 
 jobs:
   sbom:
-    name: SBOM & Vulnerability Scanning
+    name: SBOM & Vulnerability Gate
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
