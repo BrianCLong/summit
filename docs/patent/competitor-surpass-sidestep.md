@@ -12,11 +12,11 @@
 
 | Epic (link)                                                                                                      | Alignment check | Notes                                                                      |
 | ---------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------- |
-| [Epic 1 – Air-gapped deployable baseline](../SUMMIT_2025_ROADMAP.md#3-prioritized-roadmap-6–12-months)           | [x]             | Offline deployable bundles and sealed attestations reused across methods.  |
-| [Epic 2 – Secure LLM copilot and retrieval layer](../SUMMIT_2025_ROADMAP.md#3-prioritized-roadmap-6–12-months)   | [x]             | Graph-aware copilots with policy traces and governed traversal budgets.    |
-| [Epic 3 – Federation + cross-domain ingestion mesh](../SUMMIT_2025_ROADMAP.md#3-prioritized-roadmap-6–12-months) | [x]             | Federation-aware routing for knowledge bases and cross-tenant graph joins. |
-| [Epic 5 – Offline-first/mobile field kit](../SUMMIT_2025_ROADMAP.md#3-prioritized-roadmap-6–12-months)           | [x]             | Sync-safe, policy-scoped local packs for forward bases.                    |
-| [Epic 6 – Investigations UI 2.0](../SUMMIT_2025_ROADMAP.md#3-prioritized-roadmap-6–12-months)                    | [x]             | Copilot surfaces expose sidestep paths with explainable rationales.        |
+| Epic 1 – Air-gapped deployable baseline           | [x]             | Offline deployable bundles and sealed attestations reused across methods.  |
+| Epic 2 – Secure LLM copilot and retrieval layer   | [x]             | Graph-aware copilots with policy traces and governed traversal budgets.    |
+| Epic 3 – Federation + cross-domain ingestion mesh | [x]             | Federation-aware routing for knowledge bases and cross-tenant graph joins. |
+| Epic 5 – Offline-first/mobile field kit           | [x]             | Sync-safe, policy-scoped local packs for forward bases.                    |
+| Epic 6 – Investigations UI 2.0                    | [x]             | Copilot surfaces expose sidestep paths with explainable rationales.        |
 
 ### Novelty, deployment, and prior art anchors
 
