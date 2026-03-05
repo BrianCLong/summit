@@ -67,6 +67,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+          cache: pnpm
+          node-version-file: .nvmrc
+        with:
           node-version-file: .nvmrc
           cache: 'pnpm'
 
@@ -75,7 +78,7 @@ jobs:
 
       - name: Run Integration Tests
         working-directory: server
-        run: npm run test:integration
+        run: npm run test:integration --filter @intelgraph/server
         env:
           DATABASE_URL: postgresql://postgres:password@localhost:5432/test_db
           NEO4J_URI: bolt://localhost:7687

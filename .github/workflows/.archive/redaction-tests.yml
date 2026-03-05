@@ -30,9 +30,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: redaction-tests-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 jobs:
   redaction-tests:
     name: Redaction Layer Tests

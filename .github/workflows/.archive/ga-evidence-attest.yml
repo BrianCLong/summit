@@ -267,7 +267,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "# Verify attestations" >> $GITHUB_STEP_SUMMARY
             echo "cd attestations" >> $GITHUB_STEP_SUMMARY
-            echo "cosign verify-blob-attestation \\" >> $GITHUB_STEP_SUMMARY
+            echo "cosign verify-blob-attestation --use-signed-timestamps \\" >> $GITHUB_STEP_SUMMARY
             echo "  --certificate-identity-regexp 'https://github.com/${{ github.repository }}/.github/workflows/.*' \\" >> $GITHUB_STEP_SUMMARY
             echo "  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \\" >> $GITHUB_STEP_SUMMARY
             echo "  --type slsaprovenance \\" >> $GITHUB_STEP_SUMMARY

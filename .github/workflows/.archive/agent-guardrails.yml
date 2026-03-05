@@ -83,8 +83,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
 
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs
@@ -98,10 +96,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -136,4 +130,5 @@ jobs:
         run: |
           # Parse the JSON array of files and pass each as an argument to the script
           files='${{ steps.files.outputs.result }}'
-          echo "$files" | jq -r '.[]' | xargs -d '\n' node scripts/ga/scan-pii.mjs
+          echo "$files" | jq -r '.[]' | xargs -d '
+' node scripts/ga/scan-pii.mjs

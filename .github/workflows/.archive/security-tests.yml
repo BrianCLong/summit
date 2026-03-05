@@ -30,11 +30,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: ".nvmrc"
           cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --ignore-scripts
 
       - name: Run security tests
-        run: pnpm run test:security
+        run: npm run test:server
