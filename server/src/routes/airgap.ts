@@ -12,6 +12,11 @@ import express from 'express';
 export const airgapRouter = Router();
 const service = new AirgapService();
 
+// SEC-2026-002: Enforce strict "deny-by-default" posture for airgap operations.
+// Import/Export of sensitive data must be restricted to administrators.
+airgapRouter.use(ensureAuthenticated);
+airgapRouter.use(ensureRole(['ADMIN', 'admin']));
+
 // Middleware to ensure tenant context
 airgapRouter.use(tenantHeader());
 
