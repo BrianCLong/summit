@@ -124,7 +124,7 @@ router.get(
 
       const envelope = await roleService.getRole(
         principal.tenantId,
-        id,
+        (id as string),
         principal.id
       );
 
@@ -209,7 +209,7 @@ router.patch(
 
       const envelope = await roleService.updateRole(
         principal.tenantId,
-        id,
+        (id as string),
         parseResult.data,
         principal.id
       );
@@ -243,7 +243,7 @@ router.delete(
 
       const envelope = await roleService.deleteRole(
         principal.tenantId,
-        id,
+        (id as string),
         principal.id
       );
 

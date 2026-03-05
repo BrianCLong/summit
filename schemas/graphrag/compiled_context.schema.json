@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CompiledContext",
+  "type": "object",
+  "required": ["contract_version", "header", "evidence_blocks", "edge_refs", "compiler_stats", "context_digest"],
+  "properties": {
+    "contract_version": { "type": "string", "enum": ["v1"] },
+    "header": {
+      "type": "object",
+      "required": ["query_hash", "policy_hash", "graph_ref"],
+      "properties": {
+        "query_hash": { "type": "string" },
+        "policy_hash": { "type": "string" },
+        "graph_ref": { "type": "string" }
+      }
+    },
+    "evidence_blocks": { "type": "array", "items": { "$ref": "#/$defs/evidenceBlock" } },
+    "edge_refs": { "type": "array", "items": { "$ref": "#/$defs/edgeRef" } },
+    "compiler_stats": { "type": "object" },
+    "context_digest": { "type": "string" }
+  },
+  "$defs": {
+    "evidenceBlock": {
+      "type": "object",
+      "required": ["evidence_id", "kind", "excerpt"],
+      "properties": {
+        "evidence_id": { "type": "string" },
+        "kind": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "uri": { "type": "string" },
+        "score": { "type": "number" },
+        "digest": { "type": "object" },
+        "provenance": { "type": "object" }
+      }
+    },
+    "edgeRef": {
+      "type": "object",
+      "required": ["from", "to", "type"],
+      "properties": {
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "type": { "type": "string" }
+      }
+    }
+  }
+}
