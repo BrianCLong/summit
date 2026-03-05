@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-14T00:00:00Z",
-  "revision_note": "Added OpenClaw competitive one-page positioning sheet for governed differentiation.",
+  "last_updated": "2026-02-08T04:57:13Z",
+  "revision_note": "Added governed personal-agent integration reference architecture spec in docs/integrations/REFERENCE_ARCH_v0.1.md.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -204,21 +204,15 @@
       "id": "summit-architecture-brief",
       "status": "completed",
       "owner": "codex",
-      "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "competitive-openclaw-onepager",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published Summit vs OpenClaw one-page advantage sheet for governed differentiation."
+      "notes": "Published Summit Architecture Brief with module boundaries, data flow, acceptance criteria, and the governed personal-agent integration reference architecture."
     }
   ],
   "summary": {
-    "rc_ready": 9,
+    "rc_ready": 8,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
