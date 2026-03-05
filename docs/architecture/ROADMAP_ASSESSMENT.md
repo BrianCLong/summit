@@ -8,7 +8,7 @@ Based on the architectural documents (ADR-003, ADR-050, Ontology Engine Referenc
 **Confidence:** High (based on concrete architectural artifacts in the repository)
 
 1. **Ontology & semantic layer — 🟢 (Solid)**
-   - *Evidence:* `docs/architecture/ONTOLOGY_ENGINE.md`, `docs/architecture/adr/ADR-003-graph-first-intelligence-engine.md`, `ADR-050-Knowledge-OS-Data-Model.md`.
+   - *Evidence:* `docs/architecture/ONTOLOGY_ENGINE.md`, `docs/architecture/adr/0003-graph-first-intelligence-engine.md`, `docs/architecture/ADR-050-Knowledge-OS-Data-Model.md`.
    - *Details:* The platform enforces a hybrid data model (Vector Store + Graph DB). The Neo4j graph uses a strict, canonical data model with 21 entity types, 30 relationship types, and mandatory policy labels. The Ontology Engine handles RDF/XML, Turtle, JSON-LD, and validates against SHACL shapes and OPA.
 
 2. **Entity resolution engine — 🟡 (Partial - Med/High)**
@@ -21,7 +21,7 @@ Based on the architectural documents (ADR-003, ADR-050, Ontology Engine Referenc
 
 4. **Provenance & source attribution — 🟢 (Solid)**
    - *Evidence:* `docs/architecture/prov-ledger.md`.
-   - *Details:* The Provenance Ledger microservice handles immutable chains-of-custody, attaching source, license, and transformation metadata to *every* assertion. It also generates verifiable disclosure bundles with Merkle roots and Ed25519 signatures.
+   - *Details:* The Provenance Ledger microservice handles immutable chains-of-custody, attaching source, license, and transformation metadata to *every* assertion. It also generates verfiable disclosure bundles with Merkle roots and Ed25519 signatures.
 
 5. **Data ingestion framework (connectors + pipeline) — 🟡 (Partial)**
    - *Evidence:* `workers/ingest/`, `docs/architecture/CONNECTOR_GA_SUMMARY.md` (present in tree).
