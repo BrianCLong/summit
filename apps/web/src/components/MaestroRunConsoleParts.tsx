@@ -171,7 +171,7 @@ export const RunSummary: React.FC<RunPartProps> = React.memo(({ selectedRun }) =
                 By model
               </p>
               <div className="space-y-1">
-                {(Object.entries(selectedRun.costSummary.byModel) as Array<[string, any]>).map(
+                {Object.entries(selectedRun.costSummary.byModel).map(
                   ([model, stats]) => (
                     <div
                       key={model}
@@ -207,8 +207,19 @@ export const RunSummary: React.FC<RunPartProps> = React.memo(({ selectedRun }) =
 });
 
 export const RunTasks: React.FC<RunPartProps> = React.memo(({ selectedRun }) => {
+  // Memoize the results map to optimize lookup from O(N) to O(1)
+  const resultsMap = React.useMemo(() => {
+    const map = new Map<string, TaskResult>();
+    if (selectedRun?.results) {
+      for (const r of selectedRun.results) {
+        map.set(r.task.id, r);
+      }
+    }
+    return map;
+  }, [selectedRun?.results]);
+
   const findResultForTask = (taskId: string): TaskResult | undefined =>
-    selectedRun?.results.find(r => r.task.id === taskId);
+    resultsMap.get(taskId);
 
   return (
     <Card className="shadow-md border border-slate-800 bg-slate-950/60 backdrop-blur">
