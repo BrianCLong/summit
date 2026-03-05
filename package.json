@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-platform",
-  "version": "4.1.15",
+  "version": "4.2.3",
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "type": "module",
@@ -78,6 +78,7 @@
     "schema:diff:strict": "npx ts-node scripts/schema-diff.ts --version=v1 --output=json --strict",
     "schema:validate": "npm run schema:diff:strict",
     "update:golden": "ts-node --esm scripts/update-golden.ts",
+    "test:omics-deconv": "npx tsx tests/omics/run.ts",
     "e2e": "playwright test",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
@@ -124,9 +125,12 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
+    "compliance:antigravity": "pnpm compliance:check && pnpm verify:governance && pnpm ga:verify",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
+    "ga:evidence": "pnpm compliance:evidence"
   },
   "keywords": [
     "intelligence-analysis",
@@ -259,7 +263,7 @@
     "react-monaco-editor": "^0.59.0",
     "redis": "^5.8.1",
     "supertest": "^7.1.4",
-    "vitest": "^4.0.16",
+    "vitest": "^4.0.18",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.9"

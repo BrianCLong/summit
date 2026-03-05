@@ -50,10 +50,11 @@ const RAGConsole = () => {
           {/* Query Section */}
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="query-input" className="block text-sm font-medium text-gray-700 mb-2">
                 Query
               </label>
               <textarea
+                id="query-input"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="[ how do we run neo4j… ]"
@@ -76,11 +77,11 @@ const RAGConsole = () => {
 
           {/* Answer Section */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <h4 className="block text-sm font-medium text-gray-700 mb-2">
               Answer{' '}
               {response?.context?.length ? `(with [1][2] cites)` : ''}
-            </label>
-            <div className="bg-gray-50 border border-gray-300 rounded-lg p-3 min-h-[120px]">
+            </h4>
+            <div aria-live="polite" className="bg-gray-50 border border-gray-300 rounded-lg p-3 min-h-[120px]">
               {loading ? (
                 <div className="text-gray-600">Searching...</div>
               ) : response?.answer ? (
