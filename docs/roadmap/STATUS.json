@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added Formae multi-cloud control plane subsumption standards, evidence placeholder, and repo assumptions log.",
+  "revision_note": "Added HF 2602.20093 subsumption scaffold initiative and repo reality check document.",
   "initiatives": [
     {
-      "id": "formae-multi-cloud-control-plane",
+      "id": "hf-2602-20093-subsumption-scaffold",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance-first deterministic multi-cloud planning standard, evidence capture placeholder, and validation checklist scaffolding."
+      "notes": "Published grounded scaffold docs and repo reality check for HF 2602.20093 subsumption lane pending paper excerpts."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
