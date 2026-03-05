@@ -1,0 +1,24 @@
+[
+  {
+    "instruction": "Write a python function to compute the 99th percentile.",
+    "output_a": "def get_p99(arr):\n    arr.sort()\n    idx = int(len(arr) * 0.99)\n    return arr[idx]",
+    "output_b": "import numpy as np\ndef get_p99(arr):\n    return np.percentile(arr, 99)",
+    "human_preference": "B",
+    "rubrics": [
+      "Handles edge cases gracefully",
+      "Uses standard libraries efficiently",
+      "Correct mathematical computation"
+    ]
+  },
+  {
+    "instruction": "Summarize the key events of the French Revolution.",
+    "output_a": "The French Revolution happened in the 1700s. People were mad at the king and they chopped off his head. Then Napoleon took over.",
+    "output_b": "The French Revolution (1789-1799) was a period of radical political and societal change in France. It began with the Estates General of 1789 and ended with the formation of the French Consulate in November 1799. Many of its ideas are considered fundamental principles of Western liberal democracy. Key events include the Storming of the Bastille, the Declaration of the Rights of Man, and the Reign of Terror.",
+    "human_preference": "B",
+    "rubrics": [
+      "Includes dates and key figures",
+      "Covers major events like the Reign of Terror",
+      "Maintains a formal, objective tone"
+    ]
+  }
+]

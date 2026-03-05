@@ -1,0 +1,6 @@
+1b16292e99eec0b90afef4eb0126a84d718075aabc4dc8537801889eb5384f12  artifacts/release/v2026.02.26-ga/evidence-bundle.json
+9e9e3bdd11272c49c89a708b606b1b7d5736b00364611402e9a08beb9930e9b0  artifacts/release/v2026.02.26-ga/sbom/container.cdx.json
+a719a60c33691b3666be760671e82d0135847d06de32f439304405ed26e2c3c8  artifacts/release/v2026.02.26-ga/sbom/source.cdx.json
+0d6af79365c2c917ae681356a5e14df9979c60f09ae09f99b20cd0e16e9da5dd  artifacts/release/v2026.02.26-ga/vuln/container-summary.json
+f85a02b466e920efa756c73d60f0cd36e0837220287ebb3cbbfe04fc940280c7  artifacts/release/v2026.02.26-ga/vuln/source-summary.json
+50800237be5102d978530ee5f6b724dd03bc609ceadb0df16ee955600adf11e5  docs/reports/RELEASE_v2026.02.26-ga_branch_protection_plan.md
