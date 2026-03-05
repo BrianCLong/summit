@@ -1,21 +1,39 @@
-# Repo Assumptions Verification
+# Repo Assumptions & Validation Baseline
 
-## Verified Structure
+## Status
 
-The following paths were verified during implementation:
+This file captures **current verified facts** and **deferred validations** for intent-engineering integration work.
 
-- `summit/` exists and contains Python runtime modules.
-- `summit/evidence/` exists with deterministic JSON writing helpers and schemas.
-- `tests/` exists and supports Python `pytest` tests.
-- `docs/roadmap/STATUS.json` exists and tracks active initiatives.
+## Verified Paths
 
-## Assumed / Not Yet Verified
+Validated from repository root:
 
-The following itemized structure from the Copaw translation brief was not required for the minimal slice and remains unverified:
+- `.github/workflows/`
+- `docs/`
+- `docs/standards/`
+- `docs/security/data-handling/`
+- `docs/ops/runbooks/`
+- `scripts/`
+- `schemas/`
+- `tests/`
 
-- `/pipelines`
-- `/ci` (as a top-level folder dedicated to this capability)
+## Deferred Pending Validation (Before Merge-Critical Changes)
 
-## Net Action
+1. Existing evidence ID schema format and naming rules.
+2. Canonical CI job/check names enforced by branch protection.
+3. Current JSON output conventions for deterministic artifacts.
+4. Deterministic artifact stamping rules (what may vary and where).
+5. Feature-flag framework and authoritative config source.
 
-MWS implementation was aligned to the existing verified Python package layout under `summit/` and `tests/`.
+## Must-Not-Touch Until Explicitly Confirmed
+
+- Core evaluation engine internals.
+- Existing CI matrix topology and required-check wiring.
+- Security policy files and governance gates.
+
+## Working Guardrails
+
+- Keep scope to validation-first intent integration.
+- Default feature flag posture: `INTENT_ENGINE_V1=OFF`.
+- No autonomous runtime behavior in this phase.
+- No unrelated refactors while establishing baseline gates.
