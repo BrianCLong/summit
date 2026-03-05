@@ -48,3 +48,7 @@
 ## 2025-10-29 - Semantic Headings vs Forms
 **Learning:** Using `<label>` tags to visually style section headings (like an "Answer" section) confuses screen readers as it expects an associated form input.
 **Action:** Use proper heading tags (like `<h4>`) for structural sections and reserve `<label>` exclusively for form input association. Always use `id` and `htmlFor` to bind them explicitly.
+
+## 2026-03-05 - Accessible Status Badges
+**Learning:** Color-only status indicators (e.g., success/warning/error badges) are insufficient for accessibility. Adding semantic icons (CheckCircle, AlertTriangle) provides redundant cues that assist color-blind users and improve overall scanability.
+**Action:** Always provide an 'icon' prop for status-related UI components and use it to reinforce visual states.
