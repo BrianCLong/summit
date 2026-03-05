@@ -1,0 +1,9 @@
+# Evidence Map for Summit Governance
+# Ensures CI passes the required validation for evidence tracking
+
+version: 1
+evidence_records:
+  - id: EV-SUPERMUX-MWS-01
+    type: code-change
+    description: "Introduced Agent Supermux minimal winning slice"
+    status: active
