@@ -106,7 +106,7 @@ scrape_configs:
   - job_name: summit-ai
     metrics_path: /metrics
     static_configs:
-      - targets: ['ai-worker:8000']
+      - targets: ['summit-ai:8000']
         labels:
           service: 'summit-ai'
           tier: 'backend'
