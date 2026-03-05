@@ -1,6 +1,5 @@
 # Repo Assumptions
 
-<<<<<<< HEAD
 ## Verified Paths
 - `summit/`
 - `summit/explain/` (Will be created)
@@ -20,18 +19,3 @@
 ## Required schema alignment tasks
 - Align JSON schema with `report.json` and `metrics.json` structure
 - Ensure deterministic output requirements
-=======
-**Verified**
-* None (inspection unavailable initially, basic checks done now)
-
-**Assumed**
-* pipelines/ contains stage definitions
-* schemas/ contains JSON schemas
-* CI uses GitHub Actions
-* Evidence format: report.json, metrics.json, stamp.json
-
-**Must-Not-Touch**
-* Core scoring engine
-* Existing compliance attestations
-* Historical evidence logs
->>>>>>> c5daac29a (feat(cda): introduce subsumption bundle and pushback validation mechanics)
