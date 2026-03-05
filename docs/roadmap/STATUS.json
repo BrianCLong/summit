@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-26T05:19:30Z",
-  "revision_note": "Added golden-main PR recovery runbook and execution initiative for priority PR stabilization.",
+  "last_updated": "2026-02-26T16:30:12Z",
+  "revision_note": "Added MIT Sloan five heavy lifts crosswalk and Summit enforcement mapping for agentic GA governance.",
   "initiatives": [
     {
-      "id": "golden-main-pr-recovery-2026-02",
-      "status": "in_progress",
+      "id": "mit-sloan-heavy-lifts-crosswalk",
+      "status": "completed",
       "owner": "codex",
-      "notes": "Published deterministic golden-main + PR recovery runbook with priority merge queue (#18688, #18689, #18640) and backlog compression protocol."
+      "notes": "Published MIT Sloan 5 heavy lifts translation to Summit GraphRAG + multi-agent + GA gate enforcement model."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
