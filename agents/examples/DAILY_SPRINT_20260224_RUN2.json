@@ -1,0 +1,39 @@
+{
+  "task_id": "DAILY_SPRINT_20260224_RUN2",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "daily-sprint-orchestrator",
+    "version": "v1",
+    "sha256": "c3d8a8c9c3a54c0525dd7eb4b53d730de4b25f1e42f910929317f43a68bf6ed0",
+    "path": "prompts/automation/daily-sprint@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/ops/",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/",
+      "prompts/automation/",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["automation", "governance", "operations", "documentation"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": []
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Daily sprint log updated with evidence bundle, plan, execution log, and status",
+    "Roadmap status timestamp refreshed for daily sprint run",
+    "Prompt registry updated with daily sprint orchestrator entry"
+  ],
+  "stop_conditions": [
+    "CI failure in main",
+    "Sandbox violation alert",
+    "GitHub API outage preventing PR/issue evidence capture"
+  ]
+}
