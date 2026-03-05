@@ -11,10 +11,14 @@
  * - AUTONOMOUS: Low-risk reads, summaries (execute immediately)
  * - HITL: Moderate risk, analyst approval required
  * - PROHIBITED: High-risk, blocked with audit logging
+ *
+ * Differentiator vs. competitors:
+ * - Full ReAct traces for audit/explainability
+ * - Risk-tiered gates (no competitor has this fully)
+ * - Self-correction on errors
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { OpaClient } from '../utils/opa-client.js';
 
 import {
   AggregatedIntent,
@@ -29,46 +33,141 @@ import {
 } from '../types.js';
 
 // =============================================================================
+// RISK CLASSIFICATION
+// =============================================================================
+
+/**
+ * Default risk classifications for operations
+ */
+const DEFAULT_RISK_RULES: Record<string, RiskLevel> = {
+  // Autonomous (low risk)
+  'graph:read': 'autonomous',
+  'graph:query': 'autonomous',
+  'entity:lookup': 'autonomous',
+  'path:find': 'autonomous',
+  'summary:generate': 'autonomous',
+  'nl2cypher:translate': 'autonomous',
+
+  // HITL (moderate risk)
+  'graph:write': 'hitl',
+  'entity:create': 'hitl',
+  'entity:update': 'hitl',
+  'relationship:create': 'hitl',
+  'alert:create': 'hitl',
+  'report:generate': 'hitl',
+  'external:api': 'hitl',
+  'data:export': 'hitl',
+
+  // Prohibited (high risk)
+  'entity:delete': 'prohibited',
+  'bulk:delete': 'prohibited',
+  'cross_tenant:access': 'prohibited',
+  'policy:override': 'prohibited',
+  'classification:downgrade': 'prohibited',
+  'pii:access': 'prohibited',
+};
+
+/**
+ * Operations that require elevated clearance
+ */
+const CLEARANCE_REQUIRED: Record<string, string> = {
+  'classified:read': 'SECRET',
+  'classified:write': 'TOP_SECRET',
+  'sci:access': 'TOP_SECRET_SCI',
+};
+
+// =============================================================================
 // RISK CLASSIFIER
 // =============================================================================
 
 export class RiskClassifier {
-  private opa: OpaClient;
+  private rules: Record<string, RiskLevel>;
 
-  constructor() {
-    this.opa = new OpaClient();
+  constructor(customRules?: Record<string, RiskLevel>) {
+    this.rules = { ...DEFAULT_RISK_RULES, ...customRules };
   }
 
   /**
-   * Classify an operation's risk level using OPA
+   * Classify an operation's risk level
    */
-  async classify(operation: ToolOperation, context: SecurityContext): Promise<RiskClassification> {
-    const policyInput = {
-      operation: operation.operation,
-      tool_id: operation.toolId,
-      input: operation.input,
-      tenant_id: context.tenantId,
-      user_id: context.userId,
-      user_roles: context.roles,
-      user_clearance: context.clearanceLevel,
-      data_classification: operation.dataClassification || 'UNCLASSIFIED',
-    };
+  classify(operation: ToolOperation, context: SecurityContext): RiskClassification {
+    const operationKey = `${operation.toolId}:${operation.operation}`;
 
-    const decision = await this.opa.evaluate(policyInput);
+    // Check for explicit risk override
+    if (operation.riskOverride) {
+      return {
+        level: operation.riskOverride,
+        reason: `Explicit override to ${operation.riskOverride}`,
+      };
+    }
+
+    // Check clearance requirements
+    const requiredClearance = CLEARANCE_REQUIRED[operationKey];
+    if (requiredClearance) {
+      const clearanceLevels = [
+        'UNCLASSIFIED',
+        'CUI',
+        'CONFIDENTIAL',
+        'SECRET',
+        'TOP_SECRET',
+        'TOP_SECRET_SCI',
+      ];
+      const userLevel = clearanceLevels.indexOf(context.clearanceLevel);
+      const requiredLevel = clearanceLevels.indexOf(requiredClearance);
+
+      if (userLevel < requiredLevel) {
+        return {
+          level: 'prohibited',
+          reason: `Requires ${requiredClearance} clearance, user has ${context.clearanceLevel}`,
+          auditRequirements: [
+            {
+              type: 'alert',
+              retention: 'permanent',
+              notifyRoles: ['security-officer', 'compliance-officer'],
+            },
+          ],
+        };
+      }
+    }
+
+    // Check bulk operations
+    const inputCount = this.estimateInputSize(operation.input);
+    if (inputCount > 1000) {
+      return {
+        level: 'hitl',
+        reason: `Bulk operation affecting ${inputCount} items`,
+        requiredApprovals: 1,
+        requiredRoles: ['supervisor', 'admin'],
+      };
+    }
+
+    // Check default rules
+    const defaultLevel = this.rules[operationKey] ?? 'hitl';
 
     return {
-      level: decision.risk_level,
-      reason: decision.reason,
-      requiredApprovals: decision.required_approvals,
-      requiredRoles: decision.approver_roles,
-      auditRequirements: decision.requires_audit ? [
-        {
-          type: decision.risk_level === 'prohibited' ? 'alert' : 'log',
-          retention: 'permanent',
-          notifyRoles: ['security-officer'],
-        }
-      ] : undefined,
+      level: defaultLevel,
+      reason: `Default classification for ${operationKey}`,
+      requiredApprovals: defaultLevel === 'hitl' ? 1 : undefined,
+      requiredRoles: defaultLevel === 'hitl' ? ['supervisor', 'analyst'] : undefined,
+      auditRequirements:
+        defaultLevel === 'prohibited'
+          ? [
+              {
+                type: 'alert',
+                retention: 'permanent',
+                notifyRoles: ['security-officer'],
+              },
+            ]
+          : undefined,
     };
+  }
+
+  private estimateInputSize(input: Record<string, unknown>): number {
+    if (Array.isArray(input.ids)) return input.ids.length;
+    if (Array.isArray(input.entities)) return input.entities.length;
+    if (typeof input.query === 'string' && input.query.includes('MATCH'))
+      return 100; // Assume graph queries could affect many
+    return 1;
   }
 }
 
@@ -288,7 +387,7 @@ export class BoundedAutonomyEngine {
 
       for (const operation of plan) {
         // Classify risk
-        const classification = await this.riskClassifier.classify(operation, context);
+        const classification = this.riskClassifier.classify(operation, context);
 
         this.traceRecorder.recordThought(
           trace.traceId,

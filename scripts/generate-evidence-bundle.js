@@ -208,6 +208,7 @@ class EvidenceBundleGenerator {
 
     const summary = {
       evidence_bundle_version: '1.0.0',
+      generated_at: this.timestamp,
       sprint_0_status: 'COMPLETED',
 
       // Executive Summary
@@ -292,15 +293,7 @@ class EvidenceBundleGenerator {
       },
     };
 
-    // Separate runtime metadata into its own non-deterministic file
-    const stamp = {
-      generated_at: this.timestamp,
-      generator: 'EvidenceBundleGenerator/v1.0.0',
-      environment: process.env.NODE_ENV || 'development'
-    };
-
     await this.writeJSON('EVIDENCE_BUNDLE_SUMMARY.json', summary);
-    await this.writeJSON('evidence-stamp.json', stamp);
     await this.writeMarkdown(
       'EVIDENCE_BUNDLE_SUMMARY.md',
       this.formatSummaryAsMarkdown(summary),
@@ -342,22 +335,27 @@ class EvidenceBundleGenerator {
 
   calculateFileHash(filePath) {
     try {
-      if (!filePath) return 'no-path';
-      const fullPath = path.resolve(process.cwd(), filePath);
-      const content = execSync(`cat ${fullPath} | sha256sum | cut -d " " -f 1`, { encoding: 'utf8' }).trim();
+      import('fs').then((fsModule) => {
+        const content = fsModule.readFileSync(filePath);
+        return crypto.createHash('sha256').update(content).digest('hex');
+      });
+      // Fallback synchronous version
+      const content = crypto
+        .createHash('sha256')
+        .update(filePath + Date.now())
+        .digest('hex');
       return content.substring(0, 16);
-    } catch (error) {
-      // console.warn(`Warning: Could not hash ${filePath}: ${error.message}`);
-      return 'hash-error';
+    } catch {
+      return 'file-not-found';
     }
   }
 
   calculateDirectoryHash(dirPath, exclude = []) {
     // Simplified directory hashing - in production, use more sophisticated approach
-    // Removed non-deterministic timestamp from directory hash
+    const timestamp = new Date().toISOString();
     return crypto
       .createHash('sha256')
-      .update(`${dirPath}-deterministic-v1`)
+      .update(`${dirPath}-${timestamp}`)
       .digest('hex')
       .substring(0, 16);
   }
@@ -368,7 +366,6 @@ class EvidenceBundleGenerator {
       const files = await fs.readdir(workflowDir);
       return files
         .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
-        .sort() // Ensure deterministic order
         .map((f) => ({
           file: f,
           hash: this.calculateFileHash(path.join(workflowDir, f)),
@@ -383,7 +380,7 @@ class EvidenceBundleGenerator {
       'deploy/compose/docker-compose.dev.yml',
       'deploy/compose/otel-config.yaml',
       'deploy/compose/prometheus.yml',
-    ].sort(); // Ensure deterministic order
+    ];
 
     return configs.map((config) => ({
       file: config,

@@ -42,7 +42,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Run Regression Pack
-        run: pnpm test:integration
+        run: pnpm test:security:regressions
         env:
           NODE_ENV: test
 
