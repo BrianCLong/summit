@@ -5,8 +5,8 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { Kbd } from '@/components/ui/Kbd'
 import { useDemoMode } from '@/components/common/DemoIndicator'
+import { useDebounce } from '@/hooks/useDebounce'
 
 interface SearchResult {
   id: string
@@ -24,6 +24,7 @@ export function GlobalSearch() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const isDemoMode = useDemoMode()
+  const debouncedQuery = useDebounce(query, 300)
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
@@ -117,16 +118,17 @@ export function GlobalSearch() {
   }
 
   useEffect(() => {
-    if (!query || !query.trim()) {
+    if (!debouncedQuery || !debouncedQuery.trim()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setResults([])
       return
     }
 
     setLoading(true)
-    searchFunction(query)
+    searchFunction(debouncedQuery)
       .then(setResults)
       .finally(() => setLoading(false))
-  }, [query, isDemoMode])
+  }, [debouncedQuery, isDemoMode])
 
   const handleSelect = (result: SearchResult) => {
     if (result.href) {
@@ -283,8 +285,12 @@ export function GlobalSearch() {
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">
-                <Kbd keys="↑" />
-                <Kbd keys="↓" />
+                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
+                  ↑
+                </kbd>
+                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
+                  ↓
+                </kbd>
                 <span className="text-[10px]">to navigate</span>
               </div>
             </div>
