@@ -27,6 +27,62 @@ export interface SchemaValidationResult {
 
 export type IntentVerb = 'request' | 'approve' | 'escalate' | 'undo' | 'preview';
 
+export type PolicyIntent =
+  | 'business_analytics'
+  | 'decision_support'
+  | 'autonomous_targeting'
+  | 'research'
+  | 'unknown';
+
+export type ActorType = 'enterprise_user' | 'gov_operator' | 'researcher' | 'system';
+export type ModelTier = 'baseline' | 'frontier';
+
+export interface PolicyDecisionContext {
+  requestId: string;
+  tenantId: string;
+  issuedAt: string;
+}
+
+export interface PolicyDecisionInput {
+  profile: PolicyProfileName;
+  intent: PolicyIntent;
+  actorType: ActorType;
+  modelTier: ModelTier;
+  context: PolicyDecisionContext;
+}
+
+export interface PolicyRule {
+  id: string;
+  effect: 'allow' | 'deny';
+  intent: PolicyIntent | '*';
+  actorType: ActorType | '*';
+  modelTier: ModelTier | '*';
+  reason: string;
+}
+
+export type PolicyProfileName = 'civilian_safe' | 'defense_restricted' | 'research_unrestricted';
+
+export interface PolicyProfile {
+  name: PolicyProfileName;
+  description: string;
+  rules: PolicyRule[];
+}
+
+export interface PolicyDecision {
+  allowed: boolean;
+  reason: string;
+  profile: PolicyProfileName;
+  matchedRules: string[];
+  context: PolicyDecisionContext;
+}
+
+export interface PolicyAuditRecord {
+  id: string;
+  at: string;
+  decision: PolicyDecision;
+  digest: string;
+}
+
 export interface IntentEvent {
   id: string;
   intent: IntentVerb;
