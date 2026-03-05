@@ -1,0 +1,2 @@
+class LLMMonitor:
+    pass
