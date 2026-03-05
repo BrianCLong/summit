@@ -24,7 +24,7 @@ router.post('/incidents/:id/tickets', requireAuth, async (req, res) => {
         const { id } = req.params;
         const tenantId = req.user!.tenantId!;
 
-        const incident = await IncidentService.get(tenantId, id);
+        const incident = await IncidentService.get((tenantId as string), (id as string));
         if (!incident) {
             return res.status(404).json({ error: 'Incident not found' });
         }
@@ -40,7 +40,7 @@ router.post('/incidents/:id/tickets', requireAuth, async (req, res) => {
         const ticket = await jira.createTicket(incident);
 
         // Update incident
-        const updatedIncident = await IncidentService.updateTicketRef(tenantId, id, {
+        const updatedIncident = await IncidentService.updateTicketRef((tenantId as string), (id as string), {
             id: ticket.id,
             key: ticket.key,
             url: ticket.url
