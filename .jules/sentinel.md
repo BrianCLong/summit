@@ -76,7 +76,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
 
-## 2026-03-02 - [CRITICAL] Unauthenticated Access to High-Risk Operational Routes
-**Vulnerability:** The `/dr`, `/airgap`, and `/analytics` routes were mounted in `server/src/app.ts` without any authentication or authorization middleware. This allowed unauthenticated users to access disaster recovery status, trigger airgap data exports/imports, and run computationally expensive graph analytics.
-**Learning:** Routes mounted outside the main `/api` global authentication middleware are easily overlooked. Centralized protection at the `/api` prefix is not a substitute for defense-in-depth at the router level or explicit protection for all top-level mount points.
-**Prevention:** Enforce a "deny-by-default" posture for all top-level routes. Apply `authenticateToken` and `ensureRole` middleware directly in the `app.use` calls for all routers, especially those handling sensitive operational or analytical tasks.
+## 2026-03-15 - [HIGH] Identity Spoofing via Header Reliance in Support Tickets
+**Vulnerability:** The support ticket routes in `server/src/routes/support-tickets.ts` relied on a `resolveActor` helper that fell back to `x-user-id` and `x-user-role` HTTP headers when the authenticated `user` object was perceived as incomplete. This allowed unauthenticated or low-privileged users to spoof identities and roles, leading to unauthorized access and privilege escalation.
+**Learning:** Helpers that bridge authentication context must NEVER trust user-supplied headers if an authenticated session/token is required. Even if global middleware is present, inconsistent local extraction logic creates spoofing vectors.
+**Prevention:** Always rely exclusively on the validated `req.user` object for identity and role checks. Explicitly ignore identity-related headers in route handlers to prevent "Broken Access Control" patterns.
