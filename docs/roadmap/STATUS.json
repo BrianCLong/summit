@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added gemini-enterprise-adapter minimal slice with deny-by-default policy + deterministic evidence artifacts.",
+  "revision_note": "Added ecommerce UI/UX 2026 subsumption initiative and governance-aligned planning artifacts.",
   "initiatives": [
     {
-      "id": "gemini-enterprise-adapter-mws",
+      "id": "ecommerce-uiux-2026-subsumption",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Workspace-bound Gemini enterprise adapter scaffold, policy ingestion stub, and deterministic evidence report artifacts."
+      "notes": "Defined deterministic subsumption plan, standards/security/runbook docs, and WBS scaffold for Medium e-commerce UX 2026 claim set."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
