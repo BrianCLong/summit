@@ -1,34 +1,29 @@
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-
-from agents.ledger.storage import LedgerStorage
+from dataclasses import dataclass
+from typing import Any, Dict, List
 
 
 @dataclass(frozen=True)
 class LedgerEntry:
-    task_id: str
-    state: str
-    evidence_refs: list[str] = field(default_factory=list)
+    kind: str
+    value: str
+    evidence_id: str
 
 
 class ExecutionLedger:
-    def __init__(self, storage: LedgerStorage) -> None:
-        self.storage = storage
-        self.entries: list[LedgerEntry] = []
+    def __init__(self, run_id: str) -> None:
+        self.run_id = run_id
+        self.todos: List[Dict[str, Any]] = []
+        self.decisions: List[Dict[str, Any]] = []
 
-    def append(self, entry: LedgerEntry) -> None:
-        self.entries.append(entry)
+    def add_todo(self, value: str, evidence_id: str) -> None:
+        self.todos.append({"value": value, "evidence_id": evidence_id})
 
-    def persist(self) -> str:
-        payload = {
-            "tasks": [
-                {
-                    "task_id": entry.task_id,
-                    "state": entry.state,
-                    "evidence_refs": sorted(entry.evidence_refs),
-                }
-                for entry in sorted(self.entries, key=lambda item: item.task_id)
-            ]
+    def add_decision(self, value: str, evidence_id: str) -> None:
+        self.decisions.append({"value": value, "evidence_id": evidence_id})
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "run_id": self.run_id,
+            "todos": list(self.todos),
+            "decisions": list(self.decisions),
         }
-        return self.storage.save(payload)

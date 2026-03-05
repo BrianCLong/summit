@@ -1,18 +1,15 @@
-# Repository Assumptions for Autonomous Agent Runtime
+# Autonomous Engineer v2 Repo Assumptions
 
-This note records validated assumptions for the Summit autonomous engineering agent slice.
+## Verified
+- `agents/`, `scripts/`, `docs/`, `artifacts/`, and `metrics/` exist in the repository root.
+- `docs/roadmap/STATUS.json` is the active roadmap status index.
 
-## Confirmed structure
+## Assumed (deferred pending focused verification)
+- CI checks `check_plan_gate`, `check_patch_policy`, and `check_eval_min_score` can be added without renaming existing gates.
+- Artifact contract additions under `artifacts/schemas/` do not conflict with current consumers.
+- Python-based gate scripts are acceptable in current CI job runners.
 
-- `agents/` exists and contains runtime-oriented agent assets.
-- `scripts/` exists for operational automation and monitoring utilities.
-- `tests/` exists and supports adding agent-focused tests.
-- `docs/` exists for standards, security, and runbook documentation.
-- CI workflows are present under `.github/workflows/`.
-
-## Validation tasks completed
-
-1. Confirmed agent runtime location under `agents/`.
-2. Defined deterministic artifact files and schema ownership.
-3. Scoped CI verification to unit tests and deterministic artifact checks.
-4. Added a model registry at `agents/models/registry.yaml`.
+## Must-Not-Touch (until explicit verification task)
+- Existing artifact schema IDs and semantics outside `autonomous-engineer-v2` files.
+- Existing workflow names under `.github/workflows/`.
+- Security policy enforcement modules outside this scoped lane.

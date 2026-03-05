@@ -1,11 +1,6 @@
-from agents.preflight.gate import enforce_preflight, is_preflight_enabled
-from agents.preflight.plan_types import AgentPlan
-from agents.preflight.validator import PlanValidationError, validate_plan
+"""Preflight planning module for autonomous engineer v2."""
 
-__all__ = [
-    'AgentPlan',
-    'PlanValidationError',
-    'enforce_preflight',
-    'is_preflight_enabled',
-    'validate_plan',
-]
+from .schema import RunPlan
+from .questionnaire import build_run_plan, validate_run_plan
+
+__all__ = ["RunPlan", "build_run_plan", "validate_run_plan"]
