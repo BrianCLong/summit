@@ -1,0 +1,7 @@
+name: self-flow-eval
+on: [pull_request]
+jobs:
+ eval:
+   runs-on: ubuntu-latest
+   steps:
+    - run: pnpm test
