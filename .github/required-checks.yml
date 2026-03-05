@@ -7,13 +7,13 @@ protected_branches:
   - release/*
 
 required_checks:
-  - meta-gate
-  - gate
-  - Unit Tests & Coverage
-  - SOC Controls
+  - ci / install
+  - ci / lint
+  - ci / test
+  - ci / build
+  - governance / required-checks
+  - governance / branch-protection
 
 notes:
   owner: summit-ga
   policy: docs/governance/branch-protection/README.md
-
-  - ai-evals

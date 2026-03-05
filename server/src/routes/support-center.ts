@@ -12,10 +12,7 @@ import { supportCenterService } from '../support/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { isEnabled } from '../lib/featureFlags.js';
 import logger from '../utils/logger.js';
-import {
-  supportImpersonationService,
-  tenantHealthBundleService,
-} from '../services/support/index.js';
+import { supportImpersonationService, tenantHealthBundleService } from '../services/support/index.js';
 
 const router = Router();
 
@@ -107,7 +104,6 @@ const TenantHealthBundleSchema = z.object({
   reason: z.string().min(5).max(2000),
 });
 
-
 /**
  * Search knowledge base and FAQs
  * GET /api/v1/support/search
@@ -118,10 +114,10 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const query = (String((req.query.q as string)) as string) as string;
-      const category = (String((req.query.category as string)) as string) as string | undefined;
-      const locale = (String((req.query.locale as string)) as string) as string | undefined;
-      const limit = String((req.query.limit as string)) ? parseInt(String((req.query.limit as string)) as string) : undefined;
+      const query = (((req.query.q as string) as string) as string) as string;
+      const category = (((req.query.category as string) as string) as string) as string | undefined;
+      const locale = (((req.query.locale as string) as string) as string) as string | undefined;
+      const limit = (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string) : undefined;
 
       if (!query) {
         res.status(400).json({ error: 'Search query is required' });
@@ -151,10 +147,10 @@ router.get(
   requireFeatureFlag('support.knowledgeBase'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const category = (String((req.query.category as string)) as string) as string | undefined;
-      const locale = (String((req.query.locale as string)) as string) as string | undefined;
-      const limit = String((req.query.limit as string)) ? parseInt(String((req.query.limit as string)) as string) : undefined;
-      const offset = String((req.query.offset as string)) ? parseInt(String((req.query.offset as string)) as string) : undefined;
+      const category = (((req.query.category as string) as string) as string) as string | undefined;
+      const locale = (((req.query.locale as string) as string) as string) as string | undefined;
+      const limit = (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string) : undefined;
+      const offset = (((req.query.offset as string) as string) as string) ? parseInt((((req.query.offset as string) as string) as string) as string) : undefined;
 
       const result = await supportCenterService.getArticles({
         category: category as any,
@@ -209,7 +205,7 @@ router.post(
       const { id } = req.params;
       const { helpful } = VoteSchema.parse(req.body);
 
-      await supportCenterService.voteArticle((id as string), helpful);
+      await supportCenterService.voteArticle(id, helpful);
 
       res.json({ success: true });
     } catch (error: any) {
@@ -228,8 +224,8 @@ router.get(
   requireFeatureFlag('support.faq'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const category = (String((req.query.category as string)) as string) as string | undefined;
-      const locale = (String((req.query.locale as string)) as string) as string | undefined;
+      const category = (((req.query.category as string) as string) as string) as string | undefined;
+      const locale = (((req.query.locale as string) as string) as string) as string | undefined;
 
       const result = await supportCenterService.getFAQs({
         category: category as any,
@@ -341,7 +337,6 @@ router.post(
   }
 );
 
-
 /**
  * Create support ticket
  * POST /api/v1/support/tickets
@@ -385,7 +380,7 @@ router.post(
       const { id: userId } = req.user!;
 
       const result = await supportCenterService.addMessage(
-        (ticketId as string),
+        ticketId,
         userId,
         'customer',
         content,
@@ -412,7 +407,7 @@ router.post(
       const { ticketId } = req.params;
       const { reason } = req.body;
 
-      const result = await supportCenterService.escalateTicket((ticketId as string), reason || 'User requested escalation');
+      const result = await supportCenterService.escalateTicket(ticketId, reason || 'User requested escalation');
 
       res.json(result);
     } catch (error: any) {

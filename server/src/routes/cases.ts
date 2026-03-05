@@ -97,8 +97,8 @@ caseRouter.get('/:id/overview', async (req, res) => {
 
     const { id } = req.params;
 
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
+    const reason = (((req.query.reason as string) as string) as string) as string;
+    const legalBasis = (((req.query.legalBasis as string) as string) as string) as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -216,8 +216,8 @@ caseRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     // Require reason and legal basis for viewing
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
+    const reason = (((req.query.reason as string) as string) as string) as string;
+    const legalBasis = (((req.query.legalBasis as string) as string) as string) as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -239,7 +239,7 @@ caseRouter.get('/:id', async (req, res) => {
     const auditContext = {
       reason,
       legalBasis,
-      warrantId: req.query.warrantId as string,
+      warrantId: (((req.query.warrantId as string) as string) as string) as string,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     };
@@ -340,14 +340,14 @@ caseRouter.get('/', async (req, res) => {
 
     const cases = await service.listCases({
       tenantId,
-      status: req.query.status as any,
-      compartment: req.query.compartment as string,
-      policyLabels: req.query.policyLabels
-        ? (req.query.policyLabels as string).split(',')
+      status: (((req.query.status as string) as string) as string) as any,
+      compartment: (((req.query.compartment as string) as string) as string) as string,
+      policyLabels: (((req.query.policyLabels as string) as string) as string)
+        ? ((((req.query.policyLabels as string) as string) as string) as string).split(',')
         : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-      offset: req.query.offset
-        ? parseInt(req.query.offset as string)
+      limit: (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string) : undefined,
+      offset: (((req.query.offset as string) as string) as string)
+        ? parseInt((((req.query.offset as string) as string) as string) as string)
         : undefined,
     });
 
@@ -634,8 +634,8 @@ caseRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+    const limit = (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string) : undefined;
+    const offset = (((req.query.offset as string) as string) as string) ? parseInt((((req.query.offset as string) as string) as string) as string) : undefined;
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);

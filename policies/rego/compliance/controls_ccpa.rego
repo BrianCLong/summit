@@ -1,4 +1,5 @@
 package compliance
+import rego.v1
 
 import data.compliance.lib_time as t
 
