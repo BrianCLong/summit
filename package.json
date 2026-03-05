@@ -6,6 +6,7 @@
   "type": "module",
   "packageManager": "pnpm@9.12.0",
   "scripts": {
+    "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
     "bootstrap": "chmod +x scripts/bootstrap.sh && scripts/bootstrap.sh",
     "verify": "npx tsx server/scripts/verify-ga-security.ts",
     "verify:verbose": "tsx scripts/verify.ts --verbose",

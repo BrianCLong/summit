@@ -2,7 +2,7 @@
 
 **Purpose:** Framework for calculating return on investment and total cost of ownership for Summit deployments. Use to build business cases and justify pilot/production investments.
 
-_*Version: 2025-11-27*_
+## Version: 2025-11-27
 
 ---
 
@@ -21,7 +21,7 @@ _*Version: 2025-11-27*_
 ### 1.1 Organization Profile
 
 | Parameter | Value | Notes |
-| ----------- | ------- | ------- |
+|-----------|-------|-------|
 | Number of analysts | `{{N}}` | Named users who will use Summit |
 | Analyst fully-loaded cost (annual) | `${{X}}` | Salary + benefits + overhead (typically $120-200k) |
 | Number of cases/investigations per year | `{{N}}` | Total volume across team |
@@ -32,7 +32,7 @@ _*Version: 2025-11-27*_
 ### 1.2 Current State Pain Points
 
 | Pain Point | Current Impact | Measurement |
-| ------------ | ---------------- | ------------- |
+|------------|----------------|-------------|
 | Time spent searching/correlating data | `{{X}}` hours/analyst/week | Self-reported or time study |
 | Time spent context-switching between tools | `{{X}}` hours/analyst/week | Self-reported |
 | Time spent on manual documentation | `{{X}}` hours/analyst/week | Self-reported |
@@ -43,7 +43,7 @@ _*Version: 2025-11-27*_
 ### 1.3 Summit Deployment Parameters
 
 | Parameter | Value | Notes |
-| ----------- | ------- | ------- |
+|-----------|-------|-------|
 | Pilot duration | `{{N}}` weeks | |
 | Pilot cost | `${{X}}` | |
 | Production licensing (annual) | `${{X}}` | Per-user or per-environment |
@@ -60,7 +60,7 @@ _*Version: 2025-11-27*_
 
 **Driver:** Reduced time searching, correlating, and context-switching
 
-### Calculation
+**Calculation:**
 
 ```text
 Current weekly hours on inefficient tasks = {{A}} hours/analyst/week
@@ -74,10 +74,10 @@ Total annual value = Annual value per analyst × Number of analysts
 Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 ```text
 
-### Example
+**Example:**
 
 | Variable | Value | Calculation |
-| ---------- | ------- | ------------- |
+|----------|-------|-------------|
 | Hours on inefficient tasks | 12 hrs/week | Input |
 | Reduction with Summit | 40% | Conservative estimate |
 | Hours saved per week | 4.8 hrs | 12 × 0.40 |
@@ -92,7 +92,7 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 
 **Driver:** Analysts handle more cases without adding headcount
 
-### Calculation
+**Calculation:**
 
 ```text
 Current cases per analyst per year = {{A}}
@@ -102,10 +102,10 @@ Value per case = {{C}} (depends on mission; may be revenue, cost avoidance, or s
 Total annual value = Additional cases × Number of analysts × Value per case
 ```text
 
-### Example
+**Example:**
 
 | Variable | Value | Calculation |
-| ---------- | ------- | ------------- |
+|----------|-------|-------------|
 | Current cases/analyst/year | 50 | Input |
 | Throughput increase | 30% | Conservative estimate |
 | Additional cases/analyst | 15 | 50 × 0.30 |
@@ -118,7 +118,7 @@ Total annual value = Additional cases × Number of analysts × Value per case
 
 **Driver:** Provenance and audit trails built into workflow
 
-### Calculation
+**Calculation:**
 
 ```text
 Current compliance hours per analyst per year = {{A}}
@@ -133,10 +133,10 @@ Expected reduction = {{D}}%
 Remediation savings = C × D
 ```text
 
-### Example
+**Example:**
 
 | Variable | Value | Calculation |
-| ---------- | ------- | ------------- |
+|----------|-------|-------------|
 | Compliance hours/analyst/year | 100 | Input |
 | Reduction with Summit | 50% | Conservative |
 | Hours saved/analyst | 50 | 100 × 0.50 |
@@ -153,7 +153,7 @@ Remediation savings = C × D
 
 **Driver:** Retire or reduce spend on redundant tools
 
-### Calculation
+**Calculation:**
 
 ```text
 Current annual spend on tools Summit can replace/reduce = {{A}}
@@ -162,10 +162,10 @@ Tools reduced (fewer seats) = {{C}}% of spend
 Total savings = A × (B + C)
 ```text
 
-### Example
+**Example:**
 
 | Variable | Value | Calculation |
-| ---------- | ------- | ------------- |
+|----------|-------|-------------|
 | Current tool spend | $200,000 | Input |
 | Fully retired | 30% | |
 | Reduced seats | 20% | |
@@ -177,7 +177,7 @@ Total savings = A × (B + C)
 
 **Driver:** Reduce risk of missed threats, compliance failures, reputational damage
 
-### Calculation
+**Calculation:**
 
 ```text
 Probability of significant incident per year = {{A}}%
@@ -187,10 +187,10 @@ Risk reduction with Summit = {{C}}%
 Avoided cost = Expected annual cost × C
 ```text
 
-### Example
+**Example:**
 
 | Variable | Value | Calculation |
-| ---------- | ------- | ------------- |
+|----------|-------|-------------|
 | Incident probability | 10% | Historical |
 | Cost per incident | $500,000 | Historical or industry benchmark |
 | Expected annual cost | $50,000 | 0.10 × $500k |
@@ -203,7 +203,7 @@ Avoided cost = Expected annual cost × C
 
 **Driver:** Handle growth without proportional analyst hiring
 
-### Calculation
+**Calculation:**
 
 ```text
 Projected case volume growth = {{A}}% per year
@@ -213,10 +213,10 @@ Avoided hires = Without Summit hires - With Summit hires
 Avoided cost = Avoided hires × Fully-loaded analyst cost
 ```text
 
-### Example
+**Example:**
 
 | Variable | Value | Calculation |
-| ---------- | ------- | ------------- |
+|----------|-------|-------------|
 | Current analysts | 10 | |
 | Volume growth | 20% | |
 | Without Summit: New hires | 2 | 10 × 0.20 |
@@ -232,7 +232,7 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 ### 3.1 Summit Costs
 
 | Cost Category | Year 1 | Year 2 | Year 3 | 3-Year Total |
-| --------------- | -------- | -------- | -------- | -------------- |
+|---------------|--------|--------|--------|--------------|
 | Pilot | ${{X}} | - | - | ${{X}} |
 | Production License | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
 | Implementation | ${{X}} | - | - | ${{X}} |
@@ -244,7 +244,7 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 ### 3.2 Current State Costs (Comparison)
 
 | Cost Category | Year 1 | Year 2 | Year 3 | 3-Year Total |
-| --------------- | -------- | -------- | -------- | -------------- |
+|---------------|--------|--------|--------|--------------|
 | Existing tool licenses | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
 | Analyst inefficiency (opportunity cost) | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
 | Compliance overhead | ${{X}} | ${{X}} | ${{X}} | ${{X}} |
@@ -259,7 +259,7 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 ### 4.1 Annual Value Summary
 
 | Value Driver | Annual Value |
-| -------------- | ------------- |
+|--------------|-------------|
 | Analyst Productivity Gains | ${{X}} |
 | Increased Case Throughput | ${{X}} |
 | Reduced Compliance Burden | ${{X}} |
@@ -279,10 +279,10 @@ ROI = (Net Benefit ÷ Total Cost) × 100
 Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
 ```text
 
-### Example Summary
+**Example Summary:**
 
 | Metric | Value |
-| -------- | ------- |
+|--------|-------|
 | 3-Year Total Value | $3,375,000 |
 | 3-Year Summit Cost | $600,000 |
 | 3-Year Net Benefit | $2,775,000 |
@@ -296,7 +296,7 @@ Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
 Show how ROI changes with different assumptions:
 
 | Scenario | Productivity Gain | Throughput Increase | ROI |
-| ---------- | ------------------- | --------------------- | ----- |
+|----------|-------------------|---------------------|-----|
 | Conservative | 25% | 15% | {{X}}% |
 | Base Case | 40% | 30% | {{X}}% |
 | Optimistic | 50% | 40% | {{X}}% |
@@ -314,27 +314,27 @@ Use this format for business case presentations:
 **For:** {{Customer Name}}
 **Date:** {{Date}}
 
-### Current State
+**Current State:**
 
 - {{N}} analysts spending {{X}} hours/week on inefficient search and correlation
 - {{N}} cases per year; growth of {{X}}% expected
 - {{$X}} annual spend on fragmented tools
 - {{N}} audit findings related to provenance/documentation
 
-### With Summit
+**With Summit:**
 
 - Reduce analyst inefficiency by **{{X}}%**
 - Increase case throughput by **{{X}}%**
 - Consolidate tools, saving **{{$X}}** annually
 - Eliminate provenance-related audit findings
 
-### Investment
+**Investment:**
 
 - Pilot: **${{X}}** ({{N}} weeks)
 - Production (Year 1): **${{X}}**
 - 3-Year TCO: **${{X}}**
 
-### Returns
+**Returns:**
 
 - Annual value: **${{X}}**
 - 3-Year net benefit: **${{X}}**
@@ -349,42 +349,37 @@ Use this format for business case presentations:
 
 Use these questions to gather data during sales discovery:
 
-### Productivity
+**Productivity:**
 
 1. "How many hours per week do analysts spend searching for and correlating data across tools?"
 2. "How many different tools/systems do analysts access in a typical investigation?"
 3. "What's the average time to complete a case from assignment to close?"
 
-### Throughput
+**Throughput:**
+4. "How many cases does each analyst handle per month/quarter/year?"
+5. "What's your case backlog look like? Are you keeping up with volume?"
+6. "If you could handle 30% more cases, what would that be worth?"
 
-1. "How many cases does each analyst handle per month/quarter/year?"
-2. "What's your case backlog look like? Are you keeping up with volume?"
-3. "If you could handle 30% more cases, what would that be worth?"
+**Compliance:**
+7. "How much time do analysts spend on documentation and audit preparation?"
+8. "Have you had any audit findings related to data provenance or chain-of-custody?"
+9. "What does remediating an audit finding cost you (time, money, reputation)?"
 
-### Compliance
+**Tools:**
+10. "What tools are you currently using for this work? What do they cost?"
+11. "Are there tools you could retire or reduce if you had better consolidation?"
+12. "What's your annual spend on analyst tooling?"
 
-1. "How much time do analysts spend on documentation and audit preparation?"
-2. "Have you had any audit findings related to data provenance or chain-of-custody?"
-3. "What does remediating an audit finding cost you (time, money, reputation)?"
+**Risk:**
+13. "Have you had any incidents where you couldn't trace how a conclusion was reached?"
+14. "What would a significant missed threat cost you (financial, reputational, mission)?"
+15. "How confident are you in your current audit posture?"
 
-### Tools
-
-1. "What tools are you currently using for this work? What do they cost?"
-2. "Are there tools you could retire or reduce if you had better consolidation?"
-3. "What's your annual spend on analyst tooling?"
-
-### Risk
-
-1. "Have you had any incidents where you couldn't trace how a conclusion was reached?"
-2. "What would a significant missed threat cost you (financial, reputational, mission)?"
-3. "How confident are you in your current audit posture?"
-
-### Growth
-
-1. "Is your case volume growing? By how much?"
-2. "Are you planning to hire more analysts to handle growth?"
-3. "What does it cost to hire and onboard a new analyst?"
+**Growth:**
+16. "Is your case volume growing? By how much?"
+17. "Are you planning to hire more analysts to handle growth?"
+18. "What does it cost to hire and onboard a new analyst?"
 
 ---
 
-_*Version: 2025-11-27* | Update assumptions quarterly based on customer feedback_
+_Version: 2025-11-27 | Update assumptions quarterly based on customer feedback_
