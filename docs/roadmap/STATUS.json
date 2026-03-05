@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-24T06:53:46Z",
-  "revision_note": "Daily sprint continuation 2026-02-24: PR #18643 gate checks validated locally; CI pending.",
+  "last_updated": "2026-02-25T00:00:00Z",
+  "revision_note": "Added Summit golden-path demo, intelligence schemas, evidence bundle contract, GA checklist, and GTM positioning artifacts.",
   "initiatives": [
+    {
+      "id": "summit-shadow-procurement-package",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Repo-ready package for demo spec, insight/dashboard/evidence schemas, GA checklist, revenue model, pilot deck outline, and competitive positioning."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -174,7 +180,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -198,7 +204,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
