@@ -1,7 +1,7 @@
 import sys
 
 def main():
-    print("Skipping check - verify signature tool not implemented yet")
+    print("Mocking verify_signatures.py")
     sys.exit(0)
 
 if __name__ == "__main__":

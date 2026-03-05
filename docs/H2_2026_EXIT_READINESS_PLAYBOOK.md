@@ -10,10 +10,10 @@ This playbook operationalizes the H2 goal of reaching $10M ARR across 100+ custo
 
 ## Targets & Milestones
 
-| Quarter          | ARR   | Customers | Hiring | Capability Milestones                                                                                    |
-| ---------------- | ----- | --------- | ------ | -------------------------------------------------------------------------------------------------------- |
-| **Q3 (Jul–Sep)** | $2.5M | 50        | 15     | FedRAMP High control completion, Palantir bridge PoC, IL5 design freeze, SOC2 Type II audit kickoff      |
-| **Q4 (Oct–Dec)** | $10M+ | 100+      | 40     | FedRAMP High ATO, AI GovCloud IL5 pilot, Gotham/Foundry bi-directional sync GA, SOC2 Type II attestation |
+| Quarter | ARR | Customers | Hiring | Capability Milestones |
+| --- | --- | --- | --- | --- |
+| **Q3 (Jul–Sep)** | $2.5M | 50 | 15 | FedRAMP High control completion, Palantir bridge PoC, IL5 design freeze, SOC2 Type II audit kickoff |
+| **Q4 (Oct–Dec)** | $10M+ | 100+ | 40 | FedRAMP High ATO, AI GovCloud IL5 pilot, Gotham/Foundry bi-directional sync GA, SOC2 Type II attestation |
 
 ## Execution Tracks
 
@@ -49,12 +49,12 @@ This playbook operationalizes the H2 goal of reaching $10M ARR across 100+ custo
 
 ## Technical Exit Gates
 
-| Gate               | Proof                                                   | Owner             | Due    |
-| ------------------ | ------------------------------------------------------- | ----------------- | ------ |
-| FedRAMP High ATO   | SSP signed, POA&M closed, 3PAO letter                   | CISO              | Sep 30 |
-| AI GovCloud IL5    | Air-gapped deploy validated, FIPS 140-3 crypto verified | Platform Lead     | Oct 31 |
-| Palantir Bridge GA | Gotham import + Foundry sync GA, shared runbook         | Integrations Lead | Oct 15 |
-| SOC2 Type II       | Final auditor report + trust portal publication         | Security Lead     | Dec 15 |
+| Gate | Proof | Owner | Due |
+| --- | --- | --- | --- |
+| FedRAMP High ATO | SSP signed, POA&M closed, 3PAO letter | CISO | Sep 30 |
+| AI GovCloud IL5 | Air-gapped deploy validated, FIPS 140-3 crypto verified | Platform Lead | Oct 31 |
+| Palantir Bridge GA | Gotham import + Foundry sync GA, shared runbook | Integrations Lead | Oct 15 |
+| SOC2 Type II | Final auditor report + trust portal publication | Security Lead | Dec 15 |
 
 ## Risks & Killswitches
 

@@ -1,1 +1,3 @@
-print("Lint ports mock verified")
+import sys
+print("Mocking lint_ports.py")
+sys.exit(0)
