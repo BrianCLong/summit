@@ -5,7 +5,7 @@
     "artifact": "e2e/a11y-keyboard/a11y-gate.spec.ts",
     "ciStatus": "wired",
     "evidence": [
-      "reports/a11y-keyboard/README.md",
+      "docs/ga/MVP-4-GA-VERIFICATION.md",
       ".github/workflows/a11y-keyboard-smoke.yml"
     ],
     "keywords": [
@@ -52,6 +52,22 @@
     "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
   },
   {
+    "feature": "GA Exit Criteria Scorecard",
+    "tier": "C",
+    "artifact": "docs/ga/GA_EXIT_CRITERIA_v1.md",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/ga/GA_EXIT_CRITERIA_v1.md",
+      "docs/ga/MVP-4-GA-VERIFICATION.md"
+    ],
+    "keywords": [
+      "GA Threshold",
+      "GA Readiness Index",
+      "Exit Criteria"
+    ],
+    "notes": "Defines binary GA gate criteria, weighted readiness index, and acceptance checks to block premature launch."
+  },
+  {
     "feature": "GA Gate Artifact Closure",
     "tier": "C",
     "artifact": "docs/ga/MVP4_GA_GATE_ARTIFACTS.md",
@@ -93,6 +109,22 @@
     ],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
+  },
+  {
+    "feature": "Media Authenticity & Provenance",
+    "tier": "B",
+    "artifact": "scripts/ci/verify_media_provenance.ts",
+    "ciStatus": "wired",
+    "evidence": [
+      "docs/governance/media_provenance.md",
+      "scripts/ci/verify_media_provenance.ts"
+    ],
+    "keywords": [
+      "media",
+      "provenance",
+      "authenticity"
+    ],
+    "notes": "Blocks externally published media artifacts without deterministic provenance checks."
   },
   {
     "feature": "Observability Taxonomy",
