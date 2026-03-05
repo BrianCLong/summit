@@ -1,12 +1,18 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Added locked MWS bellingcat workflow/toolkit deterministic evidence lane.",
+  "last_updated": "2026-02-24T00:00:00Z",
+  "revision_note": "Added a governed documentation brief on Claude simple prompting guidance and practical prompt pattern.",
   "initiatives": [
     {
-      "id": "bellingcat-mws-media-verify",
+      "id": "claude-simple-prompting-brief",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published documentation summary capturing simple prompting guidance, context framing, and an actionable prompt pattern."
+    },
+    {
+      "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Implemented locked MWS single-media verification workflow, deterministic evidence bundle outputs, toolkit normalization schema/output, and offline fixtures/tests."
+      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -189,6 +195,12 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
+      "id": "ai-platform-daily-summary-2026-02-04",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
+    },
+    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -218,7 +230,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
