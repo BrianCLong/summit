@@ -1,5 +1,7 @@
 import json
+
 from summit_fusion.cli import main
+
 
 def test_cli_generates_artifacts(monkeypatch, tmp_path):
     golden_path = tmp_path / "fusion_demo.jsonl"

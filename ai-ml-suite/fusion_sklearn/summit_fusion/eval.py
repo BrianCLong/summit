@@ -1,9 +1,10 @@
-from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, f1_score
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 
 from .fusion import build_fusion_pipeline
+
 
 def leakage_safe_split_and_fit(
     texts: list[str],

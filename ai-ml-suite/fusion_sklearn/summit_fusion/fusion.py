@@ -1,11 +1,13 @@
 from typing import Any, Optional
-from sklearn.pipeline import FeatureUnion
-from sklearn.base import BaseEstimator, TransformerMixin
-import numpy as np
 
-from .tfidf import get_tfidf_svd_pipeline
-from .metadata import get_metadata_pipeline
+import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
+from sklearn.pipeline import FeatureUnion
+
 from .embedding import DummyEmbeddingTransformer, EmbeddingTransformer
+from .metadata import get_metadata_pipeline
+from .tfidf import get_tfidf_svd_pipeline
+
 
 class IdentitySelector(BaseEstimator, TransformerMixin):
     """Simple identity transformer to pass X through unchanged."""
