@@ -389,7 +389,7 @@ if (existsSync(sumsPath)) {
                 }
             }
         } catch (e) {
-            addError('INVALID_JSON', `Failed to parse provenance.json: ${e.message}`);
+            addError('JSON_PARSE_ERROR', `Failed to parse provenance.json: ${e.message}`);
         }
     }
 
