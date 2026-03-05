@@ -1,0 +1,20 @@
+{
+  "evidence_id": "EVD-WORLD_MODEL-ARCH-001",
+  "item_slug": "WORLD_MODEL",
+  "area": "architecture",
+  "summary": "Summit World-Model Architecture (SWMA) core scaffolding — observation, representation, state, dynamics, planning layers implemented.",
+  "findings": [
+    "Observation pipeline accepts text, image, video, audio, graph modalities",
+    "Representation layer emits UnifiedStateVector via Self-Flow latent embeddings",
+    "State model anchors every WorldState to a Neo4j graph snapshot",
+    "Dynamics model exposes predictNextState(state, action) interface",
+    "Planning engine runs rollout simulation and selects best-scoring policy",
+    "Feature flag WORLD_MODEL_ENABLED=false guards all production paths"
+  ],
+  "status": "scaffolded",
+  "threat_model_notes": [
+    "KG grounding mitigates hallucination drift",
+    "Dataset tagging enforced at ingest boundary",
+    "Simulation policy gate prevents misuse of planning engine"
+  ]
+}

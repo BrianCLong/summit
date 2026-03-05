@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 import platform
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Dict
 
 
@@ -16,7 +16,7 @@ class StampInputs:
     code_sha: str
 
 
-def build_stamp(inputs: StampInputs) -> Dict[str, str]:
+def build_stamp(inputs: StampInputs) -> dict[str, str]:
     return {
         'evidence_id': inputs.evidence_id,
         'mapping_sha256': inputs.mapping_sha256,
@@ -25,6 +25,6 @@ def build_stamp(inputs: StampInputs) -> Dict[str, str]:
         'code_sha': inputs.code_sha,
         'python': platform.python_version(),
         'platform': platform.platform(),
-        'generated_at': datetime.now(timezone.utc).isoformat(),
+        'generated_at': datetime.now(UTC).isoformat(),
         'runner': os.environ.get('GITHUB_RUN_ID', 'local'),
     }

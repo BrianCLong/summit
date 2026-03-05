@@ -1,0 +1,15 @@
+version: 1
+semantics:
+  allowed_actions:
+    - invoke_skill
+  denied_actions:
+    - exfiltrate_secrets
+intensity:
+  min: 0
+  max: 10
+abac:
+  default_effect: deny
+  rules:
+    - role: maintainer
+      allow:
+        - invoke_skill

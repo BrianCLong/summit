@@ -1,0 +1,71 @@
+version: 1
+item:
+  title: "Entrepreneur — “Why Pushback Matters More Than Validation (and How the Best Leaders Encourage It)”"
+  links: []
+  type: "unknown"
+  date_version: "unknown"
+  intriguing_claim: "Healthy pushback > passive validation"
+item_slug: "pushback-over-validation"
+
+claim_registry:
+  mode: "missing-item"
+  claims_file: "subsumption/pushback-over-validation/claims.md"
+
+prs:
+  - title: "feat(cda): structured dissent schema"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+  - title: "feat(workflow): decision.review stage"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+  - title: "feat(metrics): validation_bias_score"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+  - title: "docs: operational readiness"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+  - title: "monitoring: drift detector"
+    lane: "foundation"
+    owner: "Codex"
+    risk: "green"
+
+gates:
+  - name: "verify-subsumption-bundle"
+    required_checks_status: "assumed"
+    deny_by_default_required: true
+
+evidence:
+  schemas:
+    report: "evidence/schemas/report.schema.json"
+    metrics: "evidence/schemas/metrics.schema.json"
+    stamp: "evidence/schemas/stamp.schema.json"
+  index: "evidence/index.json"
+  required_ids:
+    - "EVID-CDA-001-A1B2C3D4"
+
+docs_targets:
+  - "docs/standards/pushback-over-validation.md"
+  - "docs/security/data-handling/pushback-over-validation.md"
+  - "docs/ops/runbooks/pushback-over-validation.md"
+  - "docs/required_checks.todo.md"
+  - "docs/repo_assumptions.md"
+  - "docs/decisions/pushback-over-validation.md"
+
+fixtures:
+  deny_policy_dir: "subsumption/pushback-over-validation/fixtures/deny"
+  tests:
+    positive:
+      - "subsumption/pushback-over-validation/fixtures/allow"
+
+feature_flags: []
+dependency_delta:
+  required_if_deps_change: true
+  doc_root: "deps_delta"
+
+required_checks_discovery:
+  status: "assumed"
+  instructions: "docs/required_checks.todo.md"

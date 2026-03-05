@@ -5,21 +5,21 @@ from typing import Any, Dict, Iterable
 NEVER_LOG_FIELDS = {"pii", "secret", "access_token", "private_financials"}
 
 
-def redact_fields(payload: Dict[str, Any], fields: Iterable[str]) -> Dict[str, Any]:
+def redact_fields(payload: dict[str, Any], fields: Iterable[str]) -> dict[str, Any]:
     return {key: value for key, value in payload.items() if key not in fields}
 
 
-def write_json(path: Path, payload: Dict[str, Any]) -> None:
+def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, sort_keys=True) + "\n")
 
 
 def write_evidence_bundle(
     base_dir: Path,
     evidence_id: str,
-    report: Dict[str, Any],
-    metrics: Dict[str, Any],
-    stamp: Dict[str, Any]
-) -> Dict[str, str]:
+    report: dict[str, Any],
+    metrics: dict[str, Any],
+    stamp: dict[str, Any]
+) -> dict[str, str]:
     evidence_dir = base_dir / evidence_id
     evidence_dir.mkdir(parents=True, exist_ok=True)
 
