@@ -36,11 +36,6 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
-## 2026-03-05 - [HIGH] Unprotected Operational and Analytics Routes
-**Vulnerability:** The `/airgap`, `/analytics`, and `/dr` routes in `server/src/app.ts` were mounted without authentication or role-based access control middleware, despite handling sensitive data export/import, graph analytics, and disaster recovery status.
-**Learning:** High-level operational routes mounted outside the `/api` prefix can easily bypass global security middleware if not explicitly protected at the mount point.
-**Prevention:** Always apply `authenticateToken` and `ensureRole` middleware to all administrative and operational route mounting points in `app.ts`.
-
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
@@ -80,3 +75,8 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-03-02 - [CRITICAL] Unauthenticated Access to High-Risk Operational Routes
+**Vulnerability:** The `/dr`, `/airgap`, and `/analytics` routes were mounted in `server/src/app.ts` without any authentication or authorization middleware. This allowed unauthenticated users to access disaster recovery status, trigger airgap data exports/imports, and run computationally expensive graph analytics.
+**Learning:** Routes mounted outside the main `/api` global authentication middleware are easily overlooked. Centralized protection at the `/api` prefix is not a substitute for defense-in-depth at the router level or explicit protection for all top-level mount points.
+**Prevention:** Enforce a "deny-by-default" posture for all top-level routes. Apply `authenticateToken` and `ensureRole` middleware directly in the `app.use` calls for all routers, especially those handling sensitive operational or analytical tasks.
