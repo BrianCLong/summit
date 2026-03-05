@@ -319,6 +319,31 @@ describe('Sanitization Utils', () => {
       expect(Object.keys(result).length).toBeLessThanOrEqual(100);
     });
   });
+
+  describe('sanitizeCypher', () => {
+    it('should correctly escape backslashes first to prevent double-escaping quotes', () => {
+      // Input: ' OR 1=1 //
+      const input = "' OR 1=1 //";
+      // Expected safe output: \' OR 1=1 // (JS string literal: "\\' OR 1=1 //")
+      // Vulnerable output: \\' OR 1=1 // (JS string literal: "\\\\' OR 1=1 //")
+      // In vulnerable version, the first backslash escapes the second backslash,
+      // leaving the single quote unescaped, which closes the string context.
+      const result = SanitizationUtils.sanitizeCypher(input);
+      expect(result).toBe("\\' OR 1=1 //");
+    });
+
+    it('should escape backslashes correctly', () => {
+      const input = '\\';
+      const result = SanitizationUtils.sanitizeCypher(input);
+      expect(result).toBe('\\\\');
+    });
+
+    it('should escape quotes correctly', () => {
+      const input = "'";
+      const result = SanitizationUtils.sanitizeCypher(input);
+      expect(result).toBe("\\'");
+    });
+  });
 });
 
 describe('Security Validator', () => {
