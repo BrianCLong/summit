@@ -1,7 +1,9 @@
 import json
-import pytest
 from pathlib import Path
-from summit.evidence.finance_writer import init_finance_evidence, add_artifact, set_metric
+
+import pytest
+
+from summit.evidence.finance_writer import add_artifact, init_finance_evidence, set_metric
 
 SCHEMAS_DIR = Path("summit/evidence/schemas")
 
