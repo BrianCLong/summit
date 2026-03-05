@@ -380,7 +380,7 @@ After resolving:
 ## Related Runbooks
 
 - [High Latency](./high-latency.md)
-- [Database Down](./database-down.md)
+- Database Down
 - [Rollback Procedures](../rollback.yaml)
 - [Incident Response](../incident-response.md)
 
