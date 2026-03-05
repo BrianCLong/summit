@@ -47,7 +47,7 @@
 ### C. SRE/Operations DoD
 - [ ] **SLOs:** Defined in `server/src/lib/telemetry/slo.ts` (Ingest Latency, API Availability).
 - [ ] **Dashboards:** "GA Health" Grafana dashboard (Ingest Rate, Queue Depth, Error Rate).
-- [ ] **Runbooks:** `RUNBOOKS/GA_INCIDENT_RESPONSE.md` created and linked in alerts.
+- [ ] **Runbooks:** `runbooks/GA_INCIDENT_RESPONSE.md` created and linked in alerts.
 - [ ] **Alerts:** Critical alerts (Ingest Down, DB High CPU) routed to PagerDuty/OpsGenie.
 
 ### D. Security/Privacy DoD

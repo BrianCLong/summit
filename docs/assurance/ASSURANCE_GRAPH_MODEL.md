@@ -8,7 +8,7 @@ The Unified Assurance Graph is a directed graph consisting of entities and relat
 
 ## 2. Schema
 
-The graph must validate against the [assurance_graph.schema.json](schemas/assurance/assurance_graph.schema.json).
+The graph must validate against the assurance_graph.schema.json.
 
 ## 3. Entities
 

@@ -2,6 +2,10 @@ import { CriticAgent } from './critic';
 import { FixerAgent } from './fixer';
 import { ReflectiveLoop } from './reflectiveLoop';
 import { StrategicCounterAntifragileOrchestrationNetwork } from './strategicCounterAntifragileNetwork';
+import {
+  ArchitectureSelector,
+  TaskSignalFeatures,
+} from '../orchestration/architectureSelector';
 import { promisify } from 'util';
 import { exec } from 'child_process';
 
@@ -27,6 +31,7 @@ export class AgentOrchestrator {
   private fixer: FixerAgent;
   private reflectiveLoop: ReflectiveLoop;
   private strategicNetwork: StrategicCounterAntifragileOrchestrationNetwork;
+  private architectureSelector: ArchitectureSelector;
 
   constructor(projectRoot: string = process.cwd()) {
     this.projectRoot = projectRoot;
@@ -35,6 +40,7 @@ export class AgentOrchestrator {
     this.reflectiveLoop = new ReflectiveLoop(projectRoot);
     this.strategicNetwork =
       new StrategicCounterAntifragileOrchestrationNetwork();
+    this.architectureSelector = new ArchitectureSelector();
   }
 
   async orchestrate(
@@ -53,6 +59,12 @@ export class AgentOrchestrator {
           criticSnapshot: criticResult,
           mode,
         });
+        const taskSignals = this.deriveTaskSignalsFromAnalysis(
+          criticResult,
+          mode,
+        );
+        const architectureRecommendation =
+          this.architectureSelector.predictOptimalArchitecture(taskSignals);
         return {
           riskScore: criticResult.riskScore,
           shouldProceed: criticResult.shouldProceed,
@@ -64,6 +76,7 @@ export class AgentOrchestrator {
           })),
           strategicCycle,
           autoPush: strategicCycle.autoPush,
+          architectureRecommendation,
         };
       });
 
@@ -347,6 +360,24 @@ export class AgentOrchestrator {
     }
 
     console.log('='.repeat(70));
+  }
+
+  private deriveTaskSignalsFromAnalysis(
+    analysis: { riskScore?: number } | undefined,
+    mode: string,
+  ): TaskSignalFeatures {
+    const riskScore = Math.min(1, Math.max(0, (analysis?.riskScore ?? 0) / 100));
+    const timeCriticalityScore = mode === 'ci' ? 0.8 : 0.5;
+
+    return {
+      id: `orchestration-${Date.now()}`,
+      name: 'agent-orchestration-cycle',
+      decomposabilityScore: 0.6,
+      estimatedToolCount: 6,
+      sequentialDependencyScore: 0.4,
+      riskScore,
+      timeCriticalityScore,
+    };
   }
 }
 

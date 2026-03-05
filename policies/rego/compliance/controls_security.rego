@@ -1,4 +1,5 @@
 package compliance
+import rego.v1
 
 pass["sec-AUTHZ-001"]["Authorization decision logged with actor and resource"] {
   input.evidence.spec == "summit.evidence.authz.v1"

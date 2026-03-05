@@ -60,3 +60,13 @@ if (violations.length) {
 }
 
 console.log("✅ Branch protection verified");
+
+// Enforce REQUIRED_CHECKS_CONTRACT.yml consistency
+try {
+  const { run } = await import('./verify_required_checks_contract.mjs');
+  await run();
+} catch (err) {
+  console.error("❌ Failed to verify required checks contract:");
+  console.error(err);
+  process.exit(1);
+}

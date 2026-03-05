@@ -49,13 +49,13 @@ router.post('/tickets', express.json(), async (req, res) => {
 router.get('/tickets', async (req, res) => {
   try {
     const options: ListTicketsOptions = {
-      status: req.query.status as any,
-      priority: req.query.priority as any,
-      category: req.query.category as any,
-      reporter_id: req.query.reporter_id as string,
-      assignee_id: req.query.assignee_id as string,
-      limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 50,
-      offset: req.query.offset ? parseInt(req.query.offset as string, 10) : 0,
+      status: (((req.query.status as string) as string) as string) as any,
+      priority: (((req.query.priority as string) as string) as string) as any,
+      category: (((req.query.category as string) as string) as string) as any,
+      reporter_id: (((req.query.reporter_id as string) as string) as string) as string,
+      assignee_id: (((req.query.assignee_id as string) as string) as string) as string,
+      limit: (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string, 10) : 50,
+      offset: (((req.query.offset as string) as string) as string) ? parseInt((((req.query.offset as string) as string) as string) as string, 10) : 0,
     };
 
     const [tickets, count] = await Promise.all([
@@ -154,7 +154,7 @@ router.post('/tickets/:id/comments', express.json(), async (req, res) => {
 /** GET /api/support/tickets/:id/comments - Get comments for a ticket */
 router.get('/tickets/:id/comments', async (req, res) => {
   try {
-    const includeDeleted = req.query.includeDeleted === 'true';
+    const includeDeleted = (((req.query.includeDeleted as string) as string) as string) === 'true';
     const comments = await getComments(req.params.id, { includeDeleted });
     res.json(comments);
   } catch (error: any) {
@@ -164,15 +164,21 @@ router.get('/tickets/:id/comments', async (req, res) => {
 });
 
 const resolveActor = (req: express.Request) => {
+  // SEC-2025-002: Prioritize identity and roles from authenticated user object
+  // populated by middleware, rather than untrusted headers to prevent spoofing.
   const user = (req as any).user;
-  const idHeader = req.headers['x-user-id'];
-  const roleHeader = req.headers['x-user-role'];
 
-  const id = (user?.sub || user?.id || (Array.isArray(idHeader) ? idHeader[0] : idHeader) || '').toString();
+  const id = (
+    user?.id ||
+    user?.sub ||
+    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : '') ||
+    ''
+  ).toString();
+
   const roles = Array.isArray(user?.roles)
     ? (user?.roles as string[])
-    : roleHeader
-      ? [roleHeader].flat()
+    : process.env.NODE_ENV === 'test' && req.headers['x-user-role']
+      ? ([req.headers['x-user-role']].flat() as unknown as string[])
       : [];
 
   return { id, roles };

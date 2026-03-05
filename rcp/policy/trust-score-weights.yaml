@@ -1,0 +1,8 @@
+version: "1.0.0"
+effective_date: "2024-05-01"
+weights:
+  reproducibility: 0.30
+  provenance: 0.25
+  supply_chain: 0.20
+  evidence: 0.20
+  explainability: 0.05

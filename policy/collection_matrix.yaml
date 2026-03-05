@@ -1,27 +1,56 @@
-version: "1.0"
+version: 1
+last_updated: "2026-02-08"
+summary: "Collection policy matrix for IO specialization (deterministic, evidence-first)."
 platforms:
-  twitter:
-    allowed_methods: ["api"]
-    rate_limit: "900/15min"
-    retention_days: 30
-    pii_policy: "redact"
-  facebook:
-    allowed_methods: ["crowdtangle", "api"]
-    rate_limit: "variable"
-    retention_days: 90
-    pii_policy: "hash"
-  tiktok:
-    allowed_methods: ["official_api"]
-    rate_limit: "variable"
-    retention_days: 30
-    pii_policy: "redact"
-  telegram:
-    allowed_methods: ["telethon", "api"]
-    rate_limit: "variable"
-    retention_days: 365
-    pii_policy: "minimize"
-  fringe:
-    allowed_methods: ["html_snapshot"]
-    rate_limit: "1/sec"
-    retention_days: 365
-    pii_policy: "none"
+  - name: TikTok
+    allowed_methods:
+      - official_api
+      - partner_feed
+      - user_export
+    prohibited_methods:
+      - tos_violating_scrape
+      - credential_sharing
+    rate_limits:
+      guidance: "Follow documented API limits and partner agreements."
+    retention_class: "restricted"
+    pii_notes: "Minimize personal data; store only required fields."
+    legal_review_required: true
+  - name: Telegram
+    allowed_methods:
+      - official_api
+      - partner_feed
+      - user_export
+    prohibited_methods:
+      - tos_violating_scrape
+      - unauthorized_channel_access
+    rate_limits:
+      guidance: "Respect published API limits and channel policies."
+    retention_class: "restricted"
+    pii_notes: "Redact PII unless necessary for attribution evidence."
+    legal_review_required: true
+  - name: Discord
+    allowed_methods:
+      - official_api
+      - partner_feed
+      - user_export
+    prohibited_methods:
+      - tos_violating_scrape
+      - token_reuse
+    rate_limits:
+      guidance: "Respect published API limits; no automation beyond policy."
+    retention_class: "restricted"
+    pii_notes: "Store user IDs only when policy-approved."
+    legal_review_required: true
+  - name: Fringe
+    allowed_methods:
+      - partner_feed
+      - user_export
+      - approved_capture
+    prohibited_methods:
+      - tos_violating_scrape
+      - unauthorized_access
+    rate_limits:
+      guidance: "Use provider-defined limits; avoid bypass techniques."
+    retention_class: "restricted"
+    pii_notes: "Apply retention class controls and minimize PII."
+    legal_review_required: true
