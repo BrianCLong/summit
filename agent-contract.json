@@ -4,11 +4,13 @@
   "allowedZones": [
     {
       "name": "Documentation",
+      "overrideLabel": "override-restricted",
       "paths": ["docs/", "docs/ga/"],
       "notes": "Safe for Tier B/C verification updates and governance docs."
     },
     {
       "name": "VerificationScripts",
+      "overrideLabel": "override-restricted",
       "paths": ["scripts/ga/", "testing/ga-verification/"],
       "notes": "Node-native checks only; no global test runner changes."
     }
@@ -23,6 +25,7 @@
   "restrictedAreas": [
     {
       "name": "Secrets",
+      "overrideLabel": "override-restricted",
       "paths": [
         "secrets/",
         "sealed-secrets/",
@@ -36,6 +39,7 @@
     },
     {
       "name": "SecurityHardening",
+      "overrideLabel": "override-restricted",
       "paths": [
         "security-hardening/",
         "security/",
@@ -51,12 +55,14 @@
     },
     {
       "name": "ProductionInfra",
+      "overrideLabel": "override-restricted",
       "paths": ["terraform/prod/"],
       "overrideLabel": "restricted-area-override",
       "notes": "Production infrastructure definitions cannot be modified by agents without a human override."
     },
     {
       "name": "ToolingConfig",
+      "overrideLabel": "override-restricted",
       "paths": [
         "jest.config.ts",
         "jest.config.js",

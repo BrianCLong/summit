@@ -40,7 +40,9 @@ const wrapConsole = (method) => (...args) => method(...args.map((arg) => sanitiz
 });
 
 // Use Zero Footprint mode to avoid real DB connections by default
-process.env.ZERO_FOOTPRINT = 'true';
+if (process.env.ZERO_FOOTPRINT === undefined) {
+  process.env.ZERO_FOOTPRINT = 'true';
+}
 
 // Mock required environment variables for config.ts validation
 if (!process.env.DATABASE_URL) {

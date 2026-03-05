@@ -1,7 +1,8 @@
 import argparse
+import datetime
 import json
 import sys
-import datetime
+
 
 def main():
     parser = argparse.ArgumentParser(description="Eval harness for AGENTS.md vs Skills reliability")
@@ -13,10 +14,10 @@ def main():
     print(f"Mode: {'Mini' if args.mini else 'Full'}")
 
     from summit.agent.skills.invocation_log import (
+        get_metrics,
         record_skill_availability,
         record_skill_invocation,
-        get_metrics,
-        reset_metrics
+        reset_metrics,
     )
 
     # Reset metrics for clean run

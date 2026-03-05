@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres || sh -c 'exit 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+  neo4j:
+    image: neo4j:2025.01
+    environment:
+      NEO4J_AUTH: neo4j/test1234
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || sh -c 'exit 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

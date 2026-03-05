@@ -1,7 +1,8 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 class CLSBDetector:
-    def detect_coordination(self, events: List[Dict[str, Any]], window_seconds: int = 60) -> List[Dict[str, Any]]:
+    def detect_coordination(self, events: list[dict[str, Any]], window_seconds: int = 60) -> list[dict[str, Any]]:
         """
         Detects coordinated link sharing within a time window.
         """
