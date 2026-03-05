@@ -205,3 +205,27 @@
 'size: XL':
   - changed-files:
     - count-greater-than: 499
+
+"risk:blocker":
+  - changed-files:
+      - any-glob-to-any-file: ".github/workflows/**"
+
+"p0:ci-determinism":
+  - changed-files:
+      - any-glob-to-any-file: ".github/workflows/**"
+
+"p0:compliance-sbom":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/sbom/**"
+          - "**/*sbom*"
+          - "**/*attest*"
+          - "**/*slsa*"
+
+"p0:authz-policy":
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*opa*"
+          - "**/*rego*"
+          - "**/*abac*"
+          - "**/*policy*"

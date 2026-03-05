@@ -561,7 +561,7 @@ router.get('/controls/:controlId/assess', async (req: Request, res: Response, ne
     const { controlId } = req.params;
     const tenantId = (req as any).tenantId || 'default';
 
-    const assessment = await regulatoryPackService.assessControl(controlId, tenantId);
+    const assessment = await regulatoryPackService.assessControl(controlId, ((tenantId as string) as string));
 
     res.json(assessment);
   } catch (error: any) {

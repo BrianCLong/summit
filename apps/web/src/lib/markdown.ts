@@ -10,5 +10,5 @@ marked.setOptions({
 
 export function renderMarkdown(content: string): string {
   const html = marked.parse(content ?? '')
-  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } })
+  return DOMPurify.sanitize(html)
 }

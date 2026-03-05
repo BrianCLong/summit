@@ -211,7 +211,7 @@ function getImageInfo(
   // Check for cosign signature
   let signature: string | undefined;
   try {
-    execCommand(`cosign verify ${fullImage}@${digest} 2>/dev/null`);
+    execCommand(`cosign verify --use-signed-timestamps ${fullImage}@${digest} 2>/dev/null`);
     signature = 'verified';
   } catch {
     signature = undefined;
@@ -221,7 +221,7 @@ function getImageInfo(
   const attestations: string[] = [];
   try {
     const attestOutput = execCommand(
-      `cosign verify-attestation --type spdx ${fullImage}@${digest} 2>/dev/null`
+      `cosign verify-attestation --use-signed-timestamps --type spdx ${fullImage}@${digest} 2>/dev/null`
     );
     if (attestOutput) {
       attestations.push('spdx');
@@ -232,7 +232,7 @@ function getImageInfo(
 
   try {
     const provenanceOutput = execCommand(
-      `cosign verify-attestation --type slsaprovenance ${fullImage}@${digest} 2>/dev/null`
+      `cosign verify-attestation --use-signed-timestamps --type slsaprovenance ${fullImage}@${digest} 2>/dev/null`
     );
     if (provenanceOutput) {
       attestations.push('slsaprovenance');
