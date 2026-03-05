@@ -1,6 +1,7 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-def detect_contradictions(clusters: List[Dict[str, Any]], window_minutes: int = 60) -> List[Dict[str, Any]]:
+
+def detect_contradictions(clusters: list[dict[str, Any]], window_minutes: int = 60) -> list[dict[str, Any]]:
     """
     Detects contradictions where the same asset (media_hash) is used in clusters with opposite stances.
 
