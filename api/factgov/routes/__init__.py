@@ -1,8 +1,9 @@
 from fastapi import APIRouter
-from .vendors import router as vendors_router
-from .rfps import router as rfps_router
-from .contracts import router as contracts_router
+
 from .auditpacks import router as auditpacks_router
+from .contracts import router as contracts_router
+from .rfps import router as rfps_router
+from .vendors import router as vendors_router
 
 router = APIRouter()
 

@@ -3,7 +3,6 @@
 <!--
 POLICY:
 1. Always maintain an [Unreleased] section at the top.
-- Fix CI workflows and required checks drift.
 2. Use subsections: Added, Changed, Deprecated, Removed, Fixed, Security.
 3. Every PR must add an entry here unless labeled 'skip-changelog'.
 -->
@@ -11,12 +10,18 @@ POLICY:
 All notable changes to Summit MVP-3 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+- Fixed CI drift
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- Fix CI workflows and required checks drift.
+n### Added
+- **Governance:** Implemented Required Checks Contract (`REQUIRED_CHECKS_CONTRACT.yml`) to enforce deterministic CI validation for protected branches.
+
+### Security
+- **Defense in Depth**: Hardened sensitive administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control (RBAC) directly within the router files.
 
 ### Added
+- Added standardized `Kbd` component to `@intelgraph/web` for platform-aware keyboard shortcut hints (⌘/Ctrl and ⇧/Shift).
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
@@ -198,7 +203,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [API Documentation](./docs/api/README.md)
 
 [Unreleased]: https://github.com/org/summit/compare/v3.0.0...HEAD
-- Fix CI workflows and required checks drift.
 [3.0.1]: https://github.com/org/summit/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/org/summit/releases/tag/v3.0.0
 ## v2.0.0-rc.1 (2025-10-07)
@@ -206,3 +210,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
+
+## [Unreleased]
+- Added idempotent Neo4j reconciliation logic

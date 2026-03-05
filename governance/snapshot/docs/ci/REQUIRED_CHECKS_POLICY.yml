@@ -31,12 +31,12 @@ branch_protection:
     contexts:
       - "meta-gate"
       - "CI Core Gate ✅"
-      - "Unit Tests"
+      - "Unit Tests (Core)"
       - "gate"
       - "Release Readiness Gate"
       - "SOC Controls"
       - "test (20.x)"
-      - "Workflow Validity Gate"
+      - "Workflow Validity Check"
 
 # Always Required Checks
 # ----------------------
@@ -51,8 +51,8 @@ always_required:
     workflow: "ci-core.yml"
     rationale: "Primary blocking gate - lint, typecheck, tests, build"
 
-  - name: "Unit Tests"
-    workflow: "ci-pr.yml"
+  - name: "Unit Tests (Core)"
+    workflow: "ci-core.yml"
     rationale: "Primary PR test gate status required by branch protection"
 
   - name: "gate"
@@ -71,7 +71,7 @@ always_required:
     workflow: "soc-controls.yml"
     rationale: "SOC control verification is required for audit readiness"
 
-  - name: "Workflow Validity Gate"
+  - name: "Workflow Validity Check"
     workflow: "workflow-validity.yml"
     rationale: "Workflow syntax validity is required by protected-branch checks"
 

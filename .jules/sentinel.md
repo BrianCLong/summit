@@ -75,3 +75,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+## 2026-02-28 - [DOMPurify Profile Override]
+**Vulnerability:** A configuration intended to strip all HTML tags was bypassed because `USE_PROFILES: { html: true }` overrode the `ALLOWED_TAGS: []` array, allowing arbitrary HTML.
+**Learning:** In `DOMPurify`, the `USE_PROFILES` configuration option takes precedence over `ALLOWED_TAGS`. If you intend to strip all tags but use an HTML profile, DOMPurify defaults to allowing HTML elements.
+**Prevention:** Do not use `USE_PROFILES` when you are also explicitly defining an empty list for `ALLOWED_TAGS` to achieve complete tag stripping.
