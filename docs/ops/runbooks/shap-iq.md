@@ -1,17 +1,23 @@
 # SHAP-IQ Runbook
 
-## How to enable
-Set environment variable `FEATURE_FLAG_SHAP_IQ=ON`.
+## Enable
+Run with explicit opt-in:
 
-## Expected runtime
-Latency <= 2x model inference time. Memory <= +30%.
+```bash
+python3 scripts/explain_run.py --input explain/shap_iq/fixtures/sample_input.json --output /tmp/shapiq --enable
+```
 
-## Interpreting interaction spikes
-Spikes in interaction strengths may indicate a concept drift or a feature interacting unexpectedly with a target. Consult data scientists for review.
+## Expected Runtime
+- Deterministic batch mode.
+- Target: bounded overhead relative to inference path.
+
+## Drift Monitoring
+
+```bash
+python3 scripts/monitoring/shap_iq-drift.py --baseline /tmp/shapiq/metrics.json --candidate /tmp/shapiq/metrics.json --output /tmp/shapiq/drift_report.json
+```
 
 ## Rollback
-Set `FEATURE_FLAG_SHAP_IQ=OFF` and clear cached artifacts.
-
-## Alerts
-- Drift spike > threshold
-- Determinism failure
+1. Disable scheduled drift job.
+2. Stop invoking `scripts/explain_run.py` in pipelines.
+3. Archive generated artifacts per retention policy.

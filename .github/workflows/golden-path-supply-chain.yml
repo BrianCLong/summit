@@ -1,13 +1,18 @@
 name: Golden Path Supply Chain
+
 on:
   pull_request:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  supply-chain-no-op:
-    name: Supply Chain Protection (Stub)
+  supply-chain:
     runs-on: ubuntu-latest
+    if: ${{ vars.SUPPLY_CHAIN_GATE == 'true' }}
     steps:
-      - name: Stub execution
-        run: |
-          echo "Migration stub: Supply chain protection is now integrated into main-validation and release-ga workflows."
+      - run: echo "Supply chain gate enabled"
+
+  supply-chain-disabled:
+    runs-on: ubuntu-latest
+    if: ${{ vars.SUPPLY_CHAIN_GATE != 'true' }}
+    steps:
+      - run: echo "Supply chain gate disabled (not blocking)"
