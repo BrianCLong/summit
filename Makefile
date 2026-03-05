@@ -167,7 +167,7 @@ STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
 STACK_SERVER      ?= stack/express5-eslint9
 STACK_CLIENT      ?= stack/client-vite7-leaflet5
 STACK_REBRAND     ?= stack/rebrand-docs
-PR_TARGETS        ?= 1279 1261 1260 1259
+PR_TARGETS        ?= 1279 1261 1260
 STATE_DIR         ?= .merge-evidence
 STATE_FILE        ?= $(STATE_DIR)/state.json
 NODE_VERSION      ?= 20
@@ -409,41 +409,6 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
-
-<<<<<<< HEAD
 eval-skills-changed:
-	@echo "Evaluating skills changed..."
-	@exit 0
-=======
-.PHONY: gql-compat bench graphview er
-
-gql-compat:
-	@echo "Running GQL compatibility mapper..."
-	@mkdir -p artifacts
-	@echo '{"status": "placeholder", "supported": true}' > artifacts/gql-support-matrix.json
-
-bench:
-	@echo "Running deterministic benchmark harness..."
-	@mkdir -p artifacts/bench
-	@echo '{"status": "placeholder", "benchmark": "complete"}' > artifacts/bench/bench_report.json
-	@echo '{"status": "placeholder", "metrics": {}}' > artifacts/bench/bench_metrics.json
-	@echo '{"status": "placeholder", "provenance": "sha256:abc"}' > artifacts/bench/provenance.json
-
-graphview:
-	@echo "Building zero-ETL graph views..."
-	@mkdir -p artifacts/graph-view
-	@echo '{"status": "placeholder", "views": "validated"}' > artifacts/graph-view/view-support.json
-
-er:
-	@echo "Running entity resolution policy check..."
-	@mkdir -p artifacts/entity-resolution
-	@echo '{"status": "placeholder", "policy": "v1"}' > artifacts/entity-resolution/er_policy_report.json
-eval-skills-changed:
-	@echo "Running changed skill evals..."
-	@mkdir -p evals/skills/artifacts
-	@echo '{"status": "placeholder", "evals": "complete"}' > evals/skills/artifacts/eval_report.json
-eval-skills-all:
-	@echo "Running all skill evals..."
-	@mkdir -p evals/skills/artifacts
-	@echo '{"status": "placeholder", "evals": "complete"}' > evals/skills/artifacts/eval_report_all.json
->>>>>>> eb5c989f9 (chore: complete pre-commit steps)
+	@echo "Checking for changed skills..."
+	@echo "Skipped"

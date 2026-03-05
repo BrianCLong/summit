@@ -10,21 +10,21 @@ Welcome to the Summit Trust Center. Security, privacy, and compliance are founda
 
 ### Architecture Principles
 
-### 1. Zero Trust Architecture
+**1. Zero Trust Architecture**
 
 - All access requires authentication and authorization
 - Policy-based access control (OPA/ABAC)
 - Least privilege by default
 - Continuous verification
 
-### 2. Defense in Depth
+**2. Defense in Depth**
 
 - Network segmentation
 - Application-layer security
 - Data encryption (at-rest and in-transit)
 - Audit logging for all operations
 
-### 3. AI-First, Human-in-Command
+**3. AI-First, Human-in-Command**
 
 - AI agents recommend, humans approve
 - Explainable AI decisions
@@ -516,13 +516,13 @@ Customers notified 30 days before adding new subprocessors.
 
 **Report a Vulnerability:**
 
-- Email: [<security@summit.com>](mailto:<security@summit.com>)
+- Email: [security@summit.com](mailto:security@summit.com)
 - PGP Key: [Download](https://summit.local/security/pgp.asc)
 - Response SLA: 24 hours
 
 **Security Questions:**
 
-- Email: [<security@summit.com>](mailto:<security@summit.com>)
+- Email: [security@summit.com](mailto:security@summit.com)
 - Trust Center: [summit.local/trust](https://summit.local/trust)
 - Status Page: [status.summit.com](https://status.summit.com)
 

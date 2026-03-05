@@ -1,28 +1,15 @@
-default: deny
-rules:
-  - id: allow-dev-builder-docs
-    effect: allow
-    env:
-      - dev
-      - test
-    agent_role: builder
-    skills:
-      - docs.update
-    scopes:
-      - repo.write
-    annotations:
-      approvals:
-        - maintainer
-
-  - id: allow-prod-governance-release
-    effect: allow
-    env:
-      - prod
-    agent_role: governance
-    skills:
-      - release.approve
-    scopes:
-      - repo.write
-    annotations:
-      approvals:
-        - governance
+version: 1
+semantics:
+  allowed_actions:
+    - invoke_skill
+  denied_actions:
+    - exfiltrate_secrets
+intensity:
+  min: 0
+  max: 10
+abac:
+  default_effect: deny
+  rules:
+    - role: maintainer
+      allow:
+        - invoke_skill

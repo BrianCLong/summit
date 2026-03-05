@@ -1,21 +1,20 @@
-# Repo Assumptions
+# Repo Assumptions & Reality Check
 
-## Verified Paths
-- `summit/`
-- `summit/explain/` (Will be created)
-- `docs/standards/`
-- `docs/security/`
-- `docs/ops/runbooks/`
-- `scripts/monitoring/`
+## Verified vs Assumed paths
+- Assumed `agents/` runtime
+- Assumed `scripts/`
+- Assumed `tests/`
+- Assumed `docs/`
+- Assumed `.github/workflows/`
 
-## Assumed Paths
-- JSON artifact schema conventions (e.g. `report.json`, `metrics.json`, `stamp.json` based on `subsumption/example/evidence`)
+## Artifact schemas
+- `run_plan.json`
+- `execution_ledger.json`
+- `patch_stack.json`
+- `eval_report.json`
+- `policy_report.json`
 
-## Must-not-touch files
-- Any `package.json` or `tsconfig.json` outside the target scope
-- CI workflow files (unless specifically necessary for gates)
-- Existing tests or application source code outside `summit/explain/shap_iq/`
-
-## Required schema alignment tasks
-- Align JSON schema with `report.json` and `metrics.json` structure
-- Ensure deterministic output requirements
+## Must-not-touch list
+- existing artifact schemas
+- CI workflow names
+- security policy enforcement modules

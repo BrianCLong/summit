@@ -113,32 +113,32 @@ Summit deployed its own platform internally with three agent archetypes:
 
 ### **Quantitative Impact**
 
-| Metric                     | Before      | After       | Improvement |
-| -------------------------- | ----------- | ----------- | ----------- |
-| **Approval Cycle Time**    | 48 hours    | 18 hours    | **-63%**    |
-| **Stale Approvals (>72h)** | 20%         | 3%          | **-85%**    |
-| **Incident MTTR**          | 8 hours     | 3.5 hours   | **-56%**    |
-| **Postmortems Completed**  | 60%         | 95%         | **+58%**    |
-| **SLA Compliance**         | 85%         | 97%         | **+14%**    |
-| **Time in Meetings**       | 12 hrs/week | 9 hrs/week  | **-25%**    |
-| **Context Switching**      | 8 tools/day | 2 tools/day | **-75%**    |
-| **Onboarding Time**        | 15 days     | 5 days      | **-67%**    |
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| **Approval Cycle Time** | 48 hours | 18 hours | **-63%** |
+| **Stale Approvals (>72h)** | 20% | 3% | **-85%** |
+| **Incident MTTR** | 8 hours | 3.5 hours | **-56%** |
+| **Postmortems Completed** | 60% | 95% | **+58%** |
+| **SLA Compliance** | 85% | 97% | **+14%** |
+| **Time in Meetings** | 12 hrs/week | 9 hrs/week | **-25%** |
+| **Context Switching** | 8 tools/day | 2 tools/day | **-75%** |
+| **Onboarding Time** | 15 days | 5 days | **-67%** |
 
 ### **Qualitative Impact**
 
-Leadership Team:
+**Leadership Team:**
 
 - "Morning briefings save me 45 minutes every day. The AI knows what's urgent better than I do." - CEO
 - "Meeting prep used to take 30 minutes. Now it's automated and I walk in fully prepared." - CTO
 - "I can finally see across all our tools without switching contexts." - VP Engineering
 
-Operations Team:
+**Operations Team:**
 
 - "Incident triage used to be a guessing game. Now it's automated with the right owner and runbook." - SRE Lead
 - "We caught 3 SLA breaches before they happened thanks to burn rate alerts." - Operations Manager
 - "Approval bottlenecks used to block deployments for days. Now we have visibility and auto-escalation." - DevOps Lead
 
-Engineering Team:
+**Engineering Team:**
 
 - "The knowledge graph connects my PR to the epic to the customer request. I finally understand the 'why'." - Senior Engineer
 - "Process drift detection caught us skipping security reviews twice. Saved us from potential incidents." - Security Engineer
@@ -171,7 +171,7 @@ The more systems we connected, the more valuable the knowledge graph became. Onc
 
 ## Architecture Deployed
 
-Infrastructure:
+**Infrastructure:**
 
 - AWS EKS (3 m5.xlarge nodes)
 - Neo4j (3-node cluster, t3.large)
@@ -181,7 +181,7 @@ Infrastructure:
 
 **Total Monthly Cost:** ~$2,100/month
 
-Team Capacity:
+**Team Capacity:**
 
 - 1 platform engineer (part-time, 20% FTE)
 - No dedicated operations team (automated by AI COO)
@@ -218,21 +218,21 @@ As we grow from 50 to 200 employees, we plan to:
 
 ### **If You're Considering Summit:**
 
-Start Here:
+**Start Here:**
 
 - Pick one high-pain operational area (approvals, incidents, pipeline management)
 - Deploy one agent archetype
 - Connect 3-5 core tools
 - Run for 30 days and measure
 
-Avoid These Pitfalls:
+**Avoid These Pitfalls:**
 
 - Don't try to boil the ocean (deploy everything)
 - Don't skip policy tuning (agents need guardrails)
 - Don't ignore integrations (they make or break value)
 - Don't go it alone (involve end users from day 1)
 
-Expect These Wins:
+**Expect These Wins:**
 
 - 40-60% reduction in operational overhead
 - 50%+ faster approval cycles
@@ -265,13 +265,13 @@ Summit is the AI-First Company Operating System that combines governance, proven
 - **Approval Engine:** Multi-stage approvals with risk assessment
 - **Audit Trail:** Complete provenance for every action
 
-Deployment Options:
+**Deployment Options:**
 
 - Internal (Self-Hosted): $50K/year
 - White-Label (Multi-Tenant): $100K/year + per-tenant
 - Hosted SaaS (Coming Q1 2026): $2.5K-$7.5K/month
 
-Learn More:
+**Learn More:**
 
 - Website: [summit.com](https://summit.com)
 - Documentation: [docs.summit.com](https://docs.summit.com)
@@ -280,4 +280,4 @@ Learn More:
 
 ---
 
-This case study was last updated on November 20, 2025. Metrics and results reflect Summit's internal deployment from August to November 2025.
+*This case study was last updated on November 20, 2025. Metrics and results reflect Summit's internal deployment from August to November 2025.*

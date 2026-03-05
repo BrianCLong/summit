@@ -1,10 +1,21 @@
 import json
-from pathlib import Path
-from typing import Any, Dict
 
+def save_ledger(ledger, filepath: str):
+    data = {
+        "todos": ledger.todos,
+        "decisions": ledger.decisions,
+        "evidence": ledger.evidence
+    }
+    with open(filepath, 'w') as f:
+        json.dump(data, f)
 
-def write_ledger(path: Path, payload: Dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8") as handle:
-        json.dump(payload, handle, sort_keys=True, indent=2)
-        handle.write("\n")
+def load_ledger(filepath: str):
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+    # Instantiate and populate
+    from .ledger import Ledger
+    ledger = Ledger()
+    ledger.todos = data.get("todos", [])
+    ledger.decisions = data.get("decisions", [])
+    ledger.evidence = data.get("evidence", [])
+    return ledger

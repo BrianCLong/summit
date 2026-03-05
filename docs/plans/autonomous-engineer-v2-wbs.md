@@ -1,8 +1,9 @@
-# Autonomous Engineer v2 WBS
+# WBS: Autonomous Engineer V2
 
-1. Research requirements and claim mapping.
-2. Finalize run plan schema and deterministic artifact contracts.
-3. Implement preflight, ledger, tool budget, and patch scaffolding.
-4. Implement policy and security gates.
-5. Implement eval and drift monitoring.
-6. Validate gates and artifact determinism.
+1. PR1 — Preflight planning
+2. PR2 — Execution ledger
+3. PR3 — Deterministic tool orchestration layer
+4. PR4 — Repo patch engine
+5. PR5 — Policy gates
+6. PR6 — Evaluation harness
+7. PR7 — Drift detector + ops pack

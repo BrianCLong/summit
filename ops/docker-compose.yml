@@ -2,8 +2,6 @@ version: '3.9'
 
 x-common-env: &common-env
   OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
-  OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
   OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME}
   NODE_ENV: production
 
@@ -40,7 +38,7 @@ services:
       retries: 10
 
   opa:
-    image: openpolicyagent/opa:latest-rootless
+    image: openpolicyagent/opa:0.69.0
     command:
       [
         'run',
@@ -65,7 +63,6 @@ services:
       - ./otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
     ports:
       - '4317:4317' # OTLP gRPC
-      - '4318:4318' # OTLP HTTP
       - '9464:9464' # Prometheus exporter endpoint
 
   jaeger:
@@ -77,10 +74,7 @@ services:
   prometheus:
     image: prom/prometheus:v2.53.1
     volumes:
-      - ../observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ../observability/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
-      - ../observability/summit-alerts.yml:/etc/prometheus/summit-alerts.yml:ro
-      - ../observability/alerts/maestro-alerts.yml:/etc/prometheus/alerts/maestro-alerts.yml:ro
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     command: ['--config.file=/etc/prometheus/prometheus.yml']
     ports: ['9090:9090']
 

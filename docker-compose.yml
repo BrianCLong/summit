@@ -6,12 +6,6 @@ services:
     ports: [ "7474:7474", "7687:7687" ]
     volumes:
       - neo4j_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || sh -c 'exit 1'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     networks:
       - default
       - observability
@@ -23,12 +17,6 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     networks:
       - default
       - observability
@@ -41,12 +29,6 @@ services:
     ports: [ "5432:5432" ]
     volumes:
       - pg_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres || sh -c 'exit 1'"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     networks:
       - default
       - observability
@@ -56,9 +38,7 @@ services:
     build: ./services/prov-ledger
     command: node dist/index.js
     ports: [ "4010:4010" ]
-    depends_on:
-      redis:
-        condition: service_healthy
+    depends_on: [ redis ]
     networks:
       - default
       - observability
@@ -103,26 +83,31 @@ services:
       - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces
       - OTEL_EXPORTER_OTLP_METRICS_ENDPOINT=http://otel-collector:4318/v1/metrics
     depends_on:
-      postgres:
-        condition: service_healthy
-      neo4j:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - postgres
+      - neo4j
+      - redis
     networks:
       - default
       - observability
       - intelgraph
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:4000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   api-gateway:
-    build: ./services/api-gateway
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     ports: [ "4000:4000" ]
     environment:
       - POLICY_DRY_RUN=true
       - ENABLE_INSECURE_DEV_AUTH=true
       - GRAPH_SERVICE_URL=http://server:4000
     depends_on:
-      redis:
+      server:
         condition: service_healthy
     networks:
       - default
@@ -135,9 +120,7 @@ services:
     ports: [ "8080:8080" ]
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-    depends_on:
-      api-gateway:
-        condition: service_started
+    depends_on: [ api-gateway ]
     networks:
       - default
       - observability
@@ -159,10 +142,8 @@ services:
       - S3_REGION
       - S3_ENDPOINT
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - postgres
+      - redis
     networks:
       - default
       - observability

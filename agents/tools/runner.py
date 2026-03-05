@@ -1,18 +1,10 @@
-from typing import Iterable, List
-
-from .budgets import BudgetExceededError, StepBudget
-
-
-class ToolRunner:
-    def __init__(self, budget: StepBudget) -> None:
+class Runner:
+    def __init__(self, budget):
         self.budget = budget
+        self.steps_taken = 0
 
-    def execute(self, commands: Iterable[str]) -> List[dict]:
-        logs: List[dict] = []
-        for index, command in enumerate(commands, start=1):
-            if index > self.budget.max_steps:
-                raise BudgetExceededError(
-                    f"tool budget exceeded: {index} > {self.budget.max_steps}"
-                )
-            logs.append({"step": index, "command": command, "status": "ok"})
-        return logs
+    def run_tool(self, tool, *args, **kwargs):
+        if self.steps_taken >= self.budget.max_steps:
+            raise Exception("Step budget exceeded")
+        self.steps_taken += 1
+        return tool(*args, **kwargs)

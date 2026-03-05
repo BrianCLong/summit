@@ -5,11 +5,11 @@
     "artifact": "e2e/a11y-keyboard/a11y-gate.spec.ts",
     "ciStatus": "wired",
     "evidence": [
-      "docs/ga/MVP-4-GA-VERIFICATION.md",
+      "reports/a11y-keyboard/README.md",
       ".github/workflows/a11y-keyboard-smoke.yml"
     ],
     "keywords": [
-      "Accessibility",
+      "accessibility",
       "keyboard"
     ],
     "notes": "Blocks GA on serious/critical axe findings or keyboard navigation regressions; artifact upload required."
@@ -50,21 +50,6 @@
       "Demo Mode"
     ],
     "notes": "Demo mode must remain behind explicit gate; verification is node-native to avoid Jest instability."
-  },
-  {
-    "feature": "Deterministic GA Safety Sweep",
-    "tier": "C",
-    "artifact": "scripts/ga/ga_safety_sweep.mjs",
-    "ciStatus": "wired",
-    "evidence": [
-      "docs/ga/reports/summit-ga-sweep-2026-03-01.yaml",
-      "docs/ga/reports/summit-ga-sweep-2026-03-01.json"
-    ],
-    "keywords": [
-      "ga_readiness",
-      "determinism"
-    ],
-    "notes": "Produces a deterministic, evidence-first GA sweep report covering merge-health telemetry constraints, P0 normalization, reproducibility checks, and CI guardrail recommendations."
   },
   {
     "feature": "GA Gate Artifact Closure",
@@ -108,17 +93,6 @@
     ],
     "keyword": "ingestion",
     "notes": "Ensures ingestion hardening expectations stay documented."
-  },
-  {
-    "feature": "Media Authenticity & Provenance",
-    "tier": "B",
-    "artifact": "scripts/ci/verify_media_provenance.ts",
-    "ciStatus": "wired",
-    "evidence": [
-      "docs/governance/media_provenance.md"
-    ],
-    "keyword": "Media Authenticity",
-    "notes": "Ensures media authenticity provenance rules remain documented and enforceable."
   },
   {
     "feature": "Observability Taxonomy",

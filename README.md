@@ -20,33 +20,54 @@
 - **📈 CompanyOS SDK**: Enterprise intelligence APIs
 - **🔒 Security Hardened**: Production-ready CORS, Helmet, observability
 
-## 🚀 ONE-COMMAND QUICKSTART (Feb 26 2026 — tested)
+## 🚀 Quickstart
+
+### Prerequisites
+
+- Node.js 18+
+- Docker & Docker Compose
+- Neo4j 5.x (via Docker)
+
+### Install & Run
 
 ```bash
-git clone --depth 1 https://github.com/BrianCLong/summit.git
+# Clone repository
+git clone https://github.com/BrianCLong/summit.git
 cd summit
 
-pnpm run cleanup          # removes bloat
-pnpm run setup            # bootstrap + permissions
-pnpm run bootstrap        # extra safety
+# Install dependencies
+pnpm install
 
-cp .env.example .env      # ← edit secrets + AI keys NOW
+# Start infrastructure (Neo4j, Postgres, Redis)
+docker-compose up -d
 
-# Docker network (dev.yml uses 'summit')
-docker network create summit 2>/dev/null || true
-
-pnpm run docker:dev       # full stack + observability + healthchecks
-
-# Wait for healthy (docker compose ps)
-
+# Run migrations
 pnpm db:migrate
-pnpm db:seed
 
+# Start dev server
 pnpm dev
-→ API: http://localhost:4000/health/ready
-→ Web: http://localhost:3000
-→ Grafana: http://localhost:3001 (admin/admin)
-→ Jaeger: http://localhost:16687
+```
+
+Server runs at `http://localhost:4000`
+
+## 🎥 Onboarding Tutorials
+
+Accelerate team onboarding with short, script-backed walkthroughs. Recordings can be captured with Loom for rapid sharing or OBS Studio when you need multi-scene production. Each video includes a narrator script, transcript for captioning, and a placeholder link to swap once the final recording is available.
+
+- **Data Ingestion Wizard Onboarding** – [Script](docs/tutorials/data-ingestion-wizard-script.md) · [Transcript](docs/tutorials/data-ingestion-wizard-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-data-ingestion-wizard)
+- **Graph Querying Essentials** – [Script](docs/tutorials/graph-querying-script.md) · [Transcript](docs/tutorials/graph-querying-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-graph-querying)
+- **ML Integration Kickstart** – [Script](docs/tutorials/ml-integration-script.md) · [Transcript](docs/tutorials/ml-integration-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-ml-integration)
+
+### First Query
+
+```bash
+# GraphQL playground
+curl -X POST http://localhost:4000/api/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ health { status version } }"}'
+
+# Or use the web UI
+open http://localhost:3000
 ```
 
 ## 🏛 Architecture
@@ -90,9 +111,9 @@ Summit follows a modular microservices architecture:
 
 - [📈 Executive Briefing (2026-01-31)](docs/executive/2026-01-31-summit-platform-briefing.md)
 - [🏛 Architecture Overview](docs/architecture/README.md)
-- [🔌 Data Ingestion](docs/architecture/README.md)
-- [🤖 Agent System](docs/architecture/README.md)
-- [🕸 Knowledge Graphs](docs/architecture/README.md)
+- [🔌 Data Ingestion](docs/architecture/ingestion.md)
+- [🤖 Agent System](docs/architecture/agents.md)
+- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
 - [🔒 Security](docs/security/README.md)
 
 ## 📚 Key Components
@@ -117,7 +138,7 @@ Retrieval-augmented generation with knowledge graphs:
 - Vector similarity search
 - LLM-powered synthesis
 
-See: [GraphRAG Guide](docs/graphrag/context_compiler_spec.md)
+See: [GraphRAG Guide](docs/graphrag/README.md)
 
 ### Agents
 
@@ -131,9 +152,9 @@ See: [Agent Development](docs/agents/README.md)
 
 ## 📡 API Reference
 
-- [GraphQL Schema](docs/api/README.md)
-- [REST Endpoints](docs/api/README.md)
-- [CompanyOS SDK](docs/api/README.md)
+- [GraphQL Schema](docs/api/graphql.md)
+- [REST Endpoints](docs/api/rest.md)
+- [CompanyOS SDK](docs/api/companyos.md)
 
 ## 🧪 Testing
 
@@ -173,7 +194,7 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
-See: [Deployment Guide](docs/ops/README.md)
+See: [Deployment Guide](docs/deployment/README.md)
 
 ## 🤝 Contributing
 
@@ -181,7 +202,7 @@ We welcome contributions! Please see:
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Development Setup](CONTRIBUTING.md)
+- [Development Setup](docs/development/setup.md)
 
 ## 📄 License
 

@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2026-03-01 - [ESM Jest Mocking in Server]
-**Learning:** The server package is strictly ESM and requires `jest.unstable_mockModule` for mocking internal modules. Tests must be executed using `pnpm test:unit` which uses the `scripts/run-jest.mjs` wrapper to correctly set `--experimental-vm-modules` and avoid resolution errors.
-**Action:** When adding new repository or service tests in the server, use ESM mocking patterns and run via the provided pnpm scripts rather than raw jest commands.
+## 2026-11-20 - [Concurrent Async Operations]
+**Learning:** Using sequential `await`s in a loop to fetch independent data (like resolving multiple entity IDs to check for supernode status) is a significant performance bottleneck because it unnecessarily blocks each subsequent query until the current one finishes.
+**Action:** When executing multiple independent asynchronous operations, map them to an array of promises and await them concurrently using `Promise.all` to minimize total latency.
