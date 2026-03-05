@@ -295,7 +295,7 @@ export async function getMetrics(): Promise<string> {
 
 // Measure event loop lag
 let lastCheck = Date.now();
-setInterval(() => {
+export const lagInterval = setInterval(() => {
   const now = Date.now();
   const lag = now - lastCheck - 1000; // Expected 1000ms
   eventLoopLag.set(Math.max(0, lag));
@@ -304,4 +304,8 @@ setInterval(() => {
 
 export function recordMessageFailed(tenant: string, reason: string): void {
   messageDropped.inc({ tenant, reason });
+}
+
+export function stopCollection(): void {
+  clearInterval(lagInterval);
 }

@@ -266,6 +266,7 @@ export class WebSocketServer {
   }
 
   public async stop(): Promise<void> {
+    metrics.stopCollection();
     logger.info('Shutting down gracefully...');
 
     // Stop accepting new connections
@@ -308,5 +309,9 @@ export class WebSocketServer {
 
   public getRoomManager(): RoomManager {
     return this.roomManager;
+  }
+
+  public getApp(): express.Application {
+    return this.app;
   }
 }

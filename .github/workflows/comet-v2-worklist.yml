@@ -1,0 +1,35 @@
+name: Comet v2 Worklist Update
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Hourly
+  workflow_dispatch:
+  issues:
+    types: [edited]
+
+jobs:
+  update-worklist:
+    runs-on: ubuntu-latest
+    if: github.repository == 'BrianCLong/summit'
+    permissions:
+      contents: write
+      issues: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch Tracking Issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue view 56 --json body -q .body > ops/comet_v2/tracking_issue.md
+
+      - name: Generate Worklist
+        run: |
+          python3 ops/comet_v2/generate_worklist.py
+
+      - name: Commit and Push
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(comet): update v2 worklist [skip ci]"
+          file_pattern: ops/comet_v2/worklist.json ops/comet_v2/tracking_issue.md

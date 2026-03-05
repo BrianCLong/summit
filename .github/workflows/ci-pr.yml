@@ -52,6 +52,8 @@ jobs:
           cache: "pnpm"
       - name: Install
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Run ${{ matrix.task }}
         run: |
           case "${{ matrix.task }}" in
@@ -81,6 +83,8 @@ jobs:
       - uses: pnpm/action-setup@v4
       - name: Install
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Validate Jest & pnpm Configuration
         run: pnpm -w check:jest-config
 
@@ -90,6 +94,7 @@ jobs:
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -111,9 +116,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
 
       - name: Run database migrations
-        run: cd server && npx tsx scripts/run-migrations.ts
+        run: cd server && npx tsx scripts/managed-migrate.ts
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/summit_test
 
@@ -138,6 +145,8 @@ jobs:
       - uses: pnpm/action-setup@v4
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Verify runtime configuration
         run: pnpm verify:runtime
       - name: Run verification scripts
@@ -149,6 +158,7 @@ jobs:
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -159,6 +169,8 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Build twice and compare checksums
         run: |
           set -euo pipefail
@@ -223,6 +235,8 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
       - name: Start Services
@@ -258,6 +272,8 @@ jobs:
         run: node scripts/ci/verify_tsconfig_inheritance.mjs
       - name: Install dependencies (for governance docs)
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Verify governance docs
         run: pnpm ci:docs-governance
 
@@ -268,6 +284,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
@@ -277,6 +294,8 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Run SOC control tests
         run: |
           mkdir -p soc-compliance-reports
@@ -301,6 +320,8 @@ jobs:
           cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Fix Phantom Types
+        run: rm -rf node_modules/@types/hapi__catbox node_modules/@types/hapi__shot
       - name: Run MCP Contract Tests
         run: npx jest tests/mcp/server.contract.test.ts
       - name: Run Pack Determinism Tests
