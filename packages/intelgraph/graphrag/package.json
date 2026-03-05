@@ -2,10 +2,12 @@
   "name": "@intelgraph/graphrag",
   "version": "0.1.0",
   "description": "GraphRAG implementation focusing on Path-Native context and Graph-First retrieval.",
-  "main": "index.ts",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "test": "jest",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "build": "tsc"
   },
   "dependencies": {
     "neo4j-driver": "^5.12.0"

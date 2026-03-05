@@ -16,24 +16,27 @@ MAN2="$TMPDIR/${ENV2}.json"
 echo "==> [1] Validate OIDC trust for $CLOUD"
 case "$CLOUD" in
   aws)
-    echo 'MOCK AWS'
-    # : "${AWS_ROLE_ARN:?missing}"
-    # : "${AWS_OIDC_AUDIENCE:?missing}"
-    # aws sts get-caller-identity >/dev/null
+    if [ -z "${AWS_ROLE_ARN:-}" ] || [ -z "${AWS_OIDC_AUDIENCE:-}" ]; then
+      echo "ERROR: AWS credentials missing. Parity check is mandatory."
+      exit 1
+    fi
+    aws sts get-caller-identity >/dev/null
     ;;
   gcp)
-    echo 'MOCK GCP'
-    # : "${GCP_WORKLOAD_POOL:?missing}"
-    # : "${GCP_PROVIDER:?missing}"
-    # : "${GCP_SERVICE_ACCOUNT:?missing}"
-    # gcloud auth print-identity-token \
-    #  --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
-    #  >/dev/null
+    if [ -z "${GCP_WORKLOAD_POOL:-}" ] || [ -z "${GCP_PROVIDER:-}" ] || [ -z "${GCP_SERVICE_ACCOUNT:-}" ]; then
+      echo "ERROR: GCP credentials missing. Parity check is mandatory."
+      exit 1
+    fi
+    gcloud auth print-identity-token \
+      --audiences="https://iam.googleapis.com/projects/-/locations/global/workloadIdentityPools/${GCP_WORKLOAD_POOL}/providers/${GCP_PROVIDER}" \
+      >/dev/null
     ;;
   azure)
-    echo 'MOCK AZURE'
-    # : "${AZURE_FEDERATED_ID:?missing}"
-    # az account show >/dev/null
+    if [ -z "${AZURE_FEDERATED_ID:-}" ]; then
+      echo "ERROR: Azure credentials missing. Parity check is mandatory."
+      exit 1
+    fi
+    az account show >/dev/null
     ;;
   *)
     echo "Unknown CLOUD=$CLOUD"; exit 1;;
@@ -41,16 +44,21 @@ esac
 
 echo "==> [2] Terraform plan & manifest canonicalization for $ENV1 and $ENV2"
 tf_plan_json () {
-  echo '[]' > "$2"
-  return 0
   local env_name="$1"
   local manifest_out="$2"
-  pushd "infra/terraform/$CLOUD/$env_name" >/dev/null
+  local plan_dir="infra/terraform/$CLOUD/$env_name"
+
+  if [ ! -d "$plan_dir" ]; then
+    echo "ERROR: Terraform directory $plan_dir not found."
+    exit 1
+  fi
+
+  pushd "$plan_dir" >/dev/null
   terraform init -input=false -no-color >/dev/null
   terraform plan -input=false -no-color -out=plan.tfplan >/dev/null
   terraform show -json plan.tfplan \
   | jq '
-      .resource_changes
+      .resource_changes // []
       | map({
           address, mode, type, name,
           change: {
@@ -69,8 +77,11 @@ tf_plan_json "$ENV1" "$MAN1"
 tf_plan_json "$ENV2" "$MAN2"
 
 echo "==> [3] Compare manifests + assert invariants"
-echo '{}' > "$RESULT"
-exit 0
+if [ ! -f infra/parity/compare_manifests.py ]; then
+    echo "ERROR: infra/parity/compare_manifests.py not found."
+    exit 1
+fi
+
 python3 infra/parity/compare_manifests.py \
   --cloud "$CLOUD" \
   --env-a "$ENV1" --file-a "$MAN1" \

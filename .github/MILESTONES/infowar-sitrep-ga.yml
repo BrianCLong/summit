@@ -1,0 +1,6 @@
+name: INFOWAR SITREP GA
+status: tracking
+requirements:
+  - schema validation passes
+  - evidence bundle generated in tests
+  - policy gates pass
