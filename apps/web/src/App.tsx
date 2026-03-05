@@ -55,6 +55,12 @@ const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboa
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
+const InvestigationsPage = React.lazy(() => import('@/pages/Investigations'))
+
+// New Switchboard Pages
+const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
+const ReceiptsPage = React.lazy(() => import('@/pages/ReceiptsPage'))
+const TenantOpsPage = React.lazy(() => import('@/pages/TenantOpsPage'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -70,6 +76,7 @@ import { CommandStatusProvider } from '@/features/internal-command/CommandStatus
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
+import { CommandPalette } from '@/components/CommandPalette'
 
 function App() {
   const [showPalette, setShowPalette] = React.useState(false);
@@ -146,6 +153,11 @@ function App() {
                       } />
                       <Route path="/trust" element={<TrustDashboard />} />
 
+                      {/* Switchboard Routes */}
+                      <Route path="/approvals" element={<ApprovalsPage />} />
+                      <Route path="/receipts" element={<ReceiptsPage />} />
+                      <Route path="/tenant-ops" element={<TenantOpsPage />} />
+
                       {/* Workbench Route */}
                       <Route path="/workbench" element={<WorkbenchShell />} />
                       <Route path="/copilot" element={<CopilotPage />} />
@@ -165,6 +177,12 @@ function App() {
                         <Route path="investigation" element={
                           <DataFetchErrorBoundary dataSourceName="Investigation Canvas">
                             <InvestigationCanvas />
+                          </DataFetchErrorBoundary>
+                        } />
+
+                        <Route path="investigations" element={
+                          <DataFetchErrorBoundary dataSourceName="Investigations">
+                            <InvestigationsPage />
                           </DataFetchErrorBoundary>
                         } />
 
