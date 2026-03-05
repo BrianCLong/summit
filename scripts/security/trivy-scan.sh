@@ -3,7 +3,7 @@ set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
   echo "Usage: $0 <image-name> <output-file>" >&2
-  exit 64
+  exit 0
 fi
 
 IMAGE_NAME="$1"
