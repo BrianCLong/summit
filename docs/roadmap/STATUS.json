@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-05T00:00:00Z",
-  "revision_note": "Added summit-praxeology package skeleton with analytic-only validation, matching engine, and golden tests.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Added locked MWS bellingcat workflow/toolkit deterministic evidence lane.",
   "initiatives": [
     {
-      "id": "summit-praxeology-analytic-layer",
+      "id": "bellingcat-mws-media-verify",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Introduced @summit/summit-praxeology with AJV+semantic guardrails for analytic/defensive playbooks and non-prescriptive hypothesis generation."
+      "notes": "Implemented locked MWS single-media verification workflow, deterministic evidence bundle outputs, toolkit normalization schema/output, and offline fixtures/tests."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
