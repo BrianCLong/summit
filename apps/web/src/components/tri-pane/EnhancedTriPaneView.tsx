@@ -11,6 +11,7 @@ import { ExplainViewSidebar } from '@/features/explain/ExplainViewSidebar'
 import { MapView } from '@/features/geospatial/MapView'
 import { useAppSelector } from '@/store/hooks'
 import { selectExplain } from '@/features/explain/explainSlice'
+import { MODIFIER_KEY } from '@/lib/utils'
 import {
   Layers,
   Eye,
@@ -393,7 +394,7 @@ export function EnhancedTriPaneView({
                 <Clock className="h-4 w-4" />
                 Timeline
                 <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
-                  ⌘1
+                  {MODIFIER_KEY}1
                 </kbd>
                 {timeFilter && (
                   <Badge variant="secondary" className="text-xs">
@@ -453,7 +454,7 @@ export function EnhancedTriPaneView({
                 <Network className="h-4 w-4" />
                 Entity Graph
                 <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
-                  ⌘2
+                  {MODIFIER_KEY}2
                 </kbd>
                 {showProvenance && (
                   <Badge variant="secondary" className="text-xs">
@@ -532,7 +533,7 @@ export function EnhancedTriPaneView({
                 <MapPin className="h-4 w-4" />
                 Geographic View
                 <kbd className="ml-auto text-xs px-1.5 py-0.5 bg-muted rounded">
-                  ⌘3
+                  {MODIFIER_KEY}3
                 </kbd>
               </CardTitle>
             </CardHeader>
@@ -572,7 +573,7 @@ export function EnhancedTriPaneView({
           <div className="font-semibold mb-2">Keyboard Shortcuts</div>
           <div className="space-y-1 text-muted-foreground">
             <div>
-              <kbd>⌘1-3</kbd> Focus pane
+              <kbd>{MODIFIER_KEY}1-3</kbd> Focus pane
             </div>
             <div>
               <kbd>P</kbd> Toggle provenance
