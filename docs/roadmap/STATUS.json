@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added unity-package-subsumption-mws initiative for deterministic Unity package governance artifacts and CI policy checks.",
+  "revision_note": "Added flex-node-selector GA subsumption MWS with deterministic artifacts, policy validation, and drift monitoring scaffolds.",
   "initiatives": [
     {
-      "id": "unity-package-subsumption-mws",
+      "id": "databricks-flex-node-subsumption-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Minimal winning slice for Unity-style package ingest, semver + registry policy validation, dependency DAG evidence, and deterministic artifact emission."
+      "notes": "Summit-native flex node selector scaffold with deterministic scoring, policy allowlists, CI hooks, and evidence artifacts."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
