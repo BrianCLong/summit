@@ -45,7 +45,7 @@ function getChangedFiles(baseRef, headRef) {
 
 function getFileContent(filepath) {
   const fullPath = path.resolve(rootDir, filepath);
-  if (fs.existsSync(fullPath) && fs.lstatSync(fullPath).isFile()) {
+  if (fs.existsSync(fullPath)) {
     return fs.readFileSync(fullPath, 'utf8');
   }
   return '';
