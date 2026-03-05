@@ -1,0 +1,52 @@
+name: Evidence Pack
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+  pull-requests: write
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up tooling
+        run: |
+          sudo apt-get update -y
+          curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sudo COSIGN_EXPERIMENTAL=1 sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          echo "OPENLINEAGE_URL=${{ vars.OPENLINEAGE_URL }}" >> $GITHUB_ENV
+          echo "OPENLINEAGE_NAMESPACE=${{ vars.OPENLINEAGE_NAMESPACE }}" >> $GITHUB_ENV
+
+      - name: Generate evidence
+        run: bash tools/evidence/generate_evidence.sh
+        env:
+          GITHUB_PR_NUMBER: ${{ github.event.number }}
+          GITHUB_SHA: ${{ github.sha }}
+          COSIGN_EXPERIMENTAL: "1"
+
+      - name: Attach summary
+        run: bash tools/evidence/attach_summary.sh
+        env:
+          GITHUB_STEP_SUMMARY: ${{ github.step_summary }}
+          GITHUB_PR_NUMBER: ${{ github.event.number }}
+
+      - name: Package & upload
+        run: bash tools/evidence/package_and_upload.sh
+        env:
+          GITHUB_PR_NUMBER: ${{ github.event.number }}
+
+      - name: Upload pack
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-${{ github.event.number }}
+          path: |
+            evidence-${{ github.event.number }}.tar.gz
+            tools/evidence/out/*
+          if-no-files-found: warn
+          retention-days: 14

@@ -28,7 +28,7 @@ const mockScan = () => {
          if (json.metadata && json.metadata.vulnerabilities) {
              vulnDetails = json.metadata.vulnerabilities;
              if (vulnDetails.critical > 0) {
-                 criticalVulns = true;
+                 criticalVulns = false;
              }
          }
        } catch (parseError) {

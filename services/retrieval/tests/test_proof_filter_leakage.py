@@ -1,5 +1,7 @@
+from services.index_store.proofs.store import ContentProofSet, ProofStore
 from services.retrieval.proof_filter import ProofFilter, RetrievalHit
-from services.index_store.proofs.store import ProofStore, ContentProofSet
+
+
 def test_filter():
     ps = ProofStore()
     ps.upload(ContentProofSet(workspace_id="w1", root_hash="r1", proofs={"p1": "h1"}))
