@@ -1,0 +1,31 @@
+{
+  "executive_summary": "Summit BizOps provides deterministic readiness checks.",
+  "market_analysis": {
+    "target_market": "US SMB founders",
+    "competitive_landscape": "Advisory tools and generic templates"
+  },
+  "organization_management": {
+    "team": ["founder", "finance lead"]
+  },
+  "products_services": {
+    "offerings": ["readiness scoring", "formation checklist"]
+  },
+  "marketing_sales": {
+    "channels": ["direct", "partner"],
+    "go_to_market": "Self-serve + assisted onboarding"
+  },
+  "financials": {
+    "startup_costs": 50000,
+    "funding_strategy": "bootstrapped",
+    "projected_income": 125000,
+    "projected_expenses": 70000
+  },
+  "formation": {
+    "legal_structure": "llc",
+    "registered": true,
+    "licenses_permits": ["state business license"]
+  },
+  "banking": {
+    "separate_business_bank_account": true
+  }
+}
