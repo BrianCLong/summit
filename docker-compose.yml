@@ -90,15 +90,25 @@ services:
       - default
       - observability
       - intelgraph
+    healthcheck:
+      test: [ "CMD", "wget", "-qO-", "http://localhost:4000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   api-gateway:
-    build: ./services/api-gateway
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
     ports: [ "4000:4000" ]
     environment:
       - POLICY_DRY_RUN=true
       - ENABLE_INSECURE_DEV_AUTH=true
       - GRAPH_SERVICE_URL=http://server:4000
-    depends_on: [ redis ]
+    depends_on:
+      server:
+        condition: service_healthy
     networks:
       - default
       - observability
@@ -120,7 +130,6 @@ services:
     volumes:
       - ./backups:/backups
       - redis_data:/redis_data
-      - neo4j_data:/neo4j_data
     environment:
       - POSTGRES_HOST=postgres
       - POSTGRES_USER=postgres

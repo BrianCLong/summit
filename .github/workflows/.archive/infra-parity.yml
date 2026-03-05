@@ -1,0 +1,28 @@
+name: Infra Parity
+on:
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
+    paths: [ "infra/**", ".github/workflows/infra-parity.yml" ]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: 1.8.5 }
+      - name: Parity ≥95%
+        run: |
+          chmod +x infra/scripts/validate_parity.sh
+          THRESHOLD=95 infra/scripts/validate_parity.sh staging preprod

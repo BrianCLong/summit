@@ -1,4 +1,5 @@
 package composer.cmk
+import rego.v1
 
 # Require CMK for artifacts in protected namespaces
 
@@ -20,6 +21,7 @@ allow {
 
 # Wrapper decision
 package composer.decision_cmk
+import rego.v1
 
 decision := {
   "policy": "cmk",
