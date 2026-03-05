@@ -7,16 +7,15 @@ const internalRoles = new Set(['admin', 'system.internal', 'ops', 'platform-admi
 
 function hasAdminRole(req: Request): boolean {
   const roles: string[] = [];
+  const user = (req as any).user;
 
-  if ((req as any).user?.role) {
-    roles.push((req as any).user.role);
+  // Rely exclusively on authenticated user object, never on untrusted headers
+  if (user?.role) {
+    roles.push(user.role);
   }
-  if (Array.isArray((req as any).user?.roles)) {
-    roles.push(...(req as any).user.roles);
+  if (Array.isArray(user?.roles)) {
+    roles.push(...user.roles);
   }
-
-  // SEC-2025-004: Do not trust x-user-role or x-role headers for internal access.
-  // Rely exclusively on the authenticated req.user object.
 
   return roles.some((role) => internalRoles.has(role));
 }
