@@ -1,0 +1,35 @@
+name: Rust CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'ibrs/**'
+      - 'bindings/**'
+      - 'rust/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+  pull_request:
+    paths:
+      - 'ibrs/**'
+      - 'bindings/**'
+      - 'rust/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  rust-ci:
+    uses: ./.github/workflows/_reusable-rust.yml
+    with:
+      toolchain: stable
+
+  rust-ci-beta:
+    uses: ./.github/workflows/_reusable-rust.yml
+    with:
+      toolchain: beta
+    # Beta failures are informational only
+    continue-on-error: true
