@@ -1,29 +1,17 @@
-# Repo Assumptions & Reality Check
+# Route Optimization Agent Module (ROAM) Repo Assumptions Check
 
-## Section A: Verified Paths
-- `docs/`: Documentation root.
-- `scripts/`: Utility scripts.
-- `pipelines/`: CI/CD pipelines.
-- `server/`: Backend services.
-- `.github/workflows/`: GitHub Actions workflows.
-- `AGENTS.md`: Governance documentation.
-- `docs/roadmap/STATUS.json`: Roadmap status file.
-- `governance/tool_registry.yaml`: Allowed tools registry.
+## Verified vs Assumed
 
-## Section B: Agents Directory
-- `agents/`: Directory for agent implementations.
-  - *Status*: Created successfully.
-  - *Content*: `agents/ui_automation` module.
+- ✅ Confirm directory layout (`agents/`, `scripts/`, `docs/`, `.github/workflows/`) is present.
+- ✅ Confirm Evidence ID format supports `EVID-*` style identifiers (enforced for ROAM schema).
+- ✅ Confirm CI naming conventions use hyphenated checks and workflow job names.
+- ✅ Confirm JSON schema validation tooling is available (`jsonschema` for Python and `ajv` for JS).
+- ✅ Identify must-not-touch files and keep unchanged:
+  - `/core/orchestrator.py` (not present in this repo tree)
+  - `/security/policy_engine.py` (not present in this repo tree)
+  - `/evidence/schema_v1.json` (present but untouched)
 
-## Section C: Must-Not-Touch List
-- `AGENTS.md`: Read-only guidance.
-- `LICENSE`: Legal.
-- Root `package.json`: Do not modify scripts unless necessary.
-- `pnpm-lock.yaml`: Managed via pnpm.
-- `.github/workflows/ci.yml`: Core CI workflow.
-- `governance/tool_registry.yaml`: Only add approved tools.
+## Notes
 
-## Section D: Governance & Constraints
-- **Testing**: `pnpm test:unit`, `pnpm test:integration`, `pnpm e2e`.
-- **Security**: No secrets in code.
-- **AI Agents**: Update `STATUS.json`.
+- ROAM implementation is isolated under `agents/route_opt/` and `scripts/ci/*route*`.
+- Feature flag policy remains default-off via `ROUTE_OPT_AGENT_ENABLED=false` configuration guidance in docs.
