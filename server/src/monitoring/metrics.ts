@@ -549,6 +549,14 @@ export const webVitalValue = createGauge({
   labelNames: ['metric', 'id'],
 });
 
+export const webVitalDurationSeconds = createHistogram({
+  registers: [],
+  name: 'web_vital_duration_seconds',
+  help: 'Distribution of Web Vitals values in seconds',
+  labelNames: ['metric'],
+  buckets: [0.1, 0.5, 1, 2.5, 4, 10],
+});
+
 // Real-time updates metrics
 export const realtimeConflictsTotal = createCounter({
   registers: [],
@@ -658,6 +666,7 @@ try {
   register.registerMetric(graphqlResolverErrorsTotal);
   register.registerMetric(graphqlResolverCallsTotal);
   register.registerMetric(webVitalValue);
+  register.registerMetric(webVitalDurationSeconds);
   register.registerMetric(realtimeConflictsTotal);
   register.registerMetric(idempotentHitsTotal);
   register.registerMetric(businessUserSignupsTotal);
@@ -706,34 +715,6 @@ try {
   register.registerMetric(narrativeSimulationDurationSeconds);
 } catch (e) { }
 
-// Agent Metrics
-export const agentExecutionsTotal = createCounter({
-  registers: [],
-  name: 'agent_executions_total',
-  help: 'Total number of agent executions',
-  labelNames: ['tenant', 'status'],
-});
-
-export const agentExecutionDuration = createHistogram({
-  registers: [],
-  name: 'agent_execution_duration_seconds',
-  help: 'Duration of agent execution in seconds',
-  labelNames: ['tenant', 'status'],
-  buckets: [1, 5, 10, 30, 60, 120, 300],
-});
-
-export const policyDecisionsTotal = createCounter({
-  registers: [],
-  name: 'policy_decisions_total',
-  help: 'Total number of policy decisions',
-  labelNames: ['policy', 'decision', 'signal_type'],
-});
-
-try {
-  register.registerMetric(agentExecutionsTotal);
-  register.registerMetric(agentExecutionDuration);
-  register.registerMetric(policyDecisionsTotal);
-} catch (e) { }
 
 // Update memory usage periodically (skip in test to avoid open handles)
 const shouldCollectMemory =
@@ -1228,6 +1209,7 @@ export const metrics = {
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
   webVitalValue,
+  webVitalDurationSeconds,
   realtimeConflictsTotal,
   idempotentHitsTotal,
   graphqlQueryCostHistogram,
@@ -1246,9 +1228,6 @@ export const metrics = {
   narrativeSimulationTicksTotal,
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
-  agentExecutionsTotal,
-  agentExecutionDuration,
-  policyDecisionsTotal,
 };
 
 export default metrics;
