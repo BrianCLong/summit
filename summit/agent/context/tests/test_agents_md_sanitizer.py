@@ -1,5 +1,7 @@
 import pytest
+
 from summit.agent.context.agents_md_loader import load_agents_md
+
 
 def test_sanitization(tmp_path):
     content = """# Header

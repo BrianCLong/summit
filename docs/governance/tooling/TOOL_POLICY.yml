@@ -1,0 +1,10 @@
+version: 1.0.0
+tools:
+  search_db:
+    allowed_scopes:
+      - db:read
+    high_risk: false
+  delete_db:
+    allowed_scopes:
+      - db:write
+    high_risk: true
