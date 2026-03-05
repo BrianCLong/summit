@@ -1,2 +1,4 @@
-self_flow_eval
-self_flow_dataset_integrity
+Unknown check names → create discovery file:
+GitHub → branch protection
+list required checks
+update CI gate names

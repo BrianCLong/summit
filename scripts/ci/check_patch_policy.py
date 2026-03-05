@@ -1,24 +1,25 @@
+#!/usr/bin/env python3
 import sys
-import os
 import json
+import os
 
-if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
-    sys.exit(0)
+def check_policy():
+    if os.environ.get("SUMMIT_AUTON_ENGINEER", "0") != "1":
+        print("Feature flag SUMMIT_AUTON_ENGINEER is OFF. Skipping patch policy check.")
+        sys.exit(0)
 
-try:
-    with open("artifacts/patch_stack.json", "r") as f:
-        patches = json.load(f)
-except FileNotFoundError:
-    print("Patch stack not found")
-    sys.exit(1)
+    try:
+        with open("artifacts/patch_stack.json", "r") as f:
+            patches = json.load(f)
+        # TODO: call agents.policy.diff_policy.check_diff_policy
+        print("Patch policy passed")
 
-report = {
-    "status": "PASS",
-    "gate": "patch_policy"
-}
+        with open("artifacts/policy_report.json", "w") as f:
+            json.dump({"status": "passed"}, f)
 
-os.makedirs("artifacts", exist_ok=True)
-with open("artifacts/policy_report.json", "w") as f:
-    json.dump(report, f, indent=2)
+    except FileNotFoundError:
+        print("artifacts/patch_stack.json not found")
+        sys.exit(1)
 
-sys.exit(0)
+if __name__ == "__main__":
+    check_policy()

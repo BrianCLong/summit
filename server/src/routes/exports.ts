@@ -71,7 +71,7 @@ router.post(
 
   try {
     const result = await watermarkVerificationService.verify({
-      exportId: id,
+      exportId: (id as string),
       artifactId,
       watermark,
     });

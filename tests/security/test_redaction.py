@@ -1,2 +1,3 @@
 def test_redaction():
-    assert True
+    # TODO: check never_log redaction logic
+    pass

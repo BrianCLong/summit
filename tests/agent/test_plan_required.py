@@ -1,2 +1,3 @@
 def test_plan_required():
-    assert True
+    # TODO: Implement test logic to ensure plan is required
+    pass

@@ -1,2 +1,3 @@
 def test_budget_enforced():
-    assert True
+    # TODO: Implement test logic to check if budget limits steps
+    pass

@@ -1,3 +1,3 @@
-# Diff format logic
-def format_diff():
-    pass
+def parse_diff(diff_string):
+    # TODO: Implement diff parsing logic
+    return diff_string

@@ -10,6 +10,7 @@ describe('Maestro Integration Tests', () => {
   let app: any;
 
   beforeAll(async () => {
+    process.env.ZERO_FOOTPRINT = 'false';
     // Create app
     app = await createApp();
 
@@ -18,19 +19,15 @@ describe('Maestro Integration Tests', () => {
     await pool.query('BEGIN');
 
     // Create test run
-    try {
-      const result = await pool.query(
-        `INSERT INTO agent_runs (id, runbook, status, started_at)
-         VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now())
-         RETURNING id`,
-      );
-      if (result.rows && result.rows.length > 0) {
-        testRunId = result.rows[0].id;
-      } else {
-        testRunId = 'test-run-id';
-      }
-    } catch (e) {
-      testRunId = 'test-run-id';
+    const result = await pool.query(
+      `INSERT INTO run (id, runbook, status, started_at) 
+       VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
+       RETURNING id`
+    );
+    if (result && result.rows && result.rows.length > 0) {
+      testRunId = result.rows[0].id;
+    } else {
+      throw new Error('Failed to create test run in integration test');
     }
 
     // Mock auth token (in real tests, use proper auth)
@@ -155,15 +152,11 @@ describe('Maestro Integration Tests', () => {
     beforeEach(async () => {
       const pool = getPostgresPool();
       // Create approval request
-      try {
-        await pool.query(
-          `INSERT INTO run_steps (run_id, step_id, status)
-           VALUES ($1, 'approval-step', 'BLOCKED')`,
-          [testRunId],
-        );
-      } catch (e) {
-        console.log('Failed to create run_step:', e.message);
-      }
+      await pool.query(
+        `INSERT INTO run_step (run_id, step_id, status) 
+         VALUES ($1, 'approval-step', 'BLOCKED')`,
+        [testRunId],
+      );
       await pool.query(
         `INSERT INTO run_event (run_id, kind, payload)
          VALUES ($1, 'approval.created', $2)`,
@@ -325,17 +318,13 @@ describe('Maestro Integration Tests', () => {
 });
 
 // Additional test utilities
-export async function createTestRun(runbook: string = 'test-runbook') {
-  try {
-    return await getPostgresPool().query(
-      `INSERT INTO agent_runs (id, runbook, status, started_at)
-       VALUES (gen_random_uuid(), $1, 'RUNNING', now())
-       RETURNING id`,
-      [runbook],
-    );
-  } catch (e) {
-    return { rows: [{ id: 'test-run-id' }] };
-  }
+export function createTestRun(runbook: string = 'test-runbook') {
+  return getPostgresPool().query(
+    `INSERT INTO run (id, runbook, status, started_at) 
+     VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
+     RETURNING id`
+    [runbook],
+  );
 }
 
 export function createTestRouterDecision(runId: string, nodeId: string) {

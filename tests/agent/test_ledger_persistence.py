@@ -1,2 +1,3 @@
 def test_ledger_persistence():
-    assert True
+    # TODO: Implement test logic to check ledger saving/loading
+    pass

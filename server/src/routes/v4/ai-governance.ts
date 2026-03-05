@@ -332,7 +332,7 @@ router.get(
   requirePermission('ai:suggestions:read'),
   async (req: Request, res: Response) => {
     try {
-      const suggestion = await policySuggestionService!.getSuggestion(req.params.id);
+      const suggestion = await policySuggestionService!.getSuggestion((req.params.id as string));
 
       if (!suggestion) {
         return res.status(404).json({
@@ -398,7 +398,7 @@ router.post(
       };
 
       const suggestion = await policySuggestionService!.reviewSuggestion(
-        req.params.id,
+        (req.params.id as string),
         feedback
       );
 
@@ -438,7 +438,7 @@ router.post(
   requirePermission('ai:suggestions:implement'),
   async (req: Request, res: Response) => {
     try {
-      const result = await policySuggestionService!.implementSuggestion(req.params.id);
+      const result = await policySuggestionService!.implementSuggestion((req.params.id as string));
 
       logger.info({
         suggestionId: (req.params.id as string),
@@ -787,7 +787,7 @@ router.get(
   requirePermission('ai:anomalies:read'),
   async (req: Request, res: Response) => {
     try {
-      const anomaly = await anomalyService!.getAnomaly(req.params.id);
+      const anomaly = await anomalyService!.getAnomaly((req.params.id as string));
 
       if (!anomaly) {
         return res.status(404).json({
@@ -846,7 +846,7 @@ router.patch(
       const notes: string = req.body.notes;
 
       const anomaly = await anomalyService!.updateAnomalyStatus(
-        req.params.id,
+        (req.params.id as string),
         status,
         notes
       );
@@ -913,7 +913,7 @@ router.post(
         actionsTaken: req.body.actionsTaken || [],
       };
 
-      const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
+      const anomaly = await anomalyService!.resolveAnomaly((req.params.id as string), resolution);
 
       logger.info({
         anomalyId: (req.params.id as string),

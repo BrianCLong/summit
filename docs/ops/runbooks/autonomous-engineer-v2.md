@@ -1,9 +1,15 @@
-# Autonomous Engineer v2 Operational Readiness Pack
+# Runbook: Autonomous Engineer V2
 
-* **How to reproduce a run from artifacts (replay):** Load `run_plan.json` and `execution_ledger.json` and re-run agent.
-* **Common failure modes:** policy failure, test failure, plan invalid.
-* **Escalation:** “agent stuck” / “tool budget exceeded”
-* **SLO assumptions (initial):** 95% runs produce a test-verified patch stack in sandbox mode.
+## How to reproduce a run from artifacts (replay)
+1. Read `artifacts/run_plan.json`
+2. Run `scripts/summit-agent --replay-from-plan`
 
-**Rollback/blast radius:**
-* single feature flag `SUMMIT_AUTON_ENGINEER=0`
+## Common failure modes
+- **Policy failure:** Check `artifacts/policy_report.json` for details
+- **Test failure:** Agent modifications caused regression, check patch diff
+
+## Escalation
+If agent stuck: Kill process, review `artifacts/execution_ledger.json`
+
+## SLO
+Initial expectation: 95% runs produce a test-verified patch stack in sandbox mode.

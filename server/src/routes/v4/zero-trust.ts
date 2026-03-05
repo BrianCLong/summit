@@ -249,7 +249,7 @@ router.get(
   requirePermission('security:keys:read'),
   async (req: Request, res: Response) => {
     try {
-      const keyHandle = await zeroTrustService!.hsm.getKey(req.params.id);
+      const keyHandle = await zeroTrustService!.hsm.getKey((req.params.id as string));
 
       if (!keyHandle) {
         return res.status(404).json({
@@ -311,7 +311,7 @@ router.post(
     try {
       const data = Buffer.from(req.body.data, 'base64');
       const signature = await zeroTrustService!.hsm.sign(
-        req.params.id,
+        (req.params.id as string),
         data,
         req.body.algorithm
       );
@@ -381,7 +381,7 @@ router.post(
     try {
       const data = Buffer.from(req.body.data, 'base64');
       const signature = Buffer.from(req.body.signature, 'base64');
-      const valid = await zeroTrustService!.hsm.verify(req.params.id, data, signature);
+      const valid = await zeroTrustService!.hsm.verify((req.params.id as string), data, signature);
 
       res.json(wrapResponse({
         keyId: (req.params.id as string),
@@ -422,7 +422,7 @@ router.post(
   requirePermission('security:keys:rotate'),
   async (req: Request, res: Response) => {
     try {
-      const newKeyHandle = await zeroTrustService!.hsm.rotateKey(req.params.id);
+      const newKeyHandle = await zeroTrustService!.hsm.rotateKey((req.params.id as string));
 
       logger.info({
         oldKeyId: (req.params.id as string),
@@ -474,7 +474,7 @@ router.get(
   requirePermission('security:keys:read'),
   async (req: Request, res: Response) => {
     try {
-      const attestation = await zeroTrustService!.hsm.attestKey(req.params.id);
+      const attestation = await zeroTrustService!.hsm.attestKey((req.params.id as string));
       res.json(wrapResponse(attestation, req));
     } catch (error: any) {
       res.status(500).json({
@@ -666,7 +666,7 @@ router.get(
   requirePermission('audit:read'),
   async (req: Request, res: Response) => {
     try {
-      const entry = await zeroTrustService!.audit.getEntry(req.params.id);
+      const entry = await zeroTrustService!.audit.getEntry((req.params.id as string));
 
       if (!entry) {
         return res.status(404).json({
@@ -712,7 +712,7 @@ router.get(
   requirePermission('audit:verify'),
   async (req: Request, res: Response) => {
     try {
-      const verification = await zeroTrustService!.audit.verifyEntry(req.params.id);
+      const verification = await zeroTrustService!.audit.verifyEntry((req.params.id as string));
       res.json(wrapResponse(verification, req));
     } catch (error: any) {
       res.status(500).json({
@@ -748,7 +748,7 @@ router.get(
   requirePermission('audit:read'),
   async (req: Request, res: Response) => {
     try {
-      const proof = await zeroTrustService!.audit.getMerkleProof(req.params.id);
+      const proof = await zeroTrustService!.audit.getMerkleProof((req.params.id as string));
       res.json(wrapResponse(proof, req));
     } catch (error: any) {
       res.status(500).json({

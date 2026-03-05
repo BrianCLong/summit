@@ -1,2 +1,3 @@
 def test_patch_policy():
-    assert True
+    # TODO: test malicious patch cases
+    pass
