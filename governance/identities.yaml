@@ -15,7 +15,7 @@ identities:
     type: "agent"
     description: "AI Software Engineer"
     roles: ["developer", "reviewer"]
-  - id: "BrianCLong"
-    type: "user"
-    description: "Repository Owner"
-    roles: ["admin", "developer", "reviewer"]
+
+- actor: BrianCLong
+  role: admin
+  system_id: github-actions

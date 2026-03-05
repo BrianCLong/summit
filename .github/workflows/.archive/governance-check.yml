@@ -23,6 +23,7 @@ jobs:
             const labels = pr.labels.map(l => l.name);
             const title = pr.title;
 
+<<<<<<< HEAD
             // Auto-infer from title if no labels
             if (labels.length === 0) {
               if (title.startsWith('feat:')) labels.push('minor');
@@ -30,6 +31,16 @@ jobs:
               else if (title.startsWith('docs:')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
+=======
+      - name: Setup Node
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'pnpm'
+          node-version: '20'
+>>>>>>> 837360eb8 (fix: resolve CI failures (sbom, reason-codes, pnpm, lint, provenance))
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
