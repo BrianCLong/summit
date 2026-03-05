@@ -1,14 +1,12 @@
-# Decentralized Infrastructure Delivery Framework (DIDF)
+# Decentralized Infrastructure Architecture
 
 ## Overview
-Summit adopts a decentralized infrastructure delivery model where domain teams provision infrastructure using standardized modules, stacks, and CI/CD-enforced governance.
+Summit is transitioning from centralized IaC managed by a platform team to decentralized infrastructure ownership by domain teams, inspired by the Adidas model.
 
-## Key Concepts
-- **Modules**: Reusable infrastructure primitives.
-- **Stacks**: Composed modules.
-- **Consumption Configs**: Configuration provided by domain teams.
+## Layers
+1. **Modules**: Reusable infra primitives maintained by platform teams.
+2. **Stacks**: Compositions of modules configured by domain teams.
+3. **Consumption Configs**: Environment-specific deployments.
 
-## Roles
-- **Platform Maintainers**: Maintain modules and policies.
-- **Domain Teams**: Configure stacks.
-- **CI System**: Enforce policies.
+## AI Agent Integration
+Summit extends this by introducing an Agentic Infra Planner that automatically generates stacks based on requirements.

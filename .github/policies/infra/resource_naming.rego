@@ -1,6 +1,5 @@
-package infra.naming
+package infra.resource_naming
 
 deny[msg] {
-  input.resource.name != "valid_name"
-  msg := "Invalid resource name"
+  msg := "Resource naming policy violation"
 }

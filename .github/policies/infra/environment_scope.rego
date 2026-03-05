@@ -1,6 +1,5 @@
-package infra.environment
+package infra.environment_scope
 
 deny[msg] {
-  input.environment != "dev"
-  msg := "Invalid environment"
+  msg := "Environment scope policy violation"
 }

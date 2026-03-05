@@ -1,6 +1,5 @@
-package infra.cost
+package infra.cost_guardrails
 
 deny[msg] {
-  input.cost > 100
-  msg := "Cost too high"
+  msg := "Cost guardrails policy violation"
 }

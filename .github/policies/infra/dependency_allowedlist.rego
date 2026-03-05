@@ -1,8 +1,5 @@
-package infra.dependency
-
-allowed_dependencies = {"module-a", "module-b"}
+package infra.dependency_allowedlist
 
 deny[msg] {
-  not allowed_dependencies[input.dependency]
-  msg := "Dependency not allowed"
+  msg := "Dependency allowedlist policy violation"
 }
