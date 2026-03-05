@@ -1,0 +1,102 @@
+version: 1
+workflow_id: bellingcat-mws-media-verify
+description: >
+  Deterministic evidence bundle for one media item. Networked connectors are OFF by default.
+  Designed for hybrid human-in-the-loop verification.
+
+feature_flags:
+  connectors.network: false
+  connectors.archiving: false
+  connectors.reverse_image: false
+
+inputs:
+  case_id: { type: string }
+  media_url: { type: string, required: true }
+  media_local_path: { type: string, required: false }
+  investigator_notes: { type: string, required: false }
+
+evidence:
+  evid_prefix: EVID
+  output_dir: artifacts/runs
+
+steps:
+  - id: normalize_case
+    kind: core.normalize
+    args:
+      case_id: "${inputs.case_id}"
+      media_url: "${inputs.media_url}"
+      media_local_path: "${inputs.media_local_path}"
+      investigator_notes: "${inputs.investigator_notes}"
+
+  - id: hash_inputs
+    kind: core.hash
+    args:
+      # Hash URL string deterministically; and file bytes if present.
+      url: "${steps.normalize_case.out.media_url}"
+      file_path: "${steps.normalize_case.out.media_local_path}"
+
+  - id: preserve_targets
+    kind: evidence.capture_targets
+    args:
+      targets:
+        - type: url
+          value: "${steps.normalize_case.out.media_url}"
+      # Always emit capture plan; actual network capture gated by flags.
+      capture_plan_only: true
+
+  - id: archive_submit
+    kind: connector.archiving.submit
+    when: "${feature_flags.connectors.archiving == true}"
+    args:
+      url: "${steps.normalize_case.out.media_url}"
+      providers: ["wayback", "archive_today"]
+      mode: "submit_then_verify"
+
+  - id: reverse_image_prepare
+    kind: core.reverse_image.query_plan
+    args:
+      media_url: "${steps.normalize_case.out.media_url}"
+      engines: ["google_images", "bing_images", "yandex_images", "tineye"]
+      # No network calls in MWS; emit URLs that the investigator can open.
+      emit_manual_links: true
+
+  - id: metadata_extract
+    kind: core.metadata.extract
+    args:
+      file_path: "${steps.normalize_case.out.media_local_path}"
+      # If absent, emit empty results deterministically.
+      allow_missing: true
+
+  - id: geo_hints
+    kind: core.geo.hints
+    args:
+      text_notes: "${steps.normalize_case.out.investigator_notes}"
+      exif: "${steps.metadata_extract.out.exif}"
+      # No vision inference in MWS; just structured hint extraction from notes/EXIF.
+
+  - id: chrono_checklist
+    kind: core.chrono.shadow_checklist
+    args:
+      # Investigator supplies these later; checklist ensures consistent capture.
+      required_fields:
+        - alleged_local_time
+        - timezone
+        - approx_lat
+        - approx_lon
+        - shadow_direction_notes
+        - shadow_length_notes
+        - weather_notes
+
+  - id: emit_bundle
+    kind: evidence.emit_bundle
+    args:
+      case_id: "${steps.normalize_case.out.case_id}"
+      media_url: "${steps.normalize_case.out.media_url}"
+      input_hashes: "${steps.hash_inputs.out}"
+      capture_plan: "${steps.preserve_targets.out}"
+      archive: "${steps.archive_submit.out}"
+      reverse_image_plan: "${steps.reverse_image_prepare.out}"
+      exif: "${steps.metadata_extract.out.exif}"
+      geo_hints: "${steps.geo_hints.out}"
+      chrono_checklist: "${steps.chrono_checklist.out}"
+      tool_registry_ref: "artifacts/toolkit/bellingcat.normalized.json"
