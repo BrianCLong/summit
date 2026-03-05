@@ -13,6 +13,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- fix: resolve case collision of dependency_delta.md
+- fix: update OPA docker image to 0.68.0-rootless
 - fix: sync server and client package versions to root version (4.1.15)
 - chore: disable pedantic markdownlint rules
 
