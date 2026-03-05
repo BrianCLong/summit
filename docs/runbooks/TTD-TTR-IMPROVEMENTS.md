@@ -111,7 +111,7 @@ Embed runbook links and quick-start commands in alert annotations:
     component: graphql-gateway
   annotations:
     summary: "GraphQL API p95 latency > 2s for {{ $labels.operation }}"
-    runbook: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/graphql-high-latency.md"
+    runbook: "https://github.com/BrianCLong/summit/blob/main/runbooks/graphql-high-latency.md"
     quick_check: |
       # Check current latency
       curl 'http://localhost:9090/api/v1/query?query=histogram_quantile(0.95,sum(rate(graphql_query_duration_ms_bucket[5m]))by(le,operation))'
@@ -250,7 +250,7 @@ setInterval(runGoldenPathTest, 60_000);
   annotations:
     summary: "Synthetic golden path test failing"
     description: "Golden path synthetic test has failed {{ $value }} times in the last 5 minutes. Users are likely affected."
-    runbook: "https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/golden-path-failure.md"
+    runbook: "https://github.com/BrianCLong/summit/blob/main/runbooks/golden-path-failure.md"
 ```
 
 **Impact**:

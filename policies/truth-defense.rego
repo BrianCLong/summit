@@ -2,6 +2,7 @@
 # Enforces adversarial-resistant decision-making rules
 
 package summit.truth_defense
+import rego.v1
 
 import future.keywords.if
 import future.keywords.in

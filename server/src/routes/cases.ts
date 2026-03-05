@@ -40,15 +40,24 @@ function getRequestContext(req: any): {
   tenantId: string | null;
   userId: string | null;
 } {
-  const tenantId = String(
-    req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
-  );
+  // SEC-2025-002: Prioritize identity and tenant context from authenticated user object
+  // populated by middleware, rather than untrusted headers to prevent spoofing.
+  const tenantId =
+    req.user?.tenantId ||
+    req.user?.tenant_id ||
+    req.tenant_id ||
+    req.tenantContext?.tenantId ||
+    (process.env.NODE_ENV === 'test' ? (req.headers['x-tenant-id'] || req.headers['x-tenant']) : null);
+
   const userId =
-    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
+    req.user?.id ||
+    req.user?.sub ||
+    req.user?.email ||
+    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : null);
 
   return {
-    tenantId: tenantId || null,
-    userId: userId || null,
+    tenantId: tenantId ? String(tenantId) : null,
+    userId: userId ? String(userId) : null,
   };
 }
 
@@ -88,8 +97,8 @@ caseRouter.get('/:id/overview', async (req, res) => {
 
     const { id } = req.params;
 
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
+    const reason = (((req.query.reason as string) as string) as string) as string;
+    const legalBasis = (((req.query.legalBasis as string) as string) as string) as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -207,8 +216,8 @@ caseRouter.get('/:id', async (req, res) => {
     const { id } = req.params;
 
     // Require reason and legal basis for viewing
-    const reason = req.query.reason as string;
-    const legalBasis = req.query.legalBasis as LegalBasis;
+    const reason = (((req.query.reason as string) as string) as string) as string;
+    const legalBasis = (((req.query.legalBasis as string) as string) as string) as LegalBasis;
 
     if (!reason) {
       return res.status(400).json({
@@ -230,7 +239,7 @@ caseRouter.get('/:id', async (req, res) => {
     const auditContext = {
       reason,
       legalBasis,
-      warrantId: req.query.warrantId as string,
+      warrantId: (((req.query.warrantId as string) as string) as string) as string,
       ipAddress: req.ip,
       userAgent: req.headers['user-agent'],
     };
@@ -331,14 +340,14 @@ caseRouter.get('/', async (req, res) => {
 
     const cases = await service.listCases({
       tenantId,
-      status: req.query.status as any,
-      compartment: req.query.compartment as string,
-      policyLabels: req.query.policyLabels
-        ? (req.query.policyLabels as string).split(',')
+      status: (((req.query.status as string) as string) as string) as any,
+      compartment: (((req.query.compartment as string) as string) as string) as string,
+      policyLabels: (((req.query.policyLabels as string) as string) as string)
+        ? ((((req.query.policyLabels as string) as string) as string) as string).split(',')
         : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-      offset: req.query.offset
-        ? parseInt(req.query.offset as string)
+      limit: (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string) : undefined,
+      offset: (((req.query.offset as string) as string) as string)
+        ? parseInt((((req.query.offset as string) as string) as string) as string)
         : undefined,
     });
 
@@ -555,15 +564,14 @@ caseRouter.post('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comment = await service.addComment(
-      {
-        caseId: id,
-        userId,
-        content,
-        metadata,
-      },
+    const comment = await service.addComment({
+      targetType: 'CASE',
+      targetId: id,
+      authorId: userId,
+      content,
+      metadata,
       tenantId,
-    );
+    });
 
     await emitAuditEvent(
       {
@@ -626,8 +634,8 @@ caseRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
-    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
+    const limit = (((req.query.limit as string) as string) as string) ? parseInt((((req.query.limit as string) as string) as string) as string) : undefined;
+    const offset = (((req.query.offset as string) as string) as string) ? parseInt((((req.query.offset as string) as string) as string) as string) : undefined;
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);

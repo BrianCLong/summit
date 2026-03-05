@@ -42,7 +42,7 @@ graph TD
 
 - **Graph & entity services**: GraphQL schemas are versioned in `docs/API_GRAPHQL_SCHEMA.graphql` with lifecycle rules in `API_VERSIONING.md` and `API_RATE_LIMITING.md`.
 - **AuthN/Z**: Implementation summaries and boundaries reside in `AUTHZ_IMPLEMENTATION_SUMMARY.md`, `SECURITY.md`, and `BOUNDARIES.md` to keep tenant isolation explicit.
-- **Operational APIs**: Runbook endpoints and health contracts are enumerated in `RUNBOOKS/` and `ALERT_POLICIES.yaml` to align SLOs with automated validation.
+- **Operational APIs**: Runbook endpoints and health contracts are enumerated in `runbooks/` and `ALERT_POLICIES.yaml` to align SLOs with automated validation.
 
 ## Non-Capability Statements
 
