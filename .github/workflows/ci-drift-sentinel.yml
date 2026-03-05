@@ -1,0 +1,33 @@
+name: CI Drift Sentinel
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'scripts/ci/validate_workflows.mjs'
+      - 'scripts/ci/workflow-budget-sentinel.mjs'
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+concurrency:
+  group: ci-drift-sentinel-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sentinel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Validate Workflow Drift
+        run: node scripts/ci/validate_workflows.mjs
+
+      - name: Validate Workflow Budget
+        run: node scripts/ci/workflow-budget-sentinel.mjs
