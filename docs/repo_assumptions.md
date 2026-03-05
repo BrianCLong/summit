@@ -1,16 +1,31 @@
 # Repo Assumptions & Verification
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+**Verified Paths:**
+* `summit/` exists and appears to be the primary python application root.
+* `policies/` exists and contains Rego/YAML policies.
+* `evidence/` exists and contains evidence bundles.
+* `scripts/` exists and contains various operational/utility scripts.
+* `ci/` exists (mostly, `.github/workflows/` and scripts). We'll assume the intention is for standard Github Actions check names.
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+**Assumed Paths:**
+* We should place the `agent_integrity` module within `summit/agent_integrity`.
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+**CI Check Names:**
+* `check-context-determinism`
+* `check-policy-binding`
+* `check-entity-reconciliation`
+* `check-evidence-id-format`
+* `check-stamp-determinism`
+* `check-performance-budget`
+
+**Must-Not-Touch Core Modules:**
+* Existing core `policies/` (except to add new ones).
+* `evidence/write_evidence.py` (unless explicitly needed to support the new schema without breaking old ones, but currently it handles simple dicts well).
+* Any files ending in `.schema.json` within `evidence/schemas/` without verifying they are backwards compatible.
+* Core Summit evaluation frameworks unless specifically integrating AEIP.
+
+**Validation Checklist Before PR Merge:**
+* [x] Confirm evidence schema naming (`EVIDENCE_ID = AEIP-<domain>-<control>-<seq>`)
+* [x] Confirm CI naming conventions (as per the CI check names above)
+* [x] Confirm JSON determinism policy (must hash consistently)
+* [x] Confirm linting rules (Ruff, Pyright - assuming standard python repo rules)
