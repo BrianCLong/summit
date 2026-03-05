@@ -124,12 +124,15 @@
     "generate:provenance": "npx tsx scripts/compliance/generate_provenance.ts",
     "ga:verify": "node scripts/ga/ga-verify-runner.mjs",
     "ga:verify:server": "pnpm --filter intelgraph-server typecheck && pnpm --filter intelgraph-server build && pnpm --filter intelgraph-server test:unit",
-    "ga:smoke": "echo '\u2705 Smoke tests not configured - add integration tests here' && exit 0",
+    "ga:smoke": "echo '✅ Smoke tests not configured - add integration tests here' && exit 0",
     "compliance:antigravity": "pnpm compliance:check && pnpm verify:governance && pnpm ga:verify",
     "release:ready": "pnpm ga:verify && pnpm --filter intelgraph-server test:ci && bash scripts/ci/validate-workflow-filters.sh",
     "prepare": "husky",
     "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
-    "ga:evidence": "pnpm compliance:evidence"
+    "ga:evidence": "pnpm compliance:evidence",
+    "rubricbench": "npx tsx scripts/evaluation/run-rubricbench.ts",
+    "benchmark:rubricbench": "npx tsx scripts/evaluation/run-rubricbench.ts",
+    "governance:selfcheck": "npx tsx scripts/monitoring/rubric-governance-drift.ts"
   },
   "keywords": [
     "intelligence-analysis",
