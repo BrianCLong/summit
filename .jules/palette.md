@@ -45,10 +45,10 @@
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
 
-## 2025-10-29 - Semantic Headings vs Forms
-**Learning:** Using `<label>` tags to visually style section headings (like an "Answer" section) confuses screen readers as it expects an associated form input.
-**Action:** Use proper heading tags (like `<h4>`) for structural sections and reserve `<label>` exclusively for form input association. Always use `id` and `htmlFor` to bind them explicitly.
+## 2025-02-25 - Tooltips and Semantic Shortcuts
 
-## 2026-03-05 - Accessible Status Badges
-**Learning:** Color-only status indicators (e.g., success/warning/error badges) are insufficient for accessibility. Adding semantic icons (CheckCircle, AlertTriangle) provides redundant cues that assist color-blind users and improve overall scanability.
-**Action:** Always provide an 'icon' prop for status-related UI components and use it to reinforce visual states.
+**Learning:** Icon-only buttons (like "Clear search") can be ambiguous and lack sufficient descriptive text for screen readers. Adding a Tooltip with an `aria-label` provides both a visual cue on hover and a reliable name for assistive technology.
+**Action:** Always wrap icon-only buttons in a Tooltip and ensure they have a descriptive `aria-label`.
+
+**Learning:** Standardizing keyboard shortcut hints with the semantic `<kbd>` tag improves both accessibility and visual consistency. Styling these tags as subtle UI elements (like cards or badges) makes them feel integrated into the design system rather than floating text.
+**Action:** Use the `<kbd>` tag for shortcut hints and apply consistent design system styling (e.g., bg-muted, border, rounded).
