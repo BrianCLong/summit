@@ -62,9 +62,16 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         with:
           script: |
+            const body = [
+              '⚠️ **Automatic bidirectional sync failed due to merge conflicts.**',
+              '',
+              'Manual resolution required to unblock synchronization.',
+              'Please check the workflow logs and resolve conflicts in a new PR.'
+            ].join('\n');
+
             github.rest.issues.createComment({
               issue_number: 14642,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '⚠️ Automatic bidirectional sync failed due to merge conflicts. Manual resolution required.'
+              body: body
             })
