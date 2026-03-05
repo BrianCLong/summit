@@ -1,0 +1,62 @@
+name: Validate SLSA and SPDX
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-attestations-and-sboms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup OPA
+        run: |
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v0.70.0/opa_linux_amd64_static
+          chmod 755 opa-bin
+          sudo mv opa-bin /usr/bin/opa
+          opa version
+
+      - name: Run OPA Tests for SLSA and SPDX
+        run: |
+          opa test policy/supply_chain/validation.rego policy/tests/slsa_spdx_test.rego -v
+
+      - name: Validate SLSA Provenance
+        run: |
+          # Only check real attestations and sboms, ignoring templates and schemas
+          find . -type f \( -name "*.intoto.jsonl" -o -name "provenance.json" \) -not -path "*/node_modules/*" -not -path "*/schemas/*" -not -path "*/templates/*" -not -path "*/docs/*" -not -path "*/.summit/*" | while read -r file; do
+            echo "Validating SLSA provenance in $file"
+
+            # Check if valid SLSA 1.2
+            result=$(opa eval -i "$file" -d policy/supply_chain/validation.rego "data.supply_chain.validation.valid_slsa" --format raw)
+            if [ "$result" != "true" ]; then
+              echo "::error file=$file::SLSA version < 1.2 or invalid predicate type."
+              exit 1
+            fi
+
+            # Check if source track fields are present
+            has_source=$(opa eval -i "$file" -d policy/supply_chain/validation.rego "data.supply_chain.validation.has_source_track" --format raw)
+            if [ "$has_source" != "true" ]; then
+              echo "::error file=$file::Missing essential fields from the SLSA Source Track."
+              exit 1
+            fi
+          done
+
+      - name: Validate SPDX SBOMs
+        run: |
+          find . -type f \( -name "*.spdx.json" -o -name "sbom*.json" \) -not -path "*/node_modules/*" -not -path "*/schemas/*" -not -path "*/templates/*" -not -path "*/docs/*" -not -path "*/.summit/*" | while read -r file; do
+            echo "Validating SPDX SBOM in $file"
+
+            # Use jq to check if this is meant to be an SPDX file (has an SPDX ID or context)
+            is_spdx=$(jq 'has("SPDXID") or has("@context")' "$file" 2>/dev/null || echo "false")
+            if [ "$is_spdx" == "true" ]; then
+                result=$(opa eval -i "$file" -d policy/supply_chain/validation.rego "data.supply_chain.validation.valid_spdx" --format raw)
+                if [ "$result" != "true" ]; then
+                  echo "::error file=$file::SPDX SBOM must use the official SPDX 3.0.1 @context."
+                  exit 1
+                fi
+            fi
+          done

@@ -922,3 +922,35 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: jules-hubspot-hygiene-pilots
+    version: v1
+    path: prompts/jules/hubspot-hygiene-pilots.md
+    sha256: b24734fe1f26871940ebc2739ed613de511e0bb1c9e4bd9e751e27a08ffa921a
+    description: Prompt to guide Jules to turn HubSpot CRM hygiene pilots into measurable, marketable proof for Summit.
+    scope:
+      paths:
+        - prompts/jules/hubspot-hygiene-pilots.md
+      domains:
+        - positioning
+        - marketing
+    verification:
+      tiers_required:
+        - A
+    execution:
+      mode: unsupervised
+      environment: default
+      dependencies: []
+    lifecycle:
+      status: active
+      created_at: '2026-03-02'
+      sunset_at: null
+    governance:
+      compliance_labels:
+        - data_classification: internal
+        - review_level: fast_track
+      risk_profile:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

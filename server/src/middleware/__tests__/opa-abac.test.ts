@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory.js';
-import { userFactory } from '../../../../tests/factories/userFactory.js';
+import { requestFactory, responseFactory, nextFactory } from '../../../tests/mocks/request-factory.ts';
+import { userFactory } from '../../../tests/mocks/user-factory.ts';
 
 // Mock function declared before mock
 const mockAxiosPost = jest.fn();
