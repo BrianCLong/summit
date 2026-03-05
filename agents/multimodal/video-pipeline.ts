@@ -21,7 +21,7 @@ import type {
 } from './types.js';
 import { CLIPPipeline } from './clip-pipeline.js';
 
-const logger = pino({ name: 'video-pipeline' });
+const logger: any = (pino as any)({ name: 'video-pipeline' });
 
 export interface VideoPipelineConfig {
   clipModel: EmbeddingModel;
@@ -387,7 +387,7 @@ export class VideoPipeline {
             frameNumber: frame.frameNumber,
             error: error instanceof Error ? error.message : 'Unknown',
           });
-          return null;
+          return null as any;
         }
       });
 
