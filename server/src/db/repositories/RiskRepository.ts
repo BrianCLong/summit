@@ -35,13 +35,19 @@ export class RiskRepository {
 
       // 2. Insert Risk Signals
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-            RETURNING *`,
-            [
+        // BOLT: Optimized batched insert for signals using chunking (chunkSize 100)
+        // This reduces database round-trips while staying within parameter limits.
+        const chunkSize = 100;
+        const now = new Date();
+
+        for (let i = 0; i < input.signals.length; i += chunkSize) {
+          const chunk = input.signals.slice(i, i + chunkSize);
+          const values: any[] = [];
+          const placeholders: string[] = [];
+          let paramIdx = 1;
+
+          for (const sig of chunk) {
+            values.push(
               savedScore.id,
               sig.type,
               sig.source,
@@ -49,10 +55,25 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
-          );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+              sig.detectedAt || now
+            );
+            placeholders.push(
+              `($${paramIdx}, $${paramIdx + 1}, $${paramIdx + 2}, $${paramIdx + 3}, $${paramIdx + 4}, $${paramIdx + 5}, $${paramIdx + 6}, $${paramIdx + 7})`
+            );
+            paramIdx += 8;
+          }
+
+          const batchSql = `
+            INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders.join(', ')}
+            RETURNING *
+          `;
+
+          const sigRows = await tx.query(batchSql, values);
+          for (const row of sigRows) {
+            savedSignals.push(this.mapSignal(row));
+          }
         }
       }
 

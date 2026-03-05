@@ -1,29 +1,49 @@
+#!/usr/bin/env python3
+"""Compare two metrics artifacts and emit a drift report."""
+
+from __future__ import annotations
+
+import argparse
 import json
-import os
-from typing import Dict, Any
+from pathlib import Path
 
-def detect_drift(current_metrics: Dict[str, Any], baseline_metrics: Dict[str, Any]) -> Dict[str, Any]:
-    threshold = 0.1 # 10% tolerance
 
-    current_mean_abs_shap = current_metrics["metrics"].get("mean_abs_shap", 0.0)
-    baseline_mean_abs_shap = baseline_metrics["metrics"].get("mean_abs_shap", 0.0)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--baseline", required=True)
+    parser.add_argument("--candidate", required=True)
+    parser.add_argument("--threshold", type=float, default=0.2)
+    parser.add_argument("--output", required=True)
+    return parser.parse_args()
 
-    current_interaction_strength_mean = current_metrics["metrics"].get("interaction_strength_mean", 0.0)
-    baseline_interaction_strength_mean = baseline_metrics["metrics"].get("interaction_strength_mean", 0.0)
 
-    drift_report = {
-        "mean_abs_shap_drift": abs(current_mean_abs_shap - baseline_mean_abs_shap),
-        "interaction_strength_drift": abs(current_interaction_strength_mean - baseline_interaction_strength_mean),
-        "is_drift_detected": False
+def main() -> int:
+    args = parse_args()
+    baseline = json.loads(Path(args.baseline).read_text(encoding="utf-8"))
+    candidate = json.loads(Path(args.candidate).read_text(encoding="utf-8"))
+
+    base_shap = float(baseline.get("mean_abs_shap", 0.0))
+    cand_shap = float(candidate.get("mean_abs_shap", 0.0))
+    denom = base_shap if base_shap else 1.0
+    shift = abs(cand_shap - base_shap) / abs(denom)
+
+    base_ix = float(baseline.get("interaction_strength_mean", 0.0))
+    cand_ix = float(candidate.get("interaction_strength_mean", 0.0))
+    ix_shift = abs(cand_ix - base_ix) / (abs(base_ix) if base_ix else 1.0)
+
+    report = {
+        "mean_abs_shap_shift": shift,
+        "interaction_strength_shift": ix_shift,
+        "threshold": args.threshold,
+        "status": "alert" if max(shift, ix_shift) > args.threshold else "ok",
     }
 
-    if drift_report["mean_abs_shap_drift"] > threshold or drift_report["interaction_strength_drift"] > threshold:
-        drift_report["is_drift_detected"] = True
+    out = Path(args.output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    print(out)
+    return 0
 
-    with open("drift_report.json", "w") as f:
-        json.dump(drift_report, f, indent=2)
-
-    return drift_report
 
 if __name__ == "__main__":
-    detect_drift({"metrics": {"mean_abs_shap": 0.5, "interaction_strength_mean": 0.2}}, {"metrics": {"mean_abs_shap": 0.45, "interaction_strength_mean": 0.18}})
+    raise SystemExit(main())
