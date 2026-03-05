@@ -62,7 +62,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -74,7 +74,7 @@ jobs:
         run: |
           if [ -f "scripts/security/trivy-scan.sh" ]; then
             chmod +x scripts/security/trivy-scan.sh
-            ./scripts/security/trivy-scan.sh ubuntu latest.json
+            ./scripts/security/trivy-scan.sh summit-app:latest trivy-report.json
           else
             echo "Trivy scan script not found, skipping."
           fi
@@ -96,7 +96,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -119,7 +119,7 @@ jobs:
 
       - name: Helm Lint
         run: |
-          if [ -d "helm" ]; then
+          if [ -d "helm" ] && [ -f "helm/Chart.yaml" ]; then
             helm lint helm/
           fi
 
@@ -152,7 +152,7 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          node-version: "20"
+          node-version: "18"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
