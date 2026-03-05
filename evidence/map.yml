@@ -1,0 +1,8 @@
+PLAN_STABILITY_GATE:
+  description: "Cypher plan fingerprint stability enforcement"
+  artifacts:
+    - tools/plan_hash.py
+    - tools/plan_heatmap.py
+    - tools/plan_gate.py
+    - docs/ga/PLAN_STABILITY_GATE.md
+  status: ACTIVE

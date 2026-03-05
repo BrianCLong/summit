@@ -2,12 +2,7 @@
 
 > Open-source intelligence gathering powered by agentic AI, knowledge graphs, and real-time data ingestion.
 
-[![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
-[![Rust CI](https://github.com/BrianCLong/summit/actions/workflows/ci-rust.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci-rust.yml)
-[![Python CI](https://github.com/BrianCLong/summit/actions/workflows/ci-python.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/ci-python.yml)
-[![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
-[![CodeQL](https://github.com/BrianCLong/summit/actions/workflows/codeql.yml/badge.svg)](https://github.com/BrianCLong/summit/actions/workflows/codeql.yml)
-[![OSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/BrianCLong/summit/badge)](https://securityscorecards.dev/viewer/?uri=github.com/BrianCLong/summit)
+[![Build Status](https://github.com/BrianCLong/summit/workflows/CI/badge.svg)](https://github.com/BrianCLong/summit/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/BrianCLong/summit)](https://codecov.io/gh/BrianCLong/summit)
 [![License](https://img.shields.io/github/license/BrianCLong/summit)](LICENSE)
 
@@ -49,14 +44,6 @@ pnpm dev
 ```
 
 Server runs at `http://localhost:4000`
-
-## 🎥 Onboarding Tutorials
-
-Accelerate team onboarding with short, script-backed walkthroughs. Recordings can be captured with Loom for rapid sharing or OBS Studio when you need multi-scene production. Each video includes a narrator script, transcript for captioning, and a placeholder link to swap once the final recording is available.
-
-- **Data Ingestion Wizard Onboarding** – [Script](docs/tutorials/data-ingestion-wizard-script.md) · [Transcript](docs/tutorials/data-ingestion-wizard-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-data-ingestion-wizard)
-- **Graph Querying Essentials** – [Script](docs/tutorials/graph-querying-script.md) · [Transcript](docs/tutorials/graph-querying-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-graph-querying)
-- **ML Integration Kickstart** – [Script](docs/tutorials/ml-integration-script.md) · [Transcript](docs/tutorials/ml-integration-transcript.md) · [Recording placeholder](https://loom.com/share/TBD-ml-integration)
 
 ### First Query
 
@@ -111,9 +98,9 @@ Summit follows a modular microservices architecture:
 
 - [📈 Executive Briefing (2026-01-31)](docs/executive/2026-01-31-summit-platform-briefing.md)
 - [🏛 Architecture Overview](docs/architecture/README.md)
-- [🔌 Data Ingestion](docs/architecture/ingestion.md)
-- [🤖 Agent System](docs/architecture/agents.md)
-- [🕸 Knowledge Graphs](docs/architecture/knowledge-graph.md)
+- [🔌 Data Ingestion](docs/architecture/data-intake-ga-spec.md)
+- [🤖 Agent System](docs/architecture/agent-archetypes.md)
+- [🕸 Knowledge Graphs](docs/architecture/phase1-intelgraph.md)
 - [🔒 Security](docs/security/README.md)
 
 ## 📚 Key Components
@@ -138,7 +125,7 @@ Retrieval-augmented generation with knowledge graphs:
 - Vector similarity search
 - LLM-powered synthesis
 
-See: [GraphRAG Guide](docs/graphrag/README.md)
+See: [GraphRAG Guide](docs/architecture/graph-rag-reference.md)
 
 ### Agents
 
@@ -152,9 +139,9 @@ See: [Agent Development](docs/agents/README.md)
 
 ## 📡 API Reference
 
-- [GraphQL Schema](docs/api/graphql.md)
-- [REST Endpoints](docs/api/rest.md)
-- [CompanyOS SDK](docs/api/companyos.md)
+- [GraphQL Schema](docs/api/overview.md)
+- [REST Endpoints](docs/api/overview.md)
+- [CompanyOS SDK](docs/api/overview.md)
 
 ## 🧪 Testing
 
@@ -194,7 +181,7 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
-See: [Deployment Guide](docs/deployment/README.md)
+See: [Deployment Guide](docs/ga/DEPLOYMENT.md)
 
 ## 🤝 Contributing
 
@@ -202,7 +189,7 @@ We welcome contributions! Please see:
 
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
-- [Development Setup](docs/development/setup.md)
+- [Development Setup](docs/ga/README.md)
 
 ## 📄 License
 
@@ -215,3 +202,4 @@ We welcome contributions! Please see:
 - **Documentation**: [Full docs](docs/)
 
 Built with ❤️ by [@BrianCLong](https://github.com/BrianCLong) and [contributors](https://github.com/BrianCLong/summit/graphs/contributors)
+\n\n# Verified Governance (2026-02-10)

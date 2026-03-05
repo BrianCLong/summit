@@ -1,4 +1,4 @@
-name: PR Quality Gate
+name: "[info] PR Quality Gate"
 
 on:
   pull_request:
@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         uses: actions/checkout@v4 # v6
 
       - name: Install pnpm
@@ -35,6 +37,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         uses: actions/checkout@v4 # v6
 
       - name: Install pnpm
@@ -56,10 +60,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
 
       - name: Setup Node.js
         uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
@@ -78,6 +81,7 @@ jobs:
 
   security-scan:
     name: Vulnerability and Security Scan
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'run-info-security') }}
     uses: ./.github/workflows/ci-security.yml
     with:
       run_dast: false # DAST is too slow for a PR check
@@ -94,19 +98,17 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: |
-          bash scripts/generate-sbom.sh summit ci artifacts/sbom
-          mv artifacts/sbom/summit-ci.cdx.json artifacts/sbom/sbom.json
+        run: bash scripts/generate-sbom.sh . artifacts/sbom
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true
         env:
-          SBOM_FILE: artifacts/sbom/sbom.json
+          SBOM_FILE: artifacts/sbom
         run: node scripts/sbom-policy-check.mjs
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx
-          path: artifacts/sbom/sbom.json
+          path: artifacts/sbom
           retention-days: 14

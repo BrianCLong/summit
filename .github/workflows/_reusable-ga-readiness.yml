@@ -71,8 +71,8 @@ jobs:
       - name: Install Tools (OPA, Cosign, Syft, Grype)
         run: |
           # OPA
-          curl -L -o opa_bin_bin_bin_bin https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
-          chmod +x opa_bin_bin_bin_bin
+          curl -L -o opa https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
+          chmod +x opa
           sudo mv opa /usr/local/bin/
 
           # Cosign
@@ -135,6 +135,13 @@ jobs:
         run: |
           # Use the hardened script that no longer uses mocks
           node scripts/generate-evidence-bundle.js
+
+      # 5. Plan Stability Gate
+      - name: Render Plan Heatmap
+        run: python3 tools/plan_heatmap.py
+
+      - name: Enforce Plan Stability Gate
+        run: python3 tools/plan_gate.py
 
       - name: Upload Readiness Artifacts
         if: always()
