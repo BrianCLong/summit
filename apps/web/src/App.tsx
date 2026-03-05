@@ -36,7 +36,9 @@ const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
+
 const FeatureFlagsPage = React.lazy(() => import('@/pages/admin/FeatureFlags'))
+const RagHealthDashboard = React.lazy(() => import('@/pages/admin/RagHealthDashboard'))
 const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
@@ -55,7 +57,6 @@ const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboa
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
-const InvestigationsPage = React.lazy(() => import('@/pages/Investigations'))
 
 // New Switchboard Pages
 const ApprovalsPage = React.lazy(() => import('@/pages/ApprovalsPage'))
@@ -180,12 +181,6 @@ function App() {
                           </DataFetchErrorBoundary>
                         } />
 
-                        <Route path="investigations" element={
-                          <DataFetchErrorBoundary dataSourceName="Investigations">
-                            <InvestigationsPage />
-                          </DataFetchErrorBoundary>
-                        } />
-
                         {/* Tri-Pane Analysis - Wrapped with DataFetchErrorBoundary */}
                         <Route
                           path="analysis/tri-pane"
@@ -303,6 +298,14 @@ function App() {
                             <MutationErrorBoundary operationName="feature flag update">
                               <FeatureFlagsPage />
                             </MutationErrorBoundary>
+                          }
+                        />
+                        <Route
+                          path="admin/rag-health"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="RAG Health">
+                              <RagHealthDashboard />
+                            </DataFetchErrorBoundary>
                           }
                         />
 

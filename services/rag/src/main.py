@@ -23,6 +23,7 @@ import tiktoken
 from chromadb.config import Settings
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 from pydantic import BaseModel, Field
 from sentence_transformers import SentenceTransformer
 
@@ -115,6 +116,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
+
+# Prometheus instrumentation
+Instrumentator().instrument(app).expose(app)
 
 # CORS middleware
 app.add_middleware(
@@ -485,6 +489,24 @@ async def get_redis():
 
 
 # API Endpoints
+
+@app.get("/rag-health")
+async def rag_health_check():
+    """Extended health check for dashboard"""
+    return {
+        "status": "healthy",
+        "service": "rag",
+        "collection_size": collection.count() if collection else 0,
+        "embedding_model": "all-MiniLM-L6-v2" if embedding_model else "unavailable",
+        "timestamp": datetime.now().isoformat(),
+        "components": {
+            "redis": redis_client is not None,
+            "postgres": postgres_pool is not None,
+            "chroma": collection is not None
+        }
+    }
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
