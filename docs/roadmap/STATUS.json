@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-03-04T00:00:00Z",
+  "revision_note": "Integrated convergent hierarchical orchestration loop into Maestro runtime and Summit workflow guidance.",
   "initiatives": [
+    {
+      "id": "summit-maestro-convergent-orchestration",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented artifact-gated hierarchical control loop (plan/architecture/implement/execute/verify/critic) in maestro-conductor and documented Summit adoption path."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
