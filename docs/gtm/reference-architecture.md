@@ -615,4 +615,4 @@ Summit's reference architecture is designed for:
 - **Resilience:** High availability, disaster recovery, automated failover
 - **Observability:** Comprehensive monitoring, alerting, tracing
 
-For deployment assistance, contact [support@summit.com](mailto:support@summit.com).
+For deployment assistance, contact [support_at_summit.com](mailto:support_at_summit.com).
