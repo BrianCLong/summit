@@ -14,6 +14,11 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_ROLE_ARN: ${{ secrets.AWS_OIDC_ROLE_ARN }}
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+
 jobs:
   parity:
     name: Parity (${{ matrix.cloud }})
@@ -41,19 +46,19 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Configure AWS Credentials
-        if: ${{ matrix.cloud == 'aws' && secrets.AWS_OIDC_ROLE_ARN != '' }}
+        if: ${{ env.AWS_ROLE_ARN != '' && matrix.cloud == 'aws' }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
           audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
           aws-region: us-east-1
       - name: Setup gcloud
-        if: ${{ matrix.cloud == 'gcp' && secrets.GCP_PROJECT_ID != '' }}
+        if: ${{ env.GCP_PROJECT_ID != '' && matrix.cloud == 'gcp' }}
         uses: google-github-actions/setup-gcloud@v3
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
-        if: ${{ matrix.cloud == 'azure' && secrets.AZURE_CLIENT_ID != '' }}
+        if: ${{ env.AZURE_CLIENT_ID != '' && matrix.cloud == 'azure' }}
         uses: azure/login@v2
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
@@ -73,6 +78,7 @@ jobs:
           AZURE_FEDERATED_ID: ${{ secrets.AZURE_FEDERATED_ID }}
           PARITY_ENV1: prodlike
           PARITY_ENV2: canary
+        if: ${{ (matrix.cloud == 'aws' && env.AWS_ROLE_ARN != '') || (matrix.cloud == 'gcp' && env.GCP_PROJECT_ID != '') || (matrix.cloud == 'azure' && env.AZURE_CLIENT_ID != '') }}
         run: bash scripts/ci/parity_check.sh
 
       - name: Upload parity artifact
