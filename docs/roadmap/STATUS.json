@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-25T00:00:00Z",
-  "revision_note": "Added Summit Trust & Safety Proof Pack v0.1 artifact for pre-GA evidence hardening and scorecard gating.",
+  "last_updated": "2026-02-26T16:28:29Z",
+  "revision_note": "Added kafka-push-proxy PR-1 scaffold initiative and repository assumption validation artifact.",
   "initiatives": [
     {
-      "id": "summit-trust-safety-proof-pack-v0-1",
+      "id": "kafka-push-proxy-pr1-scaffold",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published docs/SUMMIT_TRUST_SAFETY_PROOF_PACK_V0_1.md to define proof modules, scorecard gates, and evidence contract for GA readiness."
+      "notes": "Feature-flagged ingestion/kafka_push_proxy scaffold with deny-by-default policy placeholder and assumption validation in repo_assumptions.md."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
