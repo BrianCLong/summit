@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { GraphQLError } from 'graphql';
-import { expressMiddleware } from '@apollo/server/express4';
+import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 // import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
@@ -97,10 +97,7 @@ import resourceCostsRouter from './routes/resource-costs.js';
 
 import streamRouter from './routes/stream.js'; // Added import
 import queryPreviewStreamRouter from './routes/query-preview-stream.js';
-import CORRECTNESS_PROGRAM_ROUTER from './routes/correctness-program.js';
-import { initializeAIA, AgentInsight } from '@intelgraph/aia';
-import { agentsRouter } from './routes/agents.js';
-import { getPostgresPool } from './db/postgres.js';
+import correctnessProgramRouter from './routes/correctness-program.js';
 import commandConsoleRouter from './routes/internal/command-console.js';
 import searchV1Router from './routes/search-v1.js';
 import ontologyRouter from './routes/ontology.js';
@@ -119,7 +116,6 @@ import exportsRouter from './routes/exports.js';
 import retentionRouter from './routes/retention.js';
 import drRouter from './routes/dr.js';
 import reportingRouter from './routes/reporting.js';
-import reportsRouter from './routes/reports.js';
 import policyProfilesRouter from './routes/policy-profiles.js';
 import policyProposalsRouter from './routes/policy-proposals.js';
 import evidenceRouter from './routes/evidence.js';
@@ -141,9 +137,8 @@ import securityAdminRouter from './routes/security/security-admin.js';
 import complianceAdminRouter from './routes/compliance/compliance-admin.js';
 import sandboxAdminRouter from './routes/sandbox/sandbox-admin.js';
 import adminGateway from './routes/admin/gateway.js';
-import onboardingRouter from './routes/v1/onboarding.js';
+import onboardingRouter from './routes/onboarding.js';
 import supportCenterRouter from './routes/support-center.js';
-import supportBundlesRouter from './routes/support-bundles.js';
 import i18nRouter from './routes/i18n.js';
 import experimentationRouter from './routes/experimentation.js';
 import { v4Router } from './routes/v4/index.js';
@@ -298,6 +293,8 @@ export const createApp = async () => {
             sub: 'dev-user',
             email: 'dev@intelgraph.local',
             role: 'admin',
+            tenantId: 'global',
+            id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
           };
           return next();
         }
@@ -387,7 +384,7 @@ export const createApp = async () => {
   // Requires authentication and admin role
   app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
-      const status = await advancedRateLimiter.getStatus((req.params.userId as string));
+      const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });
@@ -399,6 +396,24 @@ export const createApp = async () => {
   app.use('/auth/sso', ssoRouter);
   app.use('/api/auth', authRouter); // Alternative path
   app.use('/sso', ssoRouter);
+
+  // SEC-2025-002: Enforce authentication globally for /api routes
+  // This mitigates the risk of missing authentication checks in individual routers.
+  app.use('/api', (req, res, next) => {
+    // Exempt known public paths (must be robust against mount point logic)
+    // Note: req.path is relative to the mount point (/api)
+
+    // Public Webhooks (e.g., GitHub, Jira)
+    if (isPublicWebhook(req)) return next();
+
+    // Auth routes (redundant as they are mounted before, but good for safety)
+    if (req.path.startsWith('/auth')) return next();
+
+    // Health checks if exposed under /api
+    if (req.path.startsWith('/health')) return next();
+
+    return authenticateToken(req, res, next);
+  });
 
   // Other routes
   // app.use('/api/policy', policyRouter);
@@ -428,7 +443,6 @@ export const createApp = async () => {
     app.use('/api/webhooks', webhookRouter);
   }
   app.use('/api/support', supportTicketsRouter);
-  app.use('/api', supportBundlesRouter);
   app.use('/api', ticketLinksRouter);
   app.use('/api/cases', caseRouter);
   app.use('/api/entities', entityCommentsRouter);
@@ -456,32 +470,7 @@ export const createApp = async () => {
   app.use('/api/tenants/:tenantId/usage', tenantUsageRouter);
   app.use('/api/internal/command-console', commandConsoleRouter);
 
-  // Phase 4: AIA Initialization
-  try {
-    initializeAIA(async (insight: AgentInsight) => {
-      const db = getPostgresPool();
-      const workflowResult = await db.query(
-        'INSERT INTO aia_insights (id, agent_id, type, severity, severity_score, confidence, rationale, evidence, is_actionable) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
-        [insight.id, insight.agentId, insight.type, insight.severity, insight.severityScore, insight.confidence, insight.rationale, JSON.stringify(insight.evidence), insight.isActionable]
-      );
-
-      if (insight.isActionable) {
-        // Trigger actual DAL workflow execution
-        const triggerResult = await db.query(
-          'INSERT INTO aia_workflow_triggers (insight_id, workflow_type) VALUES ($1, $2) RETURNING id',
-          [insight.id, insight.type]
-        );
-        return triggerResult.rows[0]?.id || null;
-      }
-      return null;
-    });
-    logger.info('AIA Engine initialized and bridged to DAL');
-  } catch (error) {
-    logger.error({ error }, 'Failed to initialize AIA Engine');
-  }
-
-  app.use('/api/v1/agents', agentsRouter);
-  app.use('/api/correctness', CORRECTNESS_PROGRAM_ROUTER);
+  app.use('/api/correctness', correctnessProgramRouter);
   app.use('/api', queryPreviewStreamRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
@@ -490,8 +479,8 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
-  app.use('/airgap', airgapRouter);
-  app.use('/analytics', analyticsRouter);
+  app.use('/airgap', authenticateToken, ensureRole(['ADMIN', 'admin']), airgapRouter);
+  app.use('/analytics', authenticateToken, ensureRole(['ADMIN', 'admin', 'ANALYST', 'analyst']), analyticsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
@@ -501,10 +490,9 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', drRouter);
+  app.use('/dr', authenticateToken, ensureRole(['ADMIN', 'admin']), drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
-  app.use('/api', reportsRouter);
   app.use('/api/mastery', masteryRouter);
   app.use('/api/crypto-intelligence', cryptoIntelligenceRouter);
   app.use('/api/demo', demoRouter);
@@ -520,7 +508,7 @@ export const createApp = async () => {
   app.use('/api/security', authenticateToken, ensureRole(['ADMIN', 'admin']), securityAdminRouter);
   app.use('/api/compliance', authenticateToken, ensureRole(['ADMIN', 'admin']), complianceAdminRouter);
   app.use('/api/sandbox', authenticateToken, ensureRole(['ADMIN', 'admin']), sandboxAdminRouter);
-  app.use('/api/v1/onboarding', authenticateToken, onboardingRouter);
+  app.use('/api/v1/onboarding', onboardingRouter);
   app.use('/api/v1/support', supportCenterRouter);
   app.use('/api/v1/i18n', i18nRouter);
   app.use('/api/v1/experiments', experimentationRouter);
@@ -620,19 +608,29 @@ export const createApp = async () => {
     appLogger.error({ err }, 'Failed to initialize Maestro V2 Engine');
   }
 
-  app.get('/search/evidence', authenticateToken, async (req, res) => {
-    const { q, skip = 0, limit = 10 } = req.query;
+  app.get('/search/evidence', authenticateToken, ensureRole(['admin', 'analyst']), async (req, res) => {
+    const { q } = req.query;
+    // SEC-DoS: Enforce pagination and offset limits
+    const limit = Math.min(Math.max(Number(req.query.limit) || 10, 1), 100);
+    const skip = Math.max(Number(req.query.skip) || 0, 0);
 
     if (!q) {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
+    }
+
+    const tenantId = (req as any).user?.tenantId || (req as any).user?.tenant_id;
+    if (!tenantId) {
+      return res.status(403).send({ error: "Tenant context is required" });
     }
 
     const driver = getNeo4jDriver();
     const session = driver.session();
 
     try {
+      // SEC-TENANCY: Filter results by tenantId/tenant to prevent cross-tenant data leakage
       const searchQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node, score
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN node, score
         SKIP $skip
         LIMIT $limit
@@ -640,16 +638,18 @@ export const createApp = async () => {
 
       const countQuery = `
         CALL db.index.fulltext.queryNodes("evidenceContentSearch", $query) YIELD node
+        WHERE node.tenantId = $tenantId OR node.tenant = $tenantId
         RETURN count(node) as total
       `;
 
       const [searchResult, countResult] = await Promise.all([
         session.run(searchQuery, {
           query: q,
+          tenantId,
           skip: Number(skip),
-          limit: Number(limit),
+          limit,
         }),
-        session.run(countQuery, { query: q }),
+        session.run(countQuery, { query: q, tenantId }),
       ]);
 
       const evidence = searchResult.records.map((record: any) => ({

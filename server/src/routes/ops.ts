@@ -18,8 +18,9 @@ const drService = new DisasterRecoveryService();
 const isHotReloadEnabled = () =>
   (process.env.POLICY_HOT_RELOAD || '').toLowerCase() === 'true';
 
-// All /ops routes require authentication
+// All /ops routes require authentication and at least OPERATOR role
 router.use(ensureAuthenticated);
+router.use(ensureRole(['ADMIN', 'admin', 'OPERATOR', 'operator']));
 
 /**
  * @route POST /ops/maintenance
@@ -71,7 +72,7 @@ router.post(
       return res.status(403).json({ error: 'POLICY_HOT_RELOAD is disabled' });
     }
 
-    const toVersion = ((((req.query.toVersion as string) as string) as string) as string) || req.body?.toVersion;
+    const toVersion = (req.query.toVersion as string) || req.body?.toVersion;
     if (!toVersion) {
       return res.status(400).json({ error: 'toVersion is required' });
     }
