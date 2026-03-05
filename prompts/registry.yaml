@@ -922,27 +922,22 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: maestro-spec-interview-v1
+  - id: daily-sprint-automation
     version: v1
-    path: prompts/maestro_spec_interview_v1.md
-    sha256: c705d30a4c0ff0261be802b36482c2fdd3ec67f7d69d4c668cdceb2b6a6a427e
-    description: Deterministic Maestro multi-phase spec interview with Summit artifact emission.
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: 87c76ac951bde59b7df0a3e16a227b179085b825426aeb3bb201624bd568e42a
+    description: Daily sprint automation prompt for Summit repo operations.
     scope:
       paths:
-        - prompts/maestro_spec_interview_v1.md
-        - prompts/registry.yaml
-        - schemas/maestro/
-        - scripts/maestro/
-        - docs/repo_assumptions.md
-        - docs/standards/maestro_spec.md
-        - docs/ops/runbooks/maestro_spec.md
-        - docs/security/data-handling/maestro_spec.md
+        - docs/ops/DAILY_SPRINT_*.md
         - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+        - agents/examples/DAILY_SPRINT_*.json
       domains:
+        - operations
         - governance
         - documentation
-        - prompts
-        - artifacts
     verification:
       tiers_required:
         - C
