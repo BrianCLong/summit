@@ -74,7 +74,7 @@ jobs:
           opa test policy/abac policy/tests/abac_test.rego \
             --format junit \
             --coverage \
-            > test-results/abac-junit.xml 2>&1 || true
+            > test-results/abac-junit.xml || true
 
           # Run tests again for readable output and coverage JSON
           opa test policy/abac policy/tests/abac_test.rego \
