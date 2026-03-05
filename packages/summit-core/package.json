@@ -1,0 +1,17 @@
+{
+  "name": "summit-core",
+  "version": "1.0.0",
+  "description": "Summit Core Ledger",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "duckdb": "^1.1.0",
+    "duckdb-async": "^1.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "vitest": "^1.0.0"
+  }
+}
