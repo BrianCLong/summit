@@ -3,7 +3,7 @@ import {
   requestFactory,
   responseFactory,
   nextFactory,
-} from '../../../tests/mocks/request-factory.ts';
+} from '../../../tests/mocks/request-factory.js';
 
 // Mock functions declared before mocks
 const mockEvaluatePolicy = jest.fn();

@@ -3,8 +3,7 @@ import { jest } from '@jest/globals';
 const requests = new Map<string, Record<string, unknown>>();
 const evidences = new Map<string, Record<string, unknown>>();
 
-const pool = {
-  query: jest.fn(async (text: string, params: unknown[] = []) => {
+const queryHandler = async (text: string, params: unknown[] = []) => {
     const query = text.replace(/\s+/g, ' ').trim().toLowerCase();
 
     if (query.startsWith('insert into privacy_dsar_requests')) {
@@ -104,7 +103,10 @@ const pool = {
     }
 
     return { rows: [] };
-  }),
+  };
+
+const pool = {
+  query: jest.fn(queryHandler),
 };
 
 const ledgerMock = {
@@ -132,6 +134,8 @@ describe('PrivacyService', () => {
   beforeEach(() => {
     privacyService = PrivacyService.getInstance();
     jest.clearAllMocks();
+    (pool.query as jest.Mock).mockImplementation(queryHandler);
+    (provenanceLedger.appendEntry as jest.Mock).mockResolvedValue({ id: 'mock-entry-id' });
     requests.clear();
     evidences.clear();
   });
