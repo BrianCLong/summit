@@ -1,0 +1,30 @@
+name: Repetition Hygiene Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-repetition:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.in ]; then pip install -r requirements.in; fi
+        pip install pytest
+    - name: Run Repetition Benchmark
+      run: python3 scripts/bench_repetition.py
+    - name: Archive artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: repetition-report
+        path: artifacts/repetition/
