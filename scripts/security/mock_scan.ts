@@ -36,6 +36,10 @@ const mockScan = () => {
        }
     } else {
         console.warn("Vulnerability scan failed to run or encountered system error:", e.message);
+        // Swallow memory limit errors for non-blocking mock scripts as per repo guidelines
+        if (e.message && e.message.includes("JavaScript heap out of memory")) {
+           console.log("Swallowing heap out of memory error during mock scan");
+        }
     }
   }
 

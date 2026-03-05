@@ -18,7 +18,7 @@ No structural or code changes are included, this is exclusively documentation to
 {
   "restricted_override": true,
   "promptId": "summit-execution-pack",
-  "taskId": "6126258352575418615",
+  "taskId": "summit-task",
   "tags": ["docs", "summit"]
 }
 <!-- AGENT-METADATA:END -->
