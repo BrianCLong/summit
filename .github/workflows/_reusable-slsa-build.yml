@@ -210,7 +210,7 @@ jobs:
 
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
-        uses: actions/attest-sbom@v2
+        uses: actions/attest-sbom@v3
         with:
           subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
           subject-digest: ${{ steps.build.outputs.digest }}
