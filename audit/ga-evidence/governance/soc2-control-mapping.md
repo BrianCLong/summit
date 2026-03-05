@@ -67,7 +67,7 @@ Every verdict includes:
   "verdict": "REJECTED",
   "policy": "copilot-answer-policy",
   "rationale": "Insufficient citations for answer",
-  "timestamp": "YYYY-MM-DDTHH:mm:ssZ",
+  "timestamp": "2025-12-27T10:30:00Z",
   "evaluatedBy": "ai-copilot-service",
   "confidence": 1.0,
   "metadata": {
@@ -137,7 +137,7 @@ Every verdict provides audit trail for change management:
 
 | Field | Purpose | Example |
 |-------|---------|---------|
-| `timestamp` | Change timestamp | `YYYY-MM-DDTHH:mm:ssZ` |
+| `timestamp` | Change timestamp | `2025-12-27T10:30:00Z` |
 | `evaluatedBy` | System making change | `ai-copilot-service` |
 | `policy` | Authorization policy | `copilot-answer-policy` |
 | `policyVersion` | Policy version used | `1.0.0` |

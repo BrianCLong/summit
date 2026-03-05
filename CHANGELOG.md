@@ -217,6 +217,3 @@ n### Added
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
-
-## [Unreleased]
-- Added idempotent Neo4j reconciliation logic

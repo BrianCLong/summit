@@ -135,7 +135,7 @@ router.get(
       const principal = (req as any).principal;
       const { id } = req.params;
 
-      const envelope = await policyService.getPolicy(principal.tenantId, (id as string), principal.id);
+      const envelope = await policyService.getPolicy(principal.tenantId, id, principal.id);
 
       if (!envelope.data) {
         res.status(404).json(envelope);
@@ -217,7 +217,7 @@ router.patch(
 
       const envelope = await policyService.updatePolicy(
         principal.tenantId,
-        (id as string),
+        id,
         parseResult.data,
         changelog || 'Policy updated',
         principal.id
@@ -250,7 +250,7 @@ router.delete(
       const principal = (req as any).principal;
       const { id } = req.params;
 
-      const envelope = await policyService.deletePolicy(principal.tenantId, (id as string), principal.id);
+      const envelope = await policyService.deletePolicy(principal.tenantId, id, principal.id);
 
       if (!envelope.data.success) {
         res.status(400).json(envelope);
@@ -285,7 +285,7 @@ router.get(
 
       const envelope = await policyService.listPolicyVersions(
         principal.tenantId,
-        (id as string),
+        id,
         principal.id
       );
 
@@ -319,7 +319,7 @@ router.post(
 
       const envelope = await policyService.rollbackPolicy(
         principal.tenantId,
-        (id as string),
+        id,
         targetVersion,
         principal.id
       );
@@ -358,7 +358,7 @@ router.post(
 
       const envelope = await policyService.submitForApproval(
         principal.tenantId,
-        (id as string),
+        id,
         reason || 'Submitted for review',
         principal.id
       );
@@ -393,7 +393,7 @@ router.post(
 
       const envelope = await policyService.approvePolicy(
         principal.tenantId,
-        (id as string),
+        id,
         notes || '',
         principal.id
       );
@@ -427,7 +427,7 @@ router.post(
 
       const envelope = await policyService.publishPolicy(
         principal.tenantId,
-        (id as string),
+        id,
         principal.id
       );
 

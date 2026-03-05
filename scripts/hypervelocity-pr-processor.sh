@@ -48,17 +48,8 @@ process_pr() {
     mkdir -p "$work_dir"
 
     # Clone and checkout PR
-    echo "  - Checking out branch $branch_name"
-    if ! git rev-parse --verify "$branch_name" >/dev/null 2>&1; then
-        echo "  - Fetching $branch_name from origin..."
-        git fetch origin "$branch_name:$branch_name" 2>/dev/null || {
-            echo "❌ Failed to fetch branch $branch_name from origin"
-            return 1
-        }
-    fi
-
     git worktree add "$work_dir" "$branch_name" 2>/dev/null || {
-        echo "❌ Failed to checkout PR #$pr_number (worktree add failed)"
+        echo "❌ Failed to checkout PR #$pr_number (branch may not exist)"
         return 1
     }
 

@@ -98,7 +98,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await approveApproval(
-        (req.params.id as string),
+        req.params.id,
         approverId,
         req.body?.reason,
       );
@@ -156,7 +156,7 @@ export function buildApprovalsRouter(maestro?: Maestro): express.Router {
       }
 
       const approval = await rejectApproval(
-        (req.params.id as string),
+        req.params.id,
         approverId,
         req.body?.reason,
       );

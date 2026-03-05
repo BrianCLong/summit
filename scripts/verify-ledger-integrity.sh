@@ -28,7 +28,7 @@ verify_root() {
     echo -n "$root_hash" > "$temp_hash"
     echo "$signature" > "$temp_sig"
 
-    if cosign verify-blob --use-signed-timestamps --key "$COSIGN_PUB_KEY" --signature "$temp_sig" "$temp_hash" >/dev/null 2>&1; then
+    if cosign verify-blob --key "$COSIGN_PUB_KEY" --signature "$temp_sig" "$temp_hash" >/dev/null 2>&1; then
         rm -f "$temp_hash" "$temp_sig"
         return 0
     else
@@ -58,10 +58,10 @@ main() {
 
     for root_file in "$BACKUP_DIR"/*.json; do
         [ -e "$root_file" ] || continue
-        
+
         if verify_root "$root_file"; then
             total_verified=$((total_verified + 1))
-            
+
             # Track latest root
             current_ts=$(jq -r '.timestamp' "$root_file")
             if [[ -z "$latest_timestamp" || "$current_ts" > "$latest_timestamp" ]]; then

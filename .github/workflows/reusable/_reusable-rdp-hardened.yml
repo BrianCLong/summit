@@ -1,0 +1,26 @@
+name: RDP Hardened Job
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        type: string
+        default: ubuntu-latest
+      timeout-minutes:
+        type: integer
+        default: 10
+
+jobs:
+  hardened-job:
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    # Minimal permissions by default
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout with SHA pinning
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Setup Node with SHA pinning
+        uses: actions/setup-node@3922559a89f3c5f0f047e7d67ca588b5c467abb2 # v4.1.0
+        with:
+          node-version: '18'

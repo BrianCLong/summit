@@ -103,7 +103,7 @@ router.get('/runs/:runId', async (req: Request, res: Response) => {
       });
     }
 
-    const result = await service.getRun((runId as string), ((tenantId as string) as string), requesterId);
+    const result = await service.getRun(runId, tenantId, requesterId);
 
     return res.status(result.success ? 200 : 404).json(result);
   } catch (error: any) {
@@ -146,7 +146,7 @@ router.get('/runs/:runId/lineage', async (req: Request, res: Response) => {
       });
     }
 
-    const result = await service.getLineage((runId as string), ((tenantId as string) as string), depth);
+    const result = await service.getLineage(runId, tenantId, depth);
 
     return res.status(result.success ? 200 : 500).json(result);
   } catch (error: any) {
@@ -244,7 +244,7 @@ router.get('/runs/:runId/verify', async (req: Request, res: Response) => {
       });
     }
 
-    const result = await service.verifyLinkage((runId as string), ((tenantId as string) as string));
+    const result = await service.verifyLinkage(runId, tenantId);
 
     return res.status(result.success ? 200 : 500).json(result);
   } catch (error: any) {

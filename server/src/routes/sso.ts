@@ -66,7 +66,7 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
   const validated = ssoConfigSchema.parse(req.body);
 
   // Get current tenant config
-  const tenant = await tenantService.getTenant((id as string));
+  const tenant = await tenantService.getTenant(id);
   if (!tenant) return res.status(404).json({ error: 'Tenant not found' });
 
   const newConfig = {
@@ -93,7 +93,7 @@ router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async 
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   try {
-    const { url, state } = await ssoService.getAuthUrl((tenantId as string), config.baseUrl || baseUrl);
+    const { url, state } = await ssoService.getAuthUrl(tenantId, config.baseUrl || baseUrl);
 
     // Set state cookie for CSRF protection
     res.cookie('sso_state', state, {
@@ -136,7 +136,7 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
   res.clearCookie('sso_state');
 
   try {
-    const { user, token, refreshToken } = await ssoService.handleCallback((tenantId as string), config.baseUrl || baseUrl, req.body, req.query);
+    const { user, token, refreshToken } = await ssoService.handleCallback(tenantId, config.baseUrl || baseUrl, req.body, req.query);
 
     // Set session cookies
     res.cookie('access_token', token, {
@@ -177,7 +177,7 @@ router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(asy
   res.clearCookie('sso_state');
 
   try {
-    const { user, token, refreshToken } = await ssoService.handleCallback((tenantId as string), config.baseUrl || baseUrl, req.body, req.query);
+    const { user, token, refreshToken } = await ssoService.handleCallback(tenantId, config.baseUrl || baseUrl, req.body, req.query);
 
     res.cookie('access_token', token, {
       httpOnly: true,

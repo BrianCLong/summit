@@ -85,7 +85,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       res.json(response);
     } catch (error: any) {
       console.error('Error fetching feature flags:', error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -113,7 +113,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error fetching feature flag ${req.params.flagKey}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -150,7 +150,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error('Error creating feature flag:', error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -172,7 +172,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error updating feature flag ${req.params.flagKey}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -192,7 +192,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error deleting feature flag ${req.params.flagKey}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -212,7 +212,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error(`Error fetching config ${req.params.key}:`, error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 
@@ -235,7 +235,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       });
     } catch (error: any) {
       console.error('Error fetching multiple configs:', error);
-      res.status(500).json({ error: 'Internal server error', message: 'An unexpected error occurred while processing your request' });
+      res.status(500).json({ error: 'Internal server error', message: error.message });
     }
   });
 

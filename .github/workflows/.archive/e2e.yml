@@ -39,7 +39,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
 
       - name: Enable Corepack
         run: corepack enable
@@ -149,7 +149,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Launch stack (server+client+deps)
@@ -191,7 +191,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
       - name: Launch backend stack (Redis+server)

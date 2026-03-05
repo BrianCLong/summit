@@ -195,15 +195,16 @@ export class SupernodeQueryOptimizer {
    * Detect supernodes in a list of entity IDs
    */
   async detectSupernodes(entityIds: string[]): Promise<SupernodeInfo[]> {
-    // ⚡ Bolt: Fetch supernode info concurrently rather than sequentially to reduce latency
-    const infos = await Promise.all(
-      entityIds.map((entityId) => this.getSupernodeInfo(entityId))
-    );
+    const supernodes: SupernodeInfo[] = [];
 
-    return infos.filter(
-      (info): info is SupernodeInfo =>
-        !!info && info.connectionCount >= this.config.supernodeThreshold
-    );
+    for (const entityId of entityIds) {
+      const info = await this.getSupernodeInfo(entityId);
+      if (info && info.connectionCount >= this.config.supernodeThreshold) {
+        supernodes.push(info);
+      }
+    }
+
+    return supernodes;
   }
 
   /**
@@ -549,17 +550,12 @@ export class SupernodeQueryOptimizer {
       );
 
       const entityIds = result.records.map((r: any) => r.get('entityId'));
+      let processed = 0;
 
-      // ⚡ Bolt: Process in batches to avoid overwhelming the connection pool
-      const batchSize = 10;
-      for (let i = 0; i < entityIds.length; i += batchSize) {
-        const batch = entityIds.slice(i, i + batchSize);
-        await Promise.all(
-          batch.map((entityId: string) => this.getSupernodeInfo(entityId)) // This will cache the result
-        );
+      for (const entityId of entityIds) {
+        await this.getSupernodeInfo(entityId); // This will cache the result
+        processed++;
       }
-
-      const processed = entityIds.length;
 
       serviceLogger.info('Supernode pre-computation complete', { processed });
       return processed;

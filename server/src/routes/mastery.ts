@@ -10,7 +10,7 @@ router.get('/labs', ensureAuthenticated, (req, res) => {
 
 router.post('/labs/:labId/start', ensureAuthenticated, (req, res) => {
   try {
-    const run = masteryService.startLab((req.params.labId as string), (req as any).user.id, (req as any).user.tenantId);
+    const run = masteryService.startLab(req.params.labId, (req as any).user.id, (req as any).user.tenantId);
     res.json(run);
   } catch (err: any) {
     res.status(400).json({ error: err.message });
@@ -23,7 +23,7 @@ router.get('/runs', ensureAuthenticated, (req, res) => {
 });
 
 router.get('/runs/:runId', ensureAuthenticated, (req, res) => {
-  const run = masteryService.getRun((req.params.runId as string));
+  const run = masteryService.getRun(req.params.runId);
   if (!run || run.userId !== (req as any).user.id) {
     return res.status(404).json({ error: 'Run not found' });
   }
@@ -31,13 +31,13 @@ router.get('/runs/:runId', ensureAuthenticated, (req, res) => {
 });
 
 router.post('/runs/:runId/steps/:stepId/validate', ensureAuthenticated, async (req, res) => {
-  const run = masteryService.getRun((req.params.runId as string));
+  const run = masteryService.getRun(req.params.runId);
   if (!run || run.userId !== (req as any).user.id) {
     return res.status(404).json({ error: 'Run not found' });
   }
 
   try {
-    const result = await masteryService.validateStep((req.params.runId as string), (req.params.stepId as string));
+    const result = await masteryService.validateStep(req.params.runId, req.params.stepId);
     res.json(result);
   } catch (err: any) {
     res.status(400).json({ error: err.message });

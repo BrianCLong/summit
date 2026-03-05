@@ -24,7 +24,6 @@ import { runsRepo } from '../maestro/runs/runs-repo.js'; // Import runsRepo
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
 import { ConductorCache } from './cache.js';
 import { createHash } from 'crypto';
-import { getBudgetLedgerManager } from '../db/budgetLedger.js';
 import { registerBuiltins, runPlugin } from '../plugins/index.js';
 import { checkResidency } from '../policy/opaClient.js';
 import { checkQuota, accrueUsage } from './quotas.js';
@@ -68,7 +67,6 @@ export class Conductor {
   }[] = [];
   private auditLog: any[] = []; // Keep existing auditLog
   private budgetController: BudgetAdmissionController; // Add this line
-  private budgetLedger = getBudgetLedgerManager();
   private cache: ConductorCache;
   private missionControlResolver: MissionControlConflictResolver;
 
@@ -233,8 +231,6 @@ export class Conductor {
         {
           userId: input.userContext?.userId,
           tenantId: tenantId,
-          agentId: input.agentId,
-          agentVersion: input.agentVersion,
         },
       );
 
@@ -315,546 +311,541 @@ export class Conductor {
         await accrueUsage(tenantId, { runInc: true });
       } catch { }
 
+      // Record actual spending for the task
+      if (result.cost) {
+        await this.budgetController.recordSpending(
+          decision.expert,
+          result.cost,
+          {
+            userId: input.userContext?.userId,
+            tenantId: tenantId,
+          },
         );
-
-      // Also record to persistent SQL ledger for audit trail
-      await this.budgetLedger.recordSpending({
-        tenantId: tenantId,
-        correlationId: auditId || uuid(),
-        operationName: `conduct:${decision.expert}`,
-        userId: input.userContext?.userId,
-        provider: decision.expert.startsWith('LLM') ? 'LLM' : 'TOOL',
-        model: decision.expert,
-        actualTotalUsd: result.cost,
-        status: 'completed',
-        agentId: input.agentId,
-        agentVersion: input.agentVersion,
-      });
-    }
+      }
 
       // Audit logging
       if (this.config.auditEnabled) {
-      this.logAudit({
+        this.logAudit({
+          auditId,
+          input,
+          decision,
+          result: conductResult,
+          missionControlResolution,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      return conductResult;
+    } catch (error: any) {
+      const endTime = performance.now();
+
+      const redacted = (s: string) =>
+        s.replace(
+          /(api[_-]?key|token|secret)\s*[:=]\s*["']?([A-Za-z0-9\-_]{4,})["']?/gi,
+          (_m, k) => `${k}: ****`,
+        );
+      const errorResult: ConductResult = {
+        expertId: 'LLM_LIGHT', // fallback
+        output: null,
+        logs: [`Error: ${redacted(error.message || String(error))}`],
+        cost: 0,
+        latencyMs: Math.round(endTime - startTime),
+        error: error.message,
         auditId,
-        input,
-        decision,
-        result: conductResult,
-        missionControlResolution,
-        timestamp: new Date().toISOString(),
-      });
+      };
+
+      if (this.config.auditEnabled) {
+        this.logAudit({
+          auditId,
+          input,
+          error: redacted(error.message || String(error)),
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      return errorResult;
+    } finally {
+      this.activeTaskCount--;
+      // drain one from queue
+      const next = this.queue.shift();
+      if (next) {
+        this.conduct(next.input).then(next.resolve).catch(next.reject);
+      }
     }
-
-    return conductResult;
-  } catch(error: any) {
-    const endTime = performance.now();
-
-    const redacted = (s: string) =>
-      s.replace(
-        /(api[_-]?key|token|secret)\s*[:=]\s*["']?([A-Za-z0-9\-_]{4,})["']?/gi,
-        (_m, k) => `${k}: ****`,
-      );
-    const errorResult: ConductResult = {
-      expertId: 'LLM_LIGHT', // fallback
-      output: null,
-      logs: [`Error: ${redacted(error.message || String(error))}`],
-      cost: 0,
-      latencyMs: Math.round(endTime - startTime),
-      error: error.message,
-      auditId,
-    };
-
-    if (this.config.auditEnabled) {
-      this.logAudit({
-        auditId,
-        input,
-        error: redacted(error.message || String(error)),
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    return errorResult;
-  } finally {
-    this.activeTaskCount--;
-    // drain one from queue
-    const next = this.queue.shift();
-    if (next) {
-      this.conduct(next.input).then(next.resolve).catch(next.reject);
-    }
-  }
   }
 
   private makeCacheKey(expert: string, input: ConductInput) {
-  const basis = JSON.stringify({
-    expert,
-    task: input.task,
-    dataRefs: input.dataRefs,
-    ctx: input.userContext,
-  });
-  return createHash('sha1').update(basis).digest('hex');
-}
+    const basis = JSON.stringify({
+      expert,
+      task: input.task,
+      dataRefs: input.dataRefs,
+      ctx: input.userContext,
+    });
+    return createHash('sha1').update(basis).digest('hex');
+  }
 
   /**
    * Preview routing decision without execution
    */
   public previewRouting(input: ConductInput): RouteDecision {
-  return moERouter.route(input);
-}
+    return moERouter.route(input);
+  }
 
   /**
    * Validate security constraints
    */
   private async validateSecurity(
-  input: ConductInput,
-  decision: RouteDecision,
-): Promise < void> {
-  // PII/Secret data constraints
-  if(input.sensitivity === 'secret') {
-  if (decision.expert === 'LLM_LIGHT' || decision.expert === 'LLM_HEAVY') {
-    const llmConfig =
-      decision.expert === 'LLM_LIGHT'
-        ? this.config.llmProviders.light
-        : this.config.llmProviders.heavy;
+    input: ConductInput,
+    decision: RouteDecision,
+  ): Promise<void> {
+    // PII/Secret data constraints
+    if (input.sensitivity === 'secret') {
+      if (decision.expert === 'LLM_LIGHT' || decision.expert === 'LLM_HEAVY') {
+        const llmConfig =
+          decision.expert === 'LLM_LIGHT'
+            ? this.config.llmProviders.light
+            : this.config.llmProviders.heavy;
 
-    // Check if LLM provider has enterprise agreement for secret data
-    if (!llmConfig?.endpoint.includes('enterprise')) {
-      throw new Error(
-        'Secret data cannot be processed by non-enterprise LLM providers',
-      );
+        // Check if LLM provider has enterprise agreement for secret data
+        if (!llmConfig?.endpoint.includes('enterprise')) {
+          throw new Error(
+            'Secret data cannot be processed by non-enterprise LLM providers',
+          );
+        }
+      }
     }
-  }
-}
 
-// Check user permissions for tool usage
-if (input.userContext?.scopes) {
-  const requiredScopes = this.getRequiredScopes(decision.expert);
-  const userScopes = input.userContext.scopes;
+    // Check user permissions for tool usage
+    if (input.userContext?.scopes) {
+      const requiredScopes = this.getRequiredScopes(decision.expert);
+      const userScopes = input.userContext.scopes;
 
-  const hasPermission = requiredScopes.every((scope) =>
-    userScopes.includes(scope),
-  );
-  if (!hasPermission) {
-    throw new Error(
-      `Insufficient permissions for ${decision.expert}. Required: ${requiredScopes.join(', ')}`,
-    );
-  }
-}
+      const hasPermission = requiredScopes.every((scope) =>
+        userScopes.includes(scope),
+      );
+      if (!hasPermission) {
+        throw new Error(
+          `Insufficient permissions for ${decision.expert}. Required: ${requiredScopes.join(', ')}`,
+        );
+      }
+    }
   }
 
   /**
    * Get required scopes for an expert
    */
   private getRequiredScopes(expert: ExpertType): string[] {
-  const scopeMap: Record<ExpertType, string[]> = {
-    LLM_LIGHT: [],
-    LLM_HEAVY: [],
-    GRAPH_TOOL: ['graph:read'],
-    RAG_TOOL: ['data:read'],
-    FILES_TOOL: ['files:read'],
-    OSINT_TOOL: ['osint:read'],
-    EXPORT_TOOL: ['export:create'],
-  };
+    const scopeMap: Record<ExpertType, string[]> = {
+      LLM_LIGHT: [],
+      LLM_HEAVY: [],
+      GRAPH_TOOL: ['graph:read'],
+      RAG_TOOL: ['data:read'],
+      FILES_TOOL: ['files:read'],
+      OSINT_TOOL: ['osint:read'],
+      EXPORT_TOOL: ['export:create'],
+    };
 
-  return scopeMap[expert] || [];
-}
+    return scopeMap[expert] || [];
+  }
 
   /**
    * Execute task with the selected expert
    */
   private async executeWithExpert(
-  expert: ExpertType,
-  input: ConductInput,
-  decision: RouteDecision,
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  const logs: string[] = [`Routed to ${expert}: ${decision.reason}`];
+    expert: ExpertType,
+    input: ConductInput,
+    decision: RouteDecision,
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    const logs: string[] = [`Routed to ${expert}: ${decision.reason}`];
 
-  switch(expert) {
+    switch (expert) {
       case 'GRAPH_TOOL':
-  return this.executeGraphTool(input, logs);
+        return this.executeGraphTool(input, logs);
 
-  case 'FILES_TOOL':
-  return this.executeFilesTool(input, logs);
+      case 'FILES_TOOL':
+        return this.executeFilesTool(input, logs);
 
-  case 'OSINT_TOOL':
-  return this.executeOsintTool(input, logs);
+      case 'OSINT_TOOL':
+        return this.executeOsintTool(input, logs);
 
-  case 'EXPORT_TOOL':
-  return this.executeExportTool(input, logs);
+      case 'EXPORT_TOOL':
+        return this.executeExportTool(input, logs);
 
-  case 'RAG_TOOL':
-  return this.executeRagTool(input, logs);
+      case 'RAG_TOOL':
+        return this.executeRagTool(input, logs);
 
-  case 'LLM_LIGHT':
-  case 'LLM_HEAVY':
-  return this.executeLLM(expert, input, logs);
+      case 'LLM_LIGHT':
+      case 'LLM_HEAVY':
+        return this.executeLLM(expert, input, logs);
 
-  default:
+      default:
         throw new Error(`Expert ${expert} not implemented`);
-}
+    }
   }
 
   private formatMissionControlLogs(
-  resolution: MissionControlResolution,
-): string[] {
-  const logs: string[] = [];
-  const summary = resolution.arbitrationSummary;
-  const assignment = resolution.currentAssignment;
+    resolution: MissionControlResolution,
+  ): string[] {
+    const logs: string[] = [];
+    const summary = resolution.arbitrationSummary;
+    const assignment = resolution.currentAssignment;
 
-  logs.push(
-    `mission-control: arbitration fairness=${summary.fairnessIndex.toFixed(2)} concessions=${summary.totalConcessions} rounds=${summary.rounds} latency=${summary.resolutionLatencyMs}ms`,
-  );
-
-  if (assignment) {
     logs.push(
-      `mission-control: mission ${assignment.missionId} assigned ${assignment.decision} slot ${assignment.slot.start}→${assignment.slot.end}`,
+      `mission-control: arbitration fairness=${summary.fairnessIndex.toFixed(2)} concessions=${summary.totalConcessions} rounds=${summary.rounds} latency=${summary.resolutionLatencyMs}ms`,
     );
-  } else {
-    logs.push('mission-control: current mission deferred by arbitration');
+
+    if (assignment) {
+      logs.push(
+        `mission-control: mission ${assignment.missionId} assigned ${assignment.decision} slot ${assignment.slot.start}→${assignment.slot.end}`,
+      );
+    } else {
+      logs.push('mission-control: current mission deferred by arbitration');
+    }
+
+    summary.priorityDecisions.slice(0, 2).forEach((decision) => {
+      logs.push(`mission-control: ${decision}`);
+    });
+
+    resolution.negotiationLog.slice(0, 3).forEach((event) => {
+      logs.push(`mission-control:${event.type}:${event.description}`);
+    });
+
+    return logs;
   }
-
-  summary.priorityDecisions.slice(0, 2).forEach((decision) => {
-    logs.push(`mission-control: ${decision}`);
-  });
-
-  resolution.negotiationLog.slice(0, 3).forEach((event) => {
-    logs.push(`mission-control:${event.type}:${event.description}`);
-  });
-
-  return logs;
-}
 
   /**
    * Execute graph operations via MCP
    */
   private async executeGraphTool(
-  input: ConductInput,
-  logs: string[],
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  logs.push('Executing graph operations via MCP');
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('Executing graph operations via MCP');
 
-  try {
-    // Simple Cypher detection and execution
-    if(
-      input.task.toLowerCase().includes('cypher') ||
+    try {
+      // Simple Cypher detection and execution
+      if (
+        input.task.toLowerCase().includes('cypher') ||
         input.task.toLowerCase().includes('match')
       ) {
-  // Extract Cypher query from task (simplified)
-  const cypherMatch = input.task.match(/(?:cypher|MATCH).*?(?:\n|$)/i);
-  const cypher = cypherMatch ? cypherMatch[0] : input.task;
+        // Extract Cypher query from task (simplified)
+        const cypherMatch = input.task.match(/(?:cypher|MATCH).*?(?:\n|$)/i);
+        const cypher = cypherMatch ? cypherMatch[0] : input.task;
 
-  const result = await executeToolAnywhere(
-    'graph.query',
-    {
-      cypher: cypher,
-      params: {},
-      tenantId: input.investigationId,
-    },
-    input.userContext?.scopes,
-  );
+        const result = await executeToolAnywhere(
+          'graph.query',
+          {
+            cypher: cypher,
+            params: {},
+            tenantId: input.investigationId,
+          },
+          input.userContext?.scopes,
+        );
 
-  logs.push(`Graph query executed on server: ${result.serverName}`);
-  return {
-    output: result.result,
-    logs,
-    cost: 0.001, // Fixed cost for graph operations
-  };
-} else {
-  // Algorithm execution
-  const algName = this.detectAlgorithm(input.task);
-  const result = await executeToolAnywhere(
-    'graph.alg',
-    {
-      name: algName,
-      args: this.extractAlgorithmArgs(input.task),
-      tenantId: input.investigationId,
-    },
-    input.userContext?.scopes,
-  );
+        logs.push(`Graph query executed on server: ${result.serverName}`);
+        return {
+          output: result.result,
+          logs,
+          cost: 0.001, // Fixed cost for graph operations
+        };
+      } else {
+        // Algorithm execution
+        const algName = this.detectAlgorithm(input.task);
+        const result = await executeToolAnywhere(
+          'graph.alg',
+          {
+            name: algName,
+            args: this.extractAlgorithmArgs(input.task),
+            tenantId: input.investigationId,
+          },
+          input.userContext?.scopes,
+        );
 
-  logs.push(`Graph algorithm '${algName}' executed`);
-  return {
-    output: result.result,
-    logs,
-    cost: 0.002,
-  };
-}
+        logs.push(`Graph algorithm '${algName}' executed`);
+        return {
+          output: result.result,
+          logs,
+          cost: 0.002,
+        };
+      }
     } catch (error: any) {
-  logs.push(`Graph operation failed: ${error.message}`);
-  throw error;
-}
+      logs.push(`Graph operation failed: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
    * Execute file operations via MCP
    */
   private async executeFilesTool(
-  input: ConductInput,
-  logs: string[],
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  logs.push('Executing file operations via MCP');
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('Executing file operations via MCP');
 
-  try {
-    if(input.task.toLowerCase().includes('search')) {
-  const query = this.extractSearchQuery(input.task);
-  const result = await executeToolAnywhere(
-    'files.search',
-    {
-      query: query,
-      limit: 10,
-    },
-    input.userContext?.scopes,
-  );
+    try {
+      if (input.task.toLowerCase().includes('search')) {
+        const query = this.extractSearchQuery(input.task);
+        const result = await executeToolAnywhere(
+          'files.search',
+          {
+            query: query,
+            limit: 10,
+          },
+          input.userContext?.scopes,
+        );
 
-  logs.push(
-    `File search completed: ${result.result.results.length} files found`,
-  );
-  return {
-    output: result.result,
-    logs,
-    cost: 0.001,
-  };
-} else if (
-  input.task.toLowerCase().includes('read') ||
-  input.task.toLowerCase().includes('get')
-) {
-  const filePath = this.extractFilePath(input.task);
-  const result = await executeToolAnywhere(
-    'files.get',
-    {
-      path: filePath,
-      encoding: 'utf8',
-    },
-    input.userContext?.scopes,
-  );
+        logs.push(
+          `File search completed: ${result.result.results.length} files found`,
+        );
+        return {
+          output: result.result,
+          logs,
+          cost: 0.001,
+        };
+      } else if (
+        input.task.toLowerCase().includes('read') ||
+        input.task.toLowerCase().includes('get')
+      ) {
+        const filePath = this.extractFilePath(input.task);
+        const result = await executeToolAnywhere(
+          'files.get',
+          {
+            path: filePath,
+            encoding: 'utf8',
+          },
+          input.userContext?.scopes,
+        );
 
-  logs.push(`File read: ${filePath}`);
-  return {
-    output: result.result,
-    logs,
-    cost: 0.0005,
-  };
-} else {
-  // Default to file listing
-  const result = await executeToolAnywhere(
-    'files.list',
-    {
-      path: '.',
-      recursive: false,
-    },
-    input.userContext?.scopes,
-  );
+        logs.push(`File read: ${filePath}`);
+        return {
+          output: result.result,
+          logs,
+          cost: 0.0005,
+        };
+      } else {
+        // Default to file listing
+        const result = await executeToolAnywhere(
+          'files.list',
+          {
+            path: '.',
+            recursive: false,
+          },
+          input.userContext?.scopes,
+        );
 
-  return {
-    output: result.result,
-    logs,
-    cost: 0.0002,
-  };
-}
+        return {
+          output: result.result,
+          logs,
+          cost: 0.0002,
+        };
+      }
     } catch (error: any) {
-  logs.push(`File operation failed: ${error.message}`);
-  throw error;
-}
+      logs.push(`File operation failed: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
    * Execute OSINT operations (placeholder)
    */
   private async executeOsintTool(
-  input: ConductInput,
-  logs: string[],
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  // Plugin integration
-  const tenant =
-    input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
-  const p = (input.userContext as any)?.plugin as
-    | { name?: string; inputs?: any }
-    | undefined;
-  if(p?.name) {
-    logs.push(`OSINT via plugin: ${p.name}`);
-    const out = await runPlugin(p.name, p.inputs || {}, { tenant });
-    return { output: out?.data ?? out, logs, cost: 0.004 };
-  }
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    // Plugin integration
+    const tenant =
+      input.userContext?.tenantId || input.userContext?.tenant || 'unknown';
+    const p = (input.userContext as any)?.plugin as
+      | { name?: string; inputs?: any }
+      | undefined;
+    if (p?.name) {
+      logs.push(`OSINT via plugin: ${p.name}`);
+      const out = await runPlugin(p.name, p.inputs || {}, { tenant });
+      return { output: out?.data ?? out, logs, cost: 0.004 };
+    }
 
     // Heuristic: parse `plugin:name arg` from task
     const m = /^plugin:([\w\.\-]+)\s+(.+)$/.exec(input.task.trim());
-  if(m) {
-    const name = m[1];
-    const arg = m[2];
-    logs.push(`OSINT via plugin prompt: ${name}`);
-    let inputs: any = {};
-    if (name === 'shodan.ip.lookup') inputs = { ip: arg };
-    else if (name === 'virustotal.hash.lookup') inputs = { hash: arg };
-    else if (name === 'crowdstrike.query') inputs = { query: arg };
-    const out = await runPlugin(name, inputs, { tenant });
-    return { output: out?.data ?? out, logs, cost: 0.004 };
-  }
+    if (m) {
+      const name = m[1];
+      const arg = m[2];
+      logs.push(`OSINT via plugin prompt: ${name}`);
+      let inputs: any = {};
+      if (name === 'shodan.ip.lookup') inputs = { ip: arg };
+      else if (name === 'virustotal.hash.lookup') inputs = { hash: arg };
+      else if (name === 'crowdstrike.query') inputs = { query: arg };
+      const out = await runPlugin(name, inputs, { tenant });
+      return { output: out?.data ?? out, logs, cost: 0.004 };
+    }
 
     logs.push('OSINT tool execution (mock)');
-  return {
-    output: { query: input.task, sources: [], findings: [], confidence: 0.5 },
-    logs,
-    cost: 0.003,
-  };
-}
+    return {
+      output: { query: input.task, sources: [], findings: [], confidence: 0.5 },
+      logs,
+      cost: 0.003,
+    };
+  }
 
   /**
    * Execute export operations (placeholder)
    */
   private async executeExportTool(
-  input: ConductInput,
-  logs: string[],
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  logs.push('Export tool execution (mock)');
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('Export tool execution (mock)');
 
-  return {
-    output: {
-      format: 'pdf',
-      status: 'generated',
-      downloadUrl: '/api/exports/mock-report-123.pdf',
-      size: '2.5MB',
-    },
-    logs,
-    cost: 0.003,
-  };
-}
+    return {
+      output: {
+        format: 'pdf',
+        status: 'generated',
+        downloadUrl: '/api/exports/mock-report-123.pdf',
+        size: '2.5MB',
+      },
+      logs,
+      cost: 0.003,
+    };
+  }
 
   /**
    * Execute RAG operations (placeholder)
    */
   private async executeRagTool(
-  input: ConductInput,
-  logs: string[],
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  logs.push('RAG tool execution (mock)');
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    logs.push('RAG tool execution (mock)');
 
-  return {
-    output: {
-      answer: `Based on the investigation context, here is the response to: "${input.task}"`,
-      sources: ['Document A', 'Entity B', 'Relationship C'],
-      confidence: 0.85,
-      citations: ['doc_1', 'doc_2'],
-    },
-    logs,
-    cost: 0.002,
-  };
-}
+    return {
+      output: {
+        answer: `Based on the investigation context, here is the response to: "${input.task}"`,
+        sources: ['Document A', 'Entity B', 'Relationship C'],
+        confidence: 0.85,
+        citations: ['doc_1', 'doc_2'],
+      },
+      logs,
+      cost: 0.002,
+    };
+  }
 
   /**
    * Execute LLM operations (placeholder)
    */
   private async executeLLM(
-  expert: ExpertType,
-  input: ConductInput,
-  logs: string[],
-): Promise < { output: any; logs: string[]; cost?: number } > {
-  const config =
-    expert === 'LLM_LIGHT'
-      ? this.config.llmProviders.light
-      : this.config.llmProviders.heavy;
+    expert: ExpertType,
+    input: ConductInput,
+    logs: string[],
+  ): Promise<{ output: any; logs: string[]; cost?: number }> {
+    const config =
+      expert === 'LLM_LIGHT'
+        ? this.config.llmProviders.light
+        : this.config.llmProviders.heavy;
 
-  if(!config) {
-    throw new Error(`${expert} provider not configured`);
-  }
+    if (!config) {
+      throw new Error(`${expert} provider not configured`);
+    }
 
     logs.push(`Executing ${expert} with model: ${config.model}`);
 
-  // Mock LLM execution
-  const costPerToken = expert === 'LLM_LIGHT' ? 0.0001 : 0.001;
-  const estimatedTokens = Math.ceil(input.task.length / 4);
+    // Mock LLM execution
+    const costPerToken = expert === 'LLM_LIGHT' ? 0.0001 : 0.001;
+    const estimatedTokens = Math.ceil(input.task.length / 4);
 
-  return {
-    output: {
-      response: `Mock ${expert} response for: "${input.task}"`,
-      model: config.model,
-      usage: {
-        promptTokens: estimatedTokens,
-        completionTokens: estimatedTokens * 2,
-        totalTokens: estimatedTokens * 3,
+    return {
+      output: {
+        response: `Mock ${expert} response for: "${input.task}"`,
+        model: config.model,
+        usage: {
+          promptTokens: estimatedTokens,
+          completionTokens: estimatedTokens * 2,
+          totalTokens: estimatedTokens * 3,
+        },
       },
-    },
-    logs,
-    cost: costPerToken * estimatedTokens * 3,
-  };
-}
+      logs,
+      cost: costPerToken * estimatedTokens * 3,
+    };
+  }
 
   // Helper methods for task parsing
   private detectAlgorithm(task: string): string {
-  const lower = task.toLowerCase();
-  if (lower.includes('pagerank')) return 'pagerank';
-  if (lower.includes('community')) return 'community';
-  if (lower.includes('shortest') || lower.includes('path'))
-    return 'shortestPath';
-  if (lower.includes('betweenness')) return 'betweenness';
-  if (lower.includes('closeness')) return 'closeness';
-  return 'pagerank'; // default
-}
+    const lower = task.toLowerCase();
+    if (lower.includes('pagerank')) return 'pagerank';
+    if (lower.includes('community')) return 'community';
+    if (lower.includes('shortest') || lower.includes('path'))
+      return 'shortestPath';
+    if (lower.includes('betweenness')) return 'betweenness';
+    if (lower.includes('closeness')) return 'closeness';
+    return 'pagerank'; // default
+  }
 
-  private extractAlgorithmArgs(task: string): Record < string, any > {
-  // Simple args extraction (in production, this would be more sophisticated)
-  return {};
-}
+  private extractAlgorithmArgs(task: string): Record<string, any> {
+    // Simple args extraction (in production, this would be more sophisticated)
+    return {};
+  }
 
   private extractSearchQuery(task: string): string {
-  const match = task.match(/search.*?for\s+["']([^"']+)["']/i);
-  return match ? match[1] : task.split(' ').slice(-3).join(' ');
-}
+    const match = task.match(/search.*?for\s+["']([^"']+)["']/i);
+    return match ? match[1] : task.split(' ').slice(-3).join(' ');
+  }
 
   private extractFilePath(task: string): string {
-  const match = task.match(/["']([^"']*\\[a-zA-Z0-9]+)["']/);
-  return match ? match[1] : 'example.txt';
-}
+    const match = task.match(/["']([^"']*\\[a-zA-Z0-9]+)["']/);
+    return match ? match[1] : 'example.txt';
+  }
 
   /**
    * Log audit events
    */
   private logAudit(event: any): void {
-  this.auditLog.push(event);
-  // In production, this would persist to database
-  console.log('AUDIT:', JSON.stringify(event, null, 2));
-}
+    this.auditLog.push(event);
+    // In production, this would persist to database
+    console.log('AUDIT:', JSON.stringify(event, null, 2));
+  }
 
   /**
    * Get conductor statistics
    */
   public getStats(): any {
-  const routingStats = moERouter.getRoutingStats();
+    const routingStats = moERouter.getRoutingStats();
 
-  return {
-    activeTaskCount: this.activeTaskCount,
-    auditLogSize: this.auditLog.length,
-    routingStats,
-    mcpConnectionStatus: mcpClient?.getConnectionStatus() || {},
-    config: {
-      maxConcurrentTasks: this.config.maxConcurrentTasks,
-      enabledExperts: this.config.enabledExperts,
-      auditEnabled: this.config.auditEnabled,
-    },
-  };
-}
+    return {
+      activeTaskCount: this.activeTaskCount,
+      auditLogSize: this.auditLog.length,
+      routingStats,
+      mcpConnectionStatus: mcpClient?.getConnectionStatus() || {},
+      config: {
+        maxConcurrentTasks: this.config.maxConcurrentTasks,
+        enabledExperts: this.config.enabledExperts,
+        auditEnabled: this.config.auditEnabled,
+      },
+    };
+  }
 
   /**
    * Shutdown conductor and cleanup resources
    */
-  public async shutdown(): Promise < void> {
-  console.log('Shutting down Conductor');
+  public async shutdown(): Promise<void> {
+    console.log('Shutting down Conductor');
 
-  // Wait for active tasks to complete (with timeout)
-  const maxWait = 30000; // 30 seconds
-  const startWait = Date.now();
+    // Wait for active tasks to complete (with timeout)
+    const maxWait = 30000; // 30 seconds
+    const startWait = Date.now();
 
-  while(this.activeTaskCount > 0 && Date.now() - startWait < maxWait) {
-  await new Promise((resolve) => setTimeout(resolve, 100));
-}
+    while (this.activeTaskCount > 0 && Date.now() - startWait < maxWait) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
 
-if (this.activeTaskCount > 0) {
-  console.warn(`Shutting down with ${this.activeTaskCount} active tasks`);
-}
+    if (this.activeTaskCount > 0) {
+      console.warn(`Shutting down with ${this.activeTaskCount} active tasks`);
+    }
 
-// Disconnect MCP clients
-if (mcpClient) {
-  await mcpClient.disconnectAll();
-}
+    // Disconnect MCP clients
+    if (mcpClient) {
+      await mcpClient.disconnectAll();
+    }
 
-console.log('Conductor shutdown complete');
+    console.log('Conductor shutdown complete');
   }
 }
 

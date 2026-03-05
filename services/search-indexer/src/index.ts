@@ -101,13 +101,7 @@ async function flushBuffer() {
                         resultsArray = JSON.parse(results); // if single string
                      } catch {
                         // might be JSONL lines
-                        // ⚡ Bolt Optimization: Replace split.filter.map with reduce to avoid intermediate array allocations
-                        resultsArray = results.split('\n').reduce((acc: any[], l) => {
-                           if (l.trim()) {
-                              acc.push(JSON.parse(l));
-                           }
-                           return acc;
-                        }, []);
+                        resultsArray = results.split('\n').filter(l => l.trim()).map(l => JSON.parse(l));
                      }
                 } else if (Array.isArray(results)) {
                     resultsArray = results;
@@ -140,13 +134,9 @@ async function flushBuffer() {
         if (actions['delete']) {
             const items = actions['delete'];
             try {
-                // ⚡ Bolt Optimization: Combine ID extraction and filtering to avoid intermediate array allocation
-                const validIds = items.reduce((acc: string[], i) => {
-                    const id = i.data.id;
-                    if (id) acc.push(id);
-                    return acc;
-                }, []);
-
+                const ids = items.map(i => i.data.id);
+                // Filter empty IDs
+                const validIds = ids.filter(id => id);
                 if (validIds.length > 0) {
                      await typesense.collections(collection).documents().delete({ filter_by: `id:[${validIds.join(',')}]` });
                 }

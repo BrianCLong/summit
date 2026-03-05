@@ -11,13 +11,6 @@
 ### PR #17438 — Hono ErrorBoundary XSS Fix (Supply Chain)
 - **Vuln:** CVE-2026-24771 impacts `hono/jsx` `ErrorBoundary` prior to **4.11.7**; fixed in **4.11.7**.
 - **Fix:** `hono` pinned to **4.11.7** in the root manifest and enforced via `pnpm.overrides` to prevent workspace downgrades.
-- **Phase 1: Server Build & Orchestration (Completed)**: Resolved ESM/isomorphic import issues, fixed `@intelgraph/feature-flags` workspace dependency, and hardened the `docker-compose` orchestration with a proper API gateway proxy.
-- **Phase 2: Governance Ledger & Evidence (Completed)**:
-    - Migrated `FIPSComplianceService` to shared `@intelgraph/cryptographic-agility` package for cross-service compliance.
-    - Hardened `prov-ledger` by replacing `alg: none` mock signatures with live HSM-backed proofs.
-    - Removed hardcoded mocks from `prov-ledger` GraphQL resolvers, connecting them to live database logic.
-    - Hardened `generate-evidence-bundle.js` by enforcing live `k6` results and implementing real validation for encryption at rest and network isolation.
-    - Updated `verify-audit-ledger.ts` to perform end-to-end, cross-service audit verification.
 - **Proof:** `hono-version-gate` verifies the lockfile contains **no** `hono@<4.11.7` after install and emits the Evidence Bundle `HONO-ERRBOUNDARY-XSS`.
 - **Closure:** Mapped to Dependabot alert #2298 in the PR narrative.
 

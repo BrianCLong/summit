@@ -42,7 +42,7 @@ router.post('/threats/:id/resolve', ensureAuthenticated, async (req, res) => {
   try {
     const { id } = req.params;
     const { notes } = req.body;
-    await psyOpsService.resolveThreat((id as string), notes || 'Resolved by user');
+    await psyOpsService.resolveThreat(id, notes || 'Resolved by user');
     res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ error: 'Resolution failed' });

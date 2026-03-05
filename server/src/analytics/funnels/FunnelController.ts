@@ -18,7 +18,7 @@ export const createFunnel = (req: Request, res: Response) => {
 export const getFunnelReport = (req: Request, res: Response) => {
     const { id } = req.params;
     try {
-        const report = service.generateReport((id as string));
+        const report = service.generateReport(id);
         res.json(report);
     } catch (e: any) {
         res.status(404).json({ error: (e as Error).message });

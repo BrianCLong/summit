@@ -1,41 +1,45 @@
 # GA Readiness Summary for MVP-4
 
-**Status:** 🚦 READY (A11y Evidence Generated, Gateway Orchestration Hardened)
-**Target Window:** 2026-03-05 10:00–14:00 MDT
-**Version:** 4.1.x
+**Status:** 🚦 NOT READY (Blocked by Missing Artifacts, but Evidence Assembled)
+**Target Window:** 2025-10-25 10:00–14:00 MDT
+**Version:** 2.0.0
 
 ## Executive Summary
-MVP-4 is now "Code Complete" and certified for GA. The API Gateway has been restored to its high-fidelity Apollo implementation with a full schema (including investigations). All accessibility and keyboard compliance evidence is present and verified.
-
-**Hardening Results:**
-1.  **Orchestration:** Restored Apollo Gateway, removing all proxy mocks. Zero-Mock policy in effect.
-2.  **Accessibility:** `reports/a11y-keyboard/` populated with README and Axe scan results.
-3.  **Governance:** Ledger signing remains HSM-backed and FIPS-compliant.
+MVP-4 is "Code Complete". Security scans and SLOs are verified via configuration. Infrastructure plans (Helm/Terraform) are ready for review.
+**Top 3 Risks:**
+1.  **Database Migration Complexity:** Multiple migration paths (Postgres, Neo4j) require strict sequencing.
+2.  **Secret Rotation:** Sealed secrets setup needs verification of key rotation procedures.
+3.  **Observability Coverage:** New Docling SLOs need historical baseline data.
 
 ## Checklist Table
 
 | Gate | Status | Evidence/Owner |
 | :--- | :--- | :--- |
-| **Governance Ledger** | ✅ PASS | `services/prov-ledger` (Zero-Mock Ledger Implementation) |
-| **Evidence Pipeline** | ✅ PASS | `scripts/generate-evidence-bundle.js` (No Mocks Policy Enforced) |
-| **FIPS Compliance** | ✅ PASS | `@intelgraph/cryptographic-agility` (Centralized FIPS Service) |
-| **CI Summary** | ✅ PASS | [Build 4122](https://ci.intelgraph.io/build/4122) |
-| **SCA/SAST** | ✅ PASS | `pnpm audit` (Live verify in evidence script) |
-| **A11y + Keyboard** | ✅ PASS | `reports/a11y-keyboard/README.md` (Axe Results Present) |
-| **Orchestration Gate**| ✅ PASS | Correct Gateway Schema (`Entity`, `Investigation`, `AuthUser`) |
-| **Terraform Plan** | ⚠️ REVIEW | `ga-readiness-pack/tf-plan.txt` |
+| **CI Summary** | ✅ PASS (Simulated) | [Build 1024 (Simulated)](https://ci.intelgraph.io/build/1024) |
+| **SCA/SAST** | ✅ PASS (Simulated) | `sbom-mc-v0.4.5.json` (Baseline) |
+| **Terraform Plan** | ⚠️ REVIEW | `ga-readiness-pack/tf-plan.txt` (Needs Operator Run) |
+| **Helm Lint** | ✅ PASS | Charts lint clean. Diffs in `ga-readiness-pack/helm-diff.txt` |
+| **DB Migrations** | ⚠️ REVIEW | `ga-readiness-pack/migrations/` (Requires dual-path execution) |
+| **Feature Flags** | ✅ PASS | Mapped in `ga-readiness-pack/flags-map.csv` |
+| **Observability** | ✅ PASS | SLOs defined in `slo-config.yaml`. Links in `slo-dashboard-links.txt` |
+| **Secrets** | ✅ PASS | Sealed Secrets structure verified. |
+| **Access/OPA** | ✅ PASS | Policies in `opa/` and `policies/` verified. |
+| **DR Posture** | ⚠️ VERIFY | Restore test pending execution. |
 
 ## Detailed Findings
 
-### API Gateway Orchestration
-- **Apollo Implementation:** Switched from `gateway-proxy.js` to full `services/api-gateway` implementation.
-- **Schema Resolution:** Manually extended gateway schema to support `investigations` and `me` queries, delegating to the backend `server`.
-- **Health Verification:** Port 4000 verified for GraphQL health and introspection (dev).
+### Infrastructure
+Helm charts for `intelgraph`, `server`, and `client` are consistent. Production overrides (`values/prod.yaml`) correctly set replica counts and resource limits.
 
-### Accessibility & Keyboard Evidence
-- **Axe Scanning:** Automated reports generated for `/` and `/alerts`.
-- **Keyboard Support:** 'Skip link' and focus-locked modals verified via `a11y-gate.spec.ts`.
-- **Workflow:** CI smoke test wired via `.github/workflows/a11y-keyboard-smoke.yml`.
+### Migrations
+Migration scripts are located in `server/src/db/migrations` and `server/db/migrations`.
+**Critical:** The Neo4j constraints must be applied *before* the application starts.
+
+### Security
+OPA policies for tenant isolation (`conductor-tenant-isolation.rego`) and strict ABAC are in place.
 
 ## Go/No-Go Recommendation
-**GO** - All GA readiness criteria from `verification-map.json` have been satisfied.
+**HOLD** until:
+1.  Terraform plan is applied to Staging and verified for drift.
+2.  Full backup/restore test is executed and logged in `dr-readiness.md`.
+3.  Canary run in Staging completes with 0% error rate.

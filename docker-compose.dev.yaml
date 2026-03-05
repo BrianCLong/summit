@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
       POSTGRES_USER: ${POSTGRES_USER:-summit}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
     ports:
       - '5432:5432'
     volumes:
@@ -43,7 +43,7 @@ services:
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
-      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:?Set NEO4J_PASSWORD in .env (see .env.example)}
+      NEO4J_AUTH: ${NEO4J_USERNAME:-neo4j}/${NEO4J_PASSWORD:-devpassword}
       NEO4J_dbms_security_procedures_unrestricted: gds.*,apoc.*
       NEO4J_PLUGINS: '["apoc","graph-data-science"]'
     ports:
@@ -103,14 +103,12 @@ services:
       dockerfile: Dockerfile.dev
     container_name: summit-api
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       PORT: 4000
       DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
-      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:-devpassword}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -127,7 +125,7 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: http://otel-collector:4318/v1/metrics
     ports:
-      - '4001:4000'
+      - '4005:4000'
     depends_on:
       postgres:
         condition: service_healthy
@@ -154,61 +152,48 @@ services:
     container_name: summit-api-gateway
     restart: unless-stopped
     environment:
-      - PORT=4000
       - NODE_ENV=development
+      - PORT=4000
       - POLICY_DRY_RUN=true
-      - ENABLE_INSECURE_DEV_AUTH=true
+      - PROV_LEDGER_URL=http://prov-ledger:4010
       - GRAPH_SERVICE_URL=http://api:4000
-    ports:
-      - '4000:4000'
+      - GRAPH_XAI_URL=http://graph-xai:4011
+      - AGENT_RUNTIME_URL=http://agent-runtime:4012
+      - PREDICTIVE_SUITE_URL=http://predictive-suite:4013
+      - XAI_EXPLAIN_ANOMALY_URL=http://xai-explain-anomaly:4000
+      - GRAPH_XAI_URL=http://graph-xai:4011
+      - CONTEXT_XAI_URL=http://graph-xai:4011
+      - AGENT_RUNTIME_URL=http://agent-runtime:4012
+      - PREDICTIVE_SUITE_URL=http://prediction-service:4013
+      - CONDUCTOR_API_URL=http://conductor-api:4000
+      - LICENSE_REGISTRY_URL=http://license-registry:4030
     depends_on:
       api:
         condition: service_healthy
-    networks:
-      - summit
-
-  gateway:
-    build:
-      context: ./services/dev-gateway
-    container_name: summit-gateway
-    restart: unless-stopped
-    environment:
-      PORT: 4100
-      PROMETHEUS_PORT: 9464
-      # OpenTelemetry Configuration
-      OTEL_SERVICE_NAME: summit-gateway
-      OTEL_SERVICE_VERSION: 1.0.0
-      JAEGER_ENDPOINT: http://jaeger:14268/api/traces
-      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
-      FEATURE_LAC_ENFORCE: "true"
-      COPILOT_NLQ: "true"
-      UI_TRIPANE: "true"
-      POLICY_COMPILER_URL: "http://policy-compiler:8080"
-      OPA_DECISION_URL: "http://opa:8181/v1/data/policy/authz/abac/decision"
-      TYPESENSE_HOST: "typesense"
-      TYPESENSE_PORT: "8108"
-      TYPESENSE_API_KEY: "xyz"
-      GRAPH_SERVICE_URL: "http://api-gateway:4000/graphql"
-    depends_on:
-      api-gateway:
+      prov-ledger:
         condition: service_started
-      policy-compiler:
-        condition: service_healthy
-      typesense:
-        condition: service_healthy
+      xai-explain-anomaly:
+        condition: service_started
+      graph-xai:
+        condition: service_started
+      agent-runtime:
+        condition: service_started
+      prediction-service:
+        condition: service_started
+      conductor-api:
+        condition: service_started
+      license-registry:
+        condition: service_started
     ports:
-      - '8080:4100'
-      - '9464:9464'
-    healthcheck:
-      test: [ 'CMD', 'curl', '-f', 'http://localhost:4100/health' ]
-      interval: 15s
-      timeout: 5s
-      retries: 10
+      - '4000:4000'
+      - '9464:4000'
     networks:
       - summit
-    labels:
-      - 'prometheus.job=summit_gateway'
-      - 'prometheus.port=4100'
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:4000/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   prov-ledger:
     build: ./services/prov-ledger
@@ -240,6 +225,82 @@ services:
   zk-tx:
     build: ./services/zk-tx
     ports: [ "8106:8080" ]
+
+  xai-explain-anomaly:
+    build:
+      context: ./services/xai-explain-anomaly
+    container_name: summit-xai-explain-anomaly
+    restart: unless-stopped
+    ports:
+      - '4022:4000'
+    networks:
+      - summit
+
+  graph-xai:
+    build:
+      context: ./services/graph-xai
+    container_name: summit-graph-xai
+    restart: unless-stopped
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_CACHE_TTL=3600
+    ports:
+      - '4011:4011'
+    networks:
+      - summit
+
+  agent-runtime:
+    build:
+      context: ./services/agent-runtime
+    container_name: summit-agent-runtime
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - REDIS_URL=redis://redis:6379
+      - API_GATEWAY_URL=http://api-gateway:4000
+    ports:
+      - '4012:4012'
+    networks:
+      - summit
+
+  prediction-service:
+    build:
+      context: ./services/prediction-service
+    container_name: summit-prediction-service
+    restart: unless-stopped
+    environment:
+      - PYTHONPATH=/app
+      - MODEL_REGISTRY_URL=http://prov-ledger:4010
+    ports:
+      - '4013:4013'
+    networks:
+      - summit
+
+  conductor-api:
+    build:
+      context: ./services/conductor
+    container_name: summit-conductor-api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://summit:devpassword@postgres:5432/summit_dev
+    ports:
+      - '4020:4000'
+    networks:
+      - summit
+
+  license-registry:
+    build:
+      context: ./services/license-registry
+    container_name: summit-license-registry
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgres://summit:devpassword@postgres:5432/summit_dev
+    ports:
+      - '4030:4030'
+    networks:
+      - summit
 
   predictd:
     build:
@@ -306,18 +367,16 @@ services:
       dockerfile: Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
-      VITE_API_URL: http://localhost:4000/graphql
-      VITE_WS_URL: ws://localhost:4000/graphql
-      VITE_WEBSOCKET_URL: ws://localhost:9001
+      VITE_API_URL: http://api:4000/graphql
+      VITE_WS_URL: ws://api:4000/graphql
+      VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:
       - '3000:3000'
     depends_on:
-      api-gateway:
-        condition: service_started
+      api:
+        condition: service_healthy
     healthcheck:
       test: [ 'CMD', 'curl', '-f', 'http://localhost:3000' ]
       interval: 15s
@@ -333,8 +392,6 @@ services:
     command: node dist/index.js
     container_name: summit-websocket-server
     restart: unless-stopped
-    env_file:
-      - .env
     environment:
       PORT: 9001
       HOST: 0.0.0.0
@@ -342,7 +399,7 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
-      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_SECRET: ${JWT_SECRET:-dev_jwt_secret_12345}
       JWT_ALGORITHM: HS256
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       CORS_CREDENTIALS: "true"
