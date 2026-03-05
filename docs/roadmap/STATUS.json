@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-05T00:19:01Z",
+  "revision_note": "Published strategic dominance stack architecture with phased execution controls and platform-killer risk guardrails.",
   "initiatives": [
+    {
+      "id": "strategic-dominance-stack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published docs/strategy/STRATEGIC_DOMINANCE_STACK.md covering 12 capability layers, reference architecture, and three failure-mode controls."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
