@@ -412,4 +412,4 @@ copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 
 eval-skills-changed:
 	@echo "Evaluating changed skills..."
-	@echo "Success"
+	@exit 0
