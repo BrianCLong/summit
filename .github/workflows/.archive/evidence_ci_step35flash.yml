@@ -8,6 +8,11 @@ on:
       - 'summit/evidence/step35flash_index.example.json'
   pull_request:
     branches: [ "main", "develop" ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'summit/evidence/schemas/step35flash_*.json'
       - 'summit/evidence/step35flash_index.example.json'
@@ -25,7 +30,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: 3.11
 
     - name: Run Validation Script
       run: python scripts/ci/validate_step35flash_evidence.py

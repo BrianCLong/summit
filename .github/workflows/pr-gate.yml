@@ -30,13 +30,13 @@ jobs:
 
       - name: Check Queue Saturation
         run: |
-          # Count PRs in merge queue specifically (non-draft and mergeable)
-          QUEUE_SIZE=$(gh pr list --search "is:pr is:open draft:false" --json mergeable --jq '[.[] | select(.mergeable=="MERGEABLE")] | length')
-          MAX_QUEUE=200
-          echo "Current Mergeable PR Count: $QUEUE_SIZE"
-          
+          # Count PRs actively in the merge queue (not all open PRs)
+          QUEUE_SIZE=$(gh pr list --search "is:pr is:open is:in-merge-queue" --json number --jq 'length')
+          MAX_QUEUE=50
+          echo "Merge queue depth: $QUEUE_SIZE / $MAX_QUEUE"
+
           if [ "$QUEUE_SIZE" -ge "$MAX_QUEUE" ]; then
-            echo "::error::Merge queue saturated ($QUEUE_SIZE/$MAX_QUEUE). Please hold new PRs."
+            echo "::error::Merge queue saturated ($QUEUE_SIZE/$MAX_QUEUE). Autopilot draining — hold new PRs."
             exit 1
           fi
         env:
@@ -62,3 +62,21 @@ jobs:
 
       - name: Timestamp scan
         run: node scripts/scan_timestamp_keys.mjs
+
+
+      - name: Detect governance policy changes
+        id: governance_changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            governance_policy:
+              - 'summit/agents/policy/**'
+              - 'summit/agents/skills/**'
+              - 'tools/governance/**'
+              - 'docs/governance/**'
+
+      - name: Governance policy bundle gate
+        if: steps.governance_changes.outputs.governance_policy == 'true'
+        run: |
+          CHANGED_FILES=$(git diff --name-only "${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}" "${{ github.sha }}")
+          pnpm exec tsx tools/governance/check-policy.ts $CHANGED_FILES

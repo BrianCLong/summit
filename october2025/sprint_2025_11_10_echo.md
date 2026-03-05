@@ -203,7 +203,7 @@ spec:
             [
               '/bin/sh',
               '-c',
-              'wget -O /pol/policy.tgz $BUNDLE_URL && wget -O /pol/policy.sig $BUNDLE_SIG && cosign verify-blob --signature /pol/policy.sig /pol/policy.tgz && tar -xzf /pol/policy.tgz -C /pol && sleep 3600',
+              'wget -O /pol/policy.tgz $BUNDLE_URL && wget -O /pol/policy.sig $BUNDLE_SIG && cosign verify-blob --use-signed-timestamps --signature /pol/policy.sig /pol/policy.tgz && tar -xzf /pol/policy.tgz -C /pol && sleep 3600',
             ]
           volumeMounts: [{ name: pol, mountPath: /pol }]
       volumes: [{ name: pol, emptyDir: {} }]

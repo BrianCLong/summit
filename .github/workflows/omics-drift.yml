@@ -1,0 +1,21 @@
+name: Omics Deconvolution Drift Detection
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Run weekly
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: 'package.json'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run drift detection
+        run: npx tsx scripts/monitoring/omics-deconv-drift.ts

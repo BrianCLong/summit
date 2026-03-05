@@ -290,7 +290,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const status = req.query.status as PolicySuggestion['status'] | undefined;
+      const status = (req.query.status as string) as PolicySuggestion['status'] | undefined;
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
 
@@ -332,13 +332,13 @@ router.get(
   requirePermission('ai:suggestions:read'),
   async (req: Request, res: Response) => {
     try {
-      const suggestion = await policySuggestionService!.getSuggestion(req.params.id);
+      const suggestion = await policySuggestionService!.getSuggestion((req.params.id as string));
 
       if (!suggestion) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Suggestion not found: ${req.params.id}`,
+            message: `Suggestion not found: ${(req.params.id as string)}`,
           },
         });
       }
@@ -398,12 +398,12 @@ router.post(
       };
 
       const suggestion = await policySuggestionService!.reviewSuggestion(
-        req.params.id,
+        (req.params.id as string),
         feedback
       );
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId: (req.params.id as string),
         decision: feedback.decision,
         reviewedBy: feedback.reviewedBy,
       }, 'Suggestion reviewed');
@@ -438,10 +438,10 @@ router.post(
   requirePermission('ai:suggestions:implement'),
   async (req: Request, res: Response) => {
     try {
-      const result = await policySuggestionService!.implementSuggestion(req.params.id);
+      const result = await policySuggestionService!.implementSuggestion((req.params.id as string));
 
       logger.info({
-        suggestionId: req.params.id,
+        suggestionId: (req.params.id as string),
         policyId: result.policyId,
         implementedBy: getUserId(req),
       }, 'Suggestion implemented');
@@ -733,7 +733,7 @@ router.get(
 
       const scope: AnomalyDetectionScope = {
         tenantIds: [tenantId],
-        minSeverity: req.query.severity as BehavioralAnomaly['severity'],
+        minSeverity: (req.query.severity as string) as BehavioralAnomaly['severity'],
         timeRange: {
           start: thirtyDaysAgo.toISOString(),
           end: now.toISOString(),
@@ -743,8 +743,8 @@ router.get(
       const anomalies = await anomalyService!.detectAnomalies(scope);
 
       // Filter by status if provided
-      const filteredAnomalies = req.query.status
-        ? anomalies.filter(a => a.status === req.query.status)
+      const filteredAnomalies = (req.query.status as string)
+        ? anomalies.filter(a => a.status === (req.query.status as string))
         : anomalies;
 
       // Apply pagination
@@ -787,13 +787,13 @@ router.get(
   requirePermission('ai:anomalies:read'),
   async (req: Request, res: Response) => {
     try {
-      const anomaly = await anomalyService!.getAnomaly(req.params.id);
+      const anomaly = await anomalyService!.getAnomaly((req.params.id as string));
 
       if (!anomaly) {
         return res.status(404).json({
           error: {
             code: 'NOT_FOUND',
-            message: `Anomaly not found: ${req.params.id}`,
+            message: `Anomaly not found: ${(req.params.id as string)}`,
           },
         });
       }
@@ -846,13 +846,13 @@ router.patch(
       const notes: string = req.body.notes;
 
       const anomaly = await anomalyService!.updateAnomalyStatus(
-        req.params.id,
+        (req.params.id as string),
         status,
         notes
       );
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId: (req.params.id as string),
         newStatus: status,
         updatedBy: getUserId(req),
       }, 'Anomaly status updated');
@@ -913,10 +913,10 @@ router.post(
         actionsTaken: req.body.actionsTaken || [],
       };
 
-      const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
+      const anomaly = await anomalyService!.resolveAnomaly((req.params.id as string), resolution);
 
       logger.info({
-        anomalyId: req.params.id,
+        anomalyId: (req.params.id as string),
         resolution: resolution.resolution,
         resolvedBy: resolution.resolvedBy,
       }, 'Anomaly resolved');
@@ -957,10 +957,10 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const tenantId = getTenantId(req);
-      const endDate = req.query.endDate
+      const endDate = (req.query.endDate as string)
         ? new Date(req.query.endDate as string)
         : new Date();
-      const startDate = req.query.startDate
+      const startDate = (req.query.startDate as string)
         ? new Date(req.query.startDate as string)
         : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000);
 

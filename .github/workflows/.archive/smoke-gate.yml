@@ -14,6 +14,11 @@ name: Smoke Gate
 on:
   pull_request:
     branches: [main, release/*]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   push:
     branches: [main, release/*]
   workflow_dispatch:
@@ -127,7 +132,7 @@ jobs:
         working-directory: server
         run: |
           echo "Starting server in background..."
-          nohup node dist/server/src/index.js > server.log 2>&1 &
+          nohup node dist/src/index.js > server.log 2>&1 &
           echo $! > server.pid
           echo "Server PID: $(cat server.pid)"
         env:

@@ -1,8 +1,4 @@
 name: 🔧 Reusable - Environment Setup
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 # Universal setup workflow for Node.js, pnpm, Python, and caching
 # Optimized for monorepo with Turbo and pnpm workspaces
 
@@ -18,7 +14,7 @@ on:
         description: "pnpm version"
         required: false
         type: string
-        default: "9.12.0"
+        default: 10.0.0
       python-version:
         description: "Python version (optional)"
         required: false
