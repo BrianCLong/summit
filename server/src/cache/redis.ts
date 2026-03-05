@@ -2,6 +2,14 @@
 import Redis, { Cluster, type ClusterNode, type ClusterOptions, type RedisOptions } from 'ioredis';
 import config from '../config/index.js';
 import { logger } from '../config/logger.js';
+import zlib from 'zlib';
+import { promisify } from 'util';
+
+const gzip = promisify(zlib.gzip);
+const gunzip = promisify(zlib.gunzip);
+
+const COMPRESSION_THRESHOLD = 1024; // 1KB
+const COMPRESSION_PREFIX = '__GZIP__:';
 
 type RedisLike = Redis | Cluster;
 
@@ -119,11 +127,26 @@ export class RedisService {
   }
 
   async get(key: string): Promise<string | null> {
-    return this.client.get(key);
+    const value = await this.client.get(key);
+    if (!value) return null;
+
+    if (value.startsWith(COMPRESSION_PREFIX)) {
+        try {
+            const buffer = Buffer.from(value.slice(COMPRESSION_PREFIX.length), 'base64');
+            const decompressed = await gunzip(buffer);
+            return decompressed.toString();
+        } catch (e) {
+            logger.error({ key, error: e }, 'Failed to decompress value');
+            return null;
+        }
+    }
+    return value;
   }
 
   async setex(key: string, seconds: number, value: string): Promise<'OK'> {
-    return this.client.setex(key, seconds, value);
+    // Reuse set logic for compression
+    const result = await this.set(key, value, seconds);
+    return result || 'OK';
   }
 
   async ping(): Promise<string> {
@@ -139,10 +162,20 @@ export class RedisService {
   }
 
   async set(key: string, value: string, ttlSeconds?: number): Promise<'OK' | null> {
-    if (ttlSeconds !== undefined) {
-      return this.client.set(key, value, 'EX', ttlSeconds);
+    let finalValue = value;
+    if (value && value.length > COMPRESSION_THRESHOLD) {
+        try {
+            const buffer = await gzip(value);
+            finalValue = COMPRESSION_PREFIX + buffer.toString('base64');
+        } catch (e) {
+            logger.warn({ key, error: e }, 'Failed to compress value, storing uncompressed');
+        }
     }
-    return this.client.set(key, value);
+
+    if (ttlSeconds !== undefined) {
+      return this.client.set(key, finalValue, 'EX', ttlSeconds);
+    }
+    return this.client.set(key, finalValue);
   }
 
   async getKeysByPattern(pattern: string): Promise<string[]> {
