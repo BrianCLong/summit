@@ -1,0 +1,76 @@
+# REQUIRED_CHECKS_EXCEPTIONS.yml
+# Auditable exceptions for intentional deviations between policy and branch protection
+#
+# Each exception documents a deliberate mismatch that should NOT trigger drift alerts.
+# All exceptions MUST have an expiration date - no permanent exceptions allowed.
+#
+# Authority: docs/ci/REQUIRED_CHECKS_EXCEPTIONS.md
+# Schema Version: 1.0
+
+version: "1.0"
+
+# Schema documentation (for validation reference)
+schema:
+  exception:
+    id: "EXC-NNN format, monotonically increasing"
+    check_name: "Exact GitHub status check context name"
+    direction: "allow_missing_in_github | allow_extra_in_github"
+    branch: "main | * (all branches) | specific-branch-name"
+    reason: "Clear justification for this exception"
+    owner: "GitHub username or team who owns this exception"
+    created_at: "YYYY-MM-DD format"
+    expires_at: "YYYY-MM-DD format (MANDATORY - max 90 days)"
+    ticket: "Link to approval ticket, issue, or PR"
+
+# Validation rules (enforced by validate_required_checks_exceptions.sh)
+validation:
+  # Maximum exception duration in days
+  max_duration_days: 90
+
+  # Exceptions cannot be created in the past
+  created_at_must_be_recent: true
+
+  # Expired exceptions are warnings, not errors (for audit trail)
+  expired_is_warning: true
+
+  # Required fields
+  required_fields:
+    - id
+    - check_name
+    - direction
+    - branch
+    - reason
+    - owner
+    - created_at
+    - expires_at
+    - ticket
+
+# Active exceptions
+# Note: Expired exceptions should be moved to archived_exceptions for audit trail
+exceptions: []
+  # Example exception (commented out):
+  # - id: "EXC-001"
+  #   check_name: "Legacy Lint Check"
+  #   direction: "allow_extra_in_github"
+  #   branch: "main"
+  #   reason: "Legacy check being phased out, removal scheduled for Q2"
+  #   owner: "platform-team"
+  #   created_at: "2026-01-08"
+  #   expires_at: "2026-04-08"
+  #   ticket: "https://github.com/org/repo/issues/12345"
+
+# Archived exceptions (for audit trail)
+# Move expired exceptions here rather than deleting them
+archived_exceptions: []
+  # Example archived exception:
+  # - id: "EXC-000"
+  #   check_name: "Deprecated Check"
+  #   direction: "allow_missing_in_github"
+  #   branch: "main"
+  #   reason: "Check temporarily disabled during migration"
+  #   owner: "devops-team"
+  #   created_at: "2025-10-01"
+  #   expires_at: "2025-12-31"
+  #   ticket: "https://github.com/org/repo/issues/11111"
+  #   archived_at: "2026-01-02"
+  #   archive_reason: "Exception expired, check has been fully migrated"
