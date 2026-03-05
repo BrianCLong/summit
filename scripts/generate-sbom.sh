@@ -9,8 +9,6 @@ echo "🚀 Starting SBOM Generation Process..."
 # Configuration
 ARTIFACT_NAME=${1:-"summit-platform"}
 VERSION=${2:-$(git describe --tags --always)}
-# Sanitize VERSION for use in filenames (replace slashes with dashes)
-VERSION_SAFE=$(echo "$VERSION" | sed 's/\//-/g')
 OUTPUT_DIR=${3:-"./sboms"}
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -98,7 +96,7 @@ if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
 fi
 
 # Create summary file
-cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json" << EOF
+cat > "/tmp/SBOM_SUMMARY.json" << EOF
 {
   "artifactName": "$ARTIFACT_NAME",
   "version": "$VERSION",
@@ -107,15 +105,15 @@ cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json" << EOF
 EOF
 
 for sbom in "$OUTPUT_DIR"/*.json; do
-  if [ -f "$sbom" ] && [[ "$sbom" != *"SBOM_SUMMARY"* ]]; then
+  if [ -f "$sbom" ]; then
     sbom_name=$(basename "$sbom")
-    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json"
+    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "/tmp/SBOM_SUMMARY.json"
   fi
 done
 
 # Remove the trailing comma and close the array
-sed -i '' '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json" 2>/dev/null || sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json"
-cat >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json" << EOF
+sed -i '' '$ s/,$//' "/tmp/SBOM_SUMMARY.json" 2>/dev/null || sed -i '$ s/,$//' "/tmp/SBOM_SUMMARY.json"
+cat >> "/tmp/SBOM_SUMMARY.json" << EOF
   ],
   "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -c "cdx\|spdx" || echo 0)
 }
@@ -123,7 +121,7 @@ EOF
 
 echo "✅ SBOM Generation Complete!"
 echo "📁 Generated SBOMs stored in: $OUTPUT_DIR"
-echo "📋 Summary available at: $OUTPUT_DIR/SBOM_SUMMARY-${VERSION_SAFE}.json"
+echo "📋 Summary available at: /tmp/SBOM_SUMMARY.json"
 
 # Verification
 if [ -d "$OUTPUT_DIR" ] && [ "$(ls -1q "$OUTPUT_DIR"/*.json | wc -l)" -gt 0 ]; then
