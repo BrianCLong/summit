@@ -478,7 +478,7 @@ interface AgentMetrics {
 **Community:** [community.summit.com](https://community.summit.com)
 
 **Contact:**
-- Technical Support: [support@summit.com](mailto:support@summit.com)
+- Technical Support: [support_at_summit.com](mailto:support_at_summit.com)
 - Feature Requests: [GitHub Issues](https://github.com/summitco/summit/issues)
 
 ---

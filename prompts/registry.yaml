@@ -922,3 +922,24 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: hubspot-hygiene-rollout
+    version: v1
+    path: prompts/jules/hubspot-hygiene-rollout@v1.md
+    sha256: c97f14c590f53c4e2609b6e98b6f2e441088363a61f1f0681ff1a92ceee9f9c8
+    description: Enforce a safety-first rollout for HubSpot CRM hygiene agents in Summit Studio v1.
+    scope:
+      paths:
+        - prompts/jules/hubspot-hygiene-rollout@v1.md
+        - prompts/registry.yaml
+      domains:
+        - safety
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
