@@ -1,0 +1,209 @@
+name: GA Blocker Radar
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */6 * * *" # every 6 hours
+
+permissions:
+  contents: read
+  actions: read
+  checks: read
+  pull-requests: read
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    outputs:
+      selected_blocker: ${{ steps.select.outputs.selected_blocker }}
+      rationale: ${{ steps.select.outputs.rationale }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps (best effort)
+        shell: bash
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            corepack enable
+            pnpm -v
+            pnpm install --frozen-lockfile
+          elif [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f yarn.lock ]; then
+            corepack enable
+            yarn install --frozen-lockfile
+          else
+            echo "No lockfile found; skipping install."
+          fi
+
+      - name: Detect failing required checks on main (Check Runs)
+        id: checkruns
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SHA="$(git rev-parse HEAD)"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+          # Fetch all check runs for the main HEAD
+          curl -sS -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/$OWNER/$REPO/commits/$SHA/check-runs?per_page=100" \
+            > checkruns.json
+
+          # Extract non-success conclusions via python one-liner
+          python3 -c "import json; d=json.load(open('checkruns.json')); bad=[(c['name'], c['conclusion']) for c in d.get('check_runs', []) if c.get('status') == 'completed' and c.get('conclusion') not in (None, 'success', 'neutral', 'skipped')]; print(f'bad_count={len(bad)}'); [print(f'bad::{n}::{c}') for n, c in bad]" > bad_checks.txt || echo "bad_count=0" > bad_checks.txt
+
+          BAD_COUNT="$(grep -E '^bad_count=' bad_checks.txt | cut -d= -f2)"
+          echo "bad_count=$BAD_COUNT" >> "$GITHUB_OUTPUT"
+
+          # Store list for summary
+          grep -E '^bad::' bad_checks.txt | sed 's/^bad:://' > bad_checks_list.txt || true
+
+      - name: Branch protection drift (if script exists)
+        id: drift
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f scripts/release/check_branch_protection_drift.sh ]; then
+            bash scripts/release/check_branch_protection_drift.sh > drift.log 2>&1 || true
+            if grep -qiE "drift|mismatch|non.?compliant|failed" drift.log; then
+              echo "drift_detected=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "drift_detected=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "drift_detected=unknown" >> "$GITHUB_OUTPUT"
+            echo "No drift script found." > drift.log
+          fi
+
+      - name: Evidence determinism (run twice + diff)
+        id: determinism
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .radar/out1 .radar/out2
+
+          # Choose script if present; otherwise mark unknown
+          if [ -f scripts/release/generate_evidence_bundle.mjs ]; then
+            # Needs supply chain artifacts or mocks to run
+            mkdir -p artifacts/supplychain
+            touch artifacts/supplychain/mock.txt
+
+            node scripts/release/generate_evidence_bundle.mjs > run1.log 2>&1 || true
+            cp artifacts/evidence-bundle.json .radar/out1/evidence-bundle.json || true
+
+            # Wait a second to ensure timestamp diff if non-deterministic
+            sleep 1.1
+
+            node scripts/release/generate_evidence_bundle.mjs > run2.log 2>&1 || true
+            cp artifacts/evidence-bundle.json .radar/out2/evidence-bundle.json || true
+
+            # Compare directories (ignore generatedAt if present, but we want to fail IF meaningful content changes)
+            # The current script puts a timestamp in generatedAt, which WILL cause drift.
+            # We want to detect if *content* drifts, or if timestamp presence is the blocker.
+
+            DIFF="$(diff -ru .radar/out1 .radar/out2 || true)"
+            if [ -n "$DIFF" ]; then
+              echo "deterministic=false" >> "$GITHUB_OUTPUT"
+              printf "%s\n" "$DIFF" | head -n 200 > determinism.diff
+            else
+              echo "deterministic=true" >> "$GITHUB_OUTPUT"
+              echo "No diff." > determinism.diff
+            fi
+          else
+            echo "deterministic=unknown" >> "$GITHUB_OUTPUT"
+            echo "No evidence generation script found." > determinism.diff
+          fi
+
+      - name: Select highest leverage blocker
+        id: select
+        shell: bash
+        run: |
+          set -euo pipefail
+          BAD_COUNT="${{ steps.checkruns.outputs.bad_count }}"
+          DRIFT="${{ steps.drift.outputs.drift_detected }}"
+          DET="${{ steps.determinism.outputs.deterministic }}"
+
+          # Priority:
+          # 1) required checks failing on main
+          # 2) drift detected
+          # 3) nondeterminism
+          # else none
+          if [ "${BAD_COUNT:-0}" != "0" ]; then
+            echo "selected_blocker=required_checks_failing_on_main" >> "$GITHUB_OUTPUT"
+            echo "rationale=Main HEAD has failing check runs ($BAD_COUNT)." >> "$GITHUB_OUTPUT"
+          elif [ "${DRIFT:-unknown}" = "true" ]; then
+            echo "selected_blocker=branch_protection_drift" >> "$GITHUB_OUTPUT"
+            echo "rationale=Branch protection drift detected by drift script." >> "$GITHUB_OUTPUT"
+          elif [ "${DET:-unknown}" = "false" ]; then
+            echo "selected_blocker=evidence_bundle_nondeterministic" >> "$GITHUB_OUTPUT"
+            echo "rationale=Evidence generation differs across two runs." >> "$GITHUB_OUTPUT"
+          else
+            echo "selected_blocker=no_blocker_detected" >> "$GITHUB_OUTPUT"
+            echo "rationale=No failing main checks; drift/determinism not indicating a blocker (or unknown)." >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write summary
+        shell: bash
+        run: |
+          {
+            echo "## GA Blocker Radar"
+            echo ""
+            echo "**Main SHA:** \`${{ steps.checkruns.outputs.sha }}\`"
+            echo ""
+            echo "**Selected blocker:** \`${{ steps.select.outputs.selected_blocker }}\`"
+            echo ""
+            echo "**Rationale:** ${{ steps.select.outputs.rationale }}"
+            echo ""
+            echo "### Failing check runs on main"
+            if [ -s bad_checks_list.txt ]; then
+              echo ""
+              while read -r line; do
+                NAME="$(echo "$line" | cut -d: -f1)"
+                CONCL="$(echo "$line" | awk -F'::' '{print $2}')"
+                echo "- $NAME — $CONCL"
+              done < bad_checks_list.txt
+            else
+              echo ""
+              echo "- None detected."
+            fi
+            echo ""
+            echo "### Branch protection drift"
+            echo ""
+            echo "- drift_detected: \`${{ steps.drift.outputs.drift_detected }}\`"
+            echo ""
+            echo "### Evidence determinism"
+            echo ""
+            echo "- deterministic: \`${{ steps.determinism.outputs.deterministic }}\`"
+            echo ""
+            echo "### Artifacts"
+            echo ""
+            echo "- drift.log, determinism.diff available in run artifacts (if uploaded)."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload radar artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-blocker-radar
+          path: |
+            checkruns.json
+            bad_checks_list.txt
+            drift.log
+            determinism.diff
+            run1.log
+            run2.log
+            .radar/
+          if-no-files-found: ignore

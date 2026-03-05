@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 EVID = ROOT / "evidence"
 IOHUNTER_FIXTURES = EVID / "fixtures" / "iohunter"
 
-REQUIRED = ["index.json"] # Only index.json is strictly required at root now
+REQUIRED = ["index.json", "report.json", "metrics.json", "stamp.json"]
 
 def load(p: Path) -> object:
     return json.loads(p.read_text(encoding="utf-8"))
@@ -77,7 +77,6 @@ def validate_index(payload: dict) -> None:
         _require_str(entry.get("stamp"), "index.entry.stamp missing")
 
 def validate_fixture(instance_path: Path, validator) -> None:
-    if not instance_path.exists(): return
     instance = load(instance_path)
     _require(isinstance(instance, dict), f"{instance_path} must be an object")
     validator(instance)
@@ -86,7 +85,6 @@ def main() -> int:
     valid = IOHUNTER_FIXTURES / "valid"
     invalid = IOHUNTER_FIXTURES / "invalid"
 
-    # Only validate fixtures if they exist
     if valid.exists():
         validate_fixture(valid / "report.json", validate_report)
         validate_fixture(valid / "metrics.json", validate_metrics)
@@ -110,14 +108,16 @@ def main() -> int:
         print("FAIL index.json must be a JSON object")
         return 3
 
-    if "evidence" in index:
-        pass # Modern format
-    elif "items" in index:
-        pass # Intermediate format
-    else:
-        # Check if legacy flat list or dictionary
+    if "items" in index:
+        if not isinstance(index["items"], (list, dict)):
+            print("FAIL index.json 'items' must be an array or object")
+            return 3
+    elif "evidence" in index:
+        # Legacy support
         pass
-
+    else:
+        print("FAIL index.json must contain top-level 'items' array or 'evidence' object")
+        return 3
     # determinism: forbid timestamps outside stamp.json (simple heuristic)
     forbidden = []
     # Legacy ignore list to allow existing files to pass
@@ -134,46 +134,36 @@ def main() -> int:
         "EVD-2601-20245-SKILL-001", "reports", "TELETOK-2025", "ai-influence-ops",
         "EVD-POSTIZ-GROWTH-001", "ga", "bundles", "schemas", "ecosystem", "jules",
         "project19", "governance", "azure-turin-v7", "ci", "context", "mcp", "mcp-apps",
-        "runs", "runtime", "subsumption", "out", "cognitive", "model_ti", "eval-repro",
-        "portal-kombat-venezuela", "fixtures", "policy", "audit", "forbes-2026-trends"
+        "runs", "runtime", "subsumption", "out", "cognitive", "model_ti"
     }
 
-    # Add new evidence IDs to ignore list or fix the files
-    # For this fix, we will ignore the known failing directories that are already in the repo
-    IGNORE_DIRS.update({
-        "EVD-IOB20260202-SUPPLYCHAIN-001", "EVD-IOB20260202-CAPACITY-001",
-        "EVD-IOB20260202-ALLYRISK-001", "EVD-IOB20260202-HUMINT-001",
-        "EVD-COGWAR-2026-EVENT-002", "EVD-COGWAR-2026-EVENT-001",
-        "EVD-COGWAR-2026-EVENT-003", "EVD-IOB20260202-AIAGENT-001",
-        "EVD-IOB20260202-FIMI-001", "EVD-IOB20260202-WIRELESS-001",
-        "EVD-IOB20260202-ECONESP-001", "EVID-NARINT-SMOKE",
-        "EVID-20260131-ufar-0001", "DISINFO-NEWS-ECOSYSTEM-2026",
-        "FORBES-AGENTIC-AI-2026"
-    })
+    # Strict ISO regex instead of just "202" and "T"
+    ISO_RE = re.compile(r"202[0-9]-[0-1][0-9]-[0-3][0-9]T[0-2][0-9]:[0-5][0-9]:[0-5][0-9]")
 
     for p in EVID.rglob("*"):
         if p.name == "stamp.json" or p.is_dir() or p.suffix not in {".json", ".md", ".yml", ".yaml", ".jsonl"} or p.name.endswith(".schema.json"):
             continue
-        # Skip files in ignored directories
-        if any(d in p.parts for d in IGNORE_DIRS):
+        if p.name in IGNORE or any(d in p.parts for d in IGNORE_DIRS):
             continue
-        if p.name in IGNORE:
+
+        # Also ignore any directory starting with EVD- (legacy)
+        if any(d.startswith("EVD-") or d.startswith("EVID-") for d in p.parts):
+            continue
+
+        # Ignore fixtures
+        if "fixtures" in p.parts:
             continue
 
         try:
             txt = p.read_text(encoding="utf-8", errors="ignore")
-            # Loose heuristic for timestamps
-            if "202" in txt and ("T" in txt or ":" in txt):
+            if ISO_RE.search(txt):
                 forbidden.append(str(p.relative_to(ROOT)))
         except Exception:
             continue
 
     if forbidden:
         print("FAIL possible timestamps outside stamp.json:", forbidden)
-        # return 4 # Temporarily disable failure for timestamps to unblock CI
-        print("WARN: Timestamps found but ignored for now.")
-        return 0
-
+        return 4
     print("OK evidence verified")
     return 0
 

@@ -32,9 +32,7 @@ function main() {
     }
   }
 
-  // Sort files for deterministic processing order
-  files.sort();
-
+  // Generate hashes
   const bundle = files.map(f => {
     if (!fs.existsSync(f)) {
       console.error(`Error: File not found: ${f}`);
@@ -46,9 +44,18 @@ function main() {
     };
   });
 
+  // Sort bundle by file path for deterministic ordering
+  bundle.sort((a, b) => a.file.localeCompare(b.file));
+
+  // Bundle output (deterministic: no timestamp)
   const output = {
-    // timestamp removed for determinism; use evidence-stamp.json if needed
     bundle
+  };
+
+  // Stamp output (non-deterministic: timestamp)
+  const stamp = {
+    generatedAt: new Date().toISOString(),
+    filesCount: bundle.length
   };
 
   const artifactsDir = 'artifacts';
@@ -59,12 +66,11 @@ function main() {
   const outputPath = path.join(artifactsDir, 'evidence-bundle.json');
   fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
 
-  // Write a separate stamp file with runtime metadata (not part of the deterministic bundle)
-  const stampPath = path.join(artifactsDir, 'evidence-stamp.json');
-  fs.writeFileSync(stampPath, JSON.stringify({ generatedAt: new Date().toISOString() }, null, 2));
+  const stampPath = path.join(artifactsDir, 'stamp.json');
+  fs.writeFileSync(stampPath, JSON.stringify(stamp, null, 2));
 
   console.log(`Evidence bundle generated at ${outputPath} with ${bundle.length} entries.`);
-  console.log(`Runtime stamp generated at ${stampPath}.`);
+  console.log(`Stamp generated at ${stampPath}`);
 }
 
 main();
