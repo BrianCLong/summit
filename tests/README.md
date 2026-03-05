@@ -64,4 +64,3 @@ Thresholds are configured to fail the run when the canary success rate drops bel
 Argo AnalysisTemplate guardrails. The built-in `http_req_failed` and
 `http_req_duration` metrics are also filtered with the `deployment=canary` tag so you
 can inspect the canary’s behavior in dashboards or CI output.
-

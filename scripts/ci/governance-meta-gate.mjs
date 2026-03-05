@@ -97,6 +97,24 @@ async function runBranchProtectionGate(sha) {
   return { verdict, state, evidence: buildBranchProtectionEvidence({ branch: 'main', state, expectedChecks, actualChecks, driftDetails, sha }) };
 }
 
+
+async function runPythonGate(scriptName, gateName, sha) {
+  console.log(`Running: ${gateName}...`);
+  const scriptPath = join(ROOT, `scripts/ci/${scriptName}`);
+  if (!existsSync(scriptPath)) {
+    console.log(`  Status: SKIP (${scriptName} not found)\n`);
+    return { verdict: 'SKIP' };
+  }
+  try {
+    const output = execSync(`PYTHONPATH=. python3 scripts/ci/${scriptName}`, { cwd: ROOT, encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    console.log('  Status: PASS\n');
+    return { verdict: 'PASS', output };
+  } catch (err) {
+    console.log('  Status: FAIL\n');
+    return { verdict: 'FAIL', output: err.stdout || err.message, error: err.stderr };
+  }
+}
+
 function generateSummaryCard(results) {
   const emoji = { PASS: '\u2705', FAIL: '\u274C', SKIP: '\u23ED\uFE0F', ERROR: '\u2753' };
   const overallPass = results.every(r => r.verdict === 'PASS' || r.verdict === 'SKIP');
@@ -121,6 +139,10 @@ async function main() {
   results.push({ gate: 'Required Checks Policy', ...await runPolicyGate(sha) });
   results.push({ gate: 'Determinism Scan', ...await runDeterminismGate(sha) });
   results.push({ gate: 'Branch Protection', ...await runBranchProtectionGate(sha) });
+    results.push({ gate: 'Plan Gate', ...await runPythonGate('check_plan_gate.py', 'Plan Gate', sha) });
+  results.push({ gate: 'Patch Policy', ...await runPythonGate('check_patch_policy.py', 'Patch Policy', sha) });
+  results.push({ gate: 'Never Log', ...await runPythonGate('check_never_log.py', 'Never Log', sha) });
+  results.push({ gate: 'Eval Min Score', ...await runPythonGate('check_eval_min_score.py', 'Eval Min Score', sha) });
   const hasBlockingFailure = results.some(r => r.verdict === 'FAIL');
   writeEvidence(results, sha);
   const card = generateSummaryCard(results);

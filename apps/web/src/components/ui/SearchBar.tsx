@@ -1,6 +1,7 @@
 import * as React from 'react'
-import { Search, X, Command } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Kbd } from './Kbd'
 
 interface SearchBarProps {
   placeholder?: string
@@ -84,10 +85,7 @@ export function SearchBar({
             </button>
           )}
           {showShortcut && !internalValue && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Command className="h-3 w-3" />
-              <span>K</span>
-            </div>
+            <Kbd keys={['mod', 'K']} />
           )}
         </div>
       </div>

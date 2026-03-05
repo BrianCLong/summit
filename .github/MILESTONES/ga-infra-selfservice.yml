@@ -1,0 +1,10 @@
+id: ga-infra-selfservice
+title: GA Infrastructure Self-Service Platform
+description: Consolidating Adidas-style team autonomy, CDK compositional reuse, TFC policy governance, and Backstage scaffolding.
+status: pending
+criteria:
+  - Infrastructure registry definitions finalized and tested.
+  - OPA deny-by-default policies and infrastructure test suites passing.
+  - Backstage-style scaffolder templates validating core component structure.
+  - Evidence schema emitting validation artifacts on all CI checks.
+  - GraphRAG infrastructure mapping flags and agent planner flags defined.
