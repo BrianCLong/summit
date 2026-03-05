@@ -24,13 +24,13 @@ jobs:
   #   with:
   #     service: copilot
   #     working-directory: services/copilot
-  #     node-version: "18"
+  #     node-version: "20"
   #     coverage-threshold: 80
   #   secrets: inherit
 
   # canary-rollback:
   #   needs: pipeline
   #   if: github.event_name == 'push'
-  #   uses: ./.github/workflows/reusable/canary-rollback.yml
+  #   uses: ./.github/workflows/_reusable-canary-rollback.yml
   #   with:
   #     service-name: copilot

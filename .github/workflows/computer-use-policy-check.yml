@@ -1,0 +1,45 @@
+name: computer-use-policy-check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "summit/__main__.py"
+      - "summit/flags.py"
+      - "summit/agents/computer_use/**"
+      - "summit/tests/test_computer_use_cli.py"
+      - "computer_use_demo.yaml"
+      - ".github/workflows/computer-use-policy-check.yml"
+  push:
+    branches: [main]
+    paths:
+      - "summit/__main__.py"
+      - "summit/flags.py"
+      - "summit/agents/computer_use/**"
+      - "summit/tests/test_computer_use_cli.py"
+      - "computer_use_demo.yaml"
+      - ".github/workflows/computer-use-policy-check.yml"
+
+jobs:
+  computer_use_policy_check:
+    name: computer_use_policy_check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+
+      - name: Run computer-use policy tests
+        run: |
+          python -m pytest --noconftest -q \
+            summit/agents/computer_use/tests/test_executor.py \
+            summit/tests/test_computer_use_cli.py
