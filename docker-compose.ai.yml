@@ -38,7 +38,7 @@ services:
       API_BASE_URL: http://api:4000
       KAFKA_BROKER: kafka:9092
       # Observability
-      OTEL_SERVICE_NAME: summit-ai
+      OTEL_SERVICE_NAME: summit-api
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
     depends_on:
       api:
@@ -67,6 +67,7 @@ services:
       retries: 3
     networks:
       - summit
+      - intelgraph
 
 networks:
   summit:
