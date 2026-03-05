@@ -1,20 +1,19 @@
+"""SemVer validation helpers for Unity package manifests."""
+
 from __future__ import annotations
 
 import re
 
-_SEMVER_PATTERN = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$")
+SEMVER_RE = re.compile(r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:[-+][0-9A-Za-z.-]+)?$")
+WILDCARD_TOKENS = ("*", "x", "X")
 
 
-class SemVerError(ValueError):
-    """Raised when semantic version validation fails."""
+def validate_semver(version: str, *, production_mode: bool = True) -> bool:
+    """Return True when version matches strict semver and wildcard policy."""
+    if not isinstance(version, str) or not version:
+        return False
 
+    if production_mode and any(token in version for token in WILDCARD_TOKENS):
+        return False
 
-def is_valid_semver(value: str) -> bool:
-    return bool(_SEMVER_PATTERN.fullmatch(value))
-
-
-def validate_semver(value: str, *, production_mode: bool = True) -> None:
-    if production_mode and any(token in value for token in ("*", "x", "X")):
-        raise SemVerError(f"wildcard versions are not allowed in production mode: {value}")
-    if not is_valid_semver(value):
-        raise SemVerError(f"invalid semantic version: {value}")
+    return bool(SEMVER_RE.fullmatch(version))

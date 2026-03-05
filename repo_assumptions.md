@@ -1,19 +1,19 @@
-# Repo Assumptions
+# Unity Packaging Subsumption Assumptions
 
-Verified: PARTIAL (live repo inspection completed for `summit/` and `docs/roadmap/STATUS.json`).
+## Verified
 
-Assumed:
-- `summit/infra/` can host infra-planning Python modules.
-- `summit/policies/` can host policy YAML assets.
-- `artifacts/` remains the canonical location for machine-verifiable outputs.
-- CI can invoke scriptable checks from repository scripts and pytest.
+- `summit/` Python package exists and already contains CLI + tests.
+- `policies/` directory exists for policy YAML artifacts.
+- `docs/roadmap/STATUS.json` exists and tracks active initiatives.
 
-Must-Not-Touch:
-- Existing policy engines and unrelated core scoring logic.
-- Existing evidence schema files outside this flexible-node slice.
+## Assumed
 
-Validation Checklist:
-- Confirm module naming conventions in `summit/`.
-- Confirm CI check names and required branch protections.
-- Confirm artifact schema review process for generated JSON evidence.
-- Confirm evidence identifier pattern acceptance (`SUMMIT-FLEXNODE-<hash>`).
+- CI can execute `python -m unittest` for targeted suites.
+- Artifact naming convention accepts `artifacts/package-report.json`, `artifacts/metrics.json`, and `artifacts/stamp.json`.
+- Required check name for policy enforcement can be introduced as `check-unity-policy` in a future workflow.
+
+## Must-Not-Touch (Intentionally constrained)
+
+- Core evaluator surfaces outside `summit/pkg` additions.
+- Scoring engine paths unrelated to package scanning.
+- Provenance chain and ledger primitives.

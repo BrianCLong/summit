@@ -1,15 +1,14 @@
 {
-  "name": "com.company.demo",
+  "name": "com.company.analytics",
   "version": "1.2.3",
   "dependencies": {
-    "com.company.core": "1.0.0",
-    "com.company.utils": "2.1.0"
+    "com.company.core": "2.0.0",
+    "com.company.math": "1.4.1"
   },
   "scopedRegistries": [
     {
-      "name": "Company Registry",
-      "url": "https://registry.company.example",
-      "scopes": ["com.company"]
+      "name": "company",
+      "url": "https://packages.company.internal"
     }
   ]
 }

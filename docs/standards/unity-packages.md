@@ -1,23 +1,18 @@
-# Unity Package Standards for Summit
+# Unity Package Governance Standard
 
-This document defines Summit's Unity package subsumption contract.
+Summit subsumes Unity-style package reuse by treating each `package.json` as a governed artifact.
 
-## Inputs
-- Unity `package.json` manifest
-- Assembly definition files (`*.asmdef`)
-- Scoped registry declarations
+## Inputs and Outputs
 
-## Outputs
-- `package-report.json`: deterministic dependency + assembly analysis
-- `metrics.json`: counts for dependencies, assemblies, registries
-- `stamp.json`: schema + determinism declaration
+- Input: Unity `package.json` (+ optional `.asmdef` files)
+- Output: deterministic `artifacts/package-report.json`, `artifacts/metrics.json`, `artifacts/stamp.json`
 
-## Determinism Rules
-- No timestamps in emitted artifacts
-- JSON keys sorted in writer
-- Dependency and assembly listings sorted
+## Enforcement
 
-## Non-Goals
-- Hosting Unity registries
-- Replacing Unity Package Manager
-- Building Unity runtime plugins
+- Strict SemVer for package and dependency versions.
+- Scoped registry policy from `policies/registry_policy.yaml`.
+- Deterministic dependency DAG generation.
+
+## Evidence Identifier
+
+`EVIDENCE:UNITYPKG:<package-name>:<version>`

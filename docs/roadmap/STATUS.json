@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added flex-node-selector GA subsumption MWS with deterministic artifacts, policy validation, and drift monitoring scaffolds.",
+  "revision_note": "Added unity-package-subsumption MWS initiative with deterministic scanner, policy gate scaffolding, and evidence outputs.",
   "initiatives": [
     {
-      "id": "databricks-flex-node-subsumption-mws",
+      "id": "unity-package-subsumption-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Summit-native flex node selector scaffold with deterministic scoring, policy allowlists, CI hooks, and evidence artifacts."
+      "notes": "Implemented Unity package scanner MVP with deterministic report artifacts, SemVer/policy validation, dependency DAG checks, and CLI entrypoint."
     },
     {
       "id": "saas-crash-2026-positioning-pack",

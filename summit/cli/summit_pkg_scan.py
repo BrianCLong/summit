@@ -1,55 +1,40 @@
+"""CLI for Unity package scan with deterministic outputs."""
+
 from __future__ import annotations
 
 import argparse
 import json
 from pathlib import Path
 
-from summit.pkg.unity_adapter import build_package_report
-
-
-def _load_policy(path: Path) -> dict[str, object]:
-    policy: dict[str, object] = {
-        "allowed_scopes": [],
-        "blocked_registries": [],
-        "enforce_https": True,
-    }
-    raw = path.read_text(encoding="utf-8").splitlines()
-    key: str | None = None
-    for line in raw:
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-        if stripped.endswith(":"):
-            key = stripped[:-1]
-            if key in ("allowed_scopes", "blocked_registries"):
-                policy[key] = []
-            continue
-        if stripped.startswith("- ") and key in ("allowed_scopes", "blocked_registries"):
-            policy[key].append(stripped[2:].strip())
-            continue
-        if ":" in stripped:
-            left, right = [part.strip() for part in stripped.split(":", 1)]
-            if left == "enforce_https":
-                policy[left] = right.lower() == "true"
-    return policy
+from summit.pkg.unity_adapter import scan_unity_package
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Scan a Unity package and emit deterministic artifacts.")
-    parser.add_argument("manifest", help="Path to Unity package.json")
-    parser.add_argument("--policy", default="policies/registry_policy.yaml", help="Path to registry policy YAML")
-    parser.add_argument("--out", default="artifacts", help="Output directory")
+    parser = argparse.ArgumentParser(description="Scan a Unity package manifest")
+    parser.add_argument("manifest", type=Path, help="Path to package.json")
+    parser.add_argument(
+        "--policy",
+        type=Path,
+        default=Path("policies/registry_policy.yaml"),
+        help="Registry policy yaml",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=Path("artifacts"),
+        help="Output directory for deterministic artifacts",
+    )
     args = parser.parse_args()
 
-    out_dir = Path(args.out)
-    out_dir.mkdir(parents=True, exist_ok=True)
+    artifacts = scan_unity_package(args.manifest, policy_path=args.policy)
 
-    policy = _load_policy(Path(args.policy))
-    report, metrics, stamp = build_package_report(args.manifest, policy)
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    for filename, payload in artifacts.items():
+        output_path = args.output_dir / filename
+        output_path.write_text(
+            json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
 
-    (out_dir / "package-report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    (out_dir / "stamp.json").write_text(json.dumps(stamp, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return 0
 
 
