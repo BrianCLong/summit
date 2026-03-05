@@ -1,5 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { execFile } from 'node:child_process';
 import {
   computeDiff,
   fetchRequiredStatusChecks,
@@ -93,6 +94,75 @@ function writeErrorEvidence(evidencePath, branch, code) {
     }
   };
   writeDeterministicJson(evidencePath, evidence);
+}
+
+async function notifyGovernanceIssue(repo, error) {
+  console.log('Attempting to notify governance issue...');
+
+  if (!process.env.GITHUB_TOKEN && !process.env.GH_TOKEN) {
+    console.warn('Skipping issue creation: No GITHUB_TOKEN or GH_TOKEN found.');
+    return;
+  }
+
+  const issueTitle = 'Governance Drift: Branch Protection Access';
+  const issueBody = `
+### Governance Alert: Branch Protection Unverifiable
+
+The automated branch protection drift check failed to verify the \`main\` branch settings due to insufficient permissions.
+
+**Repository:** ${repo}
+**Error:** ${error.message}
+
+### Remediation
+
+The token used by the CI workflow must have one of the following scopes:
+- \`repo\` (Full control of private repositories)
+- \`read:org\` (Read org and team membership, read org projects)
+- \`admin:repo_hook\` (Read and write repository hooks)
+- \`workflow\` (Update GitHub Action workflows)
+
+Please update the repository secrets or GitHub App permissions to allow reading branch protection rules.
+
+*This issue was automatically created/updated by the governance drift detector.*
+  `.trim();
+
+  try {
+    // Check if issue exists
+    const searchArgs = ['issue', 'list', '--repo', repo, '--search', `"${issueTitle}" in:title`, '--json', 'number,state'];
+    const searchResult = await new Promise((resolve, reject) => {
+      execFile('gh', searchArgs, (err, stdout) => {
+        if (err) reject(err);
+        else resolve(JSON.parse(stdout));
+      });
+    });
+
+    if (searchResult.length > 0) {
+      const issue = searchResult[0];
+      if (issue.state === 'OPEN') {
+        console.log(`Governance issue #${issue.number} already open.`);
+        // Optional: Comment on existing issue to bump?
+      } else {
+        console.log(`Reopening governance issue #${issue.number}...`);
+        await new Promise((resolve, reject) => {
+          execFile('gh', ['issue', 'reopen', issue.number.toString(), '--repo', repo, '--comment', 'Reopening: Drift check failed again due to permissions.'], (err) => {
+            if (err) reject(err);
+            else resolve();
+          });
+        });
+      }
+    } else {
+      console.log('Creating new governance issue...');
+      await new Promise((resolve, reject) => {
+        execFile('gh', ['issue', 'create', '--repo', repo, '--title', issueTitle, '--body', issueBody, '--label', 'governance'], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }
+  } catch (e) {
+    console.error(`Failed to manage governance issue: ${e.message}`);
+    // Don't fail the build just because we couldn't create an issue
+  }
 }
 
 function formatMarkdown(report, diff, remediationCommand, errorMessage) {
@@ -322,6 +392,11 @@ async function main() {
     };
     writeDeterministicJson(evidencePath, evidence);
     console.error(errorMessage);
+
+    if (errorState === 'UNVERIFIABLE_PERMISSIONS') {
+      await notifyGovernanceIssue(repo, error);
+    }
+
     process.exit(errorState === 'UNVERIFIABLE_PERMISSIONS' || errorState === 'UNVERIFIABLE_RATE_LIMIT' ? 0 : 2);
   }
 
