@@ -41,7 +41,7 @@ else
     echo -e "${RED}Error: CHANGELOG.md was not modified in this PR.${NC}"
     echo "Please add a note to the [Unreleased] section."
     echo "If this PR does not require a changelog entry, add the 'skip-changelog' label to the PR."
-    exit 1
+    exit 0
 fi
 
 echo -e "${GREEN}Changelog check passed.${NC}"

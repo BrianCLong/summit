@@ -1,0 +1,27 @@
+version: 1
+name: slo-guardrail
+scenarios:
+  - id: slo-playwright
+    type: playwright
+    command: pnpm --filter server playwright test --grep @slo
+    owner: qa
+    evidence:
+      - server/tests/e2e/.playwright-report/index.html
+  - id: slo-jest
+    type: jest
+    command: pnpm --filter server test -- CircuitBreaker.test.ts --runInBand
+    owner: platform
+    evidence:
+      - server/coverage/lcov-report/index.html
+  - id: slo-load
+    type: k6
+    command: k6 run tests/load/health-p95.k6.js
+    owner: sre
+    evidence:
+      - tests/load/output/health-p95-summary.json
+  - id: slo-chaos
+    type: chaos
+    command: kubectl apply -f tests/chaos/control-plane-latency-experiment.yaml
+    owner: sre
+    evidence:
+      - chaos/results/control-plane-latency.json

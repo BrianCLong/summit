@@ -1,0 +1,5 @@
+name: OSINT Investigations
+slug: osint-investigations
+version: "1.0"
+evidence_id: EVD-OSINT-001
+description: Subsumption plan for OSINT investigation platforms.

@@ -12,7 +12,7 @@ NEVER_LOG_PATTERNS = [
 
 def check_never_log(filepath):
     """Scans a file for patterns that must never be logged."""
-    with open(filepath, "r", errors="ignore") as f:
+    with open(filepath, errors="ignore") as f:
         content = f.read()
         for pattern in NEVER_LOG_PATTERNS:
             if re.search(pattern, content, re.IGNORECASE):
