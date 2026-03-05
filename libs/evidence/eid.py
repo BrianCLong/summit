@@ -1,7 +1,10 @@
 from __future__ import annotations
-import hashlib, json
+
+import hashlib
+import json
 from dataclasses import dataclass
 from typing import Any, Mapping
+
 
 def _stable_hash(obj: Any, n: int) -> str:
     b = json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode("utf-8")

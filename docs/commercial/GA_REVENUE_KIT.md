@@ -80,26 +80,26 @@ This kit provides the core artifacts to close 3 Paid Pilots and expand them to P
 *(Links point to public or NDA-gated repository artifacts)*
 
 1.  **Architecture & Threat Model:**
-    *   [Architecture Overview](docs/ARCHITECTURE.md)
-    *   [Threat Model (STRIDE)](docs/security/THREAT_MODEL.md)
-    *   [Data Sensitivity & Redaction Policy](docs/governance/data-sensitivity-and-redaction.md)
+    *   Architecture Overview
+    *   Threat Model (STRIDE)
+    *   Data Sensitivity & Redaction Policy
 
 2.  **Compliance Controls (SOC 2 Mapping):**
-    *   [SOC 2 Control Matrix](docs/compliance/soc2_control_matrix.md) - Maps our controls to TSC criteria.
-    *   [Public Assurance Memo](docs/assurance/PUBLIC_ASSURANCE_MEMO.md) - Our transparency commitment.
+    *   SOC 2 Control Matrix - Maps our controls to TSC criteria.
+    *   Public Assurance Memo - Our transparency commitment.
 
 3.  **Software Supply Chain (The "Hard Stuff"):**
     *   **SBOM:** We provide a CycloneDX SBOM for every release (see `sbom.json` in Release artifacts).
     *   **Provenance:** All artifacts are signed (Cosign) with SLSA v0.2 attestations.
-    *   **Secrets Policy:** [Secrets Management Standard](docs/security/secrets-policy.md) - No hardcoded secrets, rotation policy.
+    *   **Secrets Policy:** Secrets Management Standard - No hardcoded secrets, rotation policy.
 
 4.  **Operational Security:**
-    *   **TLS Policy:** [TLS 1.2+ Enforcement](docs/security/TLS_POLICY.md).
+    *   **TLS Policy:** TLS 1.2+ Enforcement.
     *   **Vulnerability Management:** Daily scans (Trivy/Grype), "Zero Critical" SLA.
-    *   **Incident Response:** [Public Assurance Memo](docs/assurance/PUBLIC_ASSURANCE_MEMO.md) covers transparency.
+    *   **Incident Response:** Public Assurance Memo covers transparency.
 
 5.  **Privacy & Data Governance:**
-    *   [Privacy Policy & Redaction](docs/governance/data-sensitivity-and-redaction.md) - How we handle PII (Redact-by-default).
+    *   Privacy Policy & Redaction - How we handle PII (Redact-by-default).
 
 ---
 
