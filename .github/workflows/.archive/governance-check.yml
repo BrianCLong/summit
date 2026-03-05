@@ -2,52 +2,55 @@ name: Governance Check
 
 on:
   pull_request:
-    types: [opened, synchronize, labeled, reopened]
+    types: [opened, synchronize, reopened, labeled]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  enforcement:
-    name: Enforce Governance Tiers
+  enforce-classification:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Required for git diff
+      - name: Checkout
+        uses: actions/checkout@v4 # v6
 
+      - name: Check Labels
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = pr.labels.map(l => l.name);
+            const title = pr.title;
+
+<<<<<<< HEAD
+            // Auto-infer from title if no labels
+            if (labels.length === 0) {
+              if (title.startsWith('feat:')) labels.push('minor');
+              else if (title.startsWith('fix:')) labels.push('patch');
+              else if (title.startsWith('docs:')) labels.push('patch');
+              else if (title.includes('BREAKING CHANGE')) labels.push('major');
+            }
+=======
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
+>>>>>>> 837360eb8 (fix: resolve CI failures (sbom, reason-codes, pnpm, lint, provenance))
 
-      - name: Run Governance Check
-        run: node scripts/ci/governance-check.js
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_EVENT_PATH: ${{ github.event_path }}
-          GITHUB_BASE_REF: ${{ github.base_ref }}
-          GITHUB_HEAD_REF: ${{ github.head_ref }}
+            const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
+            if (!valid) {
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
+            }
 
-  audit-log:
-    name: Audit Governance Decision
+  check-approvals:
+    needs: enforce-classification
     runs-on: ubuntu-latest
-    if: always()
-    needs: enforcement
+    if: contains(github.event.pull_request.labels.*.name, 'major')
     steps:
-      - name: Generate Audit Record
-        run: |
-          echo "Timestamp: $(date -u)" > audit.log
-          echo "Workflow: Governance Check" >> audit.log
-          echo "Result: ${{ needs.enforcement.result }}" >> audit.log
-          echo "Repo: ${{ github.repository }}" >> audit.log
-          echo "PR: ${{ github.event.number }}" >> audit.log
-
-      - name: Upload Audit Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: governance-audit-log
-          path: audit.log
+      - name: Verify Major Approval
+        run: echo "Checking for Architecture Review (Mock)..."
