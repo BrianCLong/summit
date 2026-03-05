@@ -1,17 +1,14 @@
-version: '3.8'
 services:
-  neo4j:
-    image: neo4j:5.11.0
-    environment:
-      - NEO4J_AUTH=neo4j/password
-    ports:
-      - "7687:7687"
-      - "7474:7474"
   postgres:
-    image: postgres:15
+    image: timescale/timescaledb:latest-pg14
     environment:
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=intelgraph
-      - POSTGRES_USER=intelgraph
+      - POSTGRES_PASSWORD=ci-postgres-password
     ports:
       - "5432:5432"
+  neo4j:
+    image: neo4j:4.4-community
+    environment:
+      - NEO4J_AUTH=none
+    ports:
+      - "7474:7474"
+      - "7687:7687"
