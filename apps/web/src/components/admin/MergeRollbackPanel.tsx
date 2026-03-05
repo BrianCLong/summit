@@ -20,7 +20,7 @@ const ROLLBACK_MERGE = gql`
   }
 `;
 
-type RollbackMergeResult = {
+type RollbackMergeResponse = {
   rollbackMergeSnapshot?: {
     success?: boolean;
     snapshotId?: string;
@@ -37,10 +37,7 @@ export default function MergeRollbackPanel() {
   const [mergeId, setMergeId] = useState('');
   const [reason, setReason] = useState('');
 
-  const [rollbackMerge, { data, loading, error }] = useMutation<
-    RollbackMergeResult,
-    RollbackMergeVariables
-  >(ROLLBACK_MERGE);
+  const [rollbackMerge, { data, loading, error }] = useMutation<RollbackMergeResponse, RollbackMergeVariables>(ROLLBACK_MERGE);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

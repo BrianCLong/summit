@@ -22,7 +22,8 @@ interface Tenant {
 }
 
 export default function PartnerConsole() {
-  const { token, user } = useAuth();
+  const { user } = useAuth();
+  const token = localStorage.getItem('auth_token');
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTenant, setSelectedTenant] = useState<string | null>(null);

@@ -171,9 +171,7 @@ export const RunSummary: React.FC<RunPartProps> = React.memo(({ selectedRun }) =
                 By model
               </p>
               <div className="space-y-1">
-                {Object.entries(
-                  selectedRun.costSummary.byModel as Record<string, ModelCostStats>,
-                ).map(
+                {(Object.entries(selectedRun.costSummary.byModel) as Array<[string, any]>).map(
                   ([model, stats]) => (
                     <div
                       key={model}
@@ -262,12 +260,6 @@ export const RunTasks: React.FC<RunPartProps> = React.memo(({ selectedRun }) => 
     </Card>
   );
 });
-
-type ModelCostStats = {
-  inputTokens: number;
-  outputTokens: number;
-  costUSD: number;
-};
 
 export const RunOutputs: React.FC<RunPartProps> = React.memo(({ selectedRun }) => {
   return (
