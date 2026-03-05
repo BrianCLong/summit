@@ -58,10 +58,10 @@ main() {
 
     for root_file in "$BACKUP_DIR"/*.json; do
         [ -e "$root_file" ] || continue
-        
+
         if verify_root "$root_file"; then
             total_verified=$((total_verified + 1))
-            
+
             # Track latest root
             current_ts=$(jq -r '.timestamp' "$root_file")
             if [[ -z "$latest_timestamp" || "$current_ts" > "$latest_timestamp" ]]; then
