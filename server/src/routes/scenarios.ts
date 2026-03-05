@@ -11,15 +11,9 @@ const routeLogger = logger.child({ name: 'ScenarioRoutes' });
  * Helper to extract user from request
  */
 function getUserId(req: any): string {
-  // SEC-2025-002: Prioritize identity from authenticated user object
-  // populated by middleware, rather than untrusted headers to prevent spoofing.
-  return (
-    req.user?.id ||
-    req.user?.sub ||
-    req.user?.email ||
-    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : null) ||
-    'system'
-  );
+  // SEC-2025-008: Do not trust x-user-id header for scenarios.
+  // Rely exclusively on the authenticated req.user object.
+  return req.user?.id || req.user?.sub || req.user?.email || 'system';
 }
 
 /**

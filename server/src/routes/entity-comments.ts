@@ -25,12 +25,14 @@ function getRequestContext(req: any): {
   const tenantId = String(
     req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
   );
-  const userId =
-    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
+
+  // SEC-2025-006: Do not trust x-user-id header for entity comments.
+  // Rely exclusively on the authenticated req.user object.
+  const userId = req.user?.id || req.user?.sub || req.user?.email || 'system';
 
   return {
     tenantId: tenantId || null,
-    userId: userId || null,
+    userId,
   };
 }
 
@@ -170,10 +172,10 @@ entityCommentsRouter.get('/:id/comments', async (req, res) => {
 
     const { id } = req.params;
     const limit = req.query.limit
-      ? parseInt(req.query.limit as string as string, 10)
+      ? parseInt(req.query.limit as string, 10)
       : undefined;
     const offset = req.query.offset
-      ? parseInt(req.query.offset as string as string, 10)
+      ? parseInt(req.query.offset as string, 10)
       : undefined;
 
     await authorizer({

@@ -43,12 +43,14 @@ function getRequestContext(req: any): {
   const tenantId = String(
     req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
   );
-  const userId =
-    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
+
+  // SEC-2025-007: Do not trust x-user-id header for cases.
+  // Rely exclusively on the authenticated req.user object.
+  const userId = req.user?.id || req.user?.sub || req.user?.email || 'system';
 
   return {
     tenantId: tenantId || null,
-    userId: userId || null,
+    userId,
   };
 }
 
@@ -331,14 +333,14 @@ caseRouter.get('/', async (req, res) => {
 
     const cases = await service.listCases({
       tenantId,
-      status: (req.query.status as string) as any,
+      status: req.query.status as any,
       compartment: req.query.compartment as string,
       policyLabels: req.query.policyLabels
         ? (req.query.policyLabels as string).split(',')
         : undefined,
-      limit: req.query.limit ? parseInt(req.query.limit as string as string) : undefined,
+      limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
       offset: req.query.offset
-        ? parseInt(req.query.offset as string as string)
+        ? parseInt(req.query.offset as string)
         : undefined,
     });
 
@@ -626,8 +628,8 @@ caseRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = req.query.limit ? parseInt(req.query.limit as string as string) : undefined;
-    const offset = req.query.offset ? parseInt(req.query.offset as string as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);
