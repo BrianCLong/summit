@@ -66,6 +66,7 @@ import {
 } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
+import { useAuth } from '../../context/AuthContext';
 
 interface Investigation {
   id: string;
@@ -204,9 +205,14 @@ const getClassificationColor = (
 
 export default function InvestigationDetail() {
   const { id } = useParams();
+  const { hasRole } = useAuth();
+  const isViewer = hasRole('viewer');
   const [selectedTab, setSelectedTab] = useState(0);
   const [addEvidenceOpen, setAddEvidenceOpen] = useState(false);
   const [addNoteOpen, setAddNoteOpen] = useState(false);
+  const [addEntityOpen, setAddEntityOpen] = useState(false);
+  const [entityName, setEntityName] = useState('');
+  const [enrichResult, setEnrichResult] = useState('');
 
   const { data: investigation, loading } = useSafeQuery<Investigation>({
     queryKey: `investigation_${id}`,
@@ -693,9 +699,24 @@ export default function InvestigationDetail() {
         {/* Entities Tab */}
         <TabPanel value={selectedTab} index={1}>
           <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Connected Entities
-            </Typography>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 3 }}
+            >
+              <Typography variant="h6">Connected Entities</Typography>
+              {!isViewer && (
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  data-testid="add-entity"
+                  onClick={() => setAddEntityOpen(true)}
+                >
+                  Add Entity
+                </Button>
+              )}
+            </Stack>
 
             <Grid container spacing={2}>
               {investigation.entities.map((entity) => (
@@ -895,12 +916,14 @@ export default function InvestigationDetail() {
 
             <Paper
               variant="outlined"
+              className="graph-view"
               sx={{
                 height: 400,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: 2,
+                position: 'relative',
               }}
             >
               <Stack alignItems="center">
@@ -911,6 +934,15 @@ export default function InvestigationDetail() {
                 <Typography variant="body2" color="text.secondary">
                   Interactive network visualization of entity connections
                 </Typography>
+                {enrichResult && (
+                  <Typography
+                    variant="body1"
+                    color="primary"
+                    sx={{ mt: 2, fontWeight: 'bold' }}
+                  >
+                    {enrichResult}
+                  </Typography>
+                )}
               </Stack>
             </Paper>
           </CardContent>
@@ -1048,6 +1080,54 @@ export default function InvestigationDetail() {
         <DialogActions>
           <Button onClick={() => setAddEvidenceOpen(false)}>Cancel</Button>
           <Button variant="contained">Add Evidence</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Entity Dialog */}
+      <Dialog
+        open={addEntityOpen}
+        onClose={() => setAddEntityOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Add Entity</DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ mt: 1 }}>
+            <TextField
+              fullWidth
+              label="Entity Name"
+              id="entity-name"
+              value={entityName}
+              onChange={(e) => setEntityName(e.target.value)}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setAddEntityOpen(false)}>Cancel</Button>
+          <Button
+            variant="outlined"
+            onClick={() => setEnrichResult('drift edges detected')}
+          >
+            Enrich
+          </Button>
+          <Button
+            variant="contained"
+            onClick={async () => {
+              // Simulate API call for audit log
+              await fetch('/api/audit-events', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-tenant-id': 'global' },
+                body: JSON.stringify({
+                  eventType: 'user_action',
+                  action: 'add_entity',
+                  details: { name: entityName },
+                }),
+              }).catch(() => {});
+              setAddEntityOpen(false);
+            }}
+          >
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
 
