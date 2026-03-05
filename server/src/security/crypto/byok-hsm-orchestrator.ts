@@ -1,7 +1,8 @@
 // @ts-nocheck
 import {
   createCipheriv,
-  createHash,
+  publicEncrypt,
+  constants,
   randomBytes,
 } from 'node:crypto';
 import {
@@ -271,22 +272,26 @@ export class ByokHsmOrchestrator {
     wrapAuthTag: string;
     wrapIv: string;
   }> {
-    const publicKey = await this.hsm.exportPublicKey(key);
-    const wrappingKey = createHash('sha256').update(publicKey).digest();
-    const wrapIv = createHash('sha1')
-      .update(`${key.id}:${key.version}`)
-      .digest()
-      .subarray(0, 12);
+    const publicKeyPem = await this.hsm.exportPublicKey(key);
 
-    const cipher = createCipheriv('aes-256-gcm', wrappingKey, wrapIv);
-    let wrappedDataKey = cipher.update(dataKey, undefined, 'base64');
-    wrappedDataKey += cipher.final('base64');
+    if (key.algorithm === 'RSA_SHA256') {
+      const wrappedDataKey = publicEncrypt(
+        {
+          key: publicKeyPem,
+          padding: constants.RSA_PKCS1_OAEP_PADDING,
+          oaepHash: 'sha256',
+        },
+        dataKey
+      );
 
-    return {
-      wrappedDataKey,
-      wrapAuthTag: Buffer.from(cipher.getAuthTag()).toString('base64'),
-      wrapIv: Buffer.from(wrapIv).toString('base64'),
-    };
+      return {
+        wrappedDataKey: wrappedDataKey.toString('base64'),
+        wrapAuthTag: '',
+        wrapIv: '',
+      };
+    }
+
+    throw new Error(`Encryption not supported for algorithm ${key.algorithm}`);
   }
 
   private validateGuardrails(guardrails: RotationGuardrails): void {

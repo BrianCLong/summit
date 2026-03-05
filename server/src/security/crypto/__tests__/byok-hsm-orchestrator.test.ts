@@ -117,4 +117,28 @@ describe('ByokHsmOrchestrator', () => {
     );
     expect(overdue.status).toBe('overdue');
   });
+
+  it('throws error for unsupported algorithms', async () => {
+    const auditLogger = new InMemoryAuditLogger();
+    const orchestrator = buildOrchestrator(auditLogger);
+
+    const { publicKey } = crypto.generateKeyPairSync('ec', {
+      namedCurve: 'P-256',
+    });
+
+    const registration: CustomerManagedKey = {
+      tenantId: 'tenant-b',
+      keyId: 'tenant-b-key',
+      provider: 'aws-kms',
+      algorithm: 'ECDSA_P256_SHA256',
+      publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
+      rotationIntervalHours: 24,
+    };
+
+    await orchestrator.registerCustomerManagedKey(registration);
+
+    await expect(
+      orchestrator.encryptForTenant('tenant-b', 'tenant-b-key', 'payload'),
+    ).rejects.toThrow('Encryption not supported for algorithm ECDSA_P256_SHA256');
+  });
 });
