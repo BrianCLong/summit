@@ -1,0 +1,48 @@
+name: Generate release sparkline
+on:
+  schedule: [{ cron: '0 2 * * *' }]
+  workflow_dispatch: {}
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect release metadata
+        run: |
+          mkdir -p build
+          # TODO: replace with your collector; must emit build/releases.json
+          # Example schema: [{date:"2026-02-26",release:"v1.4.2",determinism_score:0.93,gates:{pass:152,fail:3}}, ...]
+          ./ci/tools/collect_release_metadata.sh --out build/releases.json
+
+      - name: Validate input (non-empty)
+        run: |
+          test -s build/releases.json
+          jq 'length > 0' build/releases.json | grep true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Install deps (none required) & generate
+        run: |
+          pnpm install --prefer-offline || true
+          node scripts/generate_release_timeline.js build/releases.json
+
+      - name: Smoke-check HTML
+        run: |
+          node --input-type=module -e "import fs from 'fs'; const d=JSON.parse(fs.readFileSync('./build/releases.json')); \
+          const h=fs.readFileSync('reports/release-sparkline.html','utf8'); \
+          if(!(h.includes('<svg') && d.length>0)) process.exit(2);"
+
+      - name: Upload sparkline report
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-sparkline-report
+          path: reports/release-sparkline.html

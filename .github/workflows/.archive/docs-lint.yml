@@ -1,0 +1,70 @@
+name: Docs Lint
+
+on:
+  pull_request:
+    paths:
+      - "**.md"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  markdown-lint:
+    name: Markdown Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4 # v6
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4 # v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # v6
+        with:
+          node-version: "20"
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Create or use markdownlint config
+        run: |
+          if [ ! -f ".markdownlint.json" ]; then
+            cat > .markdownlint.json << 'CONFIG'
+          {
+            "MD013": false,
+            "MD024": false,
+            "MD033": false,
+            "MD041": false,
+            "MD036": false,
+            "MD001": false,
+            "MD028": false,
+            "MD032": false,
+            "MD012": false,
+            "MD022": false,
+            "MD030": false,
+            "MD029": false,
+            "MD009": false,
+            "MD034": false,
+            "MD007": false,
+            "MD031": false,
+            "MD056": false,
+            "MD040": false,
+            "MD060": false,
+            "MD025": false,
+            "MD058": false,
+            "MD026": false,
+            "MD052": false,
+            "MD037": false,
+            "MD038": false,
+            "MD049": false,
+            "MD004": false,
+            "MD047": false,
+            "MD055": false,
+            "MD053": false,
+            "MD010": false,
+            "MD051": false,
+            "MD018": false
+          }
+          CONFIG
+          fi
+      - name: Run Markdown Lint
+        run: pnpm dlx markdownlint-cli '**/*.md' --ignore 'node_modules' -c .markdownlint.json
