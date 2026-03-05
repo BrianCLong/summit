@@ -172,12 +172,20 @@ export function useExplainView({
   // Calculate top contributing entities
   const topEntities = useMemo(() => {
     if (!contributionData?.contributionScores.entityScores) {
+      // Bolt Optimization: Pre-calculate connection counts to avoid O(N*M) nested loop
+      // Reduced complexity to O(N + M)
+      const connectionCounts = new Map<string, number>()
+      relationships.forEach(r => {
+        connectionCounts.set(r.sourceId, (connectionCounts.get(r.sourceId) || 0) + 1)
+        if (r.targetId !== r.sourceId) {
+          connectionCounts.set(r.targetId, (connectionCounts.get(r.targetId) || 0) + 1)
+        }
+      })
+
       // Fallback to local calculation
       return entities
         .map(entity => {
-          const connections = relationships.filter(
-            r => r.sourceId === entity.id || r.targetId === entity.id
-          ).length
+          const connections = connectionCounts.get(entity.id) || 0
 
           const reasons: string[] = []
           if (connections > 5) {reasons.push(`${connections} connections`)}
@@ -217,11 +225,15 @@ export function useExplainView({
   // Calculate top contributing relationships
   const topRelationships = useMemo(() => {
     if (!contributionData?.contributionScores.relationshipScores) {
+      // Bolt Optimization: Pre-calculate entity map to avoid O(M*N) nested finds
+      // Reduced complexity to O(N + M)
+      const entityMap = new Map(entities.map(e => [e.id, e]))
+
       // Fallback to local calculation
       return relationships
         .map(relationship => {
-          const sourceEntity = entities.find(e => e.id === relationship.sourceId)
-          const targetEntity = entities.find(e => e.id === relationship.targetId)
+          const sourceEntity = entityMap.get(relationship.sourceId)
+          const targetEntity = entityMap.get(relationship.targetId)
 
           if (!sourceEntity || !targetEntity) {return null}
 
