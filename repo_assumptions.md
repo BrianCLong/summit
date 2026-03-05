@@ -1,14 +1,27 @@
-# Repo Assumptions for Gemini Enterprise Adapter
+# Repository Assumptions Validation (Offline-Local Profile)
 
-Verified: PARTIAL (live inspection performed for `summit/providers`, `tests`, and `evidence`).
+## Verified Paths
 
-Assumed:
-- Provider-level enterprise integration can be delivered under `summit/providers/google/` without core engine edits.
-- Evidence artifacts in `evidence/gemini_enterprise/` can be consumed by existing governance flows.
-- Existing CI can run focused pytest suites for provider and security checks.
-- Existing tests and contracts outside this scope remain unchanged.
+- `agents/`
+- `runtime/`
+- `evidence/`
+- `ci/`
+- `docs/`
+- `scripts/`
 
-Must-not-touch:
-- Core evaluation engine paths
-- Existing evidence schema contracts outside the new `gemini_enterprise` evidence folder
-- Existing provider adapters
+## Assumed Paths Introduced in This Change
+
+- `runtime/backends/`
+- `runtime/config/profiles/`
+- `runtime/profiles/offline_local.yaml`
+- `scripts/bench/`
+- `scripts/monitoring/`
+- `docs/ops/runbooks/offline-local.md`
+- `docs/security/data-handling/offline-local.md`
+- `docs/standards/offline-local.md`
+
+## Risk Areas
+
+- Existing runtime orchestration entrypoints may not yet load `runtime/profiles/offline_local.yaml`.
+- CI required-check mapping may need explicit registration for `offline_profile_check`.
+- Local OpenAI-compatible backend call semantics can vary between model hosts; endpoint compatibility must be verified in environment.

@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-22T00:00:00Z",
-  "revision_note": "Added WebMCP subsumption MWS initiative with adapter, policy gate, replay harness, and docs evidence contracts.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added offline-local runtime profile initiative with backend adapter, determinism evidence, network guard, and drift monitor scaffolding.",
   "initiatives": [
     {
-      "id": "webmcp-subsumption-mws",
+      "id": "offline-local-runtime-profile",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "WebMCP browser-session ingestion, policy gate, deterministic replay artifacts, and operational/data-handling standards."
+      "notes": "Offline-first local OpenAI-compatible backend adapter, offline profile, CI egress guard, determinism stamp helper, benchmark harness, and weekly drift workflow scaffold."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
