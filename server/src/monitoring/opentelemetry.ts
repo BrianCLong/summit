@@ -5,20 +5,21 @@
  * for Apollo GraphQL, Neo4j, and BullMQ operations.
  */
 
-// @ts-ignore - OpenTelemetry types not fully resolved
+// @ts-ignore
 import { NodeSDK } from '@opentelemetry/sdk-node';
-// @ts-ignore - OpenTelemetry types not fully resolved
+// @ts-ignore
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import * as resources from '@opentelemetry/resources';
-// @ts-ignore - OpenTelemetry types not fully resolved
+// @ts-ignore
+import { Resource } from '@opentelemetry/resources';
+// @ts-ignore
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-// @ts-ignore - OpenTelemetry types not fully resolved
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
-// @ts-ignore - OpenTelemetry types not fully resolved
+// @ts-ignore
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+// @ts-ignore
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+// @ts-ignore
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode, SpanKind, Span } from '@opentelemetry/api';
 import pino from 'pino';
 
 const logger: pino.Logger = (pino as any)({ name: 'opentelemetry' });
@@ -27,7 +28,8 @@ interface TracingConfig {
   serviceName: string;
   serviceVersion: string;
   environment: string;
-  jaegerEndpoint?: string;
+  otlpEndpoint?: string;
+  otlpMetricEndpoint?: string;
   enableConsoleExporter: boolean;
   sampleRate: number;
 }
@@ -44,7 +46,8 @@ class OpenTelemetryService {
       serviceVersion:
         config.serviceVersion || process.env.OTEL_SERVICE_VERSION || '1.0.0',
       environment: config.environment || process.env.NODE_ENV || 'development',
-      jaegerEndpoint: config.jaegerEndpoint || process.env.JAEGER_ENDPOINT,
+      otlpEndpoint: config.otlpEndpoint || process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://otel-collector:4318/v1/traces',
+      otlpMetricEndpoint: config.otlpMetricEndpoint || process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT || 'http://otel-collector:4318/v1/metrics',
       enableConsoleExporter:
         config.enableConsoleExporter ?? process.env.NODE_ENV === 'development',
       sampleRate:
@@ -58,8 +61,8 @@ class OpenTelemetryService {
   initialize(): void {
     try {
       // Configure resource
-      const resource = resources.Resource.default().merge(
-        new resources.Resource({
+      const resource = Resource.default().merge(
+        new Resource({
           [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
           [SemanticResourceAttributes.SERVICE_VERSION]:
             this.config.serviceVersion,
@@ -69,37 +72,35 @@ class OpenTelemetryService {
       );
 
       // Configure exporters
-      const traceExporters: any[] = [];
-
-      if (this.config.jaegerEndpoint) {
-        traceExporters.push(
-          new JaegerExporter({
-            endpoint: this.config.jaegerEndpoint,
-          }),
-        );
-      }
+      const traceExporter = new OTLPTraceExporter({
+        url: this.config.otlpEndpoint,
+      });
 
       // Configure metrics
-      const metricReaders: any[] = [];
-
-      // Prometheus metrics
-      metricReaders.push(
-        new PrometheusExporter({
-          port: parseInt(process.env.PROMETHEUS_PORT || '9464'),
-        }),
-      );
+      const metricExporter = new OTLPMetricExporter({
+        url: this.config.otlpMetricEndpoint,
+      });
+      const metricReader = new PeriodicExportingMetricReader({
+        exporter: metricExporter,
+        exportIntervalMillis: 15000, // Export metrics every 15 seconds
+      });
 
       // Initialize SDK
       this.sdk = new NodeSDK({
         resource,
-        traceExporter:
-          traceExporters.length > 0 ? traceExporters[0] : undefined,
-        metricReader: metricReaders.length > 0 ? metricReaders[0] : undefined,
+        traceExporter,
+        metricReader,
         instrumentations: [
           getNodeAutoInstrumentations({
             // Disable instrumentation for certain modules if needed
             '@opentelemetry/instrumentation-fs': {
               enabled: false,
+            },
+            '@opentelemetry/instrumentation-http': {
+               ignoreIncomingRequestHook: (req: any) => {
+                 // Ignore health checks and metrics endpoints to reduce noise
+                 return req.url?.includes('/health') || req.url?.includes('/metrics') || false;
+               },
             },
           }),
         ],
@@ -115,7 +116,7 @@ class OpenTelemetryService {
       );
 
       logger.info(
-        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, Jaeger Enabled: ${!!this.config.jaegerEndpoint}`,
+        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, OTLP Traces: ${this.config.otlpEndpoint}, OTLP Metrics: ${this.config.otlpMetricEndpoint}`,
       );
     } catch (error: any) {
       logger.error(
@@ -132,6 +133,13 @@ class OpenTelemetryService {
       await this.sdk.shutdown();
       logger.info('OpenTelemetry SDK shutdown');
     }
+  }
+
+  /**
+   * Get the current active span
+   */
+  getActiveSpan(): Span | undefined {
+    return trace.getActiveSpan();
   }
 
   /**
@@ -322,6 +330,8 @@ class OpenTelemetryService {
       setAttributes: () => {},
       addEvent: () => {},
       end: () => {},
+      isRecording: () => false,
+      spanContext: () => ({ traceId: '', spanId: '', traceFlags: 0 }),
     };
   }
 
