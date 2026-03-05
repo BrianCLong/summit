@@ -21,14 +21,14 @@ export const createCohort = (req: Request, res: Response) => {
 
 export const getCohort = (req: Request, res: Response) => {
     const { id } = req.params;
-    const cohort = cohorts.get(id);
+    const cohort = cohorts.get((id as string));
     if (!cohort) return res.status(404).json({ error: 'Not found' });
     res.json(cohort);
 };
 
 export const evaluateCohort = (req: Request, res: Response) => {
     const { id } = req.params;
-    const cohort = cohorts.get(id);
+    const cohort = cohorts.get((id as string));
     if (!cohort) return res.status(404).json({ error: 'Not found' });
 
     try {
