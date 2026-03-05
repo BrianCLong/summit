@@ -70,9 +70,10 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  actions: read
-  contents: write
+  contents: read
   packages: write
+  id-token: write
+  attestations: write
 
 env:
   REGISTRY: ghcr.io
@@ -243,18 +244,19 @@ jobs:
           retention-days: 90
 
   # SLSA provenance generation using official generator
-  # provenance:
-  #   name: Generate SLSA Provenance
-  #   needs: build
-  #   if: inputs.slsa_provenance && inputs.push
-  #   permissions:
-  #     actions: read
-  #     id-token: write
-  #     contents: write
-  #     packages: write
-  #   uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.1.0
-  #   with:
-  #     image: ${{ needs.build.outputs.image-uri }}
-  #     digest: ${{ needs.build.outputs.digest }}
-  #   secrets:
-  #     registry-password: ${{ secrets.GITHUB_TOKEN }}
+  provenance:
+    name: Generate SLSA Provenance
+    needs: build
+    if: inputs.slsa_provenance && inputs.push
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+      packages: write
+    # Pin reusable workflow to an immutable commit for workflow policy compliance.
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
+    with:
+      image: ${{ needs.build.outputs.image-uri }}
+      digest: ${{ needs.build.outputs.digest }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}

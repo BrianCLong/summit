@@ -13,16 +13,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+- CI: Enforced golden path execution for all PRs and main branch merges.
 
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
-
-### Changed
-- **Database Performance**: Refactored `EntityCommentService` to use multi-row batched inserts for attachments and mentions, reducing database round-trips from O(N) to O(N/100).
-- **CI/CD Reliability**: Moved `pnpm/action-setup` before `actions/setup-node` across all workflows to ensure `pnpm` availability for caching.
-- **Transitive Type Resolution**: Implemented automated removal of problematic `@types/hapi__*` stub types in CI to resolve workspace-wide `tsc` failures.
-- **Monorepo Versioning**: Synchronized root, server, and client package versions to `4.2.3` for ecosystem consistency.
 
 ### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
@@ -201,7 +196,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Migration Guide](./docs/migration-guide.md)
 - [API Documentation](./docs/api/README.md)
 
-[Unreleased]: https://github.com/org/summit/compare/v3.0.0...HEAD
+[Unreleased]
+- CI: Enforced golden path execution for all PRs and main branch merges.: https://github.com/org/summit/compare/v3.0.0...HEAD
 [3.0.1]: https://github.com/org/summit/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/org/summit/releases/tag/v3.0.0
 ## v2.0.0-rc.1 (2025-10-07)

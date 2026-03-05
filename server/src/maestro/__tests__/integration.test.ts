@@ -20,9 +20,10 @@ describe('Maestro Integration Tests', () => {
     // Create test run
     const result = await pool.query(
       `INSERT INTO run (id, runbook, status, started_at) 
-       VALUES ('00000000-0000-0000-0000-000000000001', 'test-runbook', 'RUNNING', now())
+       VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
+    if (!result.rows[0]) throw new Error("Failed to create test run");
     testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)
@@ -41,7 +42,7 @@ describe('Maestro Integration Tests', () => {
       // Insert test router decision
       await pool.query(
         `INSERT INTO router_decisions (id, run_id, node_id, selected_model, candidates, policy_applied)
-         VALUES ('00000000-0000-0000-0000-000000000001', $1, 'test-node', 'gpt-4', $2, 'cost-optimization')`,
+         VALUES (gen_random_uuid(), $1, 'test-node', 'gpt-4', $2, 'cost-optimization')`,
         [
           testRunId,
           JSON.stringify([
@@ -316,7 +317,7 @@ describe('Maestro Integration Tests', () => {
 export function createTestRun(runbook: string = 'test-runbook') {
   return getPostgresPool().query(
     `INSERT INTO run (id, runbook, status, started_at) 
-     VALUES ('00000000-0000-0000-0000-000000000001', $1, 'RUNNING', now())
+     VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
      RETURNING id`,
     [runbook],
   );
@@ -325,7 +326,7 @@ export function createTestRun(runbook: string = 'test-runbook') {
 export function createTestRouterDecision(runId: string, nodeId: string) {
   return getPostgresPool().query(
     `INSERT INTO router_decisions (id, run_id, node_id, selected_model, candidates)
-     VALUES ('00000000-0000-0000-0000-000000000001', $1, $2, 'gpt-4', $3)`,
+     VALUES (gen_random_uuid(), $1, $2, 'gpt-4', $3)`,
     [
       runId,
       nodeId,

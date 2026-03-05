@@ -30,7 +30,7 @@ export function CommandStatusProvider({ children }: PropsWithChildren) {
 
   const load = React.useCallback(() => {
     const controller = new AbortController()
-    dispatch({ type: 'FETCH_START' })
+    dispatch({ type: 'FETCH_START' });
 
     (Object.keys(statusEndpoints) as StatusKey[]).forEach(async key => {
       try {
