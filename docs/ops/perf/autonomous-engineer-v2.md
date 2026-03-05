@@ -1,7 +1,10 @@
-# Perf: Autonomous Engineer V2
+# Autonomous Engineer v2 Performance Budget
 
 ## Budgets
 - Planning + validation: < 250ms local
-- Patch generation step: < 2s (excluding model latency)
-- Artifact size: < 200KB per run
-- Max steps: <= 40 tool actions per run
+- Patch generation: < 2s excluding model latency
+- Deterministic artifacts: < 200KB per run
+- Tool actions: <= 40 per run (configurable)
+
+## Profiling Harness
+Run `scripts/profiling/auton_benchmark.py` to emit `artifacts/bench.json` with baseline budget metadata.
