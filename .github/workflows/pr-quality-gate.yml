@@ -28,7 +28,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate Release Policy
-        run: pnpm lint:release-policy
+        run: pnpm run lint:release-policy --filter .
 
   lint-reason-codes:
     name: Lint Release Reason Codes

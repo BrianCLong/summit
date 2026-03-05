@@ -1,3 +1,6 @@
+// Ensure OpenTelemetry instrumentation runs before anything else
+import './instrumentation.js';
+
 import http from 'http';
 import express from 'express';
 import { GraphQLError } from 'graphql';
