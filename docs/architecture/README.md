@@ -75,3 +75,9 @@ The Summit Codex Execution Plan runs eight parallel workstreams with explicit bo
 ## Innovation posture
 
 Each track should propose at least one forward-leaning enhancement (e.g., stronger type safety in governance schemas, novel CI annotations for enforcement drift, or advanced streaming feature derivations) while keeping compatibility with the mandated specs and merge discipline.
+
+## Trust Infrastructure
+- **Agent Identity & Authorization:** [`docs/architecture/trust-infrastructure.md`](./trust-infrastructure.md)
+
+## Trust Infrastructure
+- **Agent Identity & Authorization:** [`docs/architecture/trust-infrastructure.md`](./trust-infrastructure.md)
