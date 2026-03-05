@@ -1,7 +1,8 @@
-Owner: Governance
-Last-Reviewed: 2026-01-20
-Evidence-IDs: none
-Status: active
+> Owner: Governance
+> Last-Reviewed: 2026-01-20
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
+
 
 # Steady-State Governance Runbook
 

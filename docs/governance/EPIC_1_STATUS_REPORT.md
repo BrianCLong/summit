@@ -1,8 +1,8 @@
-# Epic 1: "Glass Box" Agent Governance - Status Report
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-**Report Date:** 2026-01-20
-**Epic Owner:** Security & Governance Team
-**Status:** ⚠️ PARTIALLY COMPLETE (75%)
 
 ---
 

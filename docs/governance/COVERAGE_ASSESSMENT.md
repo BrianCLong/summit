@@ -1,7 +1,8 @@
-# Coverage Assessment
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-| Signal | Status | Evidence/File | Remediation |
-| :--- | :--- | :--- | :--- |
 | **Constitutional Primacy** | ✅ Covered | `docs/governance/CONSTITUTION.md` | - |
 | **Human Primacy** | ✅ Covered | `docs/governance/CONSTITUTION.md` | - |
 | **Provenance Requirement** | ✅ Covered | `docs/governance/CONSTITUTION.md` | - |

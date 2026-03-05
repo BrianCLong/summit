@@ -1,13 +1,8 @@
-# Summit Agent Tool Policy (v1)
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-This policy defines which developer/CI tools AI agents (Codex, Claude Code, Gemini, Qwen) may invoke, under what constraints, and how evidence must be produced.
-
-## 1. Core principles
-
-1. Least privilege: agents may invoke only the minimum tool surface to complete work.
-2. Determinism: agents must prefer pinned tools and deterministic commands.
-3. Evidence: any agent-run action that affects code, artifacts, or security posture must emit auditable evidence.
-4. Safety: agents must not exfiltrate secrets, credentials, or proprietary data; must not run destructive commands outside approved paths.
 
 ## 2. Execution modes
 

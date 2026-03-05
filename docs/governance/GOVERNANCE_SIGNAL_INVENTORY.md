@@ -1,7 +1,8 @@
-# Governance Signal Inventory
+> Owner: @summit/governance
+> Last-Reviewed: 2026-02-25
+> Evidence-IDs: EVD-PLACEHOLDER
+> Status: active
 
-| Signal Name | Source Concept | Type | Regulatory Drivers | Summit Relevance |
-| :--- | :--- | :--- | :--- | :--- |
 | **Constitutional Primacy** | Meta-Governance | Compliance | Internal | Root of Authority; overrides all other instructions. |
 | **Human Primacy** | Human-in-the-Loop | Compliance | EU AI Act (Art 14) | Mandates human authorization for consequential actions. |
 | **Provenance Requirement** | Data Lineage | Differentiation | EU AI Act (Art 12), SLSA | Ensures all outputs are attributable and contestable. |
