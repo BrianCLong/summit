@@ -1,13 +1,7 @@
 {
   "last_updated": "2026-03-05T00:00:00Z",
-  "revision_note": "Added Tri-Graph Cognitive Battlespace skeleton (schemas, NG/BG writeset firewall, defensive UI page).",
+  "revision_note": "Added killer-loop priority strategy brief and execution sequence for writeset firewall, explainability, and bitemporal ledger foundation.",
   "initiatives": [
-    {
-      "id": "cognitive-battlespace-trigraph-v0",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Introduced Tri-Graph schema package, CogBattlespace runtime stubs, NG/BG-only WriteSet firewall with unified rejection reports, and tri-pane Cognitive Battlespace UI skeleton."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -211,6 +205,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "summit-killer-loop-priority",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Prioritize 30-second killer loop: ingestion -> WriteSet firewall -> tri-graph updates -> deterministic Explain()/What changed?."
     }
   ],
   "summary": {
