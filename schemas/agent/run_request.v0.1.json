@@ -1,0 +1,30 @@
+{
+  "$id": "https://summit.dev/schemas/agent/run_request.v0.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Run Request",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": { "type": "string" },
+    "playbook": { "type": "string" },
+    "input_ref": {
+      "type": "object",
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": { "type": "string" },
+        "id": { "type": "string" }
+      }
+    },
+    "input": { "type": "object", "additionalProperties": true },
+    "params": { "type": "object", "additionalProperties": true },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string", "enum": ["observe", "assist", "autopilot"] },
+        "max_wall_ms": { "type": "integer" },
+        "max_cost_usd": { "type": "number" },
+        "tools_allowlist": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

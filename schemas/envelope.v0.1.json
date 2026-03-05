@@ -1,0 +1,32 @@
+{
+  "$id": "https://summit.dev/schemas/envelope.v0.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Canonical Message Envelope",
+  "type": "object",
+  "required": ["meta", "payload"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "schema",
+        "tenant_id",
+        "correlation_id",
+        "ts"
+      ],
+      "properties": {
+        "schema": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "correlation_id": { "type": "string" },
+        "idempotency_key": { "type": "string" },
+        "source": { "type": "string" },
+        "ts": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

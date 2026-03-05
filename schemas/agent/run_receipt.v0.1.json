@@ -1,0 +1,37 @@
+{
+  "$id": "https://summit.dev/schemas/agent/run_receipt.v0.1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Run Receipt (Audit Record)",
+  "type": "object",
+  "required": [
+    "audit_id",
+    "tenant_id",
+    "correlation_id",
+    "run_id",
+    "event",
+    "hash",
+    "ts"
+  ],
+  "properties": {
+    "schema": { "type": "string" },
+    "audit_id": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "correlation_id": { "type": "string" },
+    "run_id": { "type": "string" },
+    "event": { "type": "string" },
+    "tool": { "type": "string" },
+    "inputs_hash": { "type": "string" },
+    "outputs_hash": { "type": "string" },
+    "policy": {
+      "type": "object",
+      "properties": {
+        "decision_id": { "type": "string" },
+        "outcome": { "type": "string" },
+        "rule_id": { "type": "string" }
+      }
+    },
+    "prev_hash": { "type": "string" },
+    "hash": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" }
+  }
+}
