@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-23T00:00:00Z",
-  "revision_note": "Added route-opt deterministic agent module initiative with CI gates and evidence artifacts.",
+  "last_updated": "2026-02-26T16:27:55Z",
+  "revision_note": "Added ai-mockup-2026 deterministic benchmark, evidence mapping, drift monitor, and CI gate.",
   "initiatives": [
     {
-      "id": "route-opt-deterministic-roam",
+      "id": "ai-mockup-2026-benchmark-pipeline",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Deterministic tool-driven route optimization module with schema validation, reproducibility hashes, and CI drift monitoring."
+      "notes": "Deterministic benchmark runner, evidence traceability, drift detection, standards docs, and CI workflow for AI mockup tool evaluations."
     },
     {
       "id": "saas-crash-2026-positioning-pack",

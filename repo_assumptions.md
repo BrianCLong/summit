@@ -1,17 +1,25 @@
-# Route Optimization Agent Module (ROAM) Repo Assumptions Check
+# Repo Assumptions & Validation (ai-mockup-2026)
 
 ## Verified vs Assumed
 
-- ✅ Confirm directory layout (`agents/`, `scripts/`, `docs/`, `.github/workflows/`) is present.
-- ✅ Confirm Evidence ID format supports `EVID-*` style identifiers (enforced for ROAM schema).
-- ✅ Confirm CI naming conventions use hyphenated checks and workflow job names.
-- ✅ Confirm JSON schema validation tooling is available (`jsonschema` for Python and `ajv` for JS).
-- ✅ Identify must-not-touch files and keep unchanged:
-  - `/core/orchestrator.py` (not present in this repo tree)
-  - `/security/policy_engine.py` (not present in this repo tree)
-  - `/evidence/schema_v1.json` (present but untouched)
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `benchmarks/` exists | ✅ Verified | `find benchmarks -maxdepth 2 -type f` |
+| GitHub Actions CI exists | ✅ Verified | `.github/workflows/` tree present |
+| Evidence triad (`report.json`, `metrics.json`, `stamp.json`) conventions exist | ✅ Verified | `scripts/evidence_validate.py`, `scripts/ci/validate_evidence_schema.py` |
+| Deterministic artifact policy exists | ✅ Verified | `scripts/evidence_validate.py` deterministic formatting + timestamp locality checks |
+| Existing ai-mockup benchmark scaffold exists | ❌ Not found | Added new `benchmarks/ai-mockup-2026/` |
 
-## Notes
+## CI Check Mapping (for this slice)
 
-- ROAM implementation is isolated under `agents/route_opt/` and `scripts/ci/*route*`.
-- Feature flag policy remains default-off via `ROUTE_OPT_AGENT_ENABLED=false` configuration guidance in docs.
+- `python3 benchmarks/ai-mockup-2026/runner.py --check`
+- `python3 scripts/monitoring/ai-mockup-2026-drift.py`
+- `pytest benchmarks/ai-mockup-2026/test_runner.py`
+
+## Must-Not-Touch Confirmation
+
+No core evaluator or unrelated benchmark framework files were modified outside:
+- `benchmarks/ai-mockup-2026/`
+- `reports/ai-mockup-2026/`
+- `scripts/monitoring/ai-mockup-2026-drift.py`
+- docs/workflow/status metadata files required for governance.
