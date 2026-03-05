@@ -60,6 +60,19 @@ jobs:
       - name: Evidence ID validation
         run: node scripts/ci/verify_evidence_id_consistency.mjs
 
+      - name: Detect governance policy changes
+        id: governance_policy_changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            governance_policy:
+              - 'summit/agents/policy/**'
+              - 'summit/agents/skills/**'
+
+      - name: Policy-as-code gate
+        if: steps.governance_policy_changes.outputs.governance_policy == 'true'
+        run: node tools/governance/check-policy.ts
+
       - name: Timestamp scan
         run: node scripts/scan_timestamp_keys.mjs
 
