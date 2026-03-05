@@ -1,0 +1,38 @@
+{
+  "task_id": "GOVOS_1_EPIC_DOC_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "govos-1-governed-multi-agent-os",
+    "version": "v1",
+    "sha256": "eb01ec40753e208354ad52e26d9000528dae5ee92b7f44782eea6513c200b873",
+    "path": "prompts/epics/govos-1-governed-multi-agent-os@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/epics/govos-1-governed-multi-agent-os.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/epics/govos-1-governed-multi-agent-os@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/GOVOS_1_EPIC_DOC_20260208.json"
+    ],
+    "domains": ["documentation", "governance", "epics"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["documentation-diff"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "GOVOS-1 epic documentation added with issue stack and CI gates.",
+    "Roadmap status updated to register GOVOS-1 initiative.",
+    "Prompt registry updated with hash and scope."
+  ],
+  "stop_conditions": [
+    "Policy or governance requirements cannot be expressed as policy-as-code.",
+    "Evidence-first artifacts cannot be defined for required outputs."
+  ]
+}

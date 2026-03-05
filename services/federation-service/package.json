@@ -9,8 +9,8 @@
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
     "test": "jest",
-    "test:unit": "jest --testPathPattern=unit",
-    "test:integration": "jest --testPathPattern=integration",
+    "test:unit": "jest --testPathPatterns=unit",
+    "test:integration": "jest --testPathPatterns=integration",
     "lint": "eslint src --ext .ts",
     "typecheck": "tsc --noEmit"
   },

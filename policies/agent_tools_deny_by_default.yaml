@@ -1,0 +1,37 @@
+# MCP / Agentic Tool Execution Permission Pack
+
+name: agent_tools_deny_by_default
+version: "1.0"
+description: >
+  Deny-by-default for agent tool permissions to mitigate autonomous installation
+  of hallucinated or malicious packages (MCP-style risks).
+
+default_policy: "deny"
+
+tools:
+  - name: "npm install"
+    action: "deny"
+    requires_explicit_approval: true
+    audit_trail_required: true
+
+  - name: "pip install"
+    action: "deny"
+    requires_explicit_approval: true
+    audit_trail_required: true
+
+  - name: "cargo install"
+    action: "deny"
+    requires_explicit_approval: true
+    audit_trail_required: true
+
+  - name: "execute_shell"
+    action: "deny"
+    requires_explicit_approval: true
+    audit_trail_required: true
+
+exemptions:
+  # Examples of explicitly allowed safe tools (read-only)
+  - name: "read_file"
+    action: "allow"
+  - name: "list_files"
+    action: "allow"
