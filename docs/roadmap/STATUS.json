@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-11T11:25:55Z",
-  "revision_note": "Added 12-vendor competitive battlecard pack with governed positioning assets and updated roadmap status.",
+  "last_updated": "2026-02-11T00:00:00Z",
+  "revision_note": "Added GTM competitive 12-vendor battlecard pack and deck narrative outline for Summit-vs-toolchains positioning.",
   "initiatives": [
     {
-      "id": "competitive-battlecard-pack-12-vendor",
-      "status": "completed",
+      "id": "gtm-competitive-battlecard-pack-2026",
+      "status": "in_progress",
       "owner": "codex",
-      "notes": "Published governed 12-vendor competitive battlecard pack with kill-shot talk tracks, trap questions, and Summit-above-toolchain positioning in docs/sales-toolkit/summit-competitive-battlecard-pack.md."
+      "notes": "Shipped 12-vendor competitive matrix, kill-shot talk tracks, and Summit-vs-toolchains-vs-platforms deck outline for field execution."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
