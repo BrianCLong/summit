@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 """
 Mock-only adapter scaffolding.
 Later: wire to real agent runtime (Copilot SDK / Summit agent runner) while preserving:
@@ -8,6 +9,7 @@ Later: wire to real agent runtime (Copilot SDK / Summit agent runner) while pres
 """
 import json
 from pathlib import Path
+
 
 def main() -> int:
     # TODO: load scenarios + acceptance criteria, run mock generation, emit evidence.
