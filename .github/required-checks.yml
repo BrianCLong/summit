@@ -15,3 +15,5 @@ required_checks:
 notes:
   owner: summit-ga
   policy: docs/governance/branch-protection/README.md
+
+  - ai-evals

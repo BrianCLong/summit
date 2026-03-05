@@ -1,20 +1,14 @@
-# Repository Assumptions for MALE (Media AI List Evaluator)
+# Repo Reality Check — eval-driven-agentic-rag-2026
 
-## Verified vs Assumed Paths
-* **Verified**: `data/`, `scripts/`, `docs/`, `.github/workflows/`, `tests/` directories exist or have been created.
-* **Assumed/Created**: `reports/` did not exist initially, created `reports/media_ai_lists/` to store the generated reports.
-* **Assumed/Created**: `data/media_ai_lists/`, `scripts/media_list/`, `docs/standards/`, `docs/ops/runbooks/`, `docs/security/data-handling/`.
+## Verified
+- pnpm monorepo; quickstart uses pnpm + docker-compose (Neo4j/Postgres/Redis). (source: README)
+- CI jobs include lint/typecheck/unit-tests/security-compliance/soc-controls and evidence stamping via scripts/ci/emit_evidence_stamp.mjs.
+- RAG entrypoint is located at `server/src/rag/retrieval.ts`
+- Policy engine enforcer is located at `server/src/policy/enforcer.ts`
 
-## Evidence Schema Confirmation
-* The project requires evidence artifacts to follow the Summit Evidence schema.
-* Evidence paths: `data/media_ai_lists/<slug>/evidence.json`.
-* Evidence ID pattern: `MEDIA-<slug>-CLAIM-###`.
-* Reports and metrics: `reports/media_ai_lists/<slug>/{report.json,metrics.json,stamp.json}`.
-
-## CI Naming Convention
-* MALE drift workflow: `.github/workflows/media-list-drift.yml`.
-* CI checks: `media_list_validation`, `claim-ci`, `policy-ci`, `determinism-ci`.
+## Assumed (validate)
+- The exact entry point to AI RAG capabilities outside of retrieval (such as model execution, verifier loops). This will be built in `server/src/ai/rag/verifier.ts` or similar location based on instructions.
 
 ## Must-not-touch
-* Core scoring engine: The `src/agents/policies/` or core Summit scoring mechanisms will be used but not modified directly. MALE is an overlay/plugin.
-* Feature flag: `media_ai_list.enabled=false` by default.
+- scripts/ci/emit_evidence_stamp.mjs contract
+- .github/workflows/ci.yml required checks (only additive changes)
