@@ -1,0 +1,10 @@
+{"id": "doc_1", "text": "This is a simple positive example.", "label": 1}
+{"id": "doc_2", "text": "A negative example that is slightly longer.", "label": 0}
+{"id": "doc_3", "text": "Positive review with EXCELLENT words! 123", "label": 1}
+{"id": "doc_4", "text": "Terrible experience, would not recommend.", "label": 0}
+{"id": "doc_5", "text": "It was okay, nothing special.", "label": 0}
+{"id": "doc_6", "text": "Absolutely fantastic and wonderful.", "label": 1}
+{"id": "doc_7", "text": "I hated this product so much.", "label": 0}
+{"id": "doc_8", "text": "Five stars, will buy again.", "label": 1}
+{"id": "doc_9", "text": "Boring and dull.", "label": 0}
+{"id": "doc_10", "text": "A solid choice for anyone.", "label": 1}

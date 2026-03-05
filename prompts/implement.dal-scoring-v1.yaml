@@ -1,0 +1,60 @@
+meta:
+  id: implement.dal-scoring-v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Implement DAL Impact Scoring Formulas'
+  tags: ['dal', 'scoring', 'impact', 'roi']
+  guardrails:
+    - 'Separate severity, confidence, reach, and outcome'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  target_completion_time_minutes: string
+
+template: |
+  You are implementing the **DAL Impact Scoring Formulas** for Summit.
+
+  ## Objective
+  Implement scoring formulas to reward actions that reduce risk quickly, prevent recurrence, and have verified evidence. Penalize false positives, high cost/low impact, and policy violations.
+
+  ## Target Paths
+  ```
+  services/dal-scoring/
+    ├── src/
+    │   ├── scoring/
+    │   │   ├── InsightImpactPotential.ts
+    │   │   ├── ActionExpectedValue.ts
+    │   │   └── VerifiedOutcomeScore.ts
+    │   ├── rollups/
+    │   │   ├── RiskReductionIndex.ts
+    │   │   ├── TimeToMitigation.ts
+    │   │   ├── ActionEfficiency.ts
+    │   │   └── TrustAdjustedImpact.ts
+    │   └── api/
+    │       └── ScoringController.ts
+    └── README.md
+  ```
+
+  ## Core Requirements
+  1. **Insight Impact Potential (IIP)**: 0-100 score predicting "how much this could matter".
+     - Formula: `clamp(0, 100, 0.35*S + 25*C + 15*R + 15*U + 10*E)`
+  2. **Action Expected Value (AEV)**: Used to rank recommendations.
+     - Formula: `Policy * ((ΔRisk * Psucc) - 0.4*Cost - 0.3*Blast)`
+     - Map to 0-100: `clamp(0, 100, round(100*(AEV + 0.5)))`
+  3. **Verified Outcome Score (VOS)**: Computed after action completes.
+     - Formula: `clamp(0, 100, 100*(0.55*ΔRisk_obs + 0.20*T + 0.15*Q - 0.30*Regret - 0.60*FP))`
+  4. **Program-level ROI rollups**:
+     - Risk Reduction Index (RRI)
+     - Time-to-Mitigation (TTM)
+     - Action Efficiency (AE)
+     - Trust-Adjusted Impact (TAI)
+
+  ## Acceptance Tests
+  - [ ] Scoring functions return proper boundary values (0 to 100 respectively).
+  - [ ] Unit tests enforce severity vs impact formulas natively.
+  - [ ] Expected return value ranks successfully reflect cost limits correctly.
+  - [ ] Formulas explicitly avoid zero-division and edge-case underflow anomalies.
+  - [ ] Tested edge scenarios output normalized index scores cleanly.

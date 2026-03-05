@@ -1,16 +1,20 @@
-# Repo Assumptions & Verification
+# Repo Assumptions & Reality Check
 
-**Verified:**
-*   Monorepo structure with `services/` and `src/`.
-*   `src/` contains core logic and libraries (`intelgraph`, `maestro`, `memory`, etc.).
-*   `services/evals` exists but only contains `runner.ts`.
-*   `src/evals` does NOT exist (will be created).
-*   TypeScript environment.
-*   `src/cli` exists.
+## Verified vs Assumed paths
+- Assumed `agents/` runtime
+- Assumed `scripts/`
+- Assumed `tests/`
+- Assumed `docs/`
+- Assumed `.github/workflows/`
 
-**Assumed:**
-*   We can add shared evaluation logic to `src/evals`.
-*   Test runner is Jest or similar (implied by `jest.globalSetup.js` in root).
+## Artifact schemas
+- `run_plan.json`
+- `execution_ledger.json`
+- `patch_stack.json`
+- `eval_report.json`
+- `policy_report.json`
 
-**Plan Deviation:**
-*   Instead of putting everything in `services/evals`, we are creating a shared library in `src/evals` to be used by services.
+## Must-not-touch list
+- existing artifact schemas
+- CI workflow names
+- security policy enforcement modules

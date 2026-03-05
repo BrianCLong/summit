@@ -1,0 +1,122 @@
+# Dependency Security Audit Policy
+# Configures automated dependency vulnerability scanning
+#
+# This policy file is read by scripts/release/dependency_audit.sh
+# See docs/ci/DEPENDENCY_AUDIT.md for full documentation.
+
+version: "1.0.0"
+
+# Audit configuration
+audit:
+  # Package manager to use
+  package_manager: pnpm
+
+  # Minimum severity to fail the build
+  # Options: critical, high, moderate, low
+  fail_threshold: high
+
+  # Severity levels that generate warnings only
+  warn_threshold: moderate
+
+  # Ignore specific advisories (by ID)
+  ignore_advisories: []
+  # Example:
+  # - "GHSA-xxxx-yyyy-zzzz"  # Reason: False positive for our usage
+
+  # Ignore specific packages (use sparingly, document reason)
+  ignore_packages: []
+  # Example:
+  # - name: "some-package"
+  #   reason: "Not used in production, dev-only dependency"
+  #   expires: "2026-02-01"
+
+  # Production dependencies only (ignore devDependencies)
+  production_only: false
+
+# Scanning schedule
+schedule:
+  # Regular scheduled scans
+  enabled: true
+  cron: "0 6 * * *"  # Daily at 6 AM UTC
+
+  # Scan on PRs
+  on_pull_request: true
+
+  # Scan on push to main
+  on_push_main: true
+
+# Reporting configuration
+reporting:
+  # Generate detailed report
+  generate_report: true
+
+  # Report format: json, markdown, table
+  format: markdown
+
+  # Upload as artifact
+  upload_artifact: true
+  artifact_retention_days: 30
+
+  # Post summary to PR
+  post_pr_comment: true
+
+  # Create issues for new vulnerabilities
+  create_issues: true
+  issue_labels:
+    - "security"
+    - "dependencies"
+    - "automated"
+
+# Thresholds and gates
+gates:
+  # Maximum allowed vulnerabilities by severity
+  max_critical: 0
+  max_high: 0
+  max_moderate: 10
+  max_low: 50
+
+  # Age-based escalation (days since disclosure)
+  critical_max_age_days: 1
+  high_max_age_days: 7
+  moderate_max_age_days: 30
+
+# Integration with release ops
+release_integration:
+  # Block releases if audit fails
+  block_release: true
+
+  # Add to release checklist
+  include_in_checklist: true
+
+  # Evidence capture
+  evidence_path: "docs/release/GA_EVIDENCE_INDEX.md"
+
+# Notifications
+notifications:
+  # Slack webhook (set via SLACK_WEBHOOK_URL secret)
+  slack:
+    enabled: true
+    channel: "#security-alerts"
+    on_critical: true
+    on_high: true
+    on_moderate: false
+
+  # Email alerts (set via SECURITY_EMAIL secret)
+  email:
+    enabled: false
+    on_critical: true
+
+# Remediation guidance
+remediation:
+  # Auto-create PR for patch updates
+  auto_pr_patches: true
+
+  # Suggest upgrade commands in comments
+  include_upgrade_commands: true
+
+  # Link to advisory details
+  include_advisory_links: true
+
+# State tracking
+state:
+  path: "docs/releases/_state/audit_state.json"
