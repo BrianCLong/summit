@@ -1,0 +1,10 @@
+name: GenUI Monitor
+on:
+  schedule:
+    - cron: '0 * * * *'
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm run ts-node scripts/monitoring/genui-drift.ts
