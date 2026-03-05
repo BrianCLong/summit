@@ -33,7 +33,8 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals (BOLT: Optimized batched insert with chunking)
+      // 2. Insert Risk Signals (BOLT: Batched for performance)
+      // Reduces database round-trips from O(N) to O(N/chunkSize).
       if (input.signals && input.signals.length > 0) {
         const chunkSize = 100;
         const now = new Date();
@@ -47,27 +48,27 @@ export class RiskRepository {
             values.push(
               savedScore.id,
               sig.type,
-              sig.source || null,
+              sig.source,
               sig.value,
               sig.weight,
               sig.contributionScore,
-              sig.description || null,
-              sig.detectedAt || now
+              sig.description,
+              sig.detectedAt || now,
             );
             placeholders.push(
-              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`
+              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
             );
             paramIndex += 8;
           }
 
-          const batchSql = `
-            INSERT INTO risk_signals (
+          const sigRows = await tx.query(
+            `INSERT INTO risk_signals (
               risk_score_id, type, source, value, weight, contribution_score, description, detected_at
             ) VALUES ${placeholders.join(', ')}
-            RETURNING *`;
-
-          const sigRows = await tx.query(batchSql, values);
-          sigRows.forEach((row: any) => savedSignals.push(this.mapSignal(row)));
+            RETURNING *`,
+            values,
+          );
+          savedSignals.push(...sigRows.map((r: any) => this.mapSignal(r)));
         }
       }
 
