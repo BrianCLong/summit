@@ -67,6 +67,9 @@ jobs:
         run: pnpm gate:report
 
 
+      - name: Schema validation gate
+        run: pnpm gate:schema
+
       - name: Detect governance policy changes
         id: governance_changes
         uses: dorny/paths-filter@v3
