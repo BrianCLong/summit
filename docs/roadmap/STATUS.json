@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-24T00:00:00Z",
-  "revision_note": "Added a governed documentation brief on Claude simple prompting guidance and practical prompt pattern.",
+  "last_updated": "2026-02-26T05:19:30Z",
+  "revision_note": "Added golden-main PR recovery runbook and execution initiative for priority PR stabilization.",
   "initiatives": [
     {
-      "id": "claude-simple-prompting-brief",
-      "status": "completed",
+      "id": "golden-main-pr-recovery-2026-02",
+      "status": "in_progress",
       "owner": "codex",
-      "notes": "Published documentation summary capturing simple prompting guidance, context framing, and an actionable prompt pattern."
+      "notes": "Published deterministic golden-main + PR recovery runbook with priority merge queue (#18688, #18689, #18640) and backlog compression protocol."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
