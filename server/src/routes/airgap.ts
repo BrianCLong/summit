@@ -1,18 +1,27 @@
 import { Router } from 'express';
 import { AirgapService } from '../services/AirgapService.js';
 import { tenantHeader } from '../middleware/tenantHeader.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { getNeo4jDriver } from '../config/database.js';
 import { writeFile, unlink } from 'fs/promises';
 import { createWriteStream } from 'fs';
 import { join } from 'path';
 import { randomUUID } from 'crypto';
 import express from 'express';
+import { ensureRole } from '../middleware/auth.js';
 
 export const airgapRouter = Router();
 const service = new AirgapService();
 
+// SEC-Hardening: Enforce RBAC for airgap operations
+airgapRouter.use(ensureRole(['ADMIN', 'ANALYST']));
+
 // Middleware to ensure tenant context
 airgapRouter.use(tenantHeader());
+
+// SEC-2025-001: Enforce authentication and admin role for airgap operations
+airgapRouter.use(ensureAuthenticated);
+airgapRouter.use(ensureRole(['ADMIN', 'admin']));
 
 // Export Route
 airgapRouter.post('/export', async (req: any, res) => {
