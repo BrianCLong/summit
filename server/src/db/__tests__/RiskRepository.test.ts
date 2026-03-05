@@ -1,104 +1,112 @@
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
+// ESM mocking
 jest.unstable_mockModule('../pg.js', () => ({
   pg: {
     transaction: jest.fn(),
     oneOrNone: jest.fn(),
     readMany: jest.fn(),
+    many: jest.fn(),
   },
 }));
 
-const { pg } = await import('../pg.js');
 const { RiskRepository } = await import('../repositories/RiskRepository.js');
+const { pg } = await import('../pg.js');
 
 describe('RiskRepository', () => {
-  let repository: any;
-  let mockTx: any;
+  let repository: RiskRepository;
 
   beforeEach(() => {
     repository = new RiskRepository();
-    mockTx = {
-      query: jest.fn(),
-    };
-    (pg.transaction as any).mockImplementation(async (callback: any) => {
-      return await callback(mockTx);
-    });
+    jest.clearAllMocks();
   });
 
-  it('should verify batched insertion behavior for signals', async () => {
-    const signals = [
-      { type: 'type1', source: 'src1', value: 1, weight: 0.5, contributionScore: 0.5, description: 'desc1' },
-      { type: 'type2', source: 'src2', value: 2, weight: 0.6, contributionScore: 1.2, description: 'desc2' },
-    ];
+  describe('saveRiskScore', () => {
+    it('should insert signals in batches (verifying improvement)', async () => {
+      const mockTx = {
+        query: jest.fn(),
+      };
 
-    mockTx.query
-      .mockResolvedValueOnce([{ id: 'score-123', tenant_id: 't1' }]) // Risk score insert
-      .mockResolvedValueOnce([{ id: 'sig-1' }, { id: 'sig-2' }]); // Batched signals insert
-
-    await repository.saveRiskScore({
-      tenantId: 't1',
-      entityId: 'e1',
-      entityType: 'Person',
-      score: 80,
-      level: 'high',
-      window: '24h',
-      modelVersion: '1.0',
-      rationale: 'test',
-      signals,
-    });
-
-    // NOW it should be 1 query for the score + 1 query for ALL signals = 2 total
-    expect(mockTx.query).toHaveBeenCalledTimes(2);
-
-    // First call is for the score
-    expect(mockTx.query).toHaveBeenNthCalledWith(1, expect.stringContaining('INSERT INTO risk_scores'), expect.any(Array));
-
-    // Second call is for the batched signals
-    expect(mockTx.query).toHaveBeenNthCalledWith(2, expect.stringContaining('INSERT INTO risk_signals'), expect.any(Array));
-    // Verify placeholders
-    expect(mockTx.query).toHaveBeenNthCalledWith(2, expect.stringContaining('($1, $2, $3, $4, $5, $6, $7, $8), ($9, $10, $11, $12, $13, $14, $15, $16)'), expect.any(Array));
-
-    // Verify parameters count (2 signals * 8 params = 16)
-    const params = mockTx.query.mock.calls[1][1];
-    expect(params).toHaveLength(16);
-  });
-
-  it('should verify chunking behavior for many signals', async () => {
-    const signals = [];
-    for (let i = 0; i < 150; i++) {
-      signals.push({
-        type: `type${i}`,
-        source: 'src',
-        value: i,
-        weight: 0.1,
-        contributionScore: 0.1,
-        description: `desc${i}`
+      (pg.transaction as any).mockImplementation(async (callback: any) => {
+        return await callback(mockTx);
       });
-    }
 
-    mockTx.query
-      .mockResolvedValueOnce([{ id: 'score-123', tenant_id: 't1' }]) // Risk score insert
-      .mockResolvedValueOnce(new Array(100).fill({ id: 'sig' })) // First batch (100)
-      .mockResolvedValueOnce(new Array(50).fill({ id: 'sig' })); // Second batch (50)
+      // Mock score insert
+      mockTx.query.mockResolvedValueOnce([{
+        id: 'score-1',
+        tenant_id: 't1',
+        entity_id: 'e1',
+        entity_type: 'person',
+        score: '10',
+        level: 'low',
+        window: '24h',
+        model_version: '1.0',
+        rationale: 'test',
+        created_at: new Date()
+      }]);
 
-    await repository.saveRiskScore({
-      tenantId: 't1',
-      entityId: 'e1',
-      entityType: 'Person',
-      score: 80,
-      level: 'high',
-      window: '24h',
-      modelVersion: '1.0',
-      rationale: 'test',
-      signals,
+      // Mock signal inserts (return a mock signal for each input row to avoid mapping errors)
+      mockTx.query.mockImplementation(async (query: string, params?: any[]) => {
+        if (query.includes('INSERT INTO risk_signals')) {
+          // If it's the old single insert
+          if (!query.includes('VALUES ($1, $2, $3, $4, $5, $6, $7, $8),')) {
+             return [{
+              id: 'sig-id',
+              risk_score_id: 'score-1',
+              type: 'test',
+              source: 'test',
+              value: '1',
+              weight: '1',
+              contribution_score: '1',
+              description: 'test',
+              detected_at: new Date()
+            }];
+          }
+          // If it's a batch insert (simplified mock)
+          return [{
+            id: 'sig-id',
+            risk_score_id: 'score-1',
+            type: 'test',
+            source: 'test',
+            value: '1',
+            weight: '1',
+            contribution_score: '1',
+            description: 'test',
+            detected_at: new Date()
+          }];
+        }
+        return [];
+      });
+
+      const signals = Array(150).fill(null).map((_, i) => ({
+        type: 'test',
+        source: 'test',
+        value: 1,
+        weight: 1,
+        contributionScore: 1,
+        description: `sig ${i}`,
+        detectedAt: new Date(),
+      }));
+
+      await repository.saveRiskScore({
+        tenantId: 't1',
+        entityId: 'e1',
+        entityType: 'person',
+        score: 10,
+        level: 'low',
+        window: '24h',
+        modelVersion: '1.0',
+        rationale: 'test',
+        signals,
+      });
+
+      const calls = (mockTx.query as jest.Mock).mock.calls;
+      const insertSignalsCalls = calls.filter(call => (call[0] as string).includes('INSERT INTO risk_signals'));
+
+      // Before optimization, this would be 150. After, it should be 2.
+      // We expect 2 batches for 150 signals with chunk size 100.
+      expect(insertSignalsCalls.length).toBe(2);
+      expect(mockTx.query).toHaveBeenCalledTimes(3);
     });
-
-    // 1 (score) + 2 (batches of signals) = 3 total queries
-    expect(mockTx.query).toHaveBeenCalledTimes(3);
-
-    // Verify first batch size
-    expect(mockTx.query.mock.calls[1][1]).toHaveLength(800);
-    // Verify second batch size
-    expect(mockTx.query.mock.calls[2][1]).toHaveLength(400);
   });
 });

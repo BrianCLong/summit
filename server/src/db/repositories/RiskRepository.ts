@@ -33,22 +33,16 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals in batches for performance optimization (Epic 2 Performance)
-      // BOLT OPTIMIZATION: Use multi-row INSERT with chunking to reduce DB round-trips from O(N) to O(N/100)
+      // 2. Insert Risk Signals (BOLT OPTIMIZATION: Batched multi-row inserts in chunks)
       if (input.signals && input.signals.length > 0) {
-        const CHUNK_SIZE = 100; // Stay well within PostgreSQL parameter limits
+        const CHUNK_SIZE = 100;
         for (let i = 0; i < input.signals.length; i += CHUNK_SIZE) {
           const chunk = input.signals.slice(i, i + CHUNK_SIZE);
-
-          try {
-            const valuePlaceholders = chunk.map((_, index) => {
-              const offset = index * 8;
-              return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
-            }).join(', ');
-
-            const params: any[] = [];
-            for (const sig of chunk) {
-              params.push(
+          const values: any[] = [];
+          const placeholders = chunk
+            .map((sig, index) => {
+              const base = index * 8;
+              values.push(
                 savedScore.id,
                 sig.type,
                 sig.source,
@@ -58,40 +52,21 @@ export class RiskRepository {
                 sig.description,
                 sig.detectedAt || new Date()
               );
-            }
+              return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+            })
+            .join(', ');
 
-            const sigRows = await tx.query(
-              `INSERT INTO risk_signals (
-                risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-              ) VALUES ${valuePlaceholders}
-              RETURNING *`,
-              params
-            );
+          const sigRows = await tx.query(
+            `INSERT INTO risk_signals (
+              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+            ) VALUES ${placeholders}
+            RETURNING *`,
+            values
+          );
 
+          if (sigRows && sigRows.length > 0) {
             savedSignals.push(...sigRows.map((row: any) => this.mapSignal(row)));
-          } catch (batchError) {
-            // BOLT RELIABILITY: Fallback to individual inserts if batch fails
-            for (const sig of chunk) {
-              const row = await tx.query(
-                `INSERT INTO risk_signals (
-                  risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                RETURNING *`,
-                [
-                  savedScore.id,
-                  sig.type,
-                  sig.source,
-                  sig.value,
-                  sig.weight,
-                  sig.contributionScore,
-                  sig.description,
-                  sig.detectedAt || new Date()
-                ]
-              );
-              savedSignals.push(this.mapSignal(row[0]));
-            }
           }
-
         }
       }
 

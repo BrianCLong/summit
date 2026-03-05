@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2026-03-01 - [Narrative Shift: The Proof Moat]
-**Learning:** The competitive landscape is shifting from raw agent capability ("vibe coding") to governed autonomous execution. Institutional procurement now prioritizes trust posture, determinism, and auditability over pure benchmark scores.
-**Action:** When creating investor-facing materials or strategic documentation for Summit, always anchor the value proposition in "Actionability + Provability" (The Proof Moat), deterministic replay, and policy-gated execution. Avoid terms like "vibe coding" and lean into "Agentic Engineering."
+## 2026-03-01 - [ESM Jest Mocking in Server]
+**Learning:** The server package is strictly ESM and requires `jest.unstable_mockModule` for mocking internal modules. Tests must be executed using `pnpm test:unit` which uses the `scripts/run-jest.mjs` wrapper to correctly set `--experimental-vm-modules` and avoid resolution errors.
+**Action:** When adding new repository or service tests in the server, use ESM mocking patterns and run via the provided pnpm scripts rather than raw jest commands.
