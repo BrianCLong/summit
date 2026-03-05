@@ -1,0 +1,28 @@
+{
+  "$id": "https://schemas.summit.local/cogbattlespace/links/narrative-belief-link.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "NarrativeBeliefLink",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "narrativeId", "beliefId", "type", "effectSize", "asOf", "provenance"],
+  "properties": {
+    "id": { "type": "string", "minLength": 8 },
+    "narrativeId": { "type": "string" },
+    "beliefId": { "type": "string" },
+    "type": { "type": "string", "enum": ["expresses_as", "correlates_with", "hypothesized_influence"] },
+    "effectSize": { "type": "number", "minimum": 0, "maximum": 1 },
+    "asOf": { "type": "string", "format": "date-time" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "note"],
+      "properties": {
+        "method": { "type": "string", "default": "observational-attribution-v0" },
+        "note": {
+          "type": "string",
+          "default": "Analytic/defensive: observational association only; not causal proof."
+        }
+      }
+    }
+  }
+}
