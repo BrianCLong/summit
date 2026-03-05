@@ -1,0 +1,16 @@
+{
+  "$id": "https://schemas.summit.local/cogbattlespace/metrics/belief-gap-metric.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BeliefGapMetric",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "cohortId", "beliefId", "claimId", "gap", "asOf"],
+  "properties": {
+    "id": { "type": "string", "minLength": 8 },
+    "cohortId": { "type": "string" },
+    "beliefId": { "type": "string" },
+    "claimId": { "type": "string" },
+    "gap": { "type": "number", "minimum": 0, "maximum": 1 },
+    "asOf": { "type": "string", "format": "date-time" }
+  }
+}

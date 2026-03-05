@@ -1,0 +1,24 @@
+{
+  "$id": "https://schemas.summit.local/cogbattlespace/links/belief-claim-link.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BeliefClaimLink",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "beliefId", "claimId", "type", "gap", "asOf", "provenance"],
+  "properties": {
+    "id": { "type": "string", "minLength": 8 },
+    "beliefId": { "type": "string" },
+    "claimId": { "type": "string" },
+    "type": { "type": "string", "enum": ["aligned", "diverges", "unknown"] },
+    "gap": { "type": "number", "minimum": 0, "maximum": 1 },
+    "asOf": { "type": "string", "format": "date-time" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "properties": {
+        "method": { "type": "string", "default": "gap-metric-v0" }
+      }
+    }
+  }
+}
