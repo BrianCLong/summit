@@ -1,0 +1,7 @@
+{
+  "tight_mode": false,
+  "set_at": null,
+  "reason": null,
+  "set_by": null,
+  "note": "Initial state. Set to true automatically when error budget is exhausted. Manual PR required to reset."
+}
