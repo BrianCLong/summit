@@ -40,7 +40,7 @@ router.post('/ingest', ensureAuthenticated, async (req, res) => {
 router.get('/analysis/:id', ensureAuthenticated, async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await masintService.getAnalysis(id);
+    const result = await masintService.getAnalysis((id as string));
 
     if (!result) {
       return res.status(404).json({ error: 'Analysis not found' });
