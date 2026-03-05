@@ -9,6 +9,7 @@ echo "🚀 Starting SBOM Generation Process..."
 # Configuration
 ARTIFACT_NAME=${1:-"summit-platform"}
 VERSION=${2:-$(git describe --tags --always)}
+VERSION=$(echo "$VERSION" | tr '/' '-')
 OUTPUT_DIR=${3:-"./sboms"}
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
@@ -96,7 +97,27 @@ if [ -f "pom.xml" ] || [ -f "build.gradle" ] || [ -f "build.gradle.kts" ]; then
 fi
 
 # Create summary file
-cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
+# We use a temporary file to hold the array items, so we don't accidentally
+# modify the summary file while reading from the directory.
+# Ensure output dir exists first
+mkdir -p "$OUTPUT_DIR"
+# Replace slashes in VERSION just in case it's a branch name or file path
+SAFE_VERSION=$(echo "$VERSION" | tr '/' '-')
+SUMMARY_FILE="$OUTPUT_DIR/SBOM_SUMMARY-${SAFE_VERSION}.json"
+TEMP_FILE="$OUTPUT_DIR/temp_sbom_items.txt"
+
+> "$TEMP_FILE"
+for sbom in "$OUTPUT_DIR"/*.json; do
+  if [ -f "$sbom" ] && [ "$sbom" != "$SUMMARY_FILE" ]; then
+    sbom_name=$(basename "$sbom")
+    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo "$sbom_name" | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$TEMP_FILE"
+  fi
+done
+
+# Remove trailing comma from temp file
+sed -i '$ s/,$//' "$TEMP_FILE" 2>/dev/null || true
+
+cat > "$SUMMARY_FILE" << EOF
 {
   "artifactName": "$ARTIFACT_NAME",
   "version": "$VERSION",
@@ -104,24 +125,19 @@ cat > "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
   "generatedSboms": [
 EOF
 
-for sbom in "$OUTPUT_DIR"/*.json; do
-  if [ -f "$sbom" ]; then
-    sbom_name=$(basename "$sbom")
-    echo "    {\"name\": \"$sbom_name\", \"type\": \"$(echo $sbom_name | cut -d'-' -f2 | cut -d'.' -f1)\"}," >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
-  fi
-done
+cat "$TEMP_FILE" >> "$SUMMARY_FILE"
 
-# Remove the trailing comma and close the array
-sed -i '' '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" 2>/dev/null || sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
-cat >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
+cat >> "$SUMMARY_FILE" << EOF
   ],
-  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -c "cdx\|spdx" || echo 0)
+  "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -v "$SUMMARY_FILE" | grep -c "cdx\|spdx" || echo 0)
 }
 EOF
 
+rm -f "$TEMP_FILE"
+
 echo "✅ SBOM Generation Complete!"
 echo "📁 Generated SBOMs stored in: $OUTPUT_DIR"
-echo "📋 Summary available at: $OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+echo "📋 Summary available at: $SUMMARY_FILE"
 
 # Verification
 if [ -d "$OUTPUT_DIR" ] && [ "$(ls -1q "$OUTPUT_DIR"/*.json | wc -l)" -gt 0 ]; then

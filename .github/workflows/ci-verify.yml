@@ -1,0 +1,10 @@
+name: CI Verify
+on: [push, pull_request]
+
+jobs:
+  hygiene-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Runnability Audit Hygiene Drift Check
+        run: ./scripts/monitoring/runnability-audit-2026-02-26-drift.sh
