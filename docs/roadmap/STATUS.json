@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-05T08:55:49Z",
-  "revision_note": "Added summit-cultural CDLRM foundation package and roadmap tracking entry.",
+  "last_updated": "2026-03-05T00:00:00Z",
+  "revision_note": "Added summit-praxeology package skeleton with analytic-only validation, matching engine, and golden tests.",
   "initiatives": [
     {
-      "id": "summit-cultural-cdlrm-foundation",
+      "id": "summit-praxeology-analytic-layer",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added @intelgraph/summit-cultural package scaffold with Cultural Reality Graph schema, compatibility scoring, diffusion engine, fixtures, and golden test."
+      "notes": "Introduced @summit/summit-praxeology with AJV+semantic guardrails for analytic/defensive playbooks and non-prescriptive hypothesis generation."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
