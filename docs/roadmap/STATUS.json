@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-03T00:00:00Z",
+  "revision_note": "Added deterministic SHAP-IQ explainability module scaffold, artifacts, runbook, and drift monitor.",
   "initiatives": [
+    {
+      "id": "shap-iq-explainability-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented deterministic SHAP-IQ-style feature importance, pairwise interactions, artifact schema emission, and drift monitoring scripts."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
