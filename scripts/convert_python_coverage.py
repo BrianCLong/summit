@@ -1,6 +1,7 @@
-import sys
 import json
 import os
+import sys
+
 
 def convert(coverage_json_path, summary_json_path):
     print(f"Converting {coverage_json_path} to {summary_json_path}")
@@ -8,7 +9,7 @@ def convert(coverage_json_path, summary_json_path):
         print(f"Error: {coverage_json_path} does not exist.")
         sys.exit(1)
 
-    with open(coverage_json_path, 'r') as f:
+    with open(coverage_json_path) as f:
         data = json.load(f)
 
     totals = data.get('totals', {})

@@ -1,10 +1,12 @@
 # evidence/tools/verify_evidence.py
 from __future__ import annotations
+
 import importlib.util
 import json
 import re
 import sys
 from pathlib import Path
+
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]

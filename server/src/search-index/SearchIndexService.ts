@@ -107,7 +107,7 @@ export class SearchIndexService {
     }
 
     const opts = {
-      filter: (result: SearchableItem) => {
+      filter: (result: any) => {
         // Filter by caseId
         if (result.caseId !== query.caseId) return false;
 
