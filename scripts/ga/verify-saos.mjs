@@ -2,10 +2,11 @@
 const prBody = process.env.PR_BODY || '';
 
 const requiredSections = [
+  // Keep these aligned with .github/PULL_REQUEST_TEMPLATE.md
+  { header: '## Summary', minLength: 10 },
   { header: '## Assumption Ledger', minLength: 10 },
-  { header: '## Diff Budget', minLength: 10 },
-  { header: '## Success Criteria', minLength: 5 },
-  { header: '## Evidence Summary', minLength: 10 }
+  { header: '## Evidence Bundle', minLength: 10 },
+  { header: '## Verification', minLength: 5 }
 ];
 
 console.log('🛡️ Verifying Summit Agent Operating Standard (S-AOS) compliance...');
@@ -46,7 +47,7 @@ if (tooShort.length > 0) {
 
 if (missing.length > 0 || tooShort.length > 0) {
   console.error('\nPlease update the PR description to include and fill out these sections correctly.');
-  process.exit(0);
+  process.exit(1);
 }
 
 console.log('✅ S-AOS compliance check passed.');
