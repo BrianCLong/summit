@@ -4,25 +4,25 @@ groups:
       # HTTP Availability & Latency
       - alert: HighHttpErrorRate
         expr: |
-          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          sum by (job) (rate(http_requests_total{status_code=~"5.."}[5m]))
           /
-          sum(rate(http_requests_total[5m])) > 0.01
+          sum by (job) (rate(http_requests_total[5m])) > 0.01
         for: 2m
         labels:
           severity: critical
         annotations:
-          summary: "High HTTP Error Rate detected"
-          description: "Over 1% of HTTP requests are failing with 5xx errors."
+          summary: "High HTTP Error Rate detected on {{ $labels.job }}"
+          description: "Over 1% of HTTP requests are failing with 5xx errors for job {{ $labels.job }}."
 
       - alert: HighLatency
         expr: |
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2.0
+          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 2.0
         for: 5m
         labels:
           severity: warning
         annotations:
-          summary: "High HTTP P95 Latency"
-          description: "P95 latency is above 2 seconds for the last 5 minutes."
+          summary: "High HTTP P95 Latency on {{ $labels.job }}"
+          description: "P95 latency is above 2 seconds for the last 5 minutes for job {{ $labels.job }}."
 
       # GraphQL Health
       - alert: HighGraphQLErrorRate
