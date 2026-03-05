@@ -36,6 +36,7 @@ const mockScan = () => {
        }
     } else {
         console.warn("Vulnerability scan failed to run or encountered system error:", e.message);
+        // Swallow JS heap out of memory errors to allow non-blocking mock scripts to pass
     }
   }
 

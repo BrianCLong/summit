@@ -18,4 +18,4 @@ identities:
   - id: "BrianCLong"
     type: "user"
     description: "Repository owner"
-    roles: ["admin", "developer", "reviewer"]
+    roles: ["developer", "reviewer", "admin"]

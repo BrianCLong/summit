@@ -35,20 +35,20 @@ jobs:
       - name: Evidence Map present
         run: |
           # Adjust file name/path to your canonical evidence map
-          if [ -f docs/governance/evidence-map.md ] || [ -f docs/governance/evidence-map.yaml ]; then
+          if [ -f docs/governance/evidence-map.md ] || [ -f docs/governance/evidence-map.md ]; then
             echo "Evidence map present."
           else
-            echo "Missing Evidence Map (docs/governance/evidence-map.md|yaml)"
+            echo "Missing Evidence Map (docs/governance/evidence-map.md)"
             exit 1
           fi
 
       - name: Security ledger present
         run: |
           # Adjust to your canonical ledger path
-          if [ -f docs/security/SECURITY_LEDGER.md ] || [ -f docs/security/SECURITY_LEDGER.md ]; then
+          if [ -f docs/security/security-ledger.yml ] || [ -f docs/security/security-ledger.yaml ]; then
             echo "Security ledger present."
           else
-            echo "Missing Security Ledger (docs/security/SECURITY_LEDGER.md|yaml)"
+            echo "Missing Security Ledger (docs/security/security-ledger.yml|yaml)"
             exit 1
           fi
 

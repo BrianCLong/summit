@@ -35,7 +35,7 @@
     "test:smoke:frontend": "cd client && npm run test:smoke",
     "test:unit": "cd server && npm run test:unit",
     "test:integration": "cd server && npm run test:integration",
-    "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
+    "test:fuzz:graph-guardrails": "GRAPH_GUARDRAIL_FUZZ_ITERATIONS=${GRAPH_GUARDRAIL_FUZZ_ITERATIONS:-80} GRAPH_GUARDRAIL_FUZZ_SEED=${GRAPH_GUARDRAIL_FUZZ_SEED:-7331} NODE_OPTIONS=--experimental-vm-modules jest --config test/fuzz/jest.config.cjs --runTestsByPath test/fuzz/graphGuardrails/generator.test.ts test/fuzz/graphGuardrails/graphGuardrails.fuzz.test.ts",
     "coverage:collect": "pnpm --filter server run test:coverage -- --coverageReporters=json-summary --passWithNoTests",
     "coverage:gate": "node scripts/coverage-aggregate.js --scope=${COVERAGE_SCOPE:-all} --base=${COVERAGE_BASE_REF:-origin/main}",
     "coverage:verify": "pnpm coverage:collect && pnpm coverage:gate",
@@ -268,6 +268,7 @@
     "vitest": "^4.0.18",
     "ws": "^8.18.3",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
+    "yaml": "^2.8.2",
     "zustand": "^5.0.9"
   },
   "private": true,
