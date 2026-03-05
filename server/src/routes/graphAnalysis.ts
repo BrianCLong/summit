@@ -40,7 +40,7 @@ router.post('/run', async (req: Request, res: Response, next: NextFunction) => {
     const job = await service.createJob(tenantId, algorithm as GraphAlgorithmKey, params || {});
 
     // For MVP synchronous execution if requested or short jobs
-    if (req.query.async === 'true') {
+    if ((((req.query.async as string) as string) as string) === 'true') {
          // Fire and forget (or rather, run in background)
          service.runJob(job.id).catch(err => console.error(err));
          res.json({ jobId: job.id, status: 'pending' });
@@ -63,7 +63,7 @@ router.get('/:jobId', async (req: Request, res: Response, next: NextFunction) =>
     const tenantId = getTenantId(req);
     const { jobId } = req.params;
 
-    const job = service.getJob(jobId, tenantId);
+    const job = service.getJob(jobId, ((tenantId as string) as string));
     if (!job) {
       res.status(404).json({ error: 'Job not found' });
       return;

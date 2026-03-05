@@ -20,13 +20,3 @@ This translates your research into build targets and messaging.
 | Dynamic Exploration  |              | Quantexa                       | Incremental expansion + similarity edges.                                                     |
 | Imperfect Data Tools |              | Quantexa                       | Confidence + lineage; anomaly heuristics tolerate gaps.                                       |
 | OpenTelemetry        |              | Splunk                         | OTel collector → entity mapping (host, process, user).                                        |
-
-## vs. General AI Assistants (OpenClaw, etc.)
-
-| Capability         | General AI Assistants (OpenClaw)              | Summit / IntelGraph Fusion                           |
-| :----------------- | :-------------------------------------------- | :--------------------------------------------------- |
-| **Security**       | Skill-level permissions; scan-based security. | OPA/Rego governed; CI-enforced policy-as-code.       |
-| **Provenance**     | Standard application logs.                    | Hash-chained, cryptographically linked audit trails. |
-| **Architecture**   | Single-repo / Gateway + Plugins.              | Multi-repo (IntelGraph + Maestro + Switchboard).     |
-| **Specialization** | Personal RPA (Files, Browser, Shell).         | OSINT, Threat Intel, Espionage Defense.              |
-| **Compliance**     | Operator-managed evidence.                    | Native Compliance Evidence Automation.               |

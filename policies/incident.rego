@@ -1,4 +1,5 @@
 package companyos.incident
+import rego.v1
 
 import rego.v1
 

@@ -285,7 +285,7 @@
 
 ### Production Incident
 1. Check dashboards: `/observability` artifacts
-2. Review runbooks in `RUNBOOKS/` directory
+2. Review runbooks in `runbooks/` directory
 3. Check provenance ledger for recent changes
 4. Roll back using CI/CD canary/rollback procedures
 

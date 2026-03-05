@@ -1,4 +1,5 @@
 package intelgraph.export
+import rego.v1
 
 import rego.v1
 

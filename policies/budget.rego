@@ -2,6 +2,7 @@
 # Usage: opa eval -d policies/ -i input.json "data.intelgraph.budget.allow"
 
 package intelgraph.budget
+import rego.v1
 
 import rego.v1
 

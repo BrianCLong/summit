@@ -1,4 +1,5 @@
 package abac.authz
+import rego.v1
 
 import rego.v1
 
