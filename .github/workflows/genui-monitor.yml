@@ -3,8 +3,9 @@ on:
   schedule:
     - cron: '0 * * * *'
 jobs:
-  monitor:
+  drift-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: npm run ts-node scripts/monitoring/genui-drift.ts
+      - name: Run Drift Script
+        run: npx tsx scripts/monitoring/genui-drift.ts

@@ -1,2 +1,6 @@
-// Monitor for schema violations, UI block entropy, and response latency trend
-console.log('Running GenUI drift detector...');
+/**
+ * Drift detection for GenUI
+ * Checks schema violations, UI block entropy, response latency trend
+ */
+console.log("Checking GenUI drift...");
+// Stub for monitoring job

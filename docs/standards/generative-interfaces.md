@@ -1,14 +1,12 @@
-# Generative Interface Standards
+# Interop & Standards Mapping
 
 ## Mapping
-
-| Summit | external standard |
-|---|---|
-| GenUI schema | MCP-UI |
-| Agent messages | OpenAI tool messages |
-| Workflow blocks | A2UI cards |
+| Summit          | External Standard    |
+| --------------- | -------------------- |
+| GenUI schema    | MCP-UI               |
+| Agent messages  | OpenAI tool messages |
+| Workflow blocks | A2UI cards           |
 
 ## Non-goals
-
-* fully autonomous UI coding
-* arbitrary HTML generation
+* Fully autonomous UI coding
+* Arbitrary HTML generation
