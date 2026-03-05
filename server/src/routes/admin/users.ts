@@ -17,7 +17,6 @@ import { Principal, Action } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
 import { validateRequest } from '../../middleware/validation.js';
 import { z } from 'zod';
-import { firstString, firstStringOr } from '../../utils/http-param.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
@@ -95,21 +94,14 @@ router.get(
       const principal = (req as any).principal;
 
       // Parse query params
-      const page = firstString(req.query.page);
-      const pageSize = firstString(req.query.pageSize);
-      const search = firstString(req.query.search);
-      const role = firstString(req.query.role);
-      const isActive = firstString(req.query.isActive);
-      const sortBy = firstString(req.query.sortBy);
-      const sortOrder = firstString(req.query.sortOrder);
       const input = {
-        page: (page && parseInt(page, 10)) || 1,
-        pageSize: (pageSize && parseInt(pageSize, 10)) || 20,
-        search,
-        role,
-        isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
-        sortBy: (sortBy as any) || 'createdAt',
-        sortOrder: (sortOrder as any) || 'desc',
+        page: parseInt(req.query.page as string, 10) || 1,
+        pageSize: parseInt(req.query.pageSize as string, 10) || 20,
+        search: req.query.search as string,
+        role: req.query.role as string,
+        isActive: req.query.isActive === 'true' ? true : req.query.isActive === 'false' ? false : undefined,
+        sortBy: (req.query.sortBy as any) || 'createdAt',
+        sortOrder: (req.query.sortOrder as any) || 'desc',
       };
 
       const envelope = await userService.listUsers(
@@ -138,7 +130,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       const envelope = await userService.getUser(
         principal.tenantId,
@@ -213,7 +205,7 @@ router.patch(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       // Validate input
       const parseResult = updateUserSchema.safeParse(req.body);
@@ -257,8 +249,8 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
-      const hardDelete = firstString(req.query.hard) === 'true';
+      const { id } = req.params;
+      const hardDelete = req.query.hardDelete === 'true';
 
       const envelope = await userService.deleteUser(
         principal.tenantId,
@@ -292,7 +284,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
       const { reason } = req.body;
 
       if (!reason) {
@@ -332,7 +324,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
 
       const envelope = await userService.unlockUser(
         principal.tenantId,
@@ -365,7 +357,7 @@ router.post(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
+      const { id } = req.params;
       const { tenantId, roles } = req.body;
 
       if (!tenantId || !roles || !Array.isArray(roles)) {
@@ -400,8 +392,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const id = firstStringOr(req.params.id, '');
-      const tenantId = firstStringOr(req.params.tenantId, '');
+      const { id, tenantId } = req.params;
 
       const envelope = await userService.removeUserFromTenant(
         id,

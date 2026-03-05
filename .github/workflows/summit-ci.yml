@@ -7,11 +7,6 @@ on:
       - 'client/**'
       - '.github/workflows/summit-ci.yml'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     paths:
       - 'summit/**'
       - 'client/**'
@@ -45,8 +40,8 @@ jobs:
         env:
           PYTHONPATH: .
         run: |
-          # Targeting 80% coverage is the goal, but starting with current baseline to prevent regression
-          pytest --cov=summit --cov-report=xml --cov-fail-under=9 summit/tests/
+          # Targeting 80% coverage is the goal
+          pytest --cov=summit --cov-report=xml --cov-fail-under=13 summit/tests/
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
@@ -89,6 +84,7 @@ jobs:
       REDIS_URL: redis://localhost:6379
       NODE_ENV: test
       CI: true
+      PLAYWRIGHT_USE_WEBSERVER: true
     steps:
       - uses: actions/checkout@v4
 
@@ -107,4 +103,4 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: PLAYWRIGHT_USE_WEBSERVER=true npx playwright test e2e/summit-smoke.spec.ts
+        run: npx playwright test e2e/

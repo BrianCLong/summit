@@ -121,13 +121,12 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -198,13 +197,12 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -273,13 +271,12 @@ jobs:
         uses: actions/setup-node@v4 # v4
         with:
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: ${{ inputs.node-version }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@eae0cfeb286e66ffb5155f1a79b90583a127a68b # v2
         with:
-          version: 9.12.0
+          version: 10.0.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -371,8 +368,6 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
-        with:
-          cosign-release: "v3.0.5"
 
       - name: Sign Image
         run: |

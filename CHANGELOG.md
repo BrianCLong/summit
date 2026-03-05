@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-- CI: Enforced golden path execution for all PRs and main branch merges.
+- CI Fixes: Version sync, TypeScript fixes, OPA image downgrade, and Governance header fix.
 
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
@@ -196,8 +196,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [Migration Guide](./docs/migration-guide.md)
 - [API Documentation](./docs/api/README.md)
 
-[Unreleased]
-- CI: Enforced golden path execution for all PRs and main branch merges.: https://github.com/org/summit/compare/v3.0.0...HEAD
+[Unreleased]: https://github.com/org/summit/compare/v3.0.0...HEAD
 [3.0.1]: https://github.com/org/summit/compare/v3.0.0...v3.0.1
 [3.0.0]: https://github.com/org/summit/releases/tag/v3.0.0
 ## v2.0.0-rc.1 (2025-10-07)

@@ -1,6 +1,6 @@
 # Production Python dependencies with version constraints
-fastapi==0.135.*
-uvicorn==0.41.*
+fastapi==0.128.*
+uvicorn==0.40.*
 pydantic==2.*
 sqlalchemy==2.*
 asyncpg==0.31.*
@@ -31,4 +31,4 @@ opentelemetry-instrumentation-logging
 prometheus-fastapi-instrumentator
 python-json-logger
 structlog
-torch
+pytest-asyncio

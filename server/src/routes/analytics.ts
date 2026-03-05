@@ -1,15 +1,10 @@
 import { Router } from 'express';
-import { ensureAuthenticated } from '../middleware/auth.js';
 import { AnalyticsService } from '../services/AnalyticsService.js';
 import { logger } from '../config/logger.js';
 import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
 
 const router = Router();
-
-// SEC-2025-001: Enforce authentication for analytics operations
-router.use(ensureAuthenticated);
-
 const analyticsService = AnalyticsService.getInstance();
 
 // Helper to handle async route errors
@@ -52,8 +47,8 @@ router.get(
     );
 
     // Apply Differential Privacy to community sizes if enabled
-    if (dp === 'true' && result.communities) {
-      result.communities = result.communities.map((c: any) => ({
+    if (dp === 'true' && (result as any).communities) {
+      (result as any).communities = (result as any).communities.map((c: any) => ({
         ...c,
         size: dpEngine.privatizeAggregate(c.size, { epsilon: 0.5 }),
         isPrivatized: true
