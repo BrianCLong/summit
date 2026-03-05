@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-25T20:29:21Z",
-  "revision_note": "Added Summit next-priority GA roadmap and execution-compression plan.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added Copilot Usage Metrics API (PR throughput + time-to-merge) subsumption initiative and evidence-governance plan.",
   "initiatives": [
     {
-      "id": "summit-next-priority-ga-roadmap",
+      "id": "copilot-usage-metrics-api-2026-02-19",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published prioritized P0-P3 roadmap with Golden Path demo as single integration anchor and MAESTRO-aligned mitigations."
+      "notes": "Foundation + Innovation lane plan for GitHub Copilot Usage Metrics API delivery-impact fields (pull_request_throughput, time_to_merge) with governed evidence and rollback criteria."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
