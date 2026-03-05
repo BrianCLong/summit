@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-03-05T00:00:00Z",
-  "revision_note": "Added summit-threat-map V2 package scaffold with ingestion, risk materialization contracts, tile/drilldown endpoints, and aggregate-only map UI defaults.",
+  "last_updated": "2026-03-03T00:00:00Z",
+  "revision_note": "Added minimal MCP orchestration stack architecture brief and linked roadmap initiative status.",
   "initiatives": [
-    {
-      "id": "summit-threat-map-v2",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Implemented Shodan/Shadowserver normalization pipeline, H3 risk rollup contracts, tile/drilldown API surface, and aggregate-only map component with evidence sidebar."
-    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -223,6 +217,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "mcp-orchestration-stack-minimal",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published minimal spec-to-code MCP orchestration architecture with DAG scheduling, blocker escalation, guardrails, and MAESTRO threat alignment."
     }
   ],
   "summary": {
