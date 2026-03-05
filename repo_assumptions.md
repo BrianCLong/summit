@@ -1,19 +1,21 @@
-# Unity Packaging Subsumption Assumptions
+# Coordination Evaluation Repository Assumptions
 
-## Verified
+## Assumed Structure
 
-- `summit/` Python package exists and already contains CLI + tests.
-- `policies/` directory exists for policy YAML artifacts.
-- `docs/roadmap/STATUS.json` exists and tracks active initiatives.
+- `summit/evals/` hosts evaluation modules and deterministic artifact emitters.
+- `summit/ci/` hosts hard gates that block CI on quality regressions.
+- `summit/agents/` hosts shared agent utilities, including context propagation primitives.
+- `docs/` hosts standards, security handling, and ops runbooks.
 
-## Assumed
+## Must-Not-Touch Guardrails
 
-- CI can execute `python -m unittest` for targeted suites.
-- Artifact naming convention accepts `artifacts/package-report.json`, `artifacts/metrics.json`, and `artifacts/stamp.json`.
-- Required check name for policy enforcement can be introduced as `check-unity-policy` in a future workflow.
+- Core evaluation harness internals remain unchanged; this slice adds extension modules only.
+- Existing CI checks remain active; coordination check is additive.
+- Existing evidence schemas remain untouched; coordination artifacts use separate filenames.
 
-## Must-Not-Touch (Intentionally constrained)
+## Validation Checklist
 
-- Core evaluator surfaces outside `summit/pkg` additions.
-- Scoring engine paths unrelated to package scanning.
-- Provenance chain and ledger primitives.
+- [x] Confirmed existing evidence artifacts use deterministic JSON serialization.
+- [x] Confirmed existing CI checks have explicit named scripts in `summit/ci/`.
+- [x] Confirmed Python test harness accepts pytest-style tests under `summit/evals/**/tests`.
+- [x] Confirmed artifacts can be emitted to `artifacts/` without mutating base schemas.

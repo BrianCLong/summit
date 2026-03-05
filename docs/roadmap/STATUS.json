@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added unity-package-subsumption MWS initiative with deterministic scanner, policy gate scaffolding, and evidence outputs.",
+  "revision_note": "Added coordination evaluation and CI governance initiative with deterministic artifacts.",
   "initiatives": [
     {
-      "id": "unity-package-subsumption-mws",
+      "id": "coordination-evaluation-governance",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Implemented Unity package scanner MVP with deterministic report artifacts, SemVer/policy validation, dependency DAG checks, and CLI entrypoint."
+      "notes": "Introduced coordination schema, deterministic scoring artifacts, CI quality gate, context hash ledger, and operations runbook."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
