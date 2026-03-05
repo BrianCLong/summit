@@ -1,20 +1,15 @@
-# Repo Assumptions & Reality Check
+# Autonomous Engineer v2 Repo Assumptions
 
-## Verified vs Assumed paths
-- Assumed `agents/` runtime
-- Assumed `scripts/`
-- Assumed `tests/`
-- Assumed `docs/`
-- Assumed `.github/workflows/`
+## Verified
+- `agents/`, `scripts/`, `docs/`, `artifacts/`, and `metrics/` exist in the repository root.
+- `docs/roadmap/STATUS.json` is the active roadmap status index.
 
-## Artifact schemas
-- `run_plan.json`
-- `execution_ledger.json`
-- `patch_stack.json`
-- `eval_report.json`
-- `policy_report.json`
+## Assumed (deferred pending focused verification)
+- CI checks `check_plan_gate`, `check_patch_policy`, and `check_eval_min_score` can be added without renaming existing gates.
+- Artifact contract additions under `artifacts/schemas/` do not conflict with current consumers.
+- Python-based gate scripts are acceptable in current CI job runners.
 
-## Must-not-touch list
-- existing artifact schemas
-- CI workflow names
-- security policy enforcement modules
+## Must-Not-Touch (until explicit verification task)
+- Existing artifact schema IDs and semantics outside `autonomous-engineer-v2` files.
+- Existing workflow names under `.github/workflows/`.
+- Security policy enforcement modules outside this scoped lane.
