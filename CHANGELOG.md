@@ -10,22 +10,34 @@ POLICY:
 All notable changes to Summit MVP-3 will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+- Fixed CI drift
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+n### Added
+- **Governance:** Implemented Required Checks Contract (`REQUIRED_CHECKS_CONTRACT.yml`) to enforce deterministic CI validation for protected branches.
+
+### Security
+- **Defense in Depth**: Hardened sensitive administrative and operational routes (`/airgap`, `/analytics`, `/dr`) by enforcing authentication and role-based access control (RBAC) directly within the router files.
+
+### Security
+- SEC-2025-002: Hardened identity and tenant context resolution in API routes to prevent spoofing by prioritizing authenticated user objects over untrusted headers.
+
+### Security
+- SEC-2025-002: Hardened identity and tenant context resolution in API routes to prevent spoofing by prioritizing authenticated user objects over untrusted headers.
 
 ### Added
-- Added `@summit/graphrag-context-compiler` package and integrated deterministic GraphRAG context compiler and CI evaluation pipeline.
+- Added standardized `Kbd` component to `@intelgraph/web` for platform-aware keyboard shortcut hints (⌘/Ctrl and ⇧/Shift).
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
 ### Added
-- Added `@summit/graphrag-context-compiler` package and integrated deterministic GraphRAG context compiler and CI evaluation pipeline.
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
 
 ### Fixed
+- Add missing aria-labels to close buttons in `EntityPanel.tsx`.
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
@@ -48,14 +60,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All governance and security checks pass
 
 ### Added
-- Added `@summit/graphrag-context-compiler` package and integrated deterministic GraphRAG context compiler and CI evaluation pipeline.
 - Generated SBOM at `.evidence/sbom.json`
 - CLI test suite: 262 tests passing
 
 ## [4.0.0] - MVP-4 GA - 2025-12-30
 
 ### Added
-- Added `@summit/graphrag-context-compiler` package and integrated deterministic GraphRAG context compiler and CI evaluation pipeline.
 - **Reliability Hardening**:
   - Added exponential backoff retry logic (3 attempts) to Maestro LLM execution with cancellation support.
   - Added 60s timeout to Maestro LLM calls to prevent hanging jobs.
@@ -104,7 +114,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [3.0.0] - 2024-12-28
 
 ### Added
-- Added `@summit/graphrag-context-compiler` package and integrated deterministic GraphRAG context compiler and CI evaluation pipeline.
 
 #### Core Platform
 - Multi-tenant architecture with strict tenant isolation
@@ -208,3 +217,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security Hardening: All P0/P1 issues resolved.
 - Performance: GraphQL p95 < 350ms verified.
 - CI: Fix pnpm version conflicts and standardize on pnpm v9.12.0 via packageManager
+
+## [Unreleased]
+- Added idempotent Neo4j reconciliation logic
