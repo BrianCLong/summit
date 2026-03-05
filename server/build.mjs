@@ -13,35 +13,26 @@ const workspacePlugin = {
   setup(build) {
     // Intercept @intelgraph/* imports
     build.onResolve({ filter: /^@intelgraph\// }, (args) => {
-      const parts = args.path.split('/');
-      const packageName = parts[1];
+      const packageName = args.path.split('/')[1];
+      const packagePath = path.resolve(__dirname, '..', 'packages', packageName);
 
-      // Potential package locations
-      const candidates = [
-        path.resolve(__dirname, '..', 'packages', packageName),
-        path.resolve(__dirname, '..', 'libs', packageName, 'node'),
-        path.resolve(__dirname, '..', 'services', packageName),
-      ];
+      if (fs.existsSync(packagePath)) {
+        // Try src/index.ts first
+        const srcIndex = path.join(packagePath, 'src', 'index.ts');
+        if (fs.existsSync(srcIndex)) {
+          return { path: srcIndex, namespace: 'file' };
+        }
 
-      for (const packagePath of candidates) {
-        if (fs.existsSync(packagePath)) {
-          // Try src/index.ts first
-          const srcIndex = path.join(packagePath, 'src', 'index.ts');
-          if (fs.existsSync(srcIndex)) {
-            return { path: srcIndex, namespace: 'file' };
+        // Fallback to what package.json says
+        try {
+          const pkgJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf8'));
+          const mainFile = pkgJson.main || 'index.js';
+          const resolvedPath = path.join(packagePath, mainFile);
+          if (fs.existsSync(resolvedPath)) {
+            return { path: resolvedPath, namespace: 'file' };
           }
-
-          // Fallback to what package.json says
-          try {
-            const pkgJson = JSON.parse(fs.readFileSync(path.join(packagePath, 'package.json'), 'utf8'));
-            const mainFile = pkgJson.main || 'index.js';
-            const resolvedPath = path.join(packagePath, mainFile);
-            if (fs.existsSync(resolvedPath)) {
-              return { path: resolvedPath, namespace: 'file' };
-            }
-          } catch (e) {
-            // ignore
-          }
+        } catch (e) {
+          // ignore
         }
       }
       return null;
@@ -79,7 +70,7 @@ const externalAndExtensionPlugin = {
   },
 };
 
-console.log('🚀 Starting isolated build for server (target: dist-isolated)...');
+console.warn('🚀 Starting isolated build for server (target: dist-isolated)...');
 
 async function runBuild() {
   const outputDir = 'dist-isolated';
@@ -107,7 +98,7 @@ async function runBuild() {
       },
     });
 
-    console.log(`✅ Build completed successfully in ${outputDir}`);
+    console.warn(`✅ Build completed successfully in ${outputDir}`);
   } catch (error) {
     console.error('❌ Build failed:', error);
     process.exit(1);

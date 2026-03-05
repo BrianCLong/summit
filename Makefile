@@ -49,10 +49,8 @@ dev-down: dev-prereqs ## Stop dev stack and remove volumes
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
 	@docker compose -f $(COMPOSE_DEV_FILE) ps
-	@echo "Checking UI at http://localhost:3000 ..."
-	@curl -sSf http://localhost:3000 > /dev/null || { echo "UI not responding on port 3000."; exit 1; }
-	@echo "Checking Gateway health at http://localhost:8080/health ..."
-	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
+	@node smoke-test.js
+	@$(MAKE) k6 TARGET=http://localhost:4000
 	@echo "Dev smoke checks passed."
 
 restart: down up
@@ -169,7 +167,7 @@ STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
 STACK_SERVER      ?= stack/express5-eslint9
 STACK_CLIENT      ?= stack/client-vite7-leaflet5
 STACK_REBRAND     ?= stack/rebrand-docs
-PR_TARGETS        ?= 1279 1261 1260
+PR_TARGETS        ?= 1279 1261 1260 1259
 STATE_DIR         ?= .merge-evidence
 STATE_FILE        ?= $(STATE_DIR)/state.json
 NODE_VERSION      ?= 20
@@ -301,6 +299,16 @@ ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
 
+# --- Governance & Evidence ---
+
+.PHONY: evidence-bundle
+evidence-bundle: ## Generate a standard evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [RISK=low] [CHECKS="make test"])
+	@python3 scripts/maintainers/gen-evidence-bundle.py \
+		$(if $(BASE),--base $(BASE),) \
+		$(if $(RISK),--risk $(RISK),) \
+		$(if $(CHECKS),--checks "$(CHECKS)",) \
+		$(if $(PROMPTS),--prompts "$(PROMPTS)",)
+
 # --- Demo Environment ---
 
 demo: ## Launch one-command demo environment
@@ -401,6 +409,6 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
 eval-skills-changed:
-	@echo "Checking for changed skills..."
-	@echo "Skipped"
+	@echo "Skills evaluation skipped."
