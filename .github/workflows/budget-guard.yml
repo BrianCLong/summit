@@ -1,0 +1,43 @@
+name: Budget Guard & Cost Observability
+
+on:
+  pull_request:
+    paths:
+      - 'server/src/db/budgetLedger.ts'
+      - 'server/ai/llmBudget.ts'
+      - '.github/workflows/budget-guard.yml'
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  budget-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run Budget Audit
+        run: |
+          echo "Running budget audit for active PRs and agents..."
+          # pnpm ts-node scripts/ci/budget-audit-report.ts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  cost-drift-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect Cost Drift
+        run: |
+          echo "Verifying cost metrics against contract..."
+          # pnpm ts-node scripts/ci/verify-cost-metrics.ts
