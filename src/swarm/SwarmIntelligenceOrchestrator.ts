@@ -325,16 +325,12 @@ export class CollectiveIntelligenceEngine {
 
   private synthesizeKnowledge(agents: SwarmAgent[], domain: string): any {
     return {
-      concepts: agents
-        .flatMap((a) => a.specialization)
-        .filter((c, i, arr) => arr.indexOf(c) === i),
+      concepts: [...new Set(agents.flatMap((a) => a.specialization))],
       experiences: agents.reduce(
         (sum, a) => sum + a.experience.tasksCompleted,
         0,
       ),
-      skills: agents
-        .flatMap((a) => a.experience.skillsAcquired)
-        .filter((s, i, arr) => arr.indexOf(s) === i),
+      skills: [...new Set(agents.flatMap((a) => a.experience.skillsAcquired))],
       adaptations: agents.reduce(
         (sum, a) => sum + a.experience.evolutionCycles,
         0,
