@@ -1,40 +1,70 @@
-# Intent Engine Runbook
+# Runbook: Intent Engine (Validation Layer)
 
-## Overview
-This runbook covers operational procedures for the Summit Intent Engine, an agent-optimized content pipeline and constraint enforcement system.
+## Purpose
 
-## SLOs
-- **Availability:** 99% CI pass stability for intent spec evaluations.
-- **Determinism:** <1% non-determinism incidents on identical `intent_spec` configurations.
+Operate and triage the Summit intent validation layer with deterministic outputs and policy-enforced CI behavior.
 
-## Feature Flag Rollout Plan
-**Flag Name:** `INTENT_ENGINE_V1`
-**Default State:** `OFF`
+## Preconditions
 
-To test locally:
-```bash
-export INTENT_ENGINE_V1=true
-```
+- Feature flag `INTENT_ENGINE_V1` is intentionally set for the target environment.
+- Schema, determinism, and policy checks are enabled in CI.
 
-## Triage
-### `intent-determinism-check` Failures
-**Symptom:** Constraint violations indicating non-determinism when processing identical specs.
-**Resolution:**
-1. Check `artifacts/intent/report.json` for discrepancies between runs.
-2. Ensure no non-deterministic code (e.g. timestamps, random numbers, unsorted lists) has been introduced to the pipeline evaluator.
+## Standard Flow
 
-### `perf-budget` Failures
-**Symptom:** Pipeline memory, token reduction ratio, or runtime exceeds defined limits.
-**Resolution:**
-1. Check `artifacts/intent/metrics.json` to identify which metric failed.
-2. Review the raw agent queries in the spec for unusually large token counts.
+1. Validate `intent_spec.yaml` against schema.
+2. Execute validator in deterministic mode.
+3. Generate artifacts:
+   - `artifacts/intent/report.json`
+   - `artifacts/intent/metrics.json`
+   - `artifacts/intent/stamp.json`
+4. Enforce CI pass/fail on policy verdict.
 
-## How to Regenerate Artifacts
-Run the evaluation test suite locally to recreate the outputs:
-```bash
-PYTHONPATH=. python3 tests/intent/test_determinism.py
-```
-Outputs are written to `artifacts/intent/`.
+## Failure Triage
+
+### A) Schema Validation Failure
+
+- Confirm required fields (`intent_id`, `objective`, `constraints`, `stop_rules`).
+- Confirm no unsupported constraint/operator types.
+- Re-run schema check and capture error output in CI logs.
+
+### B) Determinism Failure
+
+- Re-run validator twice on identical input.
+- Compare `report.json` and `metrics.json` byte-for-byte.
+- Ensure all time-variant fields are isolated to `stamp.json`.
+
+### C) Constraint Violation
+
+- Inspect policy verdict section in `report.json`.
+- Confirm violation maps to an explicit constraint in spec.
+- Reject merge until spec or implementation is corrected.
+
+## Regenerating Artifacts
+
+1. Remove prior `artifacts/intent/*.json` outputs.
+2. Re-run validation pipeline with same inputs.
+3. Confirm deterministic artifacts are unchanged across two consecutive runs.
 
 ## CI Override Protocol
-In an emergency (e.g. false positives in pipeline blocking merges), a security or engineering manager may temporarily disable the CI check by modifying `.github/required-checks.yml` or adding an exception flag. This action MUST be documented.
+
+No policy bypass by default.
+
+If a temporary exception is required:
+
+1. Create a governed exception record under existing governance process.
+2. Reference exception ID in PR and evidence trail.
+3. Set expiration and rollback trigger before merge.
+
+## Rollback Plan
+
+Trigger rollback when:
+
+- Determinism incident rate breaches agreed threshold.
+- CI gate false-positive rate materially degrades delivery.
+
+Rollback steps:
+
+1. Disable `INTENT_ENGINE_V1`.
+2. Revert offending change set.
+3. Re-run baseline CI suite.
+4. File remediation issue with root-cause and next safe re-enable point.
