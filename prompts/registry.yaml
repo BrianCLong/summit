@@ -1,21 +1,20 @@
 version: 1
 prompts:
-  - id: partner-enablement-kit-v1
+  - id: governed-agent-integration-reference
     version: v1
-    path: prompts/partners/partner-enablement-kit-v1.md
-    sha256: 1557c823b4eecb0fb603d2697205ac153f070fee8c3867e37363ed32031310f8
-    description: Draft the Sprint N+7 partner enablement kit v1 documentation and update roadmap status.
+    path: prompts/architecture/governed-agent-integration-reference@v1.md
+    sha256: b3cc1444eeaf4755f9a7912fb42feeb6f1726cf1212cf50d06b1f0ea49e2bd53
+    description: Publish governed agent integration reference architecture and update roadmap status.
     scope:
       paths:
-        - docs/partners/partner-enablement-kit-v1.md
+        - docs/architecture/governed-agent-integration-reference.md
         - docs/roadmap/STATUS.json
-        - prompts/partners/partner-enablement-kit-v1.md
+        - prompts/architecture/governed-agent-integration-reference@v1.md
         - prompts/registry.yaml
-        - agents/examples/PARTNER_ENABLEMENT_KIT_V1.json
       domains:
         - documentation
-        - partners
         - governance
+        - architecture
     verification:
       tiers_required:
         - C
@@ -920,25 +919,4 @@ prompts:
         permitted: 0
         retirement_target: 0
     allowed_operations:
-      - edit
-  - id: supply-chain-sigstore-bundle-first
-    version: v1
-    path: prompts/docs/supply-chain-sigstore-bundle-first@v1.md
-    sha256: 37dd1d8253fbd23edd5281935a8ebcdc46406f2973f92a174601b2a2c22970c1
-    description: Create bundle-first Sigstore governance spec and update roadmap status.
-    scope:
-      paths:
-        - docs/supply-chain/sigstore-bundle-first-governance.md
-        - docs/roadmap/STATUS.json
-        - prompts/docs/supply-chain-sigstore-bundle-first@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - supply-chain
-        - governance
-    verification:
-      tiers_required:
-        - C
-    allowed_operations:
-      - create
       - edit
