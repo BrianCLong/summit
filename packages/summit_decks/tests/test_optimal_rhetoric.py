@@ -1,5 +1,7 @@
 import unittest
-from summit_decks.optimal_rhetoric import score_deck, SlideStats
+
+from summit_decks.optimal_rhetoric import SlideStats, score_deck
+
 
 class TestOptimalRhetoric(unittest.TestCase):
     def test_empty_deck(self):

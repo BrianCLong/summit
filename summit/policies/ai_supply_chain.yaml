@@ -1,0 +1,17 @@
+policy_name: AI_Supply_Chain_Defense
+description: |
+  Defines thresholds for blocking packages that show signs of autonomous malware
+  propagation through AI recommendation loops.
+
+rules:
+  - id: ASCM-001
+    name: Block Autonomous Propagation
+    action: deny
+    condition: "package.autonomous_propagation_risk == 'high'"
+    thresholds:
+      max_ai_recommendations: 10000
+      min_package_age_days: 7
+      min_trust_score: 0.5
+    message: |
+      Package exhibits an anomalous AI recommendation spike with low trust and age.
+      This matches the profile of autonomous AI supply chain propagation.
