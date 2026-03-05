@@ -1,0 +1,1 @@
+print('Relay policy ok')

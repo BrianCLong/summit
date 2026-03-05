@@ -1,3 +1,6 @@
+import { Redis as RedisReal, Cluster as ClusterReal } from 'ioredis';
+
+const isMockEnabled = process.env.ZERO_FOOTPRINT !== 'false';
 
 const mockRedisStorage = new Map<string, string>();
 const mockRedisSets = new Map<string, Set<string>>();
@@ -11,7 +14,7 @@ export const resetMockRedis = () => {
   mockStreamIdCounter = 0;
 };
 
-export default class Redis {
+class RedisMock {
   options: any;
   keyPrefix: string;
   status: string;
@@ -304,11 +307,11 @@ export default class Redis {
   }
 }
 
-export { Redis };
+export const Redis = isMockEnabled ? (RedisMock as any) : RedisReal;
 
 // Cluster mock for ioredis Cluster support
-export class Cluster extends Redis {
-  nodes: Redis[];
+class ClusterMock extends RedisMock {
+  nodes: any[];
 
   constructor(_startupNodes?: any[], _options?: any) {
     super();
@@ -323,3 +326,6 @@ export class Cluster extends Redis {
     return this.nodes;
   }
 }
+
+export const Cluster = isMockEnabled ? (ClusterMock as any) : ClusterReal;
+export default Redis;
