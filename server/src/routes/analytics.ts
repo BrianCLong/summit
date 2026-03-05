@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { ensureAuthenticated } from '../middleware/auth.js';
 import { AnalyticsService } from '../services/AnalyticsService.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { logger } from '../config/logger.js';
 import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
@@ -11,6 +12,11 @@ const router = Router();
 router.use(ensureAuthenticated);
 
 const analyticsService = AnalyticsService.getInstance();
+
+// SEC-2026-003: Enforce authentication and RBAC for analytics endpoints.
+// Analytics queries can expose sensitive aggregate data and must be restricted to analysts and admins.
+router.use(ensureAuthenticated);
+router.use(ensureRole(['ADMIN', 'admin', 'ANALYST', 'analyst']));
 
 // Helper to handle async route errors
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
