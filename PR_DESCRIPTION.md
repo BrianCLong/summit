@@ -1,64 +1,70 @@
-# PR: Consolidate Prompt Metadata and Add Jest Network Teardown Shim
+## Summary
 
-Consolidate prompt metadata so ONE prompt hash accurately represents the full, combined scope of the current PR, including Jest network teardown shim addition, governed test updates, and LFS exception updates.
+Initialize the `longhorizon` agent module within the `agents/` workspace. This PR establishes the baseline structure, schema, and initial fixtures for the LongHorizon PR-Chains evaluation track, grounded in the repo's governance and CI invariants.
 
-## Changes
+## Risk & Surface (Required)
 
-### 1. Jest Network Teardown Shim
+**Risk Level**:
 
-- Added opt-in Jest setup shim to `server/tests/setup/jest.setup.cjs`.
-- Tracks and closes network servers and timers when `NO_NETWORK_LISTEN=true`.
-- Reduces open handle hangs in CI.
+- [x] `risk:medium` (Feature flags, backward-compatible changes)
 
-### 2. LFS Exceptions
+**Surface Area**:
 
-- Updated `.gitattributes` to include exception for `verification/*.png` to prevent LFS smudge failures in certain environments.
+- [x] `area:ci`
+- [x] `area:policy`
+- [x] `area:docs`
 
-### 3. Prompt Registry Consolidation
+## Assumption Ledger
 
-- Identified `jest-network-teardown-shim` as the prompt of record.
-- Updated prompt scope to explicitly enumerate all files touched by this PR.
-- Registered new prompt hash in `prompts/registry.yaml`.
-- Included earlier prompt file edits (`gitattributes-lfs-exception@v1.md`, `nl-graph-query-test-tson-fix@v1.md`) in the consolidated scope.
+- **Assumptions**: The `agents/*` directory is the canonical location for workspace-resident agents. PR-chains can be treated as inert JSONL data events.
+- **Ambiguities**: The exact path of the evidence map file (referenced as `evidence/map.yml` in policy) needs final verification.
+- **Tradeoffs**: Initial landing in `agents/` rather than a top-level taxonomy to minimize disruption.
+- **Stop Condition**: Failure to pass deterministic byte-compare on artifact outputs.
+
+## Execution Governor & Customer Impact
+
+- [x] **Single Product Mode**: Respects active product.
+- [x] **Frozen Code**: Feature flag `LONGHORIZON_PR_CHAINS_ENABLED` defaults to `false`.
+- **Customer Impact**: None (feature-flagged OFF). Provides the foundation for long-horizon agent evaluation.
+- **Rollback Plan**: Revert commit; the module is isolated in `agents/longhorizon`.
+
+## Evidence Bundle
+
+- [x] **Tests**: `agents/longhorizon/src/schema_validation.test.ts` implemented and passing.
+- [ ] **Screenshots**: N/A
+- [x] **Evidence Generated**: `LONGHORIZON.REPO_ASSUMPTIONS.V1` documented in `agents/longhorizon/repo_assumptions.md`.
+- [ ] **Prompt Hash**: No prompts introduced in this PR.
+
+## Security Impact
+
+- [x] **Security Impact**: No. This PR only introduces schemas and fixtures. No auth, PII, or crypto touched.
+
+## Green CI Contract Checklist
+
+- [x] **Lint**: Ran `pnpm lint` and fixed Markdown errors.
+- [x] **Tests**: Ran unit tests for schema validation.
+- [x] **Determinism**: Schema enforces stable key ordering for PR-chain artifacts.
+- [x] **Evidence**: Integrated with repo assumptions and governance artifacts.
+
+## CI & Merge Train Rules
+
+- [x] Behavior changes (CI fixes) are included to unblock the PR stack.
 
 ## Verification
 
-- Computed SHA-256 hash for consolidated prompt: `72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b`.
-- Verified hash consistency in `prompts/registry.yaml`.
-- Confirmed `server/tests/setup/jest.setup.cjs` parses correctly.
+- [x] Automated Test: Schema validation test.
+- [x] Manual Verification: Verified file structure and pnpm workspace integration.
 
-### Hash Computation
+## S-AOS Governance Compliance
 
-To compute the prompt hash, run:
-
-```bash
-sha256sum prompts/governance/jest-network-teardown-shim@v1.md
-```
+- **Diff Budget**: Within limits for a module initialization PR.
+- **Success Criteria**: Schema validation passes; CI unblocked; Repo Assumptions verified.
+- **Evidence Summary**: Initial grounding evidence captured in `agents/longhorizon/repo_assumptions.md`.
 
 <!-- AGENT-METADATA:START -->
-
-```json
 {
-  "agent_id": "jules",
-  "task_id": "consolidate-prompt-metadata",
-  "prompt_hash": "72dea420478bbb896f60d1ccd13e6148d6145be7a3edeeabc936cbfbe7983a0b",
-  "domains": ["governance", "testing"],
-  "verification_tiers": ["C"],
-  "debt_delta": 0,
-  "declared_scope": {
-    "paths": [
-      ".gitattributes",
-      "PR_DESCRIPTION.md",
-      "server/tests/setup/jest.setup.cjs",
-      "docs/roadmap/STATUS.json",
-      "prompts/registry.yaml",
-      "prompts/governance/gitattributes-lfs-exception@v1.md",
-      "prompts/governance/nl-graph-query-test-tson-fix@v1.md",
-      "prompts/governance/jest-network-teardown-shim@v1.md"
-    ]
-  },
-  "allowed_operations": ["create", "edit"]
+  "promptId": "longhorizon-init-v1",
+  "taskId": "LONGHORIZON-AGENT-INIT",
+  "tags": ["longhorizon", "initialization", "schema", "governance"]
 }
-```
-
 <!-- AGENT-METADATA:END -->
