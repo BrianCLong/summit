@@ -1,19 +1,14 @@
-export type AgentRole = 'planner' | 'executor' | 'critic' | 'search';
+import { EvaluationConfig } from './evaluation-runner';
 
-export interface TopologyConfig {
-  type: 'single-agent' | 'multi-agent' | 'parallel';
-  roles: AgentRole[];
-}
-
-export function generateTopology(type: TopologyConfig['type']): TopologyConfig {
-  switch (type) {
-    case 'single-agent':
-      return { type, roles: ['planner', 'executor'] };
-    case 'multi-agent':
-      return { type, roles: ['planner', 'critic', 'executor'] };
-    case 'parallel':
-      return { type, roles: ['planner', 'search'] }; // Simplification for search agents
-    default:
-      throw new Error(`Unknown topology type: ${type}`);
+export class TopologyGenerator {
+  generate(type: EvaluationConfig['topology']): any {
+    if (type === 'single') {
+      return { nodes: ['planner-executor'] };
+    } else if (type === 'multi') {
+      return { nodes: ['planner', 'critic', 'executor'] };
+    } else if (type === 'parallel') {
+      return { nodes: ['planner', 'search1', 'search2'] };
+    }
+    throw new Error(`Unknown topology: ${type}`);
   }
 }

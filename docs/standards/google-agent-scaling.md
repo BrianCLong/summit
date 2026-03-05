@@ -1,8 +1,10 @@
-# Google Agent Scaling Standards
+# Google Agent Scaling Principles
 
-This document describes standard compatibility with Google's scaling principles for agentic architectures.
+Based on InfoQ research (Mar 2026): [Google Publishes Scaling Principles for Agentic Architectures](https://www.infoq.com/news/2026/03/google-multi-agent/)
 
-## Protocols
+## Implementation in Summit
+
+We implemented a deterministic evaluation harness to measure whether multi-agent orchestration improves task success compared to single-agent execution.
 
 | Standard              | Role                   |
 | --------------------- | ---------------------- |
@@ -10,9 +12,6 @@ This document describes standard compatibility with Google's scaling principles 
 | A2A                   | agent messaging        |
 | Summit Agent Protocol | internal orchestration |
 
-Non-goals:
-* building full A2A runtime
-* replacing Summit orchestration layer
-
-## Architecture Evaluation
-Evaluates multi-agent coordination vs single agent efficiency.
+## Architecture Decisions
+- Add deterministic benchmarking.
+- Implement specialized roles instead of arbitrary chaining.

@@ -1,11 +1,13 @@
-# Data Handling: Google Agent Scaling
+# Agent Scaling Data Handling Policy
 
-## Never log
-* LLM prompts
-* customer data
-* API tokens
-* vector embeddings
+## Never Log
+- LLM prompts (hash only)
+- Customer data (PII redaction)
+- API tokens
+- Vector embeddings
 
 ## Retention
-* benchmarks: 30 days
-* metrics: 90 days
+- Benchmarks: 30 days
+- Metrics: 90 days
+
+Deterministic artifact generation must not include `generated_at` timestamps.

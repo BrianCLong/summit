@@ -2,13 +2,11 @@
 
 ## Alerts
 
-| Condition                   | Alert    |
-| --------------------------- | -------- |
-| coordination overhead spike | warn     |
-| token cost spike            | critical |
-| agent recursion > threshold | critical |
+| Condition                   | Alert    | Resolution                                          |
+| --------------------------- | -------- | --------------------------------------------------- |
+| coordination overhead spike | warn     | Check `agent-benchmark` logs, optimize agent prompt |
+| token cost spike            | critical | Review LLM token limits and tool payloads           |
+| agent recursion > threshold | critical | Enforce `maxSteps` strictly in EvaluationRunner     |
 
-## Post-Merge Monitoring
-
-A scheduled job monitors the scaling metrics drift, outputting reports to `reports/monitoring/agent-scaling-trend.json`.
-Detects token cost drift, coordination overhead drift, and success rate drop.
+## Metrics Dashboard
+Review `reports/agent-scaling/metrics.json` to monitor trends.

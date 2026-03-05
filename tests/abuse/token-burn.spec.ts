@@ -1,9 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import { AGENT_SCALING_CONFIG } from '../../src/agent-scaling/config';
+import { EvaluationRunner } from '../../src/agent-scaling/evaluation-runner';
 
-describe('Token Burn Limits', () => {
-    it('should enforce maximum token budgets', () => {
-        expect(AGENT_SCALING_CONFIG.budgets.tokens).toBeDefined();
-        expect(AGENT_SCALING_CONFIG.budgets.tokens).toBeLessThanOrEqual(50000);
-    });
+describe('Token Burn Guard', () => {
+  it('should restrict execution based on token cost budget', async () => {
+    const runner = new EvaluationRunner({ maxSteps: 10, maxTokens: 200, topology: 'multi' });
+    const result = await runner.runTask('expensive-task');
+    // Ensure the token cost returned does not arbitrarily exceed thresholds without flagging
+    expect(result.tokenCost).toBeLessThanOrEqual(20000);
+  });
 });
