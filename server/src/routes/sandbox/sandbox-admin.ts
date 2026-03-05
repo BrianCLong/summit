@@ -14,6 +14,7 @@ import { AuthorizationServiceImpl } from '../../services/AuthorizationService.js
 import { sandboxManager } from '../../sandbox/SandboxManager.js';
 import { Principal } from '../../types/identity.js';
 import logger from '../../utils/logger.js';
+import { firstStringOr } from '../../utils/http-param.js';
 
 const router = express.Router();
 const authz = new AuthorizationServiceImpl();
@@ -165,8 +166,8 @@ router.get(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const envelope = sandboxManager.getSandbox((id as string));
+      const id = firstStringOr(req.params.id, '');
+      const envelope = sandboxManager.getSandbox(id);
 
       if (!envelope.data) {
         res.status(404).json({ error: 'Sandbox not found' });
@@ -192,10 +193,10 @@ router.put(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
       const { name, policies, testData, limits } = req.body;
 
-      const envelope = await sandboxManager.updateSandbox((id as string), {
+      const envelope = await sandboxManager.updateSandbox(id, {
         name,
         policies,
         testData,
@@ -226,8 +227,8 @@ router.delete(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
-      const envelope = sandboxManager.deleteSandbox((id as string));
+      const id = firstStringOr(req.params.id, '');
+      const envelope = sandboxManager.deleteSandbox(id);
 
       if (!envelope.data.deleted) {
         res.status(404).json({ error: 'Sandbox not found' });
@@ -257,7 +258,7 @@ router.post(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
       const { name, description, actor, action, resource, context, expectedVerdict } = req.body;
 
       if (!name || !actor || !action || !resource) {
@@ -267,7 +268,7 @@ router.post(
         return;
       }
 
-      const envelope = sandboxManager.addScenario((id as string), {
+      const envelope = sandboxManager.addScenario(id, {
         name,
         description,
         actor,
@@ -300,11 +301,11 @@ router.post(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
       const { scenarioId, policyId, contextOverrides } = req.body;
 
       const envelope = await sandboxManager.execute({
-        sandboxId: (id as string),
+        sandboxId: id,
         scenarioId,
         policyId,
         contextOverrides,
@@ -329,7 +330,7 @@ router.get(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { executionId } = req.params;
+      const executionId = firstStringOr(req.params.executionId, '');
       const envelope = sandboxManager.getExecution(executionId);
 
       if (!envelope.data) {
@@ -360,7 +361,7 @@ router.post(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = firstStringOr(req.params.id, '');
       const { policyId, policyData } = req.body;
 
       if (!policyData) {
@@ -368,7 +369,7 @@ router.post(
         return;
       }
 
-      const sandbox = sandboxManager.getSandbox((id as string));
+      const sandbox = sandboxManager.getSandbox(id);
       if (!sandbox.data) {
         res.status(404).json({ error: 'Sandbox not found' });
         return;
@@ -385,7 +386,7 @@ router.post(
         modifiedInSandbox: false,
       };
 
-      const updated = await sandboxManager.updateSandbox((id as string), {
+      const updated = await sandboxManager.updateSandbox(id, {
         policies: [...sandbox.data.policies, clonedPolicy],
       });
 

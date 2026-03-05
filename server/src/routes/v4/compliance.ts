@@ -28,6 +28,7 @@ import {
   SOXComplianceService,
   createSOXComplianceService,
 } from '../../compliance/frameworks/SOXControls.js';
+import { firstStringOr } from '../../utils/http-param.js';
 import { GovernanceVerdict } from '../../governance/types.js';
 
 // =============================================================================
@@ -223,13 +224,13 @@ router.get(
     let controls = [...ALL_HIPAA_CONTROLS];
 
     // Filter by category
-    if ((((req.query.category as string) as string) as string)) {
-      controls = controls.filter(c => c.category === (((req.query.category as string) as string) as string));
+    if (req.query.category) {
+      controls = controls.filter(c => c.category === req.query.category);
     }
 
     // Filter by automatable
-    if ((((req.query.automatable as string) as string) as string) !== undefined) {
-      const automatable = (((req.query.automatable as string) as string) as string) === 'true';
+    if (req.query.automatable !== undefined) {
+      const automatable = req.query.automatable === 'true';
       controls = controls.filter(c => c.automatable === automatable);
     }
 
@@ -378,7 +379,7 @@ router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment(req.params.id);
+    const assessment = await hipaaService!.getAssessment(firstStringOr(req.params.id, ''));
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -491,13 +492,13 @@ router.get(
     let controls = [...ALL_SOX_CONTROLS];
 
     // Filter by category
-    if ((((req.query.category as string) as string) as string)) {
-      controls = controls.filter(c => c.category === (((req.query.category as string) as string) as string));
+    if (req.query.category) {
+      controls = controls.filter(c => c.category === req.query.category);
     }
 
     // Filter by ITGC domain (subcategory)
-    if ((((req.query.domain as string) as string) as string)) {
-      controls = controls.filter(c => c.subcategory === (((req.query.domain as string) as string) as string));
+    if (req.query.domain) {
+      controls = controls.filter(c => c.subcategory === req.query.domain);
     }
 
     res.json(wrapResponse({
@@ -647,7 +648,7 @@ router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment(req.params.id);
+    const assessment = await soxService!.getAssessment(firstStringOr(req.params.id, ''));
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -778,14 +779,14 @@ router.get(
 
     // Filter by framework if specified
     let filteredMappings = mappings;
-    if ((((req.query.sourceFramework as string) as string) as string)) {
+    if (req.query.sourceFramework) {
       filteredMappings = filteredMappings.filter(
-        m => m.source.framework === (((req.query.sourceFramework as string) as string) as string)
+        m => m.source.framework === req.query.sourceFramework
       );
     }
-    if ((((req.query.targetFramework as string) as string) as string)) {
+    if (req.query.targetFramework) {
       filteredMappings = filteredMappings.filter(
-        m => m.target.framework === (((req.query.targetFramework as string) as string) as string)
+        m => m.target.framework === req.query.targetFramework
       );
     }
 

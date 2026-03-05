@@ -1,4 +1,4 @@
-import AjvModule from 'ajv';
+import AjvModule, { type ErrorObject } from 'ajv';
 import addFormatsModule from 'ajv-formats';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -32,7 +32,8 @@ export class FcrSchemaValidator {
       if (!ok) {
         failures.push(
           ...((validate.errors || []).map(
-            (error) => `${signal.entity_id}: ${error.instancePath} ${error.message}`,
+            (error: ErrorObject) =>
+              `${signal.entity_id}: ${error.instancePath} ${error.message}`,
           )),
         );
       }

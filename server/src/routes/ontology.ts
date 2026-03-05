@@ -5,6 +5,7 @@ import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryServ
 import { opaClient } from '../services/opa-client.js';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { OntologyAssertion } from '../governance/ontology/models.js';
+import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 const executionService = OntologyExecutionService.getInstance();
@@ -56,7 +57,7 @@ router.get('/schema', asyncHandler(async (req: Request, res: Response) => {
 
 // Get specific schema
 router.get('/schema/:version', asyncHandler(async (req: Request, res: Response) => {
-    const schema = registryService.getSchema((req.params.version as string));
+    const schema = registryService.getSchema(firstStringOr(req.params.version, ''));
     if (!schema) {
         return res.status(404).json({ error: 'Schema version not found' });
     }
@@ -74,7 +75,7 @@ router.post('/schema', asyncHandler(async (req: Request, res: Response) => {
     // OPA Check
     const opaInput = {
         user: {
-            id: user.id as string,
+            id: user.id,
             roles: user.roles || []
         },
         action: 'create_draft',
@@ -93,7 +94,7 @@ router.post('/schema', asyncHandler(async (req: Request, res: Response) => {
     }
 
     const { definition, changelog } = req.body;
-    const schema = await registryService.registerSchema(definition, changelog, user.id as string);
+    const schema = await registryService.registerSchema(definition, changelog, user.id);
     res.status(201).json(schema);
 }));
 
@@ -105,7 +106,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
         return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const schemaId = req.params.id;
+    const schemaId = firstStringOr(req.params.id, '');
     const schema = registryService.getSchemaById(schemaId);
 
     if (!schema) {
@@ -114,7 +115,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
 
     const opaInput = {
         user: {
-            id: user.id as string,
+            id: user.id,
             roles: user.roles || []
         },
         action: 'approve_schema',
@@ -138,7 +139,7 @@ router.post('/schema/:id/approve', asyncHandler(async (req: Request, res: Respon
          return res.status(500).json({ error: 'Policy check failed' });
     }
 
-    await registryService.activateSchema(schemaId, user.id as string);
+    await registryService.activateSchema(schemaId, user.id);
     res.json({ status: 'approved', schemaId });
 }));
 

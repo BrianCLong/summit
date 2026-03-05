@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { DefensivePsyOpsService } from '../services/DefensivePsyOpsService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
+import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 const psyOpsService = new DefensivePsyOpsService();
@@ -40,9 +41,9 @@ router.post('/scan', ensureAuthenticated, async (req, res) => {
 // Resolve threat
 router.post('/threats/:id/resolve', ensureAuthenticated, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = firstStringOr(req.params.id, '');
     const { notes } = req.body;
-    await psyOpsService.resolveThreat((id as string), notes || 'Resolved by user');
+    await psyOpsService.resolveThreat(id, notes || 'Resolved by user');
     res.json({ success: true });
   } catch (error: any) {
     res.status(500).json({ error: 'Resolution failed' });

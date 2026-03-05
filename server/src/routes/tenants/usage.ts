@@ -5,6 +5,7 @@ import { ensureAuthenticated } from '../../middleware/auth.js';
 import { buildRequestValidator } from '../../middleware/request-schema-validator.js';
 import { TenantValidator } from '../../middleware/tenantValidator.js';
 import PricingEngine from '../../services/PricingEngine.js';
+import { firstStringOr } from '../../utils/http-param.js';
 
 const router = Router({ mergeParams: true });
 
@@ -24,7 +25,7 @@ const validateRequest = buildRequestValidator({
 
 const enforceTenant = (req: any, res: any, next: any) => {
   try {
-    const tenantId = (String((req.params.tenantId as string)) as string);
+    const tenantId = firstStringOr(req.params.tenantId, '');
     const context = TenantValidator.validateTenantAccess(
       { user: req.user },
       tenantId,
@@ -55,7 +56,7 @@ router.get('/', ensureAuthenticated, validateRequest, enforceTenant, async (req,
     });
   }
 
-  const { tenantId } = req.params;
+  const tenantId = firstStringOr(req.params.tenantId, '');
   const { from, to, dimension, dimensions, limit } = req.query as Record<
     string,
     any
@@ -92,7 +93,7 @@ router.get('/', ensureAuthenticated, validateRequest, enforceTenant, async (req,
   try {
     let plan: any = null;
     try {
-      const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
+      const pricing = await PricingEngine.getEffectivePlan(tenantId);
       plan = pricing?.plan || null;
     } catch (error: any) {
       plan = null;
@@ -175,7 +176,7 @@ router.get(
   enforceTenant,
   async (req, res) => {
     const pool = getPostgresPool();
-    const { tenantId } = req.params;
+    const tenantId = firstStringOr(req.params.tenantId, '');
     const { from, to, dimension, dimensions, limit } = req.query as Record<
       string,
       any
@@ -214,7 +215,7 @@ router.get(
       client = await pool.connect();
       let plan: any = null;
       try {
-        const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
+        const pricing = await PricingEngine.getEffectivePlan(tenantId);
         plan = pricing?.plan || null;
       } catch (error: any) {
         plan = null;
@@ -270,7 +271,7 @@ router.get(
   enforceTenant,
   async (req, res) => {
     const pool = getPostgresPool();
-    const { tenantId } = req.params;
+    const tenantId = firstStringOr(req.params.tenantId, '');
     const { from, to, dimension, dimensions, limit } = req.query as Record<
       string,
       any
@@ -309,7 +310,7 @@ router.get(
       client = await pool.connect();
       let plan: any = null;
       try {
-        const pricing = await PricingEngine.getEffectivePlan((tenantId as string));
+        const pricing = await PricingEngine.getEffectivePlan(tenantId);
         plan = pricing?.plan || null;
       } catch (error: any) {
         plan = null;

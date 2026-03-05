@@ -27,6 +27,7 @@ import { NlToCypherService } from "../ai/nl-to-cypher/nl-to-cypher.service.js";
 import { meteringEmitter } from "../metering/emitter.js";
 import { promptRegistry } from "../prompts/registry.js";
 import { tracer } from "../observability/tracing.js";
+import { v4 as uuidv4 } from "uuid";
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -705,7 +706,7 @@ export class GraphRAGQueryService {
    * Capture a step in the glass-box run
    */
   private async captureStep(runId: string, description: string): Promise<string> {
-    const stepId = require("uuid").v4();
+    const stepId = uuidv4();
     await this.glassBoxService.addStep(runId, {
       type: "tool_call",
       description,

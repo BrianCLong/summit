@@ -1,9 +1,8 @@
-import pino from 'pino';
-import fs from 'fs';
-import path from 'path';
+import pinoModule from 'pino';
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
 import { correlationEngine } from '../lib/telemetry/correlation-engine.js';
+const pino = (pinoModule as any).default || pinoModule;
 
 // AsyncLocalStorage for correlation ID propagation
 export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
@@ -24,19 +23,6 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
-let fileStream: fs.WriteStream | null = null;
-if (process.env.LOG_FILE_PATH) {
-  try {
-    const logDir = path.dirname(process.env.LOG_FILE_PATH);
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-    }
-    fileStream = fs.createWriteStream(process.env.LOG_FILE_PATH, { flags: 'a' });
-  } catch (err) {
-    console.error('Failed to create log file stream:', err);
-  }
-}
-
 const stream = {
   write: (msg: string) => {
     if (msg.trim().startsWith('{')) {
@@ -46,9 +32,6 @@ const stream = {
       } catch (e: any) {}
     }
     process.stdout.write(msg);
-    if (fileStream) {
-      fileStream.write(msg);
-    }
   },
 };
 

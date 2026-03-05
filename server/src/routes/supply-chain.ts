@@ -4,6 +4,7 @@ import { SBOMParser } from '../supply-chain/SBOMParser.js';
 import { VulnerabilityService } from '../supply-chain/VulnerabilityService.js';
 import { ContractAnalyzer } from '../supply-chain/ContractAnalyzer.js';
 import { SupplyChainRiskEngine } from '../supply-chain/SupplyChainRiskEngine.js';
+import { firstStringOr } from '../utils/http-param.js';
 
 const router = Router();
 
@@ -31,7 +32,7 @@ router.post('/vendors', async (req: Request, res: Response) => {
 });
 
 router.get('/vendors/:id', async (req: Request, res: Response) => {
-  const vendor = await vendorService.getVendor((req.params.id as string));
+  const vendor = await vendorService.getVendor(firstStringOr(req.params.id, ''));
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
   res.json(vendor);
 });
@@ -45,19 +46,19 @@ router.get('/vendors', async (req: Request, res: Response) => {
  * SBOM Upload & Analysis
  */
 router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = firstStringOr(req.params.id, '');
   const { sbomJson, productName, version } = req.body;
 
-  const vendor = await vendorService.getVendor((id as string));
+  const vendor = await vendorService.getVendor(id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 
   try {
-    const sbom = await sbomParser.parse(sbomJson, (id as string), productName, version);
+    const sbom = await sbomParser.parse(sbomJson, id, productName, version);
     const vulns = await vulnService.scanComponents(sbom.components);
     sbom.vulnerabilities = vulns;
 
-    if (!sbomStore[((id as string) as string)]) sbomStore[((id as string) as string)] = [];
-    sbomStore[(id as string)].push(sbom);
+    if (!sbomStore[id]) sbomStore[id] = [];
+    sbomStore[id].push(sbom);
 
     res.status(201).json({ sbom, vulnerabilityCount: vulns.length });
   } catch (error: any) {
@@ -69,15 +70,15 @@ router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
  * Contract Analysis
  */
 router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = firstStringOr(req.params.id, '');
   const { contractText } = req.body;
 
-  const vendor = await vendorService.getVendor((id as string));
+  const vendor = await vendorService.getVendor(id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 
   try {
-    const analysis = await contractAnalyzer.analyze(contractText, (id as string));
-    contractStore[(id as string)] = analysis;
+    const analysis = await contractAnalyzer.analyze(contractText, id);
+    contractStore[id] = analysis;
     res.status(201).json(analysis);
   } catch (error: any) {
     res.status(500).json({ error: 'Contract analysis failed' });
@@ -88,12 +89,12 @@ router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
  * Risk Assessment
  */
 router.get('/vendors/:id/risk', async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const vendor = await vendorService.getVendor((id as string));
+  const id = firstStringOr(req.params.id, '');
+  const vendor = await vendorService.getVendor(id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 
-  const sboms = sbomStore[(id as string)] || [];
-  const contract = contractStore[(id as string)];
+  const sboms = sbomStore[id] || [];
+  const contract = contractStore[id];
 
   const score = riskEngine.calculateScore(vendor, sboms, contract);
   res.json(score);
