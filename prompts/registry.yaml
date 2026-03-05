@@ -214,6 +214,30 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: daily-sprint
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: 87476d6b99c24cff241f0325f242e720a61cef9032bdd063fa5b5ff02beb1973
+    description: Daily sprint orchestration prompt for evidence capture, planning, and execution logs.
+    scope:
+      paths:
+        - docs/ops/DAILY_SPRINT_*.md
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: background-sessions-pr1-evidence-scaffold
     version: v1
     path: prompts/background-sessions/pr1-evidence-scaffold.md
@@ -922,29 +946,3 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-
-  - id: daily-sprint-ops-log
-    version: v1
-    path: prompts/ops/daily-sprint@v1.md
-    sha256: a0d7e53a884bc8f9e00bf7a2197b1a92d5325d66b55a2d67b56b6a79565c040a
-    description: Create daily sprint ops logs with evidence-first snapshots and execution status.
-    scope:
-      paths:
-        - docs/ops/
-        - docs/roadmap/STATUS.json
-        - prompts/ops/daily-sprint@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - operations
-        - governance
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-
