@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added golden-main stabilization and PR conveyor governance artifacts for CI-first backlog reduction.",
+  "last_updated": "2026-02-23T02:23:36Z",
+  "revision_note": "Daily sprint 2026-02-23 evidence refresh; live GH scans restored; PR #18569 test remains blocked by worktree dependency install instability.",
   "initiatives": [
-    {
-      "id": "golden-main-pr-conveyor",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Defined golden-main stabilization playbook and automated stale PR triage plan generation (close >180d, warn 90-180d, keep <90d)."
-    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
