@@ -1,0 +1,11 @@
+--- ops/docker-compose.yml
++++ ops/docker-compose.yml
+@@ -82,7 +82,7 @@
+       - PUID=1000
+       - PGID=1000
+
+   opa:
+-    image: openpolicyagent/opa:0.68.0-rootless
++    image: openpolicyagent/opa:0.68.0-debug
+     ports:
+       - "8181:8181"
