@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { isMac } from '@/lib/utils';
+import { Kbd } from '@/components/ui/Kbd';
 
 import { RunSummary, RunTasks, RunOutputs } from './MaestroRunConsoleParts';
 
@@ -126,9 +126,7 @@ export const MaestroRunConsole: React.FC<MaestroRunConsoleProps> = ({
                     </Button>
                   )}
                   <span className="text-[10px] text-slate-500 hidden sm:inline-block mr-1">
-                    <kbd className="font-sans border border-slate-700 rounded px-1.5 py-0.5 text-[10px] bg-slate-900/50 text-slate-400 shadow-sm">
-                      {isMac ? '⌘' : 'Ctrl'}+Enter
-                    </kbd>
+                    <Kbd keys={['mod', 'Enter']} />
                   </span>
                   <Button
                     type="submit"

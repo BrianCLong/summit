@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: intelgraph-canary
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/BrianCLong/summit.git
+    targetRevision: main
+    path: helm/intelgraph
+    helm:
+      valueFiles:
+        - values.yaml
+        - values/canary.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: intelgraph
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+    - ApplyOutOfSyncOnly=true
+  revisionHistoryLimit: 5
