@@ -1,3 +1,5 @@
+import { jest } from '@jest/globals';
+
 const mockRedis = {
   get: jest.fn(() => Promise.resolve(null)),
   set: jest.fn(() => Promise.resolve('OK')),
@@ -26,11 +28,10 @@ const mockRedis = {
   removeListener: jest.fn(),
 };
 
-class Redis {
+export class Redis {
   constructor() {
     Object.assign(this, mockRedis);
   }
 }
 
-module.exports = Redis;
-module.exports.default = Redis;
+export default Redis;

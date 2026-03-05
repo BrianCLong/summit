@@ -24,7 +24,7 @@ const validateRequest = buildRequestValidator({
 
 const enforceTenant = (req: any, res: any, next: any) => {
   try {
-    const tenantId = req.params.tenantId;
+    const tenantId = (req.params.tenantId as string);
     const context = TenantValidator.validateTenantAccess(
       { user: req.user },
       tenantId,

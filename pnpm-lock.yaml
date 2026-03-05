@@ -156,6 +156,12 @@ importers:
       '@semantic-release/npm':
         specifier: ^12.0.2
         version: 12.0.2(semantic-release@24.2.9(typescript@5.9.3))
+      '@types/hapi__catbox':
+        specifier: ^12.1.0
+        version: 12.1.0
+      '@types/hapi__shot':
+        specifier: ^6.0.0
+        version: 6.0.0
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
@@ -14696,6 +14702,9 @@ importers:
       ts-node:
         specifier: 10.9.2
         version: 10.9.2(@swc/core@1.15.3(@swc/helpers@0.5.17))(@types/node@20.19.27)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

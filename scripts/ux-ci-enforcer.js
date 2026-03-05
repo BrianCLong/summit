@@ -49,7 +49,7 @@ class UXCIEnforcer {
         console.log(`   File: ${violation.file}`);
         console.log(`   Severity: ${violation.severity}\n`);
       });
-      
+
       console.log('⚠️  UX Violations detected! PR/Commit blocked.');
       process.exit(1);
     } else {
@@ -60,14 +60,14 @@ class UXCIEnforcer {
 
   validateAccessibilityCompliance() {
     // Check for accessibility violations in JSX/TSX files
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
+    const jsxFiles = this.changes.filter(file =>
+      (file.endsWith('.jsx') || file.endsWith('.tsx')) &&
       fs.existsSync(file)
     );
 
     jsxFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8');
-      
+
       // Check for missing alt attributes in images
       const imgWithoutAlt = /<img(?!\s+alt=)[^>]*>/g;
       const matches = content.match(imgWithoutAlt);
@@ -96,14 +96,14 @@ class UXCIEnforcer {
 
   validateCriticalActionPattern() {
     // Check for critical actions without proper confirmation
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
+    const jsxFiles = this.changes.filter(file =>
+      (file.endsWith('.jsx') || file.endsWith('.tsx')) &&
       fs.existsSync(file)
     );
 
     jsxFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8');
-      
+
       // Look for destructive operations without confirmation
       const destructiveActions = [
         /delete/i,
@@ -113,7 +113,7 @@ class UXCIEnforcer {
         /clear/i,
         /reset/i
       ];
-      
+
       for (const pattern of destructiveActions) {
         if (pattern.test(content) && !this.hasConfirmPattern(content)) {
           this.violations.push({
@@ -134,19 +134,19 @@ class UXCIEnforcer {
 
   validateDesignSystemConsistency() {
     // Check for mixed design system usage
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
+    const jsxFiles = this.changes.filter(file =>
+      (file.endsWith('.jsx') || file.endsWith('.tsx')) &&
       fs.existsSync(file)
     );
 
     jsxFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8');
-      
+
       // Check for mixed design system imports
       const hasMui = /@mui\/material/.test(content);
       const hasRadix = /@radix-ui/.test(content);
       const hasTailwind = /className=.*tw-/.test(content) || /className=.*\s+bg-/.test(content);
-      
+
       if (hasMui && (hasRadix || hasTailwind)) {
         this.violations.push({
           type: 'DESIGN_SYSTEM',
@@ -160,19 +160,19 @@ class UXCIEnforcer {
 
   validateInformationHierarchy() {
     // Check for dashboard information overload
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
+    const jsxFiles = this.changes.filter(file =>
+      (file.endsWith('.jsx') || file.endsWith('.tsx')) &&
       fs.existsSync(file) &&
       (file.includes('dashboard') || file.includes('Dashboard'))
     );
 
     jsxFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8');
-      
+
       // Check for excessive metrics/components in dashboards
       // Count number of visual components
       const componentCount = (content.match(/<\w+(?!\s+className=.*simplified)/g) || []).length;
-      
+
       if (componentCount > 10) {  // Arbitrary threshold, adjust as needed
         this.violations.push({
           type: 'INFO_HIERARCHY',
@@ -186,14 +186,14 @@ class UXCIEnforcer {
 
   validateTrustBoundaries() {
     // Check for oversimplified trust indicators
-    const jsxFiles = this.changes.filter(file => 
-      (file.endsWith('.jsx') || file.endsWith('.tsx')) && 
+    const jsxFiles = this.changes.filter(file =>
+      (file.endsWith('.jsx') || file.endsWith('.tsx')) &&
       fs.existsSync(file)
     );
 
     jsxFiles.forEach(file => {
       const content = fs.readFileSync(file, 'utf8');
-      
+
       // Look for simple trust indicators without detail
       if (/(✅ Attested|trusted|secure)/i.test(content) && !this.hasTrustDetail(content)) {
         this.violations.push({

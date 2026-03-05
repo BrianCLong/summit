@@ -31,7 +31,7 @@ router.post('/vendors', async (req: Request, res: Response) => {
 });
 
 router.get('/vendors/:id', async (req: Request, res: Response) => {
-  const vendor = await vendorService.getVendor(req.params.id);
+  const vendor = await vendorService.getVendor((req.params.id as string));
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
   res.json(vendor);
 });

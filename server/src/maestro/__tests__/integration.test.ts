@@ -19,7 +19,7 @@ describe('Maestro Integration Tests', () => {
 
     // Create test run
     const result = await pool.query(
-      `INSERT INTO run (id, runbook, status, started_at) 
+      `INSERT INTO runs (id, runbook, status, started_at)
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
@@ -315,7 +315,7 @@ describe('Maestro Integration Tests', () => {
 // Additional test utilities
 export function createTestRun(runbook: string = 'test-runbook') {
   return getPostgresPool().query(
-    `INSERT INTO run (id, runbook, status, started_at) 
+    `INSERT INTO runs (id, runbook, status, started_at)
      VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
      RETURNING id`,
     [runbook],
