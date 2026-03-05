@@ -16,6 +16,7 @@ permissions:
 
 jobs:
   parity:
+    if: ${{ github.repository == 'BrianCLong/summit' }}
     name: Parity (${{ matrix.cloud }})
     runs-on: ubuntu-latest
     timeout-minutes: 30

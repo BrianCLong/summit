@@ -23,7 +23,7 @@ services:
       - "7474:7474"
       - "7687:7687"
     healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || ex" + "it 1"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || sh -c 'exit 1'"]
       interval: 5s
       timeout: 5s
       retries: 5
