@@ -1,5 +1,30 @@
 version: 1
 prompts:
+  - id: daily-sprint-automation
+    version: v1
+    path: prompts/automation/daily-sprint@v1.md
+    sha256: e91ab2ab0ce121806b98e0b5f36b4068870a0aa80f3e9dbc891f539613611e67
+    description: Run the Summit daily sprint automation with evidence-first logging and merge-ready outputs.
+    scope:
+      paths:
+        - docs/ops/
+        - docs/roadmap/STATUS.json
+        - prompts/automation/daily-sprint@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - ops
+        - automation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: saas-crash-2026-positioning-pack
     version: v1
     path: prompts/positioning/saas-crash-2026@v1.md
@@ -205,30 +230,6 @@ prompts:
       domains:
         - governance
         - documentation
-    verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
-  - id: daily-sprint
-    version: v1
-    path: prompts/automation/daily-sprint@v1.md
-    sha256: 87476d6b99c24cff241f0325f242e720a61cef9032bdd063fa5b5ff02beb1973
-    description: Daily sprint orchestration prompt for evidence capture, planning, and execution logs.
-    scope:
-      paths:
-        - docs/ops/DAILY_SPRINT_*.md
-        - docs/roadmap/STATUS.json
-        - prompts/automation/daily-sprint@v1.md
-        - prompts/registry.yaml
-      domains:
-        - documentation
-        - governance
-        - operations
     verification:
       tiers_required:
         - C
