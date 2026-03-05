@@ -2,6 +2,11 @@ name: PR Preview Cleanup
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     types: [closed]
   schedule:
     - cron: '0 */6 * * *'

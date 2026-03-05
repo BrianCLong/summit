@@ -12,6 +12,11 @@ on:
       - ".github/workflows/codedata.yml"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "codegen/**"
       - "generated/**"

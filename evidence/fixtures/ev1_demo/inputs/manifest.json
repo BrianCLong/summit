@@ -1,0 +1,10 @@
+{
+  "tenant": "demo-corp",
+  "pipeline": "brand-takedown",
+  "pipeline_semver": "1.0.0",
+  "inputs": {
+    "target_brand": "Acme Corp",
+    "domains": ["acmecorp-login.com"]
+  },
+  "inputs_sha256": "dummyhash12345"
+}

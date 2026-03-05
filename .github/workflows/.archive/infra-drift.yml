@@ -3,6 +3,11 @@ name: Infra Drift Risk
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "infra/**"
       - ".github/workflows/infra-drift.yml"
@@ -29,7 +34,7 @@ env:
 jobs:
   drift:
     name: Drift – plan & risk
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.mx.outputs.matrix }}
@@ -55,8 +60,8 @@ jobs:
 
       - name: Install OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin
           sudo mv opa /usr/local/bin/opa
 
       - name: Generate workspace matrix (rollout-aware)
@@ -70,7 +75,7 @@ jobs:
 
   plan:
     name: Plan (${{ matrix.ws }})
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
+    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     needs: [drift]
     strategy:
@@ -96,8 +101,8 @@ jobs:
 
       - name: OPA
         run: |
-          curl -L -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
-          chmod +x opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/latest/opa_linux_amd64_static
+          chmod +x opa-bin
           sudo mv opa /usr/local/bin/opa
 
       - name: Terraform init

@@ -1,0 +1,48 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-02-27T00:51:16Z",
+  "repository": "BrianCLong/summit",
+  "branch": "main",
+  "policy_version": "2.1.0",
+  "mode": "plan",
+  "api_accessible": false,
+  "api_error": "API error: ./scripts/release/reconcile_branch_protection.sh: line 223: gh: command not found",
+  "needs_reconciliation": "unknown",
+  "summary": {
+    "add_count": 0,
+    "remove_count": 0,
+    "skipped_add_count": 0,
+    "skipped_remove_count": 0
+  },
+  "actions": {
+    "add_required_checks": [],
+    "remove_required_checks": []
+  },
+  "skipped_due_to_exceptions": {
+    "add": [],
+    "remove": []
+  },
+  "current_state": {
+    "policy_checks": [
+  "CI Core Gate ✅",
+  "Release Readiness Gate",
+  "SOC Controls",
+  "Unit Tests",
+  "Workflow Validity Check",
+  "gate",
+  "meta-gate",
+  "test (20.x)"
+],
+    "github_checks": []
+  },
+  "target_state": [
+  "CI Core Gate ✅",
+  "Release Readiness Gate",
+  "SOC Controls",
+  "Unit Tests",
+  "Workflow Validity Check",
+  "gate",
+  "meta-gate",
+  "test (20.x)"
+]
+}
