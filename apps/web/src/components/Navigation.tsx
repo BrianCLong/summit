@@ -26,7 +26,6 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useRbac } from '@/hooks/useRbac'
 import type { User } from '@/types'
 import { cn, isMac } from '@/lib/utils'
-import { Kbd } from '@/components/ui/Kbd'
 
 interface NavigationProps {
   user: User | null
@@ -46,6 +45,13 @@ const navItems: NavItem[] = [
     name: 'Explore',
     href: '/explore',
     icon: Search as React.ComponentType<{ className?: string }>,
+    resource: 'investigations',
+    action: 'read',
+  },
+  {
+    name: 'Investigations',
+    href: '/investigations',
+    icon: FileText as React.ComponentType<{ className?: string }>,
     resource: 'investigations',
     action: 'read',
   },
@@ -206,7 +212,9 @@ export function Navigation({ user }: NavigationProps) {
         >
           <Command className="h-4 w-4 mr-2" />
           Search...
-          <Kbd className="ml-auto">mod+K</Kbd>
+          <kbd className="pointer-events-none ml-auto inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>K
+          </kbd>
         </Button>
       </div>
 
@@ -215,21 +223,21 @@ export function Navigation({ user }: NavigationProps) {
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2">
           Intelligence
         </div>
-        {navItems.slice(0, 3).map(item => (
+        {navItems.slice(0, 4).map(item => (
           <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Dashboards
         </div>
-        {navItems.slice(3, 7).map(item => (
+        {navItems.slice(4, 8).map(item => (
           <NavItemComponent key={item.href} item={item} user={user} />
         ))}
 
         <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 py-2 mt-6">
           Platform
         </div>
-        {navItems.slice(7).map(item => (
+        {navItems.slice(8).map(item => (
           <NavItemComponent key={item.href} item={item} user={user} />
         ))}
       </div>
