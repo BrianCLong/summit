@@ -9,8 +9,7 @@ import cors from 'cors';
 import compression from 'compression';
 import hpp from 'hpp';
 import pino from 'pino';
-import pinoHttpModule from 'pino-http';
-const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
+import pinoHttp from 'pino-http';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
@@ -224,6 +223,19 @@ export const createApp = async () => {
     req.log = appLogger;
     next();
   });
+
+  // Enable structured HTTP logging for OpenTelemetry correlation
+  app.use(pinoHttp({
+    logger: appLogger,
+    autoLogging: {
+      ignore: (req) => {
+        if (req.url === '/health' || req.url === '/metrics') {
+          return true;
+        }
+        return false;
+      }
+    }
+  }));
   app.use(requestProfilingMiddleware);
 
   app.use(
@@ -294,7 +306,7 @@ export const createApp = async () => {
           console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
-            email: 'dev@intelgraph.local',
+            email: 'dev-at-intelgraph.local',
             role: 'admin',
             tenantId: 'global',
             id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
