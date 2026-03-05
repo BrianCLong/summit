@@ -1,0 +1,41 @@
+tools:
+  - id: figma_ai
+    name: Figma AI
+    capabilities: [layout_generation]
+    evidence: ITEM:CLAIM-01
+  - id: uizard
+    name: Uizard
+    capabilities: [text_to_wireframe]
+    evidence: ITEM:CLAIM-02
+  - id: mockplus_ai
+    name: Mockplus AI
+    capabilities: [rapid_prototyping]
+    evidence: ITEM:CLAIM-03
+  - id: visily
+    name: Visily
+    capabilities: [ui_generation]
+    evidence: ITEM:CLAIM-04
+  - id: canva_magic_design
+    name: Canva Magic Design
+    capabilities: [mockup_assistance]
+    evidence: ITEM:CLAIM-05
+  - id: framer_ai
+    name: Framer AI
+    capabilities: [prompt_site_generation]
+    evidence: ITEM:CLAIM-06
+  - id: galileo_ai
+    name: Galileo AI
+    capabilities: [prompt_ui_generation]
+    evidence: ITEM:CLAIM-07
+  - id: ux_pilot
+    name: UX Pilot
+    capabilities: [ux_flow_assistance]
+    evidence: ITEM:CLAIM-08
+  - id: designs_ai
+    name: Designs.ai
+    capabilities: [ai_design_tooling]
+    evidence: ITEM:CLAIM-09
+  - id: khroma
+    name: Khroma
+    capabilities: [color_selection]
+    evidence: ITEM:CLAIM-10
