@@ -1,0 +1,11 @@
+---- WAVE BOARD (base=main) ----
+CONFLICTING:
+#1025 fix: resolve memory leak in worker [fix/mem-leak]
+
+REVIEW_REQUIRED:
+#1024 feat(platform): new auth provider [feat/auth-provider]
+#1025 fix: resolve memory leak in worker [fix/mem-leak]
+
+FAILURE / PENDING (inspect /tmp/pr_checks.txt):
+1:===PR 1024===
+3:===PR 1025===
