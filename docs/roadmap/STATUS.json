@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T08:04:00Z",
-  "revision_note": "Daily sprint: scoped PR 18373 by reverting lockfile churn; roadmap status unchanged.",
+  "last_updated": "2026-03-05T00:00:00Z",
+  "revision_note": "Added summit-threat-map V2 package scaffold with ingestion, risk materialization contracts, tile/drilldown endpoints, and aggregate-only map UI defaults.",
   "initiatives": [
+    {
+      "id": "summit-threat-map-v2",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented Shodan/Shadowserver normalization pipeline, H3 risk rollup contracts, tile/drilldown API surface, and aggregate-only map component with evidence sidebar."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
