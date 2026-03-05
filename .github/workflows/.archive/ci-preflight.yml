@@ -37,17 +37,29 @@ env:
 
 jobs:
   validate-compose:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Validate Docker Compose Config
         run: touch .env && docker compose -f docker-compose.dev.yaml config
 
   verify-server-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -64,9 +76,15 @@ jobs:
         run: pnpm -C server build
 
   verify-gateway-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Build Gateway Docker Image
         run: docker compose -f docker-compose.dev.yaml build api-gateway

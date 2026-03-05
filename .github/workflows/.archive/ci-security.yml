@@ -105,6 +105,12 @@ jobs:
         language: [javascript, python]
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Initialize CodeQL
         uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
@@ -126,6 +132,12 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Run Semgrep CI ruleset
@@ -157,6 +169,12 @@ jobs:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || secrets.snyk_token }}
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Ensure SNYK_TOKEN is configured
@@ -197,6 +215,12 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Install Trivy
         uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.0
       - name: Prepare report directory
@@ -232,6 +256,12 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Build server image for scanning
@@ -280,6 +310,12 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - uses: aquasecurity/setup-trivy@3fb12ec12f41e471780db15c232d5dd185dcb514 # v0.2.5
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
@@ -305,6 +341,12 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Install Checkov
         run: pip install --no-cache-dir checkov==3.2.23
       - name: Run Checkov across Terraform and Helm assets
@@ -335,6 +377,12 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.1.0
         with:
@@ -369,6 +417,12 @@ jobs:
       - opa-policy
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Install Helm
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.1.0
         with:
@@ -406,6 +460,12 @@ jobs:
     needs: context
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Execute baseline checks
         run: |
           chmod +x scripts/security/baseline-check.sh
@@ -426,6 +486,12 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4 # v4.1.7
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Prepare report directory
         run: mkdir -p "$REPORT_DIR"
       - name: Boot application stack
@@ -588,12 +654,18 @@ jobs:
 
   sigstore-verify:
     name: Sigstore bundle verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       # Demo: Verify cosign itself (if we could download it)
       # For now, we just download a dummy or use the action to verify a test artifact

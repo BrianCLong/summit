@@ -7,9 +7,15 @@ on:
 
 jobs:
   build-and-verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4

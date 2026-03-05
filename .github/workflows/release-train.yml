@@ -10,9 +10,15 @@ on:
 
 jobs:
   parity_audit:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Install tooling
         run: |
           sudo apt-get update
@@ -31,9 +37,15 @@ jobs:
         run: scripts/ci/secret_matrix_check.sh scripts/ci/configs/secrets.stage.json scripts/ci/configs/secrets.prod.json
 
   third_party_status:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Check provider status
         id: gate
         run: scripts/ci/provider_status_gate.sh scripts/ci/configs/providers.yaml
@@ -43,7 +55,7 @@ jobs:
   build_and_sign:
     needs: [parity_audit, third_party_status]
     if: ${{ always() && needs.third_party_status.outputs.ok == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       digest: ${{ steps.build.outputs.DIGEST }}
     steps:
@@ -91,7 +103,7 @@ jobs:
   sbom:
     name: Generate SBOM
     needs: build_and_sign
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     if: success()
 
     steps:
@@ -114,7 +126,7 @@ jobs:
 
   canary_rollout:
     needs: build_and_sign
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v6
@@ -151,18 +163,30 @@ jobs:
   finalize:
     name: Finalize Release (Dry Run)
     needs: [build_and_sign, sbom]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Step up 25% → 50% → 100%
         run: scripts/ci/release-train/progressive.sh --env=${{ inputs.target_env }} --digest=${{ needs.build_and_sign.outputs.digest }}
 
   post_deploy_verification:
     needs: finalize
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Docker Preflight Checks
+        run: |
+          docker --version
+          docker compose version
+          uname -r
       - name: Post-deploy probes (latency/error rates/log SLOs)
         run: scripts/ci/release-train/probes.sh --env=${{ inputs.target_env }} --mode=post --timeout=20m
       - name: Enforce rollback on SLO breach
