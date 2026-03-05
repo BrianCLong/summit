@@ -1,0 +1,5 @@
+risk_categories:
+  - lethal_autonomy
+  - targeting_support
+  - battlefield_decision_support
+threshold_default: 0.65

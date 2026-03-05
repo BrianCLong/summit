@@ -1,0 +1,29 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "instruction": { "type": "string" },
+    "output_a": { "type": "string" },
+    "output_b": { "type": "string" },
+    "preference": { "type": "string", "enum": ["A", "B", "tie"] },
+    "atomic_rubrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "criterion": { "type": "string" },
+          "score_a": { "type": "number" },
+          "score_b": { "type": "number" }
+        },
+        "required": ["criterion", "score_a", "score_b"]
+      }
+    },
+    "is_hard_sample": { "type": "boolean" },
+    "surface_bias_tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": ["id", "instruction", "output_a", "output_b", "preference", "atomic_rubrics"]
+}
