@@ -258,7 +258,7 @@ The dependency freeze check integrates with:
 ## References
 
 - [Release Ops Index](RELEASE_OPS_INDEX.md)
-- [RC Lockdown](rc-lockdown.yml)
+- RC Lockdown
 - [Dependency Audit](DEPENDENCY_AUDIT.md)
 - [Stabilization Report](STABILIZATION_REPORT.md)
 
