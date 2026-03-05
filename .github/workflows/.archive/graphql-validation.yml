@@ -27,11 +27,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Install dependencies
+        uses: pnpm/action-setup@v3
+        with:
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Build schema validation tools
@@ -269,11 +272,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
           cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3      - name: Install dependencies
+        uses: pnpm/action-setup@v3
+        with:
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Test sample queries

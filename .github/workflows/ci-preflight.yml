@@ -36,9 +36,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create dummy .env
-        run: touch .env
-
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
 
@@ -53,7 +50,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

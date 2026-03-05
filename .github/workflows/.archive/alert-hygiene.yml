@@ -42,14 +42,14 @@ jobs:
           python -c 'import yaml, json, sys; print(json.dumps({"catalog": yaml.safe_load(open("observability/alerts/catalog.yaml"))}))' > input.json
 
           # Evaluate policy
-          opa eval -i input.json -d .ci/policies/alerts.rego "data.policy.alerts.deny" --format json > result.json
+          ./opa-bin eval -i input.json -d .ci/policies/alerts.rego "data.policy.alerts.deny" --format json > result.json
 
           # Check for denials
           DENIALS=$(python -c 'import json; data=json.load(open("result.json")); print(len(data["result"][0]["expressions"][0]["value"]))')
 
           if [ "$DENIALS" -gt "0" ]; then
              echo "Policy check failed with $DENIALS violations:"
-             opa eval -i input.json -d .ci/policies/alerts.rego "data.policy.alerts.deny" --format pretty
+             ./opa-bin eval -i input.json -d .ci/policies/alerts.rego "data.policy.alerts.deny" --format pretty
              exit 1
           fi
           echo "Policy check passed."

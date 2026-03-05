@@ -46,7 +46,7 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # v4
-
+        with:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
 
@@ -59,20 +59,20 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v4
-
+        with:
           cache: 'pnpm'
           node-version: "20"
 
       - name: Setup Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5
-
+        with:
           go-version: "1.21"
 
       - name: Install Tools (OPA, Cosign, Syft, Grype)
         run: |
           # OPA
-          curl -L -o opa https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
-          chmod +x opa
+          curl -L -o opa-bin https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
+          chmod +x opa-bin
           sudo mv opa /usr/local/bin/
 
           # Cosign
@@ -99,7 +99,7 @@ jobs:
       # 2. Security: Secrets & Vulns
       - name: Run Trivy (Secrets)
         uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
-
+        with:
           scan-type: "fs"
           scan-ref: "."
           scanners: "secret"
@@ -139,7 +139,7 @@ jobs:
       - name: Upload Readiness Artifacts
         if: always()
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
-
+        with:
           name: ga-readiness-evidence
           path: |
             sbom.cdx.json
