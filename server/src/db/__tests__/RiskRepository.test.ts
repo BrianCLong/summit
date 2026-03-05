@@ -1,112 +1,75 @@
+
 import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-
-// ESM mocking
-jest.unstable_mockModule('../pg.js', () => ({
-  pg: {
-    transaction: jest.fn(),
-    oneOrNone: jest.fn(),
-    readMany: jest.fn(),
-    many: jest.fn(),
-  },
-}));
-
-const { RiskRepository } = await import('../repositories/RiskRepository.js');
-const { pg } = await import('../pg.js');
+import { RiskRepository } from '../repositories/RiskRepository.js';
+import { pg } from '../pg.js';
 
 describe('RiskRepository', () => {
   let repository: RiskRepository;
+  let mockTx: any;
 
   beforeEach(() => {
     repository = new RiskRepository();
+    mockTx = {
+      query: jest.fn().mockImplementation(async (sql: string, params: any[]) => {
+        if (sql.includes('INSERT INTO risk_scores')) {
+          return [{ id: 'score-1', tenant_id: 't1', entity_id: 'e1', score: 0.8 }];
+        }
+        if (sql.includes('INSERT INTO risk_signals')) {
+          // Return as many rows as were inserted if it's a batch, or just one
+          const rowsCount = sql.includes('VALUES') && sql.includes('), (')
+            ? params.length / 8
+            : 1;
+          return Array.from({ length: rowsCount }, (_, i) => ({ id: `sig-${i}` }));
+        }
+        return [];
+      })
+    };
+
+    // Mock pg.transaction to execute the callback with our mockTx
+    jest.spyOn(pg, 'transaction').mockImplementation(async (callback: any) => {
+      return await callback(mockTx);
+    });
+
     jest.clearAllMocks();
   });
 
-  describe('saveRiskScore', () => {
-    it('should insert signals in batches (verifying improvement)', async () => {
-      const mockTx = {
-        query: jest.fn(),
-      };
+  it('should save risk score and signals in batches (optimized behavior)', async () => {
+    const signals = Array.from({ length: 150 }, (_, i) => ({
+      type: `type-${i}`,
+      source: 'test',
+      value: 1,
+      weight: 0.1,
+      contributionScore: 0.1,
+      description: `desc-${i}`
+    }));
 
-      (pg.transaction as any).mockImplementation(async (callback: any) => {
-        return await callback(mockTx);
-      });
+    const input: any = {
+      tenantId: 't1',
+      entityId: 'e1',
+      entityType: 'Person',
+      score: 0.8,
+      level: 'high',
+      window: '24h',
+      modelVersion: '1.0',
+      rationale: 'test',
+      signals
+    };
 
-      // Mock score insert
-      mockTx.query.mockResolvedValueOnce([{
-        id: 'score-1',
-        tenant_id: 't1',
-        entity_id: 'e1',
-        entity_type: 'person',
-        score: '10',
-        level: 'low',
-        window: '24h',
-        model_version: '1.0',
-        rationale: 'test',
-        created_at: new Date()
-      }]);
+    await repository.saveRiskScore(input);
 
-      // Mock signal inserts (return a mock signal for each input row to avoid mapping errors)
-      mockTx.query.mockImplementation(async (query: string, params?: any[]) => {
-        if (query.includes('INSERT INTO risk_signals')) {
-          // If it's the old single insert
-          if (!query.includes('VALUES ($1, $2, $3, $4, $5, $6, $7, $8),')) {
-             return [{
-              id: 'sig-id',
-              risk_score_id: 'score-1',
-              type: 'test',
-              source: 'test',
-              value: '1',
-              weight: '1',
-              contribution_score: '1',
-              description: 'test',
-              detected_at: new Date()
-            }];
-          }
-          // If it's a batch insert (simplified mock)
-          return [{
-            id: 'sig-id',
-            risk_score_id: 'score-1',
-            type: 'test',
-            source: 'test',
-            value: '1',
-            weight: '1',
-            contribution_score: '1',
-            description: 'test',
-            detected_at: new Date()
-          }];
-        }
-        return [];
-      });
+    // Optimized: 1 (score) + 2 (signal batches: 100 + 50) = 3 calls
+    expect(mockTx.query).toHaveBeenCalledTimes(3);
 
-      const signals = Array(150).fill(null).map((_, i) => ({
-        type: 'test',
-        source: 'test',
-        value: 1,
-        weight: 1,
-        contributionScore: 1,
-        description: `sig ${i}`,
-        detectedAt: new Date(),
-      }));
+    // Verify first signal batch has 100 rows (100 * 8 params)
+    const firstBatch = mockTx.query.mock.calls.find((call: any) =>
+      call[0].includes('INSERT INTO risk_signals') && call[1].length === 800
+    );
+    expect(firstBatch).toBeDefined();
 
-      await repository.saveRiskScore({
-        tenantId: 't1',
-        entityId: 'e1',
-        entityType: 'person',
-        score: 10,
-        level: 'low',
-        window: '24h',
-        modelVersion: '1.0',
-        rationale: 'test',
-        signals,
-      });
-
-      const calls = (mockTx.query as jest.Mock).mock.calls;
-      const insertSignalsCalls = calls.filter(call => (call[0] as string).includes('INSERT INTO risk_signals'));
-
-      // Before optimization, this would be 150. After, it should be 2.
-      // We expect 2 batches for 150 signals with chunk size 100.
-      expect(insertSignalsCalls.length).toBe(2);
-      expect(mockTx.query).toHaveBeenCalledTimes(3);
-    });
+    // Verify second signal batch has 50 rows (50 * 8 params)
+    const secondBatch = mockTx.query.mock.calls.find((call: any) =>
+      call[0].includes('INSERT INTO risk_signals') && call[1].length === 400
+    );
+    expect(secondBatch).toBeDefined();
   });
 });
