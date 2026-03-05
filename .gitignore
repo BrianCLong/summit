@@ -364,12 +364,7 @@ release-assets/
 evidence-staging/
 *.txt
 tmp-test/
-.worktrees/
-_worktrees/
-
-# Evidence outputs (governed artifacts)
-!evidence/out/
-!evidence/out/**
+\n_worktrees/\n\n# Evidence outputs (governed artifacts)\n!evidence/out/\n!evidence/out/**
 .pnpm-store/
 dist-isolated/
 services/agent-runtime-restored/
@@ -383,5 +378,11 @@ packages/osint-collector/src/types/*.js
 packages/osint-collector/src/utils/*.js
 evidence/skills/
 *.js.map
-.worktrees/
-_worktrees/
+node_modules/
+coverage/
+__pycache__/
+.evidence/
+node_modules/
+coverage/
+__pycache__/
+.evidence/

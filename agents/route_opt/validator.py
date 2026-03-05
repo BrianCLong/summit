@@ -13,6 +13,17 @@ SCHEMA_PATH = Path(__file__).resolve().parent / "schemas" / "route_plan.schema.j
 
 
 def validate_output(report: dict[str, Any]) -> None:
+    """Validate the route optimization report against the schema.
+
+    Uses 'route_plan.schema.json' to verify the structure and types
+    of the report. Raises ValueError if validation fails.
+
+    Args:
+        report: The report dictionary to validate.
+
+    Raises:
+        ValueError: If schema validation fails.
+    """
     with SCHEMA_PATH.open("r", encoding="utf-8") as handle:
         schema = json.load(handle)
 

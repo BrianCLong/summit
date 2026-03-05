@@ -24,11 +24,24 @@ OUTPUT = Path("artifacts/route_plan/drift_report.json")
 
 
 def _hash(payload: dict) -> str:
+    """Compute a stable hash for drift detection.
+
+    Args:
+        payload: Dictionary to hash.
+
+    Returns:
+        Hex string of the hash.
+    """
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def main() -> int:
+    """Entry point for drift monitoring.
+
+    Re-runs the planner with fixture inputs and compares the output hash
+    against the recorded stamp. Returns 1 if drift is detected, 0 otherwise.
+    """
     payload = json.loads(FIXTURE.read_text(encoding="utf-8"))
     replay_report = run(payload)
     replay_hash = _hash(replay_report)

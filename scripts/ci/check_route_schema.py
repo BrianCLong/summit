@@ -20,6 +20,11 @@ REPORT_PATH = Path("artifacts/route_plan/report.json")
 
 
 def main() -> int:
+    """Entry point for route schema validation.
+
+    Reads the generated report artifact and validates it against the schema.
+    Returns 0 on success, non-zero on failure.
+    """
     if not REPORT_PATH.exists():
         raise FileNotFoundError(f"Missing report artifact: {REPORT_PATH}")
 

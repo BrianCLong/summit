@@ -12,11 +12,30 @@ ARTIFACT_DIR = Path("artifacts/route_plan")
 
 
 def _stable_hash(payload: dict[str, Any]) -> str:
+    """Compute a deterministic SHA-256 hash of the payload.
+
+    Args:
+        payload: Dictionary to hash.
+
+    Returns:
+        Hex digest of the SHA-256 hash.
+    """
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def write_artifacts(report: dict[str, Any]) -> dict[str, Any]:
+    """Write route optimization report artifacts to disk.
+
+    Generates 'report.json', 'metrics.json', and 'stamp.json' in the
+    artifact directory. Ensures directory existence.
+
+    Args:
+        report: The route plan report dictionary.
+
+    Returns:
+        Dictionary containing paths to the written artifacts.
+    """
     ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
 
     report_path = ARTIFACT_DIR / "report.json"
