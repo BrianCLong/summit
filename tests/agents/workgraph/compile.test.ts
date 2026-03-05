@@ -1,15 +1,11 @@
 import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 import { compileWorkGraph } from "../../../src/agents/workgraph/compile";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 describe("WorkGraph Compiler", () => {
   it("should deterministically compile a spec into a WorkGraph", () => {
     // Read the golden fixture
-    const specPath = join(__dirname, "../../fixtures/specs/todo-app/spec.md");
+    const specPath = join(process.cwd(), "tests/fixtures/specs/todo-app/spec.md");
     const specContent = readFileSync(specPath, "utf-8");
 
     // Compile

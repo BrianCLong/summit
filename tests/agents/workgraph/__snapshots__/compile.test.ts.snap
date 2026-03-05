@@ -2,7 +2,7 @@
 
 exports[`WorkGraph Compiler should deterministically compile a spec into a WorkGraph 1`] = `
 {
-  "specHash": "5490b6d8c9affd24e9ae5ffb6c1c28f8c29d228bff274edc0a1d262c694e60f5",
+  "specHash": "b9a0e1b5d12ea4edc5e92379c32cd69e058fbbd86d57436789d96e3cd5c6108b",
   "tickets": [
     {
       "deps": [],
