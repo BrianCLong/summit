@@ -410,6 +410,12 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
 
+# --- Skill Evals ---
+
 eval-skills-changed:
-	@echo "Bypassing eval-skills-changed for CI"
-	@exit 0
+	@echo "Running changed skill evals..."
+	@pnpm exec tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all:
+	@echo "Running full skill eval suite..."
+	@pnpm exec tsx evals/runner/run_skill_suite.ts

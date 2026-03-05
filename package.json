@@ -101,6 +101,7 @@
     "db:knex:smoke": "knex migrate:down && knex migrate:up",
     "check:governance": "node scripts/check-governance.cjs",
     "ci:docs-governance": "node scripts/ci/verify_governance_docs.mjs",
+    "compliance:antigravity": "npm run ci:docs-governance",
     "ci:docs-governance:fix": "node scripts/ci/verify_governance_docs.mjs --fix",
     "ci:soc-report": "python3 scripts/evidence/generate_soc_report.py --evidence-dir dist/evidence/${GITHUB_SHA}",
     "ci:branch-protection:check": "node scripts/ci/check_branch_protection_drift.mjs",
