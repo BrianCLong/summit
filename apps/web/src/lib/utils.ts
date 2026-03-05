@@ -84,3 +84,7 @@ export function debounce<T extends (...args: any[]) => any>(
 export function generateId(): string {
   return Math.random().toString(36).substr(2, 9)
 }
+
+export const isMac =
+  typeof window !== 'undefined' &&
+  /Mac|iPod|iPhone|iPad/.test(navigator.platform)
