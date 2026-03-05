@@ -205,7 +205,7 @@ if (existsSync(SIG_FILE)) {
             const identityRegex = process.env.EXPECTED_IDENTITY_REGEX || '^https://github.com/BrianCLong/summit/.github/workflows/.*@.*$';
             const issuer = process.env.EXPECTED_OIDC_ISSUER || 'https://token.actions.githubusercontent.com';
 
-            const cmd = `cosign verify-blob --certificate-identity-regexp "${identityRegex}" --certificate-oidc-issuer "${issuer}" --signature "${SIG_FILE}" "${DATA_FILE}"`;
+            const cmd = `cosign verify-blob --use-signed-timestamps --certificate-identity-regexp "${identityRegex}" --certificate-oidc-issuer "${issuer}" --signature "${SIG_FILE}" "${DATA_FILE}"`;
 
             try {
                 if (process.env.STRICT_MODE && !process.env.CI) {

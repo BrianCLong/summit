@@ -178,7 +178,7 @@ jobs:
 
           IMAGE="${{ steps.image-uri.outputs.uri }}"
 
-          cosign verify "$IMAGE" \
+          cosign verify --use-signed-timestamps "$IMAGE" \
             --certificate-identity "${{ env.EXPECTED_OIDC_SUBJECT }}" \
             --certificate-oidc-issuer "${{ env.EXPECTED_OIDC_ISSUER }}"
 
