@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added Copilot Usage Metrics API (PR throughput + time-to-merge) subsumption initiative and evidence-governance plan.",
+  "last_updated": "2026-02-24T04:16:49Z",
+  "revision_note": "Daily sprint retry succeeded: PR #18633 opened with governance labels.",
   "initiatives": [
-    {
-      "id": "copilot-usage-metrics-api-2026-02-19",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Foundation + Innovation lane plan for GitHub Copilot Usage Metrics API delivery-impact fields (pull_request_throughput, time_to_merge) with governed evidence and rollback criteria."
-    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -180,7 +174,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -204,7 +198,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
