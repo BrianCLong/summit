@@ -63,7 +63,7 @@ router.get('/:jobId', async (req: Request, res: Response, next: NextFunction) =>
     const tenantId = getTenantId(req);
     const { jobId } = req.params;
 
-    const job = service.getJob(jobId, tenantId);
+    const job = service.getJob(jobId, ((tenantId as string) as string));
     if (!job) {
       res.status(404).json({ error: 'Job not found' });
       return;
