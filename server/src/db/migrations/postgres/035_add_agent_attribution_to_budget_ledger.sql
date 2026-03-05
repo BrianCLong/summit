@@ -64,7 +64,7 @@ BEGIN
         NOW(),
         NOW()
     ) RETURNING id INTO v_id;
-    
+
     RETURN v_id;
 END;
 $$ LANGUAGE plpgsql;

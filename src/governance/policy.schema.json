@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "effect": { "type": "string", "enum": ["allow", "deny", "require_approval"] },
+          "condition": {
+             "type": "object",
+             "properties": {
+                "minRewardScore": { "type": "number" },
+                "minRubricCoverage": { "type": "number" }
+             }
+          }
+        },
+        "required": ["id", "effect"]
+      }
+    }
+  },
+  "required": ["policies"]
+}

@@ -84,4 +84,3 @@ jobs:
           elif [ -f docker-compose.yml ]; then
             docker compose down -v || true
           fi
-

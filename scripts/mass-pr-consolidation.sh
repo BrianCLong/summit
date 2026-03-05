@@ -35,7 +35,7 @@ gh api "repos/$REPO/pulls?state=open&per_page=100" \
     
     if [ "$COMMIT_COUNT" -le 2 ]; then
       echo "  📝 Low commit count - closing as duplicate" | tee -a "$LOG_FILE"
-      
+
       gh pr comment "$PR_NUM" --body "🤖 **Absorption PR Consolidated**
 
 This orphan branch absorption PR is being closed as part of mass repository consolidation.
