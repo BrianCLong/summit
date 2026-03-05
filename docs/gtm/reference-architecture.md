@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Summit Reference Architecture
 
 **Version:** 1.0
