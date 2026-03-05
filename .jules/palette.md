@@ -39,3 +39,7 @@
 ## 2026-02-07 - Accessibility for Loading States
 **Learning:** Purely visual loading indicators (spinners) are invisible to screen readers unless they are explicitly marked as status regions. Using `aria-busy` on the container (like a button) and `role="status"` on the spinner provides a consistent and accessible experience for all users.
 **Action:** Always pair visual spinners with `role="status"` and `aria-label`, and use `aria-busy` on interactive elements to communicate that an operation is in progress.
+
+## 2025-02-15 - Decorative Icon Accessibility
+**Learning:** Icons used in `EmptyState` components are typically decorative as they accompany descriptive text. Leaving them visible to screen readers creates noise.
+**Action:** Use `aria-hidden="true"` on decorative icons in shared UI components to ensure screen readers focus on the meaningful content (title and description).
