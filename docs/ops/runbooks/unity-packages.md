@@ -1,15 +1,18 @@
-# Unity Package Scanning Runbook
+# Runbook: Unity Package Scan
 
 ## CI Failure Remediation
-1. Inspect `package-report.json` validation errors.
-2. Confirm dependency versions are strict `MAJOR.MINOR.PATCH`.
-3. Confirm scoped registries use HTTPS and approved scopes.
+
+1. Inspect `artifacts/package-report.json` for version and policy failures.
+2. Correct invalid SemVer or disallowed scope.
+3. Re-run scanner and verify deterministic output hash.
 
 ## Registry Outage Handling
-- Retry using cached package manifests.
-- If outage persists, defer merge pending registry restoration.
+
+- Keep policy gate deny-by-default.
+- Retry after registry restoration; do not downgrade HTTPS rules.
 
 ## Rollback
-- Revert the latest Unity package scan change.
-- Regenerate deterministic artifacts.
-- Re-run CI policy and test gates.
+
+1. Revert the Unity packaging PR.
+2. Remove generated artifacts from release bundle.
+3. Re-run CI quality gate.

@@ -1,13 +1,18 @@
 # Unity Package Data Handling
 
 ## Classification
-Unity package scan artifacts are internal engineering metadata.
 
-## Logging Prohibitions
-- Never log auth tokens
-- Never log private registry credentials
-- Never log absolute workstation paths
+Unity package manifests are configuration metadata and are treated as internal engineering data.
+
+## Logging Constraints
+
+Never log:
+
+- Authentication tokens
+- Private registry credentials
+- Absolute local filesystem paths
 
 ## Retention
-- Package reports: 30 days
-- Drift summaries: 90 days
+
+- `package-report.json`, `metrics.json`, `stamp.json`: 30 days
+- Drift trend data (future monitoring): 90 days
