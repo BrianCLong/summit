@@ -1,40 +1,21 @@
-# Repo Assumptions & Validation
+# Repo Assumptions Verification
 
-## Verified vs Assumed Directory List
+## Verified Structure
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+The following paths were verified during implementation:
 
-## CI Check Names (Exact)
+- `summit/` exists and contains Python runtime modules.
+- `summit/evidence/` exists with deterministic JSON writing helpers and schemas.
+- `tests/` exists and supports Python `pytest` tests.
+- `docs/roadmap/STATUS.json` exists and tracks active initiatives.
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+## Assumed / Not Yet Verified
 
-## Evidence Schema Conventions (Exact)
+The following itemized structure from the Copaw translation brief was not required for the minimal slice and remains unverified:
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+- `/pipelines`
+- `/ci` (as a top-level folder dedicated to this capability)
 
-## Must-Not-Touch List (Guardrails)
+## Net Action
 
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+MWS implementation was aligned to the existing verified Python package layout under `summit/` and `tests/`.
