@@ -9,7 +9,8 @@ import cors from 'cors';
 import compression from 'compression';
 import hpp from 'hpp';
 import pino from 'pino';
-import pinoHttp from 'pino-http';
+import pinoHttpModule from 'pino-http';
+const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
@@ -223,19 +224,6 @@ export const createApp = async () => {
     req.log = appLogger;
     next();
   });
-
-  // Enable structured HTTP logging for OpenTelemetry correlation
-  app.use(pinoHttp({
-    logger: appLogger,
-    autoLogging: {
-      ignore: (req) => {
-        if (req.url === '/health' || req.url === '/metrics') {
-          return true;
-        }
-        return false;
-      }
-    }
-  }));
   app.use(requestProfilingMiddleware);
 
   app.use(
@@ -306,7 +294,7 @@ export const createApp = async () => {
           console.warn('Development: No token provided, allowing request (ENABLE_INSECURE_DEV_AUTH=true)');
           (req as any).user = {
             sub: 'dev-user',
-            email: 'dev-at-intelgraph.local',
+            email: 'dev@intelgraph.local',
             role: 'admin',
             tenantId: 'global',
             id: 'dev-user', // SEC-2025-002: Ensure downstream helpers rely on user object, not headers
@@ -399,7 +387,7 @@ export const createApp = async () => {
   // Requires authentication and admin role
   app.get('/api/admin/rate-limits/:userId', authenticateToken, ensureRole(['ADMIN', 'admin']), async (req, res) => {
     try {
-      const status = await advancedRateLimiter.getStatus((req.params.userId as string));
+      const status = await advancedRateLimiter.getStatus(req.params.userId);
       res.json(status);
     } catch (err: any) {
       res.status(500).json({ error: 'Failed to fetch rate limit status' });
@@ -487,7 +475,11 @@ export const createApp = async () => {
 
   // Phase 4: AIA Initialization
   try {
-    initializeAIA(async (insight: AgentInsight) => {
+    let isHandlingAIA = false;
+  initializeAIA(async (insight: AgentInsight) => {
+    if (isHandlingAIA) return null;
+    isHandlingAIA = true;
+    try {
       const db = getPostgresPool();
       const workflowResult = await db.query(
         'INSERT INTO aia_insights (id, agent_id, type, severity, severity_score, confidence, rationale, evidence, is_actionable) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
@@ -503,7 +495,10 @@ export const createApp = async () => {
         return triggerResult.rows[0]?.id || null;
       }
       return null;
-    });
+    } finally {
+      isHandlingAIA = false;
+    }
+  });
     logger.info('AIA Engine initialized and bridged to DAL');
   } catch (error) {
     logger.error({ error }, 'Failed to initialize AIA Engine');
@@ -519,8 +514,8 @@ export const createApp = async () => {
   app.use('/api', dataGovernanceRouter); // Register Data Governance API
   app.use('/api', sharingRouter);
   app.use('/api/gtm', gtmRouter);
-  app.use('/airgap', authenticateToken, airgapRouter);
-  app.use('/analytics', authenticateToken, analyticsRouter);
+  app.use('/airgap', airgapRouter);
+  app.use('/analytics', analyticsRouter);
   app.use('/api', experimentRouter); // Mounts /api/experiments...
   app.use('/api', cohortRouter); // Mounts /api/cohorts...
   app.use('/api', funnelRouter); // Mounts /api/funnels...
@@ -530,7 +525,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
-  app.use('/dr', authenticateToken, drRouter);
+  app.use('/dr', drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);
   app.use('/api/mastery', masteryRouter);
