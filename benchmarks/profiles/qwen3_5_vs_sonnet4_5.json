@@ -1,0 +1,27 @@
+{
+  "name": "Qwen 3.5 Medium vs Claude Sonnet 4.5",
+  "description": "Comparative benchmark focusing on coding and reasoning.",
+  "models": [
+    "models.qwen.qwen3_5_medium.Qwen35MediumAdapter",
+    "models.anthropic.sonnet_4_5.Sonnet45Adapter"
+  ],
+  "tasks": [
+    {
+      "id": "code_gen_fibonacci",
+      "prompt": "Write a Python function to calculate the nth Fibonacci number.",
+      "expected_keywords": ["def fibonacci", "return"],
+      "weight": 1.0
+    },
+    {
+      "id": "code_gen_prime",
+      "prompt": "Write a Python function to check if a number is prime.",
+      "expected_keywords": ["def is_prime", "return", "range"],
+      "weight": 1.0
+    }
+  ],
+  "metrics": [
+    "latency_ms",
+    "tokens_used",
+    "keyword_match_accuracy"
+  ]
+}

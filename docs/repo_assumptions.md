@@ -1,26 +1,24 @@
-# Repository Assumptions for Design MCP Subsumption
+# Repo Assumptions vs Reality
 
-Status: **Assumed pending local verification**.
+## Assumed Structure (from Prompt)
+- summit/
+  - benchmarks/
+  - models/
+  - evals/
+  - evidence/
+  - scripts/
 
-## Assumed Paths
+## Reality
+- No `summit/` root directory.
+- `services/` contains microservices (`model-hub-service`, `evals`, `ml-serving`).
+- `services/model-hub-service` is a TypeScript registry/router.
+- `services/evals` is a minimal TypeScript service.
+- `services/ml-serving` is a minimal Python FastAPI service.
+- No existing Python-based benchmark harness found in root.
 
-- `src/agents/`
-- `src/connectors/`
-- `src/graphrag/`
-- `.github/workflows/`
-- `.github/scripts/`
-- `docs/architecture/`
-- `docs/security/`
-
-## Must-Not-Touch Boundaries
-
-- Existing GraphRAG pipeline
-- Production CI workflows
-- Core connectors
-
-## Validation Checklist Before PR1
-
-- Confirm workspace/package topology under `pnpm`.
-- Confirm package-local test runner conventions (`vitest` vs `jest`).
-- Confirm required CI check names and branch protections.
-- Confirm canonical evidence ID schema and validator locations.
+## Plan
+- Create `models/` directory in root to house Python-based model adapters as requested.
+- Create `benchmarks/` directory for profiles.
+- Create `scripts/` for the benchmark runner and governance checks.
+- Create `evidence/` for output artifacts.
+- Use Python for the benchmark runner as implied by the file extensions in the prompt (`.py`).
