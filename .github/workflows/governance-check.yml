@@ -30,14 +30,16 @@ jobs:
 
             // Auto-infer from title if no labels
             if (labels.length === 0) {
-              if (title.startsWith('feat:')) labels.push('minor');
-              else if (title.startsWith('fix:')) labels.push('patch');
-              else if (title.startsWith('docs:')) labels.push('patch');
+              if (title.toLowerCase().startsWith('feat:')) labels.push('minor');
+              else if (title.toLowerCase().startsWith('fix:') || title.toLowerCase().startsWith('fix ')) labels.push('patch');
+              else if (title.toLowerCase().startsWith('docs:')) labels.push('patch');
               else if (title.includes('BREAKING CHANGE')) labels.push('major');
             }
 
             const valid = labels.some(l => ['patch', 'minor', 'major'].includes(l));
             if (!valid) {
+              console.log('Title: ', title);
+              console.log('Labels: ', labels);
               core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:).");
             }
 

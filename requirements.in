@@ -31,3 +31,7 @@ opentelemetry-instrumentation-logging
 prometheus-fastapi-instrumentator
 python-json-logger
 structlog
+sentence-transformers==2.6.1
+faiss-cpu==1.8.0.post1
+numpy==1.26.4
+tokenizers==0.15.2
