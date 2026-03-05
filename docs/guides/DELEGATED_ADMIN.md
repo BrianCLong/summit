@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Delegated Administration Guide
 
 This guide outlines the flows for Partners to manage Customer Tenants using the Delegated Admin capabilities.

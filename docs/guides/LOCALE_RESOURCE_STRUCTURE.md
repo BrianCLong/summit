@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # Example Locale Resource Structure
 
 This document defines the standard organization for locale resource files in CompanyOS.

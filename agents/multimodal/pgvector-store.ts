@@ -16,7 +16,7 @@ import type {
   ModalityType,
 } from './types.js';
 
-const logger = pino({ name: 'pgvector-store' });
+const logger: any = (pino as any)({ name: 'pgvector-store' });
 
 export interface PgVectorStoreConfig extends VectorStoreConfig {
   connectionString?: string;

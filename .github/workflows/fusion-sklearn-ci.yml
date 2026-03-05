@@ -1,0 +1,58 @@
+name: Fusion Sklearn CI
+
+on:
+  push:
+    paths:
+      - 'ai-ml-suite/fusion_sklearn/**'
+      - '.github/workflows/fusion-sklearn-ci.yml'
+  pull_request:
+    paths:
+      - 'ai-ml-suite/fusion_sklearn/**'
+      - '.github/workflows/fusion-sklearn-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-ml-suite/fusion_sklearn
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -e .[dev]
+          pip install pytest ruff numpy scikit-learn pydantic
+
+      - name: Lint with Ruff
+        run: ruff check .
+
+      - name: Run Tests
+        run: pytest -q
+        env:
+          SUMMIT_FUSION_ALLOW_NETWORK: "0"
+
+      - name: Run CLI Demo
+        run: |
+          python -m summit_fusion.cli run --golden ../../GOLDEN/datasets/fusion_demo.jsonl --out ../../artifacts/fusion_demo/
+
+      - name: Check Artifact Determinism
+        run: |
+          cat ../../artifacts/fusion_demo/report.json
+          cat ../../artifacts/fusion_demo/metrics.json
+          cat ../../artifacts/fusion_demo/stamp.json
+
+      - name: Run Drift Detector
+        run: |
+          cd ../../
+          python scripts/monitoring/sklearn-fusion-embeddings-tfidf-metadata-drift.py

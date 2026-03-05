@@ -8,7 +8,7 @@ class StructuredFlattener:
     def __init__(self, policy: FlatteningPolicy):
         self.policy = policy
 
-    def flatten(self, data: Dict[str, Any]) -> str:
+    def flatten(self, data: dict[str, Any]) -> str:
         if not self.policy.enabled:
             return json.dumps(data, sort_keys=True)
 
@@ -16,7 +16,7 @@ class StructuredFlattener:
         self._flatten_recursive(data, "", parts, 0)
         return ". ".join(parts) + "."
 
-    def _flatten_recursive(self, data: Any, prefix: str, parts: List[str], depth: int):
+    def _flatten_recursive(self, data: Any, prefix: str, parts: list[str], depth: int):
         if depth > self.policy.max_depth:
             return
 
@@ -44,7 +44,7 @@ class StructuredFlattener:
             else:
                 parts.append(val_str)
 
-    def trace(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def trace(self, data: dict[str, Any]) -> dict[str, Any]:
         """Produce a trace of the flattening process."""
         included_keys = []
         excluded_keys = []

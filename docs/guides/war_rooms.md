@@ -1,3 +1,4 @@
+<!-- markdownlint-disable -->
 # War Room User Guide
 
 This guide explains how to create and manage War Rooms in the IntelGraph platform.
