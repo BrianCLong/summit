@@ -4,7 +4,122 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+
+  - package-ecosystem: "gomod"
+    directory: "/ccs"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/cea"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/jpr"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/lho"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/pbs"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/alsp"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/drst"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/pcbo"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/sdnlib"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/tools/c7"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/tools/rbo"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/sdk/go/pcl"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/tools/dmcl"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/tools/rarl"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/tools/scba"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/sdk/go/abac"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2
+
+  - package-ecosystem: "gomod"
+    directory: "/platform/cce"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 2

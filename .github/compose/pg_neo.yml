@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: local_dev
+      POSTGRES_DB: summit_intel
+    ports:
+      - "5432:5432"
+
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/local_dev
+    ports:
+      - "7474:7474"
+      - "7687:7687"
