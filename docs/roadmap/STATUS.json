@@ -1,13 +1,12 @@
 {
-  "last_updated": "2026-02-26T16:42:56Z",
-  "revision_note": "Added OpenClaw incident brief with MAESTRO-layered threat and mitigation posture.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added Amazon Key event-platform analysis brief and governance-aligned recommendations.",
   "initiatives": [
     {
-      "id": "openclaw-incident-brief-2026-02-26",
-      "area": "docs/runbooks",
-      "status": "complete",
+      "id": "amazon-key-event-platform-analysis",
+      "status": "completed",
       "owner": "codex",
-      "summary": "Published governed OpenClaw incident brief documenting autonomy risk patterns, MAESTRO threat layers, and mitigation controls."
+      "notes": "Published governed analysis of Amazon Key and Key-like reference architecture for Summit/IntelGraph planning."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
