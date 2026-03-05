@@ -12,7 +12,6 @@ export function sanitizeHtml(value: string): string {
   const sanitized = DOMPurify.sanitize(value, {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
-    USE_PROFILES: { html: true },
   });
   return typeof sanitized === 'string' ? sanitized : String(sanitized);
 }

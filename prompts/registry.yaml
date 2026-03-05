@@ -922,3 +922,26 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: summit-nemo-prompt
+    version: v1
+    path: prompts/architecture/summit-nemo-prompt@v1.md
+    sha256: e02a1df51b47d28c1faf0323b1719236026ebcd9bdd6604a2351fc1ef47a880a
+    description: Generate the Summit Edition execution plan prioritizing PCQ, ZK-TX, Authority Compiler, Reasoning-Trace Signatures, and Federation Planner.
+    scope:
+      paths:
+        - docs/architecture/summit-nemo-plan.md
+        - prompts/architecture/summit-nemo-prompt@v1.md
+        - prompts/registry.yaml
+      domains:
+        - architecture
+        - governance
+        - documentation
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

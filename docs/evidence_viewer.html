@@ -1,0 +1,13 @@
+<!doctype html><meta charset="utf-8">
+<title>Evidence Graph</title>
+<script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2/viz.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/viz.js@2.1.2/full.render.js"></script>
+<div id="app"></div>
+<script>
+(async () => {
+  const dot = await (await fetch('../build/evidence.dot', {cache:'no-store'})).text();
+  const viz = new Viz();
+  const svg = await viz.renderSVGElement(dot);
+  document.getElementById('app').appendChild(svg);
+})();
+</script>
