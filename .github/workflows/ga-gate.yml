@@ -22,9 +22,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
   gate:
     name: gate
@@ -45,8 +44,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
+          node-version: 20
           cache: 'pnpm'
-          node-version-file: .nvmrc
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile
