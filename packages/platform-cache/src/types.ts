@@ -28,6 +28,10 @@ export const CacheConfigSchema = z.object({
     db: z.number().default(0),
     keyPrefix: z.string().default('cache:'),
     maxRetriesPerRequest: z.number().default(3),
+    /** Array of Redis URLs for partitioning */
+    nodes: z.array(z.string()).optional(),
+    /** Partitioning strategy */
+    partitionStrategy: z.enum(['hash', 'ring']).default('hash'),
   }).default({}),
 });
 
@@ -148,6 +152,12 @@ export interface CacheProvider {
 
   /** Get TTL for key */
   ttl(key: string): Promise<number>;
+
+  /** Backup cache data */
+  backup?(): Promise<string>;
+
+  /** Restore cache data from backup */
+  restore?(backupData: string): Promise<void>;
 
   /** Close connection */
   close(): Promise<void>;
