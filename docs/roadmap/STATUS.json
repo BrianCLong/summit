@@ -1,7 +1,19 @@
 {
-  "last_updated": "2026-03-05T00:00:00Z",
-  "revision_note": "Added killer-loop priority strategy brief and execution sequence for writeset firewall, explainability, and bitemporal ledger foundation.",
+  "last_updated": "2026-03-05T02:04:12Z",
+  "revision_note": "Added WorkOS-to-Summit identity subsumption architecture brief and governance-aligned roadmap entry.",
   "initiatives": [
+    {
+      "id": "workos-identity-subsumption-brief",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Published clean-room architecture brief defining WorkOS baseline and Summit identity-graph subsumption roadmap."
+    },
+    {
+      "id": "saas-crash-2026-positioning-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -183,6 +195,12 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
+      "id": "ai-platform-daily-summary-2026-02-04",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
+    },
+    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
@@ -205,12 +223,6 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "summit-killer-loop-priority",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Prioritize 30-second killer loop: ingestion -> WriteSet firewall -> tri-graph updates -> deterministic Explain()/What changed?."
     }
   ],
   "summary": {
@@ -218,7 +230,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
