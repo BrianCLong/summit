@@ -1,0 +1,49 @@
+{
+  "task_id": "AGENTIC_ORCH_CONTEXT_RAG_20260208",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "agentic-orchestration-context-rag",
+    "version": "v1",
+    "sha256": "240aee0cf8bc145c356d83395486eafa8818c05dee1c6f48b65a1294f5d48d2e",
+    "path": "prompts/engineering/agentic-orchestration-context-rag@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/orchestration/architectureSelector.ts",
+      "src/agents/index.ts",
+      "src/context/hybridContextManager.ts",
+      "src/context/llmAdapters/simpleLLMClient.ts",
+      "src/intelgraph/agenticRag.ts",
+      "tests/orchestration/architectureSelector.test.ts",
+      "tests/context/hybridContextManager.test.ts",
+      "tests/intelgraph/agenticRag.test.ts",
+      "docs/agent-orchestration-and-agentic-rag.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/engineering/agentic-orchestration-context-rag@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/AGENTIC_ORCH_CONTEXT_RAG_20260208.json"
+    ],
+    "domains": ["orchestration", "context", "intelgraph", "governance", "documentation", "testing"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": ["unit-tests"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Predictive orchestration selector and error amplification monitoring are implemented.",
+    "Hybrid context manager and LLM adapter are implemented with tests.",
+    "Agentic RAG scaffolding includes intent compilation and evidence budgeting.",
+    "Integration documentation is added and roadmap status updated."
+  ],
+  "stop_conditions": [
+    "Prompt hash or scope mismatch in prompts/registry.yaml.",
+    "Tests cannot be authored for new modules."
+  ],
+  "dependencies": ["docs/SUMMIT_READINESS_ASSERTION.md"],
+  "approvals": []
+}
