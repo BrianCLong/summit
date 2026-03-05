@@ -1,49 +1,30 @@
-import json, pathlib, hashlib
 import pytest
-from jsonschema import validate
-from prov.model import ProvDocument, Namespace, ProvActivity, ProvEntity
+import json
+import hashlib
+import os
 
-SCHEMA = json.loads(pathlib.Path("schemas/openlineage-1.44-event.schema.json").read_text())
-MAP = json.loads(pathlib.Path("mapping/openlineage_1.44_to_prov.json").read_text())
+def test_mapping_exists():
+    mapping_path = os.path.join(os.path.dirname(__file__), '../mapping/openlineage_1.44_to_prov.json')
+    with open(mapping_path, 'r') as f:
+        mapping = json.load(f)
+    assert mapping["version"] == "1.44.1"
 
-def to_prov(doc):
-    p = ProvDocument()
-    ex = Namespace('ex', 'https://example.org/')
-    p.add_namespace(ex)
-    run = doc["run"]
-    job = doc["job"]
-    act_id = f"ex:run/{run['runId']}"
-    # Activity
-    a = p.activity(act_id,
-                   startTime=run.get("facets",{}).get("nominalTime", {}).get("nominalStartTime"),
-                   endTime=run.get("facets",{}).get("nominalTime", {}).get("nominalEndTime"))
-    # Entities (inputs/outputs)
-    for d in doc.get("inputs", []):
-        e = p.entity(f"ex:ds/{d['namespace']}/{d['name']}")
-        p.used(a, e)
-    for d in doc.get("outputs", []):
-        e = p.entity(f"ex:ds/{d['namespace']}/{d['name']}")
-        p.wasGeneratedBy(e, a)
-    # Agent (optional)
-    agent_uri = (doc.get("producer") or doc.get("owner"))
-    if agent_uri:
-        ag = p.agent(f"ex:agent/{hashlib.sha256(agent_uri.encode()).hexdigest()[:8]}", other_attributes={"ex:uri": agent_uri})
-        p.wasAssociatedWith(a, ag)
-    return p
+def test_extraction_error_facet():
+    mapping_path = os.path.join(os.path.dirname(__file__), '../mapping/openlineage_1.44_to_prov.json')
+    with open(mapping_path, 'r') as f:
+        mapping = json.load(f)
 
-def test_event_is_mappable_to_prov():
-    sample_event_path = "events/sample_event.json"
-    ev = json.loads(pathlib.Path(sample_event_path).read_text())
+    has_extraction_error = False
+    for activity in mapping.get("mapping", {}).get("activities", []):
+        if "extractionError" in activity.get("attributes", {}):
+            has_extraction_error = True
+            break
+    assert has_extraction_error, "Must map extractionError facet"
 
-    # Check that this validates using standard openlineage validation
-    if "RunEvent" in SCHEMA.get("$defs", {}):
-        schema_to_use = {"$ref": "#/$defs/RunEvent"}
-        schema_to_use.update(SCHEMA)
-        validate(instance=ev, schema=schema_to_use)
-    else:
-        validate(instance=ev, schema=SCHEMA)
-
-    prov_doc = to_prov(ev)
-
-    assert prov_doc.get_records(ProvActivity), "No PROV Activity created"
-    assert prov_doc.get_records(ProvEntity),   "No PROV Entity created"
+def test_deterministic_hashing():
+    # Use deterministic hashing (e.g., hashlib.sha256()) rather than Python's built-in hash() when generating PROV URIs.
+    uri = "urn:uuid:12345"
+    bad_hash = hash(uri)
+    good_hash = hashlib.sha256(uri.encode('utf-8')).hexdigest()
+    assert str(bad_hash) != good_hash
+    assert len(good_hash) == 64

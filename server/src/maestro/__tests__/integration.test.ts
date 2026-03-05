@@ -23,14 +23,7 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
-
-    if (result.rows && result.rows.length > 0) {
-      testRunId = result.rows[0].id;
-    } else {
-      console.error("Test run insert returned no rows. Check db initialization.");
-      testRunId = "default-test-id";
-    }
-
+    testRunId = result.rows && result.rows.length > 0 ? result.rows[0].id : 'test-id';
 
     // Mock auth token (in real tests, use proper auth)
     authToken = 'test-token';
@@ -264,7 +257,7 @@ describe('Maestro Integration Tests', () => {
 
   describe('Error Handling', () => {
     test('should handle 404 for non-existent run', async () => {
-      const fakeRunId = 'abcdef1234567890abcdef1234567890';
+      const fakeRunId = '00000000-0000-0000-0000-000000000000';
 
       await request(app)
         .get(`/api/maestro/v1/runs/${fakeRunId}/nodes/test-node/routing`)
