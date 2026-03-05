@@ -24,7 +24,7 @@ export const listExperiments = (req: Request, res: Response) => {
 
 export const stopExperiment = (req: Request, res: Response) => {
     const { id } = req.params;
-    experimentService.stopExperiment(id);
+    experimentService.stopExperiment((id as string));
     res.status(200).json({ status: 'stopped' });
 };
 
@@ -40,6 +40,6 @@ export const getAssignment = (req: Request, res: Response) => {
     const tenantId = user.tenant_id || 'default_tenant';
     const userId = user.sub || user.id;
 
-    const assignment = experimentService.assign(id, tenantId, userId);
+    const assignment = experimentService.assign((id as string), (tenantId as string), userId);
     res.json(assignment);
 };

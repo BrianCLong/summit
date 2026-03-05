@@ -5,7 +5,7 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "rootDir": ".",
+    "rootDir": "..",
     "outDir": "./dist",
     "esModuleInterop": true,
     "downlevelIteration": true,
@@ -26,7 +26,11 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*",
+    "../packages/osint-collector/src/**/*",
+    "../libs/context-shell/node/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
