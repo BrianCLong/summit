@@ -18,9 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
-### Changed
-- **Performance**: Optimized `RiskRepository.saveRiskScore` to use chunked multi-row database insertions, significantly reducing database round-trips for large signal sets.
-
 ### Added
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
@@ -28,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
+- Daily sprint automation now records 2026-02-24 evidence snapshots, PR triage status, and governed exceptions in `docs/ops/DAILY_SPRINT_2026-02-24.md`.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 

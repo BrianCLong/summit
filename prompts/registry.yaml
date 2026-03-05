@@ -925,19 +925,17 @@ prompts:
   - id: daily-sprint-orchestrator
     version: v1
     path: prompts/automation/daily-sprint@v1.md
-    sha256: c3d8a8c9c3a54c0525dd7eb4b53d730de4b25f1e42f910929317f43a68bf6ed0
-    description: Daily sprint automation prompt for evidence-first planning, execution, and reporting.
+    sha256: 2e0a28096db3bee1397a5f8c80f7235215d427038ca13d3d9e499239bf35c4f2
+    description: Daily sprint plan and evidence-first execution log for Summit automation.
     scope:
       paths:
-        - docs/ops/
+        - docs/ops/DAILY_SPRINT_*.md
         - docs/roadmap/STATUS.json
         - prompts/automation/daily-sprint@v1.md
         - prompts/registry.yaml
-        - agents/examples/DAILY_SPRINT_20260224_RUN2.json
       domains:
-        - automation
+        - ops
         - governance
-        - operations
         - documentation
     verification:
       tiers_required:
