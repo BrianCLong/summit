@@ -57,7 +57,8 @@ echo "$READY_PRS" | jq -c '.[]' | while read -r PR; do
   PR_NUM=$(echo "$PR" | jq -r '.number')
   PR_TITLE=$(echo "$PR" | jq -r '.title')
   
-  echo -e "Queueing PR #${PR_NUM}: ${BLUE}${PR_TITLE}${NC}"
+  printf 'Queueing PR #%s: %s
+' "$PR_NUM" "$PR_TITLE"
   
   if [ "$DRY_RUN" != "true" ]; then
     gh pr merge "$PR_NUM" --auto --squash || echo -e "${RED}Failed to queue PR #$PR_NUM${NC}"
