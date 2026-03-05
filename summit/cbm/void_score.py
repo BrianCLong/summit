@@ -1,18 +1,39 @@
 import json
-from typing import Dict, Any, List
+import hashlib
+from typing import List, Dict, Any
+from .schema import DocumentEvent
 
-def calculate_void_score(topic: str, locale: str, authority_density: float) -> Dict[str, Any]:
-    """Calculate data void risk based on topic, locale and authority density."""
-    risk = 1.0 - min(authority_density, 1.0)
+def _hash_string(s: str) -> str:
+    return hashlib.sha256(s.encode('utf-8')).hexdigest()[:12]
+
+def score_data_voids(events: List[DocumentEvent], topic: str, locale: str, run_date: str = "20240101") -> Dict[str, Any]:
+    """
+    Given document events, score topic-locale authority density.
+    A low density means high data void risk (few authoritative sources).
+    Returns deterministic void scores.
+    """
+    scores = {}
+    total_docs = len(events)
+
+    auth_sources = [e for e in events if e.metadata.get("is_authoritative", False)]
+    auth_density = len(auth_sources) / max(1, total_docs)
+    void_risk = 1.0 - auth_density
+
+    scores["topic"] = topic
+    scores["locale"] = locale
+    scores["authority_density"] = auth_density
+    scores["void_risk_score"] = void_risk
+
+    run_hash = _hash_string(f"{topic}_{locale}_{void_risk}")
+    evidence_id = f"EVID-CBM-{run_date}-{run_hash}-0003"
+
     return {
-        "topic": topic,
-        "locale": locale,
-        "authority_density": authority_density,
-        "risk_score": round(risk, 4)
+        "metadata": {
+            "evidence_id": evidence_id
+        },
+        "scores": scores
     }
 
-def write_void_artifacts(scores: List[Dict[str, Any]], path: str):
-    """Write data void risk scores deterministically."""
-    sorted_scores = sorted(scores, key=lambda x: (x["topic"], x["locale"]))
-    with open(path, "w") as f:
-        json.dump(sorted_scores, f, sort_keys=True, indent=2)
+def write_void_score_artifact(score_data: Dict[str, Any], output_path: str):
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(score_data, f, indent=2, sort_keys=True)

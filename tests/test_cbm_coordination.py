@@ -1,18 +1,21 @@
-import json
-import os
-from summit.cbm.coordination import detect_coordination, write_influence_artifacts
+import pytest
+from summit.cbm.coordination import detect_coordination, SignalLedger
+from summit.cbm.schema import DocumentEvent
 
-def test_coordination_detection(tmp_path):
-    assets = [{"id": "asset1", "activity": "spam"}]
-    graph = detect_coordination(assets)
+def test_coordination_determinism():
+    events = [
+        DocumentEvent(id="1", content="Normal content", source="site1", metadata={"author_id": "botA"}),
+        DocumentEvent(id="2", content="Burst content", source="site2", metadata={"author_id": "botA"}),
+        DocumentEvent(id="3", content="Burst content", source="site2", metadata={"author_id": "botB"})
+    ]
 
-    assert "nodes" in graph
-    assert len(graph["nodes"]) > 0
+    ledger1 = SignalLedger()
+    res1 = detect_coordination(events, ledger1, "20240101")
 
-    artifact_path = os.path.join(tmp_path, "influence_graph.json")
-    write_influence_artifacts(graph, artifact_path)
+    ledger2 = SignalLedger()
+    res2 = detect_coordination(events, ledger2, "20240101")
 
-    with open(artifact_path) as f:
-        data = json.load(f)
-        assert data["nodes"][0]["id"] == "actor_asset1"
-        assert data["nodes"][1]["id"] == "coordination_cell_1"
+    assert res1 == res2
+    assert len(res1["nodes"]) == 4 # botA, botB, site1, site2
+    assert len(res1["signals"]) == 2 # 2 burst signals recorded
+    assert "EVID-CBM-20240101" in res1["metadata"]["evidence_id"]

@@ -1,23 +1,27 @@
-import json
+import pytest
 import os
-import sys
+import tempfile
+import subprocess
 
-# Ensure scripts directory is in path for tests
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from scripts.monitoring.cbm_drift import detect_drift, write_drift_report
+def test_drift_detector_cli():
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_old:
+        tmp_old.write(b"{}")
+        old_path = tmp_old.name
 
-def test_drift_detection(tmp_path):
-    current = {"laundering_risk": 0.9, "void_score": 0.2}
-    baseline = {"laundering_risk": 0.5, "void_score": 0.25}
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_new:
+        tmp_new.write(b"{}")
+        new_path = tmp_new.name
 
-    drift = detect_drift(current, baseline)
-    assert "laundering_risk" in drift
-    assert drift["laundering_risk"]["alert"] is True
-    assert "void_score" not in drift
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_out:
+        out_path = tmp_out.name
 
-    artifact_path = os.path.join(tmp_path, "drift_report.json")
-    write_drift_report(drift, artifact_path)
-
-    with open(artifact_path) as f:
-        data = json.load(f)
-        assert "laundering_risk" in data
+    try:
+        subprocess.check_call(["python3", "scripts/monitoring/cbm_drift.py", "--old", old_path, "--new", new_path, "--out", out_path])
+        assert os.path.exists(out_path)
+        with open(out_path, "r") as f:
+            content = f.read()
+            assert "drift_analyzed" in content
+    finally:
+        os.remove(old_path)
+        os.remove(new_path)
+        os.remove(out_path)

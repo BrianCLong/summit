@@ -1,18 +1,33 @@
-import json
+import pytest
 import os
-from summit.cbm.narratives import build_narrative_graph, write_narrative_artifacts
+import tempfile
+from summit.cbm.narratives import extract_and_cluster, write_narratives_artifact
+from summit.cbm.schema import DocumentEvent
 
-def test_narrative_clustering(tmp_path):
-    docs = [{"id": "doc1", "text": "Claim A"}]
-    graph = build_narrative_graph(docs)
+def test_narrative_clustering_determinism():
+    events = [
+        DocumentEvent(id="doc1", content="Claim A from doc 1", source="src1", metadata={}),
+        DocumentEvent(id="doc2", content="Claim B from doc 2", source="src2", metadata={}),
+    ]
 
-    assert "nodes" in graph
-    assert len(graph["nodes"]) > 0
+    res1 = extract_and_cluster(events, "20240101")
+    res2 = extract_and_cluster(events, "20240101")
 
-    artifact_path = os.path.join(tmp_path, "narratives.json")
-    write_narrative_artifacts(graph, artifact_path)
+    assert res1 == res2
+    assert res1["metadata"]["cluster_count"] == 1
+    assert "NARR-" in res1["narratives"][0]["id"]
+    assert "EVID-CBM-20240101" in res1["metadata"]["evidence_id"]
 
-    with open(artifact_path) as f:
-        data = json.load(f)
-        assert data["nodes"][0]["id"] == "claim_doc1"
-        assert data["nodes"][1]["id"] == "narrative_1"
+def test_write_narrative_artifact():
+    data = {"narratives": [], "metadata": {"cluster_count": 0}}
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        path = tmp.name
+
+    try:
+        write_narratives_artifact(data, path)
+        assert os.path.exists(path)
+        with open(path, "r") as f:
+            content = f.read()
+            assert "cluster_count" in content
+    finally:
+        os.remove(path)

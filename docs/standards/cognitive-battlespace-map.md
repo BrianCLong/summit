@@ -1,11 +1,11 @@
-# CBM Standards
+# Cognitive Battlespace Map Standards Interop
 
-### Import matrix
-| Source | Format | Notes |
-| --- | --- | --- |
-| News/RSS | RSS/JSON | operator-provided lists |
+## Import Matrix
+- News/RSS (JSON)
+- OSINT dumps (JSONL)
 
-### Export matrix
-| Output | Format | Consumer |
-| --- | --- | --- |
-| Narratives | JSON | UI/analytics |
+## Export Matrix
+- Narratives (JSON)
+- Influence Graph (JSON)
+- AI Exposure (JSON)
+- Drift (JSON)

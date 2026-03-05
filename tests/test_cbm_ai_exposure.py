@@ -1,16 +1,15 @@
-import json
-import os
-from summit.cbm.ai_exposure import map_ai_exposure, write_exposure_artifacts
+import pytest
+from summit.cbm.ai_exposure import map_ai_exposure
 
-def test_ai_exposure(tmp_path):
-    prompts = [{"text": "Probe query"}]
-    exposure = map_ai_exposure(prompts)
+def test_ai_exposure_determinism():
+    prompts = ["Is the moon made of cheese?"]
+    responses = [
+        {"id": "resp1", "prompt": "Is the moon made of cheese?", "text": "Yes, it is narrative_overlap"}
+    ]
 
-    assert exposure["laundering_risk"] == 0.85
+    res1 = map_ai_exposure(prompts, responses, "20240101")
+    res2 = map_ai_exposure(prompts, responses, "20240101")
 
-    artifact_path = os.path.join(tmp_path, "ai_exposure.json")
-    write_exposure_artifacts(exposure, artifact_path)
-
-    with open(artifact_path) as f:
-        data = json.load(f)
-        assert data["overlap_score"] == 0.7
+    assert res1 == res2
+    assert any(n["id"] == "narrative_laundering" for n in res1["nodes"])
+    assert "EVID-CBM-20240101" in res1["metadata"]["evidence_id"]
