@@ -84,6 +84,9 @@ jobs:
       - name: Check PR Metadata
         run: node scripts/ga/check-pr-metadata.mjs
         env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_HEAD_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           PR_BODY: ${{ github.event.pull_request.body }}
 
   saos-enforcement:
@@ -96,7 +99,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -105,10 +108,13 @@ jobs:
       - name: Verify S-AOS Compliance
         run: node scripts/ga/verify-saos.mjs
         env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_HEAD_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           PR_BODY: ${{ github.event.pull_request.body }}
-
-  pii-scan:
-    runs-on: ubuntu-latest
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_HEAD_REPO_FULL_NAME: ${{ github.event.pull_request.head.repo.full_name }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
