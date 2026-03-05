@@ -23,7 +23,7 @@ jobs:
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: ".nvmrc"
       - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/branch-protection-as-code/manifest.yaml
 
   branch-protection-drift:
@@ -46,7 +46,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.check-token.outputs.has_token == 'true'
         with:
-          node-version: 20
+          node-version-file: ".nvmrc"
       - name: Fetch branch protection rules
         if: steps.check-token.outputs.has_token == 'true'
         run: mkdir -p .tmp
