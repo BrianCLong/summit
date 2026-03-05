@@ -161,7 +161,7 @@ export default function TenantOpsPage() {
        "node-fetch": ">=2.6.7",
 ++ b/pnpm-lock.yaml
    excludeLinksFromLockfile: false
- 
+
  overrides:
   '@electron/node-gyp': 10.2.0-electron.1
    entities: ^4.5.0

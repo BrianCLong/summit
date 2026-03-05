@@ -3,7 +3,7 @@ import {
   createContextShell,
   type ContextShellOutput,
   type CreateContextShellOptions,
-} from '../../../../libs/context-shell/node/index.js';
+} from '@intelgraph/context-shell';
 import { ToolExecutor, WorkflowContext } from '../engine/WorkflowEngine.js';
 
 interface ContextShellParams {

@@ -5,6 +5,7 @@ import { useSearch } from '@/contexts/SearchContext'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Kbd } from '@/components/ui/Kbd'
 import { useDemoMode } from '@/components/common/DemoIndicator'
 
 interface SearchResult {
@@ -282,12 +283,8 @@ export function GlobalSearch() {
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
-                  ↑
-                </kbd>
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
-                  ↓
-                </kbd>
+                <Kbd keys="↑" />
+                <Kbd keys="↓" />
                 <span className="text-[10px]">to navigate</span>
               </div>
             </div>

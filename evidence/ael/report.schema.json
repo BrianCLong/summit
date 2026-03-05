@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["run_id", "objective_set", "scenarios", "rollouts", "decisions"],
+  "properties": {
+    "run_id": { "type": "string" },
+    "objective_set": { "type": "object" },
+    "scenarios": { "type": "array" },
+    "rollouts": { "type": "array" },
+    "decisions": { "type": "array" }
+  }
+}
