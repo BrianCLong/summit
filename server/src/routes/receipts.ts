@@ -1,7 +1,26 @@
 import express from 'express';
 import { ReceiptService } from '../services/ReceiptService.js';
+import { bundleExporter } from '../exports/bundle-exporter.js';
 
 const router = express.Router();
+
+// GET /receipts/:id/export - Export evidence bundle for a receipt
+router.get('/:id/export', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const tenantId = (req as any).user?.tenantId || (req as any).user?.tenant_id;
+
+    if (!tenantId) {
+      return res.status(401).json({ error: 'Tenant context required' });
+    }
+
+    const bundle = await bundleExporter.exportReceipt(id, tenantId);
+    res.json(bundle);
+  } catch (error: any) {
+    console.error('Export failed:', error);
+    res.status(500).json({ error: 'Export failed', message: error.message });
+  }
+});
 
 router.get('/:id', async (req, res) => {
   try {

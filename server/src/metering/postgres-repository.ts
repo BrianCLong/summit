@@ -52,6 +52,21 @@ export class PostgresMeterRepository {
           unit = 'seats';
           metadata = { ...metadata, userId: event.userId };
           break;
+        case MeterEventKind.POLICY_SIMULATION:
+          quantity = 1;
+          unit = 'simulations';
+          metadata = { ...metadata, rulesCount: event.rulesCount };
+          break;
+        case MeterEventKind.WORKFLOW_EXECUTION:
+          quantity = 1;
+          unit = 'executions';
+          metadata = { ...metadata, workflowName: event.workflowName, stepsCount: event.stepsCount };
+          break;
+        case MeterEventKind.RECEIPT_WRITE:
+          quantity = 1;
+          unit = 'writes';
+          metadata = { ...metadata, action: event.action };
+          break;
       }
 
       const values = [
@@ -141,6 +156,30 @@ export class PostgresTenantUsageRepository extends TenantUsageDailyRepository {
           await client.query(query, [
             row.tenantId, periodStart, periodEnd,
             MeterEventKind.STORAGE_BYTES_ESTIMATE, row.storageBytesEstimate, 'bytes', '{}'
+          ]);
+        }
+
+        // Policy Simulations
+        if (row.policySimulations > 0) {
+          await client.query(query, [
+            row.tenantId, periodStart, periodEnd,
+            MeterEventKind.POLICY_SIMULATION, row.policySimulations, 'simulations', '{}'
+          ]);
+        }
+
+        // Workflow Executions
+        if (row.workflowExecutions > 0) {
+          await client.query(query, [
+            row.tenantId, periodStart, periodEnd,
+            MeterEventKind.WORKFLOW_EXECUTION, row.workflowExecutions, 'executions', '{}'
+          ]);
+        }
+
+        // Receipt Writes
+        if (row.receiptWrites > 0) {
+          await client.query(query, [
+            row.tenantId, periodStart, periodEnd,
+            MeterEventKind.RECEIPT_WRITE, row.receiptWrites, 'writes', '{}'
           ]);
         }
 

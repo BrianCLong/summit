@@ -26,6 +26,65 @@ export class MeteringEmitter {
     });
   }
 
+  async emitPolicySimulation(input: {
+    tenantId: string;
+    rulesCount: number;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.POLICY_SIMULATION,
+      tenantId: input.tenantId,
+      rulesCount: input.rulesCount,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitWorkflowExecution(input: {
+    tenantId: string;
+    workflowName: string;
+    stepsCount: number;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.WORKFLOW_EXECUTION,
+      tenantId: input.tenantId,
+      workflowName: input.workflowName,
+      stepsCount: input.stepsCount,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
+  async emitReceiptWrite(input: {
+    tenantId: string;
+    action: string;
+    source: string;
+    correlationId?: string;
+    idempotencyKey?: string;
+    metadata?: Record<string, unknown>;
+  }) {
+    await this.safeEmit({
+      kind: MeterEventKind.RECEIPT_WRITE,
+      tenantId: input.tenantId,
+      action: input.action,
+      source: input.source,
+      correlationId: input.correlationId,
+      idempotencyKey: input.idempotencyKey,
+      metadata: input.metadata,
+    });
+  }
+
   async emitQueryCredits(input: {
     tenantId: string;
     credits: number;

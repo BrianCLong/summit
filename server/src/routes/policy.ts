@@ -4,10 +4,30 @@ import { simulatePolicyDecision, policySimulationInputSchema, overlayContextSche
 import { Profiles } from '../policy/profiles.js';
 import { policyProfileAssignmentService } from '../services/policy-profiles/PolicyProfileAssignmentService.js';
 import { buildTenantPolicyBundle, getPolicyProfileManifest } from '../policies/profile-manifests.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
+import { policyHotReloadService } from '../policy/hotReloadService.js';
 
 // Named export for compatibility (reverted from default)
 export const policyRouter = express.Router();
+
+// POST /policies/rollback - Rollback policy bundle version (Sprint 08)
+policyRouter.post('/rollback', ensureAuthenticated, ensureRole(['ADMIN', 'admin']), async (req, res) => {
+  try {
+    const { versionId } = req.body;
+    if (!versionId) {
+      return res.status(400).json({ error: 'versionId required' });
+    }
+    const version = await policyHotReloadService.rollback(versionId);
+    res.json({
+      success: true,
+      versionId: version.versionId,
+      digest: version.digest,
+      message: 'Policy rolled back successfully'
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Rollback failed', message: error.message });
+  }
+});
 
 policyRouter.post('/simulate', ensureAuthenticated, async (req, res) => {
   try {

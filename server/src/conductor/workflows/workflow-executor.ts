@@ -8,6 +8,7 @@ import yaml from 'js-yaml';
 import Redis from 'ioredis';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../../config/logger.js';
+import { meteringEmitter } from '../../metering/emitter.js';
 
 export interface WorkflowDefinition {
   name: string;
@@ -457,6 +458,23 @@ export class WorkflowExecutor extends EventEmitter {
           failedTasks: execution.failed_tasks.length,
         },
       );
+
+      // Metering: Record workflow execution
+      try {
+        await meteringEmitter.emitWorkflowExecution({
+          tenantId: execution.metadata.tenant_id,
+          workflowName: execution.workflow_name,
+          stepsCount: execution.completed_tasks.length + execution.failed_tasks.length,
+          source: 'WorkflowExecutor',
+          correlationId: executionId,
+          metadata: {
+            status: execution.status,
+            durationMs: execution.duration_ms,
+          },
+        });
+      } catch (err) {
+        logger.warn({ err }, 'Failed to emit workflow execution meter event');
+      }
     } catch (error: any) {
       execution.status = 'failed';
       execution.error = error.message;
