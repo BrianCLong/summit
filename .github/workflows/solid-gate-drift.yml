@@ -1,0 +1,33 @@
+name: Solid Gate Drift Detection
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Weekly on Monday
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift-check:
+    name: Detect Drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history needed for weekly diff
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run Drift Script
+        run: python scripts/monitoring/solid-skills-drift.py
+
+      - name: Upload Drift Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: solid-gate-drift
+          path: artifacts/solid-gate-drift/
+          retention-days: 30

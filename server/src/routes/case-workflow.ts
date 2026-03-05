@@ -226,7 +226,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
         return res.status(400).json({ error: 'userId is required' });
       }
 
-      const task = await workflowService.assignTask((taskId as string), assignedTo, authContext.userId, authContext.tenantId as string);
+      const task = await workflowService.assignTask(taskId, assignedTo, authContext.userId, authContext.tenantId);
 
       if (!task) {
         return res.status(404).json({ error: 'Task not found' });
@@ -254,7 +254,7 @@ export function createCaseWorkflowRouter(pg: Pool): Router {
         return res.status(401).json({ error: 'Authentication and tenant context required' });
       }
 
-      const task = await workflowService.completeTask((taskId as string), authContext.userId, authContext.tenantId as string, resultData);
+      const task = await workflowService.completeTask(taskId, authContext.userId, authContext.tenantId, resultData);
 
       if (!task) {
         return res.status(404).json({ error: 'Task not found' });

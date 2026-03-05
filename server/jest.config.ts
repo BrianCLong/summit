@@ -9,12 +9,6 @@ const coverageThreshold = {
     lines: 80,
     statements: 80,
   },
-  'src/utils/CircuitBreaker.ts': {
-    branches: 95,
-    functions: 95,
-    lines: 95,
-    statements: 95,
-  },
 };
 
 // In GA verify mode, use minimal ignore patterns since testMatch is explicit

@@ -17,7 +17,7 @@ fi
 
 # 1. Version Consistency Check
 echo "Checking version consistency..."
-SERVER_VERSION=$(jq -r .version package.json)
+SERVER_VERSION=$(jq -r .version server/package.json)
 CLIENT_VERSION=$(jq -r .version client/package.json)
 ROOT_VERSION=$(jq -r .version package.json)
 

@@ -166,7 +166,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const envelope = sandboxManager.getSandbox((id as string));
+      const envelope = sandboxManager.getSandbox(id);
 
       if (!envelope.data) {
         res.status(404).json({ error: 'Sandbox not found' });
@@ -195,7 +195,7 @@ router.put(
       const { id } = req.params;
       const { name, policies, testData, limits } = req.body;
 
-      const envelope = await sandboxManager.updateSandbox((id as string), {
+      const envelope = await sandboxManager.updateSandbox(id, {
         name,
         policies,
         testData,
@@ -227,7 +227,7 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const envelope = sandboxManager.deleteSandbox((id as string));
+      const envelope = sandboxManager.deleteSandbox(id);
 
       if (!envelope.data.deleted) {
         res.status(404).json({ error: 'Sandbox not found' });
@@ -267,7 +267,7 @@ router.post(
         return;
       }
 
-      const envelope = sandboxManager.addScenario((id as string), {
+      const envelope = sandboxManager.addScenario(id, {
         name,
         description,
         actor,
@@ -304,7 +304,7 @@ router.post(
       const { scenarioId, policyId, contextOverrides } = req.body;
 
       const envelope = await sandboxManager.execute({
-        sandboxId: (id as string),
+        sandboxId: id,
         scenarioId,
         policyId,
         contextOverrides,
@@ -368,7 +368,7 @@ router.post(
         return;
       }
 
-      const sandbox = sandboxManager.getSandbox((id as string));
+      const sandbox = sandboxManager.getSandbox(id);
       if (!sandbox.data) {
         res.status(404).json({ error: 'Sandbox not found' });
         return;
@@ -385,7 +385,7 @@ router.post(
         modifiedInSandbox: false,
       };
 
-      const updated = await sandboxManager.updateSandbox((id as string), {
+      const updated = await sandboxManager.updateSandbox(id, {
         policies: [...sandbox.data.policies, clonedPolicy],
       });
 

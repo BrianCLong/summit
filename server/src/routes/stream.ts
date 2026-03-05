@@ -47,11 +47,11 @@ router.get('/:streamId', async (req: AuthenticatedRequest, res: Response) => {
   req.on('close', () => {
     sub.unsubscribe();
     sub.quit();
-    graphStreamer.stopStream((streamId as string));
+    graphStreamer.stopStream(streamId);
   });
 
   // Start execution now that client is connected
-  graphStreamer.executeStream((streamId as string));
+  graphStreamer.executeStream(streamId);
 });
 
 export default router;

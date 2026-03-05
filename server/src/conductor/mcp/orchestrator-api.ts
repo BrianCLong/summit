@@ -59,7 +59,7 @@ router.post('/execute/:workflowId', async (req: Request, res: Response) => {
 
 // GET /orchestrator/executions/:id - Get execution status
 router.get('/executions/:id', (req: Request, res: Response) => {
-  const execution = orchestrator.getExecution((req.params.id as string));
+  const execution = orchestrator.getExecution(req.params.id);
   if (!execution) {
     return res.status(404).json({ error: 'Execution not found' });
   }

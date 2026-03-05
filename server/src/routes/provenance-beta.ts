@@ -57,7 +57,7 @@ router.post('/licenses', async (req: Request, res: Response) => {
  */
 router.get('/licenses/:id', async (req: Request, res: Response) => {
   try {
-    const license = await provenanceLedger.getLicense((req.params.id as string));
+    const license = await provenanceLedger.getLicense(req.params.id);
 
     if (!license) {
       return res.status(404).json({
@@ -119,7 +119,7 @@ router.post('/sources', async (req: Request, res: Response) => {
  */
 router.get('/sources/:id', async (req: Request, res: Response) => {
   try {
-    const source = await provenanceLedger.getSource((req.params.id as string));
+    const source = await provenanceLedger.getSource(req.params.id);
 
     if (!source) {
       return res.status(404).json({
@@ -182,7 +182,7 @@ router.post('/transforms', async (req: Request, res: Response) => {
  */
 router.get('/transforms/:id', async (req: Request, res: Response) => {
   try {
-    const transform = await provenanceLedger.getTransform((req.params.id as string));
+    const transform = await provenanceLedger.getTransform(req.params.id);
 
     if (!transform) {
       return res.status(404).json({
@@ -245,7 +245,7 @@ router.post('/evidence', async (req: Request, res: Response) => {
  */
 router.get('/evidence/:id', async (req: Request, res: Response) => {
   try {
-    const evidence = await provenanceLedger.getEvidence((req.params.id as string));
+    const evidence = await provenanceLedger.getEvidence(req.params.id);
 
     if (!evidence) {
       return res.status(404).json({
@@ -307,7 +307,7 @@ router.post('/claims', async (req: Request, res: Response) => {
  */
 router.get('/claims/:id', async (req: Request, res: Response) => {
   try {
-    const claim = await provenanceLedger.getClaim((req.params.id as string));
+    const claim = await provenanceLedger.getClaim(req.params.id);
 
     if (!claim) {
       return res.status(404).json({
@@ -319,7 +319,7 @@ router.get('/claims/:id', async (req: Request, res: Response) => {
     // Optionally include full provenance chain
     if (req.query.include_provenance === 'true') {
       const provenance = await provenanceLedger.getProvenanceChain(
-        (req.params.id as string),
+        req.params.id,
       );
 
       return res.json({
@@ -432,7 +432,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const links = await provenanceLedger.getClaimEvidenceLinks(
-        (req.params.claimId as string),
+        req.params.claimId,
       );
 
       res.json({
@@ -466,7 +466,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const links = await provenanceLedger.getEvidenceClaimLinks(
-        (req.params.evidenceId as string),
+        req.params.evidenceId,
       );
 
       res.json({
@@ -501,7 +501,7 @@ router.get(
  */
 router.get('/chain/:itemId', async (req: Request, res: Response) => {
   try {
-    const chain = await provenanceLedger.getProvenanceChain((req.params.itemId as string));
+    const chain = await provenanceLedger.getProvenanceChain(req.params.itemId);
 
     res.json({
       success: true,
@@ -561,7 +561,7 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const report = await provenanceLedger.verifyManifest(
-        (req.params.manifestId as string),
+        req.params.manifestId,
       );
 
       res.json({

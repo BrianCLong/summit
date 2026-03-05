@@ -2,11 +2,6 @@ name: Governance Check
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '**.md'
-      - 'prompts/**'
-      - 'evidence/**'
     types: [opened, synchronize, reopened, labeled]
 
 concurrency:

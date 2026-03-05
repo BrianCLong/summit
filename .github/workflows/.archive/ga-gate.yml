@@ -1,82 +1,43 @@
-name: "GA Gate"
-
-# AUTHORITATIVE GA GATE
-# This workflow provides the required "GA Gate" check and "ga / gate" context
-# per REQUIRED_CHECKS_POLICY.yml. It runs the official GA verification entrypoint.
-#
-# Required check contexts produced:
-# - "GA Gate" (workflow name)
-# - "ga / gate" (job name with workflow prefix)
+name: GA Gate
 
 on:
-  pull_request:
-    branches: [main]
   push:
-    branches: [main]
-  merge_group:
+    branches:
+      - main
+      - 'release/*'
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  gate:
-    name: gate
+  ga-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-    permissions:
-      contents: read
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # v6
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: 20
+          cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+        uses: pnpm/action-setup@v3
         with:
-          cache: 'pnpm'
-          node-version-file: .nvmrc
+          version: 8
 
-      - name: Install Dependencies
-        run: pnpm install --no-frozen-lockfile
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
-      - name: Run GA Verification
-        run: |
-          echo "Running GA verification entrypoint..."
-          pnpm ga:verify
-        env:
-          CI: true
-          GA_VERIFY_MODE: true
+      - name: Run GA gate
+        run: pnpm exec tsx scripts/run-ga-gate.ts
 
-      - name: Verify SLSA Attestations
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "Verifying SLSA provenance..."
-          # Only verify if we are on main branch
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            gh attestation verify . --repo ${{ github.repository }} || echo "::warning::SLSA Verification failed or no attestations found"
-          else
-            echo "Skipping SLSA verification for PR branch"
-          fi
-
-      - name: GA Gate Summary
-        if: always()
-        run: |
-          echo "### GA Gate Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "- Status: PASS" >> $GITHUB_STEP_SUMMARY
-            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "- GA verification passed. This commit meets GA readiness criteria." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- Status: FAIL" >> $GITHUB_STEP_SUMMARY
-            echo "- Commit: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-            echo "- GA verification failed. Review logs above for details." >> $GITHUB_STEP_SUMMARY
-          fi
+      - name: Upload GA gate report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ga-gate-report
+          path: artifacts/ga-gate-report.json
+          if-no-files-found: error

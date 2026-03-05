@@ -1,0 +1,46 @@
+# .github/workflows/fresh-evidence-rate.yml
+name: Fresh Evidence Rate
+
+on:
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  compute:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect summaries
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p .rate
+          gh run list --branch main --json databaseId \
+            | jq -r '.[].databaseId' \
+            | while read id; do
+                gh run download "$id" -n evidence --dir ".rate/$id" || true
+              done
+
+      - name: Verify freshness
+        run: |
+          find .rate -name summary.json \
+            -exec bash scripts/ci/verify_fresh_evidence.sh {} \; || true
+
+      - name: Aggregate
+        run: |
+          node scripts/ci/collect_fresh_evidence_rate.mjs \
+            $(find .rate -name summary.json)
+
+      - name: Commit metric
+        run: |
+          git config user.name "summit-bot"
+          git config user.email "bot@summit"
+          git add docs/governance/metrics/fresh-evidence-rate.json
+          git commit -m "chore(governance): update Fresh Evidence Rate metric" || exit 0
+          git push

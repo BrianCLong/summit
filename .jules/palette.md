@@ -44,7 +44,3 @@
 
 **Learning:** Hardcoding Mac-specific symbols (like ⌘) in keyboard shortcut hints alienates Windows and Linux users. Using a simple platform detection utility ensures that all users receive relevant and intuitive instructions.
 **Action:** Use the `isMac` utility from `@/lib/utils` to conditionally render '⌘'/'Ctrl' and '⇧'/'Shift' in all shortcut hints across the application.
-
-## 2025-10-29 - Semantic Headings vs Forms
-**Learning:** Using `<label>` tags to visually style section headings (like an "Answer" section) confuses screen readers as it expects an associated form input.
-**Action:** Use proper heading tags (like `<h4>`) for structural sections and reserve `<label>` exclusively for form input association. Always use `id` and `htmlFor` to bind them explicitly.

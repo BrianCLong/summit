@@ -27,20 +27,17 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 **Commitment:** Minimal; intro-level engagement
 **Benefits:**
-
 - Partner portal access
 - Basic sales enablement materials
 - Referral fee eligibility (15%)
 - Quarterly partner newsletter
 
 **Requirements:**
-
 - Signed partner agreement
 - Complete partner onboarding (1 hour)
 - Identify 2+ potential opportunities
 
 **Support:**
-
 - Email support
 - Quarterly check-ins
 
@@ -50,7 +47,6 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 **Commitment:** Moderate; trained and enabled
 **Benefits:**
-
 - All Registered benefits, plus:
 - Enhanced referral fee (20%)
 - Resell authorization (15% margin)
@@ -60,14 +56,12 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 - Joint marketing fund access ($5k/year)
 
 **Requirements:**
-
 - 2+ team members complete Summit certification
 - $100k+ influenced pipeline (trailing 12 months)
 - Quarterly business reviews
 - Customer success commitment
 
 **Support:**
-
 - Dedicated partner manager
 - Pre-sales technical support
 - Monthly syncs
@@ -78,7 +72,6 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 
 **Commitment:** Strategic; deep integration
 **Benefits:**
-
 - All Certified benefits, plus:
 - Premium referral fee (25%)
 - Enhanced resell margin (20-25%)
@@ -90,7 +83,6 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 - Custom training/enablement
 
 **Requirements:**
-
 - $500k+ closed revenue (trailing 12 months)
 - 3+ certified practitioners
 - Named account alignment
@@ -98,7 +90,6 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 - Joint go-to-market plan
 
 **Support:**
-
 - Executive sponsor
 - Dedicated solutions architect
 - Weekly pipeline reviews
@@ -116,7 +107,6 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 | Premier | 25% | Net 30 after customer payment |
 
 **Eligibility:**
-
 - Referral must be net-new opportunity
 - Deal registration required within 14 days of intro
 - Customer must close within 12 months
@@ -132,7 +122,6 @@ Summit's partner program is designed to accelerate go-to-market in government, d
 | Premier | 20-25% | Volume-based; negotiable |
 
 **Terms:**
-
 - Partner contracts with customer
 - Summit invoices partner at discounted rate
 - Partner responsible for collections
@@ -181,14 +170,12 @@ For joint delivery engagements:
 
 **Duration:** 4 hours (self-paced + live assessment)
 **Content:**
-
 - Summit platform overview (1 hr)
 - Value proposition & positioning (1 hr)
 - Demo certification (1 hr)
 - Sales process & deal registration (1 hr)
 
 **Assessment:**
-
 - Platform demo delivery (pass/fail)
 - Value proposition pitch (pass/fail)
 
@@ -201,14 +188,12 @@ For joint delivery engagements:
 **Duration:** 8 hours (instructor-led + hands-on)
 **Prerequisites:** Certified Practitioner
 **Content:**
-
 - Technical architecture deep dive (2 hrs)
 - Deployment patterns (cloud, on-prem, air-gap) (2 hrs)
 - Integration & data sources (2 hrs)
 - Security & compliance (2 hrs)
 
 **Assessment:**
-
 - Architecture design exercise
 - Hands-on deployment lab
 
@@ -241,7 +226,6 @@ For joint delivery engagements:
 | Premier | $25,000 | Events, content, campaigns, ABM |
 
 **MDF Rules:**
-
 - 50/50 cost share (partner matches Summit contribution)
 - Pre-approval required
 - Receipts/proof of performance required
@@ -320,7 +304,6 @@ For joint delivery engagements:
 ### Quarterly Business Review (QBR)
 
 **Agenda:**
-
 1. Pipeline review (registered, qualified, closing)
 2. Closed business (trailing quarter)
 3. Enablement status (certifications, training)

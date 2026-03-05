@@ -1,11 +1,8 @@
 import { jest } from '@jest/globals';
 import fs from 'fs';
-import * as pgReal from 'pg';
-
-const isMockEnabled = process.env.ZERO_FOOTPRINT !== 'false';
 
 const logFile = '/tmp/debug_pg_mock.txt';
-try { fs.appendFileSync(logFile, `PG MOCK LOADED at ${new Date().toISOString()} (enabled: ${isMockEnabled})\n`); } catch (_) { }
+try { fs.appendFileSync(logFile, `PG MOCK LOADED at ${new Date().toISOString()}\n`); } catch (_) { }
 
 const mockUser = {
   id: 'mock-user-id',
@@ -90,12 +87,17 @@ export const mockPool = {
   waitingCount: 0,
 };
 
-// Use real pg classes if mocking is disabled (for integration tests)
-export const Pool = isMockEnabled ? class { constructor() { return mockPool; } } : pgReal.Pool;
-export const Client = isMockEnabled ? class { constructor() { return mockClient; } } : pgReal.Client;
-export const types = isMockEnabled ? {
+export class Pool {
+  constructor() { return mockPool; }
+}
+
+export class Client {
+  constructor() { return mockClient; }
+}
+
+export const types = {
   setTypeParser: jest.fn(),
   getTypeParser: jest.fn().mockReturnValue((val: string) => val),
-} : pgReal.types;
+};
 
 export default { Pool, Client, types, mockPool, mockClient };

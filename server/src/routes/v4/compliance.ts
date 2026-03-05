@@ -378,7 +378,7 @@ router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment((req.params.id as string));
+    const assessment = await hipaaService!.getAssessment(req.params.id);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
@@ -647,7 +647,7 @@ router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
   async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment((req.params.id as string));
+    const assessment = await soxService!.getAssessment(req.params.id);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
