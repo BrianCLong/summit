@@ -1,5 +1,4 @@
 {
-  "adapter_overhead_ms": 0,
-  "memory_increment_mb": 0,
-  "policy_failure_rate": 1
+  "adapter_load_success_rate_slo": 0.999,
+  "policy_failure_rate_alert_threshold": 0.01
 }

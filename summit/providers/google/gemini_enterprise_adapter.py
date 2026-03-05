@@ -1,65 +1,54 @@
 from __future__ import annotations
 
 import json
-import os
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
-from .policy import enforce_admin_policy
+from .policy import EnterprisePolicy, EnterprisePolicyError, parse_enterprise_policy
+
+
+@dataclass(frozen=True)
+class EnforcementResult:
+    provider: str
+    workspace_bound: bool
+    policy_status: str
+    controls: tuple[str, ...]
+
+    def to_report(self) -> dict[str, Any]:
+        return {
+            "provider": self.provider,
+            "workspace_bound": self.workspace_bound,
+            "policy_status": self.policy_status,
+            "controls": list(self.controls),
+        }
 
 
 class GeminiEnterpriseAdapter:
-    """Minimal enterprise-aware Gemini adapter with deterministic reporting."""
-
     PROVIDER_ID = "google_gemini_enterprise"
 
-    def __init__(
-        self,
-        workspace_id: str | None,
-        admin_policy: dict[str, Any] | None = None,
-        enterprise_flag: bool | None = None,
-    ) -> None:
+    def __init__(self, workspace_id: str | None = None):
         self.workspace_id = workspace_id
-        self.admin_policy = admin_policy
-        self.enterprise_flag = (
-            enterprise_flag
-            if enterprise_flag is not None
-            else _env_flag("FEATURE_GEMINI_ENTERPRISE")
-        )
 
     def supports_enterprise_controls(self) -> bool:
         return True
 
-    def is_enabled(self) -> bool:
-        return self.enterprise_flag
+    def enforce_policy(self, raw_policy: Mapping[str, Any] | None) -> EnforcementResult:
+        if not self.workspace_id:
+            raise EnterprisePolicyError("Workspace ID required for enterprise adapter")
 
-    def compile_report(self) -> dict[str, Any]:
-        policy_result = enforce_admin_policy(self.admin_policy)
-        controls = [
-            {
-                "id": evidence_id,
-                "status": "deny" if not policy_result.allowed else "allow",
-            }
-            for evidence_id in policy_result.violations
-        ]
-
-        return {
-            "provider": self.PROVIDER_ID,
-            "workspace_bound": bool(self.workspace_id),
-            "policy_status": policy_result.policy_status,
-            "controls": controls,
-        }
-
-    def write_report(self, report_path: str | Path) -> None:
-        report = self.compile_report()
-        report_file = Path(report_path)
-        report_file.parent.mkdir(parents=True, exist_ok=True)
-        report_file.write_text(
-            json.dumps(report, sort_keys=True, indent=2) + "\n",
-            encoding="utf-8",
+        policy: EnterprisePolicy = parse_enterprise_policy(raw_policy)
+        return EnforcementResult(
+            provider=self.PROVIDER_ID,
+            workspace_bound=policy.workspace_bound,
+            policy_status=policy.policy_status,
+            controls=policy.controls,
         )
 
-
-def _env_flag(name: str) -> bool:
-    value = os.environ.get(name, "")
-    return value.lower() in {"1", "true", "yes", "on"}
+    def write_deterministic_report(self, output_path: str | Path, raw_policy: Mapping[str, Any] | None) -> dict[str, Any]:
+        result = self.enforce_policy(raw_policy)
+        payload = result.to_report()
+        destination = Path(output_path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return payload
