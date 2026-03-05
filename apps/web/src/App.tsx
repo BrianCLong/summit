@@ -36,9 +36,7 @@ const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
 const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
 const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
 const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
-
 const FeatureFlagsPage = React.lazy(() => import('@/pages/admin/FeatureFlags'))
-const RagHealthDashboard = React.lazy(() => import('@/pages/admin/RagHealthDashboard'))
 const ConsistencyDashboard = React.lazy(() => import('@/pages/admin/ConsistencyDashboard').then(m => ({ default: m.ConsistencyDashboard })))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
@@ -74,6 +72,7 @@ import { ResilienceProvider } from '@/contexts/ResilienceContext'
 import { ErrorBoundary, NotFound, DataFetchErrorBoundary, MutationErrorBoundary } from '@/components/error'
 import Explain from '@/components/Explain'
 import { CommandStatusProvider } from '@/features/internal-command/CommandStatusProvider'
+import { SnapshotProvider } from '@/features/snapshots'
 import { DemoIndicator } from '@/components/common/DemoIndicator'
 import { DemoModeGate } from '@/components/common/DemoModeGate'
 import { isDemoModeEnabled } from '@/lib/demoMode'
@@ -103,9 +102,10 @@ function App() {
           <AuthProvider>
             <FeatureFlagProvider>
               <SearchProvider>
-                <CommandStatusProvider>
-                  <ResilienceProvider>
-                    <Router>
+                <SnapshotProvider>
+                  <CommandStatusProvider>
+                    <ResilienceProvider>
+                      <Router>
                       <ErrorBoundary
                         enableRetry={true}
                         maxRetries={3}
@@ -300,14 +300,6 @@ function App() {
                             </MutationErrorBoundary>
                           }
                         />
-                        <Route
-                          path="admin/rag-health"
-                          element={
-                            <DataFetchErrorBoundary dataSourceName="RAG Health">
-                              <RagHealthDashboard />
-                            </DataFetchErrorBoundary>
-                          }
-                        />
 
                         {/* Support */}
                         <Route path="help" element={<HelpPage />} />
@@ -334,9 +326,10 @@ function App() {
                     </Routes>
                     </React.Suspense>
                     </ErrorBoundary>
-                  </Router>
-                  </ResilienceProvider>
-                </CommandStatusProvider>
+                      </Router>
+                    </ResilienceProvider>
+                  </CommandStatusProvider>
+                </SnapshotProvider>
               </SearchProvider>
             </FeatureFlagProvider>
           </AuthProvider>

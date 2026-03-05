@@ -1,3 +1,5 @@
+version: '3.9'
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -98,21 +100,22 @@ services:
 
   api:
     build:
-      context: ./server
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: server/Dockerfile.dev
     container_name: summit-api
     restart: unless-stopped
     env_file:
       - .env
     environment:
       PORT: 4000
-      DATABASE_URL: ${DATABASE_URL:-postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USERNAME: ${NEO4J_USERNAME:-neo4j}
       NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_URL: redis://redis:6379
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_USERNAME: elastic
       ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-devpassword}
@@ -281,8 +284,8 @@ services:
 
   web:
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/web/Dockerfile.dev
     container_name: summit-web
     restart: unless-stopped
     env_file:
