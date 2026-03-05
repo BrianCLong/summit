@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added coordination evaluation and CI governance initiative with deterministic artifacts.",
+  "revision_note": "Added modular boundary verifier MWS initiative for deterministic MBV evidence artifacts.",
   "initiatives": [
     {
-      "id": "coordination-evaluation-governance",
+      "id": "modular-boundary-verifier-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Introduced coordination schema, deterministic scoring artifacts, CI quality gate, context hash ledger, and operations runbook."
+      "notes": "Implemented summit.modulith baseline (modules config, scanner, verifier, deterministic report/metrics/stamp artifacts, and tests)."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
