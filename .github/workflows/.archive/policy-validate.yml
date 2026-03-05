@@ -2,6 +2,11 @@ name: Policy Validation
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "policies/**"
       - "packages/policy-cards/**"

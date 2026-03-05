@@ -8,6 +8,11 @@ on:
       - 'schemas/archsim/**'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'modules/archsim/**'
       - 'schemas/archsim/**'

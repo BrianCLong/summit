@@ -3,6 +3,11 @@ name: Supply Chain Gates
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "package.json"
       - "pnpm-lock.yaml"

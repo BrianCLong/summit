@@ -2,6 +2,11 @@ name: Dependency Monitoring
 
 on:
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     branches:
       - main
   push:

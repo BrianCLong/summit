@@ -5,10 +5,15 @@ on:
 
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "server/**"
       - "apps/gateway/**"
-      - "docker-compose.dev.yml"
+      - "docker-compose.dev.yaml"
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
@@ -17,7 +22,7 @@ on:
     paths:
       - "server/**"
       - "apps/gateway/**"
-      - "docker-compose.dev.yml"
+      - "docker-compose.dev.yaml"
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
@@ -37,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Validate Docker Compose Config
-        run: docker compose -f docker-compose.dev.yml config
+        run: touch .env && docker compose -f docker-compose.dev.yaml config
 
   verify-server-build:
     runs-on: ubuntu-latest
@@ -50,7 +55,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
@@ -64,4 +69,4 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Gateway Docker Image
-        run: docker compose -f docker-compose.dev.yml build gateway
+        run: docker compose -f docker-compose.dev.yaml build gateway

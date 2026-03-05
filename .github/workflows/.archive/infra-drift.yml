@@ -3,6 +3,11 @@ name: Infra Drift Risk
 on:
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - "infra/**"
       - ".github/workflows/infra-drift.yml"

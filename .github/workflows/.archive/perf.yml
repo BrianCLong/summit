@@ -5,6 +5,11 @@ on:
   schedule:
     - cron: '0 2 * * *' # Run nightly at 2 AM
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
     paths:
       - 'k6/**'
       - '.github/workflows/perf.yml'
