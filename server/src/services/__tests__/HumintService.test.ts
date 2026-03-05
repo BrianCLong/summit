@@ -1,5 +1,4 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
-import { HumintService } from '../HumintService.js';
+import { describe, it, expect, jest, beforeAll, beforeEach } from '@jest/globals';
 import { SourceReliability, SourceStatus, ReportGrading } from '../../types/humint.js';
 
 // Mock dependencies
@@ -23,12 +22,18 @@ const mockDriver = {
   configuration: jest.fn(),
 };
 
-jest.mock('../../config/database.js', () => ({
+jest.unstable_mockModule('../../config/database.js', () => ({
   getPostgresPool: () => ({
     query: mockQuery,
   }),
   getNeo4jDriver: () => mockDriver,
 }));
+
+let HumintService: typeof import('../HumintService.js').HumintService;
+
+beforeAll(async () => {
+  ({ HumintService } = await import('../HumintService.js'));
+});
 
 describe('HumintService', () => {
   let service: HumintService;
