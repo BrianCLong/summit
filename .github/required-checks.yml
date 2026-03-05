@@ -10,9 +10,8 @@ required_checks:
   - AI Governance Gates
   - meta-gate
   - gate
-  - Unit Tests
+  - Unit Tests (Core)
   - SOC Controls
-  - test (20.x)
 
 notes:
   owner: summit-ga

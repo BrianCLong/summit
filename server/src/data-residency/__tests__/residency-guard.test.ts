@@ -1,3 +1,4 @@
+import type { ResidencyGuard as IResidencyGuard } from "../residency-guard.js";
 import { jest } from '@jest/globals';
 
 const queryMock = jest.fn();
@@ -10,7 +11,7 @@ jest.unstable_mockModule('../../db/postgres.js', () => ({
 const { ResidencyGuard, ResidencyViolationError } = await import('../residency-guard.js');
 
 describe('ResidencyGuard', () => {
-  let guard: ResidencyGuard;
+  let guard: IResidencyGuard;
 
   beforeEach(() => {
     jest.clearAllMocks();

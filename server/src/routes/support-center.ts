@@ -205,7 +205,7 @@ router.post(
       const { id } = req.params;
       const { helpful } = VoteSchema.parse(req.body);
 
-      await supportCenterService.voteArticle(id, helpful);
+      await supportCenterService.voteArticle((id as string), helpful);
 
       res.json({ success: true });
     } catch (error: any) {
@@ -380,7 +380,7 @@ router.post(
       const { id: userId } = req.user!;
 
       const result = await supportCenterService.addMessage(
-        ticketId,
+        (ticketId as string),
         userId,
         'customer',
         content,
@@ -407,7 +407,7 @@ router.post(
       const { ticketId } = req.params;
       const { reason } = req.body;
 
-      const result = await supportCenterService.escalateTicket(ticketId, reason || 'User requested escalation');
+      const result = await supportCenterService.escalateTicket((ticketId as string), reason || 'User requested escalation');
 
       res.json(result);
     } catch (error: any) {
