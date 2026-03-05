@@ -253,5 +253,22 @@
     },
     "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
     "reverted": false
+  },
+  {
+    "id": "codex-desktop-20260208",
+    "timestamp": "2026-02-08T03:32:00Z",
+    "agentId": "codex-agent",
+    "policyVersion": "1.0.0",
+    "inputHash": "eyJjaGFuZ2UiOiJjb2RleCBkZXNrdG9wIGdhIGNvbnRyb2wgcm9vbSBhbmQgYXJjaGl0ZWN0dXJlIGxhYiBkb2NzIHdpdGggVUVGICsgTUFFU1RSTyBhbGlnbm1lbnQiLCJmaWxlcyI6WyJkb2NzL2NvZGV4LWRlc2t0b3Avc3VtbWl0LWdhLWNvbnRyb2wtcm9vbS5tZCIsImRvY3MvY29kZXgtZGVza3RvcC9nYS1jb250cm9sLXJvb20tcnVuLTIwMjYtMDItMDYubWQiLCJkb2NzL2NvZGV4LWRlc2t0b3Avc3VtbWl0LWFyY2hpdGVjdHVyZS1sYWIubWQiLCJkb2NzL3JvYWRtYXAvU1RBVFVTLmpzb24iLCJwYWNrYWdlcy9kZWNpc2lvbi1sZWRnZXIvZGVjaXNpb25fbGVkZ2VyLmpzb24iLCJwcm9tcHRzL2RvY3MvY29kZXgtZGVza3RvcC1nYS1jb250cm9sLXJvb21AdjIubWQiLCJwcm9tcHRzL2RvY3MvY29kZXgtZGVza3RvcC1nYS1jb250cm9sLXJvb21AdjEubWQiLCJwcm9tcHRzL3JlZ2lzdHJ5LnlhbWwiLCJhZ2VudHMvZXhhbXBsZXMvQ09ERVhfREVTS1RPUF9HQV9DT05UUk9MX1JPT01fMjAyNjAyMDguanNvbiJdfQ==",
+    "decision": {
+      "action": "document_codex_desktop_projects",
+      "rule": {
+        "condition": "codex desktop ga control room + architecture lab documentation required",
+        "action": "document_codex_desktop_projects",
+        "max_cost": 0
+      }
+    },
+    "reasoning": "Documented Codex Desktop GA Control Room and Architecture Lab setups with UEF outputs and MAESTRO alignment, registered the v2 prompt/task spec, and updated roadmap status. Rollback: revert the commit adding the codex desktop docs, registry entry, task spec, and status update.",
+    "reverted": false
   }
 ]
