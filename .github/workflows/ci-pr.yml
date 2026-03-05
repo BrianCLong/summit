@@ -50,7 +50,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Run ${{ matrix.task }}
@@ -98,7 +97,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Start Test Infrastructure
         run: |
@@ -155,12 +153,10 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build twice and compare checksums
@@ -197,7 +193,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Bootstrap and smoke test
         run: |
@@ -226,7 +221,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Install Playwright Browsers
@@ -281,7 +275,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run SOC control tests
@@ -306,7 +299,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Run MCP Contract Tests
