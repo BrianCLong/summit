@@ -62,7 +62,7 @@ White-label edition supports multiple isolated tenants:
 
 ## Component Architecture
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                            USER INTERFACES                               │
 ├────────────────┬───────────────┬─────────────────┬───────────────────────┤
@@ -141,7 +141,7 @@ White-label edition supports multiple isolated tenants:
 │  • Google       │  • Jira        │  • Azure OpenAI │  • Slack           │
 │  • LDAP         │  • Salesforce  │  • AWS Bedrock  │  • Teams           │
 └─────────────────┴────────────────┴─────────────────┴────────────────────┘
-```
+```text
 
 ---
 
@@ -151,7 +151,7 @@ White-label edition supports multiple isolated tenants:
 
 **Use Case:** Small to mid-size organization with single data center or cloud region.
 
-```
+```text
 ┌────────────────────────────────────────────────────────────┐
 │                      AWS/GCP/Azure                         │
 │                     (Single Region)                        │
@@ -202,7 +202,7 @@ White-label edition supports multiple isolated tenants:
 │  └───────────────────────────────────────────────────┘    │
 │                                                            │
 └────────────────────────────────────────────────────────────┘
-```
+```text
 
 **Specifications:**
 
@@ -226,7 +226,7 @@ White-label edition supports multiple isolated tenants:
 
 **Use Case:** Partner serving multiple clients across regions.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                          GLOBAL INFRASTRUCTURE                           │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -265,7 +265,7 @@ White-label edition supports multiple isolated tenants:
                             │  • Analytics          │
                             │  • Cross-region sync  │
                             └───────────────────────┘
-```
+```text
 
 **Tenant Isolation:**
 
@@ -297,7 +297,7 @@ White-label edition supports multiple isolated tenants:
 
 **Use Case:** Fully managed SaaS with 99.9% uptime SLA.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         PRODUCTION (US-EAST-1)                           │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -344,7 +344,7 @@ White-label edition supports multiple isolated tenants:
 │  • Read-only queries (reduce load on primary)                           │
 │  • Failover target (<4 hours RTO)                                       │
 └─────────────────────────────────────────────────────────────────────────┘
-```
+```text
 
 **High Availability Features:**
 
@@ -383,7 +383,7 @@ White-label edition supports multiple isolated tenants:
 
 ### Defense in Depth
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │ Layer 7: Application Security                                           │
 │ • Input validation, output encoding                                     │
@@ -434,7 +434,7 @@ White-label edition supports multiple isolated tenants:
 │ • Cloud provider data centers (SOC 2, ISO 27001)                        │
 │ • Access controls, surveillance                                         │
 └─────────────────────────────────────────────────────────────────────────┘
-```
+```text
 
 ---
 
@@ -442,7 +442,7 @@ White-label edition supports multiple isolated tenants:
 
 ### Connector Framework
 
-```
+```text
 ┌────────────────────────────────────────────────────────────────┐
 │                    External Systems                            │
 ├──────────┬──────────┬──────────┬──────────┬──────────┬────────┤
@@ -488,13 +488,13 @@ White-label edition supports multiple isolated tenants:
 │  • Relationships (works_for, participated_in, etc.)           │
 │  • Provenance (source, timestamp, confidence)                 │
 └────────────────────────────────────────────────────────────────┘
-```
+```text
 
 ---
 
 ## Monitoring & Observability
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         OBSERVABILITY STACK                              │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -524,7 +524,7 @@ White-label edition supports multiple isolated tenants:
 │  • Business KPIs │  │   • Routing      │  │   • Escalation  │
 │  • Agent metrics │  │   • Grouping     │  │                 │
 └──────────────────┘  └──────────────────┘  └─────────────────┘
-```
+```text
 
 **Key Metrics:**
 

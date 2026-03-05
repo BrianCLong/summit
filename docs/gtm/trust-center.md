@@ -10,21 +10,27 @@ Welcome to the Summit Trust Center. Security, privacy, and compliance are founda
 
 ### Architecture Principles
 
-**1. Zero Trust Architecture**
+**### 1. Zero Trust Architecture
+
+Some text.**
 
 - All access requires authentication and authorization
 - Policy-based access control (OPA/ABAC)
 - Least privilege by default
 - Continuous verification
 
-**2. Defense in Depth**
+**### 2. Defense in Depth
+
+Some text.**
 
 - Network segmentation
 - Application-layer security
 - Data encryption (at-rest and in-transit)
 - Audit logging for all operations
 
-**3. AI-First, Human-in-Command**
+**### 3. AI-First, Human-in-Command
+
+Some text.**
 
 - AI agents recommend, humans approve
 - Explainable AI decisions
@@ -134,15 +140,15 @@ Welcome to the Summit Trust Center. Security, privacy, and compliance are founda
 
 ### Current Status
 
- | Standard | Status | Notes |
- |----------|--------|-------|
- | **SOC 2 Type I** | In Progress | Expected Q1 2026 (Hosted SaaS) |
- | **SOC 2 Type II** | Planned | Expected Q3 2026 (Hosted SaaS) |
- | **ISO 27001** | Planned | Expected Q2 2026 |
- | **GDPR** | Compliant | Self-hosted: customer-controlled. SaaS: DPA available |
- | **HIPAA** | Ready | BAA available for Enterprise customers |
- | **CCPA** | Compliant | Privacy controls implemented |
- | **FedRAMP** | Roadmap | Targeting 2027 |
+| Standard | Status | Notes |
+| ---------- | -------- | ------- |
+| **SOC 2 Type I** | In Progress | Expected Q1 2026 (Hosted SaaS) |
+| **SOC 2 Type II** | Planned | Expected Q3 2026 (Hosted SaaS) |
+| **ISO 27001** | Planned | Expected Q2 2026 |
+| **GDPR** | Compliant | Self-hosted: customer-controlled. SaaS: DPA available |
+| **HIPAA** | Ready | BAA available for Enterprise customers |
+| **CCPA** | Compliant | Privacy controls implemented |
+| **FedRAMP** | Roadmap | Targeting 2027 |
 
 ### Framework Alignment
 
@@ -470,13 +476,13 @@ Customers notified 30 days before adding new subprocessors.
 
 ### Shared Responsibility Model
 
- | Layer | Summit | Customer |
- |-------|--------|----------|
- | **Application** | Code security, vulnerability management | Secure configuration, user management |
- | **Data** | Encryption, backup | Classification, access control policies |
- | **Network** | Infrastructure security, DDoS protection | Firewall rules (self-hosted), VPN config |
- | **Identity** | SSO integration, MFA | User provisioning, role management |
- | **Compliance** | Controls, audits (SaaS) | Policy enforcement, internal audits |
+| Layer | Summit | Customer |
+| ------- | -------- | ---------- |
+| **Application** | Code security, vulnerability management | Secure configuration, user management |
+| **Data** | Encryption, backup | Classification, access control policies |
+| **Network** | Infrastructure security, DDoS protection | Firewall rules (self-hosted), VPN config |
+| **Identity** | SSO integration, MFA | User provisioning, role management |
+| **Compliance** | Controls, audits (SaaS) | Policy enforcement, internal audits |
 
 ### Best Practices
 
