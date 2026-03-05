@@ -1,0 +1,55 @@
+name: AI Governance Gates
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install -g typescript ts-node
+
+      - name: Verify Policy Enforcement Files
+        run: |
+          if [ ! -f "src/agents/policies/redlines.ts" ]; then
+            echo "Error: Hard-coded red lines file is missing!"
+            exit 1
+          fi
+          if [ ! -f "src/agents/policies/allowedUseMatrix.ts" ]; then
+             echo "Error: Allowed use matrix file is missing!"
+             exit 1
+          fi
+          if [ ! -f "src/agents/policies/intentClassifier.ts" ]; then
+             echo "Error: Intent classifier file is missing!"
+             exit 1
+          fi
+          if [ ! -f "src/api/rest/middleware/policyGuard.ts" ]; then
+             echo "Error: REST policy guard middleware is missing!"
+             exit 1
+          fi
+          if [ ! -f "src/api/graphql/middleware/policyGuard.ts" ]; then
+             echo "Error: GraphQL policy guard middleware is missing!"
+             exit 1
+          fi
+
+      - name: Check Documentation Presence
+        run: |
+           if [ ! -f "docs/security/ai-usage-boundaries.md" ]; then
+             echo "Error: AI usage boundaries documentation is missing!"
+             exit 1
+           fi
+           if [ ! -f "docs/governance/human-in-loop-requirements.md" ]; then
+             echo "Error: Human-in-loop requirements documentation is missing!"
+             exit 1
+           fi

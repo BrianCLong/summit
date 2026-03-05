@@ -1,0 +1,23 @@
+# Environment overrides enabling progressive delivery defaults for canary releases.
+rollout:
+  enabled: true
+  canary:
+    initialWeight: 10
+    secondWeight: 50
+    initialPause: 3m
+    secondPause: 7m
+  metrics:
+    successRate:
+      successCondition: "result[0] >= 0.97"
+      failureCondition: "result[0] < 0.92"
+    errorRate:
+      successCondition: "result[0] <= 0.03"
+      failureCondition: "result[0] > 0.08"
+    latency:
+      successCondition: "result[0] <= 1500"
+      failureCondition: "result[0] > 4000"
+  tests:
+    enabled: true
+monitoring:
+  prometheus:
+    server: prometheus-operated.monitoring.svc.cluster.local

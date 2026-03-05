@@ -9,6 +9,7 @@ echo "🚀 Starting SBOM Generation Process..."
 # Configuration
 ARTIFACT_NAME=${1:-"summit-platform"}
 VERSION=${2:-$(git describe --tags --always)}
+VERSION=$(echo "$VERSION" | tr '/' '-')
 OUTPUT_DIR=${3:-"./sboms"}
 TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
