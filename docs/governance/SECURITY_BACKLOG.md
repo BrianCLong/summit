@@ -22,12 +22,12 @@ This is the deterministic backlog for security vulnerabilities, governance gaps,
 
 | id      | category          | severity | affected_area     | fix_type | owner               | status      | evidence_link   | notes                                                            |
 | :------ | :---------------- | :------- | :---------------- | :------- | :------------------ | :---------- | :-------------- | :--------------------------------------------------------------- |
-| SEC-001 | code_scanning     | P1       | repo_root         | docs     | @acme/security-team | resolved    | [PR #...](link) | Initial Triage Pack implementation.                              |
+| SEC-001 | code_scanning     | P1       | repo_root         | docs     | @acme/security-team | resolved    | PR #... | Initial Triage Pack implementation.                              |
 | SEC-002 | dependabot        | P2       | multiple          | code     | @acme/platform-core | backlog     | N/A             | Review transitive dependency vulnerabilities in production path. |
-| SEC-003 | provenance        | P1       | infra/ci          | config   | @acme/ops-team      | resolved    | [PR #...](link) | SLSA Provenance and SBOM generation policy established.          |
+| SEC-003 | provenance        | P1       | infra/ci          | config   | @acme/ops-team      | resolved    | PR #... | SLSA Provenance and SBOM generation policy established.          |
 | SEC-004 | disclosure        | P2       | SECURITY.md       | docs     | @acme/security-team | in_progress | N/A             | Clarify disclosure expectations and reporting process.           |
 | SEC-005 | iam               | P1       | .github/workflows | config   | @acme/security-team | backlog     | N/A             | Audit GitHub Actions for broad `permissions:` and pin by SHA.    |
-| SEC-006 | secret_management | P0       | repo_root         | code     | @acme/ops-team      | resolved    | [PR #...](link) | Secrets triage and rotation runbook added to security-triage.md. |
+| SEC-006 | secret_management | P0       | repo_root         | code     | @acme/ops-team      | resolved    | PR #... | Secrets triage and rotation runbook added to security-triage.md. |
 
 ---
 
