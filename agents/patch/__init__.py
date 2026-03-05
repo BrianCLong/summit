@@ -1,1 +1,1 @@
-"""Patch engine and diff formatting for autonomous engineer v2."""
+# Patch agent module

@@ -1,1 +1,1 @@
-"""Deterministic tool orchestration primitives."""
+# Tools agent module

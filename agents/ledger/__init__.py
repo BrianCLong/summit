@@ -1,1 +1,1 @@
-"""Execution ledger persistence interfaces."""
+# Ledger agent module
