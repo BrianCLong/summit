@@ -35,7 +35,7 @@ export class OpaClient {
       }
 
       const body = await response.json();
-      
+
       // If OPA policy is missing or returns nothing, fail safe to HITL
       if (!body.result) {
         return {

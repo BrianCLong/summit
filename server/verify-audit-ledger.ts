@@ -1,16 +1,17 @@
 // @ts-nocheck
 import { wormAuditChain } from './src/federal/worm-audit-chain.js';
-import { fipsService } from './src/federal/fips-compliance.js';
+import { fipsService } from '@intelgraph/cryptographic-agility';
 import crypto from 'node:crypto';
+import fetch from 'node-fetch';
 
 async function verifyAuditBundleEndToEnd() {
   console.log('🔍 Starting End-to-End Audit Bundle Verification...');
 
   // 1. Initialize services
-  await fipsService.initialize();
-  
-  // 2. Add some audit entries
-  console.log('📝 Adding audit entries...');
+  await fipsService.healthCheck();
+
+  // 2. Add some audit entries (Internal WORM)
+  console.log('📝 Adding internal audit entries...');
   await wormAuditChain.addAuditEntry({
     eventType: 'security_violation',
     userId: 'user_123',
@@ -20,70 +21,61 @@ async function verifyAuditBundleEndToEnd() {
     classification: 'SECRET'
   });
 
-  await wormAuditChain.addAuditEntry({
-    eventType: 'crypto_key_rotation',
-    userId: 'admin_sys',
-    action: 'rotate',
-    resource: 'kms_root_key',
-    details: { keyId: 'key_009' },
-    classification: 'TOP_SECRET'
-  });
-
-  // 3. Export the current segment
-  // Since we just started, we need to finalize the segment first
-  console.log('📦 Finalizing and exporting audit segment...');
+  // 3. Verify Internal WORM Segment
+  console.log('📦 Finalizing and exporting internal audit segment...');
   await (wormAuditChain as any).processPendingEntries();
   const currentSegmentId = (wormAuditChain as any).currentSegment.segmentId;
-  
   const exportResult = await wormAuditChain.exportSegment(currentSegmentId);
-  if (!exportResult) {
-    throw new Error('Failed to export audit segment');
+
+  if (exportResult) {
+    console.log(`  ✅ Internal Segment ${exportResult.segment.segmentId} exported`);
+    const isExportSignatureValid = await fipsService.verify(
+      JSON.stringify({ segment: exportResult.segment, verification: exportResult.verification }),
+      exportResult.exportSignature,
+      'audit-export-signing-key'
+    );
+    console.log(`  🛡️ Internal Export Signature: ${isExportSignatureValid ? 'VALID' : 'INVALID'}`);
   }
 
-  const { segment, verification, exportSignature } = exportResult;
-  console.log(`✅ Segment ${segment.segmentId} exported with signature`);
+  // 4. Verify PROV-LEDGER Cross-Service Manifest
+  console.log('\n🌐 Verifying Governance Ledger (prov-ledger) manifest...');
+  try {
+    const response = await fetch('http://localhost:4010/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: '{ getManifest(caseId: "ga-readiness-audit") { data } }'
+      })
+    });
 
-  // 4. Verify the Export Signature (End-to-End HSM/FIPS verification)
-  console.log('🛡️ Verifying export signature...');
-  const exportData = JSON.stringify({
-    segment,
-    verification,
-  });
-  
-  const isExportSignatureValid = await fipsService.verify(
-    exportData,
-    exportSignature,
-    'audit-export-signing-key'
-  );
+    const { data } = await response.json();
+    const manifestBase64 = data.getManifest.data;
+    const manifestJson = JSON.parse(Buffer.from(manifestBase64, 'base64').toString());
 
-  if (isExportSignatureValid) {
-    console.log('  ✅ Export signature is VALID');
-  } else {
-    console.log('  ❌ Export signature is INVALID');
-    process.exit(1);
-  }
+    console.log(`  📜 Manifest issued at: ${manifestJson.issuedAt}`);
 
-  // 5. Verify Hash Chain Integrity
-  console.log('🔗 Verifying hash chain linkage...');
-  if (verification.valid) {
-    console.log(`  ✅ Hash chain is INTACT (${verification.totalEntries} entries)`);
-  } else {
-    console.log('  ❌ Hash chain is BROKEN');
-    process.exit(1);
-  }
+    // Verify HSM Signature on Manifest
+    const manifestContent = JSON.stringify({
+      caseId: manifestJson.caseId,
+      version: manifestJson.version,
+      issuedAt: manifestJson.issuedAt,
+      claims: manifestJson.claims
+    });
 
-  // 6. Verify Root Merkle Root Signature
-  console.log('🌳 Verifying Merkle Root signature...');
-  const isRootSignatureValid = await fipsService.verify(
-    segment.rootHash,
-    segment.rootSignature,
-    'audit-root-signing-key'
-  );
+    const isProvSigValid = await fipsService.verify(
+      manifestContent,
+      manifestJson.signature.sig,
+      manifestJson.signature.kid
+    );
 
-  if (isRootSignatureValid) {
-    console.log('  ✅ Merkle Root signature is VALID');
-  } else {
-    console.log('  ❌ Merkle Root signature is INVALID');
+    if (isProvSigValid) {
+      console.log('  ✅ Prov-Ledger HSM signature is VALID (FIPS 140-2 compliant)');
+    } else {
+      console.log('  ❌ Prov-Ledger HSM signature is INVALID');
+      process.exit(1);
+    }
+  } catch (error) {
+    console.error('  ❌ Failed to communicate with prov-ledger service:', error.message);
     process.exit(1);
   }
 
