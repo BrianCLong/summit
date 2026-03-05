@@ -1,20 +1,23 @@
 import { CloudProvider, SummitQuery, Result } from '../providers/cloud-provider';
 
 export class ProviderRouter {
-  constructor(private providers: CloudProvider[]) {}
+  private providers: CloudProvider[];
+
+  constructor(providers: CloudProvider[]) {
+    this.providers = providers;
+  }
 
   async routeQuery(q: SummitQuery): Promise<Result> {
     for (const provider of this.providers) {
       if (await provider.health()) {
         try {
-          const result = await provider.query(q);
-          return result;
-        } catch (e) {
-          // Fallback on error even if health check passed
-          continue;
+          return await provider.query(q);
+        } catch (error) {
+          console.warn(`Provider ${provider.name} failed during query:`, error);
+          // Continue to next provider on query failure
         }
       }
     }
-    throw new Error('All providers unavailable');
+    throw new Error("All providers unavailable");
   }
 }

@@ -1,24 +1,18 @@
 import { CloudProvider, Result, SummitQuery } from './cloud-provider';
 
 export class AzureProvider implements CloudProvider {
-  name = 'Azure';
-  private isHealthy = true;
-
-  setHealthy(status: boolean) {
-    this.isHealthy = status;
-  }
+  name = 'azure';
 
   async health(): Promise<boolean> {
-    return this.isHealthy;
+    // In a real implementation, this would check Azure service health.
+    return true;
   }
 
   async query(q: SummitQuery): Promise<Result> {
-    if (!this.isHealthy) {
-      throw new Error('Azure Provider is unhealthy');
-    }
+    // Mock Azure query execution.
     return {
       status: 'success',
-      data: `Azure Response to ${q.id}`,
+      data: { message: `Executed query ${q.id} on Azure` },
       provider: this.name,
     };
   }

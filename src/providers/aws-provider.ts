@@ -1,24 +1,18 @@
 import { CloudProvider, Result, SummitQuery } from './cloud-provider';
 
 export class AwsProvider implements CloudProvider {
-  name = 'AWS';
-  private isHealthy = true;
-
-  setHealthy(status: boolean) {
-    this.isHealthy = status;
-  }
+  name = 'aws';
 
   async health(): Promise<boolean> {
-    return this.isHealthy;
+    // In a real implementation, this would check AWS service health.
+    return true;
   }
 
   async query(q: SummitQuery): Promise<Result> {
-    if (!this.isHealthy) {
-      throw new Error('AWS Provider is unhealthy');
-    }
+    // Mock AWS query execution.
     return {
       status: 'success',
-      data: `AWS Response to ${q.id}`,
+      data: { message: `Executed query ${q.id} on AWS` },
       provider: this.name,
     };
   }

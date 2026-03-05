@@ -1,12 +1,12 @@
 export interface SummitQuery {
   id: string;
+  type: string;
   payload: any;
 }
 
 export interface Result {
-  status: 'success' | 'error';
-  data?: any;
-  error?: string;
+  status: string;
+  data: any;
   provider: string;
 }
 

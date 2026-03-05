@@ -1,24 +1,18 @@
 import { CloudProvider, Result, SummitQuery } from './cloud-provider';
 
 export class GcpProvider implements CloudProvider {
-  name = 'GCP';
-  private isHealthy = true;
-
-  setHealthy(status: boolean) {
-    this.isHealthy = status;
-  }
+  name = 'gcp';
 
   async health(): Promise<boolean> {
-    return this.isHealthy;
+    // In a real implementation, this would check GCP service health.
+    return true;
   }
 
   async query(q: SummitQuery): Promise<Result> {
-    if (!this.isHealthy) {
-      throw new Error('GCP Provider is unhealthy');
-    }
+    // Mock GCP query execution.
     return {
       status: 'success',
-      data: `GCP Response to ${q.id}`,
+      data: { message: `Executed query ${q.id} on GCP` },
       provider: this.name,
     };
   }

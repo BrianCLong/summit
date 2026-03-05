@@ -1,41 +1,79 @@
-import { AwsProvider } from '../../src/providers/aws-provider';
-import { GcpProvider } from '../../src/providers/gcp-provider';
-import { SummitQuery } from '../../src/providers/cloud-provider';
 import { ProviderRouter } from '../../src/resilience/provider-router';
+import { CloudProvider, SummitQuery, Result } from '../../src/providers/cloud-provider';
 
-async function runTests() {
-  const aws = new AwsProvider();
-  const gcp = new GcpProvider();
-  const router = new ProviderRouter([aws, gcp]);
+// Mock Provider implementations for testing
+class MockProvider implements CloudProvider {
+  name: string;
+  isHealthy: boolean;
+  shouldFailQuery: boolean;
 
-  const q: SummitQuery = { id: 'test-1', payload: {} };
+  constructor(name: string, isHealthy: boolean = true, shouldFailQuery: boolean = false) {
+    this.name = name;
+    this.isHealthy = isHealthy;
+    this.shouldFailQuery = shouldFailQuery;
+  }
 
-  // Test 1: AWS healthy
-  let result = await router.routeQuery(q);
-  if (result.provider !== 'AWS') throw new Error('Expected AWS');
-  console.log('Test 1 Passed: Routed to AWS');
+  async health(): Promise<boolean> {
+    return this.isHealthy;
+  }
 
-  // Test 2: AWS down, fallback to GCP
-  aws.setHealthy(false);
-  result = await router.routeQuery(q);
-  if (result.provider !== 'GCP') throw new Error('Expected GCP fallback');
-  console.log('Test 2 Passed: Fallback to GCP successful');
-
-  // Test 3: Both down
-  gcp.setHealthy(false);
-  try {
-    await router.routeQuery(q);
-    throw new Error('Should have thrown');
-  } catch (e) {
-    if ((e as Error).message === 'All providers unavailable') {
-      console.log('Test 3 Passed: Both down handled correctly');
-    } else {
-      throw e;
+  async query(q: SummitQuery): Promise<Result> {
+    if (this.shouldFailQuery) {
+      throw new Error(`Query failed on ${this.name}`);
     }
+    return {
+      status: 'success',
+      data: { message: `Query resolved on ${this.name}` },
+      provider: this.name,
+    };
   }
 }
 
-runTests().catch(e => {
-  console.error(e);
-  process.exit(1);
+describe('ProviderRouter Multi-Cloud Failover', () => {
+  const dummyQuery: SummitQuery = { id: 'q1', type: 'GraphRAG', payload: { text: 'find info' } };
+
+  it('Scenario 1: AWS vector store down -> fallback to GCP', async () => {
+    const awsProvider = new MockProvider('aws', false); // Unhealthy
+    const gcpProvider = new MockProvider('gcp', true);  // Healthy
+
+    const router = new ProviderRouter([awsProvider, gcpProvider]);
+
+    const result = await router.routeQuery(dummyQuery);
+
+    expect(result.provider).toBe('gcp');
+    expect(result.status).toBe('success');
+  });
+
+  it('Scenario 2: Redis (Azure) unavailable -> fallback to alternative (AWS)', async () => {
+    const azureProvider = new MockProvider('azure', false); // Unhealthy
+    const awsProvider = new MockProvider('aws', true);    // Healthy
+
+    const router = new ProviderRouter([azureProvider, awsProvider]);
+
+    const result = await router.routeQuery(dummyQuery);
+
+    expect(result.provider).toBe('aws');
+  });
+
+  it('Scenario 3: GraphRAG query still resolves despite multiple failures', async () => {
+    const awsProvider = new MockProvider('aws', false); // Unhealthy
+    const gcpProvider = new MockProvider('gcp', true, true); // Healthy but fails query
+    const azureProvider = new MockProvider('azure', true); // Healthy and succeeds
+
+    const router = new ProviderRouter([awsProvider, gcpProvider, azureProvider]);
+
+    const result = await router.routeQuery(dummyQuery);
+
+    expect(result.provider).toBe('azure');
+    expect(result.status).toBe('success');
+  });
+
+  it('Should throw an error if all providers are unavailable or fail', async () => {
+    const awsProvider = new MockProvider('aws', false);
+    const gcpProvider = new MockProvider('gcp', false);
+
+    const router = new ProviderRouter([awsProvider, gcpProvider]);
+
+    await expect(router.routeQuery(dummyQuery)).rejects.toThrow("All providers unavailable");
+  });
 });

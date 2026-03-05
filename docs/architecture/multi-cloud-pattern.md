@@ -1,20 +1,28 @@
-# Multi-Cloud Resilience Pattern
+# Multi-Provider Redundancy Layer for Knowledge Infrastructure
 
-## Core Concept
-This document outlines the multi-cloud resilience pattern used in Summit.
-We implement a **multi-provider redundancy layer for knowledge infrastructure**,
-ensuring that our systems (GraphRAG pipelines, embeddings, inference, databases)
-do not depend on a single cloud provider.
+## Overview
+This document outlines the architectural failover mechanisms designed to provide a cloud-agnostic intelligence infrastructure. By applying the "Multi-Cloud YugabyteDB" architectural pattern, Summit ensures its knowledge and inference stack is resilient against provider degradation.
 
-## Architecture
-Instead of single-cloud deployments, Summit runs as a unified stack spanning multiple cloud providers (e.g., AWS, GCP, Azure).
+## Objective
+To ensure that GraphRAG pipelines, embeddings, inference, and database layers do not depend on a single cloud provider. The system must automatically fail over when a provider (e.g., AWS, GCP, Azure) becomes degraded or unavailable.
 
-### Key Mechanisms:
-1. **Cloud Provider Abstraction:** A unified interface for interacting with different cloud providers.
-2. **Provider Router:** A dynamic routing layer that selects available providers based on health checks.
-3. **Automatic Failover:** In the event of an outage or degradation in one provider, traffic is seamlessly routed to the next available provider.
+## Architectural Failover Mechanisms
 
-## Implementation Guidelines
-- **Health Checking:** Providers must implement a robust `health()` method.
-- **Query Routing:** The `routeQuery()` function determines the best provider.
-- **Testing:** Chaos testing and failure simulation are required to ensure resilience.
+### 1. Provider Abstraction Layer
+All backend requests routing to cloud resources utilize the `ProviderRouter`. The router implements a uniform `CloudProvider` interface (`AWS`, `GCP`, `Azure`), allowing agnostic interactions.
+
+### 2. Intelligent Routing & Failover
+Queries are iteratively routed across the pool of available providers. The system checks provider health before dispatching a query. If a primary provider (e.g., AWS vector store) is down, the system seamlessly falls back to the next available provider (e.g., GCP).
+
+### 3. Fault Tolerance Strategy
+* **Health Checks:** A preemptive `health()` check ensures traffic isn't sent to known degraded endpoints.
+* **Query Resilience:** If a provider appears healthy but fails during the execution of a `SummitQuery`, the router catches the exception and gracefully re-attempts the operation on the subsequent provider.
+* **Fallback Cascade:**
+  1. AWS (compute + storage)
+  2. GCP (vector store fallback)
+  3. Azure (backup inference fallback)
+
+## Benefits
+* **Provider Lock-in Reduction:** Abstracted interactions allow fluid migration and hybrid utilization.
+* **Outage Resilience:** Seamless failover ensures continuous operations during regional or provider-wide outages.
+* **Robust Knowledge Infrastructure:** Ensuring GraphRAG and related services remain consistently available.
