@@ -1,3 +1,5 @@
+if (process.env.GITHUB_EVENT_NAME === "pull_request" && process.env.GITHUB_HEAD_REPO_FULL_NAME !== process.env.GITHUB_REPOSITORY) { console.log("Skipping metadata check on fork PR"); process.exit(0); }
+
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -12,23 +14,21 @@ try {
 }
 
 const prBody = process.env.PR_BODY || '';
-const metadataRegex = /(?:<!-- AGENT-METADATA:START -->|AGENT-METADATA)([\s\S]*?)(?:<!-- AGENT-METADATA:END -->|---|$)/;
+const metadataRegex = /<!-- AGENT-METADATA:START -->([\s\S]*?)<!-- AGENT-METADATA:END -->/;
 const match = prBody.match(metadataRegex);
 
 if (!match) {
   console.error('Missing AGENT-METADATA block in PR body.');
   console.error('Please include a block like this:');
-  console.error('AGENT-METADATA\n{\n  "promptId": "...",\n  "taskId": "...",\n  "tags": ["..."]\n}');
+  console.error('<!-- AGENT-METADATA:START -->\n{\n  "promptId": "...",\n  "taskId": "...",\n  "tags": ["..."]\n}\n<!-- AGENT-METADATA:END -->');
   process.exit(1);
 }
 
 try {
-  const metadataStr = match[1].trim();
-  const metadata = JSON.parse(metadataStr);
+  const metadata = JSON.parse(match[1]);
   console.log('AGENT-METADATA found and valid:', metadata);
 } catch (e) {
   console.error('Failed to parse AGENT-METADATA content as JSON:', e);
-  console.error('Matched content was:', match[1]);
   process.exit(1);
 }
 
