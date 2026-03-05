@@ -11,6 +11,11 @@ name: "GA Gate"
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - 'evidence/**'
   push:
     branches: [main]
   merge_group:
@@ -39,8 +44,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
+          node-version: 20
           cache: 'pnpm'
-          node-version-file: .nvmrc
 
       - name: Install Dependencies
         run: pnpm install --no-frozen-lockfile

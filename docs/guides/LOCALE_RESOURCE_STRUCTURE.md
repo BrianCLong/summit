@@ -20,6 +20,7 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 ## JSON Structure Example
 
 ### `common.json`
+
 ```json
 {
   "actions": {
@@ -43,6 +44,7 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 ```
 
 ### `dashboard.json`
+
 ```json
 {
   "welcome": "Welcome back, {name}",
@@ -64,6 +66,7 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 ```
 
 ### `auth.json`
+
 ```json
 {
   "login": {
@@ -82,12 +85,13 @@ We split translations into **namespaces** to keep bundle sizes small and allow l
 
 ## Key Guidelines
 
-1.  **Nesting**: Use nesting up to 3 levels max for readability.
-2.  **Parameters**: Use `{paramName}` for interpolation.
-3.  **ICU Format**: Use ICU syntax for formatting within strings.
-    *   `{count, number}`
-    *   `{date, date, short}`
-4.  **Plurals**:
+1. **Nesting**: Use nesting up to 3 levels max for readability.
+2. **Parameters**: Use `{paramName}` for interpolation.
+3. **ICU Format**: Use ICU syntax for formatting within strings.
+    * `{count, number}`
+    * `{date, date, short}`
+4. **Plurals**:
+
     ```json
     "itemsSelected": "{count, plural, =0 {No items selected} one {# item selected} other {# items selected}}"
     ```
