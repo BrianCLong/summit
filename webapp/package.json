@@ -10,7 +10,7 @@
     "prettier": "^3.3.3"
   },
   "dependencies": {
-    "hono": "^4.11.4"
+    "hono": "^4.11.10"
   },
   "version": "4.2.3"
 }
