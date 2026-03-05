@@ -1,15 +1,14 @@
 import express from 'express';
-import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 import { BackupInventoryService } from '../dr/backup-inventory/BackupInventoryService.js';
 import { PolicyChecker } from '../dr/backup-inventory/PolicyChecker.js';
 import { BackupPolicy } from '../dr/backup-inventory/types.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// SEC-2025-001: Enforce authentication and admin role for disaster recovery operations
+// SEC-2026-003: Protect Disaster Recovery endpoints with authentication and RBAC
 router.use(ensureAuthenticated);
 router.use(ensureRole(['ADMIN', 'admin']));
-
 const service = BackupInventoryService.getInstance();
 const checker = new PolicyChecker();
 

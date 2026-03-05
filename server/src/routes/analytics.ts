@@ -1,20 +1,16 @@
 import { Router } from 'express';
-import { ensureAuthenticated } from '../middleware/auth.js';
 import { AnalyticsService } from '../services/AnalyticsService.js';
-import { ensureRole } from '../middleware/auth.js';
 import { logger } from '../config/logger.js';
 import { dpEngine } from '../privacy/dp/DifferentialPrivacyEngine.js';
 import { handleTelemetryEvent } from '../analytics/telemetry/TelemetryController.js';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth.js';
 
 const router = Router();
 
-// SEC-2025-001: Enforce authentication for analytics operations
+// SEC-2026-004: Protect Analytics endpoints with authentication and RBAC
 router.use(ensureAuthenticated);
-
+router.use(ensureRole(['ADMIN', 'admin', 'ANALYST', 'analyst']));
 const analyticsService = AnalyticsService.getInstance();
-
-// SEC-Hardening: Enforce RBAC for analytics operations
-router.use(ensureRole(['ADMIN', 'ANALYST']));
 
 // Helper to handle async route errors
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
@@ -56,8 +52,8 @@ router.get(
     );
 
     // Apply Differential Privacy to community sizes if enabled
-    if (dp === 'true' && result.data) {
-      result.data = result.data.map((c: any) => ({
+    if (dp === 'true' && result.communities) {
+      result.communities = result.communities.map((c: any) => ({
         ...c,
         size: dpEngine.privatizeAggregate(c.size, { epsilon: 0.5 }),
         isPrivatized: true
