@@ -1,0 +1,8 @@
+name: ci-verify
+on: [pull_request]
+jobs:
+ verify:
+   runs-on: ubuntu-latest
+   steps:
+    - name: Verify self flow
+      run: npx tsx .github/scripts/verify_self_flow.ts
