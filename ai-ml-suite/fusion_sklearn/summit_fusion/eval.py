@@ -1,42 +1,41 @@
-from sklearn.linear_model import LogisticRegression
+from typing import Any, Dict, Tuple
+
+import pandas as pd
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
-from .fusion import build_fusion_pipeline
 
-
-def leakage_safe_split_and_fit(
-    texts: list[str],
-    labels: list[int],
+def leakage_safe_split_and_train(
+    pipeline: Pipeline,
+    df: pd.DataFrame,
     test_size: float = 0.2,
-    random_state: int = 42,
-    use_dummy_embeddings: bool = True
-) -> tuple[Pipeline, dict]:
+    random_state: int = 42
+) -> tuple[Pipeline, dict[str, Any], pd.DataFrame, pd.DataFrame]:
     """
-    Enforces the 'split-before-fit' contract to prevent data leakage.
-    Splits the data first, then builds the fusion pipeline, and fits ONLY on train.
+    Ensures splitting is done BEFORE fitting to avoid test set data leakage.
+    Returns: (fitted_pipeline, metrics, X_test, y_test)
     """
+    if 'label' not in df.columns:
+        raise ValueError("DataFrame must contain a 'label' column.")
+
+    X = df[['text']] # Keep it as DataFrame for ColumnTransformer
+    y = df['label']
+
+    # SPLIT FIRST
     X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=test_size, random_state=random_state, stratify=labels
+        X, y, test_size=test_size, random_state=random_state, stratify=y
     )
 
-    feature_union = build_fusion_pipeline(use_dummy_embeddings=use_dummy_embeddings)
-
-    pipeline = Pipeline([
-        ('features', feature_union),
-        ('clf', LogisticRegression(max_iter=2000, random_state=random_state))
-    ])
-
-    # Fit only on train!
+    # FIT ONLY ON TRAIN
     pipeline.fit(X_train, y_train)
 
-    # Predict and evaluate on test
+    # EVALUATE ON TEST
     y_pred = pipeline.predict(X_test)
 
     metrics = {
         "accuracy": float(accuracy_score(y_test, y_pred)),
-        "f1_macro": float(f1_score(y_test, y_pred, average="macro"))
+        "f1_weighted": float(f1_score(y_test, y_pred, average='weighted', zero_division=0))
     }
 
-    return pipeline, metrics
+    return pipeline, metrics, X_test, y_test

@@ -1,36 +1,33 @@
-from typing import Any, Optional
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
-import numpy as np
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.pipeline import FeatureUnion
-
-from .embedding import DummyEmbeddingTransformer, EmbeddingTransformer
-from .metadata import get_metadata_pipeline
-from .tfidf import get_tfidf_svd_pipeline
+from summit_fusion.metadata import TextMetadataExtractor
+from summit_fusion.tfidf import build_tfidf_svd_branch
 
 
-class IdentitySelector(BaseEstimator, TransformerMixin):
-    """Simple identity transformer to pass X through unchanged."""
-    def fit(self, X: Any, y: Any = None) -> "IdentitySelector":
-        return self
-
-    def transform(self, X: Any, y: Any = None) -> Any:
-        # Some sklearn column transformers pass Series/DataFrame columns,
-        # we want a list of strings usually
-        if hasattr(X, "tolist"):
-            return X.tolist()
-        return X
-
-def build_fusion_pipeline(use_dummy_embeddings: bool = True) -> FeatureUnion:
+def build_fusion_feature_union(embedding_transformer=None) -> ColumnTransformer:
     """
-    Builds the FeatureUnion that fuses TF-IDF, Embeddings, and Metadata.
-    Expects input X to be a 1D array/series/list of text strings.
+    Builds the ColumnTransformer feature fusion stack:
+    1. 'text' -> TF-IDF + SVD
+    2. 'text' -> Embeddings (if provided)
+    3. 'text' -> Metadata generation -> StandardScaler
+
+    Expects input to be a pandas DataFrame with a 'text' column.
     """
 
-    embedding_transformer = DummyEmbeddingTransformer() if use_dummy_embeddings else EmbeddingTransformer()
+    transformers = [
+        ('tfidf', build_tfidf_svd_branch(), 'text'),
+        ('metadata', Pipeline([
+            ('extract', TextMetadataExtractor()),
+            ('scale', StandardScaler())
+        ]), 'text')
+    ]
 
-    return FeatureUnion([
-        ('tfidf', get_tfidf_svd_pipeline()),
-        ('embedding', embedding_transformer),
-        ('metadata', get_metadata_pipeline())
-    ])
+    if embedding_transformer is not None:
+        transformers.append(('embedding', embedding_transformer, 'text'))
+
+    return ColumnTransformer(
+        transformers=transformers,
+        remainder='drop'
+    )

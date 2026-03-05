@@ -1,68 +1,55 @@
-import re
+from unittest import mock
 
-from summit_fusion.eval import leakage_safe_split_and_fit
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from summit_fusion.eval import leakage_safe_split_and_train
+from summit_fusion.fusion import build_fusion_feature_union
 
 
-def test_no_leakage_split_before_fit():
-    """
-    Validates that a unique word in the test set NEVER appears in the
-    TfidfVectorizer vocabulary. If it did, it would mean the vectorizer
-    was fitted on the whole dataset before splitting (leakage).
-    """
-    # 8 samples (small but enough to train/test split)
-    texts = [
-        "This is a normal training sentence.",
-        "Another normal training sentence.",
-        "We are training normally.",
-        "Training happens here.",
-        "Yet another training sentence.",
-        "A final training example.",
-        # Contrived token only in test set: "leakagewarn"
-        "This is a leakagewarn sentence.",
-        "Another leakagewarn sentence."
+def test_leakage_safe_split_before_fit():
+    data = [
+        {"text": "this is a normal text train_only_token 1", "label": 0},
+        {"text": "another normal text train_only_token 2", "label": 1},
+        {"text": "more text train_only_token 3", "label": 0},
+        {"text": "this is for training train_only_token 4", "label": 1},
+        {"text": "test_only_token_leakage_check something else", "label": 0},
+        {"text": "test_only_token_leakage_check one more", "label": 1},
+        {"text": "even more text train_only_token 5", "label": 0},
+        {"text": "yep another one train_only_token 6", "label": 1},
+        {"text": "train_only_token 7", "label": 0},
+        {"text": "train_only_token 8", "label": 1},
     ]
-    labels = [0, 0, 0, 1, 1, 1, 0, 1]
 
-    # Force the contrived words to be in the test set by ensuring
-    # they are indices 6 and 7, and test_size=0.25 (2 samples)
-    # The random_state=42 with stratify might not cleanly put 6 and 7 in test,
-    # so we explicitly construct a train/test setup that guarantees it.
+    df = pd.DataFrame(data)
 
-    # We can actually just call the function and manually inspect the pipeline.
-    # To ensure it, we'll manually split here and fit the pipeline.
+    with mock.patch('summit_fusion.eval.train_test_split') as mock_split:
+        X_train = df.iloc[[0,1,2,3,6,7,8,9]][['text']]
+        X_test = df.iloc[[4,5]][['text']]
+        y_train = df.iloc[[0,1,2,3,6,7,8,9]]['label']
+        y_test = df.iloc[[4,5]]['label']
 
-    from sklearn.model_selection import train_test_split
-    X_train, X_test, y_train, y_test = train_test_split(
-        texts, labels, test_size=0.25, random_state=42, stratify=labels
-    )
+        mock_split.return_value = (X_train, X_test, y_train, y_test)
 
-    # Let's ensure "leakagewarn" is only in X_test, not in X_train.
-    # If not, let's just create explicit X_train / X_test sets for the test.
-    X_train_fixed = [t for t in texts if "leakagewarn" not in t]
-    X_test_fixed = [t for t in texts if "leakagewarn" in t]
-    y_train_fixed = [0, 0, 0, 1, 1, 1]
-    y_test_fixed = [0, 1]
+        with mock.patch('summit_fusion.fusion.build_tfidf_svd_branch') as mock_tfidf:
+            from summit_fusion.tfidf import build_tfidf_svd_branch
+            mock_tfidf.return_value = build_tfidf_svd_branch(n_components=2)
 
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import Pipeline
-    from summit_fusion.fusion import build_fusion_pipeline
+            union = build_fusion_feature_union(embedding_transformer=None)
+            pipeline = Pipeline([
+                ("features", union),
+                ("clf", LogisticRegression())
+            ])
 
-    pipeline = Pipeline([
-        ('features', build_fusion_pipeline(use_dummy_embeddings=True)),
-        ('clf', LogisticRegression(random_state=42))
-    ])
+            fitted_pipeline, metrics, _, _ = leakage_safe_split_and_train(
+                pipeline, df, test_size=0.2, random_state=42
+            )
 
-    pipeline.fit(X_train_fixed, y_train_fixed)
+            col_trans = fitted_pipeline.named_steps['features']
+            tfidf_pipeline = col_trans.named_transformers_['tfidf']
+            vectorizer = tfidf_pipeline.named_steps['tfidf']
 
-    # Inspect the vocabulary from the TF-IDF step
-    # feature_union -> tfidf -> tfidf_vectorizer
-    # feature_union is the first step in the pipeline
-    feature_union = pipeline.named_steps['features']
-    # tfidf is a pipeline: tfidf_vectorizer -> svd
-    tfidf_pipeline = feature_union.transformer_list[0][1]
-    tfidf_vectorizer = tfidf_pipeline.named_steps['tfidf']
+            vocab = vectorizer.vocabulary_
 
-    vocab = tfidf_vectorizer.vocabulary_
-
-    # Assert the contrived word does NOT exist in the vocabulary
-    assert "leakagewarn" not in vocab, "Leakage detected: 'leakagewarn' found in TF-IDF vocabulary!"
+            assert "train_only_token" in vocab, "Training tokens should be in the fitted vocabulary"
+            assert "test_only_token_leakage_check" not in vocab, "Leakage detected!"
