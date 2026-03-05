@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added HF 2602.20093 subsumption scaffold initiative and repo reality check document.",
+  "revision_note": "Added GraphRAG hybrid influence/infrastructure schema extension specification and tracked implementation lane.",
   "initiatives": [
     {
-      "id": "hf-2602-20093-subsumption-scaffold",
+      "id": "graphrag-hybrid-schema-extension",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Published grounded scaffold docs and repo reality check for HF 2602.20093 subsumption lane pending paper excerpts."
+      "notes": "Defined provenance-first Graph schema extension spec for narrative contamination, relationship-risk, and infrastructure overlay modeling."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
