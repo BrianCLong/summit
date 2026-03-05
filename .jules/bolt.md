@@ -22,7 +22,6 @@
 ## 2026-07-15 - [Safe Batched Upserts with Fallback]
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
-
-## 2026-11-20 - [Concurrent Async Operations]
-**Learning:** Using sequential `await`s in a loop to fetch independent data (like resolving multiple entity IDs to check for supernode status) is a significant performance bottleneck because it unnecessarily blocks each subsequent query until the current one finishes.
-**Action:** When executing multiple independent asynchronous operations, map them to an array of promises and await them concurrently using `Promise.all` to minimize total latency.
+## 2026-03-02 - [StrategicPlanRepo N+1 Optimization]
+**Learning:** Found significant N+1 query patterns in StrategicPlanRepo where nested collections (milestones, deliverables, etc.) were being fetched individually for each parent record. Using the PostgreSQL ANY($1) operator allows for efficient batch loading without architectural changes.
+**Action:** Always check repository collection-fetching methods for Promise.all(rows.map(async...)) patterns and replace with batch-loading helpers and in-memory Map association.

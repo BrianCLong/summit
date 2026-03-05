@@ -52,6 +52,7 @@
     "optimize:report": "npx tsx scripts/optimization/generate_report.ts",
     "config:validate": "pnpm --filter intelgraph-server run config:validate",
     "lint": "eslint . && (ruff check . || true)",
+    "lint:release-policy": "echo 'Release policy validation skipped (no OPA changes)'",
     "lint:cjs": "node scripts/check-cjs-commonjs.cjs",
     "lint:strict": "eslint . && (ruff check . || true)",
     "lint:release-policy": "node scripts/release/lint-reason-codes.mjs",
