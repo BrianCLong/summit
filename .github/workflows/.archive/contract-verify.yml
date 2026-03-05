@@ -6,7 +6,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node & deps
-        uses: actions/setup-node@v4
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
         with: { node-version: '20' , cache: 'pnpm' }
       - run: npm i -g graphql-cli graphql-schema-linter @redhat-developer/depcheck@latest @playwright/test
       - name: Validate SDL

@@ -8,7 +8,20 @@ import { execSync } from 'node:child_process';
 import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildPolicyEvidence, buildDeterminismEvidence, buildBranchProtectionEvidence, buildGovernanceSummary, VerificationState } from './lib/governance_evidence.mjs';
+import {
+  buildPolicyEvidence,
+  buildDeterminismEvidence,
+  buildBranchProtectionEvidence,
+  buildPromptInjectionEvidence,
+  buildToolBoundaryEvidence,
+  buildLineageIntegrityEvidence,
+  buildGovernanceSummary,
+  VerificationState
+} from './lib/governance_evidence.mjs';
+
+import { runPromptInjectionGate } from './gates/prompt_injection_gate.mjs';
+import { runToolBoundaryGate } from './gates/tool_boundary_gate.mjs';
+import { runLineageIntegrityGate } from './gates/lineage_integrity_gate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '../..');
@@ -97,6 +110,30 @@ async function runBranchProtectionGate(sha) {
   return { verdict, state, evidence: buildBranchProtectionEvidence({ branch: 'main', state, expectedChecks, actualChecks, driftDetails, sha }) };
 }
 
+async function runPromptInjection(sha) {
+  console.log('Running: Prompt Injection Gate...');
+  const { scannedFixtures, violations } = runPromptInjectionGate();
+  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
+  console.log(`  Status: ${verdict}\n`);
+  return { verdict, evidence: buildPromptInjectionEvidence({ scannedFixtures, violations, sha }) };
+}
+
+async function runToolBoundary(sha) {
+  console.log('Running: Tool Boundary Gate...');
+  const { scannedFixtures, violations } = runToolBoundaryGate();
+  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
+  console.log(`  Status: ${verdict}\n`);
+  return { verdict, evidence: buildToolBoundaryEvidence({ scannedFixtures, violations, sha }) };
+}
+
+async function runLineageIntegrity(sha) {
+  console.log('Running: Lineage Integrity Gate...');
+  const { scannedFixtures, violations } = runLineageIntegrityGate();
+  const verdict = violations.length === 0 ? 'PASS' : 'FAIL';
+  console.log(`  Status: ${verdict}\n`);
+  return { verdict, evidence: buildLineageIntegrityEvidence({ scannedFixtures, violations, sha }) };
+}
+
 function generateSummaryCard(results) {
   const emoji = { PASS: '\u2705', FAIL: '\u274C', SKIP: '\u23ED\uFE0F', ERROR: '\u2753' };
   const overallPass = results.every(r => r.verdict === 'PASS' || r.verdict === 'SKIP');
@@ -120,7 +157,12 @@ async function main() {
   const results = [];
   results.push({ gate: 'Required Checks Policy', ...await runPolicyGate(sha) });
   results.push({ gate: 'Determinism Scan', ...await runDeterminismGate(sha) });
+  results.push({ gate: 'CDA Requirement', verdict: (() => { try { execSync('python3 scripts/ci/gates/cda_required.py'); return 'PASS'; } catch (e) { return 'FAIL'; } })() });
   results.push({ gate: 'Branch Protection', ...await runBranchProtectionGate(sha) });
+  results.push({ gate: 'Prompt Injection Gate', ...await runPromptInjection(sha) });
+  results.push({ gate: 'Tool Boundary Gate', ...await runToolBoundary(sha) });
+  results.push({ gate: 'Lineage Integrity Gate', ...await runLineageIntegrity(sha) });
+
   const hasBlockingFailure = results.some(r => r.verdict === 'FAIL');
   writeEvidence(results, sha);
   const card = generateSummaryCard(results);
