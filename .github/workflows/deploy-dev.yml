@@ -68,4 +68,3 @@ jobs:
           kubectl -n intelgraph-dev rollout status deploy/web --timeout=180s
           kubectl -n intelgraph-dev run curl --image=curlimages/curl:8.10.1 -i --rm -q --restart=Never -- \
             sh -c "curl -sS http://api.intelgraph-dev.svc.cluster.local/healthz && curl -sS http://web.intelgraph-dev.svc.cluster.local/"
-
