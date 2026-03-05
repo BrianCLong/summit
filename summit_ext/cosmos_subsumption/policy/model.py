@@ -1,6 +1,7 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Optional, Literal
+from typing import Literal, Optional
 
 Exposure = Literal["private", "internal", "internet"]
 
