@@ -75,8 +75,7 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
 **Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
 **Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
-
-## 2026-03-01 - [HIGH] Timing Attack in Abyss Auth Header
-**Vulnerability:** The `extremeAuth` middleware in `server/src/routes/abyss.ts` used a simple string comparison (`===`) to validate the security header. This is vulnerable to timing attacks where an attacker can deduce the secret byte-by-byte by measuring response times.
-**Learning:** Standard string comparisons fail early, leaking information about how much of the string matched. For security-critical secrets like API keys or tokens, comparison time must be constant regardless of the input.
-**Prevention:** Use `crypto.timingSafeEqual` for all secret comparisons. Ensure buffers are of equal length before comparison to avoid length-leaking optimizations in the comparison function itself (though often acceptable for fixed-length tokens, it's safer to be explicit).
+## 2026-02-28 - [DOMPurify Profile Override]
+**Vulnerability:** A configuration intended to strip all HTML tags was bypassed because `USE_PROFILES: { html: true }` overrode the `ALLOWED_TAGS: []` array, allowing arbitrary HTML.
+**Learning:** In `DOMPurify`, the `USE_PROFILES` configuration option takes precedence over `ALLOWED_TAGS`. If you intend to strip all tags but use an HTML profile, DOMPurify defaults to allowing HTML elements.
+**Prevention:** Do not use `USE_PROFILES` when you are also explicitly defining an empty list for `ALLOWED_TAGS` to achieve complete tag stripping.

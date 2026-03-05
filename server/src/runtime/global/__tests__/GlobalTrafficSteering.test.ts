@@ -1,4 +1,3 @@
-import type { GlobalTrafficSteering as IGlobalTrafficSteering } from "../GlobalTrafficSteering.js";
 import { jest } from '@jest/globals';
 
 const getResidencyConfigMock = jest.fn();
@@ -32,10 +31,15 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
 // Set default resolveTargetRegion to avoid undefined during module initialization if it were used there
 resolveTargetRegionMock.mockReturnValue('us-east-1');
 
-const { GlobalTrafficSteering } = await import('../GlobalTrafficSteering.js');
+let GlobalTrafficSteering: any;
 
 describe('GlobalTrafficSteering', () => {
-    let steering: IGlobalTrafficSteering;
+    let steering: any;
+
+    beforeAll(async () => {
+        const module = await import('../GlobalTrafficSteering.js');
+        GlobalTrafficSteering = module.GlobalTrafficSteering;
+    });
 
     beforeEach(() => {
         jest.clearAllMocks();

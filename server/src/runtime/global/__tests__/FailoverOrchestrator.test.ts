@@ -1,4 +1,3 @@
-import type { FailoverOrchestrator as IFailoverOrchestrator } from "../FailoverOrchestrator.js";
 import { jest } from '@jest/globals';
 
 const axiosGetMock = jest.fn();
@@ -27,10 +26,15 @@ jest.unstable_mockModule('../../../config/regional-config.js', () => ({
     },
 }));
 
-const { FailoverOrchestrator } = await import('../FailoverOrchestrator.js');
+let FailoverOrchestrator: any;
 
 describe('FailoverOrchestrator', () => {
-    let orchestrator: IFailoverOrchestrator;
+    let orchestrator: any;
+
+    beforeAll(async () => {
+        const module = await import('../FailoverOrchestrator.js');
+        FailoverOrchestrator = module.FailoverOrchestrator;
+    });
 
     beforeEach(() => {
         jest.clearAllMocks();
