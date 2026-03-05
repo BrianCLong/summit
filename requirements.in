@@ -1,6 +1,6 @@
 # Production Python dependencies with version constraints
-fastapi==0.128.*
-uvicorn==0.40.*
+fastapi==0.135.*
+uvicorn==0.41.*
 pydantic==2.*
 sqlalchemy==2.*
 asyncpg==0.31.*
