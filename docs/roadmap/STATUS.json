@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-03-03T00:00:00Z",
-  "revision_note": "Added deterministic SHAP-IQ explainability module scaffold, artifacts, runbook, and drift monitor.",
+  "last_updated": "2026-03-04T00:00:00Z",
+  "revision_note": "Integrated convergent hierarchical orchestration loop into Maestro runtime and Summit workflow guidance.",
   "initiatives": [
     {
-      "id": "shap-iq-explainability-mws",
+      "id": "summit-maestro-convergent-orchestration",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Implemented deterministic SHAP-IQ-style feature importance, pairwise interactions, artifact schema emission, and drift monitoring scripts."
+      "notes": "Implemented artifact-gated hierarchical control loop (plan/architecture/implement/execute/verify/critic) in maestro-conductor and documented Summit adoption path."
     },
     {
       "id": "saas-crash-2026-positioning-pack",
