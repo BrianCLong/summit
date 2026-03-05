@@ -5,11 +5,17 @@ name: Docs Fast Track
 
 on:
   pull_request:
-            paths:
+    paths-ignore:
       - 'docs/**'
       - '**.md'
       - 'prompts/**'
-      
+      - 'evidence/**'
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'prompts/**'
+      - '!.github/workflows/**'  # Exclude workflow docs (handled separately)
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
