@@ -5,6 +5,7 @@ Clean-room implementation inspired by arXiv:2601.21343.
 
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class SIPLConfig:
     enabled: bool = False
