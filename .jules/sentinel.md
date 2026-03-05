@@ -36,11 +36,6 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
-## 2025-02-19 - [HIGH] Inconsistent Case-Sensitive RBAC
-**Vulnerability:** Role checks were inconsistently applied across the platform. The `ensureRole` middleware was case-sensitive, while some manual checks in routes (e.g., SSO) used hardcoded uppercase strings. This could lead to authorization bypasses if a user's role was stored in a different case than expected by a specific check.
-**Learning:** Manual role checks are error-prone and often deviate from central middleware logic. Case-sensitivity in roles adds unnecessary fragility to the authorization layer.
-**Prevention:** Normalize all role comparisons to a standard case (uppercase) within central middleware and ensure all manual checks follow the same pattern. Adopt a "case-insensitive-by-default" posture for all identity-related strings.
-
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
@@ -75,3 +70,13 @@ router.post('/secrets/rotate', rotateHandler);
 **Vulnerability:** The `validateAndScopeQuery` function in `server/src/db/query-scope.ts` naively appended `WHERE tenant_id = ...` to the end of SQL queries. This allowed attackers to use SQL comments (`--`) to neutralize the tenant scoping clause, effectively bypassing tenant isolation.
 **Learning:** Naive string concatenation for security controls is fragile. Security logic must be robust against input variations (like comments) or structural manipulation.
 **Prevention:** When auto-injecting security clauses into SQL, validate that the query structure is safe (e.g., no comments) and sanitize inputs (e.g., strip trailing semicolons). Use parser-based modification or strict validation instead of simple concatenation where possible.
+
+## 2026-03-01 - [HIGH] Hardening Evidence Search and RBAC
+**Vulnerability:** The `/search/evidence` endpoint lacked tenant isolation and explicit role checks, allowing any authenticated user to search evidence across all tenants. Additionally, `ensureRole` was case-sensitive, potentially allowing bypasses if role casing was inconsistent.
+**Learning:** Security-critical endpoints, especially those performing full-text search, must explicitly enforce both RBAC and multi-tenant isolation. Core security middleware like `ensureRole` should be robust against trivial variations like casing.
+**Prevention:** Always apply `ensureRole` and tenant-scoping clauses in Cypher queries for any endpoint exposing sensitive graph data. Use case-insensitive comparison in authorization logic.
+
+## 2026-05-22 - [HIGH] Missing Authorization on Administrative & Operational Routers
+**Vulnerability:** Several administrative and operational routers (`/airgap`, `/analytics`, `/dr`, and root-level `/` mounting `opsRouter`) were missing centralized authentication and Role-Based Access Control (RBAC) at the mounting point in `server/src/app.ts`. This exposed sensitive system operations to unauthenticated or unauthorized users if internal router checks were missing or bypassed.
+**Learning:** Hardening individual routes within a router is a good secondary defense, but centralized enforcement at the mounting point in the main application file is critical for a "deny-by-default" posture and prevents accidental exposure of new routes added to these routers.
+**Prevention:** Always apply `authenticateToken` and appropriate `ensureRole` checks at the point where administrative or operational routers are mounted in `app.ts`. For multi-path operational routers (like `opsRouter`), apply a baseline `ensureRole` (e.g., `OPERATOR`) at the router level in addition to specific route-level checks.
