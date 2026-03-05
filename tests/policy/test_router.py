@@ -1,5 +1,5 @@
 import pytest
-from summit.policy.router import route, PolicyDecision
+from summit.policy.router import route, PolicyDecision, route_request
 
 def test_route_flag_off():
     context = {"feature_flags": {"SKILL_PRESERVING_MODE": False}}
@@ -70,3 +70,29 @@ def test_route_all_checks_pass():
     decision = route(context)
     assert decision.mode == "skill_preserving"
     assert "flag_on" in decision.reasons
+
+# New edge cases for refactored router
+def test_route_invalid_context():
+    decision = route("not a dict")
+    assert decision.policy_id == "POL-ERROR"
+    assert "invalid_context" in decision.reasons
+
+def test_route_malformed_flags():
+    context = {"feature_flags": "not a dict"}
+    decision = route(context)
+    assert decision.mode == "baseline"
+    assert "flag_off" in decision.reasons
+
+def test_route_malformed_org_policy():
+    context = {
+        "feature_flags": {"SKILL_PRESERVING_MODE": True},
+        "org_policy": "not a dict"
+    }
+    decision = route(context)
+    assert decision.mode == "baseline"
+    assert "org_policy_deny" in decision.reasons
+
+def test_route_request_invalid_request():
+    decision = route_request("not a dict", {})
+    assert decision.provider_id == "openai"
+    assert decision.reason == "default"
