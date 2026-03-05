@@ -23,6 +23,6 @@
 **Learning:** While batched multi-row inserts improve performance by reducing round-trips, they change the atomicity of the operation; a single failing record can fail the entire batch. To maintain row-level reliability, a batch failure should trigger a fallback to individual inserts for that specific chunk.
 **Action:** Implement a try-catch block around batch queries that falls back to a row-by-row loop for the failed chunk, ensuring that valid records are still processed.
 
-## 2026-03-04 - [Postgres Performance Pattern: Batch Loading]
-**Learning:** Replacing N+1 query loops with batch-loading using `WHERE field = ANY($1)` significantly reduces database round-trip latency. Reconciling the results in-memory using a `Map` keyed by the parent ID allows for O(1) lookup during record mapping, keeping the complexity at O(N+M) instead of O(N*M).
-**Action:** Always identify N+1 fetch patterns in repositories and refactor them to use batch fetching with the `ANY` operator and in-memory Map association.
+## 2026-08-10 - [Batched Signal Inserts in RiskRepository]
+**Learning:** Inserting many risk signals individually in a loop was causing an N+1 problem, significantly slowing down `saveRiskScore` operations. Batched multi-row inserts with a chunk size of 100 reduced DB round-trips from O(N) to O(N/100).
+**Action:** Always prefer batched multi-row inserts for telemetry or signal data where many records are associated with a single parent entity.

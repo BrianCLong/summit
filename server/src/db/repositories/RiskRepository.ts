@@ -1,118 +1,164 @@
-import { PoolClient } from 'pg';
-import { BaseRepository } from './base/BaseRepository.js';
-import { RiskScore, RiskSignal, RiskScoreInput } from '../../types/risk.js';
+import { pg } from '../../db/pg.js';
+import { RiskScore, RiskSignal, RiskScoreInput } from '../../risk/types.js';
 
-export class RiskRepository extends BaseRepository<RiskScore> {
-  protected readonly tableName = 'risk_scores';
+/**
+ * Repository for managing Risk Scores and Signals in PostgreSQL.
+ * Follows the Epic 2 Data Model schema.
+ */
+export class RiskRepository {
+  /**
+   * Persists a risk score and its associated signals.
+   * This is transactional.
+   */
+  async saveRiskScore(input: RiskScoreInput): Promise<RiskScore> {
+    return await pg.transaction(async (tx: any) => {
+      // 1. Insert Risk Score
+      const scoreRows = await tx.query(
+        `INSERT INTO risk_scores (
+          tenant_id, entity_id, entity_type, score, level, window, model_version, rationale
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        RETURNING *`,
+        [
+          input.tenantId,
+          input.entityId,
+          input.entityType,
+          input.score,
+          input.level,
+          input.window,
+          input.modelVersion,
+          input.rationale,
+        ]
+      );
 
-  protected mapRow(row: any): RiskScore {
+      const savedScore = scoreRows[0];
+      const savedSignals: RiskSignal[] = [];
+
+      // 2. Insert Risk Signals in batches for performance optimization (Epic 2 Performance)
+      // BOLT OPTIMIZATION: Use multi-row INSERT with chunking to reduce DB round-trips from O(N) to O(N/100)
+      if (input.signals && input.signals.length > 0) {
+        const CHUNK_SIZE = 100; // Stay well within PostgreSQL parameter limits
+        for (let i = 0; i < input.signals.length; i += CHUNK_SIZE) {
+          const chunk = input.signals.slice(i, i + CHUNK_SIZE);
+
+          try {
+            const valuePlaceholders = chunk.map((_, index) => {
+              const offset = index * 8;
+              return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
+            }).join(', ');
+
+            const params: any[] = [];
+            for (const sig of chunk) {
+              params.push(
+                savedScore.id,
+                sig.type,
+                sig.source,
+                sig.value,
+                sig.weight,
+                sig.contributionScore,
+                sig.description,
+                sig.detectedAt || new Date()
+              );
+            }
+
+            const sigRows = await tx.query(
+              `INSERT INTO risk_signals (
+                risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+              ) VALUES ${valuePlaceholders}
+              RETURNING *`,
+              params
+            );
+
+            savedSignals.push(...sigRows.map((row: any) => this.mapSignal(row)));
+          } catch (batchError) {
+            // BOLT RELIABILITY: Fallback to individual inserts if batch fails
+            for (const sig of chunk) {
+              const row = await tx.query(
+                `INSERT INTO risk_signals (
+                  risk_score_id, type, source, value, weight, contribution_score, description, detected_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+                RETURNING *`,
+                [
+                  savedScore.id,
+                  sig.type,
+                  sig.source,
+                  sig.value,
+                  sig.weight,
+                  sig.contributionScore,
+                  sig.description,
+                  sig.detectedAt || new Date()
+                ]
+              );
+              savedSignals.push(this.mapSignal(row[0]));
+            }
+          }
+
+        }
+      }
+
+      return {
+        ...this.mapScore(savedScore),
+        // Note: signals are not part of RiskScore interface but usually returned in a full object
+        // For strict typing we return the RiskScore entity
+      };
+    });
+  }
+
+  /**
+   * Retrieves the latest risk score for an entity within a specific window.
+   */
+  async getLatestScore(
+    tenantId: string,
+    entityId: string,
+    window: string
+  ): Promise<RiskScore | null> {
+    const row = await pg.oneOrNone(
+      `SELECT * FROM risk_scores
+       WHERE tenant_id = $1 AND entity_id = $2 AND window = $3
+       ORDER BY created_at DESC LIMIT 1`,
+      [tenantId, entityId, window],
+      { tenantId } // For RLS if applicable or logging
+    );
+    return row ? this.mapScore(row) : null;
+  }
+
+  /**
+   * Retrieves signals associated with a specific risk score ID.
+   */
+  async getSignalsForScore(riskScoreId: string): Promise<RiskSignal[]> {
+    const rows = await pg.readMany(
+      `SELECT * FROM risk_signals WHERE risk_score_id = $1`,
+      [riskScoreId]
+    );
+    return rows.map(this.mapSignal);
+  }
+
+  private mapScore(row: any): RiskScore {
     return {
       id: row.id,
       tenantId: row.tenant_id,
       entityId: row.entity_id,
       entityType: row.entity_type,
-      overallScore: row.overall_score,
-      calculatedAt: row.calculated_at,
-      version: row.version
+      score: parseFloat(row.score),
+      level: row.level,
+      window: row.window,
+      modelVersion: row.model_version,
+      rationale: row.rationale,
+      createdAt: row.created_at,
+      validUntil: row.valid_until,
     };
   }
 
   private mapSignal(row: any): RiskSignal {
     return {
       id: row.id,
+      riskScoreId: row.risk_score_id,
       type: row.type,
       source: row.source,
-      value: row.value,
-      weight: row.weight,
-      contributionScore: row.contribution_score,
+      value: parseFloat(row.value),
+      weight: parseFloat(row.weight),
+      contributionScore: parseFloat(row.contribution_score),
       description: row.description,
-      detectedAt: row.detected_at
+      detectedAt: row.detected_at,
     };
-  }
-
-  async saveRiskScore(input: RiskScoreInput, txClient?: PoolClient): Promise<RiskScore> {
-    return this.withTransaction(async (tx) => {
-      // 1. Upsert Risk Score
-      const scoreRows = await tx.query(
-        `INSERT INTO risk_scores (tenant_id, entity_id, entity_type, overall_score, version)
-         VALUES ($1, $2, $3, $4, $5)
-         ON CONFLICT (tenant_id, entity_id, entity_type)
-         DO UPDATE SET
-           overall_score = EXCLUDED.overall_score,
-           calculated_at = CURRENT_TIMESTAMP,
-           version = EXCLUDED.version
-         RETURNING *`,
-        [input.tenantId, input.entityId, input.entityType, input.overallScore, input.version]
-      );
-
-      const savedScore = scoreRows[0];
-      const savedSignals: RiskSignal[] = [];
-
-      // 2. Insert Risk Signals (Optimized with Batched Inserts and Chunking)
-      if (input.signals && input.signals.length > 0) {
-        const chunkSize = 100;
-        for (let i = 0; i < input.signals.length; i += chunkSize) {
-          const chunk = input.signals.slice(i, i + chunkSize);
-          const values: any[] = [];
-          const placeholders: string[] = [];
-          let paramIndex = 1;
-
-          for (const sig of chunk) {
-            values.push(
-              savedScore.id,
-              sig.type,
-              sig.source,
-              sig.value,
-              sig.weight,
-              sig.contributionScore,
-              sig.description,
-              sig.detectedAt || new Date()
-            );
-            placeholders.push(
-              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`
-            );
-            paramIndex += 8;
-          }
-
-          const batchSql = `
-            INSERT INTO risk_signals (
-              risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ${placeholders.join(', ')}
-            RETURNING *
-          `;
-
-          const sigRows = await tx.query(batchSql, values);
-          for (const row of sigRows) {
-            savedSignals.push(this.mapSignal(row));
-          }
-        }
-      }
-
-      return {
-        ...this.mapRow(savedScore),
-        signals: savedSignals
-      };
-    }, txClient);
-  }
-
-  async getRiskScore(tenantId: string, entityId: string, entityType: string): Promise<RiskScore | null> {
-    return this.withTransaction(async (tx) => {
-      const scoreRows = await tx.query(
-        `SELECT * FROM risk_scores WHERE tenant_id = $1 AND entity_id = $2 AND entity_type = $3`,
-        [tenantId, entityId, entityType]
-      );
-
-      if (scoreRows.length === 0) return null;
-
-      const sigRows = await tx.query(
-        `SELECT * FROM risk_signals WHERE risk_score_id = $1 ORDER BY detected_at DESC`,
-        [scoreRows[0].id]
-      );
-
-      return {
-        ...this.mapRow(scoreRows[0]),
-        signals: sigRows.map(this.mapSignal)
-      };
-    });
   }
 }
