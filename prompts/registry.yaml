@@ -922,26 +922,62 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
-  - id: summit-nemo-prompt
+  - id: implement.predictive-risk-posture-engine-v1
     version: v1
-    path: prompts/architecture/summit-nemo-prompt@v1.md
-    sha256: e02a1df51b47d28c1faf0323b1719236026ebcd9bdd6604a2351fc1ef47a880a
-    description: Generate the Summit Edition execution plan prioritizing PCQ, ZK-TX, Authority Compiler, Reasoning-Trace Signatures, and Federation Planner.
+    path: prompts/implement.predictive-risk-posture-engine-v1.yaml
+    sha256: 9095bda1499f449a66ca1948eedb17995baf23d69ebb2e54b38933495a170605
+    description: Implement Summit Predictive Risk Posture Engine (PRPE)
     scope:
       paths:
-        - docs/architecture/summit-nemo-plan.md
-        - prompts/architecture/summit-nemo-prompt@v1.md
+        - services/prpe/
+        - prompts/implement.predictive-risk-posture-engine-v1.yaml
         - prompts/registry.yaml
       domains:
-        - architecture
-        - governance
-        - documentation
+        - risk
+        - predictive
     verification:
-      tiers_required:
-        - C
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
-      - edit
+
+  - id: implement.ftx-protocol-v1
+    version: v1
+    path: prompts/implement.ftx-protocol-v1.yaml
+    sha256: c2a550c5987e5a3f1f31400b95880302bc896471b30eae6bb45488adac45a8ee
+    description: Implement FTX Protocol Spec for Wire Format & Crypto
+    scope:
+      paths:
+        - services/ftx-protocol/
+        - prompts/implement.ftx-protocol-v1.yaml
+        - prompts/registry.yaml
+      domains:
+        - ftx
+        - protocol
+    verification:
+
+  - id: implement.aia-simulation-v1
+    version: v1
+    path: prompts/implement.aia-simulation-v1.yaml
+    sha256: 87220f42cfa8ffc403ab0c2648422f59912bd21dddb1a0f678130d5b8dd5c304
+    description: Implement AIA Simulation Environment
+    scope:
+      paths:
+        - sim/
+        - prompts/implement.aia-simulation-v1.yaml
+        - prompts/registry.yaml
+      domains:
+        - aia
+        - simulation
+    verification:
+
+  - id: implement.dal-scoring-v1
+    version: v1
+    path: prompts/implement.dal-scoring-v1.yaml
+    sha256: fb076dbe8df0a19c6ab8f8c5ae9496c87bf35ba608239ff0dffe1840079113bf
+    description: Implement DAL Impact Scoring Formulas
+    scope:
+      paths:
+        - services/dal-scoring/
+        - prompts/implement.dal-scoring-v1.yaml
+        - prompts/registry.yaml
+      domains:
+        - dal
+        - scoring
+    verification:
