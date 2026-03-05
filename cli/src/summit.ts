@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { syncToolkit } from './toolkit.js';
 import chalk from 'chalk';
 import { Command } from 'commander';
 import { AUTOMATION_WORKFLOWS, runAutomationWorkflow } from './automation.js';
@@ -9,6 +8,7 @@ import { initAgentScaffold } from './adk/init.js';
 import { validateManifestCommand } from './adk/validate.js';
 import { runAgent } from './adk/run.js';
 import { packAgent } from './adk/pack.js';
+import { registerWorkflowCommands } from './commands/workflow.js';
 
 function renderResult(result: DoctorCheckResult): void {
   const statusIcon =
@@ -51,6 +51,7 @@ async function main() {
   program.name('summit').description('Summit developer toolbox CLI');
 
   registerOpenClawCommands(program);
+  registerWorkflowCommands(program);
 
   (['init', 'check', 'test', 'release-dry-run'] as const).forEach((workflowName) => {
     program
@@ -144,20 +145,6 @@ async function main() {
     .action(async (agentDir, options) => {
       const archive = await packAgent(agentDir, options.output);
       console.log(`Packed archive: ${archive}`);
-    });
-
-
-  const toolkit = program
-    .command('toolkit')
-    .description('Manage OSINT toolkits');
-
-  toolkit
-    .command('sync')
-    .description('Sync a toolkit from an external source')
-    .requiredOption('--source <source>', 'Source of the toolkit (e.g. bellingcat)')
-    .requiredOption('--out <path>', 'Output path for the synchronized bundle')
-    .action(async (options) => {
-      await syncToolkit(options.source, options.out);
     });
 
   await program.parseAsync(process.argv);
