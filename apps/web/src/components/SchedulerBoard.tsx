@@ -30,18 +30,20 @@ export default function SchedulerBoard() {
       .then(setHints)
   }, [])
 
-  // Optimized filtering:
-  // 1. Replaced jQuery DOM manipulation with React state for better performance and maintainability.
-  // 2. Used useMemo to prevent re-filtering on every render unless q or filter changes.
-  // 3. Fixed potential memory leak from duplicate event listeners in the original code.
   const filteredQ = useMemo(() => {
-    if (!filter) return q
     const lowerFilter = filter.toLowerCase()
+    if (!lowerFilter) return q
     return q.filter(r => {
-      const text = `${r.id} ${r.tenant} ${r.eta} ${r.pool} $${r.cost.toFixed(
-        2
-      )} ${r.preemptSuggestion ? '✅' : '—'}`.toLowerCase()
-      return text.includes(lowerFilter)
+      // Create a string representation of the row content to match jQuery .text() behavior
+      const rowText = [
+        r.id,
+        r.tenant,
+        r.eta,
+        r.pool,
+        `$${r.cost.toFixed(2)}`,
+        r.preemptSuggestion ? '✅' : '—'
+      ].join('').toLowerCase()
+      return rowText.includes(lowerFilter)
     })
   }, [q, filter])
 
