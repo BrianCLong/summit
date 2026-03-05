@@ -1,8 +1,9 @@
+<!-- markdownlint-disable -->
 # Summit ROI/TCO Calculator Model
 
 **Purpose:** Framework for calculating return on investment and total cost of ownership for Summit deployments. Use to build business cases and justify pilot/production investments.
 
-_Version: 2025-11-27_
+## Version: 2025-11-27
 
 ---
 
@@ -62,7 +63,7 @@ _Version: 2025-11-27_
 
 **Calculation:**
 
-```
+```text
 Current weekly hours on inefficient tasks = {{A}} hours/analyst/week
 Expected reduction with Summit = {{B}}% (typically 30-50%)
 Hours saved per analyst per week = A × B
@@ -72,7 +73,7 @@ Annual value per analyst = Annual hours saved × (Hourly cost)
 Total annual value = Annual value per analyst × Number of analysts
 
 Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
-```
+```text
 
 **Example:**
 
@@ -94,13 +95,13 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 
 **Calculation:**
 
-```
+```text
 Current cases per analyst per year = {{A}}
 Expected throughput increase = {{B}}% (typically 20-40%)
 Additional cases per analyst = A × B
 Value per case = {{C}} (depends on mission; may be revenue, cost avoidance, or strategic)
 Total annual value = Additional cases × Number of analysts × Value per case
-```
+```text
 
 **Example:**
 
@@ -120,7 +121,7 @@ Total annual value = Additional cases × Number of analysts × Value per case
 
 **Calculation:**
 
-```
+```text
 Current compliance hours per analyst per year = {{A}}
 Expected reduction = {{B}}% (typically 40-60%)
 Hours saved per analyst = A × B
@@ -131,7 +132,7 @@ Plus: Avoided audit finding remediation
 Current annual remediation cost = {{C}}
 Expected reduction = {{D}}%
 Remediation savings = C × D
-```
+```text
 
 **Example:**
 
@@ -155,12 +156,12 @@ Remediation savings = C × D
 
 **Calculation:**
 
-```
+```text
 Current annual spend on tools Summit can replace/reduce = {{A}}
 Tools fully retired = {{B}}% of spend
 Tools reduced (fewer seats) = {{C}}% of spend
 Total savings = A × (B + C)
-```
+```text
 
 **Example:**
 
@@ -179,13 +180,13 @@ Total savings = A × (B + C)
 
 **Calculation:**
 
-```
+```text
 Probability of significant incident per year = {{A}}%
 Average cost per incident = {{B}}
 Expected annual cost = A × B
 Risk reduction with Summit = {{C}}%
 Avoided cost = Expected annual cost × C
-```
+```text
 
 **Example:**
 
@@ -205,13 +206,13 @@ Avoided cost = Expected annual cost × C
 
 **Calculation:**
 
-```
+```text
 Projected case volume growth = {{A}}% per year
 Without Summit: New analysts needed = Current analysts × A
 With Summit: New analysts needed = Current analysts × A × (1 - Throughput increase)
 Avoided hires = Without Summit hires - With Summit hires
 Avoided cost = Avoided hires × Fully-loaded analyst cost
-```
+```text
 
 **Example:**
 
@@ -270,14 +271,14 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 
 ### 4.2 ROI Calculation
 
-```
+```text
 3-Year Total Value = Annual Value × 3 (or sum if growing)
 3-Year Total Cost = Summit TCO
 3-Year Net Benefit = Total Value - Total Cost
 ROI = (Net Benefit ÷ Total Cost) × 100
 
 Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
-```
+```text
 
 **Example Summary:**
 
@@ -315,23 +316,27 @@ Use this format for business case presentations:
 **Date:** {{Date}}
 
 **Current State:**
+
 - {{N}} analysts spending {{X}} hours/week on inefficient search and correlation
 - {{N}} cases per year; growth of {{X}}% expected
 - {{$X}} annual spend on fragmented tools
 - {{N}} audit findings related to provenance/documentation
 
 **With Summit:**
+
 - Reduce analyst inefficiency by **{{X}}%**
 - Increase case throughput by **{{X}}%**
 - Consolidate tools, saving **{{$X}}** annually
 - Eliminate provenance-related audit findings
 
 **Investment:**
+
 - Pilot: **${{X}}** ({{N}} weeks)
 - Production (Year 1): **${{X}}**
 - 3-Year TCO: **${{X}}**
 
 **Returns:**
+
 - Annual value: **${{X}}**
 - 3-Year net benefit: **${{X}}**
 - **ROI: {{X}}%**
@@ -346,6 +351,7 @@ Use this format for business case presentations:
 Use these questions to gather data during sales discovery:
 
 **Productivity:**
+
 1. "How many hours per week do analysts spend searching for and correlating data across tools?"
 2. "How many different tools/systems do analysts access in a typical investigation?"
 3. "What's the average time to complete a case from assignment to close?"
