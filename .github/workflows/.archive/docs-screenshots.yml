@@ -13,13 +13,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 20
+          node-version: 18
       - name: Install dependencies
         run: npm ci
       - name: Install Playwright browsers
@@ -29,12 +26,8 @@ jobs:
           UI_URL: ${{ github.event.inputs.ui_url }}
         run: npm run screenshots
       - name: Upload screenshots artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cookbook-screenshots
+        uses: actions/upload-artifact@v4          name: cookbook-screenshots
           path: docs/cookbook/screenshots
       - name: Upload observability screenshots artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: observability-screenshots
+        uses: actions/upload-artifact@v4          name: observability-screenshots
           path: docs/observability/screenshots

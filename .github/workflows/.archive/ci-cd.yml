@@ -22,10 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Node.js for evidence bundle generation
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.0.0
-      - uses: actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: 20
@@ -77,9 +74,7 @@ jobs:
         run: ts-node scripts/ops/generate-evidence-bundle.ts
 
       - name: Upload evidence bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence-bundle-${{ github.sha }}
+        uses: actions/upload-artifact@v4          name: evidence-bundle-${{ github.sha }}
           path: evidence-bundles/evidence-${{ github.sha }}.json
 
   build-and-deploy:

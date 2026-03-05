@@ -55,11 +55,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.0.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run unit tests
@@ -69,9 +65,7 @@ jobs:
           JEST_JUNIT_OUTPUT_NAME: unit-tests.xml
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-results
+        uses: actions/upload-artifact@v4          name: unit-test-results
           path: test-results/
           retention-days: 7
 
@@ -131,11 +125,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.0.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Wait for services
@@ -161,9 +151,7 @@ jobs:
           JEST_JUNIT_OUTPUT_NAME: integration-tests.xml
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-results
+        uses: actions/upload-artifact@v4          name: integration-test-results
           path: test-results/
           retention-days: 7
 
@@ -184,11 +172,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.0.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run GraphQL resolver tests
@@ -198,9 +182,7 @@ jobs:
           JEST_JUNIT_OUTPUT_NAME: graphql-tests.xml
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: graphql-test-results
+        uses: actions/upload-artifact@v4          name: graphql-test-results
           path: test-results/
           retention-days: 7
 
@@ -221,11 +203,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10.0.0
-
-      - name: Install dependencies
+        uses: pnpm/action-setup@v2      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Run error scenario tests
@@ -235,9 +213,7 @@ jobs:
           JEST_JUNIT_OUTPUT_NAME: error-scenario-tests.xml
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: error-scenario-test-results
+        uses: actions/upload-artifact@v4          name: error-scenario-test-results
           path: test-results/
           retention-days: 7
 

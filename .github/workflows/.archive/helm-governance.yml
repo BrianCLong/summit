@@ -103,12 +103,11 @@ jobs:
           kubeconform -v
 
       - name: Lint charts with ct
-        if: steps.chart-list.outputs.count != '0'
+        if: ((((((steps.chart-list.outputs.count != '0') && (steps.chart-list.outputs.count != '0')) && (steps.chart-list.outputs.count != '0')) && (steps.chart-list.outputs.count != '0')) && (steps.chart-list.outputs.count != '0')) && (needs.lint-and-template.outputs.chart-count != '0')) && (needs.lint-and-template.outputs.chart-count != '0')
         run: |
           ct lint --config "$CT_CONFIG" --all
 
       - name: Template charts and run kubeconform
-        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
           mkdir -p "$RENDER_DIR" artifacts
@@ -143,7 +142,6 @@ jobs:
           done
 
       - name: Package docs and dashboards
-        if: steps.chart-list.outputs.count != '0'
         run: |
           set -euo pipefail
           mkdir -p artifacts
@@ -158,18 +156,12 @@ jobs:
           fi
 
       - name: Upload rendered manifests
-        if: steps.chart-list.outputs.count != '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: helm-rendered-manifests
+        uses: actions/upload-artifact@v4          name: helm-rendered-manifests
           path: ${{ env.RENDER_DIR }}
           retention-days: 7
 
       - name: Upload docs and dashboards
-        if: steps.chart-list.outputs.count != '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: helm-docs-and-dashboards
+        uses: actions/upload-artifact@v4          name: helm-docs-and-dashboards
           path: artifacts/helm-docs-and-dashboards.tgz
           retention-days: 7
 
@@ -177,15 +169,12 @@ jobs:
     name: OPA and Kyverno policy gates
     needs: lint-and-template
     runs-on: ubuntu-22.04
-    if: needs.lint-and-template.outputs.chart-count != '0'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Download rendered manifests
-        uses: actions/download-artifact@v4
-        with:
-          name: helm-rendered-manifests
+        uses: actions/download-artifact@v4          name: helm-rendered-manifests
           path: helm-rendered
 
       - name: Install conftest (OPA)
@@ -227,9 +216,7 @@ jobs:
           kyverno apply policy/kyverno/helm-ci.yaml --resource $manifests --policy-report --output yaml > policy-report.yaml
 
       - name: Upload policy report
-        uses: actions/upload-artifact@v4
-        with:
-          name: helm-policy-report
+        uses: actions/upload-artifact@v4          name: helm-policy-report
           path: policy-report.yaml
           retention-days: 7
 
@@ -237,7 +224,6 @@ jobs:
     name: Kind integration smoke
     needs: lint-and-template
     runs-on: ubuntu-22.04
-    if: needs.lint-and-template.outputs.chart-count != '0'
     env:
       IMAGE_REPOSITORY: registry.k8s.io/pause
     steps:
