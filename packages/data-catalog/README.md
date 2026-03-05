@@ -405,7 +405,7 @@ curl -X POST http://localhost:3100/api/v1/search/impact \
 ### Prerequisites
 
 - Node.js ≥ 18.18
-- pnpm ≥ 9.12.0
+- pnpm ≥ 10.0.0
 - TypeScript 5.3+
 
 ### Setup

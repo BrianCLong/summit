@@ -33,26 +33,40 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals (BOLT OPTIMIZATION: Batched multi-row inserts in chunks)
       if (input.signals && input.signals.length > 0) {
-        for (const sig of input.signals) {
+        const CHUNK_SIZE = 100;
+        for (let i = 0; i < input.signals.length; i += CHUNK_SIZE) {
+          const chunk = input.signals.slice(i, i + CHUNK_SIZE);
+          const values: any[] = [];
+          const placeholders = chunk
+            .map((sig, index) => {
+              const base = index * 8;
+              values.push(
+                savedScore.id,
+                sig.type,
+                sig.source,
+                sig.value,
+                sig.weight,
+                sig.contributionScore,
+                sig.description,
+                sig.detectedAt || new Date()
+              );
+              return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
+            })
+            .join(', ');
+
           const sigRows = await tx.query(
             `INSERT INTO risk_signals (
               risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            ) VALUES ${placeholders}
             RETURNING *`,
-            [
-              savedScore.id,
-              sig.type,
-              sig.source,
-              sig.value,
-              sig.weight,
-              sig.contributionScore,
-              sig.description,
-              sig.detectedAt || new Date(), // Default to now if not provided
-            ]
+            values
           );
-          savedSignals.push(this.mapSignal(sigRows[0]));
+
+          if (sigRows && sigRows.length > 0) {
+            savedSignals.push(...sigRows.map((row: any) => this.mapSignal(row)));
+          }
         }
       }
 
