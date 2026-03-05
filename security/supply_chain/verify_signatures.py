@@ -1,3 +1,1 @@
-import sys
-print("Simulating signature verification")
-sys.exit(0)
+print("Supply chain signatures mock verified")

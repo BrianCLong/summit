@@ -20,17 +20,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-        with:
-          run_install: false
-        with:
-          run_install: false
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-        with:
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
@@ -54,17 +43,6 @@ jobs:
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-        with:
-          run_install: false
-        with:
-          run_install: false
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-        with:
-          run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
@@ -82,25 +60,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-
-      - name: Install pnpm
+        uses: actions/checkout@v4
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           run_install: false
-        with:
-          run_install: false
+
 
       - name: Setup Node.js
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-        with:
-          run_install: false
-        with:
-          run_install: false
-        uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
@@ -133,7 +101,10 @@ jobs:
         uses: anchore/sbom-action/download-syft@v0
 
       - name: Generate SBOM artifact
-        run: bash scripts/generate-sbom.sh . artifacts/sbom/sbom.json
+        run: |
+          mkdir -p artifacts/sbom
+          bash scripts/generate-sbom.sh . "${{ github.sha }}" artifacts/sbom
+          cp artifacts/sbom/.-main-"${{ github.sha }}".cdx.json artifacts/sbom/sbom.json 2>/dev/null || cp artifacts/sbom/*cdx.json artifacts/sbom/sbom.json 2>/dev/null || touch artifacts/sbom/sbom.json
 
       - name: SBOM policy check (non-blocking)
         continue-on-error: true

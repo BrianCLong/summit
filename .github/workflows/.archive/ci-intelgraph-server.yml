@@ -19,9 +19,8 @@ on:
       - "scripts/ci/**"
 
 concurrency:
-  group: intelgraph-server-${{ github.ref || github.head_ref }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
 jobs:
   ci:
     uses: ./.github/workflows/_reusable-ci.yml

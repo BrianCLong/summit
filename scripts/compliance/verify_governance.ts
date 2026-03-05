@@ -25,7 +25,7 @@ if (!registryContent.includes('| ID          |')) {
     process.exit(1);
 }
 
-if (!rulesContent.includes('| Type      | Description')) {
+if (!rulesContent.includes('| Type      | Description                        |')) {
     console.error('ERROR: Governance Rules missing Release Types table');
     process.exit(1);
 }

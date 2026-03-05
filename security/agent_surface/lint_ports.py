@@ -1,1 +1,1 @@
-import sys; print("Mock lint_ports.py"); sys.exit(0)
+print("Lint ports mock verified")

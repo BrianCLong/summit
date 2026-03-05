@@ -108,7 +108,7 @@ jobs:
       - name: Generate SBOM
         run: |
           chmod +x scripts/generate-sbom.sh
-          ./scripts/generate-sbom.sh summit-platform ${{ env.VERSION }} ./sboms
+          ./scripts/generate-sbom.sh summit-platform ${{ env.VERSION }} sboms
           ls -la ./sboms/
 
       # Run vulnerability scan
