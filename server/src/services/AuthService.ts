@@ -48,7 +48,6 @@ import GAEnrollmentService from './GAEnrollmentService.js';
 import { PrometheusMetrics } from '../utils/metrics.js';
 import { checkScope } from '../api/scopeGuard.js';
 import { securityService as defaultSecurityService, SecurityService } from './securityService.js';
-import * as jwt from 'jsonwebtoken';
 
 /**
  * User registration data payload
@@ -580,19 +579,8 @@ export class AuthService {
         };
       }
 
-      let decoded = await this.securityService.verifyDbToken(token, this.pool);
-      if (!decoded) {
-        const jwtSecret = process.env.JWT_SECRET || cfg.JWT_SECRET;
-        if (!jwtSecret) {
-          return null;
-        }
-
-        try {
-          decoded = jwt.verify(token, jwtSecret) as TokenPayload;
-        } catch {
-          return null;
-        }
-      }
+      const decoded = await this.securityService.verifyDbToken(token, this.pool);
+      if (!decoded) return null;
 
       const client = await this.pool.connect();
       const userResult = await client.query(
@@ -605,12 +593,7 @@ export class AuthService {
         return null;
       }
 
-      const dbUser = userResult.rows[0] as DatabaseUser;
-      if (!dbUser.is_active) {
-        return null;
-      }
-
-      const user = this.formatUser(dbUser);
+      const user = this.formatUser(userResult.rows[0] as DatabaseUser);
       // Fallback to role-based scopes if scp claim is missing (legacy tokens)
       user.scopes = decoded.scp || ROLE_SCOPES[user.role.toUpperCase()] || [];
       return user;
@@ -775,7 +758,7 @@ export class AuthService {
       username: user.username,
       firstName: user.first_name,
       lastName: user.last_name,
-      fullName: [user.first_name, user.last_name].filter(Boolean).join(' ').trim(),
+      fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
       defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,

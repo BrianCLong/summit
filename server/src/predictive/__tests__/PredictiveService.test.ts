@@ -1,12 +1,13 @@
 import { jest, describe, it, expect, beforeEach, afterEach, beforeAll, afterAll } from '@jest/globals';
-import { PredictiveService } from '../PredictiveService.js';
-import { getNeo4jDriver } from '../../config/database.js';
 import { WhatIfRequest } from '../../contracts/predictive/types.js';
 
-// Mock getNeo4jDriver
-jest.mock('../../config/database', () => ({
-  getNeo4jDriver: jest.fn(),
+const getNeo4jDriver = jest.fn();
+
+jest.unstable_mockModule('../../config/database.js', () => ({
+  getNeo4jDriver,
 }));
+
+const { PredictiveService } = await import('../PredictiveService.js');
 
 describe('PredictiveService Integration (Mocked Driver)', () => {
     let mockSession: any;

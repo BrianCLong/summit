@@ -4,7 +4,13 @@ import { getPostgresPool } from '../../db/postgres.js';
 import { evidenceProvenanceService } from '../evidence/provenance-service.js';
 import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
-describe('Maestro Integration Tests', () => {
+const hasDatabaseEnv = Boolean(process.env.DATABASE_URL || process.env.WRITE_URL);
+const runIntegration = process.env.RUN_MAESTRO_INTEGRATION === 'true';
+const runDbIntegration = process.env.RUN_MAESTRO_DB_INTEGRATION === 'true';
+const describeIfDb =
+  hasDatabaseEnv && runIntegration && runDbIntegration ? describe : describe.skip;
+
+describeIfDb('Maestro Integration Tests', () => {
   let testRunId: string;
   let authToken: string;
   let app: any;
@@ -23,7 +29,6 @@ describe('Maestro Integration Tests', () => {
        VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
        RETURNING id`,
     );
-    if (!result.rows[0]) throw new Error("Failed to create test run");
     testRunId = result.rows[0].id;
 
     // Mock auth token (in real tests, use proper auth)

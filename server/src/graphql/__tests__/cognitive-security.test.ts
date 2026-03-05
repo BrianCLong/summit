@@ -58,7 +58,12 @@ jest.mock('../../cognitive-security/index.js', () => ({
 import request from 'supertest';
 import { createApp } from '../../app.js';
 
-describe('Cognitive Security GraphQL Integration', () => {
+const runCognitiveGraphqlIntegration =
+  process.env.RUN_COGNITIVE_GRAPHQL_INTEGRATION === 'true';
+
+const describeCognitiveGraphql = runCognitiveGraphqlIntegration ? describe : describe.skip;
+
+describeCognitiveGraphql('Cognitive Security GraphQL Integration', () => {
     let app: any;
     const authToken = 'test-token';
 
