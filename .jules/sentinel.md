@@ -36,6 +36,11 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
+## 2025-02-19 - [HIGH] Inconsistent Case-Sensitive RBAC
+**Vulnerability:** Role checks were inconsistently applied across the platform. The `ensureRole` middleware was case-sensitive, while some manual checks in routes (e.g., SSO) used hardcoded uppercase strings. This could lead to authorization bypasses if a user's role was stored in a different case than expected by a specific check.
+**Learning:** Manual role checks are error-prone and often deviate from central middleware logic. Case-sensitivity in roles adds unnecessary fragility to the authorization layer.
+**Prevention:** Normalize all role comparisons to a standard case (uppercase) within central middleware and ensure all manual checks follow the same pattern. Adopt a "case-insensitive-by-default" posture for all identity-related strings.
+
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
