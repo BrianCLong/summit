@@ -157,5 +157,6 @@
     "src/workers/cacheWarmupWorker.ts",
     "src/dr/**",
     "src/bootstrap/**"
+    ,"../packages/osint-collector/**/*"
   ]
 }
