@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-APPLEQAI-HCI-001",
+  "summary": "Silent-intent modality spec conformance for Apple/Q.ai micro-movement patterns.",
+  "inputs": [
+    "Apple/Q.ai patents",
+    "micro-movement sensors"
+  ],
+  "outputs": [
+    "specs/silent_intent/v0/schema.json"
+  ]
+}

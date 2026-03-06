@@ -165,7 +165,7 @@ router.get(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const envelope = sandboxManager.getSandbox(id);
 
       if (!envelope.data) {
@@ -192,7 +192,7 @@ router.put(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const { name, policies, testData, limits } = req.body;
 
       const envelope = await sandboxManager.updateSandbox(id, {
@@ -226,7 +226,7 @@ router.delete(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const envelope = sandboxManager.deleteSandbox(id);
 
       if (!envelope.data.deleted) {
@@ -257,7 +257,7 @@ router.post(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const { name, description, actor, action, resource, context, expectedVerdict } = req.body;
 
       if (!name || !actor || !action || !resource) {
@@ -300,7 +300,7 @@ router.post(
   requireSandboxAccess,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const { scenarioId, policyId, contextOverrides } = req.body;
 
       const envelope = await sandboxManager.execute({
@@ -360,7 +360,7 @@ router.post(
   requireSandboxAdmin,
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { id } = req.params as { id: string };
+      const { id } = req.params;
       const { policyId, policyData } = req.body;
 
       if (!policyData) {

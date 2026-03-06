@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-CURSOR-INDEXING-SIMHASH-001",
+  "metrics": {
+    "simhash_determinism": 1.0
+  }
+}

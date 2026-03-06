@@ -1,0 +1,21 @@
+{
+  "evidence_id": "EVD-REPLITAGENT-REPAIR-001",
+  "item_slug": "replit-agent-repair",
+  "claims": [
+    "Repair harness stays disabled by default and emits constrained proposals when enabled."
+  ],
+  "decisions": [
+    {
+      "decision": "repair_flag",
+      "status": "pass",
+      "details": "Flag gate enforced and outputs constrained."
+    }
+  ],
+  "findings": [
+    {
+      "finding": "repair_tests",
+      "status": "pass",
+      "details": "Disabled/enabled behaviors covered."
+    }
+  ]
+}

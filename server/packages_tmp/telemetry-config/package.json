@@ -1,0 +1,26 @@
+{
+  "name": "@intelgraph/telemetry-config",
+  "version": "4.2.3",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.40.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.48.0",
+    "@opentelemetry/instrumentation-express": "^0.35.0",
+    "@opentelemetry/instrumentation-graphql": "^0.37.0",
+    "@opentelemetry/instrumentation-http": "^0.48.0",
+    "@opentelemetry/instrumentation-pg": "^0.40.0",
+    "@opentelemetry/instrumentation-redis": "^0.37.0",
+    "@opentelemetry/resources": "^1.21.0",
+    "@opentelemetry/sdk-node": "^0.48.0",
+    "@opentelemetry/semantic-conventions": "^1.21.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

@@ -2,7 +2,7 @@
 
 **Purpose:** Framework for calculating return on investment and total cost of ownership for Summit deployments. Use to build business cases and justify pilot/production investments.
 
-Version: 2025-11-27_
+_Version: 2025-11-27_
 
 ---
 
@@ -62,7 +62,7 @@ Version: 2025-11-27_
 
 **Calculation:**
 
-```text
+```
 Current weekly hours on inefficient tasks = {{A}} hours/analyst/week
 Expected reduction with Summit = {{B}}% (typically 30-50%)
 Hours saved per analyst per week = A × B
@@ -72,7 +72,7 @@ Annual value per analyst = Annual hours saved × (Hourly cost)
 Total annual value = Annual value per analyst × Number of analysts
 
 Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
-```text
+```
 
 **Example:**
 
@@ -94,13 +94,13 @@ Hourly cost = Annual fully-loaded cost ÷ 2,000 hours
 
 **Calculation:**
 
-```text
+```
 Current cases per analyst per year = {{A}}
 Expected throughput increase = {{B}}% (typically 20-40%)
 Additional cases per analyst = A × B
 Value per case = {{C}} (depends on mission; may be revenue, cost avoidance, or strategic)
 Total annual value = Additional cases × Number of analysts × Value per case
-```text
+```
 
 **Example:**
 
@@ -120,7 +120,7 @@ Total annual value = Additional cases × Number of analysts × Value per case
 
 **Calculation:**
 
-```text
+```
 Current compliance hours per analyst per year = {{A}}
 Expected reduction = {{B}}% (typically 40-60%)
 Hours saved per analyst = A × B
@@ -131,7 +131,7 @@ Plus: Avoided audit finding remediation
 Current annual remediation cost = {{C}}
 Expected reduction = {{D}}%
 Remediation savings = C × D
-```text
+```
 
 **Example:**
 
@@ -155,12 +155,12 @@ Remediation savings = C × D
 
 **Calculation:**
 
-```text
+```
 Current annual spend on tools Summit can replace/reduce = {{A}}
 Tools fully retired = {{B}}% of spend
 Tools reduced (fewer seats) = {{C}}% of spend
 Total savings = A × (B + C)
-```text
+```
 
 **Example:**
 
@@ -179,13 +179,13 @@ Total savings = A × (B + C)
 
 **Calculation:**
 
-```text
+```
 Probability of significant incident per year = {{A}}%
 Average cost per incident = {{B}}
 Expected annual cost = A × B
 Risk reduction with Summit = {{C}}%
 Avoided cost = Expected annual cost × C
-```text
+```
 
 **Example:**
 
@@ -205,13 +205,13 @@ Avoided cost = Expected annual cost × C
 
 **Calculation:**
 
-```text
+```
 Projected case volume growth = {{A}}% per year
 Without Summit: New analysts needed = Current analysts × A
 With Summit: New analysts needed = Current analysts × A × (1 - Throughput increase)
 Avoided hires = Without Summit hires - With Summit hires
 Avoided cost = Avoided hires × Fully-loaded analyst cost
-```text
+```
 
 **Example:**
 
@@ -270,14 +270,14 @@ Avoided cost = Avoided hires × Fully-loaded analyst cost
 
 ### 4.2 ROI Calculation
 
-```text
+```
 3-Year Total Value = Annual Value × 3 (or sum if growing)
 3-Year Total Cost = Summit TCO
 3-Year Net Benefit = Total Value - Total Cost
 ROI = (Net Benefit ÷ Total Cost) × 100
 
 Payback Period = Total Year 1 Cost ÷ (Annual Value ÷ 12)
-```text
+```
 
 **Example Summary:**
 
@@ -377,4 +377,4 @@ Use these questions to gather data during sales discovery:
 
 ---
 
-Version: 2025-11-27 | Update assumptions quarterly based on customer feedback_
+_Version: 2025-11-27 | Update assumptions quarterly based on customer feedback_

@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-SDSBC-CODEGEN-001",
+  "item_slug": "feature-flags-codegen",
+  "summary": "Feature flags are generated deterministically from code.",
+  "claims": ["feature flags are generated deterministically from code"],
+  "decisions": [{"action": "generate", "status": "success"}],
+  "findings": [{"status": "valid", "target": "/app/generated/feature_flags.json"}]
+}

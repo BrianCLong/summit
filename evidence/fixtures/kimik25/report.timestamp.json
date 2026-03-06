@@ -4,5 +4,6 @@
     "name": "Timestamp leak"
   },
   "summary": "Includes a forbidden timestamp.",
-  "artifacts": []
+  "artifacts": [],
+  "generated_at": "2026-02-14T00:00:00Z"
 }

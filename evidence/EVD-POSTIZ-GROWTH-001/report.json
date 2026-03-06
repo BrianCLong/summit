@@ -1,0 +1,11 @@
+{
+  "evidence_id": "EVD-POSTIZ-GROWTH-001",
+  "title": "Postiz OSS SaaS growth patterns",
+  "summary": "Captured OSS-to-hosted growth signals and claimed revenue/star milestones for clean-room patterning.",
+  "classification": "public",
+  "artifacts": [],
+  "item_slug": "POSTIZ-OSS-SAAS-VIDEO",
+  "area": "growth",
+  "sources": [{ "ref": "https://www.youtube.com/watch?v=RPM4ImzcIFc", "kind": "video" }],
+  "created": "2026-01-29"
+}

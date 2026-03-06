@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-CURSOR-INDEXING-HYBRID-001",
+  "metrics": {
+    "routing_accuracy": 1.0
+  }
+}

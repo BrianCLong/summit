@@ -1,0 +1,9 @@
+{
+  "evidence_id": "EVD-CLAUDE-SUPERMEMORY-CONTRACT-002",
+  "item_slug": "claude-supermemory",
+  "summary": "Scaffolding for EVD-CLAUDE-SUPERMEMORY-CONTRACT-002",
+  "artifacts": {
+    "metrics": "evidence/EVD-CLAUDE-SUPERMEMORY-CONTRACT-002/metrics.json",
+    "stamp": "evidence/EVD-CLAUDE-SUPERMEMORY-CONTRACT-002/stamp.json"
+  }
+}

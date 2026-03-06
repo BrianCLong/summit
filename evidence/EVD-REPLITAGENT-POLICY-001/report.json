@@ -1,0 +1,21 @@
+{
+  "evidence_id": "EVD-REPLITAGENT-POLICY-001",
+  "item_slug": "replit-agent-policy",
+  "claims": [
+    "Policy engine enforces deny-by-default with explicit allowlist and classification."
+  ],
+  "decisions": [
+    {
+      "decision": "deny_by_default",
+      "status": "pass",
+      "details": "Missing allowlist/classification is blocked."
+    }
+  ],
+  "findings": [
+    {
+      "finding": "policy_tests",
+      "status": "pass",
+      "details": "Negative and positive tests added."
+    }
+  ]
+}

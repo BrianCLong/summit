@@ -1,0 +1,7 @@
+{
+  "evidence_id": "EVD-POSTIZ-GROWTH-001",
+  "metrics": [
+    { "name": "mrr_usd", "value": 17000, "unit": "usd", "provenance": "claimed" },
+    { "name": "github_stars", "value": 25000, "unit": "stars", "provenance": "claimed" }
+  ]
+}
