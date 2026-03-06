@@ -1,81 +1,96 @@
-"""Income engine orchestrator."""
+"""Deterministic Income Engine orchestration."""
+
+from __future__ import annotations
 
 import json
+import os
+from dataclasses import dataclass
 from pathlib import Path
 
-import yaml
-from jsonschema import Draft7Validator
+import jsonschema
 
-from .cost_model import calculate_projection
+from .cost_model import total_cost
 from .leverage import asset_leverage_index, simplicity_score
 from .recurrence import recurrence_score
-from .report import emit_artifacts
-
-FEATURE_FLAG = "income_engine_enabled"
+from .report import build_evidence_id, enforce_claim_policy, write_artifacts
 
 
-class IncomeEngineError(Exception):
-    """Raised when engine input is invalid or policy-gated."""
+SCHEMA_PATH = Path(__file__).with_name("income_model.schema.json")
 
 
-def _load_schema(schema_path: Path) -> dict:
-    return json.loads(schema_path.read_text(encoding="utf-8"))
+@dataclass(frozen=True)
+class IncomeEngine:
+    """Income Engine runner with deterministic outputs."""
+
+    feature_flag_env: str = "SUMMIT_ENABLE_INCOME_ENGINE"
+
+    def _load_schema(self) -> dict:
+        return json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+
+    def validate_spec(self, spec: dict) -> None:
+        jsonschema.validate(instance=spec, schema=self._load_schema())
+        if "setup_cost" not in spec:
+            raise ValueError("Cost disclosure is required.")
+        if not spec.get("evidence_links"):
+            raise ValueError("At least one evidence link is required.")
+
+    def calculate_projection(self, spec: dict) -> dict:
+        months = int(spec.get("projection_months", 12))
+        monthly_revenue = (
+            float(spec["monthly_traffic"]) * float(spec["conversion_rate"]) * float(spec["price"])
+        )
+        retained_monthly_revenue = monthly_revenue * (1 - float(spec["churn_rate"]))
+        projected_revenue = retained_monthly_revenue * months
+        costs = total_cost(spec)
+        return {
+            "projection_months": months,
+            "monthly_revenue": round(monthly_revenue, 2),
+            "retained_monthly_revenue": round(retained_monthly_revenue, 2),
+            "projected_revenue": round(projected_revenue, 2),
+            "projected_cost": costs,
+            "projected_net": round(projected_revenue - costs, 2),
+        }
+
+    def run(self, spec: dict, output_dir: Path) -> tuple[dict, dict, dict]:
+        enabled = os.getenv(self.feature_flag_env, "0") == "1"
+        if not enabled:
+            raise RuntimeError("Income Engine feature flag is disabled by default.")
+
+        self.validate_spec(spec)
+        enforce_claim_policy(spec.get("claims", []))
+
+        projection = self.calculate_projection(spec)
+        metrics = {
+            "asset_leverage_index": asset_leverage_index(spec),
+            "recurrence_score": recurrence_score(spec),
+            "simplicity_score": simplicity_score(spec),
+        }
+        report = {
+            "model_type": spec["model_type"],
+            "assumptions": {
+                "setup_cost": spec["setup_cost"],
+                "monthly_operating_cost": spec.get("monthly_operating_cost", 0),
+                "monthly_traffic": spec["monthly_traffic"],
+                "conversion_rate": spec["conversion_rate"],
+                "price": spec["price"],
+                "churn_rate": spec["churn_rate"],
+            },
+            "projection": projection,
+            "evidence_links": spec["evidence_links"],
+        }
+        evidence_id = build_evidence_id(spec, report)
+        stamp = {
+            "engine": "income_engine",
+            "version": "0.1.0",
+            "deterministic": True,
+            "evidence_id": evidence_id,
+        }
+        report["evidence_id"] = evidence_id
+
+        write_artifacts(output_dir, report, metrics, stamp)
+        return report, metrics, stamp
 
 
-def load_spec(spec_path: Path) -> dict:
-    with open(spec_path, encoding="utf-8") as handle:
-        if spec_path.suffix in {".yaml", ".yml"}:
-            return yaml.safe_load(handle)
-        if spec_path.suffix == ".json":
-            return json.load(handle)
-    raise IncomeEngineError(f"Unsupported spec format: {spec_path}")
-
-
-def validate_spec(spec: dict, schema_path: Path) -> None:
-    schema = _load_schema(schema_path)
-    validator = Draft7Validator(schema)
-    errors = sorted(validator.iter_errors(spec), key=lambda err: list(err.path))
-    if errors:
-        first = errors[0]
-        raise IncomeEngineError(f"Invalid income spec at {list(first.path)}: {first.message}")
-
-
-def run_income_engine(
-    spec: dict,
-    output_dir: Path,
-    schema_path: Path,
-    feature_flags: dict[str, bool] | None = None,
-    run_date: str | None = None,
-) -> dict[str, Path]:
-    """Run full deterministic model and write report/metrics/stamp."""
-    feature_flags = feature_flags or {}
-    if not feature_flags.get(FEATURE_FLAG, False):
-        raise IncomeEngineError("Income engine feature flag is disabled by default.")
-
-    validate_spec(spec, schema_path=schema_path)
-
-    if not spec.get("evidence_links"):
-        raise IncomeEngineError("Projections must include evidence_links.")
-
-    projection = calculate_projection(spec)
-    metrics = {
-        "asset_leverage_index": asset_leverage_index(
-            spec.get("automation_share", 0.5),
-            spec["setup_cost"],
-            spec["monthly_operating_cost"],
-        ),
-        "recurrence_score": recurrence_score(spec["churn_rate"], spec["conversion_rate"]),
-        "simplicity_score": simplicity_score(
-            required_fields_count=len(spec.keys()),
-            manual_hours_per_month=spec.get("manual_hours_per_month", 0),
-        ),
-    }
-
-    return emit_artifacts(
-        output_dir=output_dir,
-        spec=spec,
-        projection=projection,
-        metrics=metrics,
-        claims_allowed=True,
-        run_date=run_date,
-    )
+def run_income_engine(spec: dict, output_dir: Path) -> tuple[dict, dict, dict]:
+    """Convenience helper for callers."""
+    return IncomeEngine().run(spec=spec, output_dir=output_dir)

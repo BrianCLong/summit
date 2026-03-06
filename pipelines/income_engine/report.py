@@ -1,70 +1,45 @@
-"""Deterministic JSON artifact emission for income engine."""
+"""Artifact emitter for deterministic Income Engine outputs."""
+
+from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
 from pathlib import Path
 
-from .cost_model import Projection
+
+PROHIBITED_CLAIMS = (
+    "guaranteed income",
+    "risk free",
+    "instant riches",
+    "passive millions",
+)
 
 
-EVIDENCE_PREFIX = "EVID-INCOME"
+def _stable_hash(payload: dict) -> str:
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()[:12]
 
 
-def build_evidence_id(spec: dict, run_date: str | None = None) -> str:
-    """Build deterministic evidence ID by day and stable spec hash."""
-    canonical = json.dumps(spec, sort_keys=True, separators=(",", ":"))
-    digest = hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:10]
-    if run_date is None:
-        run_date = datetime.now(timezone.utc).strftime("%Y%m%d")
-    return f"{EVIDENCE_PREFIX}-{run_date}-{digest}"
+def build_evidence_id(spec: dict, report_payload: dict) -> str:
+    evidence_date = str(spec.get("evidence_date", "19700101"))
+    return f"EVID-INCOME-{evidence_date}-{_stable_hash(report_payload)}"
 
 
-def emit_artifacts(
-    output_dir: Path,
-    spec: dict,
-    projection: Projection,
-    metrics: dict,
-    claims_allowed: bool,
-    run_date: str | None = None,
-) -> dict[str, Path]:
-    """Write deterministic artifacts with sorted keys and fixed structure."""
+def enforce_claim_policy(claims: list[str]) -> None:
+    for claim in claims:
+        lowered = claim.lower()
+        if any(term in lowered for term in PROHIBITED_CLAIMS):
+            raise ValueError("Claim violates hype policy guardrail.")
+
+
+def write_artifacts(output_dir: Path, report: dict, metrics: dict, stamp: dict) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    evidence_id = build_evidence_id(spec, run_date=run_date)
-
-    report = {
-        "engine": "income_engine",
-        "evidence_id": evidence_id,
-        "model_type": spec["model_type"],
-        "projection": {
-            "monthly_customers": projection.monthly_customers,
-            "monthly_revenue": projection.monthly_revenue,
-            "monthly_cost": projection.monthly_cost,
-            "monthly_net": projection.monthly_net,
-            "annual_net": projection.annual_net,
-        },
-        "claims": {
-            "status": "allowed" if claims_allowed else "blocked",
-            "reason": "evidence_links_present" if claims_allowed else "missing_evidence_links",
-        },
-        "evidence_links": spec["evidence_links"],
-    }
-
-    stamp = {
-        "artifact_family": "income_engine",
-        "evidence_id": evidence_id,
-        "deterministic": True,
-        "schema_version": "1.0.0",
-    }
-
-    artifacts = {
-        "report": output_dir / "report.json",
-        "metrics": output_dir / "metrics.json",
-        "stamp": output_dir / "stamp.json",
-    }
-
-    for key, path in artifacts.items():
-        payload = report if key == "report" else metrics if key == "metrics" else stamp
-        path.write_text(json.dumps(payload, sort_keys=True, indent=2) + "\n", encoding="utf-8")
-
-    return artifacts
+    for filename, payload in (
+        ("report.json", report),
+        ("metrics.json", metrics),
+        ("stamp.json", stamp),
+    ):
+        (output_dir / filename).write_text(
+            json.dumps(payload, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+        )

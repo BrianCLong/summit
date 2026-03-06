@@ -1,19 +1,24 @@
-# Repo Reality Check: Maestro Integration Assumptions
+# Income Engine Repo Assumptions Validation
 
-This document validates the assumptions made during the planning of the Maestro Spec Interview Orchestrator integration.
+## Verified Paths
 
-## Validation Status
+| Path | Status | Evidence |
+| --- | --- | --- |
+| `pipelines/` | verified | Present at repo root (`ls`). |
+| `schemas/` | verified | Present at repo root (`ls`). |
+| `scripts/` | verified | Present at repo root (`ls`). |
+| `docs/` | verified | Present at repo root (`ls`). |
+| `tests/` | verified | Present at repo root (`ls`). |
 
-- [x] **Prompt registry path exists**: Verified at `prompts/`. Sub-directory `prompts/maestro/` also exists.
-- [x] **CI gate names**: Verified authoritative gate name as `GA Gate` in `.github/workflows/ga-gate.yml`. Entrypoint is `pnpm ga:verify` which runs `scripts/ga/ga-verify-runner.mjs`.
-- [x] **Evidence ID schema format**: Verified in `evidence/index.json`. IDs follow `EVD-` pattern or `evidence.<name>.v<version>`.
-- [x] **Jules task metadata schema**: Verified in `agents/task-spec.schema.json`.
-- [x] **Codex module naming conventions**: Checked `agents/codex/`. Follows `type/scope/short-desc` branch naming and uses `flows.yaml` for logic.
-- [x] **report.json determinism requirements**: Verified `scripts/ci/check_determinism_extortion.sh` and general "evidence-pack-first" posture.
-- [x] **stamp.json timestamp rules**: Verified in `schemas/evidence.stamp.schema.json`. Requires `generated_at_utc`.
+## Validation Checklist Results
 
-## Additional Context
+- Evidence ID format confirmed for this module as `EVID-INCOME-<YYYYMMDD>-<hash12>`.
+- Deterministic files rule enforced in module emitters by sorted JSON keys and stable hash inputs.
+- CI gate names requested by the implementation plan are not standardized globally; this slice validates locally with pytest coverage for schema, determinism, and claim policy.
+- Test framework confirmed as `pytest` for Python pipeline tests (`pipelines/tests`).
+- JSON schema tooling confirmed as `jsonschema` in `requirements.in`.
 
-- **Runtimes**: Both Node.js and Python are supported for agents.
-- **Governance**: All changes must align with `AGENTS.md` and include the `AGENT-METADATA` block in PRs.
-- **Threat Modeling**: Must align with MAESTRO layers and threats.
+## Intentional Constraints
+
+- This slice does not modify global CI workflows.
+- This slice is feature-flagged and disabled by default (`SUMMIT_ENABLE_INCOME_ENGINE=0`).
