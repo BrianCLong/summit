@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T01:10:00Z",
-  "revision_note": "Added workflow-graph evidence lane-1 tracking entry.",
+  "last_updated": "2026-02-08T10:06:31Z",
+  "revision_note": "Added Community Copilot Lane 1 plan entry for governed PR stack sequencing.",
   "initiatives": [
+    {
+      "id": "community-copilot-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Community Copilot Lane 1 plan doc (PR1\u2013PR5) with evidence, policy, retrieval, connector, and API contracts."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -59,12 +65,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
-    },
-    {
-      "id": "workflow-graphs-evidence-lane1",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Workflow graph evidence scaffolding with deterministic verifier and index registration."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
