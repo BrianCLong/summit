@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 // Tree-shaken D3 imports for better bundle size
-import { select, type Selection, type BaseType } from 'd3-selection'
+import { select } from 'd3-selection'
 import {
   forceSimulation,
   forceLink,
@@ -19,6 +19,10 @@ import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 import { CanvasGraphRenderer } from './CanvasGraphRenderer'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRbac } from '@/hooks/useRbac'
+import { FlagGuard } from '@/components/FlagGuard'
+import { DisabledOverlay } from '@/components/DisabledOverlay'
 
 interface GraphCanvasProps {
   entities: Entity[]
@@ -47,35 +51,7 @@ interface GraphLink extends SimulationLinkDatum<GraphNode> {
   target: GraphNode
 }
 
-// Entity type to color mapping
-const ENTITY_COLORS: Record<string, string> = {
-  PERSON: '#3b82f6',
-  ORGANIZATION: '#8b5cf6',
-  LOCATION: '#10b981',
-  IP_ADDRESS: '#f59e0b',
-  DOMAIN: '#06b6d4',
-  EMAIL: '#ec4899',
-  FILE: '#ef4444',
-  PROJECT: '#84cc16',
-  SYSTEM: '#6b7280',
-}
-const DEFAULT_COLOR = '#6b7280'
-
-// Entity type to icon mapping
-const ENTITY_ICONS: Record<string, string> = {
-  PERSON: '👤',
-  ORGANIZATION: '🏢',
-  LOCATION: '📍',
-  IP_ADDRESS: '🌐',
-  DOMAIN: '🔗',
-  EMAIL: '📧',
-  FILE: '📄',
-  PROJECT: '📊',
-  SYSTEM: '⚙️',
-}
-const DEFAULT_ICON = '📊'
-
-function SVGGraphRenderer({
+export function GraphCanvas({
   entities,
   relationships,
   layout,
@@ -83,28 +59,43 @@ function SVGGraphRenderer({
   selectedEntityId,
   className,
 }: GraphCanvasProps) {
-  const svgRef = useRef<SVGSVGElement>(null)
-  const nodeSelectionRef = useRef<Selection<SVGGElement, GraphNode, BaseType, unknown> | null>(null)
-  const linkSelectionRef = useRef<Selection<SVGLineElement, GraphLink, BaseType, unknown> | null>(null)
-  // Store callback in ref to avoid stale closures in event handlers
-  const onEntitySelectRef = useRef(onEntitySelect)
+  // Auth & RBAC
+  const { user } = useAuth()
+  const { hasPermission: canEdit } = useRbac('investigations', 'write', { user })
 
+  // Use canvas renderer for large graphs
+  const PERFORMANCE_THRESHOLD = 500
+  if (entities.length > PERFORMANCE_THRESHOLD) {
+    return (
+      <CanvasGraphRenderer
+        entities={entities}
+        relationships={relationships}
+        layout={layout}
+        onEntitySelect={onEntitySelect}
+        selectedEntityId={selectedEntityId}
+        className={className}
+      />
+    )
+  }
+
+  const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
   const [fps, setFps] = useState(0)
   const [debugMode, setDebugMode] = useState(false)
-  const frameCountRef = useRef(0)
-  const lastTimeRef = useRef(0)
+  const [tooltip, setTooltip] = useState<{
+    show: boolean
+    x: number
+    y: number
+    content: string
+  }>({ show: false, x: 0, y: 0, content: '' })
 
-  // Update callback ref
-  useEffect(() => {
-    onEntitySelectRef.current = onEntitySelect
-  }, [onEntitySelect])
+  const frameCountRef = useRef(0)
+  const lastTimeRef = useRef(performance.now())
 
   // Calculate FPS
   useEffect(() => {
     if (!debugMode) return
 
-    lastTimeRef.current = performance.now()
     let animationFrameId: number
 
     const renderLoop = (time: number) => {
@@ -137,41 +128,32 @@ function SVGGraphRenderer({
     return () => window.removeEventListener('resize', updateDimensions)
   }, [])
 
-  // Memoize nodes and links creation
-  const { nodes, links } = useMemo(() => {
-    const nodesData: GraphNode[] = entities.map(entity => ({
-      id: entity.id,
-      entity,
-    }))
-
-    const linksData: GraphLink[] = relationships
-      .filter(rel => {
-        const sourceNode = nodesData.find(n => n.id === rel.sourceId)
-        const targetNode = nodesData.find(n => n.id === rel.targetId)
-        return sourceNode && targetNode
-      })
-      .map(rel => ({
-        id: rel.id,
-        relationship: rel,
-        source: nodesData.find(n => n.id === rel.sourceId)!,
-        target: nodesData.find(n => n.id === rel.targetId)!,
-      }))
-
-    return { nodes: nodesData, links: linksData }
-  }, [entities, relationships])
-
-  // Simulation setup effect
   useEffect(() => {
-    if (!svgRef.current || nodes.length === 0) {
-        nodeSelectionRef.current = null
-        linkSelectionRef.current = null
-        return
-    }
+    if (!svgRef.current || entities.length === 0) {return}
 
     const svg = select(svgRef.current)
     svg.selectAll('*').remove()
 
     const { width, height } = dimensions
+
+    // Create nodes and links
+    const nodes: GraphNode[] = entities.map(entity => ({
+      id: entity.id,
+      entity,
+    }))
+
+    const links: GraphLink[] = relationships
+      .filter(rel => {
+        const sourceNode = nodes.find(n => n.id === rel.sourceId)
+        const targetNode = nodes.find(n => n.id === rel.targetId)
+        return sourceNode && targetNode
+      })
+      .map(rel => ({
+        id: rel.id,
+        relationship: rel,
+        source: nodes.find(n => n.id === rel.sourceId)!,
+        target: nodes.find(n => n.id === rel.targetId)!,
+      }))
 
     // Create simulation based on layout type
     let simulation: Simulation<GraphNode, GraphLink>
@@ -250,11 +232,50 @@ function SVGGraphRenderer({
       .enter()
       .append('line')
       .attr('class', 'link')
-      .attr('stroke', '#999')
+      .attr('stroke', d => {
+        // Visual guardrail: highlight drift/low confidence
+        if (d.relationship.confidence < 0.8) return '#ef4444' // red-500
+        return '#999'
+      })
+      .attr('stroke-dasharray', d => {
+        // Visual guardrail: dashed line for low confidence
+        if (d.relationship.confidence < 0.8) return '5,5'
+        return 'none'
+      })
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', d => Math.sqrt(d.relationship.confidence * 3))
 
-    linkSelectionRef.current = link
+    // Add interactions for links (guardrails)
+    link
+      .style('cursor', d => d.relationship.confidence < 0.8 ? 'pointer' : 'default')
+      .on('mouseenter', (event, d) => {
+        if (d.relationship.confidence < 0.8) {
+          select(event.currentTarget).attr('stroke-width', Math.sqrt(d.relationship.confidence * 3) + 2)
+
+          if (!canEdit) {
+            setTooltip({
+              show: true,
+              x: event.clientX,
+              y: event.clientY,
+              content: "Upgrade to propose fixes"
+            })
+          }
+        }
+      })
+      .on('mouseleave', (event, d) => {
+        select(event.currentTarget).attr('stroke-width', Math.sqrt(d.relationship.confidence * 3))
+        if (!canEdit) {
+          setTooltip(prev => ({ ...prev, show: false }))
+        }
+      })
+      .on('click', (event, d) => {
+        if (d.relationship.confidence < 0.8 && canEdit) {
+           // Simulate fix action
+           console.log(`Fixing drift for relationship ${d.id}`)
+           // In real app, this would open a dialog or trigger an action
+        }
+      })
+
 
     // Draw link labels
     const linkLabel = linksGroup
@@ -267,6 +288,38 @@ function SVGGraphRenderer({
       .attr('fill', '#666')
       .attr('text-anchor', 'middle')
       .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
+
+    // Entity type to color mapping
+    const getEntityColor = (type: string) => {
+      const colors: Record<string, string> = {
+        PERSON: '#3b82f6',
+        ORGANIZATION: '#8b5cf6',
+        LOCATION: '#10b981',
+        IP_ADDRESS: '#f59e0b',
+        DOMAIN: '#06b6d4',
+        EMAIL: '#ec4899',
+        FILE: '#ef4444',
+        PROJECT: '#84cc16',
+        SYSTEM: '#6b7280',
+      }
+      return colors[type] || '#6b7280'
+    }
+
+    // Entity type to icon mapping
+    const getEntityIcon = (type: string) => {
+      const icons: Record<string, string> = {
+        PERSON: '👤',
+        ORGANIZATION: '🏢',
+        LOCATION: '📍',
+        IP_ADDRESS: '🌐',
+        DOMAIN: '🔗',
+        EMAIL: '📧',
+        FILE: '📄',
+        PROJECT: '📊',
+        SYSTEM: '⚙️',
+      }
+      return icons[type] || '📊'
+    }
 
     // Draw nodes
     const node = nodesGroup
@@ -294,14 +347,20 @@ function SVGGraphRenderer({
           })
       )
 
-    nodeSelectionRef.current = node
-
     // Node circles
     node
       .append('circle')
       .attr('r', d => 15 + d.entity.confidence * 10)
-      .attr('fill', d => ENTITY_COLORS[d.entity.type] || DEFAULT_COLOR)
-      // Note: Stroke and filter are now handled in the styling effect
+      .attr('fill', d => getEntityColor(d.entity.type))
+      .attr('stroke', d =>
+        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
+      )
+      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
+      .style('filter', d =>
+        selectedEntityId === d.entity.id
+          ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
+          : 'none'
+      )
 
     // Node icons (using text for simplicity)
     node
@@ -309,7 +368,7 @@ function SVGGraphRenderer({
       .attr('text-anchor', 'middle')
       .attr('dy', '.35em')
       .attr('font-size', '12px')
-      .text(d => ENTITY_ICONS[d.entity.type] || DEFAULT_ICON)
+      .text(d => getEntityIcon(d.entity.type))
 
     // Node labels
     node
@@ -339,12 +398,12 @@ function SVGGraphRenderer({
     // Click handler for nodes
     node.on('click', (event, d) => {
       event.stopPropagation()
-      onEntitySelectRef.current?.(d.entity)
+      onEntitySelect?.(d.entity)
     })
 
     // Hover effects
-    node.on('mouseenter', (event, d) => {
-      select(event.currentTarget as SVGGElement)
+    node.on('mouseenter', function (this: SVGGElement, event, d) {
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -356,8 +415,8 @@ function SVGGraphRenderer({
       )
     })
 
-    node.on('mouseleave', (event, d) => {
-      select(event.currentTarget as SVGGElement)
+    node.on('mouseleave', function (this: SVGGElement, event, d) {
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -393,27 +452,14 @@ function SVGGraphRenderer({
       simulation.stop()
     }
   }, [
-    nodes,
-    links,
+    entities,
+    relationships,
     layout,
     dimensions,
+    selectedEntityId,
+    onEntitySelect,
+    canEdit
   ])
-
-  // Styling effect - runs when selection changes without restarting simulation
-  useEffect(() => {
-    if (!nodeSelectionRef.current) return
-
-    nodeSelectionRef.current.select('circle')
-      .attr('stroke', d =>
-        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
-      )
-      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
-      .style('filter', d =>
-        selectedEntityId === d.entity.id
-          ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
-          : 'none'
-      )
-  }, [selectedEntityId, nodes])
 
   return (
     <div className={cn('relative w-full h-full', className)}>
@@ -425,6 +471,20 @@ function SVGGraphRenderer({
             'radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 50%)',
         }}
       />
+
+      {/* Tooltip Overlay */}
+      {tooltip.show && (
+        <div
+          className="fixed z-50 px-2 py-1 text-xs text-white bg-black rounded shadow pointer-events-none"
+          style={{
+            left: tooltip.x + 10,
+            top: tooltip.y + 10,
+            transform: 'translate(0, 0)' // Ensure no offset issues
+          }}
+        >
+          {tooltip.content}
+        </div>
+      )}
 
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -444,6 +504,30 @@ function SVGGraphRenderer({
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
+
+            {/* RBAC Info */}
+            <div className="border-t my-1 pt-1 border-muted" />
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">Role:</span>
+              <span className="font-medium capitalize">{user?.role || 'Guest'}</span>
+            </div>
+            <div className="flex items-center gap-1">
+               <span className="text-muted-foreground">Access:</span>
+               <span className={cn("font-medium", canEdit ? "text-green-600" : "text-amber-600")}>
+                 {canEdit ? 'Full Edit' : 'Read Only'}
+               </span>
+            </div>
+            {/* Permission Matrix Tooltip Trigger */}
+            <FlagGuard required={[{ resource: 'investigations', action: 'write' }]} fallback={
+                 <div className="text-[10px] text-amber-600 mt-1 italic">
+                   Upgrade to edit graph
+                 </div>
+            }>
+               <div className="text-[10px] text-green-600 mt-1 italic">
+                 You can edit graph
+               </div>
+            </FlagGuard>
+
             {debugMode && (
               <>
                 <div className="border-t my-1 pt-1 border-muted" />
@@ -474,30 +558,36 @@ function SVGGraphRenderer({
               <div
                 className="w-3 h-3 rounded-full border"
                 style={{
-                  backgroundColor: ENTITY_COLORS[type] || DEFAULT_COLOR,
+                  backgroundColor: (() => {
+                    const colors: Record<string, string> = {
+                      PERSON: '#3b82f6',
+                      ORGANIZATION: '#8b5cf6',
+                      LOCATION: '#10b981',
+                      IP_ADDRESS: '#f59e0b',
+                      DOMAIN: '#06b6d4',
+                      EMAIL: '#ec4899',
+                      FILE: '#ef4444',
+                      PROJECT: '#84cc16',
+                      SYSTEM: '#6b7280',
+                    }
+                    return colors[type] || '#6b7280'
+                  })(),
                 }}
               />
               <span>{type.replace('_', ' ')}</span>
             </div>
           ))}
         </div>
+
+        {/* Guardrail Legend Item */}
+        <div className="border-t my-2 pt-2 border-muted" />
+        <div className="grid grid-cols-1 gap-2 text-xs">
+           <div className="flex items-center gap-2">
+              <div className="w-6 h-0 border-t-2 border-dashed border-red-500" />
+              <span>Low Confidence (Drift)</span>
+           </div>
+        </div>
       </div>
     </div>
   )
-}
-
-export function GraphCanvas(props: GraphCanvasProps) {
-  const { entities } = props
-
-  // Use canvas renderer for large graphs
-  const PERFORMANCE_THRESHOLD = 500
-  if (entities.length > PERFORMANCE_THRESHOLD) {
-    return (
-      <CanvasGraphRenderer
-        {...props}
-      />
-    )
-  }
-
-  return <SVGGraphRenderer {...props} />
 }
