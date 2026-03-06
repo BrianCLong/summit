@@ -1,24 +1,35 @@
-# Income Engine Repo Assumptions Validation
+# Repo Assumptions — ai-platform-daily-2026-02-07
 
-## Verified Paths
+**Status:** Intentionally constrained pending in-repo validation.
+**Item Slug:** ai-platform-daily-2026-02-07
 
-| Path | Status | Evidence |
-| --- | --- | --- |
-| `pipelines/` | verified | Present at repo root (`ls`). |
-| `schemas/` | verified | Present at repo root (`ls`). |
-| `scripts/` | verified | Present at repo root (`ls`). |
-| `docs/` | verified | Present at repo root (`ls`). |
-| `tests/` | verified | Present at repo root (`ls`). |
+## Verified (from provided path map)
 
-## Validation Checklist Results
+- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
+- Canonical paths:
+  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
+  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
+  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
+  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
+- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
 
-- Evidence ID format confirmed for this module as `EVID-INCOME-<YYYYMMDD>-<hash12>`.
-- Deterministic files rule enforced in module emitters by sorted JSON keys and stable hash inputs.
-- CI gate names requested by the implementation plan are not standardized globally; this slice validates locally with pytest coverage for schema, determinism, and claim policy.
-- Test framework confirmed as `pytest` for Python pipeline tests (`pipelines/tests`).
-- JSON schema tooling confirmed as `jsonschema` in `requirements.in`.
+## Assumed (must validate in repo)
 
-## Intentional Constraints
+- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
+- Existing policy engine format under `.github/policies/` (OPA vs custom).
+- Evidence schema conventions (filenames, JSON structure).
+- Current CI job names inside the workflows (exact `name:` fields).
 
-- This slice does not modify global CI workflows.
-- This slice is feature-flagged and disabled by default (`SUMMIT_ENABLE_INCOME_ENGINE=0`).
+## Must-not-touch list (until validated)
+
+- `.github/workflows/codeql.yml`
+- Any production deployment workflows (if present)
+- DB migration directories (if present)
+- Secrets / encrypted configs
+
+## Validation checklist (before PRs merge)
+
+- Confirm `.github/workflows/*` filenames + required checks in branch protection.
+- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
+- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
+- Confirm test runner + assertion libs (`pnpm test:*`).
