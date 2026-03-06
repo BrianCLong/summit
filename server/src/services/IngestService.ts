@@ -13,13 +13,6 @@ import { meteringEmitter } from '../metering/emitter.js';
 import { getTracer } from '../observability/tracer.js';
 
 const ingestLogger = logger.child({ name: 'IngestService' });
-const tracer =
-  typeof getTracer === 'function'
-    ? getTracer()
-    : {
-        withSpan: async (_name: string, fn: (span: any) => Promise<any>) =>
-          fn({ setAttribute: () => {} }),
-      };
 
 export interface IngestInput {
   tenantId: string;
@@ -62,7 +55,7 @@ export class IngestService {
    * Ingest entities and relationships with full provenance tracking
    */
   async ingest(input: IngestInput): Promise<IngestResult> {
-    return tracer.withSpan('IngestService.ingest', async (span: any) => {
+    return getTracer().withSpan('IngestService.ingest', async (span: any) => {
       span.setAttribute('ingest.tenant_id', input.tenantId);
       span.setAttribute('ingest.source_type', input.sourceType);
       span.setAttribute('ingest.entity_count', input.entities.length);
@@ -98,7 +91,7 @@ export class IngestService {
 
         // 3. Upsert entities in batches for performance
         const BATCH_SIZE = 1000;
-        await tracer.withSpan('IngestService.processEntities', async (entitySpan) => {
+        await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
           for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
             const batch = input.entities.slice(i, i + BATCH_SIZE);
 
@@ -149,7 +142,7 @@ export class IngestService {
         });
 
         // 4. Upsert relationships
-        await tracer.withSpan('IngestService.processRelationships', async (relSpan) => {
+        await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
           for (const relInput of input.relationships) {
             try {
               const fromId = idMap.get(relInput.fromExternalId);
@@ -207,7 +200,7 @@ export class IngestService {
 
         // 6. Sync to Neo4j (best effort, with outbox fallback)
         try {
-          await tracer.withSpan('IngestService.syncToNeo4j', async () => {
+          await getTracer().withSpan('IngestService.syncToNeo4j', async () => {
              await this.syncToNeo4j(input.tenantId, provenanceId);
           });
         } catch (neo4jError) {
@@ -515,24 +508,32 @@ export class IngestService {
             break;
           }
 
-          // Process entity batch
-          // We could use UNWIND in Cypher for better performance, but keeping logic similar for now
-          // to minimize risk, just fixing the memory issue.
+          // BOLT: Group entities by kind for batched UNWIND processing.
+          // This reduces round-trips from O(N) to O(unique kinds).
+          const entitiesByKind = new Map<string, any[]>();
           for (const entity of entities) {
-             await session.run(
-              `MERGE (n {id: $id, tenantId: $tenantId})
-               SET n += $properties, n:${entity.kind}
-               RETURN n`,
-              {
-                id: entity.id,
-                tenantId: entity.tenant_id,
-                properties: {
-                  ...JSON.parse(entity.props),
-                  labels: entity.labels,
-                  createdAt: entity.created_at.toISOString(),
-                  updatedAt: entity.updated_at.toISOString(),
-                },
+            const kind = entity.kind || 'Entity';
+            if (!entitiesByKind.has(kind)) {
+              entitiesByKind.set(kind, []);
+            }
+            entitiesByKind.get(kind).push({
+              id: entity.id,
+              tenantId: entity.tenant_id,
+              properties: {
+                ...JSON.parse(entity.props),
+                labels: entity.labels,
+                createdAt: entity.created_at.toISOString(),
+                updatedAt: entity.updated_at.toISOString(),
               },
+            });
+          }
+
+          for (const [kind, batch] of entitiesByKind.entries()) {
+            await session.run(
+              `UNWIND $batch AS item
+               MERGE (n {id: item.id, tenantId: item.tenantId})
+               SET n += item.properties, n:\`${kind}\``,
+              { batch },
             );
           }
 
@@ -554,25 +555,38 @@ export class IngestService {
             break;
           }
 
+          // BOLT: Group relationships by type for batched UNWIND processing.
+          // This reduces round-trips from O(N) to O(unique relationship types).
+          const relsByType = new Map<string, any[]>();
           for (const rel of relationships) {
-            await session.run(
-              `MATCH (from {id: $fromId, tenantId: $tenantId})
-               MATCH (to {id: $toId, tenantId: $tenantId})
-               MERGE (from)-[r:${rel.relationship_type}]->(to)
-               SET r += $properties
-               RETURN r`,
-              {
-                fromId: rel.from_entity_id,
-                toId: rel.to_entity_id,
-                tenantId: rel.tenant_id,
-                properties: {
-                  ...JSON.parse(rel.props),
-                  confidence: rel.confidence,
-                  source: rel.source,
-                  firstSeen: rel.first_seen.toISOString(),
-                  lastSeen: rel.last_seen ? rel.last_seen.toISOString() : new Date().toISOString()
-                },
+            const type = rel.relationship_type || 'RELATES_TO';
+            if (!relsByType.has(type)) {
+              relsByType.set(type, []);
+            }
+            relsByType.get(type).push({
+              fromId: rel.from_entity_id,
+              toId: rel.to_entity_id,
+              tenantId: rel.tenant_id,
+              properties: {
+                ...JSON.parse(rel.props),
+                confidence: rel.confidence,
+                source: rel.source,
+                firstSeen: rel.first_seen.toISOString(),
+                lastSeen: rel.last_seen
+                  ? rel.last_seen.toISOString()
+                  : new Date().toISOString(),
               },
+            });
+          }
+
+          for (const [type, batch] of relsByType.entries()) {
+            await session.run(
+              `UNWIND $batch AS item
+               MATCH (from {id: item.fromId, tenantId: item.tenantId})
+               MATCH (to {id: item.toId, tenantId: item.tenantId})
+               MERGE (from)-[r:\`${type}\`]->(to)
+               SET r += item.properties`,
+              { batch },
             );
           }
 
