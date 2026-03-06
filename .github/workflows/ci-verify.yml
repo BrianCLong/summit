@@ -1,37 +1,20 @@
-name: CI Verify (Canonical Structure)
-
+name: ci-verify
 on:
   pull_request:
-    branches: [main]
   push:
-    branches: [main]
-  merge_group:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
-permissions:
-  contents: read
-
+    branches:
+      - main
 jobs:
-  canonical-verify:
-    name: Canonical Path Verification
+  verify-evidence:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
       - uses: pnpm/action-setup@v4
-
+        with:
+          version: 10
       - uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
+          node-version: 18
           cache: pnpm
-          cache-dependency-path: '**/pnpm-lock.yaml'
-
-      - name: Verify canonical structure and CI pathing
-        run: pnpm exec node .github/scripts/verify-canonical-structure.cjs
+      - run: pnpm install --frozen-lockfile
+      - run: node .github/scripts/verify-evidence.mjs

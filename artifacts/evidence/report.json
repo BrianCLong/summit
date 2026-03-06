@@ -1,0 +1,9 @@
+{
+  "evidenceId": "EVD-SUMMIT-EVIDENCE-001",
+  "area": "evidence-system",
+  "summary": "Evidence schema and verifier scaffolding added.",
+  "details": [
+    "Added evidence index and schemas.",
+    "Added verifier script and CI workflow."
+  ]
+}
