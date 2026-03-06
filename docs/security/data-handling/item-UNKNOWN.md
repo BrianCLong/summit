@@ -1,13 +1,10 @@
-# Data Handling — item-unknown
+# item-unknown — Standards & Interop Mapping
 
-## Data classes
-- public / internal / confidential / regulated (definitions TBD)
+## Import/Export Matrix
+- (TODO) When ITEM provided: formats, protocols, connectors
 
-## Retention
-- Evidence reports/metrics retained per GA policy (TODO link)
+## Non-goals
+- No runtime integrations until ITEM is grounded and licensed
 
-## Audit export
-- evidence/index.json + manifest.yaml are the minimum export set
-
-## Never-log fields
-- secrets, tokens, credentials, personal data (deny-by-default)
+## Compatibility notes
+- Bundle manifests are stable, versioned, and verifier-enforced

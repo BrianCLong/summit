@@ -1,4 +1,0 @@
-{"finding_id": "FIND-MANUS-001", "type": "event", "description": "Meta acquired Manus for a reported deal size of over $2B (unconfirmed).", "date": "2025-12-29", "confidence": "high", "uncertainty": {"epistemic": "medium", "aleatoric": "low"}}
-{"finding_id": "FIND-MANUS-002", "type": "status", "description": "Manus is now officially part of Meta, as stated on its website.", "date": "2025-12-30", "confidence": "verified", "uncertainty": {"epistemic": "low", "aleatoric": "low"}}
-{"finding_id": "FIND-MANUS-003", "type": "governance", "description": "Meta will fully sever Manus' China ties; Singapore operations continue.", "date": "2025-12-29", "confidence": "high", "uncertainty": {"epistemic": "low", "aleatoric": "low"}}
-{"finding_id": "FIND-MANUS-004", "type": "product", "description": "Manus will continue selling subscriptions under its own brand.", "date": "2025-12-29", "confidence": "high", "uncertainty": {"epistemic": "low", "aleatoric": "low"}}

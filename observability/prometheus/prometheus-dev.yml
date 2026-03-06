@@ -101,12 +101,3 @@ scrape_configs:
         labels:
           service: 'agentic-mesh-evaluation'
           tier: 'backend'
-
-  # Summit AI Worker
-  - job_name: summit-ai
-    metrics_path: /metrics
-    static_configs:
-      - targets: ['ai-worker:8000']
-        labels:
-          service: 'summit-ai'
-          tier: 'backend'

@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-shared-memory-orch-001",
-  "metrics": {
-    "schema_files": 3,
-    "index_entries": 1,
-    "deterministic": true
-  }
-}

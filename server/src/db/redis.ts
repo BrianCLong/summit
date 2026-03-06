@@ -47,7 +47,6 @@ export function getRedisClient(): Redis | Cluster {
             password: REDIS_PASSWORD,
             tls: REDIS_TLS_ENABLED ? {} : undefined,
             connectTimeout: 10000,
-            maxRetriesPerRequest: null,
           },
           scaleReads: 'slave',
           clusterRetryStrategy: (times) => {
@@ -68,7 +67,7 @@ export function getRedisClient(): Redis | Cluster {
             const delay = Math.min(times * 50, 2000);
             return delay;
           },
-          maxRetriesPerRequest: null,
+          maxRetriesPerRequest: 3,
         });
       }
 

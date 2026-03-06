@@ -1,6 +1,0 @@
-{
-  "product_id": "prod-001",
-  "type": "provenance",
-  "payload": "engagement_event",
-  "signature": "sig_valid_1234567890abcdef"
-}

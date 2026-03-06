@@ -1,8 +1,0 @@
-{
-  "evidence_id": "EVD-SSDF12-BNDL-001",
-  "item_slug": "ssdf-v1-2",
-  "timestamp": "2026-02-03T09:11:11.168Z",
-  "tool_versions": {
-    "node": "v22.22.0"
-  }
-}
