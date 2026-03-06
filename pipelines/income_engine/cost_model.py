@@ -1,30 +1,15 @@
-"""Deterministic cost and revenue calculations for income engine."""
+"""Deterministic cost model for the Income Engine."""
 
-from dataclasses import dataclass
-
-
-@dataclass(frozen=True)
-class Projection:
-    monthly_customers: float
-    monthly_revenue: float
-    monthly_cost: float
-    monthly_net: float
-    annual_net: float
+from __future__ import annotations
 
 
-def calculate_projection(spec: dict) -> Projection:
-    """Calculate deterministic projection from model spec."""
-    monthly_customers = spec["monthly_traffic"] * spec["conversion_rate"]
-    retained_customers = monthly_customers * (1 - spec["churn_rate"])
-    monthly_revenue = retained_customers * spec["price"]
-    monthly_cost = spec["monthly_operating_cost"]
-    monthly_net = monthly_revenue - monthly_cost
-    annual_net = (monthly_net * 12) - spec["setup_cost"]
+def monthly_cost(spec: dict) -> float:
+    """Return deterministic monthly cost from the spec."""
+    return round(float(spec.get("monthly_operating_cost", 0.0)), 2)
 
-    return Projection(
-        monthly_customers=round(monthly_customers, 4),
-        monthly_revenue=round(monthly_revenue, 2),
-        monthly_cost=round(monthly_cost, 2),
-        monthly_net=round(monthly_net, 2),
-        annual_net=round(annual_net, 2),
-    )
+
+def total_cost(spec: dict) -> float:
+    """Return deterministic total cost over the projection window."""
+    months = int(spec.get("projection_months", 12))
+    upfront = float(spec["setup_cost"])
+    return round(upfront + (monthly_cost(spec) * months), 2)

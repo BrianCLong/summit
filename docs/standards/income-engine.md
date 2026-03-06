@@ -1,18 +1,22 @@
-# Income Engine Interop Standard
+# Income Engine Interop & Standards
 
-## Inputs
-- YAML or JSON spec compatible with `pipelines/income_engine/income_model.schema.json`.
+## Supported Inputs
 
-## Outputs
+- YAML or JSON specs conforming to `pipelines/income_engine/income_model.schema.json`
+
+## Deterministic Outputs
+
 - `report.json`
 - `metrics.json`
 - `stamp.json`
 
 ## Safe Claims
+
 - Evidence-linked revenue modeling
 - Deterministic projection engine
 
 ## Non-goals
+
 - Payment processing
 - Marketing automation
 - Traffic generation

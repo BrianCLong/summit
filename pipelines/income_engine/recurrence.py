@@ -1,7 +1,11 @@
-"""Recurring income scoring functions."""
+"""Recurring revenue scoring."""
+
+from __future__ import annotations
 
 
-def recurrence_score(churn_rate: float, conversion_rate: float) -> float:
-    """Score consistency using retention and conversion, bounded [0,1]."""
-    score = (1 - churn_rate) * min(conversion_rate * 10, 1)
-    return round(max(0.0, min(score, 1.0)), 4)
+def recurrence_score(spec: dict) -> float:
+    """Score recurring consistency on a normalized 0..1 scale."""
+    churn = float(spec["churn_rate"])
+    conversion = float(spec["conversion_rate"])
+    score = (1 - churn) * conversion
+    return round(max(0.0, min(1.0, score)), 4)
