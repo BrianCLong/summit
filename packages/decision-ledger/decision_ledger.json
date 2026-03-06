@@ -236,22 +236,5 @@
     },
     "reasoning": "Captured adenhq/hive subsumption scope, lane-1 gates, and required-check discovery steps with rollback via revert.",
     "reverted": false
-  },
-  {
-    "id": "jest-entities-override-20260205",
-    "timestamp": "2026-02-05T23:45:00Z",
-    "agentId": "codex-agent",
-    "policyVersion": "1.0.0",
-    "inputHash": "eyJjaGFuZ2UiOiJwaW4gZW50aXRpZXMgdG8gNC41LnggZm9yIHBhcnNlNSBKZXN0IGNvbXBhdGliaWxpdHkiLCJmaWxlcyI6WyJwYWNrYWdlLmpzb24iLCJwbnBtLWxvY2sueWFtbCIsImRvY3Mvcm9hZG1hcC9TVEFUVVMuanNvbiIsInBhY2thZ2VzL2RlY2lzaW9uLWxlZGdlci9kZWNpc2lvbl9sZWRnZXIuanNvbiIsInByb21wdHMvbWFpbnRlbmFuY2UvamVzdC1lbnRpdGllcy1vdmVycmlkZUB2MS5tZCIsInByb21wdHMvcmVnaXN0cnkueWFtbCJdfQ==",
-    "decision": {
-      "action": "pin_dependency",
-      "rule": {
-        "condition": "parse5 requires entities/decode during Jest execution",
-        "action": "pin_entities_4_5",
-        "max_cost": 0
-      }
-    },
-    "reasoning": "Pinned entities to 4.5.x to restore parse5 Jest compatibility while maintaining scoped dependency behavior. Rollback: revert the commit that adds the override and lockfile update.",
-    "reverted": false
   }
 ]

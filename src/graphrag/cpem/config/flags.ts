@@ -1,0 +1,8 @@
+export const CPEM_FLAGS = {
+  CPEM_ENABLED: false,
+  SES_ENABLED: false,
+  CPEM_DRONE_FEEDS_ENABLED: false,
+  CPEM_RF_FEEDS_ENABLED: false,
+  CPEM_VIDEO_AUDIO_INGEST_ENABLED: false,
+  SES_EXPORTS_ENABLED: false,
+};

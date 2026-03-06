@@ -5,15 +5,9 @@ on:
     branches: [main]
   push:
     branches: [main]
-  merge_group:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.ref }}
-  cancel-in-progress: true
 
 jobs:
   gate-evidence-contract:
-    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     name: gate/evidence_contract
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +22,6 @@ jobs:
         run: ./ci/gates/evidence_contract.sh
 
   gate-agent-inventory:
-    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     name: gate/agent_inventory_required
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +36,6 @@ jobs:
           echo "Agent registry verified"
 
   gate-agent-surface:
-    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     name: gate/agent_surface_lint
     runs-on: ubuntu-latest
     steps:
@@ -61,7 +53,6 @@ jobs:
           echo "Running enforcer validation..."
 
   gate-relay-policy:
-    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     name: gate/relay_policy
     runs-on: ubuntu-latest
     steps:
@@ -71,7 +62,6 @@ jobs:
           python3 security/relay_policy/enforce.py security/relay_policy/policy.json
 
   gate-supplychain-verify:
-    if: ${{ github.event_name == 'merge_group' || github.event_name == 'push' || (github.event_name == 'pull_request' && vars.MERGE_SURGE != 'true') }}
     name: gate/supplychain_verify
     runs-on: ubuntu-latest
     steps:

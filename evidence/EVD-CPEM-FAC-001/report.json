@@ -1,0 +1,16 @@
+{
+  "item": {
+    "slug": "cpem-ses-sim",
+    "date": "2025-01-29"
+  },
+  "run": {
+    "mode": "simulation"
+  },
+  "findings": [
+    {
+      "evidence_id": "EVD-CPEM-SES-001",
+      "severity": "HIGH",
+      "summary": "Simulated SES run found 1 remediations reducing risk from 0.8 to 0."
+    }
+  ]
+}
