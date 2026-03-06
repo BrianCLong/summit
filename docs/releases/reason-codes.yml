@@ -15,6 +15,35 @@ release_status_blocked:
     description: Unclassified failure
 
 maestro_nogo:
+  - code: SCHEMA_MAJOR_UNSUPPORTED
+    description: Schema major version not supported
+  - code: SCHEMA_VERSION_INVALID
+    description: Schema version string invalid
+  - code: JSON_PARSE_ERROR
+    description: Error parsing json
+  - code: MISSING_FIELD
+    description: Missing field
+  - code: INVALID_ENUM
+    description: Invalid enum
+  - code: DRIFT_DETECTED
+    description: Drift detected
+  - code: DRIFT_ERROR
+    description: Drift error
+  - code: SIG_ORPHAN
+    description: Orphan signature
+  - code: SIG_INVALID
+    description: Invalid signature
+  - code: COSIGN_MISSING
+    description: Cosign missing
+  - code: SIG_MISSING
+    description: Signature missing
+  - code: ATTESTATION_MISSING
+    description: Attestation missing
+  - code: SHA256SUMS_INVALID_FORMAT
+    description: Invalid format in sha256 sums
+  - code: INVALID_JSON
+    description: Invalid JSON
+
   - code: BUNDLE_SCHEMA_INCOMPATIBLE
     description: Bundle schema major unsupported
   - code: BUNDLE_SCHEMA_INVALID
@@ -65,35 +94,3 @@ evidence_check:
     description: notes-source.json exists but release-notes.md is missing
   - code: INTERNAL_ERROR
     description: An internal error occurred during verification
-
-compatibility_check:
-  - code: SCHEMA_MAJOR_UNSUPPORTED
-    description: Schema major version unsupported
-  - code: SCHEMA_VERSION_INVALID
-    description: Schema version format invalid
-  - code: JSON_PARSE_ERROR
-    description: Error parsing JSON
-
-bundle_verification:
-  - code: MISSING_FIELD
-    description: Required field missing in bundle
-  - code: INVALID_ENUM
-    description: Invalid enum value in bundle
-  - code: DRIFT_DETECTED
-    description: Drift detected in bundle content
-  - code: DRIFT_ERROR
-    description: Error checking for drift
-  - code: SIG_ORPHAN
-    description: Signature file without corresponding artifact
-  - code: SIG_INVALID
-    description: Signature verification failed
-  - code: COSIGN_MISSING
-    description: Cosign tool missing
-  - code: SIG_MISSING
-    description: Missing signature file
-  - code: ATTESTATION_MISSING
-    description: Missing attestation file
-  - code: SHA256SUMS_INVALID_FORMAT
-    description: Invalid format in SHA256SUMS file
-  - code: INVALID_JSON
-    description: Invalid JSON format

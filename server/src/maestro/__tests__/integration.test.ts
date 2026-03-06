@@ -1,118 +1,338 @@
-import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import { v4 as uuidv4 } from 'uuid';
-import { Pool } from 'pg';
-import { GenericContainer, StartedTestContainer } from 'testcontainers';
+import request from 'supertest';
+import { createApp } from '../../app.js';
+import { getPostgresPool } from '../../db/postgres.js';
+import { evidenceProvenanceService } from '../evidence/provenance-service.js';
+import { describe, test, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
 
-// Integration tests using real postgres container via testcontainers (or local if configured)
 describe('Maestro Integration Tests', () => {
-  let db: Pool;
-  let container: StartedTestContainer;
+  let testRunId: string;
+  let authToken: string;
+  let app: any;
 
   beforeAll(async () => {
-    // In CI, we use the service container. Locally we might use testcontainers.
-    // For this test script, we'll assume env vars are set or fallback to testcontainers.
-    if (process.env.CI) {
-        db = new Pool({
-            connectionString: process.env.DATABASE_URL,
-        });
-    } else {
-        container = await new GenericContainer('postgres:16-alpine')
-            .withEnvironment({ POSTGRES_PASSWORD: 'password', POSTGRES_DB: 'test_db' })
-            .withExposedPorts(5432)
-            .start();
+    // Create app
+    app = await createApp();
 
-        db = new Pool({
-            connectionString: `postgres://postgres:password@${container.getHost()}:${container.getMappedPort(5432)}/test_db`,
-        });
-    }
+    // Setup test database
+    const pool = getPostgresPool();
+    await pool.query('BEGIN');
 
-    // Simple migration for testing
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(50) NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `);
+    // Create test run
+    const result = await pool.query(
+      `INSERT INTO run (id, runbook, status, started_at) 
+       VALUES (gen_random_uuid(), 'test-runbook', 'RUNNING', now()) 
+       RETURNING id`,
+    );
+    testRunId = result.rows?.[0]?.id || '123';
 
-    await db.query(`
-      CREATE TABLE IF NOT EXISTS maestro_runs (
-        id UUID PRIMARY KEY,
-        status VARCHAR(50) NOT NULL,
-        config JSONB NOT NULL,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        user_id UUID REFERENCES users(id)
-      );
-    `);
-  }, 60000);
+    // Mock auth token (in real tests, use proper auth)
+    authToken = 'test-token';
+  });
 
   afterAll(async () => {
-    await db?.end();
-    if (container) await container.stop();
+    const pool = getPostgresPool();
+    await pool.query('ROLLBACK');
+    await pool.end();
   });
 
   describe('Router Decision Transparency', () => {
-    it('should fetch router decision', async () => {
-        const userId = uuidv4();
-        // Seed user
-        await db.query(
-            `INSERT INTO users (id, email, password_hash, role) VALUES ($1, $2, $3, $4)`,
-            [userId, `test-${userId}@example.com`, 'hash', 'admin']
-        );
-
-        const runId = uuidv4();
-        const config = { goal: 'test' };
-
-        // Seed run
-        const result = await db.query(
-            `INSERT INTO maestro_runs (id, status, config, user_id) VALUES ($1, $2, $3, $4) RETURNING id`,
-            [runId, 'PENDING', config, userId]
-        );
-
-        expect(result.rows[0].id).toBe(runId);
+    beforeEach(async () => {
+      const pool = getPostgresPool();
+      // Insert test router decision
+      await pool.query(
+        `INSERT INTO router_decisions (id, run_id, node_id, selected_model, candidates, policy_applied)
+         VALUES (gen_random_uuid(), $1, 'test-node', 'gpt-4', $2, 'cost-optimization')`,
+        [
+          testRunId,
+          JSON.stringify([
+            {
+              model: 'gpt-4',
+              score: 0.95,
+              reason: 'Highest quality for complex task',
+            },
+            {
+              model: 'gpt-3.5-turbo',
+              score: 0.8,
+              reason: 'Cost effective alternative',
+            },
+          ]),
+        ],
+      );
     });
 
-    it('should handle override request', async () => {
-        expect(true).toBe(true);
+    test('should fetch router decision', async () => {
+      const response = await request(app)
+        .get(`/api/maestro/v1/runs/${testRunId}/nodes/test-node/routing`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('selectedModel', 'gpt-4');
+      expect(response.body.candidates).toHaveLength(2);
+      expect(response.body).toHaveProperty('canOverride');
     });
 
-    it('should export audit data', async () => {
-        expect(true).toBe(true);
+    test('should handle override request', async () => {
+      const response = await request(app)
+        .post(
+          `/api/maestro/v1/runs/${testRunId}/nodes/test-node/override-routing`,
+        )
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          model: 'gpt-3.5-turbo',
+          reason: 'Cost optimization for testing',
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+    });
+
+    test('should export audit data', async () => {
+      // First get the decision ID
+      const getResponse = await request(app)
+        .get(`/api/maestro/v1/runs/${testRunId}/nodes/test-node/routing`)
+        .set('Authorization', `Bearer ${authToken}`);
+
+      const decisionId = getResponse.body.id;
+
+      const response = await request(app)
+        .get(`/api/maestro/v1/audit/router-decisions/${decisionId}/export`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.headers['content-type']).toContain('application/json');
+      expect(response.body).toHaveProperty('exportedAt');
     });
   });
 
   describe('Evidence Provenance System', () => {
-      it('should store and verify evidence', async () => { expect(true).toBe(true); });
-      it('should generate SBOM evidence', async () => { expect(true).toBe(true); });
+    test('should store and verify evidence', async () => {
+      const artifact = {
+        runId: testRunId,
+        artifactType: 'sbom' as const,
+        content: JSON.stringify({ components: [] }),
+        metadata: { format: 'cycloneDX' },
+      };
+
+      const artifactId =
+        await evidenceProvenanceService.storeEvidence(artifact);
+      expect(artifactId).toBeDefined();
+
+      const verification =
+        await evidenceProvenanceService.verifyEvidence(artifactId);
+      expect(verification.valid).toBe(true);
+      expect(verification.integrity).toBe(true);
+      expect(verification.provenance).toBe(true);
+    });
+
+    test('should generate SBOM evidence', async () => {
+      const dependencies = [
+        { name: 'express', version: '4.18.0', licenses: ['MIT'] },
+        { name: 'postgres', version: '14.0', licenses: ['PostgreSQL'] },
+      ];
+
+      const artifactId = await evidenceProvenanceService.generateSBOMEvidence(
+        testRunId,
+        dependencies,
+      );
+      expect(artifactId).toBeDefined();
+
+      const artifacts =
+        await evidenceProvenanceService.listEvidenceForRun(testRunId);
+      const sbomArtifact = artifacts.find((a) => a.artifact_type === 'sbom');
+      expect(sbomArtifact).toBeDefined();
+    });
   });
 
   describe('Approval System', () => {
-      it('should list pending approvals', async () => { expect(true).toBe(true); });
-      it('should handle approval via GraphQL', async () => { expect(true).toBe(true); });
+    beforeEach(async () => {
+      const pool = getPostgresPool();
+      // Create approval request
+      await pool.query(
+        `INSERT INTO run_step (run_id, step_id, status) 
+         VALUES ($1, 'approval-step', 'BLOCKED')`,
+        [testRunId],
+      );
+      await pool.query(
+        `INSERT INTO run_event (run_id, kind, payload)
+         VALUES ($1, 'approval.created', $2)`,
+        [
+          testRunId,
+          { stepId: 'approval-step', labels: ['production', 'high-cost'] },
+        ],
+      );
+    });
+
+    test('should list pending approvals', async () => {
+      const response = await request(app)
+        .get('/api/conductor/v1/approvals')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.items).toContainEqual(
+        expect.objectContaining({
+          runId: testRunId,
+          stepId: 'approval-step',
+        }),
+      );
+    });
+
+    test('should handle approval via GraphQL', async () => {
+      const mutation = `
+        mutation ApproveStep($runId: ID!, $stepId: ID!, $justification: String!) {
+          approveStep(runId: $runId, stepId: $stepId, justification: $justification)
+        }
+      `;
+
+      const response = await request(app)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          query: mutation,
+          variables: {
+            runId: testRunId,
+            stepId: 'approval-step',
+            justification: 'Approved for testing purposes',
+          },
+        })
+        .expect(200);
+
+      expect(response.body.data.approveStep).toBe(true);
+    });
   });
 
   describe('MCP Server Management', () => {
-      it('should create MCP server', async () => { expect(true).toBe(true); });
-      it('should list MCP servers', async () => { expect(true).toBe(true); });
+    test('should create MCP server', async () => {
+      const serverData = {
+        name: 'test-mcp-server',
+        url: 'wss://test.example.com/mcp',
+        scopes: ['read', 'write'],
+        tags: ['test'],
+      };
+
+      const response = await request(app)
+        .post('/api/maestro/v1/mcp/servers')
+        .set('Authorization', `Bearer ${authToken}`)
+        .send(serverData)
+        .expect(201);
+
+      expect(response.body.name).toBe('test-mcp-server');
+      expect(response.body).not.toHaveProperty('auth_token'); // Should be hidden
+    });
+
+    test('should list MCP servers', async () => {
+      const response = await request(app)
+        .get('/api/maestro/v1/mcp/servers')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(Array.isArray(response.body)).toBe(true);
+    });
   });
 
   describe('Dashboard API', () => {
-      it('should fetch dashboard summary', async () => { expect(true).toBe(true); });
-      it('should fetch autonomy configuration', async () => { expect(true).toBe(true); });
+    test('should fetch dashboard summary', async () => {
+      const response = await request(app)
+        .get('/api/maestro/v1/dashboard/summary')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('autonomy');
+      expect(response.body).toHaveProperty('health');
+      expect(response.body).toHaveProperty('budgets');
+      expect(response.body).toHaveProperty('runs');
+      expect(response.body).toHaveProperty('approvals');
+    });
+
+    test('should fetch autonomy configuration', async () => {
+      const response = await request(app)
+        .get('/api/maestro/v1/dashboard/autonomy')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('level');
+      expect(response.body).toHaveProperty('policies');
+      expect(Array.isArray(response.body.policies)).toBe(true);
+    });
   });
 
   describe('Error Handling', () => {
-      it('should handle 404 for non-existent run', async () => { expect(true).toBe(true); });
-      it('should validate input parameters', async () => { expect(true).toBe(true); });
-      it('should require authentication', async () => { expect(true).toBe(true); });
+    test('should handle 404 for non-existent run', async () => {
+      const fakeRunId = '00000000-0000-0000-0000-000000000000';
+
+      await request(app)
+        .get(`/api/maestro/v1/runs/${fakeRunId}/nodes/test-node/routing`)
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    test('should validate input parameters', async () => {
+      await request(app)
+        .post(
+          `/api/maestro/v1/runs/${testRunId}/nodes/test-node/override-routing`,
+        )
+        .set('Authorization', `Bearer ${authToken}`)
+        .send({
+          model: '', // Invalid empty model
+          reason: 'test',
+        })
+        .expect(400);
+    });
+
+    test('should require authentication', async () => {
+      await request(app).get('/api/maestro/v1/dashboard/summary').expect(401);
+    });
   });
 
   describe('Performance & Scalability', () => {
-      it('should handle concurrent router decisions', async () => { expect(true).toBe(true); });
-      it('should paginate large result sets', async () => { expect(true).toBe(true); });
+    test('should handle concurrent router decisions', async () => {
+      const promises = Array.from({ length: 10 }, (_, i) =>
+        request(app)
+          .get(`/api/maestro/v1/runs/${testRunId}/nodes/test-node-${i}/routing`)
+          .set('Authorization', `Bearer ${authToken}`),
+      );
+
+      const responses = await Promise.allSettled(promises);
+      const successfulResponses = responses.filter(
+        (r: any) => r.status === 'fulfilled',
+      ).length;
+
+      // Should handle most requests successfully
+      expect(successfulResponses).toBeGreaterThan(5);
+    });
+
+    test('should paginate large result sets', async () => {
+      const response = await request(app)
+        .get('/api/maestro/v1/runs?limit=5&offset=0')
+        .set('Authorization', `Bearer ${authToken}`)
+        .expect(200);
+
+      expect(response.body.items).toBeDefined();
+      expect(response.body.items.length).toBeLessThanOrEqual(5);
+    });
   });
 });
+
+// Additional test utilities
+export function createTestRun(runbook: string = 'test-runbook') {
+  return getPostgresPool().query(
+    `INSERT INTO run (id, runbook, status, started_at) 
+     VALUES (gen_random_uuid(), $1, 'RUNNING', now()) 
+     RETURNING id`,
+    [runbook],
+  );
+}
+
+export function createTestRouterDecision(runId: string, nodeId: string) {
+  return getPostgresPool().query(
+    `INSERT INTO router_decisions (id, run_id, node_id, selected_model, candidates)
+     VALUES (gen_random_uuid(), $1, $2, 'gpt-4', $3)`,
+    [
+      runId,
+      nodeId,
+      JSON.stringify([
+        { model: 'gpt-4', score: 0.95, reason: 'Best quality' },
+        { model: 'gpt-3.5-turbo', score: 0.8, reason: 'Cost effective' },
+      ]),
+    ],
+  );
+}
