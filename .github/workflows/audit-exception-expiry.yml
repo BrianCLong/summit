@@ -19,7 +19,6 @@ concurrency:
 
 jobs:
   validate-exceptions:
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,7 +30,6 @@ jobs:
         uses: actions/setup-node@v4 # v6
         with:
           cache: 'pnpm'
-          cache-dependency-path: '**/pnpm-lock.yaml'
           node-version: "20"
       - name: Install dependencies
         run: |
