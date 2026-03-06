@@ -11,18 +11,26 @@ interface User {
   clearance: string;
 }
 
-const users: Record<string, User> = {
-  alice: {
-    username: 'alice',
-    password: 'password123',
-    sub: 'alice',
-    tenantId: 'tenantA',
-    roles: ['reader'],
-    clearance: 'confidential',
-  },
-};
+function getUsers(): Record<string, User> {
+  const users: Record<string, User> = {};
+  const username = process.env.AUTHZ_DEMO_USERNAME;
+  const password = process.env.AUTHZ_DEMO_PASSWORD;
+
+  if (username && password) {
+    users[username] = {
+      username,
+      password,
+      sub: username,
+      tenantId: 'tenantA',
+      roles: ['reader'],
+      clearance: 'confidential',
+    };
+  }
+  return users;
+}
 
 export async function login(username: string, password: string) {
+  const users = getUsers();
   const user = users[username];
   if (!user || user.password !== password) {
     throw new Error('invalid_credentials');
