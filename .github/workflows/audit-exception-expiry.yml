@@ -15,11 +15,12 @@ on:
 
 jobs:
   validate-exceptions:
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4 # v6
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
       - name: Use Node.js 20
         uses: actions/setup-node@v4 # v6
         with:
