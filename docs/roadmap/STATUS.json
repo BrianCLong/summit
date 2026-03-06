@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-08T10:48:35Z",
-  "revision_note": "Added Agentic CI + Policy-as-Code RFC entry for TS-first DSL and GitHub-native artifacts.",
+  "last_updated": "2026-02-08T02:05:00Z",
+  "revision_note": "Added PIDM lane-1 evidence foundation initiative and CI evidence verification gate.",
   "initiatives": [
     {
-      "id": "agentic-ci-pac-integration",
+      "id": "pidm-foundation-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "RFC drafted for Agentic CI + Policy-as-Code integration with TS-first DSL and GitHub-native artifacts."
+      "notes": "PIDM evidence index, CI verification, and architecture baseline documentation."
     },
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -218,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 23,
+    "total": 16,
     "ga_blockers": []
   }
 }
