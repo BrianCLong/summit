@@ -39,7 +39,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check GraphQL schema drift
-        run: pnpm run graphql:schema:check
+        run: ppnpm run graphql:schema:check
 
       - name: Run policy contract tests
-        run: pnpm run test:policy
+        run: ppnpm run test:policy

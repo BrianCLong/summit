@@ -99,13 +99,13 @@ jobs:
           echo "Running release readiness verification..."
 
           # Try pnpm release:ready if available, otherwise run individual checks
-          if pnpm run release:ready 2>/dev/null; then
+          if ppnpm run release:ready 2>/dev/null; then
             echo "✅ Release readiness check passed"
             echo "status=passed" >> $GITHUB_OUTPUT
           else
             echo "⚠️ release:ready not available, running fallback checks..."
             # Fallback: run typecheck and build
-            pnpm run typecheck || true
+            ppnpm run typecheck || true
             pnpm --filter intelgraph-server build || true
             echo "status=fallback" >> $GITHUB_OUTPUT
           fi

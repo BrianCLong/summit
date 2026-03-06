@@ -66,7 +66,7 @@ jobs:
 
           # Run typecheck and capture exit code
           EXIT_CODE=0
-          pnpm run typecheck 2>&1 | tee ../typecheck-output.txt || EXIT_CODE=$?
+          ppnpm run typecheck 2>&1 | tee ../typecheck-output.txt || EXIT_CODE=$?
 
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
 

@@ -133,7 +133,7 @@ jobs:
       - name: Run database migrations
         if: inputs.test-type == 'integration' || inputs.test-type == 'all'
         run: |
-          pnpm run db:migrate || echo "Migration script not found or failed (non-blocking)"
+          ppnpm run db:migrate || echo "Migration script not found or failed (non-blocking)"
         env:
           DATABASE_URL: postgresql://test:testpass@localhost:5432/summit_test
           NODE_ENV: test
@@ -147,9 +147,9 @@ jobs:
         if: inputs.test-type == 'unit' || inputs.test-type == 'all'
         run: |
           if [ "${{ inputs.upload-coverage }}" = "true" ]; then
-            pnpm run test:coverage || pnpm run test
+            ppnpm run test:coverage || ppnpm run test
           else
-            pnpm run test
+            ppnpm run test
           fi
         env:
           NODE_ENV: test
@@ -157,7 +157,7 @@ jobs:
 
       - name: Run integration tests
         if: inputs.test-type == 'integration' || inputs.test-type == 'all'
-        run: pnpm run test:integration || echo "Integration tests not configured"
+        run: ppnpm run test:integration || echo "Integration tests not configured"
         env:
           NODE_ENV: test
           CI: true
@@ -167,7 +167,7 @@ jobs:
 
       - name: Run E2E tests
         if: inputs.test-type == 'e2e' || inputs.test-type == 'all'
-        run: pnpm run e2e || echo "E2E tests not configured"
+        run: ppnpm run e2e || echo "E2E tests not configured"
         env:
           NODE_ENV: test
           CI: true

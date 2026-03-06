@@ -10798,6 +10798,12 @@ importers:
 
   packages/policy-cards:
     devDependencies:
+      '@types/hapi__catbox':
+        specifier: ^12.0.6
+        version: 12.1.0
+      '@types/hapi__shot':
+        specifier: ^4.1.6
+        version: 4.1.6
       '@types/node':
         specifier: ^18.0.0
         version: 18.19.130

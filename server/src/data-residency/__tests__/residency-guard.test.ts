@@ -8,7 +8,6 @@ jest.unstable_mockModule('../../db/postgres.js', () => ({
 }));
 
 const { ResidencyGuard, ResidencyViolationError } = await import('../residency-guard.js');
-type ResidencyGuard = import('../residency-guard.js').ResidencyGuard;
 
 describe('ResidencyGuard', () => {
   let guard: ResidencyGuard;

@@ -94,7 +94,7 @@ jobs:
         id: antigravity
         run: |
           echo "⚖️ Verifying Antigravity Governance..."
-          npm run compliance:antigravity
+          pnpm run compliance:antigravity
 
       # 2. Security: Secrets & Vulns
       - name: Run Trivy (Secrets)

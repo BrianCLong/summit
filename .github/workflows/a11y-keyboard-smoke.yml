@@ -86,7 +86,7 @@ jobs:
           CI: true
           BASE_URL: http://127.0.0.1:4173
           VITE_DEMO_MODE: "true"
-        run: pnpm run test:a11y-gate
+        run: ppnpm run test:a11y-gate
 
       - name: Upload accessibility artifacts
         if: always()

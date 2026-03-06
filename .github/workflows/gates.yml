@@ -70,7 +70,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          if pnpm run -s test >/dev/null 2>&1; then
+          if ppnpm run -s test >/dev/null 2>&1; then
             pnpm test
           else
             echo "No test script; skipping."

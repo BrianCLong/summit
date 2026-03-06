@@ -37,7 +37,7 @@ jobs:
 
       - name: Run quarantined tests
         run: |
-          if npm run test:quarantine 2>/dev/null; then
+          if pnpm run test:quarantine 2>/dev/null; then
             echo "✅ Quarantined tests passed"
           else
             echo "⚠️ Quarantined tests failed (expected, non-blocking)"
@@ -147,7 +147,7 @@ jobs:
         run: |
           echo "=== Schema Diff (Deprecated) ==="
           echo "This check is being migrated to ci-verify.yml"
-          if npm run graphql:schema:check 2>/dev/null; then
+          if pnpm run graphql:schema:check 2>/dev/null; then
             echo "✅ Schema diff passed"
           else
             echo "⚠️ Schema diff failed or skipped (non-blocking)"
@@ -157,7 +157,7 @@ jobs:
         run: |
           echo "=== Old Governance Checks (Deprecated) ==="
           echo "These checks are being consolidated into ci-verify.yml"
-          if npm run check:governance:legacy 2>/dev/null; then
+          if pnpm run check:governance:legacy 2>/dev/null; then
             echo "✅ Legacy governance checks passed"
           else
             echo "⚠️ Legacy governance checks skipped (non-blocking)"
@@ -214,7 +214,7 @@ jobs:
 
       - name: Run accessibility checks
         run: |
-          if npm run test:accessibility 2>/dev/null; then
+          if pnpm run test:accessibility 2>/dev/null; then
             echo "✅ Accessibility checks passed"
           else
             echo "⚠️ Accessibility checks skipped or failed (non-blocking)"

@@ -68,7 +68,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate SBOM
-        run: npm run generate:sbom
+        run: pnpm run generate:sbom
 
       - name: Run SCA (Trivy)
         run: |
@@ -80,7 +80,7 @@ jobs:
           fi
 
       - name: Run SAST (Lint)
-        run: npm run lint
+        run: pnpm run lint
 
   build-test:
     name: Build & Test
@@ -203,7 +203,7 @@ jobs:
              if command -v docker-compose &> /dev/null; then
                  docker-compose -f docker-compose.dev.yml up -d
              else
-                 npm run build:server
+                 pnpm run build:server
                  cd server && npm start &
              fi
 
@@ -236,4 +236,4 @@ jobs:
           export TARGET_URL="${{ steps.deploy.outputs.preview_url }}"
           # Ensure smoke tests target the correct URL
           echo "Running smoke tests against $TARGET_URL"
-          npm run test:smoke
+          pnpm run test:smoke

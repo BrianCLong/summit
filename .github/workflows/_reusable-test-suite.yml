@@ -60,12 +60,12 @@ jobs:
       - name: Unit tests
         if: ${{ inputs.test-type == 'unit' }}
         working-directory: ${{ inputs.working-directory }}
-        run: ${{ inputs.test-command || 'pnpm run test:unit --coverage' }}
+        run: ${{ inputs.test-command || 'ppnpm run test:unit --coverage' }}
 
       - name: Integration tests
         if: ${{ inputs.test-type == 'integration' }}
         working-directory: ${{ inputs.working-directory }}
-        run: ${{ inputs.test-command || 'pnpm run test:integration' }}
+        run: ${{ inputs.test-command || 'ppnpm run test:integration' }}
 
       - name: E2E tests
         if: ${{ inputs.test-type == 'e2e' }}
@@ -76,19 +76,19 @@ jobs:
             docker compose -f docker-compose.ci.yml up -d --wait
           fi
           # Run E2E tests
-          ${{ inputs.test-command || 'pnpm run test:e2e' }}
+          ${{ inputs.test-command || 'ppnpm run test:e2e' }}
 
       - name: Performance tests
         if: ${{ inputs.test-type == 'perf' }}
         working-directory: ${{ inputs.working-directory }}
-        run: ${{ inputs.test-command || 'pnpm run test:perf' }}
+        run: ${{ inputs.test-command || 'ppnpm run test:perf' }}
 
       - name: Lint tests
         if: ${{ inputs.test-type == 'lint' }}
         working-directory: ${{ inputs.working-directory }}
         run: |
-          pnpm run lint
-          pnpm run type-check
+          ppnpm run lint
+          ppnpm run type-check
 
       - name: Upload test results
         if: always()

@@ -158,14 +158,14 @@ jobs:
           export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
 
           echo "=== First Build ==="
-          pnpm run build
+          ppnpm run build
           find client/dist server/dist -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum > build-checksums-a.txt || true
 
           echo "=== Cleaning ==="
           rm -rf client/dist server/dist
 
           echo "=== Second Build ==="
-          pnpm run build
+          ppnpm run build
           find client/dist server/dist -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum > build-checksums-b.txt || true
 
           echo "=== Comparing Checksums ==="

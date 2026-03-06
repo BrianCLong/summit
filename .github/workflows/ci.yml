@@ -43,7 +43,7 @@ jobs:
           cache: 'pnpm'
           node-version-file: .nvmrc
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run lint
+      - run: ppnpm run lint
 
   typecheck:
     name: Typecheck

@@ -85,7 +85,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build all packages
-        run: pnpm run build
+        run: ppnpm run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
@@ -235,14 +235,14 @@ jobs:
           export SOURCE_DATE_EPOCH=$(git log -1 --pretty=format:%ct)
 
           echo "=== First Build ==="
-          pnpm run build
+          ppnpm run build
           find client/dist server/dist -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum > build-checksums-a.txt || true
 
           echo "=== Cleaning ==="
           rm -rf client/dist server/dist
 
           echo "=== Second Build ==="
-          pnpm run build
+          ppnpm run build
           find client/dist server/dist -type f -print0 2>/dev/null | sort -z | xargs -0 sha256sum > build-checksums-b.txt || true
 
           echo "=== Comparing Checksums ==="

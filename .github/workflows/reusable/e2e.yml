@@ -122,7 +122,7 @@ jobs:
           run_install: false
 
       - name: Cache pnpm store
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@v4 # v4
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -144,7 +144,7 @@ jobs:
         run: make bootstrap
 
       - name: Cache Docker layers
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        uses: actions/cache@v4 # v4
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}

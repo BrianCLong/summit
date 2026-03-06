@@ -169,4 +169,4 @@ jobs:
           ./scripts/verify-deployment.sh
 
           # Optional: Run app-level functional smoke tests
-          # pnpm run test:smoke
+          # ppnpm run test:smoke

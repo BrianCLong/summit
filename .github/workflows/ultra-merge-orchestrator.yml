@@ -40,7 +40,7 @@ jobs:
       - name: Configure git
         run: |
           git config user.name "Ultra Merge Bot"
-          git config user.email "merge-bot@intelgraph.io"
+          git config user.email "merge-bot@example.com"
 
       - name: Analyze PR backlog
         id: analyze
@@ -172,7 +172,7 @@ jobs:
           echo "- Open PRs: $open_prs"
           echo "- PRs analyzed: ${{ steps.analyze.outputs.total_prs }}"
           echo "- Ready to merge: ${{ steps.analyze.outputs.ready_prs }}"
-          echo "- Merged this run: ${{ steps.merge.outputs.merged_count || 0 }}"
+          echo "- Merged this run: ${{ steps.execute.outputs.merged_count || 0 }}"
 
           # Calculate velocity
           echo "🚀 Merge Train Velocity:"
@@ -220,7 +220,7 @@ jobs:
           - Total Open PRs: ${{ steps.analyze.outputs.total_prs }}
           - Mergeable PRs: ${{ steps.analyze.outputs.mergeable_prs }}
           - Ready to Merge: ${{ steps.analyze.outputs.ready_prs }}
-          - PRs Merged: ${{ steps.merge.outputs.merged_count || 0 }}
+          - PRs Merged: ${{ steps.execute.outputs.merged_count || 0 }}
           - PRs Updated: ${{ steps.update.outputs.updated_count || 0 }}
 
           ## Status

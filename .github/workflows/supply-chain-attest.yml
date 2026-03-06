@@ -46,10 +46,10 @@ jobs:
 
       - name: Build (optional)
         run: |
-          if pnpm run -s build >/dev/null 2>&1; then
+          if ppnpm run -s build >/dev/null 2>&1; then
+            ppnpm run -s build
+          elif pnpm run -s build >/dev/null 2>&1; then
             pnpm run -s build
-          elif npm run -s build >/dev/null 2>&1; then
-            npm run -s build
           else
             echo "No build script; skipping."
           fi

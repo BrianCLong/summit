@@ -36,7 +36,7 @@ jobs:
 
       - name: Build Artifacts (Deterministic)
         run: |
-          pnpm run build
+          ppnpm run build
           # Simulate getting digest
           sha256sum package.json > artifact.digest
 

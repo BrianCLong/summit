@@ -25,7 +25,7 @@ jobs:
         run: |
           cd packages/policy-cards
           npm install
-          npm run build
+          pnpm run build
 
       - name: Run Drift Check
         run: npx tsx scripts/monitoring/policy-cards-v0-drift.ts

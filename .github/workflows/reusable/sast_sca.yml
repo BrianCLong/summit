@@ -60,7 +60,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Lint for vulnerabilities and quality
-        run: pnpm run lint:check
+        run: ppnpm run lint:check
 
       - name: Run dependency vulnerability scan
-        run: pnpm run security:scan
+        run: ppnpm run security:scan

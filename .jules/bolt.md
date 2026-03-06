@@ -26,6 +26,3 @@
 ## 2026-07-22 - [Batched Risk Signal Insertion]
 **Learning:** Inserting many risk signals individually in a loop within a transaction causes O(N) database round-trips. Batching these into multi-row INSERT statements reduces round-trips to O(1) or O(N/chunkSize). Chunking is still necessary to respect parameter limits.
 **Action:** Use multi-row VALUES for signal insertions in RiskRepository and ensure chunk size is maintained at 100.
-## 2025-02-19 - PostgreSQL Batched Inserts & Transaction Integrity
-**Learning:** Batched multi-row inserts (CHUNK_SIZE=100) significantly improve throughput in PostgreSQL compared to individual inserts in a loop. However, any query failure within a transaction block immediately aborts the transaction, and subsequent queries will fail with "current transaction is aborted".
-**Action:** Avoid in-transaction try-catch fallbacks that attempt to "recover" from individual row failures unless using SAVEPOINTs. Use batched inserts for bulk data and ensure the data is pre-validated.

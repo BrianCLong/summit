@@ -32,8 +32,8 @@ jobs:
 
       - name: Accessibility lint
         working-directory: apps/web
-        run: pnpm run lint:a11y
+        run: ppnpm run lint:a11y
 
       - name: Accessibility smoke test
         working-directory: apps/web
-        run: pnpm run test -- --run src/__tests__/accessibility/landmarkKeyboardFlow.test.tsx
+        run: ppnpm run test -- --run src/__tests__/accessibility/landmarkKeyboardFlow.test.tsx

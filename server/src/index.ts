@@ -34,11 +34,6 @@ import { zeroTouchOrchestrator } from './conductor/deployment/ZeroTouchOrchestra
 import { driftRemediationService } from './services/DriftRemediationService.js';
 import { projectSunsettingService } from './services/ProjectSunsettingService.js';
 
-// Export runtime classes for integration tests and control plane orchestration
-export { GlobalTrafficSteering } from './runtime/global/GlobalTrafficSteering.js';
-export { FailoverOrchestrator } from './runtime/global/FailoverOrchestrator.js';
-export { ResidencyGuard } from './data-residency/residency-guard.js';
-
 const startServer = async () => {
   // Initialize OpenTelemetry tracing early in the startup sequence
   const tracer = initializeTracing();

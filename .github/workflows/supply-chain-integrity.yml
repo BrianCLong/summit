@@ -102,7 +102,7 @@ jobs:
         if: github.event_name == 'push' && github.ref_type == 'tag'
         run: |
           chmod +x scripts/check-reproducibility.sh
-          ./scripts/check-reproducibility.sh summit-platform "npm ci && npm run build" production 2 /tmp/build-test
+          ./scripts/check-reproducibility.sh summit-platform "npm ci && pnpm run build" production 2 /tmp/build-test
 
       # Generate SBOM
       - name: Generate SBOM

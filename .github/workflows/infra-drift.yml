@@ -29,6 +29,8 @@ env:
 jobs:
   drift:
     name: Drift – plan & risk
+    outputs:
+      matrix: ${{ steps.mx.outputs.matrix }}
     if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }} 
     runs-on: ubuntu-latest
     defaults:
@@ -60,7 +62,8 @@ jobs:
       - name: Generate workspace matrix (rollout-aware)
         id: mx
         run: |
-          echo "matrix=$(echo $DRIFT_WORKSPACES | jq -R -c 'split(",")')" >> $GITHUB_OUTPUT
+          IFS=',' read -ra ALL_WS <<< "$DRIFT_WORKSPACES"
+          echo "matrix=$(printf '%s' "${ALL_WS[@]}" | jq -R -s 'split(",")')" >> $GITHUB_OUTPUT
 
       - name: Save workspace matrix
         run: echo "${{ steps.mx.outputs.matrix }}"
