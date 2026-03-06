@@ -1,37 +1,24 @@
-# Repo Assumptions & Validation (CogWar MWS)
+# Unity Package Subsumption Assumptions
 
-**Readiness reference:** Summit Readiness Assertion governs posture and exceptions. See
-`docs/SUMMIT_READINESS_ASSERTION.md`.
+## Verified
+- `summit/` Python package exists and is covered by `summit/tests/` pytest tests.
+- Repository has CI workflows under `.github/workflows/` with Python execution support.
+- Policy files are stored in YAML format in top-level policy-like directories.
 
-## Validation Checklist (Executed)
+## Assumed
+- `package-report.json`, `metrics.json`, and `stamp.json` are acceptable artifact names for package evidence.
+- `EVIDENCE:UNITYPKG:<name>:<version>` aligns with downstream evidence ingestion expectations.
+- A dedicated workflow for Unity package policy checks can be added in a follow-up change.
 
-1. `ls -la .github/workflows` → confirmed workflow inventory and gate candidates.
-2. `cat package.json pnpm-workspace.yaml` → confirmed monorepo scripts + workspace layout.
-3. `rg -n "evidence_id|report.json|stamp.json" -S` → confirmed evidence patterns + schemas.
-4. `ls src` → confirmed `src/` root for new CogWar schema placement.
+## CI Check Names (Current + Proposed)
+- Current examples: `summit-ci`, `graphci`, `ci-evidence-verify`.
+- Proposed follow-up check: `check-unity-policy`.
 
-## Verified vs Deferred (Repo Shape)
+## Existing Evidence Schema
+- Existing workflows expect machine-readable JSON evidence artifacts in `artifacts/` directories.
+- This slice emits deterministic JSON blobs with sorted keys and no timestamp fields.
 
-| Item | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Large workflow inventory present; see required check discovery in `required_checks.todo.md`. |
-| `package.json` scripts | ✅ Verified | Jest-based root tests; pnpm scripts defined. |
-| `pnpm-workspace.yaml` | ✅ Verified | Workspace spans `apps/*`, `packages/*`, `client`, `server`, `services/*`, `cli`, `tools/*`, etc. |
-| `src/` root | ✅ Verified | `src/` exists; CogWar schemas placed under `src/cogwar/schema/`. |
-| Evidence patterns | ✅ Verified | Evidence directories and schemas present under `evidence/`, `agentops/evidence/`, `intel/schema/`, `tests/evidence/`. |
-| Required CI check names | ❓ Deferred pending verification | Branch protection API/UI confirmation required to map exact status check names. |
-| Governance-required PR metadata | ❓ Deferred pending verification | Must align with `.github/PULL_REQUEST_TEMPLATE.md` metadata block before PR submission. |
-
-## Must-Not-Touch Files (Governance/Authority)
-
-- `docs/SUMMIT_READINESS_ASSERTION.md`
-- `docs/governance/CONSTITUTION.md`
-- `docs/governance/META_GOVERNANCE.md`
-- `docs/governance/AGENT_MANDATES.md`
-- `agent-contract.json`
-
-## Next Enforcement Actions
-
-- Add CogWar schemas and tests in scoped paths only.
-- Record updated roadmap status in `docs/roadmap/STATUS.json`.
-- Use governed exceptions if any deviation from deterministic artifacts is required.
+## Must-Not-Touch Files (Guardrail)
+- Core evaluator/scoring internals under `summit/benchmarks/deepsearchqa/`.
+- Provenance chain services under `services/prov-ledger/`.
+- Existing CI scoring/evaluation workflows under `.github/workflows/*eval*.yml`.
