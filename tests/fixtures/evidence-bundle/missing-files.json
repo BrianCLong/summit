@@ -1,0 +1,22 @@
+{
+  "evidence_bundle": {
+    "version": "2025.09.0",
+    "release": "quality-gates-refinement",
+    "product": "Summit Platform",
+    "created_at": "2025-09-21T16:30:00Z",
+    "environment": "staging"
+  },
+  "release_metadata": {
+    "git_commit": "{{ .Release.GitCommit }}",
+    "build_pipeline": "{{ .Release.Pipeline }}",
+    "build_timestamp": "{{ .Release.BuildTime }}",
+    "approver": "{{ .Release.Approver }}"
+  },
+  "ci_quality_gates": [
+    {
+      "name": "lint",
+      "status": "required",
+      "evidence": "non-existent-file.xml"
+    }
+  ]
+}
