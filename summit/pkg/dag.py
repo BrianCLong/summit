@@ -1,66 +1,53 @@
-"""Dependency DAG construction and cycle detection."""
+"""Dependency DAG helpers for package manifests."""
 
 from __future__ import annotations
 
-from collections import defaultdict, deque
-from typing import Dict, Iterable, List
+from collections import deque
 
 
 class DependencyCycleError(ValueError):
-    """Raised when dependency graph contains a cycle."""
+    """Raised when a dependency cycle is detected."""
 
 
-def build_dependency_dag(root_name: str, dependencies: Dict[str, str]) -> dict:
-    """Build a deterministic DAG report for a package and direct dependencies."""
-    graph = defaultdict(list)
-    indegree = defaultdict(int)
+def topological_sort(graph: dict[str, set[str]]) -> list[str]:
+    """Return a deterministic topological ordering for a dependency graph.
 
-    indegree[root_name] = 0
-    for dep in sorted(dependencies):
-        graph[root_name].append(dep)
-        indegree[dep] += 1
+    Graph format: ``{node: {dependency_node, ...}}``.
+    """
 
-    queue = deque(sorted(node for node, value in indegree.items() if value == 0))
-    topo_order: List[str] = []
+    in_degree: dict[str, int] = {node: 0 for node in graph}
+    reverse_edges: dict[str, set[str]] = {node: set() for node in graph}
+
+    for node, deps in graph.items():
+        for dependency in deps:
+            if dependency not in in_degree:
+                in_degree[dependency] = 0
+                reverse_edges[dependency] = set()
+            in_degree[node] += 1
+            reverse_edges[dependency].add(node)
+
+    queue = deque(sorted(node for node, degree in in_degree.items() if degree == 0))
+    ordered: list[str] = []
 
     while queue:
-        node = queue.popleft()
-        topo_order.append(node)
-        for neighbor in sorted(graph.get(node, [])):
-            indegree[neighbor] -= 1
-            if indegree[neighbor] == 0:
-                queue.append(neighbor)
+        current = queue.popleft()
+        ordered.append(current)
 
-    if len(topo_order) != len(indegree):
-        raise DependencyCycleError("Dependency graph contains a cycle")
+        for dependent in sorted(reverse_edges[current]):
+            in_degree[dependent] -= 1
+            if in_degree[dependent] == 0:
+                queue.append(dependent)
 
-    edges = [{"from": root_name, "to": dep} for dep in sorted(dependencies)]
+    if len(ordered) != len(in_degree):
+        raise DependencyCycleError("Dependency graph contains at least one cycle")
+
+    return ordered
+
+
+def build_manifest_graph(package_name: str, dependencies: dict[str, str]) -> dict[str, set[str]]:
+    """Create a graph from one package to its direct dependency names."""
+
     return {
-        "nodes": sorted(indegree.keys()),
-        "edges": edges,
-        "topologicalOrder": topo_order,
+        package_name: set(sorted(dependencies)),
+        **{name: set() for name in sorted(dependencies)},
     }
-
-
-def detect_cycle_from_edges(nodes: Iterable[str], edges: Iterable[tuple[str, str]]) -> None:
-    """Utility for tests and future expansion where arbitrary edges are provided."""
-    graph = defaultdict(list)
-    indegree = {node: 0 for node in nodes}
-
-    for source, target in edges:
-        graph[source].append(target)
-        indegree[target] = indegree.get(target, 0) + 1
-        indegree.setdefault(source, 0)
-
-    queue = deque(sorted(node for node, degree in indegree.items() if degree == 0))
-    seen = 0
-    while queue:
-        node = queue.popleft()
-        seen += 1
-        for neighbor in sorted(graph.get(node, [])):
-            indegree[neighbor] -= 1
-            if indegree[neighbor] == 0:
-                queue.append(neighbor)
-
-    if seen != len(indegree):
-        raise DependencyCycleError("Dependency graph contains a cycle")

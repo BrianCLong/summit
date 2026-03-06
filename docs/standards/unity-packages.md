@@ -1,18 +1,18 @@
-# Unity Package Governance Standard
+# Unity Package Ingestion Standard
 
-Summit subsumes Unity-style package reuse by treating each `package.json` as a governed artifact.
+This standard defines the Summit import/export contract for Unity UPM-style modular packages.
 
-## Inputs and Outputs
+## Inputs
+- Unity `package.json` manifest (`name`, `version`, `dependencies`).
+- Assembly Definition Files (`*.asmdef`) discovered within the package tree.
 
-- Input: Unity `package.json` (+ optional `.asmdef` files)
-- Output: deterministic `artifacts/package-report.json`, `artifacts/metrics.json`, `artifacts/stamp.json`
+## Outputs
+- `package-report.json`: canonical deterministic report.
+- `dependency-dag.json`: dependency graph and topological order.
+- `metrics.json`: dependency and assembly counts.
+- `stamp.json`: evidence stamp with report hash.
 
-## Enforcement
-
-- Strict SemVer for package and dependency versions.
-- Scoped registry policy from `policies/registry_policy.yaml`.
-- Deterministic dependency DAG generation.
-
-## Evidence Identifier
-
-`EVIDENCE:UNITYPKG:<package-name>:<version>`
+## Determinism Rules
+- No runtime timestamps in output artifacts.
+- All JSON encoded with sorted keys and compact separators.
+- Edges and node lists are emitted in stable sorted order.

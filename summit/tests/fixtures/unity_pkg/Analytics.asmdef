@@ -1,0 +1,6 @@
+{
+  "name": "Company.Analytics",
+  "references": [
+    "Company.Core"
+  ]
+}
