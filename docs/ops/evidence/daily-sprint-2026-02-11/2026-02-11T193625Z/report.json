@@ -1,0 +1,18 @@
+{
+  "evidence_id": "EVID::ops::daily_sprint::2026-02-11::run-193625Z::v1",
+  "status": "PASS",
+  "summary": "Daily sprint prompt registration is in place, live GitHub PR/issue triage captured, and deterministic sprint evidence/stamp artifacts refreshed.",
+  "timestamp_utc": "2026-02-11T19:36:25Z",
+  "artifacts": {
+    "daily_sprint_report": "docs/ops/DAILY_SPRINT_2026-02-11.md",
+    "evidence_dir": "docs/ops/evidence/daily-sprint-2026-02-11/2026-02-11T193625Z",
+    "pr_snapshot": "docs/ops/evidence/daily-sprint-2026-02-11/2026-02-11T193625Z/gh_pr_list.json",
+    "issue_snapshot": "docs/ops/evidence/daily-sprint-2026-02-11/2026-02-11T193625Z/gh_issue_list.json"
+  },
+  "gh_triage": {
+    "pr_list_status": "CAPTURED",
+    "issue_list_status": "CAPTURED",
+    "open_pr_count": 20,
+    "open_labeled_issue_count": 3
+  }
+}
