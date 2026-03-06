@@ -137,6 +137,8 @@ export const approvalsPending = createMockMetric();
 export const approvalDuration = createMockMetric();
 export const mcpSessionsTotal = createMockMetric();
 export const mcpInvocationsTotal = createMockMetric();
+export const narrativeSimulationActiveSimulations = createMockMetric();
+export const narrativeSimulationDurationSeconds = createMockMetric();
 export const regionProbeLatencyMs = createMockMetric();
 export const regionHealthStatus = createMockMetric();
 export const rollbackEventsTotal = createMockMetric();
@@ -248,6 +250,8 @@ export const metrics = {
   maestroWebScrapingRequests,
   mcpSessionsTotal,
   mcpInvocationsTotal,
+  narrativeSimulationActiveSimulations,
+  narrativeSimulationDurationSeconds,
   memoryUsage,
   neighborhoodCacheHitRatio,
   neighborhoodCacheLatencyMs,

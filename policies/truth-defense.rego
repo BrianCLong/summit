@@ -315,9 +315,22 @@ truth_defense_posture := score if {
     low_integrity_total := count([c | some c in input.claims; c.integrity_score < integrity_threshold_low])
 
     integrity_score := high_integrity_claims / total_claims
-    containment_score := quarantined_low_integrity / low_integrity_total if low_integrity_total > 0 else 1.0
 
-    score := (integrity_score + containment_score) / 2
+    # Calculate containment score
+    total_low := low_integrity_total
+
+    c_score := get_containment_score(quarantined_low_integrity, total_low)
+
+    score = (integrity_score + c_score) / 2
+}
+
+get_containment_score(quarantined, total) = 1.0 if {
+    total == 0
+}
+
+get_containment_score(quarantined, total) = result if {
+    total > 0
+    result := quarantined / total
 }
 
 # Identify high-risk decisions requiring immediate attention
