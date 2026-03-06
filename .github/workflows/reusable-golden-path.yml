@@ -36,6 +36,7 @@ jobs:
         with:
           node-version: "18"
           cache: "pnpm"
+          package-manager-cache: false # Added to potentially override if implicit default
 
       - name: Install dependencies
         run: pnpm install
