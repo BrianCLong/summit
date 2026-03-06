@@ -1,1 +1,1 @@
-export * from './upsell/trial-upsell.js';
+export * from './outreach/buyer-agent';
