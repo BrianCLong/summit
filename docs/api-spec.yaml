@@ -2,20 +2,23 @@ openapi: 3.0.0
 info:
   title: IntelGraph Summit API
   version: 1.1.0
-  description: API for IntelGraph Summit, including Maestro orchestration, policy simulation, and disclosure.
-
+  description: API for IntelGraph Summit, including Maestro orchestration, policy
+    simulation, and disclosure.
+  contact:
+    name: API Support
+    email: support@example.com
 servers:
-  - url: /api
-    description: Base API path for most endpoints
-  - url: /
-    description: Root path for monitoring and health
-
+- url: /api
+  description: Base API path for most endpoints
+- url: /
+  description: Root path for monitoring and health
 paths:
   /monitoring/metrics:
     get:
       operationId: getMonitoringMetrics
       summary: Prometheus metrics
-      tags: [Observability]
+      tags:
+      - Observability
       responses:
         '200':
           description: Prometheus metrics text
@@ -23,12 +26,13 @@ paths:
             text/plain:
               schema:
                 type: string
-
+      description: Prometheus metrics
   /health:
     get:
       operationId: getHealth
       summary: System health check
-      tags: [Observability]
+      tags:
+      - Observability
       responses:
         '200':
           description: Healthy
@@ -42,11 +46,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthStatus'
-
+      description: System health check
   /api/tenants:
     post:
       summary: Create a new tenant
-      tags: [Tenancy]
+      tags:
+      - Tenancy
       requestBody:
         required: true
         content:
@@ -60,10 +65,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tenant'
-
+      operationId: post_api_tenants
+      description: Create a new tenant
     get:
       summary: List tenants (Admin only)
-      tags: [Tenancy]
+      tags:
+      - Tenancy
       responses:
         '200':
           description: List of tenants
@@ -73,11 +80,13 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tenant'
-
+      operationId: get_api_tenants
+      description: List tenants (Admin only)
   /api/policy/simulate:
     post:
       summary: Simulate a policy decision (Preflight)
-      tags: [Governance]
+      tags:
+      - Governance
       requestBody:
         required: true
         content:
@@ -91,11 +100,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicySimulationResult'
-
+      operationId: post_api_policy_simulate
+      description: Simulate a policy decision (Preflight)
   /api/export/bundles:
     post:
       summary: Create an Intel Bundle export
-      tags: [Disclosure]
+      tags:
+      - Disclosure
       requestBody:
         required: true
         content:
@@ -109,17 +120,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JobStatus'
-
+      operationId: post_api_export_bundles
+      description: Create an Intel Bundle export
   /api/receipts/{id}:
     get:
       summary: Get a signed receipt by ID
-      tags: [Provenance]
+      tags:
+      - Provenance
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Signed receipt
@@ -127,12 +140,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Receipt'
-
+      operationId: get_api_receipts_id
+      description: Get a signed receipt by ID
   /api/maestro/route/preview:
     post:
       operationId: previewRoute
       summary: Preview routing candidates for a task
-      tags: [Maestro]
+      tags:
+      - Maestro
       requestBody:
         required: true
         content:
@@ -151,12 +166,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RoutePreviewResponse'
-
+      description: Preview routing candidates for a task
   /api/maestro/route/execute:
     post:
       operationId: executeRoute
       summary: Execute a task with selected candidates
-      tags: [Maestro]
+      tags:
+      - Maestro
       requestBody:
         required: true
         content:
@@ -177,12 +193,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RouteExecuteResponse'
-
+      description: Execute a task with selected candidates
   /api/maestro/web/interfaces:
     get:
       operationId: getWebInterfaces
       summary: Get available web interfaces
-      tags: [Maestro]
+      tags:
+      - Maestro
       responses:
         '200':
           description: List of web interfaces
@@ -190,12 +207,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WebInterfacesResponse'
-
+      description: Get available web interfaces
   /api/maestro/web/run:
     post:
       operationId: runWebOrchestration
       summary: Orchestrate web search/content tasks
-      tags: [Maestro]
+      tags:
+      - Maestro
       requestBody:
         required: true
         content:
@@ -216,12 +234,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/OrchestrateWebResponse'
-
+      description: Orchestrate web search/content tasks
   /api/maestro/budgets:
     get:
       operationId: getBudgets
       summary: Get budget and usage information
-      tags: [Maestro]
+      tags:
+      - Maestro
       responses:
         '200':
           description: Budget info
@@ -229,12 +248,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BudgetsResponse'
-
+      description: Get budget and usage information
   /api/maestro/policy/check:
     post:
       operationId: checkPolicy
       summary: Check policy for an action
-      tags: [Maestro]
+      tags:
+      - Maestro
       requestBody:
         required: true
         content:
@@ -253,12 +273,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PolicyCheckResponse'
-
+      description: Check policy for an action
   /api/maestro/runs:
     post:
       operationId: createRun
       summary: Create and run a new pipeline
-      tags: [Maestro]
+      tags:
+      - Maestro
       requestBody:
         required: true
         content:
@@ -277,18 +298,19 @@ paths:
             application/json:
               schema:
                 type: object
-
+      description: Create and run a new pipeline
   /api/tenants/{tenantId}/workflows:
     post:
       operationId: createWorkflowDefinition
       summary: Create or update a workflow definition
-      tags: [Maestro]
+      tags:
+      - Maestro
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -302,18 +324,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowDefinition'
-
+      description: Create or update a workflow definition
   /api/tenants/{tenantId}/runs:
     post:
       operationId: startRun
       summary: Start a new run from a workflow definition
-      tags: [Maestro]
+      tags:
+      - Maestro
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -327,23 +350,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Run'
-
+      description: Start a new run from a workflow definition
   /api/tenants/{tenantId}/runs/{runId}:
     get:
       operationId: getRun
       summary: Get run details including receipts
-      tags: [Maestro]
+      tags:
+      - Maestro
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: runId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: Run details
@@ -351,23 +375,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Run'
-
+      description: Get run details including receipts
   /api/tenants/{tenantId}/runs/{runId}/approve:
     post:
       operationId: approveRun
       summary: Approve or reject a run/step
-      tags: [Maestro]
+      tags:
+      - Maestro
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: runId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
       requestBody:
         required: true
         content:
@@ -381,23 +406,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApprovalResult'
-
+      description: Approve or reject a run/step
   /api/tenants/{tenantId}/runs/{runId}/events:
     get:
       operationId: getRunEvents
       summary: Get timeline events for a run
-      tags: [Maestro]
+      tags:
+      - Maestro
       parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: runId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: tenantId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: runId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
         '200':
           description: List of events
@@ -407,7 +433,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/RunEvent'
-
+      description: Get timeline events for a run
 components:
   schemas:
     HealthStatus:
@@ -415,16 +441,20 @@ components:
       properties:
         status:
           type: string
-          enum: [healthy, unhealthy]
+          enum:
+          - healthy
+          - unhealthy
         timestamp:
           type: string
           format: date-time
         error:
           type: string
-
     CreateTenantRequest:
       type: object
-      required: [name, slug, adminEmail]
+      required:
+      - name
+      - slug
+      - adminEmail
       properties:
         name:
           type: string
@@ -434,11 +464,16 @@ components:
           type: string
         tier:
           type: string
-          enum: [internal, partner, hosted]
+          enum:
+          - internal
+          - partner
+          - hosted
         policyProfile:
           type: string
-          enum: [strict, balanced, fast_ops]
-
+          enum:
+          - strict
+          - balanced
+          - fast_ops
     Tenant:
       type: object
       properties:
@@ -452,10 +487,12 @@ components:
           type: string
         status:
           type: string
-
     PolicySimulationInput:
       type: object
-      required: [subjectTenantId, resourceTenantId, action]
+      required:
+      - subjectTenantId
+      - resourceTenantId
+      - action
       properties:
         subjectTenantId:
           type: string
@@ -469,9 +506,11 @@ components:
           type: string
         profile:
           type: string
-          enum: [strict, balanced, fast_ops]
+          enum:
+          - strict
+          - balanced
+          - fast_ops
           description: Optional profile to simulate against
-
     PolicySimulationResult:
       type: object
       properties:
@@ -487,19 +526,23 @@ components:
           type: array
           items:
             type: string
-
     CreateBundleRequest:
       type: object
-      required: [runId]
+      required:
+      - runId
       properties:
         runId:
           type: string
         redactionProfile:
           type: string
-          enum: [none, sources, raw_content, actor_ids, minimize_pii]
+          enum:
+          - none
+          - sources
+          - raw_content
+          - actor_ids
+          - minimize_pii
         includeReceipts:
           type: boolean
-
     JobStatus:
       type: object
       properties:
@@ -507,8 +550,11 @@ components:
           type: string
         status:
           type: string
-          enum: [queued, processing, completed, failed]
-
+          enum:
+          - queued
+          - processing
+          - completed
+          - failed
     Receipt:
       type: object
       properties:
@@ -531,7 +577,6 @@ components:
           type: string
         signerKeyId:
           type: string
-
     Candidate:
       type: object
       properties:
@@ -539,7 +584,9 @@ components:
           type: string
         type:
           type: string
-          enum: [model, web]
+          enum:
+          - model
+          - web
         name:
           type: string
         score:
@@ -550,7 +597,6 @@ components:
           type: number
         rationale:
           type: string
-
     RoutePreviewResponse:
       type: object
       properties:
@@ -558,7 +604,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Candidate'
-
     RouteExecuteStep:
       type: object
       properties:
@@ -568,7 +613,9 @@ components:
           type: string
         status:
           type: string
-          enum: [ok, fail]
+          enum:
+          - ok
+          - fail
         tokens:
           type: number
         cost:
@@ -584,7 +631,6 @@ components:
                 type: string
         elapsed_ms:
           type: number
-
     RouteExecuteResponse:
       type: object
       properties:
@@ -594,7 +640,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RouteExecuteStep'
-
     WebInterface:
       type: object
       properties:
@@ -608,7 +653,6 @@ components:
           type: number
         cost_hint:
           type: number
-
     WebInterfacesResponse:
       type: object
       properties:
@@ -616,7 +660,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WebInterface'
-
     OrchestrateWebResponse:
       type: object
       properties:
@@ -654,13 +697,15 @@ components:
                     type: string
                   url:
                     type: string
-
     BudgetsResponse:
       type: object
       properties:
         tier:
           type: string
-          enum: [bronze, silver, gold]
+          enum:
+          - bronze
+          - silver
+          - gold
         remaining:
           type: object
           properties:
@@ -679,7 +724,6 @@ components:
                 type: number
               tokens:
                 type: number
-
     PolicyCheckResponse:
       type: object
       properties:
@@ -694,10 +738,16 @@ components:
               type: string
             sla_hours:
               type: number
-
     WorkflowDefinitionInput:
       type: object
-      required: [version, env, retentionClass, costCenter, inputSchema, outputSchema, body]
+      required:
+      - version
+      - env
+      - retentionClass
+      - costCenter
+      - inputSchema
+      - outputSchema
+      - body
       properties:
         version:
           type: string
@@ -713,24 +763,24 @@ components:
           type: string
         body:
           type: string
-
     WorkflowDefinition:
       allOf:
-        - $ref: '#/components/schemas/WorkflowDefinitionInput'
-        - type: object
-          properties:
-            id:
-              type: string
-            tenantId:
-              type: string
-            createdAt:
-              type: string
-            updatedAt:
-              type: string
-
+      - $ref: '#/components/schemas/WorkflowDefinitionInput'
+      - type: object
+        properties:
+          id:
+            type: string
+          tenantId:
+            type: string
+          createdAt:
+            type: string
+          updatedAt:
+            type: string
     StartRunInput:
       type: object
-      required: [workflowId, input]
+      required:
+      - workflowId
+      - input
       properties:
         workflowId:
           type: string
@@ -738,7 +788,6 @@ components:
           type: string
         env:
           type: string
-
     Run:
       type: object
       properties:
@@ -750,7 +799,13 @@ components:
           type: string
         status:
           type: string
-          enum: [PENDING, RUNNING, COMPLETED, FAILED, CANCELLED, NEEDS_APPROVAL]
+          enum:
+          - PENDING
+          - RUNNING
+          - COMPLETED
+          - FAILED
+          - CANCELLED
+          - NEEDS_APPROVAL
         startedAt:
           type: string
         completedAt:
@@ -763,25 +818,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Receipt'
-
     ApprovalInput:
       type: object
-      required: [decision, rationale]
+      required:
+      - decision
+      - rationale
       properties:
         decision:
           type: string
-          enum: [APPROVE, REJECT]
+          enum:
+          - APPROVE
+          - REJECT
         rationale:
           type: string
         stepId:
           type: string
-
     ApprovalResult:
       type: object
       properties:
         status:
           type: string
-
     RunEvent:
       type: object
       properties:
@@ -793,3 +849,16 @@ components:
           type: string
         payload:
           type: string
+tags:
+- name: Observability
+  description: Observability operations
+- name: Tenancy
+  description: Tenancy operations
+- name: Governance
+  description: Governance operations
+- name: Disclosure
+  description: Disclosure operations
+- name: Provenance
+  description: Provenance operations
+- name: Maestro
+  description: Maestro operations

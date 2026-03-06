@@ -1,3 +1,4 @@
+import { describe, test, it, expect } from "vitest";
 import { calculateConvergenceMetrics } from '../../src/narrative/convergence/metrics';
 import { getImplicationVector } from '../../src/narrative/convergence/implication_vector';
 

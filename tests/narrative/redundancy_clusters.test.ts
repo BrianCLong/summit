@@ -1,3 +1,4 @@
+import { describe, test, it, expect } from "vitest";
 import { findRedundancyClusters } from '../../src/narrative/redundancy/cluster';
 import { encodeStructure } from '../../src/narrative/redundancy/structure_encoder';
 import { calculateStructuralSimilarity } from '../../src/narrative/redundancy/similarity';

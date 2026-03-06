@@ -9,6 +9,7 @@ The implementation for "Narrative IO Inference & Convergence" is complete on bra
     - Fixed `package.json` (test:security).
     - Fixed `.github/workflows/pr-gates.yml` (helm lint path, pnpm setup, v4 actions).
     - Fixed `.github/workflows/ux-governance.yml`.
+    - Fixed `.github/workflows/ci-verify.yml` (pnpm version mismatch).
     - Upgraded actions to v4 across codebase.
 4.  **Documentation**: Created required docs in `docs/`.
 5.  **Monitoring**: Added `scripts/monitoring/narrative-io-inference-convergence-drift.ts`.

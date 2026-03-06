@@ -1,3 +1,4 @@
+import { describe, test, it, expect } from "vitest";
 import { evId } from '../../src/narrative/evidence/ids';
 import { InterpretiveDefault } from '../../src/narrative/schema/evidence_v1';
 

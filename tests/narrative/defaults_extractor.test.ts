@@ -1,3 +1,4 @@
+import { describe, test, it, expect } from "vitest";
 import { extractDefaults } from '../../src/narrative/inference/defaults_extractor';
 import { findSupportSpan } from '../../src/narrative/inference/support_spans';
 import { readFileSync } from 'fs';
