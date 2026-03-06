@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-09T00:00:00Z",
-  "revision_note": "Added Summit Switchboard (MCP) standards, data handling, runbook, and repo assumptions.",
+  "last_updated": "2026-02-08T18:30:02Z",
+  "revision_note": "Added sales enablement collateral: executive one-pager, pilot one-pager, outreach sequence, exec deck, demo script.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -201,12 +201,6 @@
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
     },
     {
-      "id": "summit-switchboard-mcp-mws",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Published Summit Switchboard (MCP) standards, data handling, runbook, and repo assumptions for MWS."
-    },
-    {
       "id": "summit-architecture-brief",
       "status": "completed",
       "owner": "codex",
@@ -218,7 +212,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
