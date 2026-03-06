@@ -54,7 +54,7 @@ jobs:
         run: pnpm run lint
       # Optional: upload SARIF if your linter emits it (guard to avoid hard-fail)
       - name: Upload SARIF (if present)
-        if: (always() && hashFiles('**/*.sarif') != '') && (always())
+        if: always() && hashFiles('**/*.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: '**/*.sarif'
@@ -157,6 +157,7 @@ jobs:
         observability-check,
         acceptance-criteria,
       ]
+    if: always()
     steps:
       - name: CI Summary
         run: |
