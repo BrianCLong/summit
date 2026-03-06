@@ -111,6 +111,7 @@ jobs:
           echo "updated_count=$updated" >> $GITHUB_OUTPUT
 
       - name: Intelligent merge execution
+        id: merge
         env:
           GH_TOKEN: ${{ github.token }}
           AGGRESSIVE: ${{ inputs.aggressive_mode || 'true' }}

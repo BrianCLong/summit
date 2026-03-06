@@ -5,15 +5,15 @@ import { CheckCircle, ShieldCheck, Clock, FileJson, Link as LinkIcon, Download }
 const MOCK_RECEIPT = {
   id: 'RCPT-2026-02-12-XYZ',
   timestamp: '2026-02-12T14:30:00Z',
-  actor: 'alice@example.com',
+  actor: 'alice@test.local',
   action: 'approve',
   resource: 'REQ-101',
   policy_version: 'v1.2.3',
   decision: 'allow',
   signature: 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
   evidence_links: [
-    { type: 'log', url: 'https://logs.example.com/123' },
-    { type: 'ticket', url: 'https://jira.example.com/T-456' }
+    { type: 'log', url: 'https://logs.test.local/123' },
+    { type: 'ticket', url: 'https://jira.test.local/T-456' }
   ]
 };
 
