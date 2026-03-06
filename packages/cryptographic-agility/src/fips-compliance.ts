@@ -176,7 +176,7 @@ export class FIPSComplianceService implements FIPSCrypto {
                 throw new Error('FIPS compliance not enabled');
             }
 
-            const keyId = `fips-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+            const keyId = `fips-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
 
             const keyMaterial: FIPSKeyMaterial = {
                 keyId,

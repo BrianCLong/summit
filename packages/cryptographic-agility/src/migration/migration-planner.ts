@@ -5,6 +5,7 @@
 
 import { MigrationPlan, MigrationPlanner as IMigrationPlanner, QuantumRiskAssessment } from '../types';
 import { v4 as uuidv4 } from 'crypto';
+import * as crypto from 'crypto';
 
 export class MigrationPlanner implements IMigrationPlanner {
   private plans: Map<string, MigrationPlan> = new Map();
@@ -116,7 +117,7 @@ export class MigrationPlanner implements IMigrationPlanner {
   }
 
   private generateId(): string {
-    return `migration-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+    return `migration-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
   }
 
   private calculatePriority(source: string, target: string): number {

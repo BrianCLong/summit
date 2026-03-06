@@ -6,6 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
+import * as crypto from 'crypto';
 import {
   KyberKEM,
   createKyberKEM,
@@ -736,7 +737,7 @@ export class QuantumResistantCryptoService extends EventEmitter {
   // Private helper methods
 
   private generateKeyId(): string {
-    return `pqc-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+    return `pqc-${Date.now()}-${crypto.randomBytes(4).toString('hex')}`;
   }
 
   private isKEMAlgorithm(algorithm: PQCAlgorithm): boolean {
