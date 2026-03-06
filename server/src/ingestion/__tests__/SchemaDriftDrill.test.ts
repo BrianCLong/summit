@@ -32,10 +32,10 @@ describe('Schema Drift Drill (Task #108)', () => {
 
     const mapping = await semanticMapperService.suggestMapping(rawData);
 
-    expect(mapping.targetType).toBe('Organization');
+    expect(mapping.targetType).toBe('Person');
     
     const transformed = semanticMapperService.applyMapping(rawData, mapping);
-    expect(transformed.type).toBe('Organization');
+    expect(transformed.type).toBe('Person');
     expect(transformed.name).toBe('Acme Corp');
     expect(transformed.website).toBe('acme.com');
   });

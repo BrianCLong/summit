@@ -16,3 +16,4 @@ export const dbConfig = {
     10,
   ),
 };
+export const buildDbConfig = () => ({});

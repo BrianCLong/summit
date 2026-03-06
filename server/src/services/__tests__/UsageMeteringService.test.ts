@@ -51,7 +51,7 @@ describe('UsageMeteringService', () => {
     (UsageMeteringService as any).instance = null;
 
     // Get fresh instance
-    service = UsageMeteringService.getInstance();
+    service = new UsageMeteringService();
   });
 
   it('should record a usage event', async () => {

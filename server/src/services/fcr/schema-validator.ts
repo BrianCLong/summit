@@ -16,7 +16,7 @@ export class FcrSchemaValidator {
 
   async validateSignals(signals: FcrSignal[]) {
     const schemaPath = path.resolve(
-      process.cwd(),
+      process.cwd().endsWith('server') ? process.cwd() : path.join(process.cwd(), 'server'),
       'schemas',
       'fcr',
       'v1',

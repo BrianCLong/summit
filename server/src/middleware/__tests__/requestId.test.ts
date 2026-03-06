@@ -2,7 +2,7 @@
  * Tests for requestId middleware
  */
 
-import { requestId } from '../requestId.js';
+import { requestId } from '../requestId.ts';
 import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory.js';
 import { describe, it, expect } from '@jest/globals';
 

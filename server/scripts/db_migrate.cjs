@@ -8,7 +8,7 @@ async function runMigrations() {
   try {
     // Dynamic import to load the ESM module
     // We assume the MigrationRunner is exported from server/src/db/migrate.js
-    const { MigrationRunner } = await import('../src/db/migrate.js');
+    const { MigrationRunner } = await import('../src/db/migrate.ts');
 
     const command = process.argv[2] || 'up';
     const steps = process.argv[3] ? parseInt(process.argv[3]) : 1;

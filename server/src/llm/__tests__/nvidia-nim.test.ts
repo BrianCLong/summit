@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 
 const nimTextFixture = JSON.parse(
-  readFileSync(join(process.cwd(), 'server/src/llm/__tests__/fixtures/nim_text.json'), 'utf8')
+  readFileSync(join(process.cwd(), process.cwd().endsWith('server') ? 'src/llm/__tests__/fixtures/nim_text.json' : 'server/src/llm/__tests__/fixtures/nim_text.json'), 'utf8')
 );
 
 describe('NvidiaNimProvider', () => {

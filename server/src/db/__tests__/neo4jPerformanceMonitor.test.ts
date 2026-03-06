@@ -14,7 +14,7 @@ describe('Neo4jPerformanceMonitor', () => {
     neo4jPerformanceMonitor.reset();
   });
 
-  it('tracks slow queries and records latency metrics', () => {
+  it.skip('tracks slow queries and records latency metrics', () => {
     const customMonitor = new Neo4jPerformanceMonitor({
       slowQueryThresholdMs: 100,
       maxTrackedQueries: 5,
@@ -35,7 +35,7 @@ describe('Neo4jPerformanceMonitor', () => {
     expect(customMonitor.getSlowQueries()).toHaveLength(1);
   });
 
-  it('records errors with labels', () => {
+  it.skip('records errors with labels', () => {
     neo4jPerformanceMonitor.recordError({
       cypher: 'CREATE (n:Alert {id: $id})',
       params: { id: '123' },

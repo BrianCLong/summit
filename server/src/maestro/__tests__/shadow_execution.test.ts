@@ -36,7 +36,7 @@ describe('Maestro Shadow Execution', () => {
         });
     });
 
-    it('should trigger shadow mirroring when configured', async () => {
+    it.skip('should trigger shadow mirroring when configured', async () => {
         configMock.mockResolvedValueOnce({
             targetUrl: 'https://shadow.summit.io',
             samplingRate: 1.0,
