@@ -1,4 +1,5 @@
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from 'url';
@@ -12,6 +13,13 @@ import { writeArtifacts } from "../writeset/writeArtifacts.js";
 
 const app = express();
 app.use(express.json());
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+})
 
 const quarantineStore = new MemoryQuarantineStore();
 const cfg = {
@@ -32,7 +40,7 @@ app.post("/api/eis/ingest", async (req, res) => {
   res.json(decision);
 });
 
-app.post("/api/eis/ingest-fixtures", async (_req, res) => {
+app.post("/api/eis/ingest-fixtures", limiter, async (_req, res) => {
   const dir = path.join(__dirname, "../fixtures/eis/writesets");
   const files = readdirSync(dir).filter(f => f.endsWith(".json")).sort();
   const decisions = [];
