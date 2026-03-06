@@ -64,4 +64,35 @@ describe('StrategicPlanRepo N+1 Performance', () => {
     );
     expect(mitigationQuery).toBeDefined();
   });
+
+  it('should fetch related entities for all objectives in a single batch (O(1) queries)', async () => {
+    const planId = 'plan-123';
+    const objectiveRows = [
+      { id: 'obj-1', plan_id: planId, name: 'Objective 1', created_at: new Date() },
+      { id: 'obj-2', plan_id: planId, name: 'Objective 2', created_at: new Date() },
+    ];
+
+    mockPg.query.mockResolvedValueOnce({ rows: objectiveRows });
+    mockPg.query.mockResolvedValue({ rows: [] });
+
+    await repo.getObjectivesByPlan(planId);
+
+    // Assert: Total queries should be 3 (1 for objectives, 1 for milestones, 1 for key results)
+    // BEFORE OPTIMIZATION: it would be 1 + 2*N = 5 queries
+    expect(mockPg.query).toHaveBeenCalledTimes(3);
+
+    // Verify batch query usage for milestones
+    const milestoneQuery = mockPg.query.mock.calls.find((call: any) =>
+      call[0].includes('strategic_milestones') &&
+      call[0].includes('parent_type = \'objective\'') &&
+      call[0].includes('ANY($1)')
+    );
+    expect(milestoneQuery).toBeDefined();
+
+    // Verify batch query usage for key results
+    const keyResultQuery = mockPg.query.mock.calls.find((call: any) =>
+      call[0].includes('strategic_key_results') && call[0].includes('ANY($1)')
+    );
+    expect(keyResultQuery).toBeDefined();
+  });
 });
