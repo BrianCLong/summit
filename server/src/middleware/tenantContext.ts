@@ -1,5 +1,7 @@
 // @ts-nocheck
 import { NextFunction, Request, Response } from 'express';
+import { trace } from '@opentelemetry/api';
+import { correlationStorage } from '../config/logger.js';
 import {
   TenantContext,
   TenantContextOptions,
@@ -122,6 +124,18 @@ export const tenantContextMiddleware =
       res.setHeader('x-tenant-id', tenantContext.tenantId);
       res.setHeader('x-tenant-environment', tenantContext.environment);
       res.setHeader('x-tenant-privilege-tier', tenantContext.privilegeTier);
+
+      // Propagate tenant context to OpenTelemetry and Logging
+      const store = correlationStorage.getStore();
+      if (store) {
+        store.set('tenantId', tenantContext.tenantId);
+      }
+
+      const span = trace.getActiveSpan();
+      if (span) {
+        span.setAttribute('tenant.id', tenantContext.tenantId);
+        span.setAttribute('tenant.env', tenantContext.environment);
+      }
 
       return next();
     } catch (error: any) {
