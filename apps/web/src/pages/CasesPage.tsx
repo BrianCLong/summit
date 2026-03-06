@@ -191,19 +191,14 @@ export default function CasesPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="status-filter"
-                className="text-sm font-medium mb-1 block"
-              >
+              <label htmlFor="status-filter" className="text-sm font-medium mb-1 block">
                 Status
               </label>
               <select
                 id="status-filter"
                 value={filterStatus}
-                onChange={e =>
-                  setFilterStatus(e.target.value as CaseStatus | 'all')
-                }
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onChange={e => setFilterStatus(e.target.value as CaseStatus | 'all')}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="all">All Statuses</option>
                 <option value="open">Open</option>
@@ -214,19 +209,14 @@ export default function CasesPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="priority-filter"
-                className="text-sm font-medium mb-1 block"
-              >
+              <label htmlFor="priority-filter" className="text-sm font-medium mb-1 block">
                 Priority
               </label>
               <select
                 id="priority-filter"
                 value={filterPriority}
-                onChange={e =>
-                  setFilterPriority(e.target.value as Priority | 'all')
-                }
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onChange={e => setFilterPriority(e.target.value as Priority | 'all')}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 <option value="all">All Priorities</option>
                 <option value="critical">Critical</option>
@@ -282,13 +272,13 @@ export default function CasesPage() {
               <Link
                 key={caseItem.id}
                 to={`/cases/${caseItem.id}`}
-                className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+                className="block group rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
-                <Card className="hover:shadow-md transition-shadow">
+                <Card className="hover:shadow-md transition-shadow group-hover:border-primary/50">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        {/* Title and Badges */}
+                    <div className="flex-1">
+                      {/* Title and Badges */}
                       <div className="flex items-start gap-3 mb-2">
                         <FolderOpen className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                         <div className="flex-1">
@@ -338,19 +328,19 @@ export default function CasesPage() {
                       </div>
                     </div>
 
-                      {/* SLA Indicator */}
-                      <div className="ml-4 flex flex-col items-end gap-2">
-                        <div
-                          className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            slaStatus === 'overdue'
-                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                              : slaStatus === 'at-risk'
-                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
-                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          }`}
-                        >
-                          {formatDueDate(caseItem.dueDate)}
-                        </div>
+                    {/* SLA Indicator */}
+                    <div className="ml-4 flex flex-col items-end gap-2">
+                      <div
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          slaStatus === 'overdue'
+                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                            : slaStatus === 'at-risk'
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200'
+                              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                        }`}
+                      >
+                        {formatDueDate(caseItem.dueDate)}
+                      </div>
                       </div>
                     </div>
                   </CardContent>
