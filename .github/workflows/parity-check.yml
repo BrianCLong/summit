@@ -41,6 +41,9 @@ jobs:
           terraform_version: 1.8.5
 
       - name: Configure AWS Credentials
+        if: secrets.AWS_OIDC_ROLE_ARN != ""
+        if: secrets.AWS_OIDC_ROLE_ARN != ""
+        if: secrets.AWS_OIDC_ROLE_ARN != ""
         if: matrix.cloud == 'aws'
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -48,11 +51,17 @@ jobs:
           audience: ${{ secrets.AWS_OIDC_AUDIENCE }}
           aws-region: us-east-1
       - name: Setup gcloud
+        if: secrets.GCP_PROJECT_ID != ""
+        if: secrets.GCP_PROJECT_ID != ""
+        if: secrets.GCP_PROJECT_ID != ""
         if: matrix.cloud == 'gcp'
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
       - name: Setup Azure CLI
+        if: secrets.AZURE_CLIENT_ID != ""
+        if: secrets.AZURE_CLIENT_ID != ""
+        if: secrets.AZURE_CLIENT_ID != ""
         if: matrix.cloud == 'azure'
         uses: azure/login@v2
         with:
@@ -61,6 +70,9 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Run parity check
+        if: secrets.GCP_WORKLOAD_POOL != "" || secrets.AWS_OIDC_ROLE_ARN != "" || secrets.AZURE_CLIENT_ID != ""
+        if: secrets.GCP_WORKLOAD_POOL != "" || secrets.AWS_OIDC_ROLE_ARN != "" || secrets.AZURE_CLIENT_ID != ""
+        if: secrets.GCP_WORKLOAD_POOL != "" || secrets.AWS_OIDC_ROLE_ARN != "" || secrets.AZURE_CLIENT_ID != ""
         env:
           CLOUD: ${{ matrix.cloud }}
           GITHUB_REPOSITORY: ${{ github.repository }}
