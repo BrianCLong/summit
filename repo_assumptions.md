@@ -1,40 +1,35 @@
 # Repo Assumptions & Validation
 
-## Verified vs Assumed Directory List
+## Structure Validation
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+| Plan Path | Actual Path | Status | Notes |
+|Str|Str|Str|Str|
+| `summit/` | `summit/` | ✅ Exists | Root directory containing features and core logic. |
+| `intelgraph/` | `intelgraph/` | ✅ Exists | Root directory. Python package (has `__init__.py`) and sub-services. |
+| `agents/` | `agents/` | ✅ Exists | Root directory. Contains agent definitions (e.g., `osint`, `psyops`). |
+| `pipelines/` | `pipelines/` | ✅ Exists | Root directory. |
+| `docs/` | `docs/` | ✅ Exists | Root directory. |
+| `scripts/` | `scripts/` | ✅ Exists | Root directory. |
+| `tests/` | `tests/` | ✅ Exists | Root directory. |
+| `.github/workflows/` | `.github/workflows/` | ✅ Exists | Root directory. |
 
-## CI Check Names (Exact)
+## Component Mapping
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
+| Planned Component | Proposed Location | Actual Location / Action |
+|Str|Str|Str|
+| Streaming Narrative Graph Core | `intelgraph/streaming/` | Create `intelgraph/streaming/` (New Python subpackage). |
+| Maestro Agent Conductor | `agents/maestro/` | `maestro/` (Root dir) exists. Will use `maestro/conductor.py`. |
+| Narrative Strength Index | `metrics/ns_index.json` | `metrics/` exists. Logic likely in `intelgraph/streaming/analytics.py`. |
+| Evidence Bundle | `evidence/` | `evidence/` exists. Will follow existing schema/patterns. |
 
-## Evidence Schema Conventions (Exact)
+## Constraints & Checks
 
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
+* **Graph Storage**: `intelgraph/services/ingest` and `intelgraph/graph_analytics` suggest existing graph infrastructure.
+* **Agent Runtime**: `maestro/app.py` suggests Python. `agents/` seem to be config/definitions? Or logic too? (Checked `agents/osint`, it's a dir, likely logic).
+* **CI Gates**: `AGENTS.md` lists `make smoke`, `pnpm test`.
+* **Evidence Policy**: `docs/governance/EVIDENCE_ID_POLICY.yml` (from memory) and `evidence/schemas/` (from memory) should be respected.
 
-## Must-Not-Touch List (Guardrails)
+## Next Steps
 
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+1. Implement **PR-1: Streaming Narrative Graph Core** in `intelgraph/streaming/`.
+2. Implement **PR-4: Maestro Agent Conductor** in `maestro/` (adapting from plan's `agents/maestro/`).
