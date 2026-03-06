@@ -21,7 +21,14 @@ is_simulate := input.mode == "simulate"
 is_enforce  := input.mode == "enforce"
 
 sens := lower(input.resource.sensitivity)
-needs_step_up := sens == "sensitive" or sens == "restricted"
+needs_step_up {
+    sens := lower(input.resource.sensitivity)
+    sens == "sensitive"
+}
+needs_step_up {
+    sens := lower(input.resource.sensitivity)
+    sens == "restricted"
+}
 has_step_up := input.auth.webauthn_verified == true
 
 # Collect DLP redactions from pii:* tags on fields
@@ -64,9 +71,15 @@ decision := {
 reasons := r {
   base := []
   rs := base
-  rs := cond_append(rs, needs_step_up, reason_step_up)
-  rs := cond_append(rs, needs_step_up and not has_step_up and is_enforce, reason_no_step)
-  r := rs
+  rs1 := cond_append(rs, needs_step_up, reason_step_up)
+  rs2 := cond_append(rs1, needs_step_up_not_verified, reason_no_step)
+  r := rs2
+}
+
+needs_step_up_not_verified {
+  needs_step_up
+  not has_step_up
+  is_enforce
 }
 
 # allow rules

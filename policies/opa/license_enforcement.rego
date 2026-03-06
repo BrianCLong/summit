@@ -493,7 +493,7 @@ license_metadata := {
 
 appeal_info := {
   "appealable": true,
-  "process": "Contact data owner to request license modification or exemption",
+  "process": "Contact data owner to request license modification/exemption",
   "contact": license_data.metadata.ownerContact,
   "required_documentation": [
     "Justification for access",

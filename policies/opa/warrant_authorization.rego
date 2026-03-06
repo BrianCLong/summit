@@ -275,7 +275,7 @@ subpoena_obligations := [
   {
     "type": "LEGAL_HOLD",
     "description": "Data accessed under subpoena is subject to legal hold",
-    "requirement": "Do not delete or modify accessed data",
+    "requirement": "Do not delete/modify accessed data",
     "enforceAt": "AFTER"
   }
 ] if subpoena_warrant

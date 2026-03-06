@@ -30,6 +30,8 @@ is_authenticated(user) {
     user.authenticated == true
 }
 
+import future.keywords.in
+
 # Helper to check if the user is the incident owner or an admin.
 is_owner_or_admin(user, resource) {
     user.id == resource.owner_id

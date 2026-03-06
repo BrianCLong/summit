@@ -134,13 +134,14 @@ async function runVerification(check: VerificationCheck): Promise<boolean> {
 
   return new Promise((resolve) => {
     const startTime = Date.now();
-    const child = spawn('tsx', [scriptPath], {
+    const child = spawn('npx', ['tsx', scriptPath], {
       cwd: ROOT_DIR,
       stdio: verboseMode ? 'inherit' : 'pipe',
       env: {
         ...process.env,
         NODE_ENV: 'test',
       },
+      shell: true,
     });
 
     let stdout = '';

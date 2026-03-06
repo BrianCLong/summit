@@ -7,6 +7,8 @@ package composer.residency
 #   "tenant": {"id": "acme", "allowed_regions": ["us-east-1","us-west-2"]}
 # }
 
+import future.keywords.in
+
 default allow := true
 
 violation[msg] {
@@ -24,18 +26,3 @@ allow {
 }
 
 # Top-level decision with shadow support
-package composer.decision
-
-import data.composer.residency as r
-
-decision := {
-  "policy": "residency",
-  "mode": mode,
-  "allow": allow_val,
-  "violations": r.violation,
-}
-{
-  mode := input.mode
-  allow_val := r.allow
-}
-

@@ -1,5 +1,8 @@
 
-package policies
+package summit.abac_tenant_isolation
+
+import future.keywords.if
+import future.keywords.in
 
 default allow = false
 

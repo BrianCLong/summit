@@ -38,7 +38,7 @@ authorized_agents = {
 # Violation reasons for debugging
 violation[msg] {
     not has_valid_signature
-    msg := "Missing or invalid cryptographic signature"
+    msg := "Missing/invalid cryptographic signature"
 }
 
 violation[msg] {

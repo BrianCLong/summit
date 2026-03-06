@@ -10,12 +10,19 @@ verdict := {
 {
   # In shadow mode, we never block — but we keep per-policy decisions
   input.mode == "shadow"
-  allow_all := true
-} else = verdict {
+  allow_all = true
+}
+
+verdict = v {
   input.mode == "enforce"
-  some dec in [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
-  allow_all := all(decisions, func(x){ x.allow })
+  import future.keywords.in
   decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+  allow_all_val := all(decisions, func(x){ x.allow })
+  v := {
+    "mode": input.mode,
+    "allow": allow_all_val,
+    "decisions": decisions,
+  }
 }
 
 # Helper: all()
