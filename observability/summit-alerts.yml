@@ -7,9 +7,9 @@ groups:
     rules:
       - alert: SummitApiHighErrorRate
         expr: |
-          sum(rate(http_requests_total{service="summit-api", status=~"5.."}[5m]))
+          sum(rate(http_requests_total{status=~"5.."}[5m]))
           /
-          sum(rate(http_requests_total{service="summit-api"}[5m]))
+          sum(rate(http_requests_total[5m]))
           > 0.01
         for: 2m
         labels:
@@ -22,7 +22,7 @@ groups:
           runbook_url: 'https://docs.intelgraph.com/runbooks/summit-api-errors'
 
       - alert: SummitApiLatencyHigh
-        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="summit-api"}[5m])) by (le)) > 1.0
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
         for: 5m
         labels:
           severity: warning
@@ -36,9 +36,9 @@ groups:
   # GraphQL Specific
   - alert: GraphQLHighErrorRate
     expr: |
-      sum(rate(graphql_errors_total{service="summit-api"}[5m]))
+      sum(rate(graphql_errors_total[5m]))
       /
-      sum(rate(graphql_requests_total{service="summit-api"}[5m]))
+      sum(rate(graphql_requests_total[5m]))
       > 0.02
     for: 5m
     labels:
@@ -106,3 +106,18 @@ groups:
           summary: 'Summit API High Memory Usage'
           description: 'Memory usage is {{ $value }}MB, exceeding 1.5GB.'
           runbook_url: 'https://docs.intelgraph.com/runbooks/high-memory'
+
+  # Verification Performance
+  - name: summit.verification
+    rules:
+      - alert: SummitVerificationLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(verification_latency_seconds_bucket[5m])) by (le, product)) > 5.0
+        for: 5m
+        labels:
+          severity: warning
+          service: summit-api
+          component: verification
+        annotations:
+          summary: 'Verification Latency High'
+          description: 'P95 verification latency for {{ $labels.product }} is {{ $value }}s, exceeding 5s.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/verification-latency'
