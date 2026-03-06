@@ -161,7 +161,6 @@ jobs:
       - name: CI Summary
         run: |
           echo "🎯 CI Green Lock Strategy Execution Summary"
-          echo "============================================"
           echo "✅ Local smoke validation: ${{ needs.smoke-validation.result }}"
           echo "🔍 Security audit: ${{ needs.security-audit.result }}"
           echo "🛡️ Provenance validation: ${{ needs.provenance-validation.result }}"

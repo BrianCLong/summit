@@ -240,9 +240,7 @@ jobs:
           path: artifacts/redaction-triage/
           retention-days: 30
 
-      # ========================================
       # ROLLBACK PATH: When FAIL or safety gate fails
-      # ========================================
       - name: Restore Last Known-Good Snapshot
         id: restore-snapshot
         if: steps.health-check.outputs.level == 'FAIL' || steps.verify-site.outputs.safety_passed == 'false'
@@ -362,9 +360,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "See: [PAGES_ROLLBACK.md](../../docs/ci/PAGES_ROLLBACK.md)" >> $GITHUB_STEP_SUMMARY
 
-      # ========================================
       # SUCCESS PATH: OK/WARN - store snapshot and deploy
-      # ========================================
       - name: Warn Summary
         if: steps.health-check.outputs.level == 'WARN' && steps.verify-site.outputs.safety_passed == 'true'
         run: |
@@ -411,9 +407,7 @@ jobs:
           echo "Index regenerated with deployment marker"
           ls -la site/release-ops/
 
-      # ========================================
       # DEPLOY (both success and rollback paths)
-      # ========================================
       - name: Setup Pages
         if: inputs.dry_run != true
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v4
@@ -429,9 +423,7 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
 
-      # ========================================
       # POST-DEPLOY: Store snapshot on success
-      # ========================================
       - name: Store Snapshot
         if: inputs.dry_run != true && steps.verify-site.outputs.safety_passed == 'true' && (steps.health-check.outputs.level == 'OK' || steps.health-check.outputs.level == 'WARN')
         run: |

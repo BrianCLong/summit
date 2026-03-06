@@ -60,7 +60,6 @@ jobs:
         if: always()
         run: |
           echo "🎯 Fast Lane Gate Summary"
-          echo "========================="
           echo "Bootstrap: ✅"
           echo "Lint: ✅"
           echo "Typecheck: ✅"

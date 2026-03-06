@@ -32,9 +32,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ============================================================================
   # Doc-to-Issue Link Validation
-  # ============================================================================
   validate-doc-links:
     name: Validate Doc-to-Issue Links
     runs-on: ubuntu-latest
@@ -159,9 +157,7 @@ jobs:
               });
             }
 
-  # ============================================================================
   # Backlog Health Check
-  # ============================================================================
   health-check:
     name: Backlog Health Check
     runs-on: ubuntu-latest
@@ -258,9 +254,7 @@ jobs:
               });
             }
 
-  # ============================================================================
   # Extract Promises (Manual Trigger)
-  # ============================================================================
   extract:
     name: Extract Promises
     runs-on: ubuntu-latest
@@ -308,9 +302,7 @@ jobs:
             echo "Download the artifact to review captured promises." >> $GITHUB_STEP_SUMMARY
           fi
 
-  # ============================================================================
   # Generate Report (Manual Trigger)
-  # ============================================================================
   report:
     name: Generate Report
     runs-on: ubuntu-latest

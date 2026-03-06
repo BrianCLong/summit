@@ -20,9 +20,7 @@ permissions:
   checks: write
 
 jobs:
-  # ========================================
   # SAST: Static Application Security Testing
-  # ========================================
   sast-codeql:
     name: SAST (CodeQL)
     runs-on: ubuntu-latest
@@ -49,9 +47,7 @@ jobs:
         with:
           category: "/language:javascript,python"
 
-  # ========================================
   # Secret Scanning
-  # ========================================
   secret-detection:
     name: Secret Detection
     runs-on: ubuntu-latest
@@ -79,9 +75,7 @@ jobs:
             echo "✅ No .env files found in commits"
           fi
 
-  # ========================================
   # Dependency Scanning
-  # ========================================
   dependency-scan:
     name: Dependency Scanning
     runs-on: ubuntu-latest
@@ -128,9 +122,7 @@ jobs:
           fail-on-severity: high
           deny-licenses: GPL-3.0, AGPL-3.0
 
-  # ========================================
   # Container & Infrastructure Scanning
-  # ========================================
   trivy-scan:
     name: Trivy Security Scan
     runs-on: ubuntu-latest
@@ -167,9 +159,7 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
 
-  # ========================================
   # Crypto Hygiene Check
-  # ========================================
   crypto-hygiene:
     name: Crypto Hygiene Check
     runs-on: ubuntu-latest
@@ -223,9 +213,7 @@ jobs:
             echo "⚠️ WARNING: Found deprecated crypto.createCipher usage (should use createCipheriv)"
           fi
 
-  # ========================================
   # DAST: Dynamic Application Security Testing (ZAP)
-  # ========================================
   zap-baseline:
     name: ZAP Baseline Scan
     runs-on: ubuntu-latest
@@ -258,9 +246,7 @@ jobs:
         run: |
           docker compose down || true
 
-  # ========================================
   # Security Gates & Invariants
-  # ========================================
   security-gates:
     name: Security Gates
     runs-on: ubuntu-latest
@@ -321,9 +307,7 @@ jobs:
 
           echo "✅ Allowlist is valid"
 
-  # ========================================
   # Security Report & Summary
-  # ========================================
   security-summary:
     name: Security Summary
     runs-on: ubuntu-latest

@@ -27,9 +27,7 @@ env:
   METRICS_PUSH_GATEWAY: http://localhost:9091
 
 jobs:
-  # ============================================================
   # Stage 1: Initialize Observability Infrastructure
-  # ============================================================
   setup-observability:
     name: 🔭 Setup Observability Stack
     runs-on: ubuntu-latest
@@ -53,9 +51,7 @@ jobs:
             observability/alerts
           key: observability-${{ hashFiles('observability/**') }}
 
-  # ============================================================
   # Stage 2: E2E Test Execution with Metrics Collection
-  # ============================================================
   e2e-with-metrics:
     name: 📊 E2E Tests with Metrics
     runs-on: ubuntu-latest
@@ -228,9 +224,7 @@ jobs:
           docker compose -f docker-compose.yml down -v || true
           docker compose -f docker-compose.observability.yml down -v || true
 
-  # ============================================================
   # Stage 3: Aggregate Metrics and Generate Report
-  # ============================================================
   aggregate-metrics:
     name: 📈 Aggregate Metrics
     runs-on: ubuntu-latest
@@ -334,9 +328,7 @@ jobs:
           path: aggregated/
           retention-days: 90
 
-  # ============================================================
   # Stage 4: Update Observability Dashboards
-  # ============================================================
   update-dashboards:
     name: 📊 Update Dashboards
     runs-on: ubuntu-latest
@@ -388,9 +380,7 @@ jobs:
           git diff --staged --quiet || git commit -m "chore(observability): update E2E metrics history [skip ci]"
           git push || true
 
-  # ============================================================
   # Stage 5: Alert on Failures
-  # ============================================================
   alert-on-failures:
     name: 🚨 Alert on Failures
     runs-on: ubuntu-latest

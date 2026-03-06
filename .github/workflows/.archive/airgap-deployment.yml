@@ -42,9 +42,7 @@ env:
   GRYPE_VERSION: '0.72.0'
 
 jobs:
-  # ============================================================================
   # Terraform Validation
-  # ============================================================================
   terraform-validate:
     name: Validate Terraform
     runs-on: ubuntu-latest
@@ -89,9 +87,7 @@ jobs:
         with:
           sarif_file: results.sarif
 
-  # ============================================================================
   # Kubernetes Manifest Validation
-  # ============================================================================
   kubernetes-validate:
     name: Validate Kubernetes Manifests
     runs-on: ubuntu-latest
@@ -129,9 +125,7 @@ jobs:
           files: infra/airgap/kubernetes
           ignore_missing_schemas: true
 
-  # ============================================================================
   # Security Policy Tests
-  # ============================================================================
   security-policy-tests:
     name: Security Policy Tests
     runs-on: ubuntu-latest
@@ -172,9 +166,7 @@ jobs:
           fi
           echo "Pod Security Standards validated"
 
-  # ============================================================================
   # SBOM Generation Test
-  # ============================================================================
   sbom-test:
     name: SBOM Generation Test
     runs-on: ubuntu-latest
@@ -212,9 +204,7 @@ jobs:
           grype sbom:/tmp/test-sbom.json -o json > /tmp/vulns.json
           echo "Vulnerability scanning validated"
 
-  # ============================================================================
   # Cosign Signing Test
-  # ============================================================================
   cosign-test:
     name: Cosign Signing Test
     runs-on: ubuntu-latest
@@ -250,9 +240,7 @@ jobs:
 
           echo "Cosign signing validated"
 
-  # ============================================================================
   # Documentation Validation
-  # ============================================================================
   docs-validate:
     name: Validate Documentation
     runs-on: ubuntu-latest
@@ -294,9 +282,7 @@ jobs:
           done
           echo "All required documentation sections present"
 
-  # ============================================================================
   # Integration Test
-  # ============================================================================
   integration-test:
     name: Integration Test
     runs-on: ubuntu-latest
@@ -348,9 +334,7 @@ jobs:
         run: |
           kind delete cluster --name airgap-test
 
-  # ============================================================================
   # Final Status
-  # ============================================================================
   ci-status:
     name: CI Status
     runs-on: ubuntu-latest

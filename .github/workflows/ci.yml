@@ -37,6 +37,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -54,6 +56,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -67,12 +71,17 @@ jobs:
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests (CI)
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node
@@ -127,13 +136,26 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls (CI)
+    name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
     services:
       postgres:
         image: postgres:15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: "pnpm"
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: SOC Control Unit Tests
+        run: bash scripts/test-soc-controls.sh soc-compliance-reports || bash scripts/test-soc-controls.sh soc-compliance-reports
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password

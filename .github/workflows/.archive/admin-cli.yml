@@ -20,9 +20,7 @@ env:
   PNPM_VERSION: '9'
 
 jobs:
-  # ============================================
   # Quality Checks
-  # ============================================
   quality:
     name: Code Quality
     runs-on: ubuntu-latest
@@ -66,9 +64,7 @@ jobs:
       - name: Check formatting
         run: pnpm prettier --check "src/**/*.ts" || true
 
-  # ============================================
   # Unit Tests
-  # ============================================
   test:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -100,9 +96,7 @@ jobs:
           flags: admin-cli
           name: admin-cli-coverage
 
-  # ============================================
   # Build
-  # ============================================
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -140,9 +134,7 @@ jobs:
           path: tools/admin-cli/dist/
           retention-days: 7
 
-  # ============================================
   # Integration Tests
-  # ============================================
   integration:
     name: Integration Tests
     runs-on: ubuntu-latest
@@ -183,9 +175,7 @@ jobs:
           INTELGRAPH_ENDPOINT: http://localhost:4000
           INTELGRAPH_TOKEN: test-token
 
-  # ============================================
   # Security Scan
-  # ============================================
   security:
     name: Security Scan
     runs-on: ubuntu-latest
@@ -217,9 +207,7 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
           head: HEAD
 
-  # ============================================
   # Package & Publish (on release)
-  # ============================================
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
@@ -254,9 +242,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  # ============================================
   # Docker Build (on release)
-  # ============================================
   docker:
     name: Build Docker Image
     runs-on: ubuntu-latest

@@ -114,7 +114,6 @@ jobs:
       - name: Summary
         run: |
           echo "🌙 Nightly Operations Delta Complete"
-          echo "===================================="
           echo "✅ Ops delta: $(ls out/daily-ops-delta-*.json)"
           echo "✅ Markdown: $(ls dist/daily-ops-delta-*.md)"
           echo "✅ Evidence: dist/evidence-v0.3.2-mc-nightly.json"

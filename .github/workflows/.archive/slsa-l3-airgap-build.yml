@@ -54,9 +54,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # ===========================================================================
   # Stage 1: Pre-flight Checks for Air-Gapped Build
-  # ===========================================================================
   IMAGE_NAME_SERVER: ${{ github.repository }}/server
   IMAGE_NAME_WEB: ${{ github.repository }}/web
   BUNDLE_NAME: intelgraph-airgap-bundle
@@ -124,9 +122,7 @@ jobs:
 
           echo "Pre-flight checks completed"
 
-  # ===========================================================================
   # Stage 2: Multi-Stage Hermetic Build for Air-Gap
-  # ===========================================================================
   hermetic-build:
     name: Hermetic Container Build
     steps:
@@ -216,9 +212,7 @@ jobs:
           path: bundle/images/
           retention-days: 30
 
-  # ===========================================================================
   # Stage 3: Generate SBOM and Attestations
-  # ===========================================================================
   sbom-generation:
     name: Generate SBOM and Attestations
     needs: [preflight, hermetic-build]
@@ -355,9 +349,7 @@ jobs:
           path: bundle/
           retention-days: 30
 
-  # ===========================================================================
   # Stage 4: Create Air-Gap Bundle
-  # ===========================================================================
   create-bundle:
     name: Create Air-Gap Transfer Bundle
     needs: [preflight, hermetic-build, sbom-generation]
@@ -606,9 +598,7 @@ jobs:
             ${{ env.BUNDLE_NAME }}-*.sig.instructions
           retention-days: 90
 
-  # ===========================================================================
   # Stage 5: Generate Compliance Report
-  # ===========================================================================
   compliance-report:
     name: Generate Compliance Report
     needs: [preflight, hermetic-build, sbom-generation, create-bundle]

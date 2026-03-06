@@ -36,9 +36,7 @@ env:
   TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
 jobs:
-  # ============================================================================
   # PHASE 1: Pre-flight Checks & Setup
-  # ============================================================================
 
   preflight:
     name: 📋 Preflight Checks
@@ -112,9 +110,7 @@ jobs:
           echo "| Schema Changed | ${{ steps.changes.outputs.schema == 'true' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Dockerfiles Changed | ${{ steps.changes.outputs.docker == 'true' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
 
-  # ============================================================================
   # PHASE 2: Code Quality & Static Analysis (Parallel)
-  # ============================================================================
 
   lint:
     name: 🔍 Lint & Format Check
@@ -272,9 +268,7 @@ jobs:
           path: sbom.spdx.json
           retention-days: 90
 
-  # ============================================================================
   # PHASE 3: Build (Parallel Across Platforms)
-  # ============================================================================
 
   build:
     name: 🏗️ Build - ${{ matrix.os }}
@@ -357,9 +351,7 @@ jobs:
           retention-days: 7
           if-no-files-found: warn
 
-  # ============================================================================
   # PHASE 4: Test Suites (Parallel)
-  # ============================================================================
 
   test-unit:
     name: 🧪 Unit Tests - ${{ matrix.os }}
@@ -503,9 +495,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
           NEO4J_URI: bolt://localhost:7687
 
-  # ============================================================================
   # PHASE 5: Golden Path Validation
-  # ============================================================================
 
   golden-path:
     name: 🎯 Golden Path Smoke Tests
@@ -574,9 +564,7 @@ jobs:
       - name: 5. Cleanup
         run: ./scripts/teardown.sh
 
-  # ============================================================================
   # PHASE 6: Production Guardrails
-  # ============================================================================
 
   prod-guardrails:
     name: 🛡️ Production Guardrails
@@ -623,9 +611,7 @@ jobs:
             exit 0
           fi
 
-  # ============================================================================
   # PHASE 7: Final Gate - Merge Readiness
-  # ============================================================================
 
   merge-readiness:
     name: ✅ Merge Readiness Gate

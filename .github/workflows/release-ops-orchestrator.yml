@@ -98,9 +98,7 @@ jobs:
       VERBOSE: ${{ inputs.verbose || 'false' }}
 
     steps:
-      # =========================================================================
       # A) CHECKOUT
-      # =========================================================================
       - name: Checkout
         uses: actions/checkout@v4 # v4
         with:
@@ -127,9 +125,7 @@ jobs:
           echo "Run ID: ${{ github.run_id }}" >> artifacts/release-train/cycle_info.txt
           echo "Dry Run: ${DRY_RUN}" >> artifacts/release-train/cycle_info.txt
 
-      # =========================================================================
       # B) GENERATE DASHBOARD (Policy Engine)
-      # =========================================================================
       - name: "Step 1: Generate Dashboard"
         id: dashboard
         env:
@@ -160,9 +156,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # C) RAISE/UPDATE BLOCKER ISSUES
-      # =========================================================================
       - name: "Step 2: Raise Blocker Issues"
         id: blocker_issues
         if: env.ENABLE_ISSUE_WRITES == 'true'
@@ -215,9 +209,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # D) APPLY ROUTING LABELS
-      # =========================================================================
       - name: "Step 3: Apply Routing"
         id: routing
         if: env.ENABLE_ROUTING == 'true'
@@ -249,9 +241,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # E) APPLY ESCALATION THRESHOLDS
-      # =========================================================================
       - name: "Step 4: Apply Escalation"
         id: escalation
         if: env.ENABLE_ESCALATION == 'true'
@@ -283,9 +273,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # F) GENERATE DAILY DIGEST (Cadence-Gated: once per day in configured window)
-      # =========================================================================
       - name: "Step 5: Check Digest Cadence"
         id: digest_cadence
         env:
@@ -352,9 +340,7 @@ jobs:
           echo "" >> "${REPORT_FILE}"
           echo "See \`docs/ci/RELEASE_OPS_DIGEST_POLICY.yml\` for window configuration." >> "${REPORT_FILE}"
 
-      # =========================================================================
       # G) GENERATE ON-CALL HANDOFF (Cadence-Gated: shift-change windows)
-      # =========================================================================
       - name: "Step 6: Check Handoff Cadence"
         id: handoff_cadence
         env:
@@ -421,9 +407,7 @@ jobs:
           echo "" >> "${REPORT_FILE}"
           echo "See \`docs/ci/ONCALL_HANDOFF_POLICY.yml\` for window configuration." >> "${REPORT_FILE}"
 
-      # =========================================================================
       # G.5) GENERATE SINGLE PAGE SUMMARY
-      # =========================================================================
       - name: "Step 7: Generate Single Page"
         id: single_page
         run: |
@@ -452,9 +436,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # G.6) RENDER SINGLE PAGE AS HTML
-      # =========================================================================
       - name: "Step 7b: Render Single Page HTML"
         id: single_page_html
         run: |
@@ -484,9 +466,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # G.7) GENERATE BUNDLE INDEX PAGE
-      # =========================================================================
       - name: "Step 7c: Generate Bundle Index"
         id: bundle_index
         run: |
@@ -510,9 +490,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # H) UPLOAD ARTIFACT BUNDLE
-      # =========================================================================
       - name: "Step 8: Prepare Artifact Bundle"
         run: |
           echo "::group::Prepare Artifact Bundle"
@@ -587,9 +565,7 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
-      # =========================================================================
       # I) COMMIT STATE FILES (Optional)
-      # =========================================================================
       - name: "Step 9: Commit State Updates"
         if: env.DRY_RUN != 'true' && env.ENABLE_ISSUE_WRITES == 'true'
         run: |
@@ -621,9 +597,7 @@ jobs:
 
           echo "::endgroup::"
 
-      # =========================================================================
       # GENERATE WORKFLOW SUMMARY
-      # =========================================================================
       - name: Generate Summary
         if: always()
         run: |

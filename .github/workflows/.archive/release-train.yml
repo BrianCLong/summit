@@ -35,9 +35,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ==========================================================================
   # Job 1: Pre-flight checks - ensure all required gates are green
-  # ==========================================================================
   preflight:
     name: Pre-flight Checks
     runs-on: ubuntu-latest
@@ -132,9 +130,7 @@ jobs:
         run: |
           echo '{"trace_id": "${{ github.run_id }}", "span": "preflight", "eligible": "${{ steps.eligibility.outputs.eligible }}"}' | tee preflight-trace.json
 
-  # ==========================================================================
   # Job 2: Calculate semantic version from conventional commits
-  # ==========================================================================
   version:
     name: Calculate Version
     needs: preflight
@@ -171,9 +167,7 @@ jobs:
 
           # Output is written to GITHUB_OUTPUT by the script
 
-  # ==========================================================================
   # Job 3: Create release branch and draft release notes
-  # ==========================================================================
   validate-whitepaper:
     name: Validate GA Whitepaper
     needs: preflight
@@ -291,9 +285,7 @@ jobs:
           name: release-notes-${{ needs.version.outputs.rc_version }}
           path: release-notes.md
 
-  # ==========================================================================
   # Job 4: Build and sign images for release candidate
-  # ==========================================================================
   build-images:
     name: Build Release Images
     needs: [preflight, version, create-release-branch]
@@ -360,9 +352,7 @@ jobs:
           cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api@${API_DIGEST}
           cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web@${WEB_DIGEST}
 
-  # ==========================================================================
   # Job 5: Deploy to Stage environment
-  # ==========================================================================
   deploy-stage:
     name: Deploy to Stage
     needs: [preflight, version, create-release-branch, build-images]
@@ -425,9 +415,7 @@ jobs:
           kubectl -n "$NAMESPACE" rollout status deployment/api --timeout=5m
           kubectl -n "$NAMESPACE" rollout status deployment/web --timeout=5m
 
-  # ==========================================================================
   # Job 6: Run stage validation (smoke + golden-path probes)
-  # ==========================================================================
   stage-validation:
     name: Stage Validation
     needs: [version, deploy-stage]
@@ -476,9 +464,7 @@ jobs:
           # Check p95 latency < 500ms
           echo "SLO validation passed (simulated)"
 
-  # ==========================================================================
   # Job 7: Package Evidence Bundle (SBO, Tests, Scans)
-  # ==========================================================================
   package-evidence:
     name: Package Evidence Bundle
     needs: [version, create-release-branch, build-images, stage-validation]
@@ -550,9 +536,7 @@ jobs:
             "evidence-bundle-v${RC_VERSION}.zip" \
             --clobber
 
-  # ==========================================================================
   # Job 8: Notify channels about release candidate
-  # ==========================================================================
   notify:
     name: Notify Channels
     needs: [version, create-release-branch, stage-validation]

@@ -1,0 +1,64 @@
+{
+  "artifacts": {
+    "apps/web/src/components/CommandPalette.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/EntityDrawer.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/GlobalSearch.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/GraphCanvas.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/Layout.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/NetworkGraph.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/Notifications.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/SearchFilter.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/Sidebar.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/TimelineRail.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/components/UserProfile.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/pages/DashboardPage.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/pages/GraphPage.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/pages/SettingsPage.tsx": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    },
+    "apps/web/src/stores/useGraphStore.ts": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "timestamp": "2026-02-01T00:00:00Z"
+    }
+  }
+}

@@ -22,9 +22,7 @@ env:
   STAGING_URL: https://staging-api.intelgraph.com
 
 jobs:
-  # =========================
   # Uptime Checks (Every 1min)
-  # =========================
   uptime-checks:
     name: Uptime Checks
     runs-on: ubuntu-latest
@@ -233,9 +231,7 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
 
-  # =========================
   # API Functional Tests (Every 5min)
-  # =========================
   api-functional-tests:
     name: API Functional Tests
     runs-on: ubuntu-latest
@@ -272,9 +268,7 @@ jobs:
           name: synthetic-test-results
           path: monitoring/synthetic/results/
 
-  # =========================
   # Critical User Journeys (Every 10min)
-  # =========================
   user-journey-tests:
     name: Critical User Journey Tests
     runs-on: ubuntu-latest
@@ -406,9 +400,7 @@ jobs:
               }]
             }'
 
-  # =========================
   # Performance Benchmarks (Every 1 hour)
-  # =========================
   performance-benchmarks:
     name: Performance Benchmarks
     runs-on: ubuntu-latest
@@ -452,9 +444,7 @@ jobs:
           name: performance-results
           path: results.json
 
-  # =========================
   # SSL Certificate Check (Daily)
-  # =========================
   ssl-certificate-check:
     name: SSL Certificate Check
     runs-on: ubuntu-latest

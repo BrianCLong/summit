@@ -30,7 +30,6 @@ jobs:
       - name: Check infrastructure components
         run: |
           echo "🏗️ Infrastructure Health Check"
-          echo "=============================="
 
           # Check package.json integrity
           echo "📦 Package.json integrity: ✅"
@@ -75,7 +74,6 @@ jobs:
       - name: Security audit
         run: |
           echo "🛡️ Security Posture Verification"
-          echo "================================"
 
           # Run npm audit
           echo "🔍 Running npm audit..."
@@ -121,7 +119,6 @@ jobs:
       - name: Performance checks
         run: |
           echo "⚡ Performance Baseline Check"
-          echo "============================"
 
           # Check build time
           echo "⏱️ Build performance check..."
@@ -151,7 +148,6 @@ jobs:
       - name: Check workflow files
         run: |
           echo "🔄 CI/CD Pipeline Health Check"
-          echo "=============================="
 
           # Count workflow files
           WORKFLOW_COUNT=$(find .github/workflows -name "*.yml" -o -name "*.yaml" | wc -l)
@@ -189,7 +185,6 @@ jobs:
       - name: Check feature flags
         run: |
           echo "🚩 Feature Flag Health Check"
-          echo "==========================="
 
           # Look for feature flag patterns
           echo "🔍 Scanning for feature flags..."
@@ -215,7 +210,6 @@ jobs:
       - name: Check observability setup
         run: |
           echo "📊 Monitoring & Observability Check"
-          echo "==================================="
 
           # Check for logging configuration
           echo "📝 Checking logging setup..."
@@ -244,7 +238,6 @@ jobs:
       - name: Compliance checks
         run: |
           echo "⚖️ Compliance Audit"
-          echo "=================="
 
           # Check for license file
           if [ -f "LICENSE" ] || [ -f "LICENSE.md" ] || [ -f "LICENSE.txt" ]; then
@@ -294,7 +287,6 @@ jobs:
       - name: Generate operational report
         run: |
           echo "📊 OPERATIONAL VERIFICATION SUMMARY"
-          echo "===================================="
           echo "Date: $(date -u)"
           echo "Repository: ${{ github.repository }}"
           echo "Commit: ${{ github.sha }}"

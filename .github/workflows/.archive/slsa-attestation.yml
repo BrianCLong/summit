@@ -359,9 +359,7 @@ jobs:
           echo "✅ Build is parameterless and reproducible"
 
           echo ""
-          echo "========================================"
           echo "🎉 SLSA Level 3 requirements: VERIFIED"
-          echo "========================================"
 
       - name: Generate compliance report
         run: |

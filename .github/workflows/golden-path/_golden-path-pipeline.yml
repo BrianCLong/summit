@@ -102,9 +102,7 @@ env:
   WORKING_DIR: ${{ inputs.working-directory }}
 
 jobs:
-  # ============================================================================
   # Stage 1: Lint
-  # ============================================================================
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -153,9 +151,7 @@ jobs:
       - name: Format Check
         run: pnpm --filter @intelgraph/${{ inputs.service }} format:check || true
 
-  # ============================================================================
   # Stage 2: Test
-  # ============================================================================
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -249,9 +245,7 @@ jobs:
             fi
           fi
 
-  # ============================================================================
   # Stage 3: Security
-  # ============================================================================
   security:
     name: Security
     runs-on: ubuntu-latest
@@ -304,9 +298,7 @@ jobs:
         with:
           sarif_file: "trivy-fs-results.sarif"
 
-  # ============================================================================
   # Stage 4: Build
-  # ============================================================================
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -382,9 +374,7 @@ jobs:
           name: sbom-${{ inputs.service }}
           path: sbom.spdx.json
 
-  # ============================================================================
   # Stage 5: Deploy (Staging)
-  # ============================================================================
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -415,9 +405,7 @@ jobs:
           sleep 5
           echo "success=true" >> $GITHUB_OUTPUT
 
-  # ============================================================================
   # Stage 6: Verify
-  # ============================================================================
   verify:
     name: Verify
     runs-on: ubuntu-latest
@@ -448,9 +436,7 @@ jobs:
             exit 1
           fi
 
-  # ============================================================================
   # Stage 7: Canary + Rollback Guard
-  # ============================================================================
   canary-rollback:
     name: Canary + Rollback Guard
     needs: verify
@@ -465,9 +451,7 @@ jobs:
       canary-saturation-max: ${{ inputs['canary-saturation-max'] }}
       rollback-enabled: ${{ inputs['rollback-enabled'] }}
 
-  # ============================================================================
   # Summary
-  # ============================================================================
   summary:
     name: Pipeline Summary
     runs-on: ubuntu-latest

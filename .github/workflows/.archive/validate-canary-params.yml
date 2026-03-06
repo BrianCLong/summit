@@ -173,7 +173,6 @@ jobs:
         run: |
           echo ""
           echo "🔒 GATE CONSISTENCY VALIDATION COMPLETE ✅"
-          echo "========================================"
           echo "✅ Canary configuration validated"
           echo "✅ Rollback triggers verified"
           echo "✅ Deployment waves configured"

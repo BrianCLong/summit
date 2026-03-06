@@ -23,9 +23,7 @@ jobs:
 
       - name: Runner Info
         run: |
-          echo "========================================"
           echo "Runner Information"
-          echo "========================================"
           echo "Hostname: $(hostname)"
           echo "OS: $(uname -s)"
           echo "Architecture: $(uname -m)"
@@ -33,7 +31,6 @@ jobs:
           echo "Runner: $RUNNER_NAME"
           echo "Runner OS: $RUNNER_OS"
           echo "Runner Arch: $RUNNER_ARCH"
-          echo "========================================"
 
       - name: Check Docker
         run: |
@@ -96,14 +93,11 @@ jobs:
 
       - name: Runner Info
         run: |
-          echo "========================================"
           echo "Ubuntu Runner Information"
-          echo "========================================"
           echo "Hostname: $(hostname)"
           echo "OS: $(lsb_release -d | cut -f2)"
           echo "Architecture: $(uname -m)"
           echo "Runner: $RUNNER_NAME"
-          echo "========================================"
 
       - name: Verify Prerequisites
         run: |
@@ -121,9 +115,7 @@ jobs:
     steps:
       - name: Summary
         run: |
-          echo "========================================"
           echo "🎯 Runner Test Summary"
-          echo "========================================"
           echo "✅ macOS runners: TESTED"
           echo "⏳ Ubuntu runners: PENDING SETUP"
           echo ""
@@ -132,4 +124,3 @@ jobs:
           echo "2. Verify runners at: https://github.com/BrianCLong/summit/actions/runners"
           echo "3. Enable test-ubuntu-runners job in this workflow"
           echo "4. Re-run this workflow to test all 5 runners"
-          echo "========================================"

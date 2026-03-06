@@ -218,7 +218,6 @@ jobs:
       - name: Generate status report
         run: |
           echo "📊 PR Green-Up Protocol Status Report"
-          echo "====================================="
           echo ""
           echo "🔧 Systematic fixes: ${{ needs.pr-systematic-fix.result }}"
           echo "🔄 Auto-rebase: ${{ needs.auto-rebase-strategy.result }}"

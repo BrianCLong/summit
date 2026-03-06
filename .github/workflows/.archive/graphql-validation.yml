@@ -89,7 +89,6 @@ jobs:
             const result = validateSchema(schema);
 
             console.log('\\nValidation Results:');
-            console.log('===================');
 
             if (result.errors.length > 0) {
               console.log('\\n❌ Errors:');
@@ -183,7 +182,6 @@ jobs:
             const { defaultComplexityConfig } = require('./dist/graphql/complexity-calculator');
 
             console.log('\\nComplexity Configuration:');
-            console.log('=========================');
             console.log(\`Max Complexity: \${defaultComplexityConfig.maxComplexity}\`);
             console.log(\`Max Depth: \${defaultComplexityConfig.maxDepth}\`);
             console.log(\`List Multiplier: \${defaultComplexityConfig.listMultiplier}\`);
@@ -214,7 +212,6 @@ jobs:
                 console.log('✅ No schema changes detected');
               } else {
                 console.log('\\nSchema Changes:');
-                console.log('================');
 
                 const breaking = changes.filter(c => c.criticality.level === 'BREAKING');
                 const dangerous = changes.filter(c => c.criticality.level === 'DANGEROUS');

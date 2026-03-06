@@ -286,7 +286,6 @@ jobs:
       - name: Generate documentation report
         run: |
           echo "📋 Documentation Quality Report" > docs-report.md
-          echo "===============================" >> docs-report.md
           echo "" >> docs-report.md
           echo "## Summary" >> docs-report.md
           echo "- Total markdown files: $(find . -name "*.md" -not -path "./node_modules/*" -not -path "./.turbo/*" | wc -l)" >> docs-report.md

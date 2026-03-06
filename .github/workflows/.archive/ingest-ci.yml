@@ -33,9 +33,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # =========================================================================
   # Schema Validation
-  # =========================================================================
   schema-lint:
     name: Schema Lint & Validation
     runs-on: ubuntu-latest
@@ -74,9 +72,7 @@ jobs:
               echo "::warning::Schema has changed - review for breaking changes"
           fi
 
-  # =========================================================================
   # Contract Tests
-  # =========================================================================
   contract-tests:
     name: Contract Tests
     runs-on: ubuntu-latest
@@ -101,9 +97,7 @@ jobs:
           # Test that sample data validates against schemas
           pnpm --filter @intelgraph/ingest-adapters test:contracts || true
 
-  # =========================================================================
   # Build & Test
-  # =========================================================================
   build-test:
     name: Build & Test
     runs-on: ubuntu-latest
@@ -166,9 +160,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
           DATABASE_URL: postgresql://postgres:test@localhost:5432/ingest_test
 
-  # =========================================================================
   # Load/Smoke Tests
-  # =========================================================================
   load-smoke:
     name: Load & Smoke Tests
     runs-on: ubuntu-latest
@@ -220,9 +212,7 @@ jobs:
           REDIS_URL: redis://localhost:6379
           KAFKA_BROKERS: localhost:9092
 
-  # =========================================================================
   # Policy Checks
-  # =========================================================================
   policy-checks:
     name: OPA Policy Checks
     runs-on: ubuntu-latest
@@ -250,9 +240,7 @@ jobs:
               opa eval -d .ci/policies/ingest.rego 'data.ingest.policy.allow' || true
           fi
 
-  # =========================================================================
   # Security Scan
-  # =========================================================================
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest

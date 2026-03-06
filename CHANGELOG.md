@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- CI Infrastructure: Fixed `pnpm` setup in workflows, `python` version mismatch, and `git` submodule issues causing pipeline failures.
+
+### Fixed
+- Fixed CI infrastructure issues: git submodule configuration, missing dependencies (pnpm, tsx, OPA), and workflow syntax errors.
+- Improved `SchedulerBoard` component performance by replacing jQuery with React state.
+
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.

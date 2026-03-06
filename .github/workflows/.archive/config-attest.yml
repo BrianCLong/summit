@@ -96,7 +96,6 @@ jobs:
       - name: Summary
         run: |
           echo "🔐 Config Attestation Summary"
-          echo "============================="
           echo "✅ Current snapshot: evidence/v0.3.3/config/config-current.json"
           if [[ -f "evidence/v0.3.3/config/config-signature.txt" ]]; then
             echo "✅ Signature: evidence/v0.3.3/config/config-signature.txt"

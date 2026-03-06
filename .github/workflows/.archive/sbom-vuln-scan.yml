@@ -453,7 +453,6 @@ jobs:
           HIGH="${{ needs.vulnerability-scan.outputs.high }}"
 
           echo "📋 Security Policy Evaluation"
-          echo "=============================="
           echo "SBOM Components: ${{ needs.sbom-generate.outputs.component-count }}"
           echo "Critical Vulnerabilities: $CRITICAL"
           echo "High Vulnerabilities: $HIGH"

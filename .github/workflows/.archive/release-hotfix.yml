@@ -35,9 +35,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  # ==========================================================================
   # Job 1: Validate hotfix eligibility
-  # ==========================================================================
   validate:
     name: Validate Hotfix
     runs-on: ubuntu-latest
@@ -112,9 +110,7 @@ jobs:
 
           echo "Hotfix version: v$HOTFIX_VERSION"
 
-  # ==========================================================================
   # Job 2: Create hotfix branch and cherry-pick commits
-  # ==========================================================================
   create-branch:
     name: Create Hotfix Branch
     needs: validate
@@ -191,9 +187,7 @@ jobs:
         run: |
           git push origin "$BRANCH_NAME"
 
-  # ==========================================================================
   # Job 3: Build hotfix images with stricter validation
-  # ==========================================================================
   build:
     name: Build Hotfix Images
     needs: [validate, create-branch]
@@ -281,9 +275,7 @@ jobs:
           cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api@${API_DIGEST}
           cosign sign --yes ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web@${WEB_DIGEST}
 
-  # ==========================================================================
   # Job 4: Deploy to stage with strict smoke test
-  # ==========================================================================
   deploy-stage:
     name: Deploy Hotfix to Stage
     needs: [validate, build]
@@ -360,9 +352,7 @@ jobs:
 
           echo "Stage validation passed"
 
-  # ==========================================================================
   # Job 5: Fast-track production deployment with stricter SLO
-  # ==========================================================================
   deploy-prod:
     name: Deploy Hotfix to Production
     needs: [validate, build, deploy-stage]
@@ -436,9 +426,7 @@ jobs:
 
           echo "Production health verified"
 
-  # ==========================================================================
   # Job 6: Create release and evidence bundle
-  # ==========================================================================
   finalize:
     name: Finalize Hotfix Release
     needs: [validate, build, deploy-prod]

@@ -472,7 +472,6 @@ jobs:
       - name: Validate Mythic Readiness
         run: |
           echo "🏆 MYTHIC READINESS VALIDATION"
-          echo "=============================="
           echo "✅ All 5 epics implemented and validated"
           echo "✅ Zero-knowledge provenance: Cryptographic policy compliance"
           echo "✅ Byzantine fault tolerance: Multi-region consensus resilience"

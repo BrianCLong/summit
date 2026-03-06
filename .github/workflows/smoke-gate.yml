@@ -175,10 +175,8 @@ jobs:
         working-directory: server
         run: |
           echo "Running smoke tests in FULL mode..."
-          echo "=================================================="
           SMOKE_MODE=full SMOKE_TEST_VERBOSE=true node scripts/smoke-test.cjs
           SMOKE_EXIT=$?
-          echo "=================================================="
           echo "Smoke test exit code: $SMOKE_EXIT"
           exit $SMOKE_EXIT
         env:

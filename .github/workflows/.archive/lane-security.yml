@@ -118,7 +118,6 @@ jobs:
       - name: Security summary
         run: |
           echo "🔒 Security Lane Summary"
-          echo "========================"
           echo "SBOM Generation: ${{ needs.sbom-generation.result }}"
           echo "Vulnerability Scan: ${{ needs.vulnerability-scan.result }}"
           echo ""

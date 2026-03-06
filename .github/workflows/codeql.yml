@@ -46,11 +46,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4 # v6
 
-      # ============================================================================
       # MONOREPO SETUP: This monorepo uses pnpm workspaces with client/, server/,
       # and packages/ directories. Dependencies MUST be installed before CodeQL
       # analysis to ensure proper JavaScript/TypeScript resolution.
-      # ============================================================================
       - name: Setup pnpm
         if: matrix.language == 'javascript-typescript'
         uses: pnpm/action-setup@v4 # v4
@@ -69,10 +67,8 @@ jobs:
           # Prevent installation failures from blocking analysis
           HUSKY: 0
 
-      # ============================================================================
       # CODEQL INITIALIZATION: Must happen after dependency installation for
       # JavaScript/TypeScript to ensure proper module resolution and analysis.
-      # ============================================================================
       - name: Initialize CodeQL
         uses: github/codeql-action/init@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
         with:
@@ -85,10 +81,8 @@ jobs:
               - server
               - packages
 
-      # ============================================================================
       # BUILD STEP: Using manual build instead of autobuild for reliability.
       # Autobuild can be flaky with pnpm workspaces and ESM modules.
-      # ============================================================================
       - name: Build TypeScript projects (manual build for reliability)
         if: matrix.language == 'javascript-typescript'
         run: |

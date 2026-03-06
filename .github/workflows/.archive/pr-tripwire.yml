@@ -11,7 +11,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: No conflict markers
         run: |
-          if grep -R --line-number -E '^(<<<<<<<|=======|>>>>>>>)' -- . ':(exclude).git'; then
             echo "::error::Conflict markers present"; exit 1; fi
       - name: No DB/caches or huge binaries in diff
         run: |

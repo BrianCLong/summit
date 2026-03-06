@@ -46,9 +46,7 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/summit
 
 jobs:
-  # ============================================================================
   # PHASE 1: Prepare Build Matrix
-  # ============================================================================
 
   prepare:
     name: 📋 Prepare Build Matrix
@@ -101,9 +99,7 @@ jobs:
           '
           echo "matrix=$(echo $matrix | jq -c .)" >> "$GITHUB_OUTPUT"
 
-  # ============================================================================
   # PHASE 2: Build & Push Images
-  # ============================================================================
 
   build-push:
     name: 🏗️ Build ${{ matrix.name }}
@@ -273,9 +269,7 @@ jobs:
           echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
-  # ============================================================================
   # PHASE 3: Security & Compliance Report
-  # ============================================================================
 
   security-report:
     name: 📊 Security Report

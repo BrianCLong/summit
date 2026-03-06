@@ -44,9 +44,7 @@ permissions:
   issues: write
 
 jobs:
-  # ==========================================================================
   # Job 1: Validate release and check guardrails
-  # ==========================================================================
   validate:
     name: Validate Release
     runs-on: ubuntu-latest
@@ -165,9 +163,7 @@ jobs:
           echo "::notice::Production actions require dual approval"
           echo "Approval validated via environment protection rules"
 
-  # ==========================================================================
   # Job 2: Deploy canary at specified weight
-  # ==========================================================================
   deploy-canary:
     name: Deploy Canary (${{ inputs.action }})
     needs: validate
@@ -274,9 +270,7 @@ jobs:
 
           # Would call feature flag API to sync ramps
 
-  # ==========================================================================
   # Job 3: Validate canary deployment with SLO gates
-  # ==========================================================================
   validate-canary:
     name: Validate Canary
     needs: [validate, deploy-canary]
@@ -372,9 +366,7 @@ jobs:
           URL="${GRAFANA_URL}/d/release-canary?orgId=1&from=${FROM}000&to=${NOW}000&var-version=${{ inputs.version }}"
           echo "url=$URL" >> $GITHUB_OUTPUT
 
-  # ==========================================================================
   # Job 4: Auto-rollback on failure
-  # ==========================================================================
   auto-rollback:
     name: Auto-Rollback
     needs: [validate, deploy-canary, validate-canary]
@@ -470,9 +462,7 @@ jobs:
 
           echo "Recovery probes passed"
 
-  # ==========================================================================
   # Job 5: Manual rollback
-  # ==========================================================================
   manual-rollback:
     name: Manual Rollback
     needs: validate
@@ -550,9 +540,7 @@ jobs:
 
           echo "Rollback verified"
 
-  # ==========================================================================
   # Job 6: Finalize release on successful 100% promotion
-  # ==========================================================================
   finalize:
     name: Finalize Release
     needs: [validate, deploy-canary, validate-canary]
