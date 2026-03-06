@@ -14,3 +14,13 @@ packages:
   - 'devtools/*'
   - 'prov-ledger-service'
   - 'agents/*'
+exclude:
+  - 'archive/**'
+  - 'apps/desktop-electron'
+  - 'apps/mobile-native'
+  - 'apps/.mobile-native-disabled'
+  - 'tools/summitctl'
+  - 'intelgraph-mvp/ui'
+  - '!**/test/**'
+  - '!**/tests/**'
+  - '!**/node_modules/**'
