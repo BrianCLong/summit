@@ -71,24 +71,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Discover charts
-        id: chart-list
-        run: |
-          set -euo pipefail
-          mapfile -t charts < <(find ${CHART_SEARCH_PATHS} -name Chart.yaml -print 2>/dev/null | sort)
-          printf 'count=%s\n' "${#charts[@]}" >> "$GITHUB_OUTPUT"
-          printf 'paths<<EOF\n%s\nEOF\n' "$(printf '%s\n' "${charts[@]}")" >> "$GITHUB_OUTPUT"
-          if [ ${#charts[@]} -eq 0 ]; then
-            echo "No charts detected in search paths; skipping Helm lint and rendering"
-          else
-            printf 'Discovered charts:\n%s\n' "${charts[*]}"
-          fi
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
-        with:
           version: v3.14.4
 
       - name: Install chart-testing
@@ -158,13 +140,6 @@ jobs:
       - name: Upload rendered manifests
         uses: actions/upload-artifact@v4
         with:
-          name: helm-rendered-manifests
-          path: ${{ env.RENDER_DIR }}
-          retention-days: 7
-
-      - name: Upload docs and dashboards
-        uses: actions/upload-artifact@v4
-        with:
           name: helm-docs-and-dashboards
           path: artifacts/helm-docs-and-dashboards.tgz
           retention-days: 7
@@ -179,50 +154,6 @@ jobs:
 
       - name: Download rendered manifests
         uses: actions/download-artifact@v4
-        with:
-          name: helm-rendered-manifests
-          path: helm-rendered
-
-      - name: Install conftest (OPA)
-        run: |
-          set -euo pipefail
-          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.55.0/conftest_0.55.0_Linux_x86_64.tar.gz -o conftest.tar.gz
-          tar -xzf conftest.tar.gz
-          sudo mv conftest /usr/local/bin/
-          conftest --version
-
-      - name: Install Kyverno CLI
-        run: |
-          set -euo pipefail
-          curl -L https://github.com/kyverno/kyverno/releases/download/v1.12.6/kyverno-cli_v1.12.6_linux_x86_64.tar.gz -o kyverno.tar.gz
-          tar -xzf kyverno.tar.gz kyverno
-          sudo mv kyverno /usr/local/bin/
-          kyverno version --client
-
-      - name: Run OPA policy checks
-        run: |
-          set -euo pipefail
-          manifests=$(find helm-rendered -name '*.yaml')
-          if [ -z "$manifests" ]; then
-            echo "No manifests available for policy checks"
-            exit 0
-          fi
-          conftest test $manifests -p policy/conftest/helm-ci
-
-      - name: Kyverno lint and apply
-        run: |
-          set -euo pipefail
-          kyverno lint policy/kyverno policies/kyverno
-          manifests=$(find helm-rendered -name '*.yaml')
-          if [ -z "$manifests" ]; then
-            echo "No manifests available for Kyverno checks"
-            echo "No manifests available" > policy-report.yaml
-            exit 0
-          fi
-          kyverno apply policy/kyverno/helm-ci.yaml --resource $manifests --policy-report --output yaml > policy-report.yaml
-
-      - name: Upload policy report
-        uses: actions/upload-artifact@v4
         with:
           name: helm-policy-report
           path: policy-report.yaml
@@ -240,12 +171,6 @@ jobs:
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.10.0
-        with:
-          version: v0.22.0
-          node_image: kindest/node:v1.29.2
-
-      - name: Set up Helm
-        uses: azure/setup-helm@v4
         with:
           version: v3.14.4
 

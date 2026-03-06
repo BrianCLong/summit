@@ -131,22 +131,6 @@ JSON
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate metadata
-        id: meta
-        run: |
-          PR_NUMBER=${{ github.event.number }}
-          SERVER_IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/server:pr-${PR_NUMBER}"
-          CLIENT_IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/client:pr-${PR_NUMBER}"
-          echo "server-image=${SERVER_IMAGE}" >> $GITHUB_OUTPUT
-          echo "client-image=${CLIENT_IMAGE}" >> $GITHUB_OUTPUT
-
-      - name: Build and push server image
-        uses: docker/build-push-action@v5
-        with:
           context: ./server
           push: true
           tags: ${{ steps.meta.outputs.server-image }}
@@ -156,23 +140,6 @@ JSON
       - name: Build and push client image
         uses: docker/build-push-action@v5
         with:
-          context: ./client
-          push: true
-          tags: ${{ steps.meta.outputs.client-image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy-preview:
-    needs: [context, build-images]
-    runs-on: ubuntu-latest
-    environment: preview
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-        with:
           version: v3.14.0
 
       - name: Setup kubectl
@@ -180,125 +147,8 @@ JSON
         with:
           version: v1.29.0
 
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
-      - name: Create namespace
-        env:
-          TTL: ${{ needs.context.outputs.ttl-hours }}
-        run: |
-          PR_NUMBER=${{ github.event.number }}
-          NAMESPACE="pr-${PR_NUMBER}"
-          CREATED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-          kubectl label namespace ${NAMESPACE} env=preview cost-center=intelgraph-preview pr=${PR_NUMBER} owner=${{ github.actor }} repo=${{ github.repository }} branch=${{ github.head_ref }} ttl_hours=${TTL} budget_usd=${{ needs.context.outputs.budget-usd }} --overwrite
-          kubectl annotate namespace ${NAMESPACE} created_at=${CREATED_AT} ttl_hours=${TTL} budget_usd=${{ needs.context.outputs.budget-usd }} --overwrite
-
-      - name: Deploy preview environment
-        env:
-          TTL: ${{ needs.context.outputs.ttl-hours }}
-        run: |
-          PR_NUMBER=${{ github.event.number }}
-          NAMESPACE="pr-${PR_NUMBER}"
-          helm upgrade --install \
-            intelgraph-pr-${PR_NUMBER} \
-            ./deploy/helm/intelgraph \
-            -f ./deploy/helm/intelgraph/values-preview.yaml \
-            --namespace ${NAMESPACE} \
-            --create-namespace \
-            --set image.server.repository=${{ env.REGISTRY }}/${{ github.repository }}/server \
-            --set image.server.tag=pr-${PR_NUMBER} \
-            --set image.client.repository=${{ env.REGISTRY }}/${{ github.repository }}/client \
-            --set image.client.tag=pr-${PR_NUMBER} \
-            --set preview.ttlHours=${TTL} \
-            --set-string preview.annotations.owner=${{ github.actor }} \
-            --set-string preview.annotations.repo=${{ github.repository }} \
-            --wait --timeout 10m
-
-      - name: Verify deployment
-        run: |
-          NAMESPACE="pr-${{ github.event.number }}"
-          kubectl rollout status deployment/intelgraph-pr-${{ github.event.number }} -n ${NAMESPACE} --timeout=300s
-
-  update-pr:
-    needs: [context, deploy-preview]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install PR tooling
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests
-
-      - name: Post PR comment
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PR_NUMBER=${{ github.event.number }}
-          PREVIEW_URL="https://pr-${PR_NUMBER}.preview.intelgraph.dev"
-          GRAFANA_URL="https://grafana.preview.intelgraph.dev/d/preview-fleet?var-namespace=pr-${PR_NUMBER}"
-          JAEGER_URL="https://jaeger.preview.intelgraph.dev/search?namespace=pr-${PR_NUMBER}"
-          python .ci/scripts/preview/pr_comment.py \
-            --repo "${{ github.repository }}" \
-            --pr ${PR_NUMBER} \
-            --namespace "pr-${PR_NUMBER}" \
-            --preview-url "${PREVIEW_URL}" \
-            --grafana-url "${GRAFANA_URL}" \
-            --jaeger-url "${JAEGER_URL}" \
-            --ttl-hours ${{ needs.context.outputs.ttl-hours }} \
-            --budget-usd ${{ needs.context.outputs.budget-usd }} \
-            --hourly-usd ${{ needs.context.outputs.hourly-usd }} \
-            --total-usd ${{ needs.context.outputs.total-usd }} \
-            --extend-url "${{ github.server_url }}/${{ github.repository }}/actions/workflows/preview-env.yml/dispatches" \
-            --destroy-url "${{ github.server_url }}/${{ github.repository }}/actions/workflows/preview-env.yml/dispatches" \
-            --trace-id "preview-${PR_NUMBER}" \
-            --body "Live links plus extend/destroy controls."
-
-  teardown:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    environment: preview
-    steps:
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: v1.29.0
-
       - name: Setup Helm
         uses: azure/setup-helm@v4
-        with:
-          version: v3.14.0
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
-      - name: Teardown preview environment
-        run: |
-          NAMESPACE="pr-${{ github.event.number }}"
-          PR_NUMBER=${{ github.event.number }}
-          helm uninstall intelgraph-pr-${PR_NUMBER} --namespace ${NAMESPACE} --ignore-not-found
-          kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
-
-      - name: Comment on PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr comment ${{ github.event.number }} --body "🧹 Preview environment teardown completed."
-
-  dispatch:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
         with:
           version: v1.29.0
 

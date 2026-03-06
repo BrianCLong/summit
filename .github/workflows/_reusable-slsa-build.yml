@@ -65,6 +65,9 @@ on:
         description: "Container registry password/token"
         required: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -91,25 +94,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
         with:
-          fetch-depth: 0
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
-        with:
           driver-opts: |
             network=none
             image=moby/buildkit:v0.12.4
 
       - name: Log in to Container Registry
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.registry_password || secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5
         with:
           images: ${{ env.REGISTRY }}/${{ inputs.image_name }}
           tags: |
@@ -127,33 +117,6 @@ jobs:
       - name: Build and push
         id: build
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
-        with:
-          context: ${{ inputs.context }}
-          file: ${{ inputs.dockerfile }}
-          push: ${{ inputs.push }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: |
-            ${{ steps.meta.outputs.labels }}
-            io.slsa.level=3
-            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: ${{ inputs.platforms }}
-          sbom: ${{ inputs.sbom }}
-          provenance: mode=max
-          build-args: |
-            SOURCE_DATE_EPOCH=${{ env.SOURCE_DATE_EPOCH }}
-            GIT_COMMIT=${{ github.sha }}
-
-      - name: Set image URI
-        id: image-uri
-        run: |
-          URI="${{ env.REGISTRY }}/${{ inputs.image_name }}@${{ steps.build.outputs.digest }}"
-          echo "uri=$URI" >> "$GITHUB_OUTPUT"
-
-      - name: Install Cosign
-        if: inputs.sign
-        uses: sigstore/cosign-installer@f713795cb21599bc4e5c4b58cbad1da852d7eeb9 # v3
         with:
           cosign-release: v2.2.4
 
@@ -186,20 +149,7 @@ jobs:
       - name: Generate SBOMs (SPDX + CycloneDX)
         if: inputs.sbom
         id: sbom
-        uses: anchore/sbom-action@v0.16.0
-        with:
-          image: ${{ steps.image-uri.outputs.uri }}
-          format: spdx-json, cyclonedx-json
-
-      - name: Rename SBOMs
-        if: inputs.sbom
-        run: |
-          mv syft.spdx.json sbom.spdx.json
-          mv syft.cyclonedx.json sbom.cyclonedx.json
-
-      - name: Attest Build Provenance
-        if: inputs.push && inputs.sign
-        uses: actions/attest-build-provenance@v3
+        uses: anchore/sbom-action@v0
         with:
           subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
           subject-digest: ${{ steps.build.outputs.digest }}
@@ -208,31 +158,6 @@ jobs:
       - name: Attest SBOM
         if: inputs.sbom && inputs.sign && inputs.push
         uses: actions/attest-sbom@v2
-        with:
-          subject-name: ${{ env.REGISTRY }}/${{ inputs.image_name }}
-          subject-digest: ${{ steps.build.outputs.digest }}
-          sbom-path: sbom.spdx.json
-          push-to-registry: true
-
-      - name: Determine SLSA level
-        id: slsa-check
-        run: |
-          LEVEL="SLSA_0"
-
-          # Check for SLSA requirements
-          if [ "${{ inputs.push }}" = "true" ] && [ "${{ inputs.sign }}" = "true" ]; then
-            if [ "${{ inputs.sbom }}" = "true" ] && [ "${{ inputs.slsa_provenance }}" = "true" ]; then
-              LEVEL="SLSA_3"
-            else
-              LEVEL="SLSA_2"
-            fi
-          fi
-
-          echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
-          echo "Achieved SLSA Level: $LEVEL"
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4 # v6
         with:
           name: build-artifacts-${{ inputs.image_name }}-${{ github.run_id }}
           path: |

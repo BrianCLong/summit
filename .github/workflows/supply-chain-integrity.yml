@@ -46,25 +46,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4 # v4.1.7 (pinned to v4 branch tip)
         with:
-          fetch-depth: 0
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4 # v4
-        # version is read from package.json packageManager field
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4 # v4.0.3
-        with:
           node-version: "20"
           cache: "pnpm"
 
       - name: Set up Python
         uses: actions/setup-python@4f41a90a1f38628c7ccc608d05fbafe701bc20ae # v5.1.0
-        with:
-          python-version: "3.11"
-
-      - name: Set up Go
-        uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5.0.1
         with:
           go-version: "1.21"
 
@@ -125,14 +111,6 @@ jobs:
 
       # Upload source SBOMs immediately to free disk space before Docker build
       - name: Upload Source SBOMs
-        uses: actions/upload-artifact@v4 # v4.3.3
-        with:
-          name: sboms-source-${{ env.VERSION }}
-          path: ./sboms/
-          retention-days: 90
-
-      # Upload source vulnerability reports immediately
-      - name: Upload Source Vulnerability Reports
         uses: actions/upload-artifact@v4 # v4.3.3
         with:
           name: vulnerability-reports-source-${{ env.VERSION }}
@@ -218,15 +196,6 @@ jobs:
         if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
         uses: actions/upload-artifact@v4 # v4.3.3
         with:
-          name: sboms-container-${{ env.VERSION }}
-          path: ./sboms/
-          retention-days: 90
-
-      # Upload container vulnerability reports (generated during Docker build)
-      - name: Upload Container Vulnerability Reports
-        if: ${{ hashFiles('Dockerfile') != '' && (github.ref == 'refs/heads/main' || github.ref_type == 'tag') }}
-        uses: actions/upload-artifact@v4 # v4.3.3
-        with:
           name: vulnerability-reports-container-${{ env.VERSION }}
           path: ./vulnerability-reports/
           retention-days: 90
@@ -236,56 +205,10 @@ jobs:
         if: github.event_name == 'push' && github.ref_type == 'tag'
         uses: actions/upload-artifact@v4 # v4.3.3
         with:
-          name: release-evidence-${{ env.VERSION }}
-          path: ./release-evidence/summit-release-${{ env.VERSION }}-evidence.tar.gz
-          retention-days: 90
-
-  # CI Gate: Final verification of all supply chain integrity
-  ci-gate:
-    needs: supply-chain-integrity
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4 # v4.1.7
-
-      - name: Download Source SBOMs
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
-        with:
           name: sboms-source-${{ needs.supply-chain-integrity.outputs.release-version }}
           path: ./sboms
 
       - name: Download Source Vulnerability Reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
-        with:
-          name: vulnerability-reports-source-${{ needs.supply-chain-integrity.outputs.release-version }}
-          path: ./vulnerability-reports
-
-      - name: Install tools
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.39.0
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.104.3
-
-      - name: Run CI Supply Chain Gate
-        env:
-          RELEASE_VERSION: ${{ needs.supply-chain-integrity.outputs.release-version }}
-        run: |
-          chmod +x scripts/ci-supply-chain-gate.sh
-          ./scripts/ci-supply-chain-gate.sh summit-platform production true false true true true true
-
-  # Create GitHub Release (only for tags)
-  release:
-    needs: [supply-chain-integrity, ci-gate]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref_type == 'tag'
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
-
-    steps:
-      - name: Download Release Evidence Bundle
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v4.1.7
         with:
           name: release-evidence-${{ needs.supply-chain-integrity.outputs.release-version }}

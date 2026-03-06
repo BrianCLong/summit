@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package composer.policy_shadow
 
 # Combine sub-decisions and emit a consolidated verdict
@@ -5,23 +7,26 @@ package composer.policy_shadow
 verdict := {
   "mode": input.mode,
   "allow": allow_all,
-  "decisions": [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision],
-}
-{
+  "decisions": decisions,
+} if {
   # In shadow mode, we never block — but we keep per-policy decisions
   input.mode == "shadow"
   allow_all := true
-} else = verdict {
-  input.mode == "enforce"
-  some dec in [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
-  allow_all := all(decisions, func(x){ x.allow })
   decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+} else := v if {
+  input.mode == "enforce"
+  decisions := [data.composer.decision, data.composer.decision_dlp.decision, data.composer.decision_cmk.decision]
+  allow_all := all(decisions)
+  v := {
+    "mode": input.mode,
+    "allow": allow_all,
+    "decisions": decisions,
+  }
 }
 
 # Helper: all()
-all(arr, fn) = ok {
-  ok := true
-  some i
-  ok = ok & fn(arr[i])
+all(arr) if {
+  every x in arr {
+    x.allow
+  }
 }
-

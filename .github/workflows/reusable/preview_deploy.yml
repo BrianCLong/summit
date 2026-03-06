@@ -36,13 +36,6 @@ jobs:
       - name: Publish preview manifest
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: preview-manifest
-          path: preview/manifest.yaml
-          retention-days: 3
-
-      - name: Post preview summary
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-        with:
           script: |
             core.summary.addHeading('Preview Environment')
             core.summary.addRaw(`Namespace: ${process.env.PREVIEW_NAMESPACE}`)

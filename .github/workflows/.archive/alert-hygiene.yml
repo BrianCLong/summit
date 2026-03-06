@@ -21,19 +21,6 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          pip install -r tools/alertsync/requirements.txt
-
-      - name: Generate Prometheus Rules
-        run: |
-          python tools/alertsync/sync.py --catalog observability/alerts/catalog.yaml --output observability/alerts/generated
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
-        with:
           version: latest
 
       - name: Validate Alert Catalog Policy

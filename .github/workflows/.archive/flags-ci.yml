@@ -24,14 +24,6 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Validate catalog metadata
-        run: python tools/flagctl/flagctl.py lint
-      - name: Validate targets reference catalog
-        run: python tools/flagctl/validate_flags.py
-      - name: Conftest policy check
-        uses: instrumenta/conftest-action@v0.6.0
-        with:
           policy: .ci/policies
           files: flags/catalog.yaml
       - name: Upload audit log

@@ -53,39 +53,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
         with:
-          fetch-depth: 0
-          ref: ${{ inputs.commit_sha || 'main' }}
-
-      - name: Determine Parameters
-        id: params
-        run: |
-          # Determine commit SHA
-          if [[ -n "${{ inputs.commit_sha }}" ]]; then
-            COMMIT_SHA="${{ inputs.commit_sha }}"
-          else
-            COMMIT_SHA=$(git rev-parse HEAD)
-          fi
-          echo "commit_sha=${COMMIT_SHA}" >> $GITHUB_OUTPUT
-          echo "commit_short=${COMMIT_SHA:0:7}" >> $GITHUB_OUTPUT
-
-          # Determine version
-          if [[ -n "${{ inputs.base_version }}" ]]; then
-            VERSION="${{ inputs.base_version }}"
-          else
-            # Auto-detect from package.json or tags
-            VERSION=$(grep '"version"' package.json | head -n1 | sed 's/.*"version": "\(.*\)".*/\1/' | cut -d'-' -f1)
-          fi
-          echo "base_version=${VERSION}" >> $GITHUB_OUTPUT
-
-          echo "Commit SHA: ${COMMIT_SHA}"
-          echo "Base Version: ${VERSION}"
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20"
 

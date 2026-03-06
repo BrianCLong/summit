@@ -27,41 +27,6 @@ jobs:
             const projectNumber = parseInt(process.env.PROJECT_NUMBER, 10);
             const ownerType = (process.env.PROJECT_OWNER_TYPE || 'organization').toLowerCase();
             const owner = process.env.PROJECT_OWNER;
-
-            if (!projectNumber || !owner) {
-              throw new Error('PROJECT_NUMBER and PROJECT_OWNER must be set (use repository variables).');
-            }
-
-            const projectQuery = ownerType === 'user'
-              ? `query($login: String!, $number: Int!){ user(login: $login) { projectV2(number: $number) { id } } }`
-              : `query($login: String!, $number: Int!){ organization(login: $login) { projectV2(number: $number) { id } } }`;
-
-            const projectResponse = await github.graphql(projectQuery, { login: owner, number: projectNumber });
-            const project = ownerType === 'user' ? projectResponse.user?.projectV2 : projectResponse.organization?.projectV2;
-
-            if (!project?.id) {
-              throw new Error(`Project ${projectNumber} not found for ${ownerType} ${owner}.`);
-            }
-
-            await github.graphql(
-              `mutation($projectId: ID!, $contentId: ID!) { addProjectV2ItemById(input: { projectId: $projectId, contentId: $contentId }) { item { id } } }`,
-              { projectId: project.id, contentId: context.payload.issue.node_id }
-            );
-
-            core.info(`Added issue #${context.payload.issue.number} to project ${projectNumber}.`);
-
-  audit_project:
-    if: github.event_name != 'issues'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Audit SLA and archive done items
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.PROJECTS_TOKEN || secrets.GITHUB_TOKEN }}
-          script: |
-            const projectNumber = parseInt(process.env.PROJECT_NUMBER, 10);
-            const ownerType = (process.env.PROJECT_OWNER_TYPE || 'organization').toLowerCase();
-            const owner = process.env.PROJECT_OWNER;
             const doneAfterDays = parseInt(process.env.DONE_AFTER_DAYS, 10);
             const slaLabel = process.env.SLA_LABEL;
 

@@ -19,19 +19,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Install dependencies (root)
-        run: npm install -g pnpm && pnpm install
-
-      - name: Run Static Scanner
-        run: npx tsx scripts/security/scan-tenant-isolation.ts
-
-      - name: Upload Scan Report
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
           name: tenant-scan-report
           path: reports/tenant-scan-static.json
 

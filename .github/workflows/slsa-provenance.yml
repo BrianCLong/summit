@@ -14,11 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: 18.x
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+          version: 10
+      - uses: actions/setup-node@v4
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -26,44 +24,6 @@ jobs:
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.1.1
-        with:
-          cosign-release: 'v2.2.0'
-
-      - name: Install Syft
-        uses: anchore/sbom-action/download-syft@v0.14.3
-
-      - name: Build real artifacts
-        run: pnpm exec tsx scripts/release/build-artifacts.ts --out-dir dist
-
-      - name: Generate SBOMs
-        run: |
-          syft . -o spdx-json=sbom.spdx.json
-          syft . -o cyclonedx-json=sbom.cdx.json
-
-      - name: Sign SBOMs
-        run: |
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.spdx.json.sig sbom.spdx.json
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature sbom.cdx.json.sig sbom.cdx.json
-        env:
-          SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
-
-      - name: Record Provenance
-        run: |
-          python scripts/compliance/in-toto-record.py --step-name build \
-            --materials "./src,./sbom.spdx.json,./sbom.cdx.json" \
-            --products "./dist/*"
-
-      - name: Sign Provenance
-        run: |
-          cosign sign-blob --key env://SIGSTORE_KEY --output-signature attestation.json.sig attestation.json
-        env:
-          SIGSTORE_KEY: ${{ secrets.SIGSTORE_KEY }}
-
-      - name: Prepare subjects for SLSA
-        id: slsa-subjects
-        run: |
-          echo "hashes=$(base64 -w0 dist/checksums.txt)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@v4
         with:
           retention-days: 14
           name: summit-artifacts
@@ -86,11 +46,6 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v7
-        with:
-          name: summit-artifacts
-          path: dist
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v3
         with:
           subject-checksums: dist/checksums.txt
 

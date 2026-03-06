@@ -21,13 +21,6 @@ jobs:
       - name: Login to GHCR
         uses: docker/login-action@184bdaa
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Rollback deployment
-        uses: appleboy/ssh-action@029f5b4
-        with:
           host: ${{ secrets[format('{0}_SSH_HOST', github.event.inputs.environment)] }}
           username: ${{ secrets[format('{0}_SSH_USER', github.event.inputs.environment)] }}
           key: ${{ secrets[format('{0}_SSH_KEY', github.event.inputs.environment)] }}

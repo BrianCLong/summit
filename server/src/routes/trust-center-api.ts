@@ -305,7 +305,7 @@ router.get('/controls', async (req: Request, res: Response, next: NextFunction) 
  */
 router.get('/controls/:controlId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = req.params.controlId as string;
 
     const control = CONTROL_MAPPINGS[controlId];
 
@@ -325,7 +325,7 @@ router.get('/controls/:controlId', async (req: Request, res: Response, next: Nex
  */
 router.get('/controls/:controlId/evidence', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = req.params.controlId as string;
     const { startDate, endDate } = req.query;
     const tenantId = (req as any).tenantId || 'default';
 
@@ -410,7 +410,7 @@ router.post('/evidence/request', async (req: Request, res: Response, next: NextF
  */
 router.get('/evidence/request/:requestId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { requestId } = req.params;
+    const requestId = req.params.requestId as string;
     const pool = getPostgresPool();
 
     const { rows } = await pool.query(
@@ -446,7 +446,7 @@ router.get('/evidence/request/:requestId', async (req: Request, res: Response, n
  */
 router.get('/evidence/packages/:packageId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { packageId } = req.params;
+    const packageId = req.params.packageId as string;
     const tenantId = (req as any).tenantId || 'default';
     const pool = getPostgresPool();
 
@@ -533,7 +533,7 @@ router.post('/reports/generate', async (req: Request, res: Response, next: NextF
  */
 router.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { reportId } = req.params;
+    const reportId = req.params.reportId as string;
     const tenantId = (req as any).tenantId || 'default';
     const pool = getPostgresPool();
 
@@ -558,7 +558,7 @@ router.get('/reports/:reportId', async (req: Request, res: Response, next: NextF
  */
 router.get('/controls/:controlId/assess', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { controlId } = req.params;
+    const controlId = req.params.controlId as string;
     const tenantId = (req as any).tenantId || 'default';
 
     const assessment = await regulatoryPackService.assessControl(controlId, tenantId);

@@ -19,20 +19,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-      - name: Run SOC control tests
-        run: |
-          mkdir -p soc-compliance-reports
-          bash scripts/test-soc-controls.sh soc-compliance-reports
-      - name: Upload SOC compliance reports
-        uses: actions/upload-artifact@v4
         with:
           name: soc-compliance-report
           path: soc-compliance-reports

@@ -16,16 +16,6 @@ jobs:
       - name: Trivy FS Scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-
-      - name: Upload Trivy Results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
           sarif_file: 'trivy-results.sarif'
           category: trivy
 

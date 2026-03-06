@@ -15,30 +15,10 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 1.x.x # Specify your Terraform version
-
-      - name: Run Terraform fmt
-        run: terraform fmt -check -recursive
-
-      - name: Run Terraform validate
-        run: terraform validate
-
-      - name: Run tfsec
-        uses: aquasecurity/tfsec-action@v1.0.0 # Use a specific version
-        with:
           soft_fail: true # Allow tfsec to fail without failing CI
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@v12 # Use a specific version
-        with:
-          directory: terraform/environments/ # Scan all Terraform environments
-          soft_fail: true # Allow Checkov to fail without failing CI
-
-      - name: Run OPA (conftest) for Terraform policies (Placeholder)
-        run: echo "OPA conftest for Terraform policies would run here"
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

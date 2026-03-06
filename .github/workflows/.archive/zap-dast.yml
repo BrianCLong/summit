@@ -43,9 +43,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+          version: 10
         with:
           node-version: '20.11.x'
           cache: 'pnpm'
@@ -108,16 +106,6 @@ jobs:
         with:
           target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
           rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          issue_title: 'ZAP Baseline Scan Report'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          allow_issue_writing: true
-
-      - name: ZAP Full Scan
-        uses: zaproxy/action-full-scan@v0.10.0
-        with:
-          target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
-          rules_file_name: '.zap/rules.tsv'
           cmd_options: '-j -l WARN'
           issue_title: 'ZAP Full Scan Report'
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -125,17 +113,6 @@ jobs:
 
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
-        with:
-          target: ${{ github.event.inputs.target_url || 'http://localhost:3000' }}
-          format: openapi
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-j -l WARN'
-          issue_title: 'ZAP API Scan Report'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          allow_issue_writing: true
-
-      - name: Upload ZAP Results
-        uses: actions/upload-artifact@v4
         with:
           name: zap-scan-results
           path: |

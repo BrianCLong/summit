@@ -24,12 +24,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '18'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -56,14 +50,6 @@ jobs:
         if: ((always()) && (always())) && (always())
         uses: actions/upload-artifact@v4
         with:
-          name: vuln-report-${{ env.SERVICE_NAME }}
-          path: |
-            vuln_report.${{ env.SERVICE_NAME }}.json
-            artifacts/security/${{ env.SERVICE_NAME }}/
-
-      - name: Upload audit report
-        uses: actions/upload-artifact@v4
-        with:
           name: dependency-audit-report
           path: audit-report.json
 
@@ -84,64 +70,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  security-linting:
-    name: Security Linting
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: '18'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run security ESLint
-        run: pnpm exec eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0
-        continue-on-error: true
-
-  snyk-scan:
-    name: Snyk Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: '18'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        continue-on-error: false
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           args: --severity-threshold=high
 

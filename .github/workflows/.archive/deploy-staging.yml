@@ -66,62 +66,11 @@ jobs:
         id: deployment
         uses: actions/github-script@v7
         with:
-          script: |
-            const deployment = await github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.sha,
-              environment: 'staging',
-              description: 'Deploy version ${{ steps.version.outputs.version }} to staging',
-              auto_merge: false,
-              required_contexts: []
-            });
-            core.setOutput('deployment_id', deployment.data.id);
-            return deployment.data.id;
-
-  build-images:
-    name: Build & Push Docker Images
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service:
-          - name: api
-            dockerfile: deploy/docker/Dockerfile.api
-            context: .
-          - name: web
-            dockerfile: deploy/docker/Dockerfile.web
-            context: .
-          - name: worker
-            dockerfile: Dockerfile
-            context: .
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to Amazon ECR
-        id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build and push ${{ matrix.service.name }}
-        uses: docker/build-push-action@v5
         with:
           context: ${{ matrix.service.context }}
           file: ${{ matrix.service.dockerfile }}
@@ -161,16 +110,6 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig --name ${{ env.CLUSTER_NAME }} --region ${{ env.AWS_REGION }}
-
-      - name: Install Helm
-        uses: azure/setup-helm@v4
-        with:
           version: 'v3.13.0'
 
       - name: Ensure namespace exists
@@ -201,28 +140,6 @@ jobs:
 
       - name: Update deployment status (in progress)
         uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: ${{ needs.prepare.outputs.deployment-id }},
-              state: 'in_progress',
-              description: 'Deployment in progress',
-              environment_url: 'https://staging.intelgraph.io'
-            });
-
-  health-check:
-    name: Health Checks
-    needs: [prepare, deploy]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
@@ -256,45 +173,12 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               deployment_id: ${{ needs.prepare.outputs.deployment-id }},
-              state: 'success',
-              description: 'Deployment successful',
-              environment_url: 'https://staging.intelgraph.io'
-            });
-
-      - name: Update deployment status (failure)
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: ${{ needs.prepare.outputs.deployment-id }},
               state: 'failure',
               description: 'Deployment failed',
               environment_url: 'https://staging.intelgraph.io'
             });
 
       - name: Notify Slack (success)
-        uses: slackapi/slack-github-action@v1
-        with:
-          payload: |
-            {
-              "text": "✅ Staging deployment successful",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Staging Deployment Successful* ✅\n\n*Version:* `${{ needs.prepare.outputs.version }}`\n*Environment:* `staging`\n*URL:* https://staging.intelgraph.io"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-      - name: Notify Slack (failure)
         uses: slackapi/slack-github-action@v1
         with:
           payload: |

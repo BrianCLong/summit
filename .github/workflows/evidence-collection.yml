@@ -76,60 +76,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Install gitleaks
-        run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.1/gitleaks_8.18.1_linux_x64.tar.gz | tar xz
-          sudo mv gitleaks /usr/local/bin/
-
-      - name: Collect Evidence
-        id: collect
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          chmod +x scripts/release/generate_evidence_bundle.sh
-
-          CATEGORY="${{ inputs.category || 'all' }}"
-          ARGS="--category $CATEGORY"
-
-          if [[ "${{ inputs.update_index }}" == "true" ]]; then
-            ARGS="$ARGS --update-index"
-          fi
-
-          # Run collection
-          ./scripts/release/generate_evidence_bundle.sh $ARGS 2>&1 | tee collection.log
-
-          # Parse summary file for outputs
-          SUMMARY_FILE=$(ls artifacts/evidence/evidence-summary-*.md 2>/dev/null | tail -1)
-          if [[ -n "$SUMMARY_FILE" ]]; then
-            RUN_ID=$(basename "$SUMMARY_FILE" .md | sed 's/evidence-summary-//')
-            echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-
-            # Count results
-            PASSED=$(grep -c '✓' "$SUMMARY_FILE" || echo "0")
-            FAILED=$(grep -c '✗' "$SUMMARY_FILE" || echo "0")
-            echo "passed=$PASSED" >> $GITHUB_OUTPUT
-            echo "failed=$FAILED" >> $GITHUB_OUTPUT
-
-            if [[ "$FAILED" -eq 0 ]]; then
-              echo "status=PASS" >> $GITHUB_OUTPUT
-            else
-              echo "status=PARTIAL" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "status=FAIL" >> $GITHUB_OUTPUT
-            echo "run_id=unknown" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload Evidence Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4 # v6
-        with:
           name: evidence-${{ steps.collect.outputs.run_id || github.run_id }}
           path: |
             artifacts/evidence/
@@ -177,22 +123,6 @@ jobs:
     steps:
       - name: Download Evidence
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          name: evidence-${{ needs.collect.outputs.run_id || github.run_id }}
-          path: evidence/
-
-      - name: Create Release Evidence Archive
-        run: |
-          TAG="${GITHUB_REF#refs/tags/}"
-          ARCHIVE_NAME="evidence-${TAG}-${{ needs.collect.outputs.run_id }}.tar.gz"
-
-          tar -czvf "$ARCHIVE_NAME" evidence/
-
-          echo "Created archive: $ARCHIVE_NAME"
-          ls -la "$ARCHIVE_NAME"
-
-      - name: Upload Release Archive
-        uses: actions/upload-artifact@v4 # v6
         with:
           name: release-evidence-${{ github.ref_name }}
           path: evidence-*.tar.gz

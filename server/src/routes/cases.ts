@@ -86,7 +86,7 @@ caseRouter.get('/:id/overview', async (req, res) => {
       return res.status(401).json({ error: 'user_required' });
     }
 
-    const { id } = req.params;
+    const id = req.params.id as string;
 
     const reason = req.query.reason as string;
     const legalBasis = req.query.legalBasis as LegalBasis;
@@ -115,7 +115,7 @@ caseRouter.get('/:id/overview', async (req, res) => {
       return res.status(404).json({ error: 'case_not_found' });
     }
 
-    const overview = await overviewService.getOverview(id, tenantId);
+    const overview = await overviewService.getOverview(id as string, tenantId);
 
     routeLogger.info(
       {

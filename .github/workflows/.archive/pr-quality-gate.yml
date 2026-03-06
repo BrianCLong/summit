@@ -24,10 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Needed for some checks
-
-      - uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
@@ -35,17 +31,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -82,14 +67,6 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Enable Corepack
-        run: corepack enable
-
-      - uses: pnpm/action-setup@v2
-        with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
@@ -101,27 +78,6 @@ jobs:
       - name: Setup pnpm cache
         uses: actions/cache@v4
         with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
-
-      - name: Run Unit Tests
-        run: pnpm run test:jest
-
-  # Smoke Test Lane: The Golden Path
-  smoke-tests:
-    name: Smoke Tests (Golden Path)
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
@@ -129,17 +85,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@v2
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -183,14 +128,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
           args: >
             -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
             -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
@@ -199,25 +136,6 @@ jobs:
 
   compliance-drift-check:
     name: Compliance Drift Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dorny/paths-filter@v2
-        id: filter
-        with:
-          filters: |
-            governance:
-              - 'docs/governance/**'
-
-      - name: Fail if governance docs changed without acknowledgement
-        run: |
-          echo "ERROR: Changes detected in 'docs/governance/'. You must include the phrase 'compliance-impact-acknowledged' in your PR description to proceed."
-          exit 1
-
-  threat-model-drift-check:
-    name: Threat Model Drift Check
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

@@ -45,10 +45,6 @@ jobs:
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
         with:
-          version: ${{ env.PNPM_VERSION }}
-      
-      - uses: actions/setup-node@v4 # v4
-        with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       
@@ -57,61 +53,9 @@ jobs:
         id: cache
         uses: actions/cache@v4 # v4
         with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-            **/node_modules
-          key: pnpm-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            pnpm-${{ runner.os }}-
-      
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: pnpm install --frozen-lockfile
-  
-  # Matrix-driven test execution - replaces 5 separate workflows
-  test:
-    needs: setup
-    runs-on: ${{ matrix.os }}
-    name: 🧪 Test - ${{ matrix.suite }} (${{ matrix.os }})
-    
-    strategy:
-      fail-fast: false  # Continue other tests if one fails
-      matrix:
-        # Run different test suites in parallel
-        suite:
-          - unit
-          - integration
-          - e2e
-          - performance
-          - accessibility
-        # Optionally test on multiple OS
-        os:
-          - ubuntu-latest
-        # Can add node versions if needed
-        # node-version: [18, 20]
-        
-        # Conditional includes for specific combinations
-        include:
-          # Run e2e tests on macOS too
-          - suite: e2e
-            os: macos-latest
-    
-    steps:
-      - uses: actions/checkout@v4 # v4
-      
-      - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
           version: ${{ env.PNPM_VERSION }}
       
       - uses: actions/setup-node@v4 # v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      
-      # Restore cached dependencies from setup job
-      - name: Restore dependencies
-        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: |
             ~/.pnpm-store
@@ -128,13 +72,6 @@ jobs:
       - name: Upload coverage
         if: ((matrix.suite != 'e2e'  # Conditional step) && (always())) && (always())
         uses: codecov/codecov-action@b9fd7d16f6d7d1b5d2bec1a2887e65ceed900238 # v4
-        with:
-          files: ./coverage/coverage-final.json
-          flags: ${{ matrix.suite }}
-          name: ${{ matrix.suite }}-coverage
-      
-      - name: Upload test results
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: test-results-${{ matrix.suite }}-${{ matrix.os }}
           path: |
@@ -174,10 +111,6 @@ jobs:
       - uses: actions/checkout@v4 # v4
       
       - uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d # v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-      
-      - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'

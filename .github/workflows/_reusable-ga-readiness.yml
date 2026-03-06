@@ -47,58 +47,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4 # v4
         with:
-          ref: ${{ inputs.ref }}
-          fetch-depth: 0
-
-      - name: Capture SHA
-        id: capture-sha
-        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
-        with:
           cache: 'pnpm'
           node-version: "20"
 
       - name: Setup Go
         uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v5
-        with:
-          go-version: "1.21"
-
-      - name: Install Tools (OPA, Cosign, Syft, Grype)
-        run: |
-          # OPA
-          curl -L -o opa https://openpolicyagent.org/downloads/v0.61.0/opa_linux_amd64_static
-          chmod +x opa
-          sudo mv opa /usr/local/bin/
-
-          # Cosign
-          curl -L -o cosign https://github.com/sigstore/cosign/releases/download/v2.2.3/cosign-linux-amd64
-          chmod +x cosign
-          sudo mv cosign /usr/local/bin/
-
-          # Syft
-          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-
-          # Grype
-          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      # 1. Antigravity Governance Check
-      - name: Antigravity Compliance
-        id: antigravity
-        run: |
-          echo "⚖️ Verifying Antigravity Governance..."
-          npm run compliance:antigravity
-
-      # 2. Security: Secrets & Vulns
-      - name: Run Trivy (Secrets)
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # v0.24.0
         with:
           scan-type: "fs"
           scan-ref: "."

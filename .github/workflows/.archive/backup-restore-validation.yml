@@ -172,59 +172,6 @@ jobs:
       - name: Upload backup artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-backup-${{ steps.create_backup.outputs.backup_id }}
-          path: backups/${{ steps.create_backup.outputs.backup_id }}
-          retention-days: 7
-
-      - name: Backup creation summary
-        run: |
-          BACKUP_ID="${{ steps.create_backup.outputs.backup_id }}"
-          BACKUP_SIZE=$(du -sh backups/$BACKUP_ID | cut -f1)
-
-          echo "## Backup Creation Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backup ID**: \`$BACKUP_ID\`" >> $GITHUB_STEP_SUMMARY
-          echo "- **Backup Set**: ${{ steps.backup_set.outputs.backup_set }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Size**: $BACKUP_SIZE" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status**: ✅ Created Successfully" >> $GITHUB_STEP_SUMMARY
-
-  restore-validation:
-    name: Validate Backup Restore
-    needs: create-backup
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: intelgraph
-          POSTGRES_PASSWORD: devpassword
-          POSTGRES_DB: intelgraph_dev
-        ports:
-          - 5432:5432
-
-      neo4j:
-        image: neo4j:5-community
-        env:
-          NEO4J_AUTH: neo4j/local_dev_pw
-          NEO4J_PLUGINS: '["apoc"]'
-        ports:
-          - 7474:7474
-          - 7687:7687
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Download backup artifact
-        uses: actions/download-artifact@v4
-        with:
           pattern: test-backup-*
           path: backups/
 

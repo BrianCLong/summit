@@ -61,17 +61,6 @@ jobs:
       id: changes
       uses: dorny/paths-filter@4512585
       with:
-        filters: |
-          client: 
-            - 'client/**'
-          server: 
-            - 'server/**'
-          python: 
-            - 'python/**'
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
         node-version: ${{ matrix.node }}
         cache: 'npm'
         cache-dependency-path: |
@@ -142,27 +131,6 @@ jobs:
 
     - name: Run Python ML tests
       uses: actions/setup-python@824a62378795d7a63864050674956c050c8c0868
-      with: 
-        python-version: '3.12'
-      - name: Install Poetry
-        run: pip install poetry
-      - name: Install ML dependencies
-        run: |
-          if [ -f python/pyproject.toml ]; then poetry install --no-interaction --no-ansi; fi
-      - name: Run ML tests
-        run: |
-          if [ -f python/pyproject.toml ]; then poetry run pytest -q; fi
-
-    - name: Install Playwright browsers
-      working-directory: ./client
-      run: npx playwright install --with-deps
-
-    - name: Run E2E tests
-      working-directory: ./client
-      run: npm run test:e2e
-
-    - name: Upload server coverage reports
-      uses: codecov/codecov-action@94d76d3bc1
       with:
         directory: ./server/coverage
         flags: unittests
@@ -171,24 +139,11 @@ jobs:
     - name: Upload client coverage reports
       uses: codecov/codecov-action@94d76d3bc1
       with:
-        directory: ./client/coverage
-        flags: client-unittests
-        name: Client-Coverage
-
-    - name: Upload server JUnit report
-      uses: actions/upload-artifact@0b7f8f6
-      with:
         name: server-junit-report
         path: server/junit.xml
 
     - name: Upload client JUnit report
       uses: actions/upload-artifact@0b7f8f6
-      with:
-        name: client-junit-report
-        path: client/junit.xml
-
-    - name: Publish Test Report
-      uses: dorny/test-reporter@31a54ee
       with:
         name: Test Results
         path: 'server/junit.xml,client/junit.xml'

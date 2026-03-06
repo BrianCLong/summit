@@ -1,8 +1,8 @@
-import { Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import { experimentService } from './ExperimentService.js';
 import { Experiment } from './types.js';
 
-export const createExperiment = (req: Request, res: Response) => {
+export const createExperiment = (req: express.Request, res: express.Response) => {
     try {
         const experiment: Experiment = req.body;
         // Basic validation
@@ -17,20 +17,20 @@ export const createExperiment = (req: Request, res: Response) => {
     }
 };
 
-export const listExperiments = (req: Request, res: Response) => {
+export const listExperiments = (req: express.Request, res: express.Response) => {
     const experiments = experimentService.listExperiments();
     res.json(experiments);
 };
 
-export const stopExperiment = (req: Request, res: Response) => {
-    const { id } = req.params;
+export const stopExperiment = (req: express.Request, res: express.Response) => {
+    const id = req.params.id as string;
     experimentService.stopExperiment(id);
     res.status(200).json({ status: 'stopped' });
 };
 
 // Internal endpoint to check assignment (useful for debugging or client-side assignment via API)
-export const getAssignment = (req: Request, res: Response) => {
-    const { id } = req.params;
+export const getAssignment = (req: express.Request, res: express.Response) => {
+    const id = req.params.id as string;
     const user = (req as any).user; // Assumes auth middleware populated user
 
     if (!user) {
@@ -40,6 +40,6 @@ export const getAssignment = (req: Request, res: Response) => {
     const tenantId = user.tenant_id || 'default_tenant';
     const userId = user.sub || user.id;
 
-    const assignment = experimentService.assign(id, tenantId, userId);
+    const assignment = experimentService.assign(id as string, tenantId, userId);
     res.json(assignment);
 };

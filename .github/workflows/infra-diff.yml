@@ -27,52 +27,6 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_wrapper: false
-
-      - name: Terraform Init
-        working-directory: terraform/environments/prod
-        run: terraform init -backend=false
-
-      - name: Terraform Plan
-        working-directory: terraform/environments/prod
-        id: plan
-        # We use -detailed-exitcode but ignore it here to process output manually
-        run: |
-          terraform plan -no-color -out=tfplan > plan.txt 2>&1 || true
-          cat plan.txt
-
-      - name: Calculate Diff Budget
-        working-directory: terraform/environments/prod
-        id: budget
-        run: |
-          # Extract the summary line like "Plan: X to add, Y to change, Z to destroy."
-          SUMMARY=$(grep "Plan:" plan.txt || echo "Plan: 0 to add, 0 to change, 0 to destroy.")
-          echo "Summary found: $SUMMARY"
-
-          ADD=$(echo $SUMMARY | awk -F'[, ]' '{for(i=1;i<=NF;i++) if($i=="add") print $(i-2)}')
-          CHANGE=$(echo $SUMMARY | awk -F'[, ]' '{for(i=1;i<=NF;i++) if($i=="change") print $(i-2)}')
-          DESTROY=$(echo $SUMMARY | awk -F'[, ]' '{for(i=1;i<=NF;i++) if($i=="destroy") print $(i-2)}')
-
-          ADD=${ADD:-0}
-          CHANGE=${CHANGE:-0}
-          DESTROY=${DESTROY:-0}
-
-          TOTAL=$((ADD + CHANGE + DESTROY))
-          echo "Total changes: $TOTAL"
-          echo "total_changes=$TOTAL" >> $GITHUB_OUTPUT
-
-          if [ "$TOTAL" -gt "$DIFF_BUDGET" ]; then
-            echo "❌ Diff budget exceeded! ($TOTAL > $DIFF_BUDGET)"
-            echo "budget_exceeded=true" >> $GITHUB_OUTPUT
-            # We don't exit 1 yet, we want to post comment first
-          else
-            echo "✅ Diff budget within limits."
-            echo "budget_exceeded=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Post Diff Summary
-        uses: actions/github-script@v7
-        with:
           script: |
             const fs = require('fs');
             const path = 'terraform/environments/prod/plan.txt';

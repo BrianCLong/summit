@@ -1,11 +1,13 @@
+import future.keywords.in
+import future.keywords.if
 package composer.dlp
 
 # input.dlp_hits: array of findings from your scanners (post-redaction)
 # Example hit: { "severity": "high", "type": "PII_EMAIL", "path": "/logs/build-123.log" }
 
-block {
-  some h
-  input.dlp_hits[h].severity == "high"
+block if {
+  some h in input.dlp_hits
+  h.severity == "high"
 }
 
 # Shadow-able wrapper decision
@@ -17,4 +19,3 @@ decision := {
   "allow": not data.composer.dlp.block,
   "violations": input.dlp_hits,
 }
-

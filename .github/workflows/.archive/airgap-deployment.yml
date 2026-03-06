@@ -58,34 +58,11 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: ${{ env.TF_VERSION }}
-
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
-
-      - name: Terraform Init
-        run: terraform init -backend=false
-
-      - name: Terraform Validate
-        run: terraform validate
-
-      - name: TFSec Security Scan
-        uses: aquasecurity/tfsec-action@v1.0.3
-        with:
           working_directory: infra/airgap/terraform
           soft_fail: false
 
       - name: Checkov IaC Scan
         uses: bridgecrewio/checkov-action@v12
-        with:
-          directory: infra/airgap/terraform
-          framework: terraform
-          output_format: sarif
-          output_file_path: results.sarif
-
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        if: ((always()) && (always())) && (always())
         with:
           sarif_file: results.sarif
 
@@ -125,22 +102,6 @@ jobs:
 
       - name: Kubeval Validation
         uses: instrumenta/kubeval-action@master
-        with:
-          files: infra/airgap/kubernetes
-          ignore_missing_schemas: true
-
-  # ============================================================================
-  # Security Policy Tests
-  # ============================================================================
-  security-policy-tests:
-    name: Security Policy Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -224,44 +185,6 @@ jobs:
 
       - name: Setup Cosign
         uses: sigstore/cosign-installer@v3
-        with:
-          cosign-release: v${{ env.COSIGN_VERSION }}
-
-      - name: Generate Test Key Pair
-        run: |
-          cosign generate-key-pair --output-key-prefix=test
-          echo "Cosign key generation validated"
-
-      - name: Test Blob Signing
-        run: |
-          echo "test content" > /tmp/test-blob.txt
-          cosign sign-blob \
-            --key test.key \
-            --output-signature /tmp/test-blob.sig \
-            --tlog-upload=false \
-            /tmp/test-blob.txt
-
-          # Verify signature
-          cosign verify-blob \
-            --key test.pub \
-            --signature /tmp/test-blob.sig \
-            --insecure-ignore-tlog=true \
-            /tmp/test-blob.txt
-
-          echo "Cosign signing validated"
-
-  # ============================================================================
-  # Documentation Validation
-  # ============================================================================
-  docs-validate:
-    name: Validate Documentation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'

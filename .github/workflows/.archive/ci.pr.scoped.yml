@@ -14,18 +14,6 @@ jobs:
       - id: paths
         uses: dorny/paths-filter@v3
         with:
-          filters: |
-            ts:
-              - '**/*.ts'
-              - 'tsconfig*.json'
-              - 'package.json'
-  path-ci:
-    runs-on: ubuntu-latest
-    needs: detect
-    if: needs.detect.outputs.has_ts == 'true'
-    steps:
-      - uses: actions/checkout@v4
-        with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:

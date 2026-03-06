@@ -17,29 +17,6 @@ jobs:
       - uses: actions/checkout@v4
       - id: paths
         uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            app:
-              - 'apps/**'
-      - name: Decide
-        id: decide
-        run: |
-          run="false"
-          if [ "${{ steps.paths.outputs.app }}" = "true" ]; then run="true"; fi
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            labels=$(jq -r '.pull_request.labels[].name' <<< '${{ toJson(github.event) }}' || true)
-            if echo "$labels" | grep -q '^ui:smoke$'; then run="true"; fi
-          fi
-          echo "run=$run" >> $GITHUB_OUTPUT
-
-  smoke:
-    needs: detect
-    if: (needs.detect.outputs.run == 'true') && (failure())
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with: { node-version: '20.14.x', cache: 'pnpm' }
       - name: Install deps & browsers
         run: |

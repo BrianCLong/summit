@@ -25,52 +25,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
           version: 9.12.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build PVE
-        run: pnpm --filter @intelgraph/pve build
-
-      - name: Run PVE Tests
-        run: pnpm --filter @intelgraph/pve test:run
-
-      - name: Validate PR
-        if: (github.event_name == 'pull_request') && (github.event_name == 'pull_request')
-        run: |
-          node --loader ts-node/esm packages/pve/scripts/validate-pr.ts
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-
-  schema-drift:
-    name: Schema Drift Detection
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
           fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -97,11 +60,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'

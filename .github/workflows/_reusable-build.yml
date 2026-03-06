@@ -69,20 +69,11 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: ${{ inputs.node-version }}
-          cache: "pnpm"
-
-      - name: Get pnpm store path
-        id: pnpm-store
-        shell: bash
-        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4 # v5
         with:
           path: ${{ steps.pnpm-store.outputs.path }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -91,53 +82,6 @@ jobs:
 
       - name: Cache Turbo
         uses: actions/cache@v4 # v5
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-build-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-build-
-            ${{ runner.os }}-turbo-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build application
-        id: build-step
-        run: ${{ inputs.build-command }}
-        env:
-          NODE_ENV: production
-          CI: true
-
-      - name: Check build outputs
-        id: check-outputs
-        run: |
-          echo "### 📦 Build Outputs" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          if [ -d "dist" ]; then
-            size=$(du -sh dist | cut -f1)
-            echo "- \`dist/\`: $size" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -d "build" ]; then
-            size=$(du -sh build | cut -f1)
-            echo "- \`build/\`: $size" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -d ".next" ]; then
-            size=$(du -sh .next | cut -f1)
-            echo "- \`\.next/\`: $size" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -d "server/dist" ]; then
-            size=$(du -sh server/dist | cut -f1)
-            echo "- \`server/dist/\`: $size" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -d "client/dist" ]; then
-            size=$(du -sh client/dist | cut -f1)
-            echo "- \`client/dist/\`: $size" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: Upload build artifacts
-        if: inputs.upload-artifacts
-        uses: actions/upload-artifact@v4 # v6
         with:
           name: ${{ inputs.artifact-name }}-${{ github.run_number }}
           path: ${{ inputs.artifact-path }}

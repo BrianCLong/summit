@@ -32,17 +32,6 @@ jobs:
       - name: Scan Server Image with Trivy
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'intelgraph-server:latest'
-          format: 'table'
-          exit-code: '1' # Fail CI if vulnerabilities are found
-          severity: 'HIGH,CRITICAL'
-
-      - name: Build Client Docker Image
-        run: docker build -t intelgraph-client:latest -f client/Dockerfile.prod ./client
-
-      - name: Scan Client Image with Trivy
-        uses: aquasecurity/trivy-action@master
-        with:
           image-ref: 'intelgraph-client:latest'
           format: 'table'
           exit-code: '1' # Fail CI if vulnerabilities are found

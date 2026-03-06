@@ -44,23 +44,5 @@ jobs:
         uses: actions/download-artifact@v7
         with:
           name: security-metrics
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ steps.previous_run.outputs.run_id }}
-          path: previous-metrics
-        continue-on-error: true # It's okay if this is the first run or artifact expired
-
-      - name: Collect Metrics
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ALERT_THRESHOLD_CRITICAL: 0
-        run: |
-          # Grant execute permission just in case
-          node scripts/ci/collect_security_metrics.mjs
-
-      - name: Upload Metrics Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-metrics
           path: artifacts/security-metrics.json
           retention-days: 90

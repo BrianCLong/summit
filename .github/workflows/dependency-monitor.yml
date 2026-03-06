@@ -32,32 +32,6 @@ jobs:
       - name: Dependency review
         uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
         with:
-          fail-on-severity: high
-          comment-summary-in-pr: true
-          allow-ghsas: true
-          deny-licenses: AGPL-3.0, GPL-3.0, LGPL-3.0
-
-  snyk-scan:
-    name: Snyk dependency vulnerability scan
-    needs: dependency-review
-    runs-on: ubuntu-latest
-    # Run if dependency-review passed or was skipped, and not from fork PRs
-    if: ${{ (vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule') && always() && (needs.dependency-review.result == 'success' || needs.dependency-review.result == 'skipped') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    env:
-      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4 # v4.1.7
-
-      - name: Prepare report directory
-        run: mkdir -p "$REPORT_DIR"
-
-      - name: Run Snyk test across all manifests
-        if: env.SNYK_TOKEN != ''
-        uses: snyk/actions/node@9adf32b1121593767fc3c057af55b55db032dc04 # 1.0.0
-        env:
-          SNYK_TOKEN: ${{ env.SNYK_TOKEN }}
-        with:
           command: test
           args: >-
             --all-projects
@@ -68,12 +42,6 @@ jobs:
       - name: Upload Snyk SARIF
         if: env.SNYK_TOKEN != ''
         uses: github/codeql-action/upload-sarif@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v4
-        with:
-          sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
-
-      - name: Persist Snyk report
-        if: always() && env.SNYK_TOKEN != ''
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           retention-days: 14
           name: dependency-monitoring

@@ -34,18 +34,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Detect versions
-        id: versions
-        run: |
-          echo "node=$NODE_VERSION" >> "$GITHUB_OUTPUT"
-          echo "pnpm=$PNPM_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Detect changed files
-        id: changes
-        uses: dorny/paths-filter@v3
-        with:
           filters: |
             migrations:
               - 'server/src/migrations/**'
@@ -84,11 +72,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v3
-        with:
-          version: ${{ needs.setup.outputs.pnpm }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: ${{ needs.setup.outputs.node }}
           cache: 'pnpm'
@@ -165,11 +148,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: ${{ needs.setup.outputs.pnpm }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: ${{ needs.setup.outputs.node }}
           cache: 'pnpm'
 
@@ -207,73 +185,15 @@ jobs:
         if: ((((((((((always()) && (needs.setup.outputs.has-schema == 'true')) && (github.event_name == 'pull_request')) && (always())) && (github.ref == 'refs/heads/main')) && (always())) && (always() && (needs.lint-and-typecheck.result == 'success' || needs.lint-and-typecheck.result == 'skipped'))) && (always())) && (github.ref == 'refs/heads/main' && needs.build-and-attestation.result == 'success')) && (always())) && (always())
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ github.run_number }}
-          path: coverage/
-          retention-days: 7
-
-  schema-api-validation:
-    name: Schema & API Validation
-    runs-on: ubuntu-latest
-    needs: [setup, lint-and-typecheck]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
           version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ needs.setup.outputs.node }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: GraphQL schema check
-        run: |
-          echo "📋 Validating GraphQL schema..."
-          # Check for schema compatibility
-          pnpm run graphql:check || echo "GraphQL check not configured"
-
-      - name: Persisted queries validation
-        run: |
-          echo "💾 Validating persisted queries..."
-          pnpm run persist:queries || echo "Persisted queries not configured"
-
-      - name: API contract tests
-        run: |
-          echo "📝 Running API contract tests..."
-          pnpm run api:contract:test || echo "API contract tests not configured"
-
-      - name: Generate schema diff
-        run: |
-          echo "📊 Generating schema diff report..."
-          echo "## GraphQL Schema Changes" >> $GITHUB_STEP_SUMMARY
-          echo "Schema validation completed for PR" >> $GITHUB_STEP_SUMMARY
-
-  security-gates:
-    name: Security Gates
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
           fetch-depth: 0
 
       - name: SBOM Generation (Syft)
         uses: anchore/sbom-action@v0.17.1
-        with:
-          path: '.'
-          format: 'spdx-json'
-          output-file: 'sbom.spdx.json'
-
-      - name: Vulnerability Scan (Trivy)
-        uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -291,59 +211,10 @@ jobs:
       - name: Upload Security Results
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: 'trivy-results.sarif'
-          category: 'trivy-security-scan'
-
-      - name: SBOM attestation (Cosign)
-        run: |
-          echo "🔏 Creating SBOM attestation..."
-          # Install cosign
-          curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
-          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-          sudo chmod +x /usr/local/bin/cosign
-
-          # Create attestation (simplified for CI)
-          echo "Cosign attestation would be created here"
-
-      - name: Security summary
-        run: |
-          echo "# Security Scan Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Component | Status | Notes |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| SBOM | ✅ Generated | SPDX format |" >> $GITHUB_STEP_SUMMARY
-          echo "| Vulnerability Scan | ⚠️ See results | Trivy scan completed |" >> $GITHUB_STEP_SUMMARY
-          echo "| Secret Scan | ✅ Completed | Gitleaks scan |" >> $GITHUB_STEP_SUMMARY
-
-  build-and-attestation:
-    name: Build & Attestation
-    runs-on: ubuntu-latest
-    needs: [lint-and-typecheck, unit-integration-tests, security-gates]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
-        with:
           version: ${{ needs.setup.outputs.pnpm }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: ${{ needs.setup.outputs.node }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build application
-        run: |
-          echo "🔨 Building application..."
-          pnpm run build || echo "Build not configured or failed"
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts-${{ github.run_number }}
           path: |

@@ -9,12 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          lfs: true
-      - uses: dorny/paths-filter@v3
-        id: pkg
-        continue-on-error: true
-        with:
           initial-fetch-depth: 0
           filters: |
             manifests:
@@ -25,13 +19,6 @@ jobs:
         if: (((((steps.pkg.outputs.manifests != 'true') && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')) && (steps.pkg.outputs.manifests == 'true')
         run: echo "No manifest changes; skipping audit"
       - uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: 20
-      - run: npm install --ignore-scripts || true
-      - run: npm audit --audit-level=critical || true
-      - run: npm audit --json > audit.json || echo '{}' > audit.json
-      - uses: actions/upload-artifact@v4
         with:
           name: npm-audit
           path: audit.json

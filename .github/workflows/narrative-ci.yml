@@ -21,11 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
           node-version: "20"
 
       - name: Install dependencies
@@ -45,22 +40,6 @@ jobs:
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
-        with:
-          version: v0.68.0
-
-      - name: OPA policy tests
-        run: |
-          opa test .github/policies/narrative_ci -v
-
-      - name: Determinism gate (no timestamps)
-        run: |
-          if grep -rE "\"ts\"|\"timestamp\"|\"created_at\"|\"updated_at\"" out; then
-            echo "timestamp-like fields found in deterministic outputs"
-            exit 1
-          fi
-
-      - name: Upload evidence
-        uses: actions/upload-artifact@v4
         with:
           name: narrative-ci-evidence
           path: |

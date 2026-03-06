@@ -26,27 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Lint
-        run: pnpm run lint
-
-  unit:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - uses: actions/setup-node@v4
+          version: 10
         with:
           node-version: '20.11.x'
           cache: 'pnpm'
@@ -66,29 +46,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Contract tests
-        run: pnpm run test:policy
-        env:
-          CI: 'true'
-
-  playwright:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - uses: actions/setup-node@v4
+          version: 10
         with:
           node-version: '20.11.x'
           cache: 'pnpm'

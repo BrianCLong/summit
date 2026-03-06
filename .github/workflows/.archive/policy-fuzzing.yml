@@ -20,21 +20,5 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
-      - name: Run Policy Fuzzer (Standard)
-        run: |
-          cd policy-fuzzer
-          python main.py --iterations 50
-
-      - name: Run Policy Fuzzer (Aggressive)
-        if: (success()) && (always())
-        run: |
-          cd policy-fuzzer
-          python main.py --iterations 20 --enable-synonym-dodges --enable-field-aliasing
-
-      - name: Archive Fuzzing Reports
-        uses: actions/upload-artifact@v4
-        with:
           name: fuzzing-reports
           path: policy-fuzzer/reports/

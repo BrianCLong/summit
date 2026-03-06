@@ -39,11 +39,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
@@ -110,11 +105,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
@@ -141,99 +131,15 @@ jobs:
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
-          files: services/sandbox-gateway/coverage/lcov.info,services/sandbox-tenant-profile/coverage/lcov.info,services/datalab-service/coverage/lcov.info
-          flags: sandbox
-          fail_ci_if_error: false
-
-  integration-test:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: sandbox_test
-        ports:
-          - 5432:5432
-
-      neo4j:
-        image: neo4j:5-community
-        env:
-          NEO4J_AUTH: neo4j/testpassword
-        ports:
-          - 7687:7687
-          - 7474:7474
-
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build all
-        run: |
-          pnpm --filter @intelgraph/sandbox-tenant-profile build
-          pnpm --filter @intelgraph/datalab-service build
-          pnpm --filter @intelgraph/sandbox-gateway build
-
-      - name: Run integration tests
-        run: pnpm --filter @intelgraph/sandbox-gateway test:integration
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/sandbox_test
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: testpassword
-          REDIS_URL: redis://localhost:6379
-          NODE_ENV: test
-
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
           version: ${{ env.PNPM_VERSION }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Audit dependencies
-        run: pnpm audit --audit-level=high
-        continue-on-error: true
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: 'services/sandbox-gateway'
@@ -245,31 +151,6 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build:
-    name: Build Docker Image
-    runs-on: ubuntu-latest
-    needs: [lint, test, security-scan]
-    outputs:
-      image-digest: ${{ steps.build.outputs.digest }}
-      image-tag: ${{ steps.meta.outputs.version }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Container Registry
-        if: (((((github.event_name != 'pull_request') && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main')) && (always())
-        uses: docker/login-action@v3
-        with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -277,18 +158,6 @@ jobs:
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-
-      - name: Build and push
-        id: build
-        uses: docker/build-push-action@v5
         with:
           context: .
           file: services/sandbox-gateway/Dockerfile
@@ -303,13 +172,6 @@ jobs:
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
-        with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
-          artifact-name: sbom-sandbox-gateway.spdx.json
-          output-file: ./sbom-sandbox-gateway.spdx.json
-
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v3
         with:
           name: sbom
           path: ./sbom-sandbox-gateway.spdx.json
@@ -327,11 +189,6 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
-        with:
-          version: 'v3.13.0'
-
-      - name: Configure kubectl
-        uses: azure/k8s-set-context@v3
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.STAGING_KUBECONFIG }}
@@ -364,11 +221,6 @@ jobs:
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
-        with:
-          version: 'v3.13.0'
-
-      - name: Configure kubectl
-        uses: azure/k8s-set-context@v3
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.PRODUCTION_KUBECONFIG }}

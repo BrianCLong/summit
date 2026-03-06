@@ -1,3 +1,5 @@
+import future.keywords.in
+import future.keywords.if
 package composer.residency
 
 # Input contract (example):
@@ -9,7 +11,7 @@ package composer.residency
 
 default allow := true
 
-violation[msg] {
+violation[msg] if {
   not input.artifact.region in input.tenant.allowed_regions
   msg := {
     "code": "RESIDENCY_VIOLATION",
@@ -19,7 +21,7 @@ violation[msg] {
   }
 }
 
-allow {
+allow if {
   count(violation) == 0
 }
 
@@ -33,9 +35,7 @@ decision := {
   "mode": mode,
   "allow": allow_val,
   "violations": r.violation,
-}
-{
+} if {
   mode := input.mode
   allow_val := r.allow
 }
-

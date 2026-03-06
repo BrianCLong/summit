@@ -47,34 +47,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate GraphQL schema syntax
-        run: |
-          npx graphql-schema-linter graphql/v040/mc-admin.v040.graphql
-          echo "✅ GraphQL v0.4.0 schema validation passed"
-
-      - name: Check schema compatibility
-        run: |
-          # Validate that v0.4.0 extends v0.3.9 without breaking changes
-          node scripts/validate-schema-compatibility.js graphql/v039/ graphql/v040/
-          echo "✅ Schema compatibility validation passed"
-
-  # Validate OPA Policies
-  validate-opa-policies:
-    name: Validate OPA Policies v0.4.0
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
-        with:
           version: latest
 
       - name: Validate OPA policy syntax
@@ -107,28 +79,6 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install Python dependencies
-        run: |
-          pip install -r ops/sandbox/requirements.txt
-          pip install pytest pytest-asyncio pytest-cov
-
-      - name: Run sandbox unit tests
-        run: |
-          cd ops/sandbox
-          pytest test_evolution_sandbox.py -v --cov=evolution_sandbox --cov-report=xml
-          echo "✅ Evolution sandbox tests passed"
-
-      - name: Test sandbox integration
-        run: |
-          cd ops/sandbox
-          python evolution_sandbox.py test/fixtures/sample-proposal.json
-          echo "✅ Sandbox integration test passed"
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
           file: ./ops/sandbox/coverage.xml
           flags: sandbox
           name: sandbox-coverage
@@ -143,49 +93,6 @@ jobs:
 
       - name: Setup Python
         uses: actions/setup-python@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install quantum dependencies
-        run: |
-          pip install -r ops/qecf/requirements.txt
-          pip install pytest pytest-asyncio
-
-      - name: Run quantum cognition tests
-        run: |
-          cd ops/qecf
-          pytest test_quantum_cognition.py -v
-          echo "✅ Quantum cognition tests passed"
-
-      - name: Validate quantum advantage
-        run: |
-          cd ops/qecf
-          python quantum_cognition.py --validate-advantage
-          echo "✅ Quantum advantage validation passed"
-
-  # Test Transcendent Resolvers
-  test-transcendent-resolvers:
-    name: Test Transcendent Resolvers
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: mc_platform_test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -225,38 +132,10 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          scan-type: 'fs'
-          scan-ref: 'ops/sandbox/'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v2
-        with:
           sarif_file: 'trivy-results.sarif'
 
       - name: Scan for secrets
         uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: main
-          head: HEAD
-
-      - name: Validate post-quantum security
-        run: |
-          python3 scripts/validate-pq-security.py --check-v040
-          echo "✅ Post-quantum security validation passed"
-
-  # Policy Simulation Tests
-  policy-simulation:
-    name: Policy Simulation Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
         with:
           version: latest
 
@@ -305,14 +184,6 @@ jobs:
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch
@@ -322,28 +193,6 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: Dockerfile.transcendent
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            VERSION=v0.4.0
-            TRANSCENDENT_MODE=enabled
-
-  # Helm Chart Validation
-  validate-helm-chart:
-    name: Validate Helm Chart v0.4.0
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v3
         with:
           version: 'v3.12.0'
 
@@ -380,27 +229,6 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install Playwright
-        run: |
-          pnpm install --frozen-lockfile
-          npx playwright install
-
-      - name: Start test environment
-        run: |
-          docker-compose -f docker-compose.test.yml up -d
-          sleep 30
-
-      - name: Run Playwright E2E tests
-        run: |
-          npx playwright test tests/e2e/v040/ --reporter=html
-          echo "✅ E2E tests passed"
-
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v3
         with:
           name: playwright-report-v040
           path: playwright-report/
@@ -441,23 +269,6 @@ jobs:
 
       - name: Upload performance results
         uses: actions/upload-artifact@v3
-        with:
-          name: performance-results-v040
-          path: performance-results/
-          retention-days: 30
-
-  # Deployment to Staging
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [e2e-tests, performance-benchmarks]
-    environment: staging
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

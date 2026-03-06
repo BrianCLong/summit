@@ -24,11 +24,9 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - uses: pnpm/action-setup@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
         with:
           run_install: false
 
@@ -68,19 +66,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: client-playwright-artifacts
-          path: |
-            client/playwright-report
-            client/playwright-results
-            client/test-results
-
-      - name: Generate Persisted Queries Manifest
-        run: pnpm run persist:queries
-        working-directory: client
-
-      - name: Upload Persisted Queries Manifest
-        uses: actions/upload-artifact@v4
-        with:
           name: persisted-queries-manifest
           path: client/persisted-operations.json
 
@@ -90,23 +75,6 @@ jobs:
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
-          path: client
-          format: cyclonedx-json
-          output-file: client/sbom.json
-
-      - name: Generate Build Manifest
-        run: |
-          npx tsx scripts/generate-build-manifest.ts client:client/dist:client/sbom.json
-        env:
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          ARTIFACTS_DIR: artifacts
-
-      - name: Upload Supply Chain Artifacts
-        uses: actions/upload-artifact@v4
-        with:
           name: client-supply-chain-artifacts
           path: |
             client/sbom.json
@@ -114,12 +82,6 @@ jobs:
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
-        with:
-          name: client-coverage-report
-          path: client/coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
         with:
           files: ./client/coverage/lcov.info # Path to LCOV coverage report
           flags: client # Optional: add flags to distinguish reports

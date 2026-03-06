@@ -1,8 +1,10 @@
+import future.keywords.in
+import future.keywords.if
 
 package maestro.governance
 
 # Deny overly permissive IAM roles
-deny[msg] {
+deny[msg] if {
     input.asset_type == "aws_iam_role"
     some statement in input.attributes.policy.Statement
     statement.Effect == "Allow"

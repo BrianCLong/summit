@@ -256,7 +256,7 @@ router.post(
       return;
     }
 
-    const message = await gateway.sendMessage(req.params.id, content, {
+    const message = await gateway.sendMessage(req.params.id as string, content, {
       translate,
       targetLanguage,
     });
@@ -287,7 +287,7 @@ router.post(
   '/sessions/:id/complete',
   asyncHandler(async (req, res) => {
     const gateway = getCrossBorderGateway();
-    await gateway.completeSession(req.params.id);
+    await gateway.completeSession(req.params.id as string);
 
     res.json({ success: true });
   })
@@ -311,7 +311,7 @@ router.post(
     }
 
     const response = await gateway.initiateHandover(
-      req.params.id,
+      req.params.id as string,
       targetNation,
       reason
     );

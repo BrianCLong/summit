@@ -22,25 +22,6 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9' # Match the Python version in Dockerfile
-
-      - name: Install dependencies
-        run: pip install -r cognitive-targeting-engine/requirements.txt jsonschema
-
-      - name: Validate config.json schema
-        run: python cognitive-targeting-engine/scripts/validate_config.py
-
-      - name: Run unit tests
-        run: pytest cognitive-targeting-engine/tests/
-
-      - name: Build Docker image
-        run: |
-          docker build -t cognitive-targeting-engine:${{ github.sha }} -f cognitive-targeting-engine/Dockerfile cognitive-targeting-engine/
-          docker tag cognitive-targeting-engine:${{ github.sha }} cognitive-targeting-engine:latest
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 

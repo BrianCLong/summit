@@ -21,33 +21,11 @@ jobs:
     name: Unit Tests
     uses: ./.github/workflows/_reusable-test-suite.yml
     with:
-      test-type: unit
-      upload-coverage: true
-      timeout-minutes: 20
-
-  integration-tests:
-    name: Integration Tests
-    uses: ./.github/workflows/_reusable-test-suite.yml
-    with:
       test-type: integration
       timeout-minutes: 30
 
   lint-tests:
     name: Lint & Type Check
-    uses: ./.github/workflows/_reusable-test-suite.yml
-    with:
-      test-type: lint
-      timeout-minutes: 15
-
-  # Security scanning
-  security:
-    name: Security Scan
-    uses: ./.github/workflows/ci-security.yml
-
-  # Performance tests (conditional)
-  performance:
-    name: Performance Tests
-    if: ((${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}) && (${{ always() && (github.event_name == 'push' && github.ref == 'refs/heads/main') }})) && (always())
     uses: ./.github/workflows/_reusable-test-suite.yml
     with:
       test-type: perf

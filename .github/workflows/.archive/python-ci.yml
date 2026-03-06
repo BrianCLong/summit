@@ -12,14 +12,6 @@ jobs:
         id: pychanges
         continue-on-error: true
         with:
-          filters: |
-            python:
-              - 'python/**'
-      - name: Skip (no python changes)
-        if: (((((((steps.pychanges.outputs.python != 'true') && (steps.pychanges.outputs.python == 'true')) && (steps.pychanges.outputs.python == 'true')) && (steps.pychanges.outputs.python == 'true')) && (steps.dpchanges.outputs.datap != 'true')) && (steps.dpchanges.outputs.datap == 'true')) && (steps.dpchanges.outputs.datap == 'true')) && (steps.dpchanges.outputs.datap == 'true')
-        run: echo "No python/ changes"
-      - uses: actions/setup-python@v5
-        with:
           python-version: '3.11'
           cache: 'pip'
       - name: Install (editable with extras)
@@ -38,13 +30,6 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: dpchanges
         continue-on-error: true
-        with:
-          filters: |
-            datap:
-              - 'server/data-pipelines/**'
-      - name: Skip (no data-pipelines changes)
-        run: echo "No data-pipelines changes"
-      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: 'pip'

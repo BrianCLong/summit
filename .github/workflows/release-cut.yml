@@ -121,22 +121,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
         with:
-          ref: ${{ inputs.ref }}
-          fetch-depth: 0
-
-      - name: Get SHA
-        id: sha
-        run: |
-          SHA=$(git rev-parse HEAD)
-          echo "sha=${SHA}" >> $GITHUB_OUTPUT
-          echo "Commit SHA: ${SHA}"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
-        with:
           node-version-file: .nvmrc
 
       - name: Install Dependencies
@@ -193,14 +177,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
         with:
-          ref: ${{ inputs.ref }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v4
-        with:
           node-version-file: .nvmrc
 
       - name: Install Dependencies
@@ -222,42 +198,6 @@ jobs:
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4 # v4
-        with:
-          name: release-bundle-${{ inputs.release_tag }}
-          path: |
-            artifacts/release/${{ needs.verify-evidence.outputs.sha }}/
-            artifacts/evidence/go-live/${{ needs.verify-evidence.outputs.sha }}/
-          retention-days: 90
-
-      - name: Release Notes Summary
-        run: |
-          SHA="${{ needs.verify-evidence.outputs.sha }}"
-          TAG="${{ inputs.release_tag }}"
-
-          echo "### Release Notes Generated" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | \`${TAG}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| SHA | \`${SHA:0:8}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Artifact | \`release-bundle-${TAG}\` |" >> $GITHUB_STEP_SUMMARY
-
-  # ═══════════════════════════════════════════════════════════════════════════
-  # Create Release: Tag and publish GitHub Release
-  # ═══════════════════════════════════════════════════════════════════════════
-  create-release:
-    name: "Create GitHub Release"
-    runs-on: ubuntu-latest
-    needs: [validate, verify-evidence, generate-notes]
-    if: needs.generate-notes.outputs.notes_generated == 'true'
-
-    environment:
-      name: ${{ inputs.environment }}
-      url: ${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ inputs.release_tag }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4 # v4
         with:
           ref: ${{ inputs.ref }}
 

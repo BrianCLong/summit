@@ -38,50 +38,16 @@ jobs:
       - name: Validate OpenAPI specs
         uses: char0n/swagger-editor-validate@v1.3.2
         with:
-          definition-file: openapi/spec.yaml
-
-      - name: Validate Core API spec
-        uses: char0n/swagger-editor-validate@v1.3.2
-        with:
           definition-file: openapi/intelgraph-core-api.yaml
 
       - name: OpenAPI Lint
         uses: stoplightio/spectral-action@v0.8.11
-        with:
-          file_glob: 'openapi/*.yaml'
-
-  # Generate SDKs
-  generate-sdks:
-    runs-on: ubuntu-latest
-    name: Generate Client SDKs
-    needs: validate
-    if: ((((github.event_name == 'push' && github.ref == 'refs/heads/main') && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-sdk]'))) && (secrets.NPM_TOKEN != '')) && (secrets.PYPI_TOKEN != '')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '18'
 
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Generate TypeScript SDK
-        run: |
-          chmod +x ./scripts/generate-sdks.sh
-          ./scripts/generate-sdks.sh typescript
-
-      - name: Generate Python SDK
-        run: |
-          ./scripts/generate-sdks.sh python
-
-      - name: Upload SDK artifacts
-        uses: actions/upload-artifact@v4
         with:
           name: generated-sdks
           path: sdks/
@@ -102,36 +68,6 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '18'
-
-      - name: Install dependencies
-        run: |
-          npm install -g redoc-cli swagger-ui-dist
-
-      - name: Generate ReDoc HTML
-        run: |
-          mkdir -p docs/openapi
-          redoc-cli bundle openapi/spec.yaml -o docs/openapi/index.html --title "IntelGraph API Documentation"
-          redoc-cli bundle openapi/intelgraph-core-api.yaml -o docs/openapi/core-api.html --title "IntelGraph Core API Documentation"
-
-      - name: Copy OpenAPI specs
-        run: |
-          cp openapi/*.yaml docs/openapi/
-          cp openapi/*.json docs/openapi/ || true
-
-      - name: Convert Markdown to HTML
-        run: |
-          npm install -g markdown-to-html
-          markdown docs/API_INTEGRATION_GUIDE.md > docs/API_INTEGRATION_GUIDE.html || true
-          markdown docs/API_VERSIONING_STRATEGY.md > docs/API_VERSIONING_STRATEGY.html || true
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
           path: 'docs'
 
       - name: Deploy to GitHub Pages
@@ -149,12 +85,6 @@ jobs:
 
       - name: Download SDK artifacts
         uses: actions/download-artifact@v4
-        with:
-          name: generated-sdks
-          path: sdks/
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '18'

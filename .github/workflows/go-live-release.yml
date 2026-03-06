@@ -39,17 +39,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v4
         with:
-          fetch-depth: 0
-
-      - name: Capture SHA
-        id: capture-sha
-        run: echo "sha=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v4
+          version: 10
         with:
           node-version: "20"
 
@@ -59,63 +49,6 @@ jobs:
 
       - name: Setup pnpm cache
         uses: actions/cache@7f84b8d26f5a22fbf8a47afefabd3a8bb8c6fb4a # v4
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Generate Evidence Bundle
-        id: generate
-        env:
-          GA_VERIFY_MODE: "true"
-          SMOKE_URL: ${{ inputs.smoke_url }}
-          CI: "true"
-        run: |
-          pnpm evidence:go-live:gen || true
-          SHA=$(git rev-parse HEAD)
-          EVIDENCE_PATH="artifacts/evidence/go-live/${SHA}"
-          echo "evidence_path=${EVIDENCE_PATH}" >> $GITHUB_OUTPUT
-
-      - name: Generate SBOM
-        run: |
-          SHA=$(git rev-parse HEAD)
-          pnpm release:go-live:sbom "artifacts/evidence/go-live/${SHA}"
-
-      - name: Generate Provenance
-        run: |
-          SHA=$(git rev-parse HEAD)
-          pnpm release:go-live:provenance "artifacts/evidence/go-live/${SHA}"
-
-      - name: Generate Release Notes
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          SHA=$(git rev-parse HEAD)
-          pnpm release:go-live:notes "artifacts/evidence/go-live/${SHA}"
-
-      - name: Sign Evidence Bundle
-        env:
-          COSIGN_EXPERIMENTAL: "1"
-        run: |
-          SHA=$(git rev-parse HEAD)
-          pnpm release:go-live:sign "artifacts/evidence/go-live/${SHA}" || echo "Signing failed (non-fatal for dry-run)"
-
-      - name: Verify Evidence Bundle
-        id: verify
-        run: |
-          SHA=$(git rev-parse HEAD)
-          if pnpm evidence:go-live:verify "artifacts/evidence/go-live/${SHA}"; then
-            echo "passed=true" >> $GITHUB_OUTPUT
-          else
-            echo "passed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload Evidence Artifact
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v4
         with:
           name: go-live-evidence-${{ steps.capture-sha.outputs.sha }}
           path: artifacts/evidence/go-live/${{ steps.capture-sha.outputs.sha }}/

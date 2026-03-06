@@ -1,5 +1,5 @@
 
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { SSOService } from '../services/SSOService.js';
 import { tenantService } from '../services/TenantService.js';
@@ -44,8 +44,8 @@ const ssoConfigSchema = z.object({
  * @desc Configure SSO for a tenant
  * @access Private (Admin of Tenant or System Admin)
  */
-router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { id } = req.params;
+router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncHandler(async (req: express.Request, res: express.Response) => {
+  const id = req.params.id as string;
 
   // Strict Access Control:
   // Must be logged in (ensureAuthenticated handles this)
@@ -88,8 +88,8 @@ router.post('/tenants/:id/sso', ensureAuthenticated, rateLimitMiddleware, asyncH
  * @desc Initiate SSO login
  * @access Public
  */
-router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async (req: express.Request, res: express.Response) => {
+  const tenantId = req.params.tenantId as string;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   try {
@@ -115,8 +115,8 @@ router.get('/auth/sso/:tenantId/login', rateLimitMiddleware, asyncHandler(async 
  * @desc Handle SSO callback
  * @access Public
  */
-router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req: express.Request, res: express.Response) => {
+  const tenantId = req.params.tenantId as string;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   // CSRF / State Validation
@@ -162,8 +162,8 @@ router.post('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(as
 }));
 
 // Handle GET callback (OIDC implicit/code flow sometimes uses GET)
-router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req, res) => {
-  const { tenantId } = req.params;
+router.get('/auth/sso/:tenantId/callback', rateLimitMiddleware, asyncHandler(async (req: express.Request, res: express.Response) => {
+  const tenantId = req.params.tenantId as string;
   const baseUrl = `${req.protocol}://${req.get('host')}`;
 
   const stateCookie = req.cookies['sso_state'];

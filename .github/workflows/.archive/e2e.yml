@@ -16,25 +16,6 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          filters: |
-            server:
-              - 'server/**'
-              - 'client/**'
-              - 'docker-compose.yml'
-              - 'docs/realtime/**'
-              - '.github/workflows/e2e.yml'
-
-  test-golden-path:
-    name: test:golden-path
-    runs-on: ubuntu-latest
-    needs: changes
-    if: (((github.event_name == 'workflow_dispatch' || needs.changes.outputs.server == 'true') && (always())) && (always())) && (github.event_name == 'pull_request')
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node 18
-        uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: 18
 
@@ -91,16 +72,6 @@ jobs:
         id: upload-golden-path
         uses: actions/upload-artifact@v4
         with:
-          name: golden-path-recording
-          path: |
-            e2e/client/test-results/**/*.webm
-            e2e/client/playwright-report/**
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Comment PR with Golden Path video
-        uses: actions/github-script@v7
-        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const artifactId = '${{ steps.upload-golden-path.outputs.artifact-id }}';
@@ -136,45 +107,6 @@ jobs:
       matrix:
         layout: [cose-bilkent, dagre]
         sprite: ['0', '1']
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node 18
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: 18
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-      - name: Launch stack (server+client+deps)
-        run: |
-          docker compose -f docker-compose.yml up -d --build postgres neo4j redis
-          sleep 8
-          docker compose -f docker-compose.yml up -d --build server client
-          # wait for client and server
-          for i in {1..60}; do curl -fsS http://localhost:4000/health && break || sleep 2; done
-          for i in {1..60}; do curl -fsS http://localhost:3000 || sleep 2; done
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Run E2E tests (layout=${{ matrix.layout }}, sprite=${{ matrix.sprite }})
-        env:
-          LAYOUT: ${{ matrix.layout }}
-          SPRITE_LABELS: ${{ matrix.sprite }}
-        run: cd client && pnpm run test:e2e
-      - name: Dump compose logs (on failure)
-        run: docker compose -f docker-compose.yml logs --no-color server client | tail -n 300
-      - name: Tear down
-        run: docker compose -f docker-compose.yml down -v
-
-  e2e-analytics-bridge:
-    name: E2E (Analytics Bridge)
-    runs-on: ubuntu-latest
-    needs: changes
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' &&
-        (contains(toJson(github.event.pull_request.labels), 'server') || needs.changes.outputs.server == 'true'))
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

@@ -46,13 +46,6 @@ jobs:
       - name: Checkout PR
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref || github.ref }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20'
           cache: 'npm'
 
@@ -118,73 +111,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          fetch-depth: 0
-
-      - name: Setup rebase strategy
-        run: |
-          echo "🔄 Setting up auto-rebase strategy..."
-
-          # Configure git
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          # Fetch latest main
-          git fetch origin main
-
-          # Check if PR is behind main
-          BEHIND_COUNT=$(git rev-list --count HEAD..origin/main)
-          echo "📊 PR is $BEHIND_COUNT commits behind main"
-
-          if [ "$BEHIND_COUNT" -gt 0 ]; then
-            echo "🔄 Auto-rebase required"
-
-            # Attempt rebase
-            if git rebase origin/main; then
-              echo "✅ Auto-rebase successful"
-
-              # Push with force-with-lease
-              if git push --force-with-lease origin HEAD; then
-                echo "🚀 Rebase pushed successfully"
-              else
-                echo "❌ Failed to push rebase"
-                exit 1
-              fi
-            else
-              echo "❌ Auto-rebase failed - conflicts detected"
-              echo "Please resolve conflicts manually"
-
-              # Create comment on PR
-              gh pr comment ${{ github.event.pull_request.number }} \
-                --body "🔄 **Auto-rebase failed**
-
-              This PR has conflicts with the main branch that require manual resolution.
-
-              Please:
-              1. Checkout your branch locally
-              2. Run \`git fetch origin && git rebase origin/main\`
-              3. Resolve any conflicts
-              4. Push the resolved changes
-
-              The PR Green-Up Protocol will continue once conflicts are resolved."
-            fi
-          else
-            echo "✅ PR is up to date with main"
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  validation-gate:
-    name: Validation Gate
-    runs-on: ubuntu-latest
-    needs: [pr-systematic-fix]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'

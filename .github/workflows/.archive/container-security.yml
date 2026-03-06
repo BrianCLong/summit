@@ -25,17 +25,6 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: deploy/aws/Dockerfile
-          push: false
-          load: true
-          tags: intelgraph/maestro:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.20.0
-        with:
           image-ref: 'intelgraph/maestro:latest'
           format: 'table'
           exit-code: '1'

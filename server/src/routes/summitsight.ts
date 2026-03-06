@@ -27,8 +27,8 @@ router.get('/kpi', ensureAuthenticated, async (req: Request, res: Response) => {
 
 router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const tenantId = (req as any).user?.tenantId; // Assuming auth middleware attaches user
-    const status = await kpiEngine.getKPIStatus(req.params.id, tenantId);
+    const tenantId = (req as any).user?.tenantId as string; // Assuming auth middleware attaches user
+    const status = await kpiEngine.getKPIStatus(req.params.id as string, tenantId);
     res.json(status);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -37,8 +37,8 @@ router.get('/kpi/:id/status', ensureAuthenticated, async (req: Request, res: Res
 
 router.get('/kpi/:id/history', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const tenantId = (req as any).user?.tenantId;
-    const values = await dataService.getKPIValues(req.params.id, tenantId, 'daily', 30);
+    const tenantId = (req as any).user?.tenantId as string;
+    const values = await dataService.getKPIValues(req.params.id as string, tenantId, 'daily', 30);
     res.json(values);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });
@@ -104,8 +104,8 @@ router.get('/warroom', ensureAuthenticated, async (req: Request, res: Response) 
 
 router.get('/forecast/:kpiId', ensureAuthenticated, async (req: Request, res: Response) => {
   try {
-    const tenantId = (req as any).user?.tenantId;
-    const forecast = await forecastingEngine.generateForecast(req.params.kpiId, tenantId);
+    const tenantId = (req as any).user?.tenantId as string;
+    const forecast = await forecastingEngine.generateForecast(req.params.kpiId as string, tenantId);
     res.json(forecast);
   } catch (error: any) {
     res.status(500).json({ error: (error as Error).message });

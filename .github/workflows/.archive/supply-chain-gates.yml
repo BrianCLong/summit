@@ -28,15 +28,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Prepare directories
-        run: |
-          mkdir -p "$SBOM_DIR" "$SCAN_DIR" "$ATTEST_DIR" "$SIGN_DIR" "$PACKAGE_DIR"
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3.5.0
-        with:
           cosign-release: 'v2.4.0'
 
       - name: Build images/packages
@@ -91,11 +82,6 @@ jobs:
       - name: Upload Grype SARIF
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: ${{ steps.grype.outputs.sarif }}
-
-      - name: Upload OSV SARIF
-        uses: github/codeql-action/upload-sarif@v3
-        with:
           sarif_file: ${{ steps.osv.outputs.sarif }}
 
       - name: Diff against budget
@@ -128,15 +114,6 @@ jobs:
       - name: Upload SBOM and signatures
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-and-signatures
-          path: |
-            ${{ steps.sbom.outputs.sbom_path }}
-            ${{ env.SIGN_DIR }}/*
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-      - name: Upload scan results
-        uses: actions/upload-artifact@v4
-        with:
           name: vulnerability-reports
           path: |
             ${{ steps.grype.outputs.json }}
@@ -149,15 +126,6 @@ jobs:
 
       - name: Upload attestations
         uses: actions/upload-artifact@v4
-        with:
-          name: attestations
-          path: |
-            ${{ steps.attest.outputs.attestation }}
-          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
-
-      - name: Post PR summary
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');

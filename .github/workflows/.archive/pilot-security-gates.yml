@@ -24,12 +24,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@d667e5d86909ebc1e279160ce0caa49005a140a9
-        with:
 
 
       - name: Install dependencies (scoped)

@@ -24,12 +24,6 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
 
       - name: Install dependencies
         run: |
@@ -78,12 +72,6 @@ jobs:
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
         with:
 
       - name: Install dependencies
@@ -140,12 +128,6 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
 
       - name: Validate examples against schema
         run: |
@@ -174,12 +156,6 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -196,72 +172,6 @@ jobs:
 
       - name: Upload documentation artifact
         uses: actions/upload-artifact@v4
-        with:
-          name: api-documentation
-          path: docs/api/
-          retention-days: 30
-
-  check-documentation:
-    name: Check Documentation Quality
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check for undocumented endpoints
-        run: |
-          # Check that all routes have OpenAPI documentation
-          echo "Checking for undocumented REST endpoints..."
-
-          # Extract route definitions from code
-          ROUTES=$(grep -rh "Router\(\).*\.\(get\|post\|put\|patch\|delete\)" services/api/src/routes/ | wc -l || echo "0")
-          echo "Found $ROUTES route handlers in code"
-
-          # This is a basic check - in production, you'd parse the OpenAPI spec
-          # and compare against actual route definitions
-
-      - name: Validate markdown documentation
-        run: |
-          pnpm add -g markdownlint-cli
-
-          markdownlint 'docs/api/**/*.md' --config .markdownlint.json || {
-            echo "⚠️  Markdown linting failed"
-            exit 1
-          }
-
-      - name: Check for broken links in documentation
-        run: |
-          pnpm add -g markdown-link-check
-
-          find docs/api -name '*.md' -exec markdown-link-check {} \;
-
-  security-scan:
-    name: Security Scan API Spec
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run security checks on OpenAPI spec
-        run: |
-          pnpm add -g @42crunch/api-security-audit
-
-          # Scan for security issues in API design
-          42c audit openapi/spec.yaml || {
-            echo "⚠️  Security issues found in API specification"
-            echo "Review the security audit results above"
-            exit 1
-          }
-
-  changelog-check:
-    name: Check API Changelog
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -294,12 +204,6 @@ jobs:
     steps:
       - name: Download documentation artifact
         uses: actions/download-artifact@v4
-        with:
-          name: api-documentation
-          path: docs/api/
-
-      - name: Comment on PR
-        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');

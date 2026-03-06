@@ -168,87 +168,6 @@ jobs:
       - name: Alert on failure
         uses: slackapi/slack-github-action@v1
         with:
-          payload: |
-            {
-              "text": "🚨 Synthetic Monitor Alert",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "🚨 Synthetic Monitor Failed"
-                  }
-                },
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Endpoint:*\n${{ matrix.endpoint.name }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Status Code:*\n${{ steps.health-check.outputs.status_code }}"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Duration:*\n${{ steps.health-check.outputs.duration }}ms"
-                    },
-                    {
-                      "type": "mrkdwn",
-                      "text": "*Environment:*\nProduction"
-                    }
-                  ]
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*URL:* ${{ steps.set-url.outputs.BASE_URL }}${{ matrix.endpoint.path }}"
-                  }
-                },
-                {
-                  "type": "actions",
-                  "elements": [
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View Logs"
-                      },
-                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                    },
-                    {
-                      "type": "button",
-                      "text": {
-                        "type": "plain_text",
-                        "text": "View Grafana"
-                      },
-                      "url": "https://grafana.intelgraph.com/d/production-health"
-                    }
-                  ]
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_ALERTS }}
-
-  # =========================
-  # API Functional Tests (Every 5min)
-  # =========================
-  api-functional-tests:
-    name: API Functional Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    # Run every 5 minutes (skip 4 out of 5 runs)
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: '20'
 
@@ -268,35 +187,6 @@ jobs:
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
-        with:
-          name: synthetic-test-results
-          path: monitoring/synthetic/results/
-
-  # =========================
-  # Critical User Journeys (Every 10min)
-  # =========================
-  user-journey-tests:
-    name: Critical User Journey Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    # Run every 10 minutes
-
-    strategy:
-      matrix:
-        journey:
-          - name: create-investigation
-            description: Create investigation workflow
-          - name: search-and-visualize
-            description: Search and visualize entities
-          - name: export-data
-            description: Export investigation data
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
@@ -382,46 +272,6 @@ jobs:
       - name: Upload failure screenshot
         uses: actions/upload-artifact@v4
         with:
-          name: journey-failure-${{ matrix.journey.name }}
-          path: |
-            failure-screenshot.png
-            videos/
-
-      - name: Report journey metrics
-        run: |
-          SUCCESS=${{ steps.journey-test.outcome == 'success' && '1' || '0' }}
-
-          curl -X POST "https://api.datadoghq.com/api/v1/series" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ secrets.DATADOG_API_KEY }}" \
-            -d '{
-              "series": [{
-                "metric": "synthetic.journey.success",
-                "type": "gauge",
-                "points": [['"$(date +%s)"', '"$SUCCESS"']],
-                "tags": [
-                  "journey:${{ matrix.journey.name }}",
-                  "environment:production"
-                ]
-              }]
-            }'
-
-  # =========================
-  # Performance Benchmarks (Every 1 hour)
-  # =========================
-  performance-benchmarks:
-    name: Performance Benchmarks
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    # Run once per hour
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: '20'
 
@@ -448,37 +298,6 @@ jobs:
 
       - name: Upload results
         uses: actions/upload-artifact@v4
-        with:
-          name: performance-results
-          path: results.json
-
-  # =========================
-  # SSL Certificate Check (Daily)
-  # =========================
-  ssl-certificate-check:
-    name: SSL Certificate Check
-    runs-on: ubuntu-latest
-    # Run once per day
-
-    steps:
-      - name: Check SSL certificate
-        run: |
-          EXPIRY=$(echo | openssl s_client -servername intelgraph.com -connect intelgraph.com:443 2>/dev/null | openssl x509 -noout -enddate | cut -d= -f2)
-          EXPIRY_EPOCH=$(date -d "$EXPIRY" +%s)
-          NOW_EPOCH=$(date +%s)
-          DAYS_REMAINING=$(( ($EXPIRY_EPOCH - $NOW_EPOCH) / 86400 ))
-
-          echo "SSL Certificate expires in $DAYS_REMAINING days"
-
-          if [ $DAYS_REMAINING -lt 30 ]; then
-            echo "⚠️ SSL certificate expires soon!"
-            exit 1
-          fi
-
-          echo "✅ SSL certificate valid"
-
-      - name: Alert on expiry
-        uses: slackapi/slack-github-action@v1
         with:
           payload: |
             {

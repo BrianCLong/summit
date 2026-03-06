@@ -17,8 +17,9 @@ describe('SOC Control Verification', () => {
     const workflowPath = path.join(repoRoot, '.github/workflows/_reusable-slsa-build.yml');
     const workflowContent = fs.readFileSync(workflowPath, 'utf8');
 
-    expect(workflowContent).toMatch(/syft/);
-    expect(workflowContent).toMatch(/sbom\.cdx\.json/);
+    // Matches either Syft download or anchore/sbom-action
+    expect(workflowContent).toMatch(/sbom-action|syft/);
+    expect(workflowContent).toMatch(/sbom\.cyclonedx\.json|sbom\.spdx\.json/);
   });
 
   test('SOC2-CC-2.2: Artifact signing is configured', () => {
@@ -26,7 +27,7 @@ describe('SOC Control Verification', () => {
     const workflowContent = fs.readFileSync(workflowPath, 'utf8');
 
     expect(workflowContent).toMatch(/cosign sign/);
-    expect(workflowContent).toMatch(/cosign attest/);
+    expect(workflowContent).toMatch(/attest-build-provenance|attest-sbom/);
   });
 
   test('SOC2-CC-8.1: Branch protection policy prerequisite exists', () => {

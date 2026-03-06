@@ -130,7 +130,7 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const principal = (req as any).principal;
-      const { id } = req.params;
+      const id = req.params.id as string;
 
       const envelope = await userService.getUser(
         principal.tenantId,
@@ -219,7 +219,7 @@ router.patch(
 
       const envelope = await userService.updateUser(
         principal.tenantId,
-        id,
+        id as string,
         parseResult.data,
         principal.id
       );
@@ -254,7 +254,7 @@ router.delete(
 
       const envelope = await userService.deleteUser(
         principal.tenantId,
-        id,
+        id as string,
         principal.id,
         hardDelete
       );

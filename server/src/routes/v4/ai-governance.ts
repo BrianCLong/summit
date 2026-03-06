@@ -10,7 +10,7 @@
  * @version 4.0.0
  */
 
-import { Router, Request, Response, NextFunction } from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { requirePermission, requireRole } from '../../middleware/rbac.js';
 import logger from '../../utils/logger.js';
@@ -230,7 +230,7 @@ router.use(async (_req, _res, next) => {
 router.post(
   '/policy-suggestions',
   requirePermission('ai:suggestions:generate'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const tenantId = getTenantId(req);
       const context: SuggestionContext = {
@@ -287,17 +287,17 @@ router.post(
 router.get(
   '/policy-suggestions',
   requirePermission('ai:suggestions:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const tenantId = getTenantId(req);
       const status = req.query.status as PolicySuggestion['status'] | undefined;
-      const limit = parseInt(req.query.limit as string) || 20;
-      const offset = parseInt(req.query.offset as string) || 0;
+      const limit = parseInt(req.query.limit as string || '20') || 20;
+      const offset = parseInt(req.query.offset as string || '0') || 0;
 
       const result = await policySuggestionService!.listSuggestions(tenantId, {
         status,
-        limit,
-        offset,
+        limit: limit as any,
+        offset: offset as any,
       });
 
       res.json(wrapResponse(result, req));
@@ -330,7 +330,7 @@ router.get(
 router.get(
   '/policy-suggestions/:id',
   requirePermission('ai:suggestions:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const suggestion = await policySuggestionService!.getSuggestion(req.params.id);
 
@@ -387,7 +387,7 @@ router.get(
 router.post(
   '/policy-suggestions/:id/review',
   requirePermission('ai:suggestions:review'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const feedback: SuggestionFeedback = {
         reviewedBy: getUserId(req),
@@ -398,7 +398,7 @@ router.post(
       };
 
       const suggestion = await policySuggestionService!.reviewSuggestion(
-        req.params.id,
+        req.params.id as string,
         feedback
       );
 
@@ -436,9 +436,9 @@ router.post(
 router.post(
   '/policy-suggestions/:id/implement',
   requirePermission('ai:suggestions:implement'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
-      const result = await policySuggestionService!.implementSuggestion(req.params.id);
+      const result = await policySuggestionService!.implementSuggestion(req.params.id as string);
 
       logger.info({
         suggestionId: req.params.id,
@@ -468,7 +468,7 @@ router.post(
 router.get(
   '/policy-suggestions/statistics',
   requirePermission('ai:suggestions:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const tenantId = getTenantId(req);
       const statistics = await policySuggestionService!.getStatistics(tenantId);
@@ -521,7 +521,7 @@ router.get(
 router.post(
   '/verdict-explanations',
   requirePermission('ai:explanations:generate'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const verdict: GovernanceVerdict = req.body.verdict;
       const context: ExplanationContext = {
@@ -579,7 +579,7 @@ router.post(
 router.post(
   '/verdict-explanations/batch',
   requirePermission('ai:explanations:generate'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const verdicts: GovernanceVerdict[] = req.body.verdicts;
       const context: ExplanationContext = {
@@ -665,7 +665,7 @@ router.post(
 router.post(
   '/anomalies/detect',
   requirePermission('ai:anomalies:detect'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const tenantId = getTenantId(req);
       const scope: AnomalyDetectionScope = {
@@ -725,7 +725,7 @@ router.post(
 router.get(
   '/anomalies',
   requirePermission('ai:anomalies:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const tenantId = getTenantId(req);
       const now = new Date();
@@ -744,13 +744,13 @@ router.get(
 
       // Filter by status if provided
       const filteredAnomalies = req.query.status
-        ? anomalies.filter(a => a.status === req.query.status)
+        ? anomalies.filter(a => a.status === req.query.status as string)
         : anomalies;
 
       // Apply pagination
-      const offset = parseInt(req.query.offset as string) || 0;
-      const limit = parseInt(req.query.limit as string) || 20;
-      const paginated = filteredAnomalies.slice(offset, offset + limit);
+      const offsetVal = parseInt(req.query.offset as string || '0') || 0;
+      const limitVal = parseInt(req.query.limit as string || '20') || 20;
+      const paginated = filteredAnomalies.slice(offsetVal, offsetVal + limitVal);
 
       res.json(wrapResponse({
         anomalies: paginated,
@@ -785,7 +785,7 @@ router.get(
 router.get(
   '/anomalies/:id',
   requirePermission('ai:anomalies:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const anomaly = await anomalyService!.getAnomaly(req.params.id);
 
@@ -840,13 +840,13 @@ router.get(
 router.patch(
   '/anomalies/:id/status',
   requirePermission('ai:anomalies:update'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const status: AnomalyStatus = req.body.status;
       const notes: string = req.body.notes;
 
       const anomaly = await anomalyService!.updateAnomalyStatus(
-        req.params.id,
+        req.params.id as string,
         status,
         notes
       );
@@ -903,7 +903,7 @@ router.patch(
 router.post(
   '/anomalies/:id/resolve',
   requirePermission('ai:anomalies:resolve'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const resolution: AnomalyResolution = {
         resolvedBy: getUserId(req),
@@ -913,7 +913,7 @@ router.post(
         actionsTaken: req.body.actionsTaken || [],
       };
 
-      const anomaly = await anomalyService!.resolveAnomaly(req.params.id, resolution);
+      const anomaly = await anomalyService!.resolveAnomaly(req.params.id as string, resolution);
 
       logger.info({
         anomalyId: req.params.id,
@@ -954,7 +954,7 @@ router.post(
 router.get(
   '/anomalies/trends',
   requirePermission('ai:anomalies:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     try {
       const tenantId = getTenantId(req);
       const endDate = req.query.endDate
@@ -990,7 +990,51 @@ router.get(
  *       200:
  *         description: Service is healthy
  */
-router.get('/health', async (_req: Request, res: Response) => {
+/**
+ * @swagger
+ * /api/v4/ai/providers:
+ *   get:
+ *     summary: List available HSM providers
+ *     tags: [Zero-Trust - HSM]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: HSM providers
+ */
+router.get(
+  '/providers',
+  requirePermission('security:read'),
+  async (req: express.Request, res: express.Response) => {
+    const providers = [
+      {
+        id: 'software-hsm',
+        name: 'Software HSM (Development)',
+        type: 'software_hsm',
+        status: 'active',
+        fipsCompliant: false,
+      },
+      {
+        id: 'aws-cloudhsm',
+        name: 'AWS CloudHSM',
+        type: 'aws_cloudhsm',
+        status: process.env.AWS_HSM_ENABLED === 'true' ? 'active' : 'disabled',
+        fipsCompliant: true,
+      },
+      {
+        id: 'azure-managed-hsm',
+        name: 'Azure Managed HSM',
+        type: 'azure_managed_hsm',
+        status: process.env.AZURE_HSM_ENABLED === 'true' ? 'active' : 'disabled',
+        fipsCompliant: true,
+      },
+    ];
+
+    res.json(wrapResponse(providers, req));
+  }
+);
+
+router.get('/health', async (_req: express.Request, res: express.Response) => {
   try {
     const status = {
       status: 'healthy',

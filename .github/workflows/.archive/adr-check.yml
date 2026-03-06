@@ -42,12 +42,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Need full history to check changed files
-
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v46.0.1
-        with:
           files: |
             services/authz-gateway/**
             policy/**

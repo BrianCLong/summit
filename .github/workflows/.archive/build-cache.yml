@@ -30,44 +30,10 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          filters: |
-            packages:
-              - 'packages/**'
-            services:
-              - 'services/**'
-              - 'server/**'
-              - 'apps/**'
-            infra:
-              - 'infra/**'
-              - 'k8s/**'
-              - 'terraform/**'
-            docs:
-              - 'docs/**'
-              - '*.md'
-
-  # Install dependencies with aggressive caching
-  install:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
           key: pnpm-store-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -80,36 +46,10 @@ jobs:
       - name: Cache node_modules
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            services/*/node_modules
-            apps/*/node_modules
-            server/node_modules
-            client/node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-  # Build packages with Turbo remote caching
-  build-packages:
-    needs: [install, changes]
-    if: ((needs.changes.outputs.packages == 'true' || github.ref == 'refs/heads/main') && (needs.changes.outputs.services == 'true' || github.ref == 'refs/heads/main')) && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
 
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Restore node_modules
-        uses: actions/cache@v4
         with:
           path: |
             node_modules
@@ -122,17 +62,6 @@ jobs:
 
       - name: Cache Turbo
         uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
-
-      - name: Build packages
-        run: pnpm turbo run build --filter='./packages/*'
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
         with:
           name: packages-dist
           path: packages/*/dist
@@ -148,58 +77,17 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20'
           cache: 'pnpm'
 
       - name: Restore node_modules
         uses: actions/cache@v4
         with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            services/*/node_modules
-            apps/*/node_modules
-            server/node_modules
-            client/node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Download packages artifacts
-        uses: actions/download-artifact@v4
-        with:
           name: packages-dist
           path: packages
 
       - name: Cache Turbo
         uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: turbo-${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            turbo-${{ runner.os }}-
-
-      - name: Build services
-        run: pnpm turbo run build --filter='./services/*' --filter='./server' --filter='./apps/*'
-
-  # Build Docker images with layer caching
-  build-docker:
-    needs: [build-services]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -208,15 +96,6 @@ jobs:
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=sha,prefix=
-            type=ref,event=branch
-            type=ref,event=pr
-
-      - name: Build and push API image
-        uses: docker/build-push-action@v5
         with:
           context: .
           file: infra/docker/Dockerfile.optimized
@@ -240,27 +119,10 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20'
           cache: 'pnpm'
 
       - name: Restore node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            services/*/node_modules
-            apps/*/node_modules
-            server/node_modules
-            client/node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Cache TypeScript build info
         uses: actions/cache@v4
         with:
           path: |
@@ -282,23 +144,10 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20'
           cache: 'pnpm'
 
       - name: Restore node_modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Cache ESLint
         uses: actions/cache@v4
         with:
           path: .eslintcache
@@ -321,28 +170,11 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20'
           cache: 'pnpm'
 
       - name: Restore node_modules
         uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            services/*/node_modules
-            apps/*/node_modules
-            server/node_modules
-            client/node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('**/pnpm-lock.yaml') }}
-
-      - name: Download packages artifacts
-        uses: actions/download-artifact@v4
         with:
           name: packages-dist
           path: packages
@@ -352,20 +184,6 @@ jobs:
 
       - name: Upload coverage
         uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.shard }}
-          path: coverage
-          retention-days: 1
-
-  # Merge coverage from shards
-  coverage:
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download all coverage artifacts
-        uses: actions/download-artifact@v4
         with:
           pattern: coverage-*
           merge-multiple: true

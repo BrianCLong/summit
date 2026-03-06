@@ -6,31 +6,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          lfs: true
-      - uses: dorny/paths-filter@v3
-        id: changes
-        with:
           filters: |
             client:
               - 'client/**'
             server:
               - 'server/**'
       - uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: 20
-      - name: Install, Lint, Typecheck, and Build
-        if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
-        run: |
-          npm ci
-          npm run lint
-          npm run typecheck
-          npm run build
-  policies:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           lfs: true

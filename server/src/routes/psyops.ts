@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { DefensivePsyOpsService } from '../services/DefensivePsyOpsService.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
 
@@ -40,7 +40,7 @@ router.post('/scan', ensureAuthenticated, async (req, res) => {
 // Resolve threat
 router.post('/threats/:id/resolve', ensureAuthenticated, async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id as string;
     const { notes } = req.body;
     await psyOpsService.resolveThreat(id, notes || 'Resolved by user');
     res.json({ success: true });

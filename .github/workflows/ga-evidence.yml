@@ -33,14 +33,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: "20"
 
       - name: Install Dependencies
@@ -53,16 +45,6 @@ jobs:
 
       - name: Setup OPA
         uses: open-policy-agent/setup-opa@v2
-        with:
-          version: v0.61.0
-
-      - name: Generate Evidence Bundle
-        run: pnpm ga:evidence
-        env:
-          VERSION: ${{ github.event.inputs.version || '5.3.1' }}
-
-      - name: Upload Evidence Bundle
-        uses: actions/upload-artifact@v4
         with:
           name: ga-evidence-bundle-${{ github.event.inputs.version || '5.3.1' }}
           path: dist/evidence/ga-v*.zip

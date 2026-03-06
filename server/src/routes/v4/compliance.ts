@@ -10,7 +10,7 @@
  * @version 4.1.0
  */
 
-import { Router, Request, Response } from 'express';
+import express, { Router, Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import { requirePermission } from '../../middleware/rbac.js';
 import logger from '../../utils/logger.js';
@@ -103,15 +103,15 @@ const initializeServices = async () => {
 // Helper Functions
 // =============================================================================
 
-const getTenantId = (req: Request): string => {
-  return req.tenantId || req.user?.tenantId || 'default';
+const getTenantId = (req: express.Request): string => {
+  return (req as any).tenantId || (req as any).user?.tenantId || 'default';
 };
 
-const getUserId = (req: Request): string => {
-  return req.user?.id || req.user?.id || 'anonymous';
+const getUserId = (req: express.Request): string => {
+  return (req as any).user?.id || 'anonymous';
 };
 
-const wrapResponse = <T>(data: T, req: Request): DataEnvelope<T> => {
+const wrapResponse = <T>(data: T, req: express.Request): DataEnvelope<T> => {
   return {
     data,
     metadata: {
@@ -173,7 +173,7 @@ router.use(async (_req, _res, next) => {
 router.get(
   '/frameworks',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     const frameworks = [
       {
         ...HIPAA_FRAMEWORK,
@@ -187,7 +187,7 @@ router.get(
       },
     ];
 
-    res.json(wrapResponse(frameworks, req));
+    res.json(wrapResponse(frameworks, req as any));
   }
 );
 
@@ -219,7 +219,7 @@ router.get(
 router.get(
   '/hipaa/controls',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     let controls = [...ALL_HIPAA_CONTROLS];
 
     // Filter by category
@@ -237,7 +237,7 @@ router.get(
       controls,
       total: controls.length,
       categories: HIPAA_FRAMEWORK.categories,
-    }, req));
+    }, req as any));
   }
 );
 
@@ -264,8 +264,8 @@ router.get(
 router.get(
   '/hipaa/controls/:id',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
-    const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.params.id);
+  async (req: express.Request, res: express.Response) => {
+    const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.params.id as string);
 
     if (!control) {
       return res.status(404).json({
@@ -276,7 +276,7 @@ router.get(
       });
     }
 
-    res.json(wrapResponse(control, req));
+    res.json(wrapResponse(control, req as any));
   }
 );
 
@@ -295,12 +295,12 @@ router.get(
 router.get(
   '/hipaa/phi-identifiers',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     res.json(wrapResponse({
       identifiers: PHI_IDENTIFIERS,
       total: PHI_IDENTIFIERS.length,
       description: 'The 18 HIPAA-defined identifiers that constitute Protected Health Information (PHI)',
-    }, req));
+    }, req as any));
   }
 );
 
@@ -331,7 +331,7 @@ router.get(
 router.post(
   '/hipaa/assess',
   requirePermission('compliance:assess'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     const tenantId = getTenantId(req);
     const { categories } = req.body;
     const assessment = await hipaaService!.performAssessment(tenantId, { categories });
@@ -346,7 +346,7 @@ router.post(
       'HIPAA assessment completed'
     );
 
-    res.json(wrapResponse(assessment, req));
+    res.json(wrapResponse(assessment, req as any));
   }
 );
 
@@ -360,10 +360,10 @@ router.post(
 router.get(
   '/hipaa/history',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
-    const tenantId = getTenantId(req);
+  async (req: express.Request, res: express.Response) => {
+    const tenantId = getTenantId(req as any);
     const history = await hipaaService!.getAssessmentHistory(tenantId);
-    res.json(wrapResponse(history, req));
+    res.json(wrapResponse(history, req as any));
   }
 );
 
@@ -377,15 +377,14 @@ router.get(
 router.get(
   '/hipaa/assessments/:id',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
-    const assessment = await hipaaService!.getAssessment(req.params.id);
+  async (req: express.Request, res: express.Response) => {
+    const assessment = await hipaaService!.getAssessment(req.params.id as string);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
-    res.json(wrapResponse(assessment, req));
+    res.json(wrapResponse(assessment, req as any));
   }
 );
-
 
 /**
  * @swagger
@@ -423,7 +422,7 @@ router.get(
 router.post(
   '/hipaa/evidence',
   requirePermission('compliance:evidence:submit'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     const control = ALL_HIPAA_CONTROLS.find(c => c.id === req.body.controlId);
     if (!control) {
       return res.status(400).json({
@@ -454,7 +453,7 @@ router.post(
       submittedBy: evidence.collectedBy,
     }, 'HIPAA evidence submitted');
 
-    res.status(201).json(wrapResponse(evidence, req));
+    res.status(201).json(wrapResponse(evidence, req as any));
   }
 );
 
@@ -487,7 +486,7 @@ router.post(
 router.get(
   '/sox/controls',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     let controls = [...ALL_SOX_CONTROLS];
 
     // Filter by category
@@ -505,7 +504,7 @@ router.get(
       total: controls.length,
       categories: SOX_FRAMEWORK.categories,
       itgcDomains: ITGC_DOMAINS,
-    }, req));
+    }, req as any));
   }
 );
 
@@ -532,8 +531,8 @@ router.get(
 router.get(
   '/sox/controls/:id',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
-    const control = ALL_SOX_CONTROLS.find(c => c.id === req.params.id);
+  async (req: express.Request, res: express.Response) => {
+    const control = ALL_SOX_CONTROLS.find(c => c.id === req.params.id as string);
 
     if (!control) {
       return res.status(404).json({
@@ -544,7 +543,7 @@ router.get(
       });
     }
 
-    res.json(wrapResponse(control, req));
+    res.json(wrapResponse(control, req as any));
   }
 );
 
@@ -563,11 +562,11 @@ router.get(
 router.get(
   '/sox/itgc-domains',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     res.json(wrapResponse({
       domains: ITGC_DOMAINS,
       description: 'IT General Controls (ITGC) domains for SOX compliance',
-    }, req));
+    }, req as any));
   }
 );
 
@@ -599,10 +598,10 @@ router.get(
 router.post(
   '/sox/assess',
   requirePermission('compliance:assess'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     const tenantId = getTenantId(req);
     const assessment = await soxService!.performAssessment(tenantId, {
-      sections: req.body.sections as any[],
+      categories: req.body.sections as any[],
     });
 
     logger.info(
@@ -615,7 +614,7 @@ router.post(
       'SOX assessment completed'
     );
 
-    res.json(wrapResponse(assessment, req));
+    res.json(wrapResponse(assessment, req as any));
   }
 );
 
@@ -629,10 +628,10 @@ router.post(
 router.get(
   '/sox/history',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
-    const tenantId = getTenantId(req);
+  async (req: express.Request, res: express.Response) => {
+    const tenantId = getTenantId(req as any);
     const history = await soxService!.getAssessmentHistory(tenantId);
-    res.json(wrapResponse(history, req));
+    res.json(wrapResponse(history, req as any));
   }
 );
 
@@ -646,12 +645,12 @@ router.get(
 router.get(
   '/sox/assessments/:id',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
-    const assessment = await soxService!.getAssessment(req.params.id);
+  async (req: express.Request, res: express.Response) => {
+    const assessment = await soxService!.getAssessment(req.params.id as string);
     if (!assessment) {
       return res.status(404).json({ error: 'Assessment not found' });
     }
-    res.json(wrapResponse(assessment, req));
+    res.json(wrapResponse(assessment, req as any));
   }
 );
 
@@ -688,7 +687,7 @@ router.get(
 router.post(
   '/sox/evidence',
   requirePermission('compliance:evidence:submit'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     const control = ALL_SOX_CONTROLS.find(c => c.id === req.body.controlId);
     if (!control) {
       return res.status(400).json({
@@ -719,7 +718,7 @@ router.post(
       submittedBy: evidence.collectedBy,
     }, 'SOX evidence submitted');
 
-    res.status(201).json(wrapResponse(evidence, req));
+    res.status(201).json(wrapResponse(evidence, req as any));
   }
 );
 
@@ -753,7 +752,7 @@ router.post(
 router.get(
   '/mappings',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     // Return sample mappings between frameworks
     const mappings = [
       {
@@ -792,7 +791,7 @@ router.get(
     res.json(wrapResponse({
       mappings: filteredMappings,
       total: filteredMappings.length,
-    }, req));
+    }, req as any));
   }
 );
 
@@ -811,7 +810,7 @@ router.get(
 router.get(
   '/dashboard',
   requirePermission('compliance:read'),
-  async (req: Request, res: Response) => {
+  async (req: express.Request, res: express.Response) => {
     const tenantId = getTenantId(req);
     const hipaaLatest = await hipaaService!.getAssessmentHistory(tenantId);
     const soxLatest = await soxService!.getAssessmentHistory(tenantId);
@@ -872,7 +871,7 @@ router.get(
         .slice(0, 5),
     };
 
-    res.json(wrapResponse(dashboard, req));
+    res.json(wrapResponse(dashboard, req as any));
   }
 );
 
@@ -887,7 +886,7 @@ router.get(
  *       200:
  *         description: Service is healthy
  */
-router.get('/health', async (_req: Request, res: Response) => {
+router.get('/health', async (_req: express.Request, res: express.Response) => {
   res.json({
     status: 'healthy',
     frameworks: {

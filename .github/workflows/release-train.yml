@@ -53,11 +53,6 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
         with:
-          version: "9.12.0"
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
-        with:
           cache: "pnpm"
           node-version: "20"
 
@@ -72,15 +67,6 @@ jobs:
 
       - name: Upload Client Artifacts
         if: hashFiles('client/dist/**') != ''
-        uses: actions/upload-artifact@v4 # v6
-        with:
-          name: client-dist
-          path: client/dist
-          retention-days: 5
-          if-no-files-found: warn
-
-      - name: Upload Server Artifacts
-        if: hashFiles('server/dist/**') != ''
         uses: actions/upload-artifact@v4 # v6
         with:
           name: server-dist
@@ -121,11 +107,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4 # v4.1.0
-        with:
-          version: "9.12.0"
-
-      - name: Setup Node
-        uses: actions/setup-node@v4 # v6
         with:
           cache: "pnpm"
           node-version: "20"

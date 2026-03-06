@@ -77,12 +77,18 @@ export class HighRiskOperationService {
         // Record to Provenance Ledger
         await provenanceLedger.appendEntry({
             tenantId,
+            timestamp: new Date().toISOString(),
             actionType: 'HRO_REQUEST_CREATED',
             resourceType: 'HighRiskOperationRequest',
             resourceId: request.id,
             actorId,
             actorType: 'user',
-            payload: { request },
+            payload: {
+                mutationType: 'CREATE',
+                entityId: request.id,
+                entityType: 'HighRiskOperationRequest',
+                request
+            },
             metadata: {
                 operationType,
                 manifestHash: manifest.hash
@@ -110,12 +116,18 @@ export class HighRiskOperationService {
 
         await provenanceLedger.appendEntry({
             tenantId: request.tenantId,
+            timestamp: new Date().toISOString(),
             actionType: 'HRO_REQUEST_APPROVED',
             resourceType: 'HighRiskOperationRequest',
             resourceId: request.id,
             actorId: userId,
             actorType: 'user',
-            payload: { approval: { userId, role } },
+            payload: {
+                mutationType: 'UPDATE',
+                entityId: request.id,
+                entityType: 'HighRiskOperationRequest',
+                approval: { userId, role }
+            },
             metadata: {
                 currentStatus: request.status,
                 approvalCount: request.approvals.length,
@@ -137,10 +149,10 @@ export class HighRiskOperationService {
             throw new Error('Trust Intelligence Failure: Operation does not satisfy governance constraints');
         }
 
-        if (request.status !== HighRiskOpStatus.APPROVED && request.status !== HighRiskOpStatus.REQUESTED) {
+        if (request.status !== (HighRiskOpStatus.APPROVED as any) && request.status !== (HighRiskOpStatus.REQUESTED as any)) {
             // Note: REQUESTED might be okay if policy allows single-actor for some things, 
             // but here we expect APPROVED via dual-control.
-            if (request.status !== HighRiskOpStatus.APPROVED) {
+            if (request.status !== (HighRiskOpStatus.APPROVED as any)) {
                 throw new Error(`Execution denied: current status is ${request.status}`);
             }
         }
@@ -153,12 +165,18 @@ export class HighRiskOperationService {
 
         await provenanceLedger.appendEntry({
             tenantId: request.tenantId,
+            timestamp: new Date().toISOString(),
             actionType: 'HRO_EXECUTED',
             resourceType: 'HighRiskOperationRequest',
             resourceId: request.id,
             actorId: 'system',
             actorType: 'system',
-            payload: { execution: true },
+            payload: {
+                mutationType: 'UPDATE',
+                entityId: request.id,
+                entityType: 'HighRiskOperationRequest',
+                execution: true
+            },
             metadata: {
                 operationType: request.operationType,
                 executionTime: new Date()

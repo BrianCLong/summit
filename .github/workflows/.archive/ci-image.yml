@@ -16,20 +16,6 @@ jobs:
         id: changes
         uses: dorny/paths-filter@4512585
         with:
-          filters: |
-            client: 
-              - 'client/**'
-              - 'client/Dockerfile.prod'
-            server: 
-              - 'server/**'
-              - 'server/Dockerfile.prod'
-            dockerfile: 
-              - '**/Dockerfile*'
-
-      - name: Docker metadata
-        id: meta
-        uses: docker/metadata-action@902fa8e
-        with:
           images: |
             ghcr.io/${{ github.repository }}-server
             ghcr.io/${{ github.repository }}-client
@@ -45,14 +31,6 @@ jobs:
       - name: Login to GHCR
         uses: docker/login-action@184bdaa
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push server image
-        if: (((((steps.changes.outputs.server == 'true' || steps.changes.outputs.dockerfile == 'true') && (steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')) && (steps.changes.outputs.server == 'true' || steps.changes.outputs.client == 'true' || steps.changes.outputs.dockerfile == 'true')
-        uses: docker/build-push-action@v4 # No specific SHA found
-        with:
           context: ./server
           file: ./server/Dockerfile.prod # Assuming a production Dockerfile exists
           push: true
@@ -61,27 +39,12 @@ jobs:
       - name: Build and push client image
         uses: docker/build-push-action@v4 # No specific SHA found
         with:
-          context: ./client
-          file: ./client/Dockerfile.prod # Assuming a production Dockerfile exists
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-
-      - name: Run hadolint
-        uses: reviewdog/action-hadolint@fc7ee4a
-        with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           filter_mode: added
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0 # Using v0 as specific SHA not found for v0.1.0
-        with:
-          image: ghcr.io/${{ github.repository }}-server:${{ github.sha }}
-          format: spdx-json
-          output: server-sbom.spdx.json
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@0b7f8f6
         with:
           name: server-sbom
           path: server-sbom.spdx.json

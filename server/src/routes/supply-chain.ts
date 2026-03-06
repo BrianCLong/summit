@@ -21,7 +21,7 @@ const contractStore: Record<string, any> = {}; // vendorId -> ContractAnalysis
 /**
  * Vendor Routes
  */
-router.post('/vendors', async (req: Request, res: Response) => {
+router.post('/vendors', async (req: express.Request, res: express.Response) => {
   try {
     const vendor = await vendorService.createVendor(req.body);
     res.status(201).json(vendor);
@@ -30,13 +30,13 @@ router.post('/vendors', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/vendors/:id', async (req: Request, res: Response) => {
-  const vendor = await vendorService.getVendor(req.params.id);
+router.get('/vendors/:id', async (req: express.Request, res: express.Response) => {
+  const vendor = await vendorService.getVendor(req.params.id as string);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
   res.json(vendor);
 });
 
-router.get('/vendors', async (req: Request, res: Response) => {
+router.get('/vendors', async (req: express.Request, res: express.Response) => {
   const vendors = await vendorService.listVendors();
   res.json(vendors);
 });
@@ -44,8 +44,8 @@ router.get('/vendors', async (req: Request, res: Response) => {
 /**
  * SBOM Upload & Analysis
  */
-router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
-  const { id } = req.params;
+router.post('/vendors/:id/sbom', async (req: express.Request, res: express.Response) => {
+  const id = req.params.id as string;
   const { sbomJson, productName, version } = req.body;
 
   const vendor = await vendorService.getVendor(id);
@@ -68,8 +68,8 @@ router.post('/vendors/:id/sbom', async (req: Request, res: Response) => {
 /**
  * Contract Analysis
  */
-router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
-  const { id } = req.params;
+router.post('/vendors/:id/contract', async (req: express.Request, res: express.Response) => {
+  const id = req.params.id as string;
   const { contractText } = req.body;
 
   const vendor = await vendorService.getVendor(id);
@@ -87,8 +87,8 @@ router.post('/vendors/:id/contract', async (req: Request, res: Response) => {
 /**
  * Risk Assessment
  */
-router.get('/vendors/:id/risk', async (req: Request, res: Response) => {
-  const { id } = req.params;
+router.get('/vendors/:id/risk', async (req: express.Request, res: express.Response) => {
+  const id = req.params.id as string;
   const vendor = await vendorService.getVendor(id);
   if (!vendor) return res.status(404).json({ error: 'Vendor not found' });
 

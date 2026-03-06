@@ -23,31 +23,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Prepare perf directories
-        run: mkdir -p perf/reports perf/metrics
-
-      - name: Start application stack
-        run: |
-          if [ -f ops/docker-compose.ci.yml ]; then
-            docker compose -f ops/docker-compose.ci.yml up -d --wait
-          elif [ -f ops/docker-compose.yml ]; then
-            docker compose -f ops/docker-compose.yml up -d --wait
-          else
-            echo "No docker-compose definition found for CI" && exit 1
-          fi
-
-      - name: Wait for GraphQL API
-        run: ./scripts/wait-for.sh localhost:4000 90
-
-      - name: Execute k6 thresholds
-        uses: grafana/k6-action@e4714b734f2b0afaabeb7b4a69142745548ab9ec # v0.3.1
-        with:
           filename: perf/k6/graphql-slo.js
           flags: --summary-export perf/reports/k6-summary.json
         env:

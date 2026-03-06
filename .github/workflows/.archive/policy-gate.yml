@@ -17,24 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: trufflesecurity/trufflehog@v3
-        with: { path: '.', base: 'origin/main', head: '${{ github.sha }}' }
-
-  license-scan:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pilosus/action-pip-license-checker@v2
         with: { requirements: 'requirements.txt', fail: 'strong' }
       - uses: pilosus/action-licensefinder@v2
-        with: { decisions-file: 'doc/license-decisions.yml' }
-
-  npm-audit:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true
       - run: pnpm audit --json > audit-report.json || true
@@ -50,19 +38,6 @@ jobs:
       - name: Upload vulnerability artifacts
         if: always()
         uses: actions/upload-artifact@v4
-        with:
-          name: vuln-report-${{ env.SERVICE_NAME }}
-          path: |
-            vuln_report.${{ env.SERVICE_NAME }}.json
-            artifacts/security/${{ env.SERVICE_NAME }}/
-
-  opa-policy-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
         with:
           version: latest
 
@@ -95,12 +70,6 @@ jobs:
 
       - name: Download vulnerability report
         uses: actions/download-artifact@v4
-        with:
-          name: vuln-report-${{ env.SERVICE_NAME }}
-          path: security-artifacts
-
-      - name: Setup OPA
-        uses: open-policy-agent/setup-opa@v2
         with:
           version: latest
 

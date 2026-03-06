@@ -67,17 +67,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
-
-      - name: Run smoke test
-        id: smoke
-        continue-on-error: true
-        uses: grafana/k6-action@v0.3.1
-        with:
           filename: .github/k6/smoke.js
         env:
           UI_URL: ${{ steps.endpoints.outputs.ui_url }}
@@ -170,18 +159,6 @@ jobs:
       - name: Upload deploy verification artifact
         uses: actions/upload-artifact@v4
         with:
-          name: deploy-verification-${{ steps.target.outputs.target }}-${{ github.run_id }}
-          path: |
-            deploy_verification.json
-            synthetic-results.json
-            synthetic-latency-histogram.json
-          if-no-files-found: warn
-          retention-days: 14
-
-      - name: Locate release for deployment tag
-        id: release_tag
-        uses: actions/github-script@v7
-        with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const headSha = '${{ github.event.workflow_run.head_sha }}';
@@ -213,14 +190,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.release_tag.outputs.upload_url }}
-          asset_path: ./deploy_verification.json
-          asset_name: deploy_verification.json
-          asset_content_type: application/json
-
-      - name: Comment results on PR
-        uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |

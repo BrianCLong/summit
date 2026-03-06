@@ -70,40 +70,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
         with:
-          fetch-depth: 0 # Full history for tag detection
-
-      - name: Install Dependencies
-        run: |
-          # jq is pre-installed on ubuntu-latest
-          which jq || sudo apt-get install -y jq
-
-          # Install yq for YAML processing
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-
-      - name: Make Scripts Executable
-        run: |
-          chmod +x scripts/release/generate_release_train_dashboard.sh
-          chmod +x scripts/release/verify-green-for-tag.sh
-          chmod +x scripts/release/compute_base_for_commit.sh || true
-
-      - name: Generate Dashboard
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ARGS=""
-          if [[ "${{ inputs.skip_api }}" == "true" ]]; then
-            ARGS="${ARGS} --skip-api"
-          fi
-          if [[ "${{ inputs.verbose }}" == "true" ]]; then
-            ARGS="${ARGS} --verbose"
-          fi
-
-          ./scripts/release/generate_release_train_dashboard.sh ${ARGS}
-
-      - name: Upload Dashboard JSON
-        uses: actions/upload-artifact@v4 # v4
-        with:
           name: release-train-dashboard
           path: |
             artifacts/release-train/dashboard.json

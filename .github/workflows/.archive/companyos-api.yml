@@ -10,14 +10,5 @@ jobs:
     uses: ./.github/workflows/companyos-service-template.yml
     with:
       service: companyos-api
-      helm_chart: charts/companyos-api
-      job_label: companyos-api
-
-  sbom:
-    name: Attach SBOM
-    needs: companyos-api
-    uses: ./.github/workflows/reusable/sbom.yml
-    with:
-      service: companyos-api
       working-directory: companyos
     secrets: inherit

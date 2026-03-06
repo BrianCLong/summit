@@ -34,12 +34,9 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
         with:
           version: '9.12.0'
 
@@ -63,23 +60,6 @@ jobs:
       - name: ZAP Baseline Scan - Web
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'http://localhost:3000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          fail_action: true
-          allow_issue_writing: true
-          artifact_name: 'zap-web-baseline-report'
-
-      - name: Stop web application
-        if: (((always()) && (always())) && (always())) && (always())
-        run: |
-          if [ -f /tmp/web-app.pid ]; then
-            kill $(cat /tmp/web-app.pid) || true
-          fi
-
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
-        with:
           name: zap-web-report-${{ github.sha }}
           path: |
             zap-web-baseline-report.html
@@ -96,12 +76,9 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
         with:
           version: '9.12.0'
 
@@ -124,21 +101,6 @@ jobs:
 
       - name: ZAP Baseline Scan - Mobile
         uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'http://localhost:3001'
-          cmd_options: '-a -j -l WARN'
-          fail_action: true
-          allow_issue_writing: true
-          artifact_name: 'zap-mobile-baseline-report'
-
-      - name: Stop mobile interface
-        run: |
-          if [ -f /tmp/mobile-app.pid ]; then
-            kill $(cat /tmp/mobile-app.pid) || true
-          fi
-
-      - name: Upload ZAP Report
-        uses: actions/upload-artifact@v4
         with:
           name: zap-mobile-report-${{ github.sha }}
           path: |
@@ -178,12 +140,9 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
         with:
           version: '9.12.0'
 
@@ -205,22 +164,6 @@ jobs:
 
       - name: ZAP API Scan
         uses: zaproxy/action-api-scan@v0.7.0
-        with:
-          target: 'http://localhost:4000/graphql'
-          format: 'graphql'
-          cmd_options: '-a -j -l WARN'
-          fail_action: true
-          allow_issue_writing: true
-          artifact_name: 'zap-api-scan-report'
-
-      - name: Stop API server
-        run: |
-          if [ -f /tmp/api-server.pid ]; then
-            kill $(cat /tmp/api-server.pid) || true
-          fi
-
-      - name: Upload ZAP API Report
-        uses: actions/upload-artifact@v4
         with:
           name: zap-api-report-${{ github.sha }}
           path: |

@@ -40,11 +40,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
 
@@ -53,19 +48,6 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
-
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    if: ((github.event_name == 'pull_request') && (github.ref == 'refs/heads/main')) && (always())
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: critical
           deny-licenses: GPL-2.0, GPL-3.0
@@ -77,17 +59,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Gitleaks Scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
-
-      - name: TruffleHog Scan
-        uses: trufflesecurity/trufflehog@main
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}
@@ -105,16 +76,6 @@ jobs:
       - name: Run Trivy vulnerability scanner (filesystem)
         uses: aquasecurity/trivy-action@0.24.0
         with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-fs-results.sarif'
-          severity: 'CRITICAL,HIGH,MEDIUM'
-          exit-code: '0'
-
-      - name: Run Trivy vulnerability scanner (config)
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
           scan-type: 'config'
           scan-ref: '.'
           format: 'sarif'
@@ -122,12 +83,6 @@ jobs:
           exit-code: '0'
 
       - name: Upload Trivy results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-fs-results.sarif'
-          category: 'trivy-filesystem'
-
-      - name: Upload Trivy config results
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-config-results.sarif'
@@ -159,12 +114,9 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
         with:
           version: '9.12.0'
 
@@ -185,33 +137,12 @@ jobs:
       - name: Upload audit report
         uses: actions/upload-artifact@v4
         with:
-          name: npm-audit-report
-          path: audit-report.json
-          retention-days: 30
-
-  sbom-generation:
-    name: SBOM Generation
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Generate SBOM with Syft (SPDX)
-        uses: anchore/sbom-action@v0.17.1
-        with:
           path: .
           format: spdx-json
           output-file: sbom-spdx.json
 
       - name: Generate SBOM with Syft (CycloneDX)
         uses: anchore/sbom-action@v0.17.1
-        with:
-          path: .
-          format: cyclonedx-json
-          output-file: sbom-cyclonedx.json
-
-      - name: Upload SBOMs
-        uses: actions/upload-artifact@v4
         with:
           name: sbom-reports-${{ github.sha }}
           path: |

@@ -98,16 +98,6 @@ EOB
       - name: Upload security reports
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports
-          path: security-reports
-
-      - name: Create or update security issue
-        if: steps.summarize.outputs.has_findings == '1'
-        uses: actions/github-script@v7
-        env:
-          ISSUE_TITLE: ${{ steps.summarize.outputs.issue_title }}
-          ISSUE_BODY: ${{ steps.summarize.outputs.issue_body }}
-        with:
           script: |
             const core = require('@actions/core');
             const { github, context } = require('@actions/github');

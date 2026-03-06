@@ -30,8 +30,6 @@ jobs:
         ports: ['6379:6379']
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
         with: { node-version: '20.14.x', cache: 'pnpm' }
       - name: Enable corepack + pnpm
         run: |
@@ -41,11 +39,6 @@ jobs:
         run: pnpm i -w
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.8.6
-          terraform_wrapper: false
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
         with:
           version: v3.15.2 --frozen-lockfile=false
       - name: Codegen (GraphQL)

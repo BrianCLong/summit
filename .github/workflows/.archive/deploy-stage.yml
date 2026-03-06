@@ -22,41 +22,6 @@ jobs:
       - name: Download SBOM Artifacts
         uses: actions/download-artifact@v4
         with:
-          run-id: ${{ github.event.workflow_run.id }}
-          pattern: sbom-*
-          merge-multiple: true
-          path: sboms
-
-      - name: Determine image tag
-        id: image-tag
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            echo "tag=${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=${{ github.sha }}" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy
-
-      - name: 🔒 Vulnerability Gate (SBOM Scan)
-        run: |
-          echo "Scanning SBOMs for Critical/High vulnerabilities..."
-          # Scan each SBOM json file found
-          for sbom in sboms/*.spdx.json; do
-            echo "Scanning $sbom..."
-            trivy sbom "$sbom" --severity CRITICAL,HIGH --exit-code 1
-          done
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3
-        with:
           cosign-release: 'v2.2.4'
 
       - name: Sign and attach attestations

@@ -55,22 +55,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
           run_install: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-
-      - name: Cache pnpm store
-        uses: actions/cache@v4
         with:
           path: ~/.pnpm-store
           key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -78,31 +66,6 @@ jobs:
 
       - name: Cache Turbo
         uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: ${{ runner.os }}-turbo-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build workspace
-        run: pnpm build
-
-      - name: Run tests
-        run: pnpm test
-        continue-on-error: false
-
-      - name: Run linter
-        run: pnpm lint
-        continue-on-error: false
-
-      - name: Semantic Release
-        id: semantic
-        uses: cycjimmy/semantic-release-action@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           dry_run: ${{ inputs.dry_run || 'false' }}
           extra_plugins: |
@@ -155,13 +118,6 @@ jobs:
 
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
-        with:
-          name: release-bundle-${{ steps.semantic.outputs.new-release-version }}
-          path: summit-${{ steps.semantic.outputs.new-release-version }}.tgz
-          retention-days: 90
-
-      - name: Notify Slack
-        uses: slackapi/slack-github-action@v1
         with:
           payload: |
             {

@@ -102,26 +102,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           cache: 'pnpm'
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
         with:
           path: ${{ env.STORE_PATH }}
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -186,15 +171,6 @@ jobs:
       - name: Upload Oracle Report
         if: ((((always()) && (github.event_name == 'pull_request' && always())) && (steps.oracle.outcome == 'failure')) && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (steps.metrics.outputs.avg_latency != '')
         uses: actions/upload-artifact@v4
-        with:
-          name: graph-oracle-report
-          path: |
-            reports/graph-oracle-report.md
-            reports/graph-oracle-report.json
-          retention-days: 30
-
-      - name: Comment PR with Results
-        uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');

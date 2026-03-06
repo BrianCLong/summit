@@ -35,37 +35,6 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          role-session-name: GitHubActions-OIDC-Setup
-          aws-region: ${{ vars.AWS_REGION || 'us-west-2' }}
-
-      - name: Verify AWS OIDC Configuration
-        run: |
-          echo "🔐 Verifying AWS OIDC setup..."
-          aws sts get-caller-identity
-
-          # Test S3 access for Terraform state
-          aws s3 ls s3://intelgraph-terraform-state/ || echo "⚠️ Terraform state bucket not accessible"
-
-          # Test EKS access
-          aws eks describe-cluster --name intelgraph-${{ inputs.environment }} --region ${{ vars.AWS_REGION || 'us-west-2' }} || echo "⚠️ EKS cluster not found"
-
-      - name: Update kubeconfig
-        run: |
-          aws eks update-kubeconfig --region ${{ vars.AWS_REGION || 'us-west-2' }} --name intelgraph-${{ inputs.environment }}
-          kubectl cluster-info
-          kubectl get nodes
-
-  configure-oci-oidc:
-    runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup OCI CLI
-        uses: oracle-actions/configure-oci-cli@v1.0
-        with:
           user: ${{ secrets.OCI_USER_OCID }}
           fingerprint: ${{ secrets.OCI_FINGERPRINT }}
           tenancy: ${{ secrets.OCI_TENANCY_OCID }}

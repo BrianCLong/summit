@@ -76,13 +76,6 @@ jobs:
         if: ((env.SBOM_ENABLED == 'true') && (env.SIGN_ENABLED == 'true')) && (env.SIGN_ENABLED == 'true')
         uses: anchore/sbom-action@v0
         with:
-          image: oci-archive:build/image.tar
-          format: cyclonedx-json
-          output-file: build/sbom.cdx.json
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3.5.0
-        with:
           cosign-release: 'v2.4.1'
 
       - name: Keyless sign digest
@@ -99,27 +92,6 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        with:
-          name: pilot-stage-artifacts
-          path: |
-            build/image.tar
-            build/digest.txt
-            build/sbom.cdx.json
-            build/image.sig
-            build/image.pem
-          if-no-files-found: error
-
-  policy_gate:
-    name: OPA policy gate
-    runs-on: ubuntu-latest
-    needs: build_and_sign
-    continue-on-error: ${{ env.OPA_ENFORCE != 'true' }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install OPA
-        uses: open-policy-agent/setup-opa@v1
         with:
           version: v0.66.0
 
@@ -142,12 +114,6 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
-        with:
-          name: pilot-stage-artifacts
-          path: build
-
-      - name: Install cosign
-        uses: sigstore/cosign-installer@v3.5.0
         with:
           cosign-release: 'v2.4.1'
 
@@ -181,18 +147,6 @@ jobs:
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v4
-        with:
-          name: pilot-stage-artifacts
-          path: build
-
-      - name: Honor OIDC toggle
-        run: |
-          if [ "${OIDC_ENABLED}" != "true" ]; then
-            echo "OIDC_DISABLED: deploy skipped" && exit 0
-          fi
-
-      - name: Configure AWS credentials (OIDC only)
-        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_STAGE_ROLE_ARN }}
           role-session-name: pilot-hardening-stage

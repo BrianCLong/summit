@@ -27,10 +27,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          run_install: false
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+          version: 10
         with:
           cache: 'pnpm'
           node-version: '20.11.x'

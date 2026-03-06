@@ -90,7 +90,7 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Get a specific feature flag evaluation
-  router.get('/:flagKey', async (req: Request, res: Response) => {
+  router.get('/:flagKey', async (req: express.Request, res: express.Response) => {
     try {
       const { flagKey } = req.params;
 
@@ -102,8 +102,8 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
       };
 
       // Get the flag evaluation
-      const enabled = await deps.featureFlagService.isEnabled(flagKey, context);
-      const variant = await deps.featureFlagService.getVariant(flagKey, context);
+      const enabled = await deps.featureFlagService.isEnabled(flagKey as string, context);
+      const variant = await deps.featureFlagService.getVariant(flagKey as string, context);
 
       res.json({
         key: flagKey,
@@ -197,12 +197,12 @@ export const createFeatureFlagRouter = (deps: FeatureFlagApiDependencies): Route
   });
 
   // Get configuration values
-  router.get('/config/:key', async (req: Request, res: Response) => {
+  router.get('/config/:key', async (req: express.Request, res: express.Response) => {
     try {
       const { key } = req.params;
       const environment = req.query.env as string || process.env.NODE_ENV || 'development';
 
-      const value = await deps.configService.getConfig(key, environment);
+      const value = await deps.configService.getConfig(key as string, environment);
 
       res.json({
         key,

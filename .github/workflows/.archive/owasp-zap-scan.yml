@@ -41,11 +41,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20'
           cache: 'npm'
 
@@ -66,16 +61,6 @@ jobs:
       - name: ZAP Baseline Scan
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'http://localhost:4000'
-          rules_file_name: '.github/workflows/config/zap-rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          allow_issue_writing: true
-          fail_action: ${{ github.event_name == 'pull_request' }}
-          artifact_name: 'zap-baseline-report'
-
-      - name: Upload ZAP Baseline Report
-        uses: actions/upload-artifact@v4
-        with:
           name: zap-baseline-report
           path: |
             report_html.html
@@ -94,29 +79,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Build application
-        run: npm run build --if-present
-        continue-on-error: true
-
-      - name: Start test server
-        run: |
-          npm start &
-          sleep 30
-
-      - name: Generate OpenAPI spec
-        run: |
-          curl http://localhost:4000/api/docs/json > openapi.json || echo '{}' > openapi.json
-        continue-on-error: true
-
-      - name: ZAP API Scan
-        uses: zaproxy/action-api-scan@v0.7.0
-        with:
           target: 'http://localhost:4000'
           format: 'openapi'
           api_spec: 'openapi.json'
@@ -127,24 +89,6 @@ jobs:
 
       - name: Upload ZAP API Report
         uses: actions/upload-artifact@v4
-        with:
-          name: zap-api-report
-          path: |
-            report_html.html
-            report_json.json
-            report_md.md
-          retention-days: 30
-
-  zap-full-scan:
-    name: ZAP Full Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -164,16 +108,6 @@ jobs:
       - name: ZAP Full Scan
         uses: zaproxy/action-full-scan@v0.10.0
         with:
-          target: 'http://localhost:4000'
-          rules_file_name: '.github/workflows/config/zap-rules.tsv'
-          cmd_options: '-a -j -l WARN'
-          allow_issue_writing: true
-          fail_action: false
-          artifact_name: 'zap-full-report'
-
-      - name: Upload ZAP Full Report
-        uses: actions/upload-artifact@v4
-        with:
           name: zap-full-report
           path: |
             report_html.html
@@ -183,36 +117,6 @@ jobs:
 
       - name: Create issue if vulnerabilities found
         uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            let reportContent = 'ZAP Full Scan found security vulnerabilities.';
-
-            try {
-              const report = fs.readFileSync('report_md.md', 'utf8');
-              reportContent = report;
-            } catch (error) {
-              console.log('Could not read markdown report');
-            }
-
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: '🔐 OWASP ZAP Security Scan Found Vulnerabilities',
-              body: reportContent,
-              labels: ['security', 'owasp-zap', 'vulnerability']
-            });
-
-  graphql-security-scan:
-    name: GraphQL Security Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
@@ -260,22 +164,6 @@ jobs:
 
       - name: Upload GraphQL test results
         uses: actions/upload-artifact@v4
-        with:
-          name: graphql-security-tests
-          path: |
-            graphql-*.json
-          retention-days: 30
-
-  security-headers-check:
-    name: Security Headers Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'

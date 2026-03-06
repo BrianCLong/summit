@@ -16,23 +16,6 @@ jobs:
         with:
           cache: 'pnpm'
           node-version: '20'
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile=false
-      - name: Run Unit Tests
-        run: pnpm test
-
-  test-e2e:
-    needs: test-unit
-    runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.45.0-jammy # Includes browsers for Playwright & Cypress deps
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          cache: 'pnpm'
-          node-version: '20'
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile=false
@@ -55,17 +38,6 @@ jobs:
       - name: Upload Cypress Screenshots
         if: failure()
         uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-
-  performance-baseline:
-    needs: test-unit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
@@ -103,28 +75,6 @@ jobs:
       - name: Upload Metrics
         uses: actions/upload-artifact@v4
         with:
-          name: performance-metrics
-          path: metrics.json
-name: Golden Path CI/CD
-
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-jobs:
-  lint:
-    name: Lint Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
           node-version: 18
           cache: 'npm'
 
@@ -144,25 +94,6 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Unit Tests
-        run: npm run test
-
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -203,32 +134,6 @@ jobs:
 
       - name: Install Helm
         uses: azure/setup-helm@v3
-        with:
-          version: 'v3.11.1'
-
-      - name: Deploy Canary
-        env:
-          KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
-        run: |
-          echo "Deploying canary release..."
-          # helm upgrade --install summit-canary ./deploy/helm/summit-chart --namespace summit-canary --create-namespace --set environment=canary
-          echo "Canary deployment simulation complete."
-
-      - name: Run Canary Gates
-        run: |
-          chmod +x ./deploy/gates/*.sh
-          ./deploy/gates/health-check.sh
-          ./deploy/gates/security-baseline.sh
-          ./deploy/gates/smoke-test.sh
-
-  notify:
-    name: Notify
-    runs-on: ubuntu-latest
-    needs: [canary-deploy]
-    if: (always()) && (always())
-    steps:
-      - name: Slack Notification
-        uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took

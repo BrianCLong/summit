@@ -98,11 +98,6 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4 # v4
         with:
-          run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
           node-version: ${{ inputs.node-version }}
           cache: "pnpm"
           cache-dependency-path: ${{ inputs.cache-dependency-path }}
@@ -116,23 +111,6 @@ jobs:
       - name: Cache dependencies
         id: cache-pnpm
         uses: actions/cache@v4 # v5
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-            .next/cache
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Install dependencies
-        if: inputs.install-deps
-        working-directory: ${{ inputs.working-directory }}
-        run: pnpm install --frozen-lockfile
-
-      - name: Setup Python (optional)
-        if: inputs.python-version != ''
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6
         with:
           python-version: ${{ inputs.python-version }}
           cache: "pip"

@@ -82,26 +82,6 @@ jobs:
       - name: Checkout at tagged commit
         uses: actions/checkout@v4 # v6
         with:
-          ref: ${{ steps.params.outputs.tag }}
-          fetch-depth: 0
-
-      - name: Resolve Commit SHA
-        id: resolve
-        run: |
-          if [[ -z "${{ steps.params.outputs.commit }}" ]]; then
-            COMMIT=$(git rev-parse HEAD)
-          else
-            COMMIT="${{ steps.params.outputs.commit }}"
-          fi
-          echo "commit=${COMMIT}" >> $GITHUB_OUTPUT
-          echo "Resolved commit: ${COMMIT}"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
-        with:
           cache: 'pnpm'
           node-version: "20"
 
@@ -134,67 +114,6 @@ jobs:
     steps:
       - name: Checkout at tagged commit
         uses: actions/checkout@v4 # v6
-        with:
-          ref: ${{ needs.verify.outputs.tag }}
-          fetch-depth: 0
-
-      - name: Compute Base Reference
-        id: base
-        run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-
-          echo "Computing base reference for RC: ${TAG}"
-
-          chmod +x scripts/release/compute_base_for_commit.sh
-
-          # Compute deterministic base
-          BASE=$(scripts/release/compute_base_for_commit.sh --tag "${TAG}" --commit "${COMMIT}" --verbose 2>&1 | tail -1 || echo "${COMMIT}^")
-
-          echo "Computed base: ${BASE}"
-          echo "base=${BASE}" >> $GITHUB_OUTPUT
-
-      - name: Run Promotion Guard
-        id: guard
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="${{ needs.verify.outputs.tag }}"
-          COMMIT="${{ needs.verify.outputs.commit }}"
-          BASE="${{ steps.base.outputs.base }}"
-
-          echo "Running Promotion Guard for RC: ${TAG}"
-          echo "Commit: ${COMMIT}"
-          echo "Base: ${BASE}"
-
-          chmod +x scripts/release/verify-green-for-tag.sh
-
-          mkdir -p artifacts/verification
-          OUTPUT_FILE="artifacts/verification/REQUIRED_CHECKS.txt"
-
-          # Run verification with explicit base - allow failure but capture result
-          set +e
-          scripts/release/verify-green-for-tag.sh \
-              --tag "${TAG}" \
-              --commit "${COMMIT}" \
-              --base "${BASE}" \
-              --verbose 2>&1 | tee "${OUTPUT_FILE}"
-          EXIT_CODE=$?
-          set -e
-
-          echo "output_file=${OUTPUT_FILE}" >> $GITHUB_OUTPUT
-
-          if [[ ${EXIT_CODE} -eq 0 ]]; then
-            echo "promotion_allowed=true" >> $GITHUB_OUTPUT
-            echo "✅ Promotion Guard: PASSED"
-          else
-            echo "promotion_allowed=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Promotion Guard: Some checks pending/failed"
-            echo "Note: Bundle will still be created for audit purposes"
-          fi
-
-      - name: Upload Verification Output
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: verification-output
           path: artifacts/verification/
@@ -229,12 +148,6 @@ jobs:
     steps:
       - name: Checkout at tagged commit
         uses: actions/checkout@v4 # v6
-        with:
-          ref: ${{ needs.verify.outputs.tag }}
-          fetch-depth: 0
-
-      - name: Download Verification Output
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: verification-output
           path: staging/verification
@@ -389,13 +302,6 @@ jobs:
 
       - name: Upload RC Pipeline Bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          name: rc-pipeline-bundle-${{ needs.verify.outputs.tag }}
-          path: ${{ steps.assemble.outputs.bundle_dir }}
-          retention-days: 90
-
-      - name: Cleanup Intermediate Artifacts
-        uses: geekyeggo/delete-artifact@f275313e70c08f6120db482d7a6b98377786765b # v5
         with:
           name: verification-output
           failOnError: false

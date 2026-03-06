@@ -51,12 +51,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
           version: 9.12.0
 
       - name: Install dependencies
@@ -71,97 +65,11 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: unit-test-results
-          path: test-results/
-          retention-days: 7
-
-  # Integration tests - require services
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: unit-tests
-
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: intelgraph_test
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-      neo4j:
-        image: neo4j:5-community
-        env:
-          NEO4J_AUTH: neo4j/test_password
-          NEO4J_PLUGINS: '["apoc"]'
-        options: >-
-          --health-cmd "cypher-shell -u neo4j -p test_password 'RETURN 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
-        ports:
-          - 7474:7474
-          - 7687:7687
-
-      redis:
-        image: redis:7-alpine
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 6379:6379
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20.x'
           cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Wait for services
-        run: |
-          echo "Waiting for services to be ready..."
-          sleep 15
-          # Verify PostgreSQL
-          pg_isready -h localhost -p 5432 -U test_user -d intelgraph_test || exit 1
-          # Verify Redis
-          redis-cli -h localhost -p 6379 ping || exit 1
-          echo "All services are ready"
-
-      - name: Run integration tests
-        run: pnpm test:jest --testPathPattern='integration' --runInBand
-        env:
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/intelgraph_test
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USERNAME: neo4j
-          NEO4J_PASSWORD: test_password
-          REDIS_URL: redis://localhost:6379
-          JWT_SECRET: test_jwt_secret_for_ci
-          JEST_JUNIT_OUTPUT_DIR: ./test-results
-          JEST_JUNIT_OUTPUT_NAME: integration-tests.xml
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
         with:
           name: integration-test-results
           path: test-results/
@@ -180,12 +88,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
           version: 9.12.0
 
       - name: Install dependencies
@@ -200,42 +102,11 @@ jobs:
       - name: Upload test results
         uses: actions/upload-artifact@v4
         with:
-          name: graphql-test-results
-          path: test-results/
-          retention-days: 7
-
-  # Error scenario tests
-  error-scenario-tests:
-    name: Error Scenario Tests
-    runs-on: ubuntu-latest
-    needs: unit-tests
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
           node-version: '20.x'
           cache: 'pnpm'
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
-        with:
-          version: 9.12.0
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run error scenario tests
-        run: pnpm test:jest --testPathPattern='tests/error-scenarios' --runInBand
-        env:
-          JEST_JUNIT_OUTPUT_DIR: ./test-results
-          JEST_JUNIT_OUTPUT_NAME: error-scenario-tests.xml
-
-      - name: Upload test results
-        uses: actions/upload-artifact@v4
         with:
           name: error-scenario-test-results
           path: test-results/

@@ -43,47 +43,5 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
-          node-version: '20'
-
-      - name: Install Dependencies
-        run: |
-          npm install -g pnpm
-          pnpm install
-
-      - name: Seed Database (Schema only)
-        # In a real scenario, we would restore a sanitized backup here.
-        # For now, we will just create the schema using the migration scripts if available.
-        working-directory: ./server
-        env:
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: intelgraph
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: password
-        run: |
-           # Attempt to run migrations
-           pnpm migrate || echo "Migration script failed or missing, skipping..."
-
-      - name: Run Data Quality Checks
-        env:
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: intelgraph
-          NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j
-          NEO4J_PASSWORD: password
-        run: |
-          pnpm run dq:check
-
-      - name: Archive DQ Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
           name: dq-report
           path: reports/

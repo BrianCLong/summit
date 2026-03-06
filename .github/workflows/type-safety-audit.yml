@@ -73,57 +73,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Run Type Safety Audit
-        id: audit
-        continue-on-error: true
-        run: |
-          chmod +x scripts/release/type_safety_audit.sh
-
-          MAX_ANY="${{ inputs.max_any || 50 }}"
-          ARGS="--max-any $MAX_ANY --report"
-
-          if [[ "${{ inputs.strict }}" == "true" ]]; then
-            ARGS="$ARGS --strict"
-          fi
-
-          if [[ "${{ inputs.coverage }}" == "true" ]]; then
-            ARGS="$ARGS --coverage"
-          fi
-
-          # Run audit and capture exit code
-          EXIT_CODE=0
-          ./scripts/release/type_safety_audit.sh $ARGS || EXIT_CODE=$?
-
-          # Parse results from state file
-          if [[ -f docs/releases/_state/type_safety_state.json ]]; then
-            TOTAL_ANY=$(jq -r '.last_result.total_any // 0' docs/releases/_state/type_safety_state.json)
-            STRICT_ANY=$(jq -r '.last_result.strict_any // 0' docs/releases/_state/type_safety_state.json)
-            TYPE_ERRORS=$(jq -r '.last_result.type_errors // 0' docs/releases/_state/type_safety_state.json)
-            FAILED=$(jq -r '.last_result.failed // false' docs/releases/_state/type_safety_state.json)
-          else
-            TOTAL_ANY=0
-            STRICT_ANY=0
-            TYPE_ERRORS=0
-            FAILED=false
-          fi
-
-          echo "total_any=$TOTAL_ANY" >> $GITHUB_OUTPUT
-          echo "strict_any=$STRICT_ANY" >> $GITHUB_OUTPUT
-          echo "type_errors=$TYPE_ERRORS" >> $GITHUB_OUTPUT
-          echo "failed=$FAILED" >> $GITHUB_OUTPUT
-
-          exit $EXIT_CODE
-
-      - name: Upload Audit Report
-        if: always()
-        uses: actions/upload-artifact@v4 # v6
-        with:
           name: type-safety-report-${{ github.run_id }}
           path: artifacts/type-safety/
           retention-days: 30

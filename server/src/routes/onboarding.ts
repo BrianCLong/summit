@@ -6,7 +6,7 @@
  * @module routes/onboarding
  */
 
-import { Router, Request, Response, NextFunction } from 'express';
+import express, { Router, Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import { enhancedOnboardingService } from '../onboarding/index.js';
 import { ensureAuthenticated } from '../middleware/auth.js';
@@ -111,14 +111,14 @@ router.post(
   requireFeatureFlag('onboarding.enhancedFlow'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { stepId } = req.params;
+      const stepId = req.params.stepId as string;
       const data = CompleteStepSchema.parse(req.body);
       const { tenantId, id: userId } = req.user!;
 
       const result = await enhancedOnboardingService.completeStep(
-        tenantId,
-        userId,
-        stepId,
+        tenantId as string,
+        userId as string,
+        stepId as string,
         data
       );
 
@@ -139,14 +139,14 @@ router.post(
   requireFeatureFlag('onboarding.enhancedFlow'),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { stepId } = req.params;
+      const stepId = req.params.stepId as string;
       const { reason } = SkipStepSchema.parse(req.body);
       const { tenantId, id: userId } = req.user!;
 
       const result = await enhancedOnboardingService.skipStep(
-        tenantId,
-        userId,
-        stepId,
+        tenantId as string,
+        userId as string,
+        stepId as string,
         reason
       );
 

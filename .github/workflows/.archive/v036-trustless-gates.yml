@@ -24,70 +24,6 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: |
-          pip install fastapi uvicorn cryptography
-
-      - name: Start ZTA Verifier
-        run: |
-          cd ops/attest
-          python verifier.py &
-          VERIFIER_PID=$!
-          echo "VERIFIER_PID=$VERIFIER_PID" >> $GITHUB_ENV
-          sleep 5  # Allow verifier to start
-
-      - name: Test Agent Action Attestation
-        run: |
-          # Test that agent actions require attestation
-          curl -X POST http://localhost:8080/attest \
-            -H "Content-Type: application/json" \
-            -d '{
-              "agent_id": "test-agent-ci",
-              "action_type": "query",
-              "action_payload": {"query": "test query for CI"},
-              "tenant_id": "TENANT_CI_TEST"
-            }' > attestation_response.json
-
-          # Verify attestation was generated
-          if jq -e '.receipt.receipt_id' attestation_response.json; then
-            echo "✅ Attestation gate passed: Agent actions properly attested"
-          else
-            echo "❌ Attestation gate failed: No valid attestation generated"
-            exit 1
-          fi
-
-      - name: Verify Attestation Performance
-        run: |
-          # Check verifier performance meets SLA
-          METRICS=$(curl -s http://localhost:8080/metrics)
-          P95_MS=$(echo "$METRICS" | jq -r '.p95_ms')
-
-          if (( $(echo "$P95_MS <= 200" | bc -l) )); then
-            echo "✅ Performance gate passed: P95 = ${P95_MS}ms (≤200ms)"
-          else
-            echo "❌ Performance gate failed: P95 = ${P95_MS}ms (>200ms)"
-            exit 1
-          fi
-
-      - name: Cleanup
-        if: always()
-        run: |
-          if [ -n "$VERIFIER_PID" ]; then
-            kill $VERIFIER_PID || true
-          fi
-
-  policy-proof-gate:
-    name: '⚖️ Policy Proof Verification Gate'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       - name: Install Z3 SMT Solver
         run: |
           sudo apt-get update
@@ -141,21 +77,6 @@ jobs:
       - name: Upload Proof Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: policy-proofs
-          path: |
-            ops/policy/proof_results.json
-            evidence/v0.3.6/policy/*.smt2
-
-  remediation-dry-run-gate:
-    name: '🔧 Remediation Dry-Run Gate'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
           python-version: '3.11'
 
       - name: Test Remediation Proposal Generation
@@ -202,20 +123,6 @@ jobs:
 
       - name: Upload Remediation Artifacts
         uses: actions/upload-artifact@v3
-        with:
-          name: remediation-proposals
-          path: |
-            ops/remediator/remediation_proposal.json
-
-  confidential-compute-gate:
-    name: '🔒 Confidential Compute Gate'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 

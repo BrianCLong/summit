@@ -26,21 +26,6 @@ jobs:
       - name: Set up k6
         uses: grafana/setup-k6-action@v1
         with:
-          k6-version: v0.52.0
-
-      - name: Run baseline
-        run: |
-          mkdir -p perf/results
-          k6 run k6/golden-baseline.js --summary-export perf/results/k6-baseline-summary.json --out json=perf/results/k6-baseline.json
-
-      - name: Run stress (nightly only)
-        if: github.event_name == 'schedule'
-        run: |
-          k6 run k6/golden-stress.js --summary-export perf/results/k6-stress-summary.json --out json=perf/results/k6-stress.json
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
           name: k6-results
           path: perf/results
 

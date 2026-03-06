@@ -10,8 +10,6 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
-      - uses: actions/setup-node@v4
         with: { node-version: '20.14.x', cache: 'pnpm' }
       - name: Install & heal
         run: |
@@ -29,20 +27,6 @@ jobs:
           fi
       - name: k6 smoke (strict)
         uses: grafana/k6-action@v0.3.1
-        with:
-          filename: .github/k6/smoke.js
-        env:
-          UI_URL: http://localhost:3000
-          API_URL: http://localhost:4000
-      - name: Down
-        if: always()
-        run: |
-          if [ -f .github/ci/docker-compose.ci.yml ]; then
-            docker compose -f .github/ci/docker-compose.ci.yml down -v
-          fi
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.8.6
           terraform_wrapper: false

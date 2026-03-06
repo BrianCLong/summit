@@ -53,47 +53,6 @@ jobs:
       - name: Setup toolchain
         uses: ./.github/actions/setup-toolchain
         with:
-          node-version: ${{ inputs.node-version }}
-          pnpm-version: ${{ inputs.pnpm-version }}
-          working-directory: ${{ inputs.working-directory }}
-
-      - name: Unit tests
-        if: ${{ inputs.test-type == 'unit' }}
-        working-directory: ${{ inputs.working-directory }}
-        run: ${{ inputs.test-command || 'pnpm run test:unit --coverage' }}
-
-      - name: Integration tests
-        if: ${{ inputs.test-type == 'integration' }}
-        working-directory: ${{ inputs.working-directory }}
-        run: ${{ inputs.test-command || 'pnpm run test:integration' }}
-
-      - name: E2E tests
-        if: ${{ inputs.test-type == 'e2e' }}
-        working-directory: ${{ inputs.working-directory }}
-        run: |
-          # Start services if needed
-          if [ -f docker-compose.ci.yml ]; then
-            docker compose -f docker-compose.ci.yml up -d --wait
-          fi
-          # Run E2E tests
-          ${{ inputs.test-command || 'pnpm run test:e2e' }}
-
-      - name: Performance tests
-        if: ${{ inputs.test-type == 'perf' }}
-        working-directory: ${{ inputs.working-directory }}
-        run: ${{ inputs.test-command || 'pnpm run test:perf' }}
-
-      - name: Lint tests
-        if: ${{ inputs.test-type == 'lint' }}
-        working-directory: ${{ inputs.working-directory }}
-        run: |
-          pnpm run lint
-          pnpm run type-check
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4 # v6
-        with:
           retention-days: 14
           name: test-results-${{ inputs.test-type }}
           path: |

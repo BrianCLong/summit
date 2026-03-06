@@ -23,38 +23,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: services/authz-gateway/package.json
-
-      - name: Install dependencies
-        working-directory: services/authz-gateway
-        run: npm install --legacy-peer-deps
-
-      - name: Build service
-        working-directory: services/authz-gateway
-        run: npm run build
-
-      - name: Install cosign
-        run: |
-          COSIGN_VERSION=v2.4.0
-          curl -L "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64" -o /usr/local/bin/cosign
-          chmod +x /usr/local/bin/cosign
-
-      - name: Run Phase 1 gate (SBOM, provenance, cosign verify)
-        working-directory: services/authz-gateway
-        env:
-          ENABLE_COSIGN: 'true'
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ github.sha }}
-          GITHUB_REF: ${{ github.ref }}
-          BUILD_COMMAND: 'npm run build'
-          DEPLOY_ACTOR: ${{ github.actor }}
-        run: npm run phase1:gate
-
-      - name: Upload gate artifacts
-        uses: actions/upload-artifact@a8a3f3ad6f5350a3f99e34c93f3c7878e7b8ed5c
-        with:
           name: phase1-security-artifacts
           path: |
             services/authz-gateway/dist/security/sbom.json

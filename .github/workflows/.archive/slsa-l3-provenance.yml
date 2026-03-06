@@ -66,134 +66,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: false
-
-      - name: Verify commit signatures
-        id: commit-check
-        run: |
-          set -euo pipefail
-
-          # Check if the commit is signed
-
-          # Check if the commit is signed
-
-          # Check if the commit is signed
-
-          # Check if the commit is signed
-
-          # Check if the commit is signed
-          if git log -1 --show-signature 2>/dev/null | grep -q "Good signature"; then
-            echo "verified=true" >> "$GITHUB_OUTPUT"
-            echo "Commit signature verified"
-          else
-            echo "verified=false" >> "$GITHUB_OUTPUT"
-            echo "Warning: Commit signature not verified (acceptable for SLSA L3)"
-          fi
-
-      - name: Calculate source hash
-        id: source-hash
-        run: |
-          set -euo pipefail
-
-          # Create deterministic hash of source tree (excluding .git)
-
-          # Create deterministic hash of source tree (excluding .git)
-
-          # Create deterministic hash of source tree (excluding .git)
-
-          # Create deterministic hash of source tree (excluding .git)
-
-          # Create deterministic hash of source tree (excluding .git)
-          SOURCE_HASH=$(git archive HEAD --prefix=source/ | sha256sum | cut -d' ' -f1)
-          echo "hash=$SOURCE_HASH" >> "$GITHUB_OUTPUT"
-          echo "Source hash: $SOURCE_HASH"
-
-      - name: Secret scanning pre-flight
-        run: |
-          set -euo pipefail
-
-          # Quick check for obvious secrets in staged files
-
-          # Quick check for obvious secrets in staged files
-
-          # Quick check for obvious secrets in staged files
-
-          # Quick check for obvious secrets in staged files
-
-          # Quick check for obvious secrets in staged files
-          if git diff --cached --name-only 2>/dev/null | xargs -r grep -l -E "(api_key|secret_key|password\s*=)" 2>/dev/null; then
-            echo "Potential secrets detected in staged files"
-            exit 1
-          fi
-          echo "No obvious secrets detected"
-
-      - name: Verify lockfile integrity
-        run: |
-          set -euo pipefail
-
-          # Verify pnpm-lock.yaml hasn't been tampered with
-          if [ -f pnpm-lock.yaml ]; then
-            LOCKFILE_HASH=$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)
-            echo "Lockfile hash: $LOCKFILE_HASH"
-          fi
-
-  # ===========================================================================
-  # Stage 2: Product Matrix Builds (Reusable SLSA build)
-  # ===========================================================================
-  matrix-builds:
-    name: Product Build (${{ matrix.product }})
-    needs: pre-build-checks
-    strategy:
-      matrix:
-        product: [maestro, intelgraph, companyos, switchboard]
-    uses: ./.github/workflows/_reusable-slsa-build.yml
-    with:
-      image_name: ${{ toLower(format('{0}-{1}', github.repository, matrix.product)) }}
-      dockerfile: ./Dockerfile
-      context: .
-      platforms: linux/amd64
-      push: ${{ github.event_name != 'pull_request' }}
-      sign: true
-      sbom: true
-      slsa_provenance: true
-    secrets: inherit
-
-  # ===========================================================================
-  # Stage 3: Multi-Stage Hermetic Build (SLSA L3 Requirement)
-  # ===========================================================================
-  hermetic-build:
-    name: Hermetic Multi-Stage Build
-  # ===========================================================================
-  # Stage 3: Hermetic Builds (Server & Web)
-  # ===========================================================================
-  build-server:
-    name: Build Server
-    needs: pre-build-checks
-    runs-on: ubuntu-latest
-    outputs:
-      image-digest: ${{ steps.build.outputs.digest }}
-      image-uri: ${{ steps.meta.outputs.tags }}
-      sbom-digest: ${{ steps.sbom.outputs.digest }}
-      image-uri: ${{ steps.meta.outputs.tags }}
-      sbom-digest: ${{ steps.sbom.outputs.digest }}
-      image-uri: ${{ steps.meta.outputs.tags }}
-      sbom-digest: ${{ steps.sbom.outputs.digest }}
-      image-uri: ${{ steps.meta.outputs.tags }}
-      sbom-digest: ${{ steps.sbom.outputs.digest }}
-      image-uri: ${{ steps.meta.outputs.tags }}
-      sbom-digest: ${{ steps.sbom.outputs.digest }}
-      image-uri: ${{ steps.build-image-uri.outputs.uri }}
-      build-timestamp: ${{ steps.build-info.outputs.timestamp }}
-      build-id: ${{ steps.build-info.outputs.build-id }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-        with:
-          fetch-depth: 0
-        with:
-          fetch-depth: 0
         with:
           fetch-depth: 0
         with:
@@ -233,20 +105,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          driver-opts: |
-            network=none
-            image=moby/buildkit:v0.12.4
-
-      - name: Log in to Container Registry (OIDC)
-          echo "timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$GITHUB_OUTPUT"
-          echo "build-id=${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Registry
-        uses: docker/login-action@v3
-        with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -254,19 +112,6 @@ jobs:
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=sha-
-            type=raw,value=slsa-l3-{{date 'YYYYMMDD-HHmmss'}}
-
-      - name: Build and push (multi-stage hermetic)
-        id: build
-        uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
@@ -319,30 +164,6 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
-          path: |
-            sbom.cdx.json
-            sbom.spdx.json
-            sbom.syft.json
-            build-metadata.json
-          retention-days: 90
-
-  # ===========================================================================
-  # Stage 3: SLSA L3 Provenance Generation (Official SLSA Generator)
-  # ===========================================================================
-  slsa-provenance:
-    name: Generate SLSA L3 Provenance
-    needs: hermetic-build
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=sha,prefix=sha-
-
-      - name: Build and push Server
-        id: build
-        uses: docker/build-push-action@v4
-        with:
           context: ./server
           file: ./server/Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
@@ -363,27 +184,6 @@ jobs:
         id: sbom
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}@${{ steps.build.outputs.digest }}
-          artifact-name: sbom-server.spdx.json
-          format: spdx-json
-
-  build-web:
-    name: Build Web
-    needs: pre-build-checks
-    runs-on: ubuntu-latest
-    outputs:
-      image-digest: ${{ steps.build.outputs.digest }}
-      image-uri: ${{ steps.build-image-uri.outputs.uri }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Registry
-        uses: docker/login-action@v3
-        with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
@@ -391,16 +191,6 @@ jobs:
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=sha,prefix=sha-
-
-      - name: Build and push Web
-        id: build
-        uses: docker/build-push-action@v4
         with:
           context: ./apps/web
           file: ./apps/web/Dockerfile
@@ -421,85 +211,11 @@ jobs:
       - name: Generate SBOM (Web)
         uses: anchore/sbom-action@v0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}@${{ steps.build.outputs.digest }}
-          artifact-name: sbom-web.spdx.json
-          format: spdx-json
-
-  # ===========================================================================
-  # Stage 3: SLSA Provenance Generation (Official Generator)
-  # ===========================================================================
-  provenance-server:
-    needs: build-server
-    if: (((((github.event_name != 'pull_request') && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request')) && (github.event_name != 'pull_request' && !inputs.skip_verification)) && (always())) && (always() && github.event_name != 'pull_request')
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-      packages: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
-    with:
-      image: ${{ needs.hermetic-build.outputs.image-uri }}
-      digest: ${{ needs.hermetic-build.outputs.image-digest }}
-      image: ${{ needs.hermetic-build.outputs.image-uri }}
-      digest: ${{ needs.hermetic-build.outputs.image-digest }}
-      image: ${{ needs.hermetic-build.outputs.image-uri }}
-      digest: ${{ needs.hermetic-build.outputs.image-digest }}
-      image: ${{ needs.hermetic-build.outputs.image-uri }}
-      digest: ${{ needs.hermetic-build.outputs.image-digest }}
-      image: ${{ needs.hermetic-build.outputs.image-uri }}
-      digest: ${{ needs.hermetic-build.outputs.image-digest }}
-      image: ${{ needs.build-server.outputs.image-uri }}
-      digest: ${{ needs.build-server.outputs.image-digest }}
-    secrets:
-      registry-password: ${{ secrets.GITHUB_TOKEN }}
-
-  provenance-web:
-    needs: build-web
-    permissions:
-      actions: read
-      id-token: write
-      contents: write
-      packages: write
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
-    with:
-      image: ${{ needs.build-web.outputs.image-uri }}
-      digest: ${{ needs.build-web.outputs.image-digest }}
-    secrets:
-      registry-password: ${{ secrets.GITHUB_TOKEN }}
-
-  # ===========================================================================
-  # Stage 4: Cosign OIDC Keyless Signing
-  # ===========================================================================
-  cosign-sign:
-    name: Cosign OIDC Keyless Signing
-    needs: hermetic-build
-  # Stage 4: Cosign Signing
-  # ===========================================================================
-  sign-images:
-    name: Sign Images (Cosign)
-    needs: [build-server, build-web]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write  # OIDC token for keyless signing
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
           name: build-artifacts
           path: ./artifacts
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
-        with:
-          cosign-release: v2.2.4
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -668,103 +384,6 @@ jobs:
       - name: Log in to Registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify image signature
-        run: |
-          set -euo pipefail
-
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.hermetic-build.outputs.image-digest }}"
-
-          echo "Verifying image signature..."
-          cosign verify "$IMAGE" \
-            --certificate-identity-regexp="https://github.com/${{ github.repository }}" \
-            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
-
-          echo "Signature verification passed"
-
-      - name: Verify SBOM attestations
-        run: |
-          set -euo pipefail
-
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.hermetic-build.outputs.image-digest }}"
-
-          echo "Verifying CycloneDX SBOM attestation..."
-          cosign verify-attestation "$IMAGE" \
-            --type cyclonedx \
-            --certificate-identity-regexp="https://github.com/${{ github.repository }}" \
-            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
-
-          echo "Verifying SPDX SBOM attestation..."
-          cosign verify-attestation "$IMAGE" \
-            --type spdx \
-            --certificate-identity-regexp="https://github.com/${{ github.repository }}" \
-            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
-
-          echo "SBOM attestation verification passed"
-
-      - name: Verify SLSA provenance attestation
-        run: |
-          set -euo pipefail
-
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.hermetic-build.outputs.image-digest }}"
-
-          echo "Verifying SLSA provenance attestation..."
-          cosign verify-attestation "$IMAGE" \
-            --type slsaprovenance \
-            --certificate-identity-regexp="https://github.com/${{ github.repository }}" \
-            --certificate-oidc-issuer="https://token.actions.githubusercontent.com"
-
-          echo "SLSA provenance verification passed"
-
-      - name: Generate compliance report
-        run: |
-          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
-
-          ## SLSA L3 Compliance Report
-
-          | Check | Status |
-          |-------|--------|
-          | Image Signature | Verified |
-          | OIDC Identity | GitHub Actions |
-          | CycloneDX SBOM | Attested |
-          | SPDX SBOM | Attested |
-          | SLSA Provenance | Attested |
-          | Build Isolation | Hermetic |
-          | SLSA Level | **Level 3** |
-
-          ### Image Details
-          - **Registry**: ${{ env.REGISTRY }}
-          - **Repository**: ${{ env.IMAGE_NAME }}
-          - **Digest**: \`${{ needs.hermetic-build.outputs.image-digest }}\`
-          - **Build ID**: \`${{ needs.hermetic-build.outputs.build-id }}\`
-          - **Timestamp**: ${{ needs.hermetic-build.outputs.build-timestamp }}
-
-          ### OIDC Identity
-          - **Issuer**: https://token.actions.githubusercontent.com
-          - **Subject**: repo:${{ github.repository }}:ref:${{ github.ref }}
-
-          EOF
-
-  # ===========================================================================
-  # Stage 6: Vulnerability Scanning
-  # ===========================================================================
-  vulnerability-scan:
-    name: Security Vulnerability Scan
-    needs: hermetic-build
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download SBOM artifacts
-        uses: actions/download-artifact@v4
-        with:
           name: build-artifacts
           path: ./artifacts
 
@@ -810,12 +429,6 @@ jobs:
 
       - name: Upload SARIF to GitHub Security
         uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: vulnerability-report.sarif
-          category: grype-sbom-scan
-
-      - name: Upload vulnerability report
-        uses: actions/upload-artifact@v4
         with:
           name: vulnerability-report
           path: vulnerability-report.json
@@ -911,13 +524,6 @@ jobs:
     steps:
       - name: Download SBOMs
         uses: actions/download-artifact@v4
-        with:
-          pattern: sbom-*.spdx.json
-          path: sboms
-          merge-multiple: true
-
-      - name: Scan Server SBOM
-        uses: anchore/scan-action@v3
         with:
           sbom: sboms/sbom-server.spdx.json
           fail-build: false

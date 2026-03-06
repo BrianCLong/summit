@@ -24,19 +24,5 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: |
-          pip install -r eval/requirements.txt
-
-      - name: Run Evals (Mock)
-        run: |
-          # running in mock mode for CI demonstration
-          python eval/runner.py --suite eval/suites/core_evals.yaml --mock
-
-      - name: Upload Evidence
-        uses: actions/upload-artifact@v3
-        with:
           name: eval-results
           path: .evidence/eval_results/

@@ -35,8 +35,8 @@ export class ConflictUIController {
 
       // Get recent conflicts for entity
       const history = await this.conflictResolver.getConflictHistory(
-        entityId,
-        tenantId,
+        entityId as string,
+        tenantId as string,
         10,
       );
 
@@ -102,8 +102,8 @@ export class ConflictUIController {
 
       // Get active conflicts
       const history = await this.conflictResolver.getConflictHistory(
-        entityId,
-        tenantId,
+        entityId as string,
+        tenantId as string,
         10,
       );
       const activeConflicts = history.conflicts.filter((c) => !c.resolved_at);
@@ -190,8 +190,8 @@ export class ConflictUIController {
       }
 
       const history = await this.conflictResolver.getConflictHistory(
-        entityId,
-        tenantId,
+        entityId as string,
+        tenantId as string,
         limit,
       );
 

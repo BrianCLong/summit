@@ -20,54 +20,6 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Run merge validation
-        run: |
-          echo "🔄 Running merge queue validation..."
-          echo "  ✓ Branch: ${{ github.head_ref }}"
-          echo "  ✓ Commit: ${{ github.sha }}"
-          echo "  ✓ Merge group: ${{ github.event.merge_group.head_sha }}"
-
-      - name: Quick smoke test
-        run: |
-          echo "💨 Running quick smoke test for merge queue..."
-          npm run typecheck || echo "Typecheck completed with warnings"
-          echo "✅ Merge queue validation completed"
-
-  pr-ready-check:
-    name: PR Ready for Merge
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Check PR readiness
-        run: |
-          echo "🎯 Checking PR readiness for merge queue..."
-
-          # Check if PR is approved
-          echo "  📋 Checking approvals..."
-
-          # Check if CI is passing
-          echo "  ✅ Checking CI status..."
-
-          # Check if conflicts exist
-          echo "  🔍 Checking for conflicts..."
-
-          echo "✅ PR ready for merge queue"
-
-  auto-rebase:
-    name: Auto-rebase PR
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 

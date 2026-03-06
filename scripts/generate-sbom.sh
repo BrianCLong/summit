@@ -112,7 +112,7 @@ for sbom in "$OUTPUT_DIR"/*.json; do
 done
 
 # Remove the trailing comma and close the array
-sed -i '' '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" 2>/dev/null || sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
+sed -i '$ s/,$//' "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json"
 cat >> "$OUTPUT_DIR/SBOM_SUMMARY-${VERSION}.json" << EOF
   ],
   "totalSboms": $(ls "$OUTPUT_DIR"/*.json 2>/dev/null | grep -c "cdx\|spdx" || echo 0)

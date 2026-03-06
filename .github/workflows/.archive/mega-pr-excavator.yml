@@ -45,59 +45,11 @@ jobs:
       - name: Batch recovery
         env:
           GH_TOKEN: ${{ github.token }}
-          BATCH_START: 0
-          BATCH_SIZE: 100
-        run: |
-          bash .github/scripts/excavate-pr-batch.sh 0 100
-
-  excavate-batch-2:
-    name: Recovery Batch 2 (100-200)
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure git
-        run: |
-          git config user.name "Mega Excavator Bot"
-          git config user.email "excavator@summit.dev"
-          git config pull.rebase false
-
-      - name: Batch recovery
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
           bash .github/scripts/excavate-pr-batch.sh 100 100
 
   excavate-batch-3:
     name: Recovery Batch 3 (200-300)
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Configure git
-        run: |
-          git config user.name "Mega Excavator Bot"
-          git config user.email "excavator@summit.dev"
-          git config pull.rebase false
-
-      - name: Batch recovery
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          bash .github/scripts/excavate-pr-batch.sh 200 100
-
-  excavate-batch-4:
-    name: Recovery Batch 4 (300-415)
     runs-on: ubuntu-latest
     timeout-minutes: 45
 

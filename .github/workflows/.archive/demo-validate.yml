@@ -32,14 +32,6 @@ jobs:
       - name: k6 smoke
         uses: grafana/k6-action@v0.3.1
         with:
-          filename: .github/ci/k6/smoke.js
-        env:
-          UI_URL: http://localhost:3000
-          API_URL: http://localhost:4000
-          SMOKE_JWT: ${{ secrets.SMOKE_JWT }}
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
           name: demo-artifacts
           path: |
             docs/cookbook/screenshots/**

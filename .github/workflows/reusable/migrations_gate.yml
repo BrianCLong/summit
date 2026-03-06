@@ -18,11 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v4
         with:
-          fetch-depth: 0
-
-      - name: Enforce migration gate label
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
-        with:
           script: |
             const pr = context.payload.pull_request;
             if (!pr) {

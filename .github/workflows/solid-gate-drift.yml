@@ -15,11 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Full history needed for weekly diff
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
           python-version: "3.12"
 
       - name: Run Drift Script
