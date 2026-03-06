@@ -1,0 +1,3 @@
+17754	OPEN	[Governance Drift] Branch protection does not match REQUIRED_CHECKS_POLICY (main)	ci, governance, release-ops, severity:P1	2026-02-09T10:20:40Z
+257	OPEN	Data importers: STIX/TAXII & CSV bulk	backend, OSINT, integration	2025-08-14T04:54:48Z
+193	OPEN	OSINT data integration	backend, P2, OSINT, integration, due:2025-11-30, sprint:3, enriched	2026-01-16T18:18:04Z
