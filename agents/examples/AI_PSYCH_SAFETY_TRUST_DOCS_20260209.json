@@ -1,0 +1,45 @@
+{
+  "task_id": "AI_PSYCH_SAFETY_TRUST_DOCS_20260209",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "ai-psych-safety-trust-docs",
+    "version": "v1",
+    "sha256": "54b62f3745dff902fd33c169319937ebec3a7b27574d7d8e966d9748f5e30e37",
+    "path": "prompts/docs/ai-psych-safety-trust-docs@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "repo_assumptions.md",
+      "docs/standards/ai-psych-safety-trust.md",
+      "docs/security/data-handling/ai-psych-safety-trust.md",
+      "docs/ops/runbooks/ai-psych-safety-trust.md",
+      "docs/roadmap/STATUS.json",
+      "agents/examples/AI_PSYCH_SAFETY_TRUST_DOCS_20260209.json",
+      "prompts/docs/ai-psych-safety-trust-docs@v1.md",
+      "prompts/registry.yaml"
+    ],
+    "domains": ["documentation", "governance", "security", "operations"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/standards/ai-psych-safety-trust.md",
+      "docs/security/data-handling/ai-psych-safety-trust.md",
+      "docs/ops/runbooks/ai-psych-safety-trust.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Documentation pack is present and deterministic requirements are stated.",
+    "Roadmap status includes AI psych safety trust pack entry.",
+    "Repo assumptions updated with validation checklist."
+  ],
+  "stop_conditions": [
+    "Governance requires additional policy-as-code before proceeding.",
+    "Documentation scope crosses into non-doc zones without approval."
+  ]
+}

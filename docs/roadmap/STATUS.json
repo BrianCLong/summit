@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:45:00Z",
-  "revision_note": "Added CSE graph extensions standard and schema reference for cogwar lab alignment.",
+  "last_updated": "2026-02-09T00:00:00Z",
+  "revision_note": "Added AI psych safety trust pack standards, data handling, and runbook targets.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -159,10 +159,16 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
+      "id": "ai-psych-safety-trust-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "AI psych safety trust pack standards, data handling, and runbook foundations."
+    },
+    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Cognitive campaign schema plus CSE graph extensions standard/schema alignment for RU-UA lab."
+      "notes": "Cognitive campaign schema, examples, and deterministic packs for RU-UA lab."
     },
     {
       "id": "ip-claims-continuation-pack-c451-s480",
@@ -212,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
