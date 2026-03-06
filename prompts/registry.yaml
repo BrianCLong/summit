@@ -162,6 +162,32 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: cse-graph-extensions
+    version: v1
+    path: prompts/standards/cse-graph-extensions@v1.md
+    sha256: 7871b1cd6c0f0d8228aa907773f05e169636ebf784dedb0a4f477d9d90d476ec
+    description: Define the CSE graph extensions standard, schema, and roadmap alignment updates.
+    scope:
+      paths:
+        - docs/standards/cognitive-security-engine.md
+        - docs/standards/README.md
+        - schemas/cogwar/cse.graph.v1.schema.json
+        - docs/roadmap/STATUS.json
+        - prompts/standards/cse-graph-extensions@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - io-cogwar
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: keel-evidence-templates
     version: v1
     path: prompts/evidence/keel-evidence-templates@v1.md
@@ -921,37 +947,4 @@ prompts:
         permitted: 0
         retirement_target: 0
     allowed_operations:
-      - edit
-  - id: maestro-spec-interview
-    version: v1
-    path: prompts/maestro/maestro_spec_interview_v1.md
-    sha256: 86bdbd027bb5c18254210330bf4b1648274abf7744e9c10978094a00d71100e6
-    description: Structured requirements engineering interview engine with deterministic spec artifacts.
-    scope:
-      paths:
-        - agents/maestro/
-        - prompts/maestro/
-        - scripts/emit_spec_bundle.py
-        - schemas/maestro_spec.schema.json
-        - schemas/spec_bundle.schema.json
-        - scripts/ga/verify-maestro-spec.mjs
-        - docs/standards/maestro_spec.md
-        - docs/ops/runbooks/maestro_spec.md
-        - docs/security/data-handling/maestro_spec.md
-        - scripts/monitoring/maestro_spec-drift.py
-        - docs/roadmap/STATUS.json
-        - prompts/registry.yaml
-      domains:
-        - requirements-engineering
-        - orchestration
-        - governance
-        - documentation
-    verification:
-      tiers_required:
-        - A
-      debt_budget:
-        permitted: 0
-        retirement_target: 0
-    allowed_operations:
-      - create
       - edit
