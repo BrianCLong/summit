@@ -1,0 +1,8 @@
+{
+  "evidence_id": "EVD-cogops-feb2026-MODEL-001",
+  "metrics": {
+    "nodes": 10,
+    "edges": 14,
+    "complete": true
+  }
+}
