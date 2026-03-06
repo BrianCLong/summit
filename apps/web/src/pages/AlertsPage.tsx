@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -19,7 +19,7 @@ import {
 import mockData from '@/mock/data.json'
 import type { Alert, KPIMetric, AlertStatus } from '@/types'
 
-// Helper functions moved outside component to prevent recreation on each render
+// Helper functions moved outside component
 const getSeverityColor = (severity: string) => {
   switch (severity) {
     case 'critical':
@@ -48,14 +48,8 @@ const getStatusColor = (status: string) => {
   }
 }
 
-// Memoized row component to prevent unnecessary re-renders when other rows change
-const AlertRow = memo(({
-  alert,
-  onStatusChange
-}: {
-  alert: Alert
-  onStatusChange: (id: string, status: AlertStatus) => void
-}) => {
+// Extracted AlertRow component
+const AlertRow = React.memo(({ alert, onStatusChange }: { alert: Alert; onStatusChange: (id: string, status: AlertStatus) => void }) => {
   return (
     <tr className="group">
       <td>
@@ -96,7 +90,9 @@ const AlertRow = memo(({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onStatusChange(alert.id, 'investigating')}
+              onClick={() =>
+                onStatusChange(alert.id, 'investigating')
+              }
             >
               Investigate
             </Button>
@@ -105,7 +101,9 @@ const AlertRow = memo(({
             <Button
               size="sm"
               variant="outline"
-              onClick={() => onStatusChange(alert.id, 'resolved')}
+              onClick={() =>
+                onStatusChange(alert.id, 'resolved')
+              }
             >
               Resolve
             </Button>
@@ -178,21 +176,19 @@ export default function AlertsPage() {
     }
   }, [alertUpdates])
 
-  // Memoized filter logic
-  const filteredAlerts = useMemo(() => {
-    return alerts.filter(alert => {
-      if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
-      if (selectedStatus && alert.status !== selectedStatus) {return false}
-      if (
-        searchQuery &&
-        !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-        {return false}
-      return true
-    })
-  }, [alerts, selectedSeverity, selectedStatus, searchQuery])
+  // Filter alerts - Memoized
+  const filteredAlerts = useMemo(() => alerts.filter(alert => {
+    if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
+    if (selectedStatus && alert.status !== selectedStatus) {return false}
+    if (
+      searchQuery &&
+      !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+      {return false}
+    return true
+  }), [alerts, selectedSeverity, selectedStatus, searchQuery])
 
-  // Memoized KPI calculation
+  // Calculate KPIs (do not show change deltas in demo-only mode) - Memoized
   const kpiMetrics: KPIMetric[] = useMemo(() => [
     {
       id: 'critical',
@@ -203,7 +199,7 @@ export default function AlertsPage() {
         alerts.filter(a => a.severity === 'critical').length > 0
           ? 'error'
           : 'success',
-      ...(alertsData ? { change: { value: 12, direction: 'up' as const, period: 'last hour' } } : {}),
+      ...(alertsData ? { change: { value: 12, direction: 'up', period: 'last hour' } } : {}),
     },
     {
       id: 'active',
@@ -211,7 +207,7 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'open').length,
       format: 'number',
       status: 'warning',
-      ...(alertsData ? { change: { value: 5, direction: 'down' as const, period: 'last hour' } } : {}),
+      ...(alertsData ? { change: { value: 5, direction: 'down', period: 'last hour' } } : {}),
     },
     {
       id: 'resolved',
@@ -219,7 +215,7 @@ export default function AlertsPage() {
       value: alerts.filter(a => a.status === 'resolved').length,
       format: 'number',
       status: 'success',
-      ...(alertsData ? { change: { value: 23, direction: 'up' as const, period: 'yesterday' } } : {}),
+      ...(alertsData ? { change: { value: 23, direction: 'up', period: 'yesterday' } } : {}),
     },
     {
       id: 'response',
@@ -227,10 +223,11 @@ export default function AlertsPage() {
       value: 156,
       format: 'duration',
       status: 'neutral',
-      ...(alertsData ? { change: { value: 8, direction: 'down' as const, period: 'last week' } } : {}),
+      ...(alertsData ? { change: { value: 8, direction: 'down', period: 'last week' } } : {}),
     },
   ], [alerts, alertsData])
 
+  // Memoized handler
   const handleStatusChange = useCallback(async (
     alertId: string,
     newStatus: AlertStatus
