@@ -1,46 +1,55 @@
-# Repo Assumptions & Validation (CogWar MWS)
+# Repo Assumptions & Validation
 
-## Verified vs Assumed Paths / Modules / Checks
+## Sensing Mode (Evidence-First)
 
-### ✅ Verified (observed in-repo)
+> This section records verified observations before any planning decisions.
 
-| Area | Verified Path / Name | Evidence |
-| --- | --- | --- |
-| CI workflows | `.github/workflows/*` includes `pr-quality-gate.yml`, `ci-core.yml`, `ci-security.yml`, `ci-pr.yml`, `ci.yml`, and many additional gates | `.github/workflows/` directory listing | 
-| Workspace root | `package.json` defines `intelgraph-platform` scripts and Node/Pnpm versions | `package.json` | 
-| Pnpm workspace | `pnpm-workspace.yaml` defines workspaces including `apps/*`, `packages/*`, `services/*`, `client`, `server`, `cli` | `pnpm-workspace.yaml` |
-| Evidence schemas | `schemas/evidence_*.schema.json`, `schemas/evidence/*.schema.json`, and `schemas/cogwar/campaign.v1.schema.json` | `schemas/` + evidence ID search | 
-| Evidence artifacts | `report.json`, `metrics.json`, `stamp.json` patterns are enforced in multiple standards and examples | `docs/standards/*`, `docs/evidence/*`, `examples/cogwar/*` |
-| Examples | `examples/cogwar/ru-ua/*.campaign.json` exists | `examples/cogwar/ru-ua/` |
+## Verified Structure & Tooling
 
-### ❓ Deferred (pending targeted verification)
+| Plan Item | Verified Evidence | Status | Notes |
+| --- | --- | --- | --- |
+| Repo root | `/workspace/summit` | ✅ Verified | Monorepo root with extensive top-level modules. |
+| Node/TypeScript tooling | `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml` | ✅ Verified | pnpm workspace present; TypeScript config files in root. |
+| Python tooling | `pyproject.toml`, `pytest.ini`, `ruff.toml` | ✅ Verified | Python utilities and tests are present. |
+| Rust tooling | `Cargo.toml`, `Cargo.lock` | ✅ Verified | Rust workspace present. |
+| Docs tree | `docs/` | ✅ Verified | Governance, security, and ops documentation present. |
+| Scripts tree | `scripts/` | ✅ Verified | CI and utility scripts directory exists. |
+| Evidence store | `evidence/` | ✅ Verified | Evidence structure documented in `evidence/README.md`. |
+| CI workflows | `.github/workflows/` | ✅ Verified | Extensive GitHub Actions workflows, including PR quality gate. |
 
-| Area | Planned / Assumed | Status |
-| --- | --- | --- |
-| Required status checks | Exact GitHub branch protection required checks | **Deferred pending branch protection policy export** |
-| Evidence bundle schema location | Canonical evidence bundle schema for new CogWar artifacts | **Deferred pending evidence contract decision** |
-| Primary CogWar implementation path | Whether `src/cogwar/` is the canonical module path | **Deferred pending maintainers’ module boundary decision** |
+## Verified Evidence & Governance References
 
-## Must-Not-Touch Files / Areas (verified via CODEOWNERS)
+| Requirement | Verified Source | Status | Notes |
+| --- | --- | --- | --- |
+| Evidence ID policy | `docs/governance/EVIDENCE_ID_POLICY.yml` | ✅ Verified | Policy file referenced by governance docs. |
+| Evidence storage convention | `evidence/README.md` | ✅ Verified | Specifies `evidence/<EVIDENCE_ID>/` layout. |
+| CI required checks | `.github/workflows/pr-quality-gate.yml` | ✅ Verified | Declared as the standard quality gate workflow. |
+| GA guardrails | `docs/ga/` | ✅ Verified | GA guidance exists; follow guardrails for new agent work. |
 
-Use human-owner review for any changes to the following ownership-controlled areas:
+## CI Gate Reality Check (Verified)
 
-- `/policy/`, `/opa/`, `/server/src/middleware/auth.ts`, `/server/src/lib/permissions/` (policy owners)
-- `/security/`, `/server/src/provenance/`, `/server/src/security/` (security owners)
-- `/server/src/db/`, `/migrations/`, `/schema/` (data owners)
-- `/server/src/agents/`, `/server/src/services/`, `/tools/ultra-agent/`, `/agents/` (platform core)
-- `/client/`, `/apps/web/`, `/conductor-ui/` (frontend owners)
-- `/services/*` specific service owners (see `CODEOWNERS` for exact scopes)
+- GitHub Actions is the CI platform (`.github/workflows/`).
+- `pr-quality-gate.yml` is the declared standard for PR validation.
+- Additional governance and evidence workflows exist (e.g., evidence, governance, supply chain).
 
-## Validation Checklist (executed)
+## Repo Reality Assertions (Updated)
 
-1. ✅ Listed `.github/workflows/` to confirm workflow names.
-2. ✅ Read `package.json` and `pnpm-workspace.yaml` to confirm workspace layout and scripts.
-3. ✅ Searched for evidence artifacts/schema patterns (`evidence_id`, `report.json`, `stamp.json`).
-4. ✅ Confirmed primary pipeline code locations via workspace config and top-level directories (`apps/`, `packages/`, `services/`, `client/`, `server/`, `cli`).
+- **Runtime mix**: Node/TypeScript + Python + Rust are all present and active. (Verified)
+- **Evidence system**: Dedicated `evidence/` tree with documented layout. (Verified)
+- **Governance**: Extensive governance docs and gate workflows exist. (Verified)
 
-## Notes for CogWar MWS alignment
+## Deferred Pending Validation
 
-- Evidence artifacts must remain deterministic: `report.json` and `metrics.json` should exclude unstable timestamps; `stamp.json` is the approved metadata container.
-- Existing CogWar schemas and example campaigns are already present under `schemas/cogwar/` and `examples/cogwar/`, indicating a precedent for CogWar-specific schema evolution.
+- **Primary CLI entrypoint**: Identify canonical CLI (`summitctl` or other) for adding new commands.
+- **Existing graph/retrieval modules**: Locate any existing graph or retrieval subsystems to avoid duplication.
+- **Redaction utilities**: Confirm any central redaction/log-safety library to reuse.
 
+## Must-Not-Touch (Governed Exceptions Only)
+
+- `.github/workflows/*` (add-only unless explicitly authorized)
+- `LICENSE*`, `NOTICE*`
+- `SECURITY.md` / `SECURITY/` (owner review required)
+
+## Immediate Next Step (Repo-Scoped)
+
+- Update execution status in `docs/roadmap/STATUS.json` to log the repo-assumptions validation work.
