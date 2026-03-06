@@ -1,5 +1,5 @@
-"""Summit modular boundary verifier."""
+"""Summit Modulith boundary verifier."""
 
-from .main import run
+from .runner import run
 
 __all__ = ["run"]

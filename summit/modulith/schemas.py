@@ -1,3 +1,5 @@
-REPORT_SCHEMA_VERSION = "1.0"
-METRICS_SCHEMA_VERSION = "1.0"
-STAMP_SCHEMA_VERSION = "1.0"
+"""Schema constants for modulith evidence artifacts."""
+
+EVIDENCE_ID_PREFIX = "MBV-IMP"
+TOOL_NAME = "summit.modulith"
+TOOL_VERSION = "0.1.0"

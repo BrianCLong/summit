@@ -4,60 +4,66 @@ import ast
 from dataclasses import dataclass
 from pathlib import Path
 
-from .config import ModulithConfig
-
 
 @dataclass(frozen=True)
 class ImportEdge:
-    source_file: str
+    source_file: Path
     source_module: str
     target_module: str
-    import_name: str
-    import_kind: str
+    target_symbol: str
+    uses_event_channel: bool
 
 
+def _is_event_channel(target_symbol: str) -> bool:
+    return ".events." in target_symbol or target_symbol.endswith(".events")
 
-def _scan_ast(module_ast: ast.AST) -> list[tuple[str, str]]:
-    imports: list[tuple[str, str]] = []
-    for node in ast.walk(module_ast):
+
+def _module_prefixes(module_path: Path) -> set[str]:
+    prefixes = {module_path.name}
+    parts = list(module_path.parts)
+    if "summit" in parts:
+        idx = parts.index("summit")
+        prefixes.add(".".join(parts[idx:]))
+    return prefixes
+
+
+def _symbol_to_module(symbol: str, module_paths: dict[str, Path]) -> str | None:
+    normalized = symbol.replace("/", ".")
+    for module_name, module_path in module_paths.items():
+        for prefix in _module_prefixes(module_path):
+            if normalized == prefix or normalized.startswith(f"{prefix}."):
+                return module_name
+    return None
+
+
+def _imports_from_ast(file_path: Path) -> list[str]:
+    tree = ast.parse(file_path.read_text(encoding="utf-8"), filename=str(file_path))
+    symbols: list[str] = []
+    for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                imports.append((alias.name, "import"))
-        elif isinstance(node, ast.ImportFrom):
-            if node.module:
-                imports.append((node.module, "from"))
-        elif isinstance(node, ast.Call):
-            if (
-                isinstance(node.func, ast.Attribute)
-                and isinstance(node.func.value, ast.Name)
-                and node.func.value.id == "importlib"
-                and node.func.attr == "import_module"
-                and node.args
-                and isinstance(node.args[0], ast.Constant)
-                and isinstance(node.args[0].value, str)
-            ):
-                imports.append((node.args[0].value, "dynamic"))
-    return imports
+                symbols.append(alias.name)
+        if isinstance(node, ast.ImportFrom) and node.module:
+            symbols.append(node.module)
+            for alias in node.names:
+                symbols.append(f"{node.module}.{alias.name}")
+    return symbols
 
 
-def scan_import_edges(config: ModulithConfig) -> list[ImportEdge]:
+def scan_import_edges(module_paths: dict[str, Path], python_files: list[Path], source_module_for: dict[Path, str]) -> list[ImportEdge]:
     edges: list[ImportEdge] = []
-
-    for module in sorted(config.modules.values(), key=lambda x: x.name):
-        for path in sorted(module.path.rglob("*.py")):
-            parsed = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-            for import_name, kind in _scan_ast(parsed):
-                target = config.module_for_import(import_name)
-                if not target or target == module.name:
-                    continue
+    for file_path in sorted(python_files):
+        source_module = source_module_for[file_path]
+        for symbol in sorted(set(_imports_from_ast(file_path))):
+            target_module = _symbol_to_module(symbol, module_paths)
+            if target_module and target_module != source_module:
                 edges.append(
                     ImportEdge(
-                        source_file=str(path),
-                        source_module=module.name,
-                        target_module=target,
-                        import_name=import_name,
-                        import_kind=kind,
+                        source_file=file_path,
+                        source_module=source_module,
+                        target_module=target_module,
+                        target_symbol=symbol,
+                        uses_event_channel=_is_event_channel(symbol),
                     )
                 )
-
-    return sorted(edges, key=lambda e: (e.source_module, e.target_module, e.source_file, e.import_name, e.import_kind))
+    return edges

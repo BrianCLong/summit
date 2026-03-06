@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-11T19:36:25Z",
-  "revision_note": "Daily sprint 2026-02-11 live triage snapshot, evidence refresh, and prompt registry alignment.",
+  "last_updated": "2026-02-26T00:00:00Z",
+  "revision_note": "Added modulith boundary verifier MWS tracking entry.",
   "initiatives": [
+    {
+      "id": "modulith-boundary-verifier-mws",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "MWS for summit.modulith static module-boundary verification, deterministic evidence artifacts, and CI-ready exit code behavior."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
