@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Personal Intelligence Evidence Stamp",
+  "type": "object",
+  "required": ["generated_at", "git_sha"],
+  "properties": {
+    "generated_at": {
+      "type": "string"
+    },
+    "git_sha": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,18 +1,18 @@
 {
-  "last_updated": "2026-02-08T02:05:00Z",
-  "revision_note": "Added PIDM lane-1 evidence foundation initiative and CI evidence verification gate.",
+  "last_updated": "2026-02-08T12:30:00Z",
+  "revision_note": "Added Personal Intelligence evidence/policy scaffolding and security readiness anchors.",
   "initiatives": [
-    {
-      "id": "pidm-foundation-lane1",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "PIDM evidence index, CI verification, and architecture baseline documentation."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+    },
+    {
+      "id": "personal-intelligence-layer-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Personal Intelligence Layer lane-1 evidence and policy scaffolding with deny-by-default gates."
     },
     {
       "id": "B",
