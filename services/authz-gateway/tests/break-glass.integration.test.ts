@@ -14,6 +14,8 @@ describe('break glass flow', () => {
     sessionManager.clear();
     delete process.env.BREAK_GLASS;
     delete process.env.SERVICE_AUTH_CALLERS;
+    delete process.env.AUTHZ_DEMO_USERNAME;
+    delete process.env.AUTHZ_DEMO_PASSWORD;
   });
 
   it('grants, uses, and expires elevated access', async () => {
@@ -21,6 +23,8 @@ describe('break glass flow', () => {
     jest.setSystemTime(new Date('2024-01-01T00:00:00Z'));
     process.env.BREAK_GLASS = '1';
     process.env.SERVICE_AUTH_CALLERS = 'ops';
+    process.env.AUTHZ_DEMO_USERNAME = 'alice';
+    process.env.AUTHZ_DEMO_PASSWORD = 'password123';
     const app = await createApp();
 
     const loginRes = await request(app)
