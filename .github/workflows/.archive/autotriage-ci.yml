@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [20.x, 20.x]
 
     steps:
       - name: Checkout code
@@ -67,7 +67,9 @@ jobs:
 
       - name: Upload test report
         if: (always()) && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
-        uses: actions/upload-artifact@v3          name: test-report-node-${{ matrix.node-version }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report-node-${{ matrix.node-version }}
           path: /tmp/test-report.md
           retention-days: 7
 
@@ -110,7 +112,9 @@ jobs:
           labels: triage, automated, weekly-report
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3          name: weekly-triage-${{ github.run_number }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: weekly-triage-${{ github.run_number }}
           path: |
             triage-report.md
             triage-labels.json

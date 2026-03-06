@@ -8,7 +8,6 @@ inputs:
   pnpm-version:
     description: 'pnpm version'
     required: false
-    default: '8'
   install-deps:
     description: 'Whether to install dependencies'
     required: false
@@ -29,8 +28,6 @@ runs:
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
-      with:
-        version: ${{ inputs.pnpm-version }}
 
     - name: Get pnpm store directory
       shell: bash
@@ -38,7 +35,7 @@ runs:
         echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
 
     - name: Setup pnpm cache
-      uses: actions/cache@v4
+      uses: actions/cache@v3
       with:
         path: ${{ env.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}

@@ -43,7 +43,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
-          node-version: 18
+          node-version: 20
       - uses: actions/setup-go@v5
         with:
           go-version: '1.21'
@@ -117,7 +117,7 @@ jobs:
   sbom:
     name: Attach SBOM
     needs: plan
-    uses: ./.github/workflows/_reusable-sbom.yml
+    uses: ./.github/workflows/reusable/sbom.yml
     with:
       service: supply-chain
       working-directory: security/supply-chain
