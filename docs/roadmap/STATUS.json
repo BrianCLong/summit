@@ -1,12 +1,12 @@
 {
   "last_updated": "2026-02-26T00:00:00Z",
-  "revision_note": "Added income-engine deterministic pipeline initiative with schema, metrics, and governance artifacts.",
+  "revision_note": "Added modulith boundary verifier MWS scaffolding and deterministic artifact gate tracking.",
   "initiatives": [
     {
-      "id": "income-engine-mws",
+      "id": "modulith-boundary-verifier-mws",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Income Engine MWS: deterministic projection artifacts, evidence ID enforcement, claim policy linter, and feature-flagged runtime."
+      "notes": "Introduced summit.modulith static import boundary verifier, deterministic artifacts, and acceptance test coverage for MBV evidence IDs."
     },
     {
       "id": "saas-crash-2026-positioning-pack",

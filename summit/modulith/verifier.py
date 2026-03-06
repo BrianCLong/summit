@@ -1,51 +1,60 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
-from .config import ModulithConfig
-from .scanner import ImportEdge
-from .schemas import EVIDENCE_ID_PREFIX
+from summit.modulith.schemas import ModulithConfig, Violation
+from summit.modulith.scanner import ImportEdge
 
 
-@dataclass(frozen=True)
-class Violation:
-    evidence_id: str
-    code: str
-    source_module: str
-    target_module: str
-    source_file: str
-    import_symbol: str
-    message: str
-
-
-def verify_edges(edges: list[ImportEdge], config: ModulithConfig) -> list[Violation]:
+def verify(edges: list[ImportEdge], dynamic_candidates: list[dict[str, object]], config: ModulithConfig) -> list[Violation]:
     violations: list[Violation] = []
+
     for edge in edges:
-        allowed = config.allowed_dependencies_for(edge.source_module)
-        if edge.target_module not in allowed:
+        if edge.source_module == edge.target_module:
+            continue
+        if config.rules.cross_module_requires_event and ".events" not in edge.target_import:
             violations.append(
-                Violation(
-                    evidence_id=f"{EVIDENCE_ID_PREFIX}-{len(violations) + 1:03d}",
-                    code="MBV-IMP-001",
-                    source_module=edge.source_module,
-                    target_module=edge.target_module,
-                    source_file=str(edge.source_file),
-                    import_symbol=edge.target_symbol,
-                    message="cross-module import is not declared in allowed_dependencies",
-                )
+                {
+                    "evidence_code": "IMP",
+                    "rule": "cross_module_requires_event",
+                    "from_module": edge.source_module,
+                    "to_module": edge.target_module,
+                    "source_file": edge.source_file,
+                    "line": edge.line,
+                    "target_import": edge.target_import,
+                    "message": "Cross-module imports must use event namespace",
+                }
             )
             continue
-
-        if config.cross_module_requires_event and not edge.uses_event_channel:
+        if not config.allowed(edge.source_module, edge.target_module):
             violations.append(
-                Violation(
-                    evidence_id=f"{EVIDENCE_ID_PREFIX}-{len(violations) + 1:03d}",
-                    code="MBV-IMP-002",
-                    source_module=edge.source_module,
-                    target_module=edge.target_module,
-                    source_file=str(edge.source_file),
-                    import_symbol=edge.target_symbol,
-                    message="cross-module import must use module event channel (.events)",
-                )
+                {
+                    "evidence_code": "IMP",
+                    "rule": "allowed_dependency_matrix",
+                    "from_module": edge.source_module,
+                    "to_module": edge.target_module,
+                    "source_file": edge.source_file,
+                    "line": edge.line,
+                    "target_import": edge.target_import,
+                    "message": "Cross-module dependency is not allowlisted",
+                }
             )
+
+    for candidate in dynamic_candidates:
+        if str(candidate["source_module"]) == str(candidate["target_module"]):
+            continue
+        violations.append(
+            {
+                "evidence_code": "DYN",
+                "rule": "dynamic_import_cross_module",
+                "from_module": candidate["source_module"],
+                "to_module": candidate["target_module"],
+                "source_file": candidate["source_file"],
+                "line": candidate["line"],
+                "target_import": candidate["target_import"],
+                "message": "Dynamic import across modules is denied by default",
+            }
+        )
+
+    for index, violation in enumerate(sorted(violations, key=lambda v: (v["source_file"], v["line"], v["target_import"], v["rule"])), start=1):
+        violation["evidence_id"] = f"MBV-{violation['evidence_code']}-{index:03d}"
+
     return violations

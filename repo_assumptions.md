@@ -1,24 +1,14 @@
-# Unity Package Subsumption Assumptions
+# repo_assumptions.md
 
-## Verified
-- `summit/` Python package exists and is covered by `summit/tests/` pytest tests.
-- Repository has CI workflows under `.github/workflows/` with Python execution support.
-- Policy files are stored in YAML format in top-level policy-like directories.
+Verified:
+- Python package code exists under `summit/` and pytest-based tests are present in multiple package test folders.
+- Existing deterministic evidence conventions use `report.json`, `metrics.json`, and `stamp.json` outputs in repository tooling.
+- GitHub Actions workflows are present under `.github/workflows`.
 
-## Assumed
-- `package-report.json`, `metrics.json`, and `stamp.json` are acceptable artifact names for package evidence.
-- `EVIDENCE:UNITYPKG:<name>:<version>` aligns with downstream evidence ingestion expectations.
-- A dedicated workflow for Unity package policy checks can be added in a follow-up change.
+Assumed:
+- CI execution in this repository can run a Python module gate command.
+- Existing evidence ingestion can consume new deterministic artifacts under `artifacts/modulith/`.
 
-## CI Check Names (Current + Proposed)
-- Current examples: `summit-ci`, `graphci`, `ci-evidence-verify`.
-- Proposed follow-up check: `check-unity-policy`.
-
-## Existing Evidence Schema
-- Existing workflows expect machine-readable JSON evidence artifacts in `artifacts/` directories.
-- This slice emits deterministic JSON blobs with sorted keys and no timestamp fields.
-
-## Must-Not-Touch Files (Guardrail)
-- Core evaluator/scoring internals under `summit/benchmarks/deepsearchqa/`.
-- Provenance chain services under `services/prov-ledger/`.
-- Existing CI scoring/evaluation workflows under `.github/workflows/*eval*.yml`.
+Must-not-touch:
+- Existing CI workflow names.
+- Existing evidence schema contracts outside the new modulith artifacts.

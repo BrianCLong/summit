@@ -4,66 +4,86 @@ import ast
 from dataclasses import dataclass
 from pathlib import Path
 
+from summit.modulith.schemas import ModulithConfig
+
 
 @dataclass(frozen=True)
 class ImportEdge:
-    source_file: Path
+    source_file: str
     source_module: str
+    target_import: str
     target_module: str
-    target_symbol: str
-    uses_event_channel: bool
+    line: int
+    import_kind: str
 
 
-def _is_event_channel(target_symbol: str) -> bool:
-    return ".events." in target_symbol or target_symbol.endswith(".events")
+def _iter_python_files(repo_root: Path) -> list[Path]:
+    return sorted(path for path in repo_root.rglob("*.py") if ".venv/" not in path.as_posix())
 
 
-def _module_prefixes(module_path: Path) -> set[str]:
-    prefixes = {module_path.name}
-    parts = list(module_path.parts)
-    if "summit" in parts:
-        idx = parts.index("summit")
-        prefixes.add(".".join(parts[idx:]))
-    return prefixes
-
-
-def _symbol_to_module(symbol: str, module_paths: dict[str, Path]) -> str | None:
-    normalized = symbol.replace("/", ".")
-    for module_name, module_path in module_paths.items():
-        for prefix in _module_prefixes(module_path):
-            if normalized == prefix or normalized.startswith(f"{prefix}."):
-                return module_name
-    return None
-
-
-def _imports_from_ast(file_path: Path) -> list[str]:
-    tree = ast.parse(file_path.read_text(encoding="utf-8"), filename=str(file_path))
-    symbols: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            for alias in node.names:
-                symbols.append(alias.name)
-        if isinstance(node, ast.ImportFrom) and node.module:
-            symbols.append(node.module)
-            for alias in node.names:
-                symbols.append(f"{node.module}.{alias.name}")
-    return symbols
-
-
-def scan_import_edges(module_paths: dict[str, Path], python_files: list[Path], source_module_for: dict[Path, str]) -> list[ImportEdge]:
+def scan_imports(repo_root: Path, config: ModulithConfig) -> tuple[list[ImportEdge], list[dict[str, object]]]:
     edges: list[ImportEdge] = []
-    for file_path in sorted(python_files):
-        source_module = source_module_for[file_path]
-        for symbol in sorted(set(_imports_from_ast(file_path))):
-            target_module = _symbol_to_module(symbol, module_paths)
-            if target_module and target_module != source_module:
+    dynamic_candidates: list[dict[str, object]] = []
+
+    for pyfile in _iter_python_files(repo_root):
+        src_module = config.module_for_file(pyfile, repo_root)
+        if src_module is None:
+            continue
+        tree = ast.parse(pyfile.read_text(encoding="utf-8"), filename=str(pyfile))
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    target_module = config.module_for_import(alias.name)
+                    if target_module is None:
+                        continue
+                    edges.append(
+                        ImportEdge(
+                            source_file=str(pyfile.relative_to(repo_root)),
+                            source_module=src_module,
+                            target_import=alias.name,
+                            target_module=target_module,
+                            line=node.lineno,
+                            import_kind="import",
+                        )
+                    )
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                target_module = config.module_for_import(node.module)
+                if target_module is None:
+                    continue
                 edges.append(
                     ImportEdge(
-                        source_file=file_path,
-                        source_module=source_module,
+                        source_file=str(pyfile.relative_to(repo_root)),
+                        source_module=src_module,
+                        target_import=node.module,
                         target_module=target_module,
-                        target_symbol=symbol,
-                        uses_event_channel=_is_event_channel(symbol),
+                        line=node.lineno,
+                        import_kind="from",
                     )
                 )
-    return edges
+            elif isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+                    if node.func.value.id == "importlib" and node.func.attr == "import_module" and node.args:
+                        arg = node.args[0]
+                        if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                            target_module = config.module_for_import(arg.value)
+                            if target_module is None:
+                                continue
+                            dynamic_candidates.append(
+                                {
+                                    "source_file": str(pyfile.relative_to(repo_root)),
+                                    "source_module": src_module,
+                                    "target_import": arg.value,
+                                    "target_module": target_module,
+                                    "line": node.lineno,
+                                }
+                            )
+
+    return sorted(edges, key=lambda e: (e.source_file, e.line, e.target_import)), sorted(
+        dynamic_candidates,
+        key=lambda c: (
+            str(c["source_file"]),
+            int(c["line"]),
+            str(c["target_import"]),
+        ),
+    )

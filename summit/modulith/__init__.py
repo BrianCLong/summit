@@ -1,5 +1,3 @@
-"""Summit Modulith boundary verifier."""
-
-from .runner import run
+from summit.modulith.main import run
 
 __all__ = ["run"]

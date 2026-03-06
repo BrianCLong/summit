@@ -4,48 +4,37 @@ import argparse
 import os
 from pathlib import Path
 
-from .config import load_config
-from .reporter import build_input_hash, write_artifacts
-from .scanner import scan_import_edges
-from .verifier import verify_edges
-
+from summit.modulith.config import ConfigError, load_config
+from summit.modulith.reporter import write_artifacts
+from summit.modulith.scanner import scan_imports
+from summit.modulith.verifier import verify
 
 
 def run(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Summit Modulith verifier")
+    parser = argparse.ArgumentParser(description="Summit modulith boundary verifier")
     parser.add_argument("--config", default="config/modules.yaml")
-    parser.add_argument("--artifacts-dir", default="artifacts/modulith")
     parser.add_argument("--repo-root", default=".")
+    parser.add_argument("--out-dir", default="artifacts/modulith")
     args = parser.parse_args(argv)
 
-    enabled = os.getenv("ENABLE_MODULITH", "false").lower() == "true"
-
-    repo_root = Path(args.repo_root).resolve()
-    config_path = (repo_root / args.config).resolve()
-    artifacts_dir = (repo_root / args.artifacts_dir).resolve()
-
-    if not enabled:
-        write_artifacts(
-            artifacts_dir=artifacts_dir,
-            violations=[],
-            edges=[],
-            input_hash="sha256:disabled",
-            enabled=False,
-        )
+    if os.getenv("ENABLE_MODULITH", "false").lower() not in {"1", "true", "yes", "on"}:
         return 0
 
-    config_text = config_path.read_text(encoding="utf-8")
-    config = load_config(config_path=config_path, repo_root=repo_root)
-    edges = scan_import_edges(config)
-    violations = verify_edges(edges, config)
-    input_hash = build_input_hash(config_text=config_text, edges=edges)
+    config_path = Path(args.config)
+    repo_root = Path(args.repo_root)
+    out_dir = Path(args.out_dir)
 
-    write_artifacts(
-        artifacts_dir=artifacts_dir,
-        violations=violations,
-        edges=edges,
-        input_hash=input_hash,
-        enabled=True,
-    )
+    try:
+        config = load_config(config_path)
+    except (OSError, ConfigError) as exc:
+        parser.error(str(exc))
+
+    edges, dynamic_candidates = scan_imports(repo_root, config)
+    violations = verify(edges, dynamic_candidates, config)
+    write_artifacts(out_dir, config=config, config_path=config_path, edges=edges, violations=violations)
 
     return 1 if violations else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(run())
