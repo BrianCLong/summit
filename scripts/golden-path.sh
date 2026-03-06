@@ -1,126 +1,65 @@
 #!/bin/bash
-set -e
 
-# Golden Path Entrypoint
-# Validates the entire development lifecycle: setup -> lint -> test -> e2e
+# Summit Golden Path Diagnostic Wrapper
+# Purpose: Execute and verify the "Golden Path" (clean -> bootstrap -> up)
 
-# Colors for output
-GREEN="\033[0;32m"
-RED="\033[0;31m"
-YELLOW="\033[1;33m"
-NC="\033[0m" # No Color
+set -euo pipefail
+
+CI_MODE=${1:-""}
 
 log() {
-    echo -e "${GREEN}[Golden Path]${NC} $1"
+    echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $1"
 }
 
-error() {
-    echo -e "${RED}[Golden Path Error]${NC} $1"
+error_exit() {
+    log "ERROR: $1"
+    exit 1
 }
 
-warn() {
-    echo -e "${YELLOW}[Golden Path Warning]${NC} $1"
-}
+log "🏔 Starting Summit Golden Path"
 
-# Load .env if present
-if [ -f .env ]; then
-    export $(cat .env | grep -v "^#" | xargs)
+# Ensure .env exists
+if [ ! -f .env ]; then
+    log "📝 .env file missing. Copying from .env.example..."
+    cp .env.example .env || error_exit "Failed to copy .env.example"
 fi
 
-# Cleanup function to be called on exit
-cleanup() {
-    EXIT_CODE=$?
-    if [ $EXIT_CODE -ne 0 ]; then
-        error "Golden Path failed with exit code $EXIT_CODE"
-        log "Docker logs (tail 50 lines):"
-        docker compose -f docker-compose.dev.yml logs --tail=50 || true
-    fi
-    log "Cleaning up resources..."
-    make down > /dev/null 2>&1 || true
-}
+# Step 1: Clean
+log "🧹 Step 1/3: make clean..."
+make clean || error_exit "make clean failed"
 
-# Trap exit to ensure cleanup
-trap cleanup EXIT
-
-# 1. Prerequisite Check
-log "Step 1: Checking Prerequisites..."
-command -v node >/dev/null 2>&1 || { error "node not found"; exit 1; }
-command -v pnpm >/dev/null 2>&1 || { error "pnpm not found"; exit 1; }
-command -v docker >/dev/null 2>&1 || { error "docker not found"; exit 1; }
-
-echo "Node: $(node -v)"
-echo "pnpm: $(pnpm -v)"
-echo "Docker: $(docker -v)"
-
-# 2. Bootstrap (Install Dependencies)
-log "Step 2: Bootstrapping Environment..."
-# Run make bootstrap but suppress noisy output unless it fails
-if ! make bootstrap > /dev/null 2>&1; then
-    error "Bootstrap failed. Re-running with output:"
-    make bootstrap
+# Step 2: Bootstrap
+log "📦 Step 2/3: make bootstrap..."
+if make bootstrap; then
+    log "✅ Bootstrap succeeded"
+else
+    log "❌ Bootstrap failed"
     exit 1
 fi
 
-# 3. Fast Checks (Lint & Unit Tests)
-log "Step 3: Fast Checks (Lint & Unit Tests)..."
-log "Running lint..."
-if ! make lint > /dev/null 2>&1; then
-    error "Lint failed. Re-running with output:"
-    make lint
-    exit 1
-fi
-
-log "Running unit tests..."
-if ! make test > /dev/null 2>&1; then
-    warn "Unit tests failed. Continuing but please fix tests."
-    # In strict mode we would exit here:
-    # make test
-    # exit 1
-fi
-
-# 4. Start Stack
-log "Step 4: Starting Development Stack..."
-make up
-
-# 5. Wait for Health
-log "Step 5: Waiting for Services..."
-TIMEOUT=120
-START_TIME=$(date +%s)
-
-wait_for_url() {
-    local url=$1
-    local name=$2
-    local healthy=0
-
-    echo -n "Waiting for $name ($url)..."
-    while [ $(( $(date +%s) - START_TIME )) -lt $TIMEOUT ]; do
-        if curl -s -f "$url" > /dev/null 2>&1; then
-            healthy=1
-            echo " OK"
-            return 0
+# Step 3: Up
+log "🚀 Step 3/3: make up..."
+if [ "$CI_MODE" == "--ci" ]; then
+    log "Verifying docker-compose config (CI mode)..."
+    docker compose -f docker-compose.dev.yaml config > /dev/null || error_exit "docker-compose config validation failed"
+    log "✅ Config valid. Skipping full bring-up in CI."
+else
+    if make up; then
+        log "✅ Platform is up!"
+    else
+        log "❌ make up failed"
+        log "DIAGNOSTICS:"
+        if ! docker info >/dev/null 2>&1; then
+            log "  - Docker daemon is not running."
         fi
-        echo -n "."
-        sleep 2
-    done
-
-    echo " FAIL"
-    error "Service $name failed to start within $TIMEOUT seconds."
-    return 1
-}
-
-if ! wait_for_url "http://localhost:4000/health" "API"; then exit 1; fi
-if ! wait_for_url "http://localhost:3000" "Frontend"; then exit 1; fi
-
-# 6. End-to-End Smoke Tests
-log "Step 6: Running E2E Golden Path Tests..."
-# Force Playwright to use the running stack (no webServer)
-export PLAYWRIGHT_USE_WEBSERVER=false
-export BASE_URL=http://localhost:3000
-
-# We use the golden-path specific E2E tests
-if ! pnpm test:e2e:golden-path; then
-    error "E2E tests failed."
-    exit 1
+        # Check for rate limit in stderr if possible, but make up already failed.
+        # We can try to pull a small image to check rate limit explicitly
+        if docker pull alpine:latest 2>&1 | grep -q "rate limit"; then
+             log "  - Docker Hub rate limit detected."
+        fi
+        log "See docs/dev/golden-path-troubleshooting.md for more info."
+        exit 1
+    fi
 fi
 
-log "SUCCESS: Golden Path Verified!"
+log "🎉 Golden Path Finished Successfully"

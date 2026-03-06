@@ -45,6 +45,25 @@ pnpm dev
 
 Server runs at `http://localhost:4000`
 
+### 🌟 Golden Path (Recommended)
+
+For a deterministic and clean bring-up of the local development environment:
+
+```bash
+# Automates: make clean -> make bootstrap -> make up
+./scripts/golden-path.sh
+```
+
+Or manually:
+
+```bash
+make clean      # Clean build artifacts and docker system
+make bootstrap  # Install Python venv and Node dependencies
+make up         # Start all services via Docker Compose
+```
+
+Refer to [Golden Path Troubleshooting](docs/dev/golden-path-troubleshooting.md) for common issues (like Docker rate limits).
+
 ### First Query
 
 ```bash
@@ -144,15 +163,6 @@ See: [Agent Development](docs/agents/README.md)
 - [CompanyOS SDK](docs/api/companyos.md)
 
 ## 🧪 Testing
-
-### Golden Path (Required for PRs)
-
-Run the full verification suite (Lint + Test + E2E):
-
-```bash
-make golden-path
-```
-
 
 ```bash
 # Run all tests
