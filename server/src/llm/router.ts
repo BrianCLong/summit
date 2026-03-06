@@ -15,6 +15,7 @@ import {
 import { resolvePaletteRuntimeConfig } from './palette/registry.js';
 import { paletteCandidateHistogram, paletteSelectionLatency, paletteUsedTotal } from './palette/metrics.js';
 import { PaletteProvenanceRecorder, buildCandidateEvidence } from './palette/provenance.js';
+import { llmRequestsTotal, llmRequestDuration } from '../../monitoring/metrics.js';
 
 export class LLMRouter {
   private providers: Map<string, ProviderAdapter> = new Map();
@@ -108,9 +109,39 @@ export class LLMRouter {
 
       let lastError: Error | null = null;
       for (const provider of candidates) {
+        const start = Date.now();
         try {
-          return await provider.generate(req);
+          const response = await provider.generate(req);
+          const duration = (Date.now() - start) / 1000;
+
+          llmRequestsTotal.inc({
+            provider: provider.name,
+            model: req.model || 'unknown',
+            status: 'success'
+          });
+
+          llmRequestDuration.observe({
+            provider: provider.name,
+            model: req.model || 'unknown',
+            status: 'success'
+          }, duration);
+
+          return response;
         } catch (error: any) {
+          const duration = (Date.now() - start) / 1000;
+
+          llmRequestsTotal.inc({
+            provider: provider.name,
+            model: req.model || 'unknown',
+            status: 'error'
+          });
+
+          llmRequestDuration.observe({
+            provider: provider.name,
+            model: req.model || 'unknown',
+            status: 'error'
+          }, duration);
+
           console.error(`Provider ${provider.name} failed:`, error);
           lastError = error instanceof ProviderError ? error : new ProviderError(provider.name, error.message, error);
         }
