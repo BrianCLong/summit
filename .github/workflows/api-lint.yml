@@ -12,10 +12,6 @@ on:
       - 'openapi/**'
       - '.github/workflows/api-lint.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   lint-openapi:
     name: Lint OpenAPI Specs

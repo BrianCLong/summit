@@ -3,6 +3,8 @@ name: 🏭 Mega Merge Orchestrator - Industrial Scale
 on:
   schedule:
     - cron: '*/15 * * * *'  # Every 15 minutes (4x faster)
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       batch_size:

@@ -16,7 +16,6 @@ RUN apk add --no-cache \
     pangomm-dev \
     libjpeg-turbo-dev \
     freetype-dev \
-    postgresql-client \
     curl
 
 # Install nodemon globally
@@ -33,28 +32,14 @@ ENV PUPPETEER_SKIP_DOWNLOAD=1 \
 
 # Copy workspace configuration
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
-COPY tsconfig.base.json tsconfig.json ./
 COPY server/package.json ./server/
-COPY packages/feature-flags/package.json ./packages/feature-flags/
-COPY packages/osint-collector/package.json ./packages/osint-collector/
 COPY packages/maestro-core/package.json ./packages/maestro-core/
 COPY packages/telemetry-config/package.json ./packages/telemetry-config/
-COPY packages/types/package.json ./packages/types/
-COPY libs/context-shell/node/package.json ./libs/context-shell/node/
+COPY packages/feature-flags/package.json ./packages/feature-flags/
+COPY services/osint-collector/package.json ./services/osint-collector/
 
 # Install dependencies for the server workspace
-RUN pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collector... --filter @intelgraph/maestro-core... --filter @intelgraph/types... --frozen-lockfile || pnpm install --filter intelgraph-server... --filter @intelgraph/osint-collector... --filter @intelgraph/maestro-core... --filter @intelgraph/types...
-
-# Copy workspace packages source for building
-COPY packages/feature-flags ./packages/feature-flags/
-COPY packages/osint-collector ./packages/osint-collector/
-COPY packages/maestro-core ./packages/maestro-core/
-COPY packages/types ./packages/types/
-
-# Build workspace packages
-RUN pnpm --filter @intelgraph/feature-flags run build
-RUN pnpm --filter @intelgraph/osint-collector run build
-RUN pnpm --filter @intelgraph/maestro-core run build
+RUN pnpm install --filter intelgraph-server... --frozen-lockfile || pnpm install --filter intelgraph-server...
 
 # Copy the rest of the code
 COPY . .
