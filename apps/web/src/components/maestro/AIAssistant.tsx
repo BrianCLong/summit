@@ -307,7 +307,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
         {/* Loading indicator */}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 text-gray-900 rounded-lg p-3 max-w-[80%]">
+            <div className="bg-gray-100 text-gray-900 rounded-lg p-3 max-w-[80%]" role="status" aria-busy="true" aria-label="Thinking">
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -364,6 +364,7 @@ export function AIAssistant({ context }: AIAssistantProps) {
           <button aria-label="Send message"
             onClick={sendMessage}
             disabled={!inputValue.trim() || isLoading}
+            aria-busy={isLoading}
             className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white rounded-lg p-2 transition-colors"
           >
             <PaperAirplaneIcon className="h-4 w-4" />

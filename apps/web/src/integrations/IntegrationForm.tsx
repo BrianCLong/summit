@@ -57,6 +57,7 @@ export const IntegrationForm = React.memo<IntegrationFormProps>(({ type, initial
                 <button
                     onClick={handleTestClick}
                     disabled={loading}
+                    aria-busy={loading}
                     className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded transition-colors disabled:opacity-50"
                 >
                     {loading ? 'Testing...' : 'Test Connection'}
@@ -64,6 +65,7 @@ export const IntegrationForm = React.memo<IntegrationFormProps>(({ type, initial
                 <button
                     onClick={handleSaveClick}
                     disabled={loading}
+                    aria-busy={loading}
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors disabled:opacity-50"
                 >
                     {loading ? 'Saving...' : 'Save & Enable'}

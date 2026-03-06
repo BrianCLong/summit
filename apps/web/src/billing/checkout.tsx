@@ -44,6 +44,7 @@ const CheckoutPage: React.FC = () => {
           <button
             onClick={() => handleCheckout('pro')}
             disabled={loading}
+            aria-busy={loading}
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? 'Loading...' : 'Upgrade to Pro'}
@@ -63,6 +64,7 @@ const CheckoutPage: React.FC = () => {
           <button
             onClick={() => handleCheckout('ent')}
             disabled={loading}
+            aria-busy={loading}
             className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-900 disabled:opacity-50"
           >
             {loading ? 'Loading...' : 'Upgrade to Enterprise'}

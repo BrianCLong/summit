@@ -186,6 +186,7 @@ export const ScenarioSimulator: React.FC = () => {
             <button
               onClick={runSimulation}
               disabled={loading}
+              aria-busy={loading}
               className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded disabled:opacity-50"
               aria-label={loading ? 'Simulation in progress' : 'Run Monte Carlo Batch Simulation (20 iterations)'}
             >
