@@ -26,15 +26,15 @@ jobs:
         with:
           fetch-depth: 0 # Needed for patch generation if used
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4
-        # version is read from package.json packageManager field
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # v4
+        # version is read from package.json packageManager field
 
       - name: Install dependencies
         run: pnpm install

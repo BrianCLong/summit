@@ -7,16 +7,11 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   bench-test:
     name: LB probe + cache benchmark
-    if: false && (vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1')
     runs-on: ubuntu-latest
-
+    if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_BENCH == '1'
 
     steps:
       - name: Checkout code
