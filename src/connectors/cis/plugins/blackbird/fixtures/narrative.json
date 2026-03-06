@@ -1,0 +1,20 @@
+[
+  {
+    "id": "bb-fixture-456",
+    "narrative": "Deepfake CEO scandal",
+    "risk_score": 85,
+    "actors": [
+      "BotNet-A",
+      "User-X"
+    ],
+    "platforms": [
+      "Twitter",
+      "Telegram"
+    ],
+    "topics": [
+      "finance",
+      "fraud"
+    ],
+    "timestamp": "2023-10-27T10:00:00Z"
+  }
+]

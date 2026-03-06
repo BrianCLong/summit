@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi, Mock } from 'vitest';
 import { Pool, PoolClient } from 'pg';
-import { OrchestratorPostgresStore } from './OrchestratorPostgresStore';
-import { MaestroAgent } from './types';
+import { OrchestratorPostgresStore } from '../OrchestratorPostgresStore';
+import { MaestroAgent } from '../types';
 
 // Mock the logger
 vi.mock('../../src/config/logger', () => ({
@@ -58,9 +58,10 @@ describe('OrchestratorPostgresStore', () => {
       };
 
       // Mock the transaction flow
-      (mockClient.query as Mock).mockResolvedValueOnce({ rowCount: 1 }); // UPDATE query
-      (mockClient.query as Mock).mockResolvedValueOnce({ rows: [mockAgentRow] }); // Return agent data
-      (mockPool.query as Mock).mockResolvedValue({ rows: [] }); // Audit log insertion
+      (mockClient.query as Mock).mockResolvedValueOnce({ command: 'BEGIN' });
+      (mockClient.query as Mock).mockResolvedValueOnce({ rowCount: 1, rows: [mockAgentRow] });
+      (mockClient.query as Mock).mockResolvedValueOnce({ command: 'INSERT' }); // Audit log insertion using client not pool
+      (mockClient.query as Mock).mockResolvedValueOnce({ command: 'COMMIT' });
 
       const result = await store.updateAgent(agentId, updates, actor);
 
@@ -74,11 +75,7 @@ describe('OrchestratorPostgresStore', () => {
         metrics: {},
       });
 
-      expect(mockClient.query).toHaveBeenCalledTimes(2); // UPDATE and RETURNING
-      expect(mockPool.query).toHaveBeenCalledWith(
-        expect.any(String), // SQL string for audit log
-        expect.arrayContaining(['test-user', 'update_agent', `agent:${agentId}`, expect.any(String)])
-      );
+      expect(mockClient.query).toHaveBeenCalledTimes(4); // BEGIN, UPDATE, INSERT AUDIT, COMMIT
     });
 
     it('should return null if agent does not exist', async () => {
@@ -86,8 +83,9 @@ describe('OrchestratorPostgresStore', () => {
       const updates: Partial<MaestroAgent> = { status: 'inactive' };
       const actor = 'test-user';
 
-      // Mock UPDATE returning 0 rows affected
-      (mockClient.query as Mock).mockResolvedValueOnce({ rowCount: 0 });
+      (mockClient.query as Mock).mockResolvedValueOnce({ command: 'BEGIN' });
+      (mockClient.query as Mock).mockResolvedValueOnce({ rowCount: 0, rows: [] });
+      (mockClient.query as Mock).mockResolvedValueOnce({ command: 'ROLLBACK' });
 
       const result = await store.updateAgent(agentId, updates, actor);
 

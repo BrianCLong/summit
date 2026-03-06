@@ -33,10 +33,6 @@ on:
   schedule:
     - cron: "0 3 * * *"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   checks: write
@@ -108,7 +104,7 @@ jobs:
           k6 run k6/slo-gate.js \
             --env TARGET="$TARGET_URL" \
             --env OUTPUT_JSON=true \
-            --summary-export=slo-summary.json \
+            --summary-export=slo-results.json \
             --out json=slo-metrics.json
 
       - name: Parse SLO Results

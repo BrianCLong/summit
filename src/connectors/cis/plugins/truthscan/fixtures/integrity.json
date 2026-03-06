@@ -1,0 +1,12 @@
+{
+  "id": "ts-fixture-123",
+  "timestamp": "2023-10-27T10:00:00Z",
+  "modality": "text",
+  "results": {
+    "ai_generated_score": 0.98,
+    "manipulated_score": 0.05,
+    "spoof_score": 0.01
+  },
+  "confidence": 0.99,
+  "model_version": "ts-v4-enterprise"
+}

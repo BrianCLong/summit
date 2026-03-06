@@ -243,4 +243,3 @@ export function applyRedaction<T extends { hashes?: { inputs?: Array<{ name: str
 
 export * from './trace-model';
 export * from './replay-runner';
-export * from './mapping';

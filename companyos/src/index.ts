@@ -1,60 +1,36 @@
-import express from 'express';
-import { appendFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { PDPService } from './pdp/decide.js';
+import express, { Router } from 'express';
+import cookieParser from 'cookie-parser';
+import { startPolicyManager } from './policy/index.js';
+import { stepUpHandler } from './auth/step-up-route.js';
+import { stubIdentity } from './authz/identity-middleware.js';
+import { createDisclosurePackRouter } from './api/disclosure-packs.js';
 
 const app = express();
-const port = process.env.PORT || 3000;
-const pdp = new PDPService();
-const auditLogPath = process.env.AUDIT_LOG_PATH || './audit.log';
+const port = Number(process.env.PORT || 3000);
 
+app.use(cookieParser());
 app.use(express.json());
+app.use(stubIdentity);
 
-// Ensure audit log directory exists
-const auditDir = path.dirname(auditLogPath);
-await mkdir(auditDir, { recursive: true });
+app.get('/healthz', (_req, res) => res.json({ ok: true }));
+app.get('/livez', (_req, res) => res.json({ ok: true }));
 
-app.post('/api/v1/pdp/decide', async (req, res) => {
+const apiRouter = Router();
+apiRouter.post('/auth/step-up', stepUpHandler);
+apiRouter.use('/disclosure-packs', createDisclosurePackRouter());
+
+app.use('/api', apiRouter);
+app.post('/auth/step-up', stepUpHandler);
+
+if (
+  process.env.NODE_ENV !== 'test' &&
+  process.env.POLICY_AUTO_START !== 'false'
+) {
   try {
-    const decision = await pdp.decide(req.body);
-    const auditEntry = JSON.stringify({
-      timestamp: new Date().toISOString(),
-      request: req.body,
-      response: decision
-    }) + '\n';
-    await appendFile(auditLogPath, auditEntry);
-    res.json(decision);
-  } catch (error) {
-    console.error('PDP Decision Error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    startPolicyManager();
+  } catch (e) {
+    console.warn('policy manager start failed', (e as Error).message);
   }
-});
+}
 
-// Bootstrap/Provisioning Endpoints (MWS)
-app.post('/api/v1/orgs', async (req, res) => {
-  console.log('[companyOS] Provisioning Org:', req.body.name);
-  res.status(201).json({ status: 'created', ...req.body });
-});
-
-app.post('/api/v1/roles', async (req, res) => {
-  console.log('[companyOS] Provisioning Role:', req.body.name);
-  res.status(201).json({ status: 'created', ...req.body });
-});
-
-app.post('/api/v1/budgets', async (req, res) => {
-  console.log('[companyOS] Setting Budget:', req.body.tenantId);
-  res.status(201).json({ status: 'created', ...req.body });
-});
-
-app.post('/api/v1/policies', async (req, res) => {
-  console.log('[companyOS] Applying Policy:', req.body.name);
-  res.status(201).json({ status: 'created', ...req.body, version: 'v1.0.0' });
-});
-
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
-
-app.listen(port, () => {
-  console.log(`companyOS Governance Service listening at http://localhost:${port}`);
-});
+app.listen(port, () => console.log(`[companyos] listening on :${port}`));
