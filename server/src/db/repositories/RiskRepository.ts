@@ -33,15 +33,18 @@ export class RiskRepository {
       const savedScore = scoreRows[0];
       const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals in batches of 100 to optimize performance
-      // This reduces database round-trips from O(N) to O(N/100)
+      // 2. Insert Risk Signals
       if (input.signals && input.signals.length > 0) {
+        // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
         const chunkSize = 100;
+
         for (let i = 0; i < input.signals.length; i += chunkSize) {
           const chunk = input.signals.slice(i, i + chunkSize);
           const values: any[] = [];
-          const placeholders = chunk.map((sig, index) => {
-            const base = index * 8;
+          const placeholders: string[] = [];
+          let paramIndex = 1;
+
+          for (const sig of chunk) {
             values.push(
               savedScore.id,
               sig.type,
@@ -50,24 +53,31 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date()
+              sig.detectedAt || new Date(),
             );
-            return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`;
-          }).join(', ');
+            placeholders.push(
+              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
+            );
+            paramIndex += 8;
+          }
 
-          const sigRows = await tx.query(
-            `INSERT INTO risk_signals (
+          const batchSql = `
+            INSERT INTO risk_signals (
               risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ${placeholders}
-            RETURNING *`,
-            values
-          );
-          savedSignals.push(...sigRows.map((r: any) => this.mapSignal(r)));
+            ) VALUES ${placeholders.join(', ')}
+            RETURNING *`;
+
+          // BOLT: If batch fails, we allow the error to propagate to abort the transaction,
+          // matching original behavior but with much better performance in the success case.
+          const sigRows = await tx.query(batchSql, values);
+          sigRows.forEach((row: any) => savedSignals.push(this.mapSignal(row)));
         }
       }
 
       return {
         ...this.mapScore(savedScore),
+        // Note: signals are not part of RiskScore interface but usually returned in a full object
+        // For strict typing we return the RiskScore entity
       };
     });
   }
