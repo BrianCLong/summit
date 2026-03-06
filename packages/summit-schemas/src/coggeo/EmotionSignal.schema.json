@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coggeo/EmotionSignal.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "obs_id", "valence", "arousal", "ts"],
+  "properties": {
+    "id": { "type": "string" },
+    "obs_id": { "type": "string" },
+    "valence": { "type": "number", "minimum": -1, "maximum": 1 },
+    "arousal": { "type": "number", "minimum": 0, "maximum": 1 },
+    "labels": { "type": "array", "items": { "type": "string" } },
+    "ts": { "type": "string", "format": "date-time" }
+  }
+}

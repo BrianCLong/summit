@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "coggeo/Narrative.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "label", "time_range"],
+  "properties": {
+    "id": { "type": "string" },
+    "label": { "type": "string" },
+    "time_range": {
+      "type": "object",
+      "required": ["start", "end"],
+      "properties": {
+        "start": { "type": "string", "format": "date-time" },
+        "end": { "type": "string", "format": "date-time" }
+      }
+    },
+    "evidence_refs": { "type": "array", "items": { "type": "string" } }
+  }
+}
