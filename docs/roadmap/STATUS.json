@@ -1,12 +1,12 @@
 {
-  "last_updated": "2026-02-14T00:15:00Z",
-  "revision_note": "Refined AgentApp repo recon anchors with readiness assertion and governed exceptions.",
+  "last_updated": "2026-02-08T03:20:48Z",
+  "revision_note": "Recorded inline comment intake deferral for repo assumptions baseline.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, and evidence-first lane-1 posture."
+      "notes": "Scaffold adenhq/hive subsumption bundle, required check mapping, evidence-first lane-1 posture, repo assumptions baseline refresh, and inline comment intake deferral."
     },
     {
       "id": "B",
@@ -65,12 +65,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "PromptSpec schema, clean-room pack, eval rubric, and policy gate scaffolding."
-    },
-    {
-      "id": "kore-agentic-stack-recon",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Repo reconnaissance for AgentApp subsumption: CLI, evidence, connectors, GraphRAG anchors."
     },
     {
       "id": "E",
@@ -188,7 +182,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
