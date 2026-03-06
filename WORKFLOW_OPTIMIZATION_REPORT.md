@@ -198,6 +198,126 @@ Many workflows already had appropriate path filters:
 - **After**: Docker builds only run when Dockerfile or code changes
 - **Impact**: Significant runner hour savings on docs/config PRs
 
+---
+
+## Phase 3: Affected-Only Execution (Task Graph + Caching)
+
+**Readiness Assertion:** Align this change with the Summit Readiness Assertion to preserve required
+gates while accelerating feedback loops. See `docs/SUMMIT_READINESS_ASSERTION.md`.
+
+### Primary Objective
+
+Stop rebuilding the entire monorepo on every PR. Shift CI to **affected-only** lint/typecheck/test/
+build using the task graph and remote cache.
+
+### Preferred Implementation (Turbo)
+
+**Run only what changed:**
+
+```bash
+pnpm turbo run lint typecheck test build --filter=...[origin/main]
+```
+
+**Cache outputs in CI:**
+
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: .turbo
+    key: ${{ runner.os }}-turbo-${{ hashFiles('**/pnpm-lock.yaml') }}
+    restore-keys: |
+      ${{ runner.os }}-turbo-
+```
+
+### Fast Alternative (No Task Graph Yet)
+
+Use path filters + pnpm workspace filters to gate jobs and scope package work to changed paths.
+
+---
+
+## Phase 4: pnpm Store Caching (Install Time Reduction)
+
+### Required CI Pattern
+
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    node-version: 20
+    cache: pnpm
+
+- name: Enable corepack
+  run: corepack enable
+
+- name: Install dependencies
+  run: pnpm install --frozen-lockfile
+```
+
+### Explicit Store Cache (Optional, Tighter Control)
+
+```yaml
+- name: Get pnpm store path
+  run: echo "PNPM_STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+- uses: actions/cache@v4
+  with:
+    path: ${{ env.PNPM_STORE_PATH }}
+    key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+    restore-keys: |
+      ${{ runner.os }}-pnpm-store-
+```
+
+---
+
+## Phase 5: Fast Lane vs Full Lane (Gate the Expensive Work)
+
+### Fast Lane (PR Required)
+
+- lint, typecheck, unit tests (affected-only)
+- minimal build for touched packages
+
+### Full Lane (Nightly / Manual)
+
+- e2e + heavy scans + full builds + image builds
+- scheduled or workflow_dispatch
+
+```yaml
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+---
+
+## Phase 6: Docker Build Acceleration (BuildKit Cache + Smaller Contexts)
+
+### BuildKit Cache Mount
+
+```dockerfile
+# syntax=docker/dockerfile:1.6
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+```
+
+### Reduce Build Context
+
+If using Turbo, run `turbo prune` to produce a minimal dependency graph for image builds.
+
+---
+
+## Phase 7: Measurement & Telemetry
+
+Enable step timings, surface cache hit rates, and track the slowest package build before
+expanding scope.
+
+---
+
+## Immediate Execution Checklist (Do This Now)
+
+1. Add `concurrency.cancel-in-progress` to PR workflows.
+2. Verify pnpm store cache hits in CI.
+3. Add `paths-ignore` for docs/runbooks-only changes.
+4. Convert CI commands to affected-only (Turbo preferred; path filters otherwise).
+
 ### Workflows Most Impacted
 
 1. **docker-build.yml** (Multi-arch builds)
