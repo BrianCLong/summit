@@ -5,45 +5,61 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .schemas import TOOL_NAME, TOOL_VERSION
-from .verifier import Violation
+from summit.modulith.schemas import ModulithConfig, Violation
+from summit.modulith.scanner import ImportEdge
 
 
-def _stable_dump(payload: dict[str, Any], path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+def _stable_json(data: Any) -> str:
+    return json.dumps(data, sort_keys=True, indent=2) + "\n"
 
 
-def _hash_inputs(config_path: Path, scanned_files: list[Path]) -> str:
-    digest = hashlib.sha256()
-    digest.update(config_path.read_bytes())
-    for file_path in sorted(scanned_files):
-        digest.update(str(file_path).encode("utf-8"))
-        digest.update(file_path.read_bytes())
-    return f"sha256:{digest.hexdigest()}"
+def _input_hash(config_path: Path, edges: list[ImportEdge]) -> str:
+    config_bytes = config_path.read_bytes()
+    edge_fingerprint = [
+        {
+            "source_file": e.source_file,
+            "source_module": e.source_module,
+            "target_import": e.target_import,
+            "target_module": e.target_module,
+            "line": e.line,
+        }
+        for e in edges
+    ]
+    raw = config_bytes + json.dumps(edge_fingerprint, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return f"sha256:{hashlib.sha256(raw).hexdigest()}"
 
 
-def write_artifacts(output_dir: Path, config_path: Path, scanned_files: list[Path], violations: list[Violation]) -> None:
+def write_artifacts(
+    out_dir: Path,
+    *,
+    config: ModulithConfig,
+    config_path: Path,
+    edges: list[ImportEdge],
+    violations: list[Violation],
+) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+
     report = {
-        "tool": TOOL_NAME,
-        "version": TOOL_VERSION,
+        "tool": "summit.modulith",
         "status": "fail" if violations else "pass",
-        "violations": [violation.__dict__ for violation in violations],
+        "summary": "Modular boundary verification report",
+        "violations": violations,
     }
     metrics = {
-        "tool": TOOL_NAME,
-        "version": TOOL_VERSION,
-        "evidence_id": violations[0].evidence_id if violations else "MBV-IMP-000",
-        "files_scanned": len(scanned_files),
-        "violations": len(violations),
+        "tool": "summit.modulith",
+        "totals": {
+            "modules": len(config.modules),
+            "imports_scanned": len(edges),
+            "violations": len(violations),
+        },
     }
     stamp = {
-        "tool": TOOL_NAME,
-        "version": TOOL_VERSION,
-        "input_hash": _hash_inputs(config_path, scanned_files),
+        "tool": "summit.modulith",
+        "version": "0.1.0",
+        "input_hash": _input_hash(config_path, edges),
         "evidence_id_prefix": "MBV",
     }
 
-    _stable_dump(report, output_dir / "report.json")
-    _stable_dump(metrics, output_dir / "metrics.json")
-    _stable_dump(stamp, output_dir / "stamp.json")
+    (out_dir / "report.json").write_text(_stable_json(report), encoding="utf-8")
+    (out_dir / "metrics.json").write_text(_stable_json(metrics), encoding="utf-8")
+    (out_dir / "stamp.json").write_text(_stable_json(stamp), encoding="utf-8")

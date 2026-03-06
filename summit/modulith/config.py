@@ -1,68 +1,49 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import yaml
 
-
-@dataclass(frozen=True)
-class ModuleRule:
-    name: str
-    path: Path
-    allowed_dependencies: tuple[str, ...]
+from summit.modulith.schemas import ModuleSpec, ModulithConfig, Rules
 
 
-@dataclass(frozen=True)
-class ModulithConfig:
-    modules: dict[str, ModuleRule]
-    cross_module_requires_event: bool
-
-    def module_for_path(self, file_path: Path) -> str | None:
-        resolved = file_path.resolve()
-        for module in sorted(self.modules.values(), key=lambda item: len(str(item.path)), reverse=True):
-            if resolved.is_relative_to(module.path):
-                return module.name
-        return None
-
-    def allowed_dependencies_for(self, module_name: str) -> set[str]:
-        rule = self.modules[module_name]
-        return set(rule.allowed_dependencies)
+class ConfigError(ValueError):
+    pass
 
 
-def _normalize_module(base_dir: Path, name: str, raw: dict[str, Any]) -> ModuleRule:
-    if "path" not in raw:
-        raise ValueError(f"module '{name}' is missing required 'path'")
-    raw_allowed = raw.get("allowed_dependencies", [])
-    if not isinstance(raw_allowed, list):
-        raise ValueError(f"module '{name}' has non-list 'allowed_dependencies'")
-    return ModuleRule(
-        name=name,
-        path=(base_dir / raw["path"]).resolve(),
-        allowed_dependencies=tuple(sorted(str(item) for item in raw_allowed)),
-    )
+def load_config(path: Path) -> ModulithConfig:
+    data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise ConfigError("modules.yaml must contain an object at root")
 
-
-def load_config(config_path: Path) -> ModulithConfig:
-    with config_path.open("r", encoding="utf-8") as handle:
-        payload = yaml.safe_load(handle) or {}
-
-    modules_raw = payload.get("modules")
+    modules_raw = data.get("modules")
     if not isinstance(modules_raw, dict) or not modules_raw:
-        raise ValueError("modules.yaml must define non-empty 'modules' map")
+        raise ConfigError("modules must be a non-empty mapping")
 
-    base_dir = config_path.parent.parent.resolve()
-    modules = {
-        str(name): _normalize_module(base_dir, str(name), raw)
-        for name, raw in sorted(modules_raw.items(), key=lambda item: item[0])
-    }
+    modules: list[ModuleSpec] = []
+    for name, payload in modules_raw.items():
+        if not isinstance(payload, dict):
+            raise ConfigError(f"module {name} must be an object")
+        module_path = payload.get("path")
+        if not isinstance(module_path, str) or not module_path:
+            raise ConfigError(f"module {name} must define a non-empty path")
+        allowed = payload.get("allowed_dependencies", [])
+        if not isinstance(allowed, list) or any(not isinstance(item, str) for item in allowed):
+            raise ConfigError(f"module {name} allowed_dependencies must be string array")
 
-    for module_name, module in modules.items():
-        invalid = [dep for dep in module.allowed_dependencies if dep not in modules or dep == module_name]
-        if invalid:
-            raise ValueError(f"module '{module_name}' has invalid dependency declarations: {invalid}")
+        modules.append(
+            ModuleSpec(
+                name=name,
+                path=Path(module_path),
+                allowed_dependencies=tuple(sorted(set(allowed))),
+            )
+        )
 
-    rules = payload.get("rules", {})
-    cross_module_requires_event = bool(rules.get("cross_module_requires_event", True))
-    return ModulithConfig(modules=modules, cross_module_requires_event=cross_module_requires_event)
+    rules_payload = data.get("rules", {})
+    if not isinstance(rules_payload, dict):
+        raise ConfigError("rules must be an object")
+
+    rules = Rules(
+        cross_module_requires_event=bool(rules_payload.get("cross_module_requires_event", False))
+    )
+    return ModulithConfig(modules=tuple(sorted(modules, key=lambda m: m.name)), rules=rules)
