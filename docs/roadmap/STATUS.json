@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added 24th+ order imputed intention analysis artifact.",
+  "last_updated": "2026-02-08T00:33:31Z",
+  "revision_note": "Added governed GitHub Actions OIDC with AWS STS hardening guide in docs/security.",
   "initiatives": [
-    {
-      "id": "imputed-intention-24plus",
-      "status": "complete",
-      "owner": "codex",
-      "notes": "Added governed analysis artifact for 24th–40th order imputed intention expansion."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
