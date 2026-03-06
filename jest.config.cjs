@@ -11,7 +11,7 @@ module.exports = {
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'libs'],
+  roots: ['server', 'client', 'packages', 'services', 'tests', 'scripts', 'libs', 'agents'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',
@@ -71,7 +71,7 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
-    '^pg$': '<rootDir>/__mocks__/pg.js',
+    '^pg$': '<rootDir>/__mocks__/pg.cjs',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',

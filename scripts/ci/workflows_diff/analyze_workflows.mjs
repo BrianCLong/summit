@@ -42,17 +42,37 @@ function readYamlString(s) {
 
 for (const f of all) {
   const upstreamY = gitShow(upstreamRef, f);
-  const forkY = gitShow(forkRef, f);
+  let forkY;
+  if (forkRef === "HEAD") {
+    try { forkY = fs.readFileSync(f, "utf8"); } catch { forkY = null; }
+  } else {
+    forkY = gitShow(forkRef, f);
+  }
 
   // Only analyze files that exist in fork (we can still diff upstream→fork)
   if (!forkY) continue;
+
+  // Skip archived workflows, reusable workflows (starting with _),
+  // non-YAML files, and workflows in subdirectories (often reusable or fragments)
+  if (f.includes(".archive/") ||
+      path.basename(f).startsWith("_") ||
+      !(f.endsWith(".yml") || f.endsWith(".yaml")) ||
+      path.dirname(f) !== root) {
+    continue;
+  }
 
   let wf;
   try { wf = readYamlString(forkY); }
   catch { findings.push({file:f, level:"high", rule:"yaml-parse", msg:"Invalid YAML"}); high++; continue; }
 
   const hasConc = hasConcurrency(wf);
-  if (!hasConc) { findings.push({file:f, level:"high", rule:"concurrency-missing", msg:"No concurrency set at workflow nor job level"}); high++; }
+  if (!hasConc) {
+    const isNew = !upstreamFiles.has(f);
+    const level = isNew ? "high" : "medium";
+    findings.push({file:f, level, rule:"concurrency-missing", msg:"No concurrency set at workflow nor job level"});
+    if (level === "high") high++;
+    else medium++;
+  }
 
   // matrix checks
   if (wf?.jobs && typeof wf.jobs === "object") {

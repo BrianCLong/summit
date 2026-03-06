@@ -4,9 +4,9 @@
   "version": "4.2.3",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "npx vite",
+    "build": "npx vite build",
+    "preview": "npx vite preview",
     "typecheck": "tsc -p tsconfig.strict.json --noEmit",
     "test": "node node_modules/jest/bin/jest.js --config jest.config.cjs",
     "test:jest": "node node_modules/jest/bin/jest.js --config jest.config.cjs",

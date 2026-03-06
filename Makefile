@@ -49,8 +49,10 @@ dev-down: dev-prereqs ## Stop dev stack and remove volumes
 dev-smoke: dev-prereqs ## Minimal smoke checks for local dev
 	@echo "Running dev smoke checks..."
 	@docker compose -f $(COMPOSE_DEV_FILE) ps
-	@node smoke-test.js
-	@$(MAKE) k6 TARGET=http://localhost:4000
+	@echo "Checking UI at http://localhost:3000 ..."
+	@curl -sSf http://localhost:3000 > /dev/null || { echo "UI not responding on port 3000."; exit 1; }
+	@echo "Checking Gateway health at http://localhost:8080/health ..."
+	@curl -sSf http://localhost:8080/health > /dev/null || { echo "Gateway health endpoint not responding on port 8080."; exit 1; }
 	@echo "Dev smoke checks passed."
 
 restart: down up
@@ -299,16 +301,6 @@ ga-verify: ## Run GA tier B/C verification sweep (deterministic)
 ops-verify: ## Run unified Ops Verification (Observability + Storage/DR)
 	./scripts/verification/verify_ops.sh
 
-# --- Governance & Evidence ---
-
-.PHONY: evidence-bundle
-evidence-bundle: ## Generate a standard evidence bundle (Usage: make evidence-bundle [BASE=origin/main] [RISK=low] [CHECKS="make test"])
-	@python3 scripts/maintainers/gen-evidence-bundle.py \
-		$(if $(BASE),--base $(BASE),) \
-		$(if $(RISK),--risk $(RISK),) \
-		$(if $(CHECKS),--checks "$(CHECKS)",) \
-		$(if $(PROMPTS),--prompts "$(PROMPTS)",)
-
 # --- Demo Environment ---
 
 demo: ## Launch one-command demo environment
@@ -409,3 +401,15 @@ copilot-task: ## Run Copilot CLI in task lane (set PROMPT/ARGS vars)
 
 copilot-review: ## Run Copilot CLI in review lane (set PROMPT/ARGS vars)
 	@tools/copilot/summit-copilot review $(ARGS) $(PROMPT)
+
+# --- Eval Skills ---
+
+.PHONY: eval-skill eval-skills-changed eval-skills-all
+eval-skill: ## Run evaluation for a specific skill (SKILL=name)
+	@npx tsx evals/runner/run_skill_eval.ts --skill $(SKILL)
+
+eval-skills-changed: ## Run evaluation for changed skills
+	@npx tsx evals/runner/run_skills_changed.ts
+
+eval-skills-all: ## Run evaluation for all skills
+	@npx tsx evals/runner/run_skill_suite.ts
