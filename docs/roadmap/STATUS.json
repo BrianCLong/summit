@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Added locked MWS bellingcat workflow/toolkit deterministic evidence lane.",
+  "last_updated": "2026-03-05T19:37:20Z",
+  "revision_note": "Added SPAR minimal winning slice runtime prototype with deterministic artifacts and tests.",
   "initiatives": [
     {
       "id": "bellingcat-mws-media-verify",
@@ -211,6 +211,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "SPAR-MWS",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Goal\u2192plan\u2192allocate\u2192parallel execute\u2192artifact pipeline implemented under runtime/spar with regression tests."
     }
   ],
   "summary": {
