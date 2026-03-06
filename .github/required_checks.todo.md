@@ -1,8 +1,19 @@
-# Required checks discovery TODO
+# Required checks discovery (TODO)
 
-1. Open repository settings.
-2. Navigate to **Branches** and open the relevant branch protection rule.
-3. Record the exact required status check names.
-4. Update workflow check naming if needed.
+## Goal
+Discover the exact required status check names enforced by branch protection for `main`,
+then align workflow `name:` fields and job names accordingly.
 
-Temporary check introduced by this bundle: `pipeline-verify`.
+## Steps (UI)
+1. Repo → Settings → Branches → Branch protection rules.
+2. Find rule for `main`.
+3. Copy the “Require status checks to pass before merging” list verbatim.
+
+## Steps (API)
+Use GitHub REST API:
+- `GET /repos/{owner}/{repo}/branches/main/protection`
+
+## Output
+Create/Update:
+- `.github/policies/required-checks.json` (exact names)
+- If any workflow names differ, add a small PR to rename workflow `name:` fields.

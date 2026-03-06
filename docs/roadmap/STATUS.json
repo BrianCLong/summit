@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-09T00:00:00Z",
-  "revision_note": "Added AI psych safety trust pack standards, data handling, and runbook targets.",
+  "last_updated": "2026-02-08T01:05:00Z",
+  "revision_note": "Seeded evidence bundle schemas, verifier workflow, and required checks discovery placeholder.",
   "initiatives": [
+    {
+      "id": "saas-crash-2026-positioning-pack",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -58,7 +64,7 @@
       "id": "governance-evidence-contracts",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+      "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle. Seeded artifacts/evidence bundle, schemas, and CI verifier workflow with required checks TODO."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
@@ -159,12 +165,6 @@
       "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook."
     },
     {
-      "id": "ai-psych-safety-trust-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "AI psych safety trust pack standards, data handling, and runbook foundations."
-    },
-    {
       "id": "ru-ua-cogwar-lab",
       "status": "in_progress",
       "owner": "codex",
@@ -187,6 +187,12 @@
       "area": "docs/runbooks",
       "status": "complete",
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
+    },
+    {
+      "id": "ai-platform-daily-summary-2026-02-04",
+      "area": "docs/runbooks",
+      "status": "complete",
+      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
     },
     {
       "id": "ip-defense-claims-c391-s420",
