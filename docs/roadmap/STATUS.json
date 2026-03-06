@@ -1,13 +1,7 @@
 {
-  "last_updated": "2026-02-08T01:30:00Z",
-  "revision_note": "Validated repo assumptions for graph-grounded agent planning; recorded evidence sources and deferred validations.",
+  "last_updated": "2026-02-08T01:10:00Z",
+  "revision_note": "Added workflow-graph evidence lane-1 tracking entry.",
   "initiatives": [
-    {
-      "id": "repo-assumptions-graph-grounded-agent",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Repo assumptions validated with evidence-first inventory for graph-grounded agent lane; deferred CLI and redaction discovery."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -65,6 +59,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Governance evidence JSON artifacts, schemas, deterministic gate runner, and NDS foundation flags. Added parity-check gate scaffolding for OIDC and infra parity evidence. Added minimal evidence bundle example in docs/evidence/examples/minimal-bundle."
+    },
+    {
+      "id": "workflow-graphs-evidence-lane1",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Workflow graph evidence scaffolding with deterministic verifier and index registration."
     },
     {
       "id": "summit-skill-router-ga-orchestrator",
@@ -214,11 +214,11 @@
     }
   ],
   "summary": {
-    "rc_ready": 9,
+    "rc_ready": 8,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
