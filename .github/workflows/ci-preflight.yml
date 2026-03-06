@@ -12,6 +12,9 @@ on:
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
 
+concurrency:
+  group: ci-preflight-${{ github.ref }}
+=======
   push:
     branches: [main]
     paths:
@@ -20,27 +23,13 @@ on:
       - "docker-compose.dev.yaml"
       - "services/opa/**"
       - ".github/workflows/ci-preflight.yml"
-
-concurrency:
-  group: ci-preflight-${{ github.ref }}
-
-env:
-  POSTGRES_PASSWORD: ci-postgres-password
-  NEO4J_PASSWORD: ci-neo4j-password
-  JWT_SECRET: ci-jwt-secret-at-least-32-characters-long
-  JWT_REFRESH_SECRET: ci-refresh-secret-at-least-32-chars
+>>>>>>> 6d314f68d7 (feat: introduce standard evidence bundle and generator + fix CI pnpm conflict)
 
 jobs:
   validate-compose:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Provide fallback .env for compose validation
-        run: |
-          if [ ! -f .env ]; then
-            cp .env.example .env 2>/dev/null || touch .env
-          fi
 
       - name: Validate Docker Compose Config
         run: docker compose -f docker-compose.dev.yaml config
@@ -56,7 +45,7 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
