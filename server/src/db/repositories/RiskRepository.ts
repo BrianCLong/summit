@@ -10,8 +10,8 @@ export class RiskRepository {
    * Persists a risk score and its associated signals.
    * This is transactional.
    */
-  async saveRiskScore(input: RiskScoreInput): Promise<RiskScore> {
-    return await pg.transaction(async (tx: any) => {
+  saveRiskScore(input: RiskScoreInput): Promise<RiskScore> {
+    return pg.transaction(async (tx: any) => {
       // 1. Insert Risk Score
       const scoreRows = await tx.query(
         `INSERT INTO risk_scores (
@@ -31,20 +31,17 @@ export class RiskRepository {
       );
 
       const savedScore = scoreRows[0];
-      const savedSignals: RiskSignal[] = [];
 
-      // 2. Insert Risk Signals
+      // 2. Insert Risk Signals (Optimized: Batched multi-row insert)
       if (input.signals && input.signals.length > 0) {
-        // BOLT: Optimized batched insertion with chunking to reduce database round-trips.
-        const chunkSize = 100;
+        const CHUNK_SIZE = 100;
+        const signals = input.signals;
 
-        for (let i = 0; i < input.signals.length; i += chunkSize) {
-          const chunk = input.signals.slice(i, i + chunkSize);
+        for (let i = 0; i < signals.length; i += CHUNK_SIZE) {
+          const chunk = signals.slice(i, i + CHUNK_SIZE);
           const values: any[] = [];
-          const placeholders: string[] = [];
-          let paramIndex = 1;
-
-          for (const sig of chunk) {
+          const placeholders = chunk.map((sig, index) => {
+            const offset = index * 8;
             values.push(
               savedScore.id,
               sig.type,
@@ -53,24 +50,17 @@ export class RiskRepository {
               sig.weight,
               sig.contributionScore,
               sig.description,
-              sig.detectedAt || new Date(),
+              sig.detectedAt || new Date()
             );
-            placeholders.push(
-              `($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7})`,
-            );
-            paramIndex += 8;
-          }
+            return `($${offset + 1}, $${offset + 2}, $${offset + 3}, $${offset + 4}, $${offset + 5}, $${offset + 6}, $${offset + 7}, $${offset + 8})`;
+          }).join(', ');
 
-          const batchSql = `
-            INSERT INTO risk_signals (
+          await tx.query(
+            `INSERT INTO risk_signals (
               risk_score_id, type, source, value, weight, contribution_score, description, detected_at
-            ) VALUES ${placeholders.join(', ')}
-            RETURNING *`;
-
-          // BOLT: If batch fails, we allow the error to propagate to abort the transaction,
-          // matching original behavior but with much better performance in the success case.
-          const sigRows = await tx.query(batchSql, values);
-          sigRows.forEach((row: any) => savedSignals.push(this.mapSignal(row)));
+            ) VALUES ${placeholders}`,
+            values
+          );
         }
       }
 
