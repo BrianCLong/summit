@@ -298,20 +298,20 @@ export const deploymentRollbacksTotal = createCounter({
 });
 
 // Human-in-the-loop approvals
-export const approvalsPending = createGauge({
+const approvalsPending = createGauge({
   registers: [],
   name: 'approvals_pending',
   help: 'Current pending approvals requiring human review',
 });
 
-export const approvalsApprovedTotal = createCounter({
+const approvalsApprovedTotal = createCounter({
   registers: [],
   name: 'approvals_approved_total',
   help: 'Total approvals granted by human reviewers',
   labelNames: ['reviewer_role'],
 });
 
-export const approvalsRejectedTotal = createCounter({
+const approvalsRejectedTotal = createCounter({
   registers: [],
   name: 'approvals_rejected_total',
   help: 'Total approvals rejected by human reviewers',
@@ -1130,11 +1130,6 @@ try {
   register.registerMetric(maestroSynthesisOperations);
 } catch (e) { }
 
-// Debug log to verify metrics loading
-if (process.env.NODE_ENV === 'test') {
-  // console.log('DEBUG: metrics.ts loaded in test environment');
-}
-
 export const metrics = {
   graphExpandRequestsTotal,
   aiRequestTotal,
@@ -1219,5 +1214,3 @@ export const metrics = {
   narrativeSimulationEventsTotal,
   narrativeSimulationDurationSeconds,
 };
-
-export default metrics;

@@ -1,0 +1,19 @@
+{
+  "name": "@intelgraph/context",
+  "version": "1.0.0",
+  "description": "Context engineering for coding agents",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\""
+  },
+  "dependencies": {
+    "glob": "^11.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.0"
+  }
+}

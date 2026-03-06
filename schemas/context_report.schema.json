@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Context Report",
+  "type": "object",
+  "properties": {
+    "sessionId": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "loaded": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "layer": { "type": "string", "enum": ["guidance", "instructions", "interfaces", "skills"] },
+          "path": { "type": "string" },
+          "reason": { "type": "string" },
+          "provenance": { "type": "string" }
+        },
+        "required": ["id", "layer", "path", "provenance"]
+      }
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "totalChars": { "type": "integer" },
+        "limitChars": { "type": "integer" },
+        "status": { "type": "string", "enum": ["ok", "warn", "exceeded"] }
+      },
+      "required": ["totalChars", "limitChars", "status"]
+    }
+  },
+  "required": ["sessionId", "timestamp", "loaded", "budget"]
+}

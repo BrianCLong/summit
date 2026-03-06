@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Context Manifest",
+  "type": "object",
+  "properties": {
+    "version": { "type": "string" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "guidance": { "$ref": "#/definitions/fileList" },
+    "instructions": { "$ref": "#/definitions/fileList" },
+    "interfaces": { "$ref": "#/definitions/fileList" },
+    "skills": { "$ref": "#/definitions/fileList" }
+  },
+  "required": ["version", "generatedAt"],
+  "definitions": {
+    "fileList": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "description": { "type": "string" },
+          "hash": { "type": "string" },
+          "size": { "type": "integer" }
+        },
+        "required": ["id", "path", "hash"]
+      }
+    }
+  }
+}

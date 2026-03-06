@@ -8,10 +8,6 @@ on:
       - 'scripts/ci/enforce-provenance.sh'
       - '.github/workflows/provenance-gate.yml'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   provenance-enforcement:
     name: Enforce Supply Chain Provenance
