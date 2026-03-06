@@ -2,7 +2,7 @@ import { pg } from '../db/pg.js';
 // import { v4 as uuidv4 } from 'uuid';
 import crypto from 'crypto';
 import { webhookQueue } from './webhook.queue.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 export interface WebhookConfig {
   id: string;

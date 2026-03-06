@@ -12,7 +12,7 @@
  * - Permission checks
  */
 
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { sanitizeHtml } from '../utils/htmlSanitizer.js';
 
 // Base validation schemas

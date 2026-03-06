@@ -40,15 +40,24 @@ function getRequestContext(req: any): {
   tenantId: string | null;
   userId: string | null;
 } {
-  const tenantId = String(
-    req.headers['x-tenant-id'] || req.headers['x-tenant'] || '',
-  );
+  // SEC-2025-002: Prioritize identity and tenant context from authenticated user object
+  // populated by middleware, rather than untrusted headers to prevent spoofing.
+  const tenantId =
+    req.user?.tenantId ||
+    req.user?.tenant_id ||
+    req.tenant_id ||
+    req.tenantContext?.tenantId ||
+    (process.env.NODE_ENV === 'test' ? (req.headers['x-tenant-id'] || req.headers['x-tenant']) : null);
+
   const userId =
-    req.user?.id || req.headers['x-user-id'] || req.user?.email || 'system';
+    req.user?.id ||
+    req.user?.sub ||
+    req.user?.email ||
+    (process.env.NODE_ENV === 'test' ? req.headers['x-user-id'] : null);
 
   return {
-    tenantId: tenantId || null,
-    userId: userId || null,
+    tenantId: tenantId ? String(tenantId) : null,
+    userId: userId ? String(userId) : null,
   };
 }
 
@@ -333,11 +342,13 @@ caseRouter.get('/', async (req, res) => {
       tenantId,
       status: req.query.status as any,
       compartment: req.query.compartment as string,
-      policyLabels: (req.query.policyLabels as string)
+      policyLabels: req.query.policyLabels
         ? (req.query.policyLabels as string).split(',')
         : undefined,
       limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
-      offset: req.query.offset ? parseInt(req.query.offset as string) : undefined,
+      offset: req.query.offset
+        ? parseInt(req.query.offset as string)
+        : undefined,
     });
 
     res.json(cases);
@@ -553,15 +564,14 @@ caseRouter.post('/:id/comments', async (req, res) => {
     const pg = getPostgresPool();
     const service = new CommentService(pg);
 
-    const comment = await service.addComment(
-      {
-        caseId: id,
-        userId,
-        content,
-        metadata,
-      },
+    const comment = await service.addComment({
+      targetType: 'CASE',
+      targetId: id,
+      authorId: userId,
+      content,
+      metadata,
       tenantId,
-    );
+    });
 
     await emitAuditEvent(
       {
@@ -624,8 +634,8 @@ caseRouter.get('/:id/comments', async (req, res) => {
     }
 
     const { id } = req.params;
-    const limit = ((req.query.limi as string)t as string) ? parseInt(((req.query.lim as string)i as string)t as string) : undefined;
-    const offset = ((req.query.offse as string)t as string) ? parseInt(((req.query.offs as string)e as string)t as string) : undefined;
+    const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+    const offset = req.query.offset ? parseInt(req.query.offset as string) : undefined;
 
     const pg = getPostgresPool();
     const service = new CommentService(pg);

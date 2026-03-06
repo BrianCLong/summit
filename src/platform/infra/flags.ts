@@ -1,7 +1,0 @@
-export const FLAGS = {
-  INFRA_REGISTRY_ENABLED: process.env.INFRA_REGISTRY_ENABLED !== "false",
-  INFRA_POLICY_ENFORCE: process.env.INFRA_POLICY_ENFORCE !== "false",
-  SCAFFOLDER_ENABLED: process.env.SCAFFOLDER_ENABLED !== "false",
-  GRAPHRAG_INFRA_ENABLED: process.env.GRAPHRAG_INFRA_ENABLED === "true",
-  AGENT_INFRA_PLANNER_ENABLED: process.env.AGENT_INFRA_PLANNER_ENABLED === "true",
-};
