@@ -1,26 +1,13 @@
 /**
  * OpenTelemetry Instrumentation
  *
- * Replaces custom tracing with industry-standard OpenTelemetry
- * for Apollo GraphQL, Neo4j, and BullMQ operations.
+ * Wrapper around the core observability/tracer to provide backward compatibility
+ * and specialized wrapping methods.
  */
 
-// @ts-ignore
-import { NodeSDK } from '@opentelemetry/sdk-node';
-// @ts-ignore
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-// @ts-ignore
-import { Resource } from '@opentelemetry/resources';
-// @ts-ignore
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-// @ts-ignore
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-// @ts-ignore
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
-// @ts-ignore
-import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
-import { trace, context, SpanStatusCode, SpanKind, Span } from '@opentelemetry/api';
+import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
+import { getTracer, initializeTracing } from '../observability/tracer.js';
 
 const logger: pino.Logger = (pino as any)({ name: 'opentelemetry' });
 
@@ -28,15 +15,12 @@ interface TracingConfig {
   serviceName: string;
   serviceVersion: string;
   environment: string;
-  otlpEndpoint?: string;
-  otlpMetricEndpoint?: string;
+  jaegerEndpoint?: string;
   enableConsoleExporter: boolean;
   sampleRate: number;
 }
 
 class OpenTelemetryService {
-  private sdk: NodeSDK | null = null;
-  private tracer: any = null;
   private config: TracingConfig;
 
   constructor(config: Partial<TracingConfig> = {}) {
@@ -46,8 +30,7 @@ class OpenTelemetryService {
       serviceVersion:
         config.serviceVersion || process.env.OTEL_SERVICE_VERSION || '1.0.0',
       environment: config.environment || process.env.NODE_ENV || 'development',
-      otlpEndpoint: config.otlpEndpoint || process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT || 'http://otel-collector:4318/v1/traces',
-      otlpMetricEndpoint: config.otlpMetricEndpoint || process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT || 'http://otel-collector:4318/v1/metrics',
+      jaegerEndpoint: config.jaegerEndpoint || process.env.JAEGER_ENDPOINT,
       enableConsoleExporter:
         config.enableConsoleExporter ?? process.env.NODE_ENV === 'development',
       sampleRate:
@@ -60,64 +43,15 @@ class OpenTelemetryService {
    */
   initialize(): void {
     try {
-      // Configure resource
-      const resource = Resource.default().merge(
-        new Resource({
-          [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-          [SemanticResourceAttributes.SERVICE_VERSION]:
-            this.config.serviceVersion,
-          [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
-            this.config.environment,
-        }),
-      );
-
-      // Configure exporters
-      const traceExporter = new OTLPTraceExporter({
-        url: this.config.otlpEndpoint,
+      const tracer = initializeTracing({
+        serviceName: this.config.serviceName,
+        serviceVersion: this.config.serviceVersion,
+        environment: this.config.environment,
+        jaegerEndpoint: this.config.jaegerEndpoint,
+        sampleRate: this.config.sampleRate
       });
-
-      // Configure metrics
-      const metricExporter = new OTLPMetricExporter({
-        url: this.config.otlpMetricEndpoint,
-      });
-      const metricReader = new PeriodicExportingMetricReader({
-        exporter: metricExporter,
-        exportIntervalMillis: 15000, // Export metrics every 15 seconds
-      });
-
-      // Initialize SDK
-      this.sdk = new NodeSDK({
-        resource,
-        traceExporter,
-        metricReader,
-        instrumentations: [
-          getNodeAutoInstrumentations({
-            // Disable instrumentation for certain modules if needed
-            '@opentelemetry/instrumentation-fs': {
-              enabled: false,
-            },
-            '@opentelemetry/instrumentation-http': {
-               ignoreIncomingRequestHook: (req: any) => {
-                 // Ignore health checks and metrics endpoints to reduce noise
-                 return req.url?.includes('/health') || req.url?.includes('/metrics') || false;
-               },
-            },
-          }),
-        ],
-      });
-
-      // Start the SDK
-      this.sdk.start();
-
-      // Get tracer
-      this.tracer = trace.getTracer(
-        this.config.serviceName,
-        this.config.serviceVersion,
-      );
-
-      logger.info(
-        `OpenTelemetry initialized. Service Name: ${this.config.serviceName}, Environment: ${this.config.environment}, OTLP Traces: ${this.config.otlpEndpoint}, OTLP Metrics: ${this.config.otlpMetricEndpoint}`,
-      );
+      tracer.initialize();
+      logger.info('OpenTelemetry initialized via core tracer');
     } catch (error: any) {
       logger.error(
         `Failed to initialize OpenTelemetry. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -129,17 +63,9 @@ class OpenTelemetryService {
    * Shutdown OpenTelemetry SDK
    */
   async shutdown(): Promise<void> {
-    if (this.sdk) {
-      await this.sdk.shutdown();
-      logger.info('OpenTelemetry SDK shutdown');
-    }
-  }
-
-  /**
-   * Get the current active span
-   */
-  getActiveSpan(): Span | undefined {
-    return trace.getActiveSpan();
+    const tracer = getTracer();
+    await tracer.shutdown();
+    logger.info('OpenTelemetry SDK shutdown');
   }
 
   /**
@@ -150,11 +76,8 @@ class OpenTelemetryService {
     attributes: Record<string, any> = {},
     kind: typeof SpanKind.INTERNAL = SpanKind.INTERNAL,
   ) {
-    if (!this.tracer) {
-      return this.createNoOpSpan();
-    }
-
-    return this.tracer.startSpan(name, {
+    const tracer = getTracer();
+    return tracer.startSpan(name, {
       kind,
       attributes: {
         'service.name': this.config.serviceName,
@@ -322,20 +245,6 @@ class OpenTelemetryService {
   }
 
   /**
-   * Create no-op span for when tracing is disabled
-   */
-  private createNoOpSpan() {
-    return {
-      setStatus: () => {},
-      setAttributes: () => {},
-      addEvent: () => {},
-      end: () => {},
-      isRecording: () => false,
-      spanContext: () => ({ traceId: '', spanId: '', traceFlags: 0 }),
-    };
-  }
-
-  /**
    * Get service health and metrics
    */
   getHealth(): {
@@ -344,11 +253,12 @@ class OpenTelemetryService {
     environment: string;
     tracerActive: boolean;
   } {
+    const tracer = getTracer();
     return {
-      enabled: !!this.sdk,
+      enabled: tracer.isInitialized(),
       serviceName: this.config.serviceName,
       environment: this.config.environment,
-      tracerActive: !!this.tracer,
+      tracerActive: tracer.isInitialized(),
     };
   }
 }

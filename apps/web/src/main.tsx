@@ -8,6 +8,10 @@ import './index.css'
 import reportWebVitals from './reportWebVitals';
 import { TenantProvider } from './contexts/TenantContext'
 import { BrandPackProvider } from './contexts/BrandPackContext'
+import { initializeInstrumentation } from './instrumentation';
+
+// Initialize OpenTelemetry
+initializeInstrumentation();
 
 // Start MSW for development
 async function enableMocking() {
