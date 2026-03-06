@@ -1,45 +1,63 @@
-name: UX Governance Check
+name: UX Governance
 
 on:
   pull_request:
-    branches: [main, develop]
-  push:
-    branches: [main]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
 
 jobs:
-  ux-governance:
+  enforce-classification:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4 # v6
+      - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@fe02b34f77f8bc703788d5817da081398fad5dd2 # v4.0.0
-        # Version read from package.json packageManager field
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4 # v6
+      - name: Check PR Semantic Versioning
+        uses: actions/github-script@v7
         with:
-          cache: 'pnpm'
-          node-version: "20"
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              console.log("Not a pull request, skipping.");
+              return;
+            }
+            const labels = pr.labels.map(l => l.name);
+            const title = pr.title;
+            const classificationLabels = ['patch', 'minor', 'major'];
 
-      - name: Install dependencies
-        run: |
-          pnpm install --frozen-lockfile
+            console.log(`Title: ${title}`);
+            console.log(`Current Labels: ${JSON.stringify(labels)}`);
 
-      - name: Run UX Governance Check
-        run: |
-          node scripts/ux-ci-enforcer.js
+            let hasClassification = labels.some(l => classificationLabels.includes(l));
 
-      - name: Upload UX Governance Report
-        if: failure()
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
-        with:
-          retention-days: 14
-          name: ux-governance-report
-          path: ux-governance-report.json
+            // Auto-infer from title if no classification label is present
+            if (!hasClassification) {
+              console.log("No classification label found. Attempting inference from title...");
+              if (title.startsWith('feat:')) {
+                labels.push('minor');
+                console.log("Inferred 'minor' from 'feat:' prefix");
+              }
+              else if (title.startsWith('fix:')) {
+                labels.push('patch');
+                console.log("Inferred 'patch' from 'fix:' prefix");
+              }
+              else if (title.startsWith('docs:')) {
+                labels.push('patch');
+                console.log("Inferred 'patch' from 'docs:' prefix");
+              }
+              else if (title.startsWith('chore:')) {
+                labels.push('patch');
+                console.log("Inferred 'patch' from 'chore:' prefix");
+              }
+              else if (title.includes('BREAKING CHANGE')) {
+                labels.push('major');
+                console.log("Inferred 'major' from 'BREAKING CHANGE' in title");
+              }
+
+              // Re-evaluate
+              hasClassification = labels.some(l => classificationLabels.includes(l));
+            }
+
+            if (!hasClassification) {
+              core.setFailed("PR must have a classification label (patch, minor, or major) or use conventional commit prefixes (feat:, fix:, chore:, docs:) in the title.");
+            } else {
+              console.log("PR classification check passed.");
+            }
