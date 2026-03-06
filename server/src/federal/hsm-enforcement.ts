@@ -132,7 +132,7 @@ class HSMEnforcement {
     } catch (error: any) {
       console.error('HSM probe exception:', error);
       otelService.recordException(error);
-      span?.setStatus({ code: 2, message: error.message });
+      span.setStatus({ code: 2, message: error.message });
 
       this.probeCache = {
         available: false,
@@ -180,6 +180,7 @@ class HSMEnforcement {
       // Get available mechanisms
       const mechanisms = p11.C_GetMechanismList(slot);
       const mechanismNames = mechanisms.map((mech: number) => {
+        const info = p11.C_GetMechanismInfo(slot, mech);
         return `0x${mech.toString(16).padStart(8, '0')}`;
       });
 
@@ -269,52 +270,16 @@ class HSMEnforcement {
       const libPath =
         process.env.NSHIELD_PKCS11_LIB ||
         '/opt/nfast/toolkits/pkcs11/libcknfast.so';
-      const pkcs11 = await import('pkcs11js').catch(() => null);
 
-      if (!pkcs11) {
-        throw new Error('PKCS#11 library not available');
-      }
-
-      const p11 = new pkcs11.PKCS11();
-      try {
-        p11.load(libPath);
-        p11.C_Initialize();
-      } catch (e) {
-        return {
-          available: false,
-          fipsMode: false,
-          provider: 'nShield',
-          lastProbed: new Date(),
-          mechanisms: [],
-          error: `Failed to load nShield library: ${e.message}`,
-        };
-      }
-
-      const slots = p11.C_GetSlotList(true);
-      if (slots.length === 0) {
-        throw new Error('No nShield slots available');
-      }
-
-      const slot = slots[0];
-      const tokenInfo = p11.C_GetTokenInfo(slot);
-
-      // nShield FIPS validation
-      const fipsMode =
-        tokenInfo.label.includes('FIPS') ||
-        tokenInfo.model.includes('FIPS') ||
-        (tokenInfo.flags & 0x00000002) !== 0;
-
-      const mechanisms = p11.C_GetMechanismList(slot);
-      const mechanismNames = mechanisms.map((mech: number) => `nShield_0x${mech.toString(16)}`);
-
-      p11.C_Finalize();
-
+      // nShield specific FIPS validation
+      // In production, would check nShield FIPS module status
       return {
-        available: true,
-        fipsMode,
+        available: false, // Placeholder - implement actual nShield probe
+        fipsMode: false,
         provider: 'nShield',
         lastProbed: new Date(),
-        mechanisms: mechanismNames,
+        mechanisms: [],
+        error: 'nShield probe not implemented',
       };
     } catch (error: any) {
       return {
@@ -331,54 +296,13 @@ class HSMEnforcement {
   private async probeAzureHSM(): Promise<HSMProbeResult> {
     try {
       // Azure Dedicated HSM probe
-      const libPath =
-        process.env.AZURE_HSM_PKCS11_LIB ||
-        '/opt/azhsm/lib/libazhsm_pkcs11.so';
-      const pkcs11 = await import('pkcs11js').catch(() => null);
-
-      if (!pkcs11) {
-        throw new Error('PKCS#11 library not available');
-      }
-
-      const p11 = new pkcs11.PKCS11();
-      try {
-        p11.load(libPath);
-        p11.C_Initialize();
-      } catch (e) {
-        return {
-          available: false,
-          fipsMode: false,
-          provider: 'Azure_HSM',
-          lastProbed: new Date(),
-          mechanisms: [],
-          error: `Failed to load Azure HSM library: ${e.message}`,
-        };
-      }
-
-      const slots = p11.C_GetSlotList(true);
-      if (slots.length === 0) {
-        throw new Error('No Azure HSM slots available');
-      }
-
-      const slot = slots[0];
-      const tokenInfo = p11.C_GetTokenInfo(slot);
-
-      // Azure Dedicated HSM FIPS mode
-      const fipsMode =
-        tokenInfo.label.includes('FIPS') ||
-        tokenInfo.model.includes('FIPS');
-
-      const mechanisms = p11.C_GetMechanismList(slot);
-      const mechanismNames = mechanisms.map((mech: number) => `Azure_0x${mech.toString(16)}`);
-
-      p11.C_Finalize();
-
       return {
-        available: true,
-        fipsMode,
+        available: false, // Placeholder - implement actual Azure HSM probe
+        fipsMode: false,
         provider: 'Azure_HSM',
         lastProbed: new Date(),
-        mechanisms: mechanismNames,
+        mechanisms: [],
+        error: 'Azure HSM probe not implemented',
       };
     } catch (error: any) {
       return {
@@ -402,7 +326,7 @@ class HSMEnforcement {
       try {
         // Check if HSM is available and FIPS-enabled
         if (!this.probeCache) {
-          span?.setStatus({ code: 2, message: 'HSM not probed yet' });
+          span.setStatus({ code: 2, message: 'HSM not probed yet' });
           return res.status(503).json({
             error: 'hsm_not_ready',
             message: 'HSM availability not yet determined',
@@ -410,7 +334,7 @@ class HSMEnforcement {
         }
 
         if (!this.probeCache.available) {
-          span?.setStatus({ code: 2, message: 'HSM unavailable' });
+          span.setStatus({ code: 2, message: 'HSM unavailable' });
           return res.status(503).json({
             error: 'hsm_unavailable',
             message: 'Hardware Security Module is not available',
@@ -421,7 +345,7 @@ class HSMEnforcement {
         }
 
         if (!this.probeCache.fipsMode) {
-          span?.setStatus({ code: 2, message: 'HSM not FIPS-enabled' });
+          span.setStatus({ code: 2, message: 'HSM not FIPS-enabled' });
           return res.status(503).json({
             error: 'fips_required',
             message: 'HSM is not operating in FIPS mode',
@@ -440,7 +364,7 @@ class HSMEnforcement {
       } catch (error: any) {
         console.error('HSM enforcement middleware error:', error);
         otelService.recordException(error);
-        span?.setStatus({ code: 2, message: error.message });
+        span.setStatus({ code: 2, message: error.message });
 
         return res.status(500).json({
           error: 'hsm_enforcement_error',

@@ -6,10 +6,6 @@ on:
       - "scripts/ci/workflows_diff/**"
   workflow_dispatch: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pull-requests: write
@@ -37,8 +33,7 @@ jobs:
           git fetch upstream --depth=1 ${{ steps.upstream.outputs.ref }}
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
+        uses: pnpm/action-setup@v4      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
