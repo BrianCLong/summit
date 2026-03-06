@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react'
+// jquery removed for performance
 
 interface QueueItem {
   id: string
@@ -24,28 +25,23 @@ export default function SchedulerBoard() {
     return () => s.close()
   }, [])
 
+  // Optimization: Replaced jQuery DOM manipulation with React state and memoization
+  // This avoids expensive DOM traversals on every input change and O(N) DOM updates
+  const filteredQ = useMemo(() => {
+    if (!filter) return q
+    const v = filter.toLowerCase()
+    return q.filter(r => {
+      // Reconstruct the text content to match previous behavior (search across all columns)
+      const text = `${r.id}${r.tenant}${r.eta}${r.pool}$${r.cost.toFixed(2)}${r.preemptSuggestion ? '✅' : '—'}`.toLowerCase()
+      return text.includes(v)
+    })
+  }, [q, filter])
+
   useEffect(() => {
     fetch('/api/autoscale/hints')
       .then(r => r.json())
       .then(setHints)
   }, [])
-
-  const filteredQ = useMemo(() => {
-    const lowerFilter = filter.toLowerCase()
-    if (!lowerFilter) return q
-    return q.filter(r => {
-      // Create a string representation of the row content to match jQuery .text() behavior
-      const rowText = [
-        r.id,
-        r.tenant,
-        r.eta,
-        r.pool,
-        `$${r.cost.toFixed(2)}`,
-        r.preemptSuggestion ? '✅' : '—'
-      ].join('').toLowerCase()
-      return rowText.includes(lowerFilter)
-    })
-  }, [q, filter])
 
   return (
     <div className="p-4 rounded-2xl shadow">

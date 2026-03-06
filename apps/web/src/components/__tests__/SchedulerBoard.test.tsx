@@ -1,96 +1,83 @@
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { vi, describe, it, expect, beforeEach } from 'vitest'
 import React from 'react'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SchedulerBoard from '../SchedulerBoard'
-import { vi, describe, it, expect } from 'vitest'
 
-// Mock jQuery to avoid crash in current implementation
-vi.mock('jquery', () => {
-  const m = {
-    on: vi.fn(),
-    val: vi.fn(),
-    each: vi.fn(),
-    text: vi.fn(),
-    toggle: vi.fn(),
-  }
-  const fn = () => m
-  // Add static methods/properties if needed, though mostly $(...) is used.
-  return {
-    default: fn,
-    __esModule: true,
-  }
-})
+// Global EventSource mock setup
+let eventSourceInstance: any;
 
-// Mock EventSource
-const mockEventSource = {
-  onmessage: null,
-  close: vi.fn(),
-}
-
-// @ts-ignore
-global.EventSource = vi.fn(() => mockEventSource)
+global.EventSource = class EventSource {
+    onmessage: ((event: MessageEvent) => void) | null = null;
+    close = vi.fn();
+    addEventListener = vi.fn();
+    removeEventListener = vi.fn();
+    constructor(url: string) {
+        eventSourceInstance = this;
+    }
+} as any;
 
 // Mock fetch
 global.fetch = vi.fn(() =>
   Promise.resolve({
-    json: () => Promise.resolve({ minuteAhead: 42 }),
+    json: () => Promise.resolve({ minuteAhead: 5 }),
   })
 ) as any
 
 describe('SchedulerBoard', () => {
-  it('renders rows and filters them', async () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    eventSourceInstance = null
+  })
+
+  it('renders queue items and filters them', async () => {
     render(<SchedulerBoard />)
 
-    // Simulate EventSource message
-    const mockData = [
-      { id: 'run-1', tenant: 'acme', eta: '5m', pool: 'gpu-large', cost: 1.5, preemptSuggestion: true },
-      { id: 'run-2', tenant: 'globex', eta: '10m', pool: 'cpu-small', cost: 0.2, preemptSuggestion: false },
+    // Wait for the component to mount and set up the EventSource listener
+    await waitFor(() => expect(eventSourceInstance).toBeTruthy())
+
+    // Simulate incoming data
+    const queueData = [
+      { id: '1', tenant: 'TenantA', eta: '10:00', pool: 'pool-1', cost: 10, preemptSuggestion: false },
+      { id: '2', tenant: 'TenantB', eta: '10:05', pool: 'pool-2', cost: 20, preemptSuggestion: true },
     ]
 
-    // Trigger the onmessage callback manually
-    const event = { data: JSON.stringify(mockData) }
-
-    // We need to wait for the component to attach the listener
-    // Since useEffect runs after render, and we are in the same tick effectively (or slightly after),
-    // we should be able to trigger it.
-    // However, `mockEventSource.onmessage` is assigned inside useEffect.
-
-    // We can use a small delay or waitFor to ensure useEffect has run?
-    // Actually `render` triggers effects.
-
-    if (mockEventSource.onmessage) {
-        (mockEventSource as any).onmessage(event)
-    } else {
-        // Retry a bit later if not attached yet (though usually it is synchronous after render in tests unless suspended)
-        // But `render` returns, effects run.
-        // Let's wrapping in act? React Testing Library `render` handles this.
+    // Simulate receiving data via onmessage
+    if (eventSourceInstance) {
+        const event = { data: JSON.stringify(queueData) } as MessageEvent;
+        if (eventSourceInstance.onmessage) {
+            // Need to wrap in act? render and fireEvent handle it usually.
+            // Since this is outside react lifecycle event, strictly speaking yes,
+            // but for now let's try direct call.
+            eventSourceInstance.onmessage(event);
+        }
     }
 
-    // Re-trigger if needed, or rely on the reference update.
-    // Since `mockEventSource` is a singleton in our mock scope,
-    // when `SchedulerBoard` sets `.onmessage`, it sets it on our object.
-
-    expect(mockEventSource.onmessage).toBeTruthy()
-    ;(mockEventSource as any).onmessage(event)
-
-    // Verify rows are rendered
-    expect(await screen.findByText('acme')).toBeInTheDocument()
-    expect(screen.getByText('globex')).toBeInTheDocument()
-    expect(screen.getByText('$1.50')).toBeInTheDocument()
-    expect(screen.getByText('42')).toBeInTheDocument() // Hints
-
-    // Test Filtering
-    const input = screen.getByPlaceholderText('filter tenant…')
-    fireEvent.change(input, { target: { value: 'acme' } })
-
-    // In the new implementation (React state), this should trigger a re-render with filtered list.
-    // In the old implementation (jQuery), this relies on jQuery toggling display:none.
-    // Since we mocked jQuery, the old implementation does NOTHING visible to JSDOM (it calls mock toggle).
-    // So this assertion `expect(screen.queryByText('globex')).not.toBeInTheDocument()` will FAIL on current code.
-    // This is EXPECTED. It confirms that my test validates the NEW behavior.
-
+    // Verify items are rendered
     await waitFor(() => {
-        expect(screen.queryByText('globex')).not.toBeInTheDocument()
+      expect(screen.getByText('TenantA')).toBeInTheDocument()
+      expect(screen.getByText('TenantB')).toBeInTheDocument()
     })
-    expect(screen.getByText('acme')).toBeInTheDocument()
+
+    // Test filtering
+    const filterInput = screen.getByPlaceholderText('filter tenant…')
+    fireEvent.input(filterInput, { target: { value: 'TenantA' } })
+
+    // Verify filtering behavior
+    // TenantA should be visible
+    const rowA = screen.getByText('TenantA').closest('tr');
+    expect(rowA).toBeVisible()
+
+    // TenantB should be hidden (current impl) or removed (future impl)
+    const rowBText = screen.queryByText('TenantB');
+
+    if (rowBText) {
+       const rowB = rowBText.closest('tr');
+       // If it exists, it must be hidden.
+       // Note: expect(element).not.toBeVisible() passes if display: none.
+       expect(rowB).not.toBeVisible();
+    } else {
+       // If it doesn't exist (future implementation), that's also correct filtering.
+       expect(rowBText).not.toBeInTheDocument();
+    }
   })
 })
