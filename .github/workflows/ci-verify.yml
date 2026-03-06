@@ -1,20 +1,32 @@
 name: ci-verify
+
 on:
   pull_request:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+
 jobs:
-  verify-evidence:
+  verify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: node .github/scripts/verify-evidence.mjs
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm test --runInBand tests/graphrag/evidence/writer.test.ts tests/graphrag/evidence/schema-validation.test.ts
+
+      - name: Validate evidence schemas and determinism
+        run: pnpm exec tsx scripts/ci/verify-evidence-bundle.ts

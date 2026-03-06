@@ -1,0 +1,10 @@
+{
+  "policy": "media-claims",
+  "mode": "deny-by-default",
+  "deny": [
+    {
+      "condition": "claim.verified == true && claim.evidence_ids.length == 0",
+      "message": "verified media claims require linked evidence"
+    }
+  ]
+}
