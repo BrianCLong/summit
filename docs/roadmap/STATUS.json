@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added agentic CI subsumption RFC entry for governance-aligned pipeline modernization.",
+  "last_updated": "2026-02-10T14:05:00Z",
+  "revision_note": "Added Pydantic v2 validation performance standards initiative and evidence-first documentation alignment.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -79,16 +79,16 @@
       "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
     },
     {
+      "id": "pydantic-perf-v2-standards",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Documented Pydantic v2 validation performance standards with evidence artifacts, budgets, and MAESTRO-aligned guidance."
+    },
+    {
       "id": "summit-pr-stack-sequencer-skill",
       "status": "in_progress",
       "owner": "codex",
       "notes": "Merge-train skill for deterministic PR DAGs, merge order, rollback plans, and evidence hooks."
-    },
-    {
-      "id": "agentic-ci-subsumption-rfc",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Drafted RFC AG-01 for agentic CI subsumption, policy-as-code, and TS workflow DSL."
     },
     {
       "id": "promptspec-foundation-lane1",
@@ -218,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 16,
+    "total": 17,
     "ga_blockers": []
   }
 }
