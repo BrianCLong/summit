@@ -1,54 +1,95 @@
-import { jest, describe, it, expect, beforeEach } from '@jest/globals';
-import { RiskRepository } from '../repositories/RiskRepository.js';
-import { pg } from '../../db/pg.js';
+import { jest } from '@jest/globals';
+import { RiskRepository, RiskScore } from '../repositories/RiskRepository.js';
+import { pool } from '../pg.js';
 
 describe('RiskRepository', () => {
-  let repository: RiskRepository;
+  let riskRepository: RiskRepository;
+  let mockClient: any;
 
   beforeEach(() => {
-    repository = new RiskRepository();
-    jest.clearAllMocks();
+    riskRepository = new RiskRepository();
+    mockClient = {
+      query: jest.fn().mockImplementation((text, _params) => {
+        if (typeof text === 'string' && text.includes('INSERT INTO risk_scores')) {
+          return Promise.resolve({ rows: [{ id: 'score-123' }] });
+        }
+        return Promise.resolve({ rows: [], rowCount: 0 });
+      }),
+      release: jest.fn(),
+    };
+
+    jest.spyOn(pool, 'connect').mockResolvedValue(mockClient as any);
   });
 
-  it('should batch signals in chunks of 100', async () => {
-    // Mock pg.transaction to immediately execute the callback
-    const mockTx = {
-      query: jest.fn().mockResolvedValue([{ id: 'test-score-id' }]),
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should save a risk score and its signals using batching (optimized)', async () => {
+    const riskScore: RiskScore = {
+      entity_id: 'entity-1',
+      entity_type: 'user',
+      score: 75,
+      level: 'high',
+      signals: [
+        { signal_type: 'type1', value: 10, weight: 1 },
+        { signal_type: 'type2', value: 20, weight: 2 },
+        { signal_type: 'type3', value: 30, weight: 3 },
+      ]
     };
-    const transactionSpy = jest.spyOn(pg, 'transaction').mockImplementation(async (cb: any) => {
-      return await cb(mockTx);
-    });
 
-    const signals = Array.from({ length: 250 }, (_, i) => ({
-      type: 'test',
-      source: 'test',
-      value: 1,
-      weight: 1,
-      contributionScore: 1,
-      description: `signal ${i}`,
-    }));
+    const id = await riskRepository.saveRiskScore(riskScore);
 
-    await repository.saveRiskScore({
-      tenantId: 't1',
-      entityId: 'e1',
-      entityType: 'user',
-      score: 50,
-      level: 'medium',
-      window: '24h',
-      modelVersion: '1.0',
-      rationale: 'test',
-      signals,
-    });
+    expect(id).toBe('score-123');
+    expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
 
-    // 1 for the score insert, then 3 for signals (100 + 100 + 50)
-    expect(mockTx.query).toHaveBeenCalledTimes(4);
-
-    // Verify first signal batch
-    expect(mockTx.query).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO risk_signals'),
-      expect.arrayContaining([signals[0].description])
+    // Check risk_scores insert
+    expect(mockClient.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO risk_scores'),
+      ['entity-1', 'user', 75, 'high']
     );
 
-    transactionSpy.mockRestore();
+    // Check batched risk_signals insert
+    // It should be ONE call for all 3 signals
+    expect(mockClient.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO risk_signals'),
+      [
+        'score-123', 'type1', 10, 1, undefined,
+        'score-123', 'type2', 20, 2, undefined,
+        'score-123', 'type3', 30, 3, undefined
+      ]
+    );
+
+    expect(mockClient.query).toHaveBeenCalledWith('COMMIT');
+    expect(mockClient.release).toHaveBeenCalled();
+
+    // Total queries: BEGIN, score insert, batched signals insert, COMMIT = 4
+    expect(mockClient.query).toHaveBeenCalledTimes(4);
+  });
+
+  it('should throw an error and rollback the transaction if batching fails', async () => {
+    const riskScore: RiskScore = {
+      entity_id: 'entity-1',
+      entity_type: 'user',
+      score: 75,
+      level: 'high',
+      signals: [{ signal_type: 'type1', value: 10, weight: 1 }]
+    };
+
+    mockClient.query.mockImplementation((text) => {
+      if (typeof text === 'string' && text.includes('INSERT INTO risk_signals')) {
+        return Promise.reject(new Error('Batch insert failed'));
+      }
+      if (typeof text === 'string' && text.includes('INSERT INTO risk_scores')) {
+        return Promise.resolve({ rows: [{ id: 'score-123' }] });
+      }
+      return Promise.resolve({ rows: [] });
+    });
+
+    await expect(riskRepository.saveRiskScore(riskScore)).rejects.toThrow('Batch insert failed');
+
+    expect(mockClient.query).toHaveBeenCalledWith('BEGIN');
+    expect(mockClient.query).toHaveBeenCalledWith('ROLLBACK');
+    expect(mockClient.release).toHaveBeenCalled();
   });
 });
