@@ -36,6 +36,11 @@ router.post('/secrets/rotate', rotateHandler);
 
 ## Vulnerability Log
 
+## 2026-03-06 - [CRITICAL] Insecure JWT Validation in v24 Signal Ingest
+**Vulnerability:** The `authenticateRequest` middleware in `v24_modules/server/src/ingest/http.ts` used placeholder logic that bypassed JWT signature verification and trusted a user-supplied `tenantId` from the request body.
+**Learning:** Placeholder "TODO" comments in security-critical middleware can easily be overlooked and become critical vulnerabilities in production-like modules. Mocking authentication for "ease of development" without strict environment gates often leads to insecure defaults.
+**Prevention:** Never use placeholder logic for authentication. Always implement full JWT validation (signature, issuer, audience) from the start, or use a robust, well-tested security library. Extract identity and tenancy claims exclusively from the verified token payload.
+
 ## 2025-10-26 - [CRITICAL] Insecure JWT Secret Fallback
 **Vulnerability:** The server used a hardcoded default string ('super-secret-key') for JWT signing when the `JWT_SECRET` environment variable was missing, even in production.
 **Learning:** Default fallbacks for security-critical secrets are dangerous. The absence of a secret in production should be treated as a fatal configuration error, not an opportunity to use a default.
