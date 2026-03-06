@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:33:30Z",
-  "revision_note": "Added pnpm setup to PR Quality Gate LongRunJob validation to prevent missing pnpm failures.",
+  "last_updated": "2026-02-08T00:43:05Z",
+  "revision_note": "Aligned OSINT source inventory with GDELT GKG access notes.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
