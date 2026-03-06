@@ -1,40 +1,20 @@
-# Repo Assumptions & Validation
+# Repo Assumptions
 
-## Verified vs Assumed Directory List
+## Verified
+- Repo root has `prompts/` directory.
+- `summit/` is a Python package with `cli/` and `eval/`.
+- `summit/tests/` exists and contains tests.
+- Existing prompts use YAML format (e.g., `code.critic@v1.yaml`).
+- `pyproject.toml` exists in the root.
 
-| Path | Status | Notes |
-| --- | --- | --- |
-| `.github/workflows/` | ✅ Verified | Present at repo root. |
-| `docs/` | ✅ Verified | Present at repo root. |
-| `scripts/` | ✅ Verified | Present at repo root. |
-| `tests/` | ✅ Verified | Present at repo root. |
-| `src/` | ✅ Verified | Present at repo root. |
-| `server/` | ✅ Verified | Present at repo root. |
-| `client/` | ✅ Verified | Present at repo root. |
-| `packages/` | ✅ Verified | Present at repo root. |
-| `docs/operations/` | Deferred pending validation | Validate before adding new trees. |
-| `docs/governance/` | ✅ Verified | Present at repo root. |
+## Assumed
+- `pytest` is the test runner.
+- `summit/prompts/` is the best place for new prompt logic.
+- `summit/cli/` is the best place for the new CLI command.
 
-## CI Check Names (Exact)
+## To-verify
+- Can I run `summit` CLI? (Failed earlier, will create `summit/cli/main.py`).
 
-Deferred pending validation against `.github/workflows/*` and branch protection.
-
-## Evidence Schema Conventions (Exact)
-
-Deferred pending validation against `docs/governance/*` and `evidence/` schemas.
-
-## Must-Not-Touch List (Guardrails)
-
-Deferred pending validation. Baseline expectations:
-
-- Lockfiles (`pnpm-lock.yaml`, `package-lock.json`, `yarn.lock`)
-- Production compose files (`docker-compose*.yml`)
-- Secrets or `.env` files
-
-## Validation Checklist
-
-1. Confirm Node version + package manager in `package.json` and workflows.
-2. Confirm workflows and required checks in branch protection.
-3. Confirm evidence/telemetry conventions (schemas, naming, and locations).
-4. Confirm whether `docs/operations/` and `docs/governance/` already exist.
-5. Confirm graph stores in configs (Neo4j/Qdrant/etc).
+## Must-not-touch
+- `src/` core execution paths (unless confirmed).
+- `data/` (not seen but assumed).

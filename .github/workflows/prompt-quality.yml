@@ -1,0 +1,38 @@
+name: Prompt Quality Gate
+
+on:
+  pull_request:
+    paths:
+      - 'prompts/**/*.prompt.yaml'
+      - 'summit/prompts/**'
+      - 'summit/eval/**'
+  push:
+    branches: [ main ]
+
+jobs:
+  lint-and-eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install .
+          pip install pytest
+
+      - name: Run Prompt Lint
+        run: |
+          python -m summit.cli.main prompt lint prompts/
+
+      - name: Run Eval Tests
+        run: |
+          pytest summit/tests/eval/
+
+      - name: Run Schema Tests
+        run: |
+          pytest summit/tests/prompts/

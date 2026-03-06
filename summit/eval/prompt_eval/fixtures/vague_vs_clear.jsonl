@@ -1,0 +1,2 @@
+{"id": "case_1", "input": "This is bad.", "expected_output": "Negative"}
+{"id": "case_2", "input": "This is good.", "expected_output": "Positive"}

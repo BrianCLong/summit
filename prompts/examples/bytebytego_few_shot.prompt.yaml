@@ -1,0 +1,23 @@
+id: PROMPT:BBG-FEW-SHOT:1.0.0
+system: "You are a helpful AI assistant."
+user_template: "Classify the following text into Neutral, Negative, or Positive.\n\n{{examples}}\nText: {{text}}\nSentiment:"
+components:
+  task_description: "Classify text sentiment with examples."
+  examples:
+    - input: "I think the food was okay."
+      output: "Neutral"
+    - input: "The food was terrible."
+      output: "Negative"
+    - input: "I loved it!"
+      output: "Positive"
+  concrete_task: "Classify the input text based on examples."
+output_format: "^(Neutral|Negative|Positive)$"
+techniques:
+  zero_shot: false
+  few_shot: true
+  cot: false
+  role: false
+  chaining: false
+budgets:
+  max_examples: 5
+requires_context: false

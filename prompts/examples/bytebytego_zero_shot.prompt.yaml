@@ -1,0 +1,16 @@
+id: PROMPT:BBG-ZERO-SHOT:1.0.0
+system: "You are a helpful AI assistant."
+user_template: "Classify the following text into Neutral, Negative, or Positive.\n\nText: {{text}}\nSentiment:"
+components:
+  task_description: "Classify text sentiment."
+  concrete_task: "Classify the input text."
+output_format: "^(Neutral|Negative|Positive)$"
+techniques:
+  zero_shot: true
+  few_shot: false
+  cot: false
+  role: false
+  chaining: false
+budgets:
+  max_examples: 0
+requires_context: false

@@ -26,10 +26,6 @@ on:
 # - Top-level: read-only by default
 # - generate-pack job: contents read only (no signing)
 # - attest job: id-token write for OIDC signing
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 
@@ -57,9 +53,8 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4 # v6
         with:
           node-version: "20"
           cache: "pnpm"

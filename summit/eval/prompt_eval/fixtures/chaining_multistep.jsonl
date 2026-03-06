@@ -1,0 +1,1 @@
+{"id": "chain_1", "input": "Analyze the sentiment of 'I love it' and then translate to Spanish.", "expected_steps": ["sentiment", "translation"]}

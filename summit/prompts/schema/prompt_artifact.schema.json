@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.ai/schemas/prompt-artifact.schema.json",
+  "title": "Summit Prompt Artifact",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^PROMPT:[A-Z0-9-]+:\\d+\\.\\d+\\.\\d+$",
+      "description": "Unique identifier for the prompt, e.g., PROMPT:CODE-CRITIC:1.0.0"
+    },
+    "system": {
+      "type": "string",
+      "description": "System prompt content"
+    },
+    "user_template": {
+      "type": "string",
+      "description": "Jinja2 template for the user prompt"
+    },
+    "components": {
+      "type": "object",
+      "properties": {
+        "task_description": { "type": "string" },
+        "context_rules": { "type": "string" },
+        "examples": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "input": { "type": "string" },
+              "output": { "type": "string" },
+              "explanation": { "type": "string" }
+            },
+            "required": ["input", "output"]
+          }
+        },
+        "concrete_task": { "type": "string" }
+      },
+      "required": ["task_description", "concrete_task"]
+    },
+    "output_schema": {
+      "type": "object",
+      "description": "JSON Schema for the expected model output"
+    },
+    "output_format": {
+      "type": "string",
+      "description": "Description of output format if schema is not sufficient"
+    },
+    "techniques": {
+      "type": "object",
+      "properties": {
+        "zero_shot": { "type": "boolean" },
+        "few_shot": { "type": "boolean" },
+        "cot": { "type": "boolean" },
+        "role": { "type": "boolean" },
+        "chaining": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_examples": { "type": "integer", "default": 5 },
+        "max_tokens_soft": { "type": "integer" }
+      }
+    },
+    "requires_context": {
+      "type": "boolean",
+      "default": false
+    },
+    "untrusted_inputs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of input variables that come from untrusted users"
+    }
+  },
+  "required": ["id", "components", "techniques"],
+  "additionalProperties": false
+}

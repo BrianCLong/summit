@@ -15,6 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Prompt engineering guide artifacts, CLI, evaluation harness, and CI gates.
+
+### Fixed
+- Fixed extensive CI workflow syntax errors and indentation issues.
+- Resolved stale submodule and dependency issues in CI.
+- Fixed version mismatch in server package.json.
+
+### Added
 - Added `@summit/trends` package for business trend instrumentation.
 - Added evidence system for Forbes 2026 trends analysis.
 
