@@ -4,50 +4,48 @@ from dataclasses import dataclass
 
 from .config import ModulithConfig
 from .scanner import ImportEdge
+from .schemas import EVIDENCE_ID_PREFIX
 
 
 @dataclass(frozen=True)
 class Violation:
     evidence_id: str
-    rule_id: str
+    code: str
     source_module: str
     target_module: str
     source_file: str
-    import_name: str
+    import_symbol: str
     message: str
-
 
 
 def verify_edges(edges: list[ImportEdge], config: ModulithConfig) -> list[Violation]:
     violations: list[Violation] = []
-
     for edge in edges:
-        source = config.modules[edge.source_module]
-        if edge.target_module not in source.allowed_dependencies:
+        allowed = config.allowed_dependencies_for(edge.source_module)
+        if edge.target_module not in allowed:
             violations.append(
                 Violation(
-                    evidence_id=f"MBV-IMP-{len(violations) + 1:03d}",
-                    rule_id="MBV-IMP-001",
+                    evidence_id=f"{EVIDENCE_ID_PREFIX}-{len(violations) + 1:03d}",
+                    code="MBV-IMP-001",
                     source_module=edge.source_module,
                     target_module=edge.target_module,
-                    source_file=edge.source_file,
-                    import_name=edge.import_name,
-                    message="Cross-module import is not in the allowlist matrix.",
+                    source_file=str(edge.source_file),
+                    import_symbol=edge.target_symbol,
+                    message="cross-module import is not declared in allowed_dependencies",
                 )
             )
             continue
 
-        if config.rules.cross_module_requires_event and ".events" not in edge.import_name:
+        if config.cross_module_requires_event and not edge.uses_event_channel:
             violations.append(
                 Violation(
-                    evidence_id=f"MBV-EVT-{len(violations) + 1:03d}",
-                    rule_id="MBV-EVT-001",
+                    evidence_id=f"{EVIDENCE_ID_PREFIX}-{len(violations) + 1:03d}",
+                    code="MBV-IMP-002",
                     source_module=edge.source_module,
                     target_module=edge.target_module,
-                    source_file=edge.source_file,
-                    import_name=edge.import_name,
-                    message="Cross-module import must use the events namespace.",
+                    source_file=str(edge.source_file),
+                    import_symbol=edge.target_symbol,
+                    message="cross-module import must use module event channel (.events)",
                 )
             )
-
     return violations
