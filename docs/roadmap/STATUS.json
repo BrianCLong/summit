@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-10T14:05:00Z",
-  "revision_note": "Added Pydantic v2 validation performance standards initiative and evidence-first documentation alignment.",
+  "last_updated": "2026-02-08T10:48:35Z",
+  "revision_note": "Added Agentic CI + Policy-as-Code RFC entry for TS-first DSL and GitHub-native artifacts.",
   "initiatives": [
+    {
+      "id": "agentic-ci-pac-integration",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "RFC drafted for Agentic CI + Policy-as-Code integration with TS-first DSL and GitHub-native artifacts."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -77,12 +83,6 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Added Summit GA Preflight (Hard-Gate Auditor) skill with deterministic GA/merge readiness output."
-    },
-    {
-      "id": "pydantic-perf-v2-standards",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Documented Pydantic v2 validation performance standards with evidence artifacts, budgets, and MAESTRO-aligned guidance."
     },
     {
       "id": "summit-pr-stack-sequencer-skill",
@@ -218,7 +218,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 23,
     "ga_blockers": []
   }
 }
