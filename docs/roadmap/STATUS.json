@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:05:00Z",
-  "revision_note": "Expanded narrative dominance operationalization standards with new high-signal extensions.",
+  "last_updated": "2026-02-08T00:35:58Z",
+  "revision_note": "Added GHA hardening guardrails workflow plus permissions/action pinning preflight scripts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -150,7 +150,7 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added narrative operationalization extensions (debt, partitioning, exhaustion, assumptions, compression, absorption, funnels, governance signaling) in docs/standards/narrative-dominance-tech.md."
+      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
     },
     {
       "id": "ru-ua-cogwar-lab",
