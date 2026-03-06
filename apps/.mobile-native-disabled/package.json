@@ -82,7 +82,7 @@
     "react-native-background-fetch": "^4.2.0",
     "@sentry/react-native": "^5.15.2",
     "metro-minify-terser": "^0.83.3",
-    "axios": "^1.11.0",
+    "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "zod": "^4.1.12",
     "react-hook-form": "^7.54.2",

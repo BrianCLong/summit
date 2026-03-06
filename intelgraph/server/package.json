@@ -18,7 +18,7 @@
     "db:reset": "npm run db:migrate && npm run db:seed"
   },
   "dependencies": {
-    "@apollo/server": "^4.9.1",
+    "@apollo/server": "^4.16.0",
     "apollo-server-express": "^3.12.0",
     "argon2": "^0.31.0",
     "cors": "^2.8.5",
