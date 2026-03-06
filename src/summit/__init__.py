@@ -1,1 +1,0 @@
-# Summit namespace package

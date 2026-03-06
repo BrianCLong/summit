@@ -1,19 +1,7 @@
 {
-  "last_updated": "2026-02-21T00:00:00Z",
-  "revision_note": "Added GA exit criteria v1 scorecard artifact and wired it into GA verification mapping.",
+  "last_updated": "2026-02-08T01:30:00Z",
+  "revision_note": "Validated repo assumptions for CogWar MWS alignment; recorded evidence and CI workflow verification.",
   "initiatives": [
-    {
-      "id": "ga-exit-criteria-v1-scorecard",
-      "status": "completed",
-      "owner": "codex",
-      "notes": "Published docs/ga/GA_EXIT_CRITERIA_v1.md and mapped the gate in docs/ga verification artifacts."
-    },
-    {
-      "id": "saas-crash-2026-positioning-pack",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Evidence-backed SaaS crash 2026 positioning pack, claim registry, and repo validation checklist alignment."
-    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
@@ -180,7 +168,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -195,16 +183,10 @@
       "summary": "Published cognitive security defense runbook with governance, evidence, and exit criteria."
     },
     {
-      "id": "ai-platform-daily-summary-2026-02-04",
-      "area": "docs/runbooks",
-      "status": "complete",
-      "summary": "Published AI platform daily summary runbook covering MCP ecosystem updates, context engineering, and governed next steps."
-    },
-    {
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
@@ -225,18 +207,18 @@
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
     },
     {
-      "id": "org-mesh-twin-ga-buyer-demo",
-      "status": "complete",
-      "owner": "Jules",
-      "notes": "Buyer-ready demo script, metrics instrumentation (@intelgraph/metrics), and runbook for Org Mesh Twin GA."
+      "id": "cogwar-mws-repo-assumptions",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Captured verified vs deferred repo layout, CI workflow presence, evidence schema locations, and must-not-touch zones for CogWar MWS."
     }
   ],
   "summary": {
-    "rc_ready": 9,
+    "rc_ready": 8,
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 18,
+    "total": 17,
     "ga_blockers": []
   }
 }

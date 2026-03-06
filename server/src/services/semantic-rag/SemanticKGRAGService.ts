@@ -21,7 +21,7 @@ import { Driver } from 'neo4j-driver';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { createHash, randomUUID } from 'crypto';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import logger from '../../utils/logger.js';
 
 const serviceLogger = logger.child({ name: 'SemanticKGRAGService' });

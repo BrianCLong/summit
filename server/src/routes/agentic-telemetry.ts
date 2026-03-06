@@ -2,7 +2,7 @@
 import { Router, Request, Response } from 'express';
 import { maestro } from '../orchestrator/maestro.js';
 import { logger } from '../utils/logger.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { AuthenticatedRequest } from './types.js';
 
 const router = Router();

@@ -11,7 +11,7 @@
  */
 
 import * as crypto from 'node:crypto';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { RiskEngine, RiskResult } from '../../risk/RiskEngine.js';
 import { FeatureVector } from '../../risk/FeatureStore.js';
 import { dualNotary } from '../../federal/dual-notary.js';

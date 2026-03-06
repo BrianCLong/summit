@@ -1,7 +1,7 @@
 // @ts-nocheck
 import express, { Response, NextFunction } from 'express';
 import { DeceptionService, HoneypotConfig, InteractionData } from '../services/DeceptionService.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import logger from '../utils/logger.js';
 import { cfg } from '../config.js';
 import type { AuthenticatedRequest } from './types.js';

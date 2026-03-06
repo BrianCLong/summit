@@ -7,7 +7,7 @@ import {
 } from '../services/ticket-links.js';
 import { LifecycleManager } from '../services/lifecycle-listeners.js';
 import { webhookService, CreateWebhookSchema, UpdateWebhookSchema } from '../webhooks/webhook.service.js';
-import { z } from 'zod/v4';
+import { z } from 'zod';
 import { logger, metrics, tracer } from '../observability/index.js';
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 import crypto from 'crypto';
