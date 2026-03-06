@@ -1,95 +1,106 @@
 # Daily Sprint - 2026-02-25
 
-## Sprint Plan
+## Summit Readiness Assertion
+Readiness posture remains active with governed exceptions only; security and GA-critical guardrails are prioritized over velocity.
 
-1. Goal: Stabilize high-priority open PRs by isolating smallest actionable CI blockers.
-- Scope: `.github/workflows/*`, `scripts/ga/*`, `scripts/ci/*`, PRs #18706/#18690/#18689.
-- Validation: `gh pr checks`, failed-run log inspection via `gh run view --log-failed`.
+## Scan and Plan
 
-2. Goal: Keep Bolt and Sentinel security PRs merge-ready by confirming required gates.
-- Scope: PRs #18690 and #18689 status/check rollups.
-- Validation: `gh pr checks <pr> --required`.
+### Inputs consumed
+- Governance and precedence files reviewed:
+  - `docs/SUMMIT_READINESS_ASSERTION.md`
+  - `docs/governance/CONSTITUTION.md`
+  - `docs/governance/META_GOVERNANCE.md`
+  - `docs/governance/AGENT_MANDATES.md`
+- Roadmap status reviewed:
+  - `docs/roadmap/STATUS.json`
+- Open PR scan (top 20 by recency; captured before GitHub API outage):
+  - [#18706](https://github.com/BrianCLong/summit/pull/18706) Stabilize Main: Apply CI/Lockfile Fixes from Orphan Branch
+  - [#18705](https://github.com/BrianCLong/summit/pull/18705) Bolt: batch risk signals insertion
+  - [#18704](https://github.com/BrianCLong/summit/pull/18704) Add Policy Gate for SBOM and Provenance
+  - [#18703](https://github.com/BrianCLong/summit/pull/18703) Add Grounding and Plan Determinism Benchmark
+  - [#18702](https://github.com/BrianCLong/summit/pull/18702) Add OpenLineage batch and OTel support
+  - [#18701](https://github.com/BrianCLong/summit/pull/18701) Fix auth fallback and privacy caching
+  - [#18700](https://github.com/BrianCLong/summit/pull/18700) Add Nimble response strategy doc and update roadmap STATUS.json
+  - [#18699](https://github.com/BrianCLong/summit/pull/18699) Add AI Company Operating Model Comparison briefing and update executive index/status
+  - [#18698](https://github.com/BrianCLong/summit/pull/18698) docs(intelgraph): add IntelGraph ecosystem map and GA-readiness gap matrix
+  - [#18697](https://github.com/BrianCLong/summit/pull/18697) Fix trailing blank lines in page components
+  - [#18696](https://github.com/BrianCLong/summit/pull/18696) docs(release): add Summit v1.0 GA launch package and link canonical notes
+  - [#18695](https://github.com/BrianCLong/summit/pull/18695) docs: add Summit Subsumption Engine v2 plan and update roadmap status
+  - [#18694](https://github.com/BrianCLong/summit/pull/18694) docs: add Claude simple prompting brief and roadmap status update
+  - [#18693](https://github.com/BrianCLong/summit/pull/18693) Enhance Summit Monitoring and Observability
+  - [#18692](https://github.com/BrianCLong/summit/pull/18692) Enhance Data Storage and Backup Infrastructure
+  - [#18691](https://github.com/BrianCLong/summit/pull/18691) Palette: Polish SearchBar UX and EmptyState icons
+  - [#18690](https://github.com/BrianCLong/summit/pull/18690) Bolt: Batched Risk Signal Inserts
+  - [#18689](https://github.com/BrianCLong/summit/pull/18689) Sentinel: [HIGH] Secure unauthenticated operational/administrative routers
+  - [#18688](https://github.com/BrianCLong/summit/pull/18688) feat: Comprehensive Testing Suite & CI/CD
+  - [#18687](https://github.com/BrianCLong/summit/pull/18687) Palette: Fix EmptyState icon rendering and add fallback
+- Open issue scan with `security|ga|governance|osint|bolt` labels: blocked by intermittent GitHub API outage.
 
-3. Goal: Resolve one concrete blocker end-to-end with merge-ready patch.
-- Scope: `scripts/ga/ga-verify-runner.mjs` on PR #18706 branch.
-- Validation: targeted regression check against CI logs + local command smoke.
+## Sprint Tasks (Planned)
 
-4. Goal: Maintain daily operations evidence trail.
-- Scope: `docs/ops/DAILY_SPRINT_2026-02-25.md`.
-- Validation: committed file + PR comment with commands/results.
+### Task 1 - Triage high-risk open PRs and identify smallest merge-ready unit
+- Goal: Prioritize a security-critical PR that can be completed with bounded risk in this run.
+- Expected files/subsystems: `server/src/routes/*`, `.github/workflows/*`, `docs/ops/*`.
+- Validation: PR metadata scan + local branch diff against `origin/main`.
+- Status: Completed.
 
-## Triage Snapshot
+### Task 2 - Harden PR #18689 with regression coverage for auth guardrails
+- Goal: Prevent regression where operational routers become reachable without authentication.
+- Expected files/subsystems: `server/src/routes/__tests__/` and auth-protected route modules.
+- Validation: route-scoped Jest test for unauthenticated access returns `401`.
+- Status: Completed (code added). Execution blocked locally by missing `node_modules` in `server`.
 
-### Open PRs (Top 20 by recency)
-- #18706 [Stabilize Main: Apply CI/Lockfile Fixes from Orphan Branch](https://github.com/BrianCLong/summit/pull/18706)
-- #18705 [⚡ Bolt: batch risk signals insertion](https://github.com/BrianCLong/summit/pull/18705)
-- #18704 [Add Policy Gate for SBOM and Provenance](https://github.com/BrianCLong/summit/pull/18704)
-- #18703 [Add Grounding and Plan Determinism Benchmark](https://github.com/BrianCLong/summit/pull/18703)
-- #18702 [Add OpenLineage batch and OTel support](https://github.com/BrianCLong/summit/pull/18702)
-- #18701 [Fix auth fallback and privacy caching](https://github.com/BrianCLong/summit/pull/18701)
-- #18700 [Add Nimble response strategy doc and update roadmap STATUS.json](https://github.com/BrianCLong/summit/pull/18700)
-- #18699 [Add AI Company Operating Model Comparison briefing and update executive index/status](https://github.com/BrianCLong/summit/pull/18699)
-- #18698 [docs(intelgraph): add IntelGraph ecosystem map and GA-readiness gap matrix](https://github.com/BrianCLong/summit/pull/18698)
-- #18697 [Fix trailing blank lines in page components](https://github.com/BrianCLong/summit/pull/18697)
-- #18696 [docs(release): add Summit v1.0 GA launch package and link canonical notes](https://github.com/BrianCLong/summit/pull/18696)
-- #18695 [docs: add Summit Subsumption Engine v2 plan and update roadmap status](https://github.com/BrianCLong/summit/pull/18695)
-- #18694 [docs: add Claude simple prompting brief and roadmap status update](https://github.com/BrianCLong/summit/pull/18694)
-- #18693 [Enhance Summit Monitoring and Observability](https://github.com/BrianCLong/summit/pull/18693)
-- #18692 [Enhance Data Storage and Backup Infrastructure](https://github.com/BrianCLong/summit/pull/18692)
-- #18691 [🎨 Palette: Polish SearchBar UX and EmptyState icons](https://github.com/BrianCLong/summit/pull/18691)
-- #18690 [⚡ Bolt: Batched Risk Signal Inserts](https://github.com/BrianCLong/summit/pull/18690)
-- #18689 [🛡️ Sentinel: [HIGH] Secure unauthenticated operational/administrative routers](https://github.com/BrianCLong/summit/pull/18689)
-- #18688 [feat: Comprehensive Testing Suite & CI/CD](https://github.com/BrianCLong/summit/pull/18688)
-- #18687 [🎨 Palette: Fix EmptyState icon rendering and add fallback](https://github.com/BrianCLong/summit/pull/18687)
+### Task 3 - Run mandatory boundary governance check
+- Goal: Confirm route-test additions do not violate declared parallelization boundaries.
+- Expected files/subsystems: `scripts/check-boundaries.cjs`.
+- Validation: `node scripts/check-boundaries.cjs`.
+- Status: Completed.
 
-### Priority issues (security/ga/governance focus)
-- #18646 (security, compliance, ga-blocker): Compliance automation.
-- #18645 (ci, ga-blocker, determinism): CI reproducibility gate.
-- #18644 (ga-blocker, determinism, infra): run manifest integration.
-- #18631 (ci, governance): core gate blocked by pnpm setup.
-- #18597 (ci, governance): Golden Path supply-chain workflow pre-job failure.
+### Task 4 - Publish evidence and blockers for operator follow-up
+- Goal: Leave deterministic run evidence and exact unblock commands for next run.
+- Expected files/subsystems: `docs/ops/DAILY_SPRINT_2026-02-25.md`.
+- Validation: file updated with commands, outcomes, and blocker causes.
+- Status: Completed.
 
 ## Execution Log
 
-### Commands run (this run)
-- `gh pr list --repo BrianCLong/summit --state open --limit 20 --json ...`
-- `gh issue list --repo BrianCLong/summit --state open --limit 50 --json ...`
-- `node scripts/check-boundaries.cjs` ✅ PASS
-- `gh pr view 18690 --json ...`
-- `gh pr view 18689 --json ...`
-- `gh pr checks 18690 --required` ✅ required checks passing
-- `gh pr checks 18689 --required` ✅ required checks passing
-- `gh pr checks 18706 --required` ❌ gate/meta-gate failures
-- `gh run view 22413157252 --log-failed`
-- `gh run view 22413157326 --log-failed`
+### Branch/worktree
+- Working branch: `codex/daily-sprint-18689-auth-tests`
+- Base tracking branch: `origin/sentinel-secure-ops-routers-2431741579196400576`
 
-### Root cause isolated (#18706)
-- `gate` failure shows `ga:verify` failed on `typecheck` due missing `@types/hapi__catbox` / `@types/hapi__shot` stubs.
-- Branch `chore/stabilize-main-13959852129103910136` had removed the `sanitize:type-stubs` pre-step from `scripts/ga/ga-verify-runner.mjs`.
+### Commands run
+- `gh pr list --repo BrianCLong/summit --state open --limit 20 --json number,title,updatedAt,isDraft,labels,url,headRefName,baseRefName`
+  - Result: Success (one run), top-20 PR set captured above.
+- `gh issue list --repo BrianCLong/summit --state open --limit 100 --json number,title,labels,updatedAt,url`
+  - Result: Failed repeatedly due `error connecting to api.github.com`.
+- `git diff origin/main...origin/sentinel-secure-ops-routers-2431741579196400576 -- server/src/routes/airgap.ts server/src/routes/analytics.ts server/src/routes/dr.ts`
+  - Result: Success; confirmed auth/role middleware insertion.
+- `pnpm --filter intelgraph-server test -- --runTestsByPath src/routes/__tests__/operational-router-auth-guards.test.ts`
+  - Result: Failed (environment) with `spawn jest ENOENT` and warning `node_modules missing`.
+- `node scripts/check-boundaries.cjs`
+  - Result: Success (`No boundary violations found`).
 
-### Change applied
-- Restored `sanitize:type-stubs` step in `scripts/ga/ga-verify-runner.mjs` (same guardrail pattern already present on `main`).
+## Changes Produced
+- Added regression test file:
+  - `server/src/routes/__tests__/operational-router-auth-guards.test.ts`
+- Updated roadmap tracking:
+  - `docs/roadmap/STATUS.json`
 
-## Task Status
+## End-of-Day Summary
 
-- Task 1 (triage + isolate blockers): ✅ Completed.
-- Task 2 (required-gate check for #18690/#18689): ✅ Completed.
-- Task 3 (merge-ready blocker patch on #18706): ✅ Completed (code change committed).
-- Task 4 (daily operations evidence): ✅ Completed (this file).
+### Planned vs completed
+- Planned tasks: 4
+- Completed tasks: 4
+- Partially complete due environment blockers: 1 validation step (Jest execution only)
 
-## Planned Follow-up (next run)
+### PRs touched
+- Primary target: [#18689](https://github.com/BrianCLong/summit/pull/18689)
 
-1. Re-run CI on #18706 after push and capture delta in failing gates.
-2. If `meta-gate` still fails, patch Required Checks Policy mismatch path in `scripts/ci/governance-meta-gate.mjs`/related policy loader.
-3. Continue targeted remediation only on failing required gates to avoid broad workflow churn.
+### Blockers
+- GitHub API availability was intermittent to unavailable for issue-triage and PR-detail refresh during this run.
+- Local test runtime for `intelgraph-server` is currently blocked due missing dependencies in `server/node_modules`.
 
-## Blockers
-
-- Local workspace in this run did not have full dependency install, so direct local `pnpm typecheck` produced broad missing-package failures and is not a trustworthy full validation signal.
-- Mitigation used: CI log-based root-cause validation + minimal patch aligned to `main` behavior.
-
-## End-of-run summary
-
-- Completed: triage, required-check verification for #18689/#18690, root-cause isolation and patch for #18706 GA typecheck regression.
-- In progress: CI stabilization of #18706 after patch push.
-- Blocked: full local monorepo typecheck due missing installed dependencies in this workspace snapshot.
+### Follow-ups for next sprint
+1. Re-run `gh issue list` and priority label triage after API connectivity stabilizes.
+2. Run `pnpm install` (or `pnpm --filter intelgraph-server install`) then rerun the route-auth regression test.
+3. Post test+boundary evidence comment directly on PR #18689 once connectivity is healthy.

@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-- **Performance**: Implemented Copy-on-Write (CoW) optimization for input sanitization middleware, reducing memory allocation and CPU overhead by ~30% for clean requests.
+### Security
+- Hardened administrative routes (dr, airgap, analytics) with mandatory authentication and RBAC.
+### Security
+- Hardened administrative routes (dr, airgap, analytics) with mandatory authentication and RBAC.
 
 ### Added
 - Added `@summit/trends` package for business trend instrumentation.
@@ -25,6 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Context Engineering Core package with token budgeting, eviction, compression, and manifest metrics.
 - Context manifest schema versioning and provenance validation for CEP core.
 - **ACP Registry Integration**: Added `summit.acp` module for agent registry ingestion, policy enforcement, and plan-only installation support (Lane 1/Lane 2 foundation).
+
+### Fixed
+- CI governance and evidence gates now support legacy evidence index shape and non-merge-base PR diffs in protected workflows.
 
 ## [4.1.1] - MVP-4 GA Build Fix - 2026-01-06
 

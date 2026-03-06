@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-11T11:32:16Z",
-  "revision_note": "Daily sprint continuation: refreshed GH triage evidence and completed schema validation via uv runtime.",
+  "last_updated": "2026-02-25T23:20:00Z",
+  "revision_note": "Added daily sprint security guardrail regression workstream for operational router auth enforcement.",
   "initiatives": [
+    {
+      "id": "daily-sprint-2026-02-25-router-auth-guardrails",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Added regression test coverage to enforce auth guardrails on airgap/analytics/dr routers and logged validation blockers in daily sprint ops report."
+    },
     {
       "id": "saas-crash-2026-positioning-pack",
       "status": "in_progress",
@@ -174,7 +180,7 @@
       "id": "ip-claims-continuation-pack-c451-s480",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Added defense CRM and simulation apparatus dependent claims C451–C480 and S451–S480."
+      "notes": "Added defense CRM and simulation apparatus dependent claims C451\u2013C480 and S451\u2013S480."
     },
     {
       "id": "io-cogwar-radar-2027-brief",
@@ -198,7 +204,7 @@
       "id": "ip-defense-claims-c391-s420",
       "status": "completed",
       "owner": "codex",
-      "notes": "Added CRM and Simulation Apparatus claims C391–C420/S391–S420 for graph integrity, appeals, and causal guardrails."
+      "notes": "Added CRM and Simulation Apparatus claims C391\u2013C420/S391\u2013S420 for graph integrity, appeals, and causal guardrails."
     },
     {
       "id": "spec-driven-development-docs",
