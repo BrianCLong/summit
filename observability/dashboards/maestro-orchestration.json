@@ -1,0 +1,91 @@
+{
+  "dashboard": {
+    "title": "Maestro Orchestration & DORA Metrics",
+    "tags": ["maestro", "dora", "orchestration"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Deployments Total",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(maestro_deployments_total[24h])) by (status)",
+            "legendFormat": "{{status}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Change Failure Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "maestro_change_failure_rate",
+            "legendFormat": "Failure Rate",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "PR Lead Time (Hours)",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum(rate(maestro_pr_lead_time_hours_bucket[24h])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 4,
+        "title": "Mean Time To Recovery (MTTR - Hours)",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "sum(rate(maestro_mttr_hours_bucket[24h])) by (le)",
+            "format": "heatmap",
+            "legendFormat": "{{le}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 5,
+        "title": "DAG Execution Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(maestro_dag_execution_duration_seconds_bucket[1h])) by (le, dag_id))",
+            "legendFormat": "{{dag_id}} p95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 6,
+        "title": "Job Execution Duration",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(maestro_job_execution_duration_seconds_bucket[1h])) by (le, job_type))",
+            "legendFormat": "{{job_type}} p95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 16 }
+      }
+    ],
+    "refresh": "1m",
+    "time": { "from": "now-24h", "to": "now" }
+  }
+}

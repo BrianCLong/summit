@@ -1,46 +1,32 @@
-import { Request, Response, NextFunction } from 'express';
 import { getTracer } from '../observability/tracer.js';
-import { httpRequestsTotal, httpRequestDuration } from './metrics.js';
-// import { logger } from '../utils/logger.js'; // logger is unused in current implementation
+import { Request, Response, NextFunction } from 'express';
 
-export const tracingService = {
-  expressMiddleware: () => {
-    return (req: Request, res: Response, next: NextFunction) => {
-      const span = getTracer().getCurrentSpan();
+/**
+ * Express middleware to attach trace context to response headers.
+ * This ensures downstream clients can correlate requests with traces.
+ *
+ * Note: Tracer initialization should happen at application bootstrap (e.g. index.ts).
+ * This middleware assumes the global tracer provider is already registered.
+ */
+export const expressMiddleware = () => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    // getTracer() retrieves the global singleton.
+    // If not initialized, it returns a safe instance (usually) or throws depending on impl.
+    // Given usage in index.ts, it should be ready.
+    const tracer = getTracer();
 
-      if (span && span.isRecording()) {
-        const traceId = span.spanContext().traceId;
-        res.setHeader('X-Trace-Id', traceId);
+    const span = tracer.getCurrentSpan();
+    if (span) {
+      const traceId = span.spanContext().traceId;
+      // Standard header for trace correlation
+      res.setHeader('X-Trace-ID', traceId);
+
+      // Add standard attributes to the span from the request if not already auto-instrumented
+      if (req.user) {
+        span.setAttribute('user.id', (req.user as any).id || 'unknown');
+        span.setAttribute('user.tenant', (req.user as any).tenantId || 'unknown');
       }
-
-      const start = process.hrtime();
-
-      res.on('finish', () => {
-        const duration = process.hrtime(start);
-        const durationInSeconds = duration[0] + duration[1] / 1e9;
-
-        const method = req.method;
-        const route = req.route ? req.route.path : 'unknown';
-        const statusCode = res.statusCode;
-
-        // Increment total requests counter
-        try {
-          httpRequestsTotal.labels(method, route, statusCode.toString()).inc();
-        } catch (e) {
-          // Ignore metric errors
-        }
-
-        // Observe duration
-        try {
-            httpRequestDuration.labels(method, route, statusCode.toString()).observe(durationInSeconds);
-        } catch (e) {
-            // Ignore metric errors
-        }
-      });
-
-      next();
-    };
-  },
+    }
+    next();
+  };
 };
-
-export default tracingService;
