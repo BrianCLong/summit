@@ -1,7 +1,7 @@
 {
   "name": "@intelgraph/recursive-outcome-amplifier",
   "version": "4.2.3",
-  "description": "Recursive Outcome Amplifier™ - Predicts cascading consequences through multi-order propagation",
+  "description": "Recursive Outcome Amplifier\u2122 - Predicts cascading consequences through multi-order propagation",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@apollo/server": "^4.9.5",
+    "@apollo/server": "^4.16.0",
     "graphql": "^16.8.1",
     "neo4j-driver": "^5.14.0",
     "pino": "^8.16.2",
