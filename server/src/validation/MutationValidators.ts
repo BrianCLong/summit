@@ -422,12 +422,6 @@ export class SecurityValidator {
       /on\w+\s*=/gi,
     ];
 
-    const prototypePollutionPatterns = [
-      /"__proto__"/g,
-      /"constructor"/i,
-      /"prototype"/i,
-    ];
-
     if (sqlInjectionPatterns.some((pattern) => pattern.test(inputStr))) {
       errors.push('Potential SQL injection detected');
     }
@@ -438,10 +432,6 @@ export class SecurityValidator {
 
     if (xssPatterns.some((pattern) => pattern.test(inputStr))) {
       errors.push('Potential XSS content detected');
-    }
-
-    if (prototypePollutionPatterns.some((pattern) => pattern.test(inputStr))) {
-      errors.push('Potential Prototype Pollution detected');
     }
 
     // Check for excessively long inputs (potential DoS)

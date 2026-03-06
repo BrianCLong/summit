@@ -13,12 +13,11 @@ jobs:
       hashes: ${{ steps.slsa-subjects.outputs.hashes }}
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: 18.x
-      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
+      - uses: pnpm/action-setup@v4 # v4      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v5
         with:
           python-version: "3.11"
       - name: Install dependencies
@@ -85,7 +84,7 @@ jobs:
       contents: read
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           name: summit-artifacts
           path: dist
@@ -101,7 +100,7 @@ jobs:
     needs: [provenance]
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           name: summit-artifacts
           path: dist

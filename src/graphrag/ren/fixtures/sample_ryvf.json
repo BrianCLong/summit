@@ -1,0 +1,18 @@
+[
+  {
+    "tenant_id": "tenant-123",
+    "artifact_id": "art-001",
+    "yield_facts": [
+      {
+        "fact_id": "fact-001",
+        "category": "technical",
+        "sensitivity": "medium",
+        "claim_text_hash": "claimhash1",
+        "evidence_spans": ["page 5, paragraph 2"],
+        "confidence": 0.9
+      }
+    ],
+    "yield_links": [],
+    "assumptions": []
+  }
+]
