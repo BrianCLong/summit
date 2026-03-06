@@ -11,10 +11,6 @@ on:
       - ".github/workflows/graph-guardrail-fuzz.yml"
       - "package.json"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   guardrail-fuzz:
     runs-on: ubuntu-latest

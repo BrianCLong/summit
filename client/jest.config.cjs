@@ -17,7 +17,6 @@ const config = {
   moduleNameMapper: {
     '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
     '\\.(gif|ttf|eot|svg|png)$': '<rootDir>/__mocks__/fileMock.js',
-    '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
     '^ansi-regex$': '<rootDir>/__mocks__/ansi-regex.js',
     '^@mui/material/Unstable_Grid2$': '<rootDir>/__mocks__/MuiGrid2.js',
     '^@/(.*)$': '<rootDir>/src/$1',

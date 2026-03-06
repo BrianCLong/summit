@@ -20,6 +20,7 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
+import DOMPurify from 'dompurify';
 import {
   Send as SendIcon,
   Psychology as PsychologyIcon,
@@ -188,9 +189,8 @@ function ChatMessage({ message, isUser, isLoading }) {
                   '& em': { fontStyle: 'italic' },
                 }}
                 dangerouslySetInnerHTML={{
-                  __html: message.replace(
-                    /\*\*(.*?)\*\*/g,
-                    '<strong>$1</strong>',
+                  __html: DOMPurify.sanitize(
+                    message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
                   ),
                 }}
               />
