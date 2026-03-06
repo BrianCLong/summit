@@ -22,13 +22,13 @@ export default defineConfig({
     ? {
         webServer: [
           {
-            command: 'cd apps/web && pnpm dev',
+            command: 'npm run client:dev',
             port: 3000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },
           {
-            command: 'cd server && pnpm dev',
+            command: 'npm run server:dev',
             port: 4000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
@@ -40,7 +40,7 @@ export default defineConfig({
   ...((process.env.CI && !useWebServer)
     ? {
         webServer: {
-          command: 'echo "CI uses make up"',
+          command: 'sleep 120',
           url: 'http://localhost:3000',
           reuseExistingServer: true,
           timeout: 120_000,

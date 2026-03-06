@@ -29,7 +29,6 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    if: ${{ vars.MERGE_SURGE != 'true' || github.event_name == 'merge_group' || github.event_name == 'push' || github.event_name == 'schedule' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
@@ -61,7 +60,6 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-          cache-dependency-path: '**/pnpm-lock.yaml'
 
       - name: Install dependencies (monorepo workspaces)
         if: matrix.language == 'javascript-typescript'
