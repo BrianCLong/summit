@@ -1,12 +1,16 @@
 import { CronJob } from 'cron';
+import { getPostgresPool } from '../db/postgres.js';
 import { logger as baseLogger } from '../config/logger.js';
-import { partitionManager } from '../db/partitioning.js';
+import { PartitionManager, PartitionOptions } from '../orchestrator/PartitionManager.js';
 
 const logger = baseLogger.child({ service: 'PartitionMaintenanceService' });
 
-const TABLES_TO_MAINTAIN = [
-  'provenance_ledger_v2',
-];
+const TABLES_CONFIG: Record<string, PartitionOptions> = {
+  'provenance_ledger_v2': {}, // Default suffix _yYYYYmMM
+  'audit_logs': {}, // Default suffix
+  'orchestrator_events_p': { stripSuffix: '_p', suffixFormat: '_YYYY_MM' },
+  'orchestrator_outbox_p': { stripSuffix: '_p', suffixFormat: '_YYYY_MM' }
+};
 
 export class PartitionMaintenanceService {
   private job: CronJob;
@@ -35,20 +39,34 @@ export class PartitionMaintenanceService {
 
   public async maintainPartitions() {
     logger.info('Starting partition maintenance');
+    const managedPool = getPostgresPool();
+    // Use the underlying write pool for DDL operations
+    const partitionManager = new PartitionManager(managedPool.pool);
 
+    // Outbox Events (using DB function - keeping legacy support)
     try {
-        // Create upcoming partitions
-        await partitionManager.maintainPartitions(TABLES_TO_MAINTAIN);
-        logger.info('Upcoming partitions ensured');
-
-        // Archive old partitions (e.g., keep 12 months)
-        // Configuration could be dynamic, defaulting to 12 months
-        const retentionMonths = process.env.PARTITION_RETENTION_MONTHS ? parseInt(process.env.PARTITION_RETENTION_MONTHS) : 12;
-        await partitionManager.detachOldPartitions(TABLES_TO_MAINTAIN, retentionMonths);
-        logger.info('Old partitions cleanup completed');
-
+      await managedPool.write('SELECT ensure_outbox_partition($1, $2)', [2, 6]);
+      logger.info({ tableName: 'outbox_events' }, 'Partition maintenance successful (DB function)');
     } catch (error) {
-        logger.error({ error }, 'Partition maintenance failed');
+      logger.error({ tableName: 'outbox_events', error }, 'Failed to maintain partitions for table (DB function)');
+    }
+
+    // Generic Partition Management
+    const now = new Date();
+    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const monthAfterNext = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+
+    for (const [tableName, options] of Object.entries(TABLES_CONFIG)) {
+      try {
+        // Ensure next month
+        await partitionManager.ensureMonthlyPartition(tableName, nextMonth, options);
+        // Ensure month after next (buffer)
+        await partitionManager.ensureMonthlyPartition(tableName, monthAfterNext, options);
+
+        logger.info({ tableName }, 'Partition maintenance successful');
+      } catch (error) {
+        logger.error({ tableName, error }, 'Failed to maintain partitions for table');
+      }
     }
   }
 }
