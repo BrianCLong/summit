@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T10:42:56Z",
-  "revision_note": "Added agentic analytics 2026 documentation track (standards, data handling, runbook, assumptions).",
+  "last_updated": "2026-02-08T10:06:26Z",
+  "revision_note": "Added AI adoption artifact templates and required-check discovery scaffold.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -205,12 +205,6 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
-    },
-    {
-      "id": "agentic-analytics-2026-docs",
-      "status": "in_progress",
-      "owner": "codex",
-      "notes": "Published agentic analytics 2026 standards, data handling, runbook, and repo assumptions (docs-only PR1)."
     }
   ],
   "summary": {
@@ -218,7 +212,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 16,
     "ga_blockers": []
   }
 }
