@@ -1,4 +1,3 @@
-import future.keywords
 package helmsecurity
 
 # Deny deployments without security context

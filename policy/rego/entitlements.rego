@@ -1,4 +1,3 @@
-import future.keywords
 package entitlements
 
 # input: { plan, feature }

@@ -1,4 +1,3 @@
-import future.keywords
 package abac
 
 default allow = false

@@ -1,4 +1,3 @@
-import future.keywords
 package secrets
 
 import data.inventory

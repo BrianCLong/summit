@@ -1,4 +1,3 @@
-import future.keywords
 package conductor.security
 
 import rego.v1

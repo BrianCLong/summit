@@ -55,13 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     name: Generate Client SDKs
     needs: validate
-    if: ((((github.event_name == 'push' && github.ref == 'refs/heads/main') && (github.event_name == 'push' && github.ref == 'refs/heads/main')) && (github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-sdk]'))) && (secrets.NPM_TOKEN != '')) && (secrets.PYPI_TOKEN != '')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -94,6 +92,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy API Documentation
     needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -101,8 +100,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -147,6 +144,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Publish SDKs
     needs: generate-sdks
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[publish-sdk]')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -157,8 +155,6 @@ jobs:
           name: generated-sdks
           path: sdks/
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -167,6 +163,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish TypeScript SDK to npm
+        if: secrets.NPM_TOKEN != ''
         working-directory: sdks/typescript
         run: |
           npm publish --access public
@@ -179,6 +176,7 @@ jobs:
           python-version: '3.11'
 
       - name: Publish Python SDK to PyPI
+        if: secrets.PYPI_TOKEN != ''
         working-directory: sdks/python
         run: |
           pip install build twine

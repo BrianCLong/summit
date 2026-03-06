@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.authz
 
 default allow = false

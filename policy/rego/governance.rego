@@ -1,4 +1,3 @@
-import future.keywords
 package rego.governance
 
 default allow := false

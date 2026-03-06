@@ -27,8 +27,6 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -70,7 +68,7 @@ jobs:
         continue-on-error: true
       
       - name: Deploy to GitHub Pages
-        if: (github.ref == 'refs/heads/main' && github.event_name == 'push') && (always())
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -78,6 +76,7 @@ jobs:
           cname: docs.summit.io
       
       - name: Upload build artifacts
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: docs-build
@@ -91,8 +90,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

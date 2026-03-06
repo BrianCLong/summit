@@ -1,4 +1,3 @@
-import future.keywords
 package release_gates
 
 test_allow {

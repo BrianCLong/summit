@@ -1,4 +1,3 @@
-import future.keywords
 package dockersecurity
 
 # Deny final images running as root

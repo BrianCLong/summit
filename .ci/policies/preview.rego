@@ -1,4 +1,3 @@
-import future.keywords
 package preview
 
 default allow = false

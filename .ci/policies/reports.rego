@@ -1,4 +1,3 @@
-import future.keywords
 package reports
 
 default allow = false

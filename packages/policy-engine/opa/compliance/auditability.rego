@@ -1,4 +1,3 @@
-import future.keywords
 package compliance.auditability
 
 default allow = false

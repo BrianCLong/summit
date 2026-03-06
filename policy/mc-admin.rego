@@ -1,4 +1,3 @@
-import future.keywords
 package mc.admin
 
 default allow := false

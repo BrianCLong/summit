@@ -1,4 +1,3 @@
-import future.keywords
 package cos.abac
 
 default allow = false

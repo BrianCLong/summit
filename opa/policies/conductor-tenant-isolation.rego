@@ -1,4 +1,3 @@
-import future.keywords
 # Conductor Tenant Isolation Policy
 # Enforces strict tenant boundaries and data access controls
 

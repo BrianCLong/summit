@@ -22,7 +22,6 @@ jobs:
         with:
           version: 9.12.0
 
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -47,7 +46,6 @@ jobs:
         with:
           version: 9.12.0
 
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -70,7 +68,6 @@ jobs:
         with:
           version: 9.12.0
 
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -125,7 +122,6 @@ jobs:
         with:
           version: 9.12.0
 
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '20'

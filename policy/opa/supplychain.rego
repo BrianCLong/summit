@@ -1,4 +1,3 @@
-import future.keywords
 package supplychain
 
 import rego.v1

@@ -1,4 +1,3 @@
-import future.keywords
 package summit.release
 
 default allow := false

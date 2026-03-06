@@ -21,7 +21,6 @@ jobs:
       PNPM_CACHE_FOLDER: ${{ inputs.pnpm_cache_folder }}
     steps:
       - uses: actions/checkout@v4 # v4
-      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4 # v4
         with:
           node-version: ${{ inputs.node_version }}
@@ -85,7 +84,8 @@ jobs:
       - name: Golden path smoke tests
         run: make smoke
       - name: Compose logs on failure
-        if: (failure()) && (always())
+        if: failure()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
       - name: Tear down stack
+        if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v

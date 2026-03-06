@@ -1,4 +1,3 @@
-import future.keywords
 package revops.lead_routing_test
 
 import data.revops.lead_routing

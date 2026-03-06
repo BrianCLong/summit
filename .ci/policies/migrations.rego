@@ -1,4 +1,3 @@
-import future.keywords
 package migrations
 
 default allow = false

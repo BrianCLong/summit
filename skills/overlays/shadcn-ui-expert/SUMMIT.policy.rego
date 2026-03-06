@@ -1,4 +1,3 @@
-import future.keywords
 package summit.skills.overlays
 
 permissions["shadcn-ui-expert"] = {

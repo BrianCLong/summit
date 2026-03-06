@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.rbac
 
 import rego.v1

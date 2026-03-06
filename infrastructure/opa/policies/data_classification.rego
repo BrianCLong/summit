@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.data_classification
 
 import rego.v1

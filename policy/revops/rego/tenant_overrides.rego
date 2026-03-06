@@ -1,4 +1,3 @@
-import future.keywords
 package revops.tenant_overrides
 
 # Applies per-tenant overrides while keeping invariants intact.

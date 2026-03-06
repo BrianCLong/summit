@@ -1,4 +1,3 @@
-import future.keywords
 package policy.flags
 
 deny[msg] {

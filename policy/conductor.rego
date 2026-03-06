@@ -1,4 +1,3 @@
-import future.keywords
 package conductor.authz
 
 default allow := false

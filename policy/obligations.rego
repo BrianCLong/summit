@@ -1,4 +1,3 @@
-import future.keywords
 package policy.obligations
 
 # OPA Obligations for RFA and Step-Up Auth

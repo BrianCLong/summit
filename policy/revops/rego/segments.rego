@@ -1,4 +1,3 @@
-import future.keywords
 package revops.segments
 
 # Segment rules centralize SMB/Mid/Enterprise classification for reuse across decisions.

@@ -1,4 +1,3 @@
-import future.keywords
 package revops.invariants_test
 
 import data.revops.invariants

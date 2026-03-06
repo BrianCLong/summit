@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.authz
 
 test_auditor_can_read_audit_logs if {

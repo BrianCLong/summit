@@ -1,4 +1,3 @@
-import future.keywords
 package repo.adr
 default allow = true
 deny[msg] {

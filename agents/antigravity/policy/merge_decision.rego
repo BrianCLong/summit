@@ -1,4 +1,3 @@
-import future.keywords
 package antigravity.merge
 
 default allow_automerge := false

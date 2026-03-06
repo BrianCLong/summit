@@ -75,7 +75,7 @@ def main() -> None:
                     pass
             elif fn.endswith("stamp.json"):
                 data = load(base / fn)
-                if not any(k in data for k in ("generated_at_utc", "generated_at", "created_at", "timestamp")):
+                if not any(k in data for k in ("generated_at_utc", "generated_at", "created_at", "timestamp", "retrieved_at")):
                     fail(f"{evd_id} stamp.json missing generated time field")
 
     print("[verify_evidence] OK")

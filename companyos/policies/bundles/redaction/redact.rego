@@ -1,4 +1,3 @@
-import future.keywords
 # CompanyOS Identity Fabric - Data Redaction Policy
 # Version: 1.0.0
 #

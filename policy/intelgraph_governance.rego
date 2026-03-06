@@ -1,4 +1,3 @@
-import future.keywords
 # policy/intelgraph_governance.rego
 package intelgraph.governance
 

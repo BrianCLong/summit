@@ -1,4 +1,3 @@
-import future.keywords
 package orchestra
 default allow = false
 allow if {

@@ -1,4 +1,3 @@
-import future.keywords
 package search
 
 default allow = false

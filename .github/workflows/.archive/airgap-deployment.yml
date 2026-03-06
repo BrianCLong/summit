@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload SARIF
         uses: github/codeql-action/upload-sarif@v3
-        if: ((always()) && (always())) && (always())
+        if: always()
         with:
           sarif_file: results.sarif
 
@@ -260,8 +260,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -347,6 +345,7 @@ jobs:
           echo "Network policy enforcement validated"
 
       - name: Cleanup
+        if: always()
         run: |
           kind delete cluster --name airgap-test
 
@@ -364,6 +363,7 @@ jobs:
       - cosign-test
       - docs-validate
       - integration-test
+    if: always()
     steps:
       - name: Check CI Status
         run: |

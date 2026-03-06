@@ -1,4 +1,3 @@
-import future.keywords
 package docs.content
 
 # Example policy: All docs must have a title

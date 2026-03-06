@@ -1,4 +1,3 @@
-import future.keywords
 package deepagent.authz
 
 default allow = false

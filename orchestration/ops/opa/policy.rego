@@ -1,4 +1,3 @@
-import future.keywords
 package chronos.admission
 
 default allow = false

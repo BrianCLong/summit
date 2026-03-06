@@ -1,4 +1,3 @@
-import future.keywords
 package tenant.bundle
 
 import rego.v1

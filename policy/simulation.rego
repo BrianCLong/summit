@@ -1,4 +1,3 @@
-import future.keywords
 package summit.policy.simulation
 
 default decision := "deny"

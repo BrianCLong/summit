@@ -1,4 +1,3 @@
-import future.keywords
 # Service-to-Service Authorization Policy
 # Zero-Trust enforcement for inter-service communication
 #

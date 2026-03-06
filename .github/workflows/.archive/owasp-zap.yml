@@ -32,14 +32,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: '9.12.0'
 
@@ -71,7 +71,7 @@ jobs:
           artifact_name: 'zap-web-baseline-report'
 
       - name: Stop web application
-        if: (((always()) && (always())) && (always())) && (always())
+        if: always()
         run: |
           if [ -f /tmp/web-app.pid ]; then
             kill $(cat /tmp/web-app.pid) || true
@@ -94,14 +94,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: '9.12.0'
 
@@ -132,6 +132,7 @@ jobs:
           artifact_name: 'zap-mobile-baseline-report'
 
       - name: Stop mobile interface
+        if: always()
         run: |
           if [ -f /tmp/mobile-app.pid ]; then
             kill $(cat /tmp/mobile-app.pid) || true
@@ -176,14 +177,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version: '20'
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: '9.12.0'
 
@@ -214,6 +215,7 @@ jobs:
           artifact_name: 'zap-api-scan-report'
 
       - name: Stop API server
+        if: always()
         run: |
           if [ -f /tmp/api-server.pid ]; then
             kill $(cat /tmp/api-server.pid) || true
@@ -233,6 +235,7 @@ jobs:
     name: ZAP Results Summary
     runs-on: ubuntu-latest
     needs: [zap-baseline-web, zap-baseline-mobile, zap-api-scan]
+    if: always()
     steps:
       - name: Generate security summary
         run: |

@@ -1,4 +1,3 @@
-import future.keywords
 package summit.regulatory
 
 test_deny_missing_jurisdiction if {

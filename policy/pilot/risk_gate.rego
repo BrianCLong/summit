@@ -1,4 +1,3 @@
-import future.keywords
 package pilot.gate
 
 default allow := false

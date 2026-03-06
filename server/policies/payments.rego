@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.payments
 
 default allow_webhook = false

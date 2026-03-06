@@ -1,4 +1,3 @@
-import future.keywords
 package maestro.integrations.n8n.trigger
 
 default allow = false

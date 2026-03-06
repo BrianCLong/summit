@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.decisions
 
 import rego.v1

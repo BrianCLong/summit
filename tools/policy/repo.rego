@@ -1,4 +1,3 @@
-import future.keywords
 package repo.policy
 
 default allow = false

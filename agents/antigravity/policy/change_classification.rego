@@ -1,4 +1,3 @@
-import future.keywords
 package antigravity.change
 
 default classification := "restricted"

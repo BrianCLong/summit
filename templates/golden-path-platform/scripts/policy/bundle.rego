@@ -1,4 +1,3 @@
-import future.keywords
 package cicd
 
 default allow = false

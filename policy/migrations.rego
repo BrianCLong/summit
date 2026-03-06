@@ -1,4 +1,3 @@
-import future.keywords
 package intelgraph.migrations
 
 default allow := false

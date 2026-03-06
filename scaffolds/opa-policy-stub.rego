@@ -1,4 +1,3 @@
-import future.keywords
 package summit.policy.example
 
 # Title: Dual Control Delete Policy

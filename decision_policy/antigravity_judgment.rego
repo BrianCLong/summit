@@ -1,4 +1,3 @@
-import future.keywords
 package decision_policy.antigravity
 
 default allow := false

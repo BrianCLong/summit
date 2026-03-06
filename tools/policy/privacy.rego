@@ -1,4 +1,3 @@
-import future.keywords
 package repo.privacy
 
 deny[msg] {

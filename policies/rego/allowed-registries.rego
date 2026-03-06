@@ -1,6 +1,4 @@
 package policies.allowedregistries
-import future.keywords.if
-import future.keywords.in
 
 default allow = false
 

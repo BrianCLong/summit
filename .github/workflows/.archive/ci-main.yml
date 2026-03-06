@@ -37,7 +37,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -54,7 +54,7 @@ jobs:
         run: pnpm run lint
       # Optional: upload SARIF if your linter emits it (guard to avoid hard-fail)
       - name: Upload SARIF (if present)
-        if: (always() && hashFiles('**/*.sarif') != '') && (always())
+        if: always() && hashFiles('**/*.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: '**/*.sarif'
@@ -89,7 +89,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -157,6 +157,7 @@ jobs:
         observability-check,
         acceptance-criteria,
       ]
+    if: always()
     steps:
       - name: CI Summary
         run: |

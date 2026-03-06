@@ -1,6 +1,4 @@
 package policies.allowedregistries
-import future.keywords.if
-import future.keywords.in
 
 test_allow_ghcr {
   allow with input as {"review": {"object": {"spec": {"template": {"spec": {"containers": [{"image": "ghcr.io/BrianCLong/summit:sha"}]}}}}}}

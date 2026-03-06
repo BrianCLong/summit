@@ -21,8 +21,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -48,7 +46,7 @@ jobs:
         continue-on-error: true
 
       - name: Check for breaking changes
-        if: ((((github.event_name == 'pull_request') && (github.event_name == 'pull_request')) && (github.event_name == 'pull_request')) && (steps.api_changed.outputs.api_changed == 'true')) && (github.event_name == 'pull_request')
+        if: github.event_name == 'pull_request'
         run: |
           # Fetch base branch for comparison
           git fetch origin ${{ github.base_ref }}
@@ -78,8 +76,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -110,6 +106,7 @@ jobs:
           "
 
       - name: Check GraphQL schema for breaking changes
+        if: github.event_name == 'pull_request'
         run: |
           pnpm add -g @graphql-inspector/cli
 
@@ -141,8 +138,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -177,8 +172,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -266,6 +259,7 @@ jobs:
   changelog-check:
     name: Check API Changelog
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
 
     steps:
       - name: Checkout code
@@ -284,6 +278,7 @@ jobs:
           fi
 
       - name: Check for changelog entry
+        if: steps.api_changed.outputs.api_changed == 'true'
         run: |
           # Check if CHANGELOG.md was updated
           if ! git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q '^docs/api/CHANGELOG.md'; then
@@ -297,6 +292,7 @@ jobs:
   comment-pr:
     name: Comment on PR with Documentation Link
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     needs: [validate-openapi, validate-graphql, generate-docs]
 
     steps:

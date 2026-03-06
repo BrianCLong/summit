@@ -1,4 +1,3 @@
-import future.keywords
 package policy_tests
 
 import data.maestro.authz

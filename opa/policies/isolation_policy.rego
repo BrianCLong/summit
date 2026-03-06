@@ -1,4 +1,3 @@
-import future.keywords
 package summit.authz.isolation
 
 default allow := false
