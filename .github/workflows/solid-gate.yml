@@ -11,10 +11,6 @@ on:
       - "server/**"
       - "tools/solid_gate/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
 

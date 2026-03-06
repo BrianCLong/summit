@@ -9,10 +9,6 @@ on:
     paths:
       - 'ci/graphci/**'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   determinism-check:
     runs-on: ubuntu-latest
