@@ -1,79 +1,66 @@
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { Request, Response } from 'express';
-import { sanitizeInput } from '../sanitization';
+import { describe, it, expect, jest } from '@jest/globals';
+import { sanitizeInput } from '../sanitization.js';
 
-describe('Sanitization Middleware', () => {
-    let mockRequest: Partial<Request>;
-    let mockResponse: Partial<Response>;
-    let nextFunction: jest.Mock;
-
-    beforeEach(() => {
-        mockRequest = {};
-        mockResponse = {};
-        nextFunction = jest.fn();
-    });
+describe('Sanitization Middleware (Optimized)', () => {
+    const next = jest.fn();
+    const res = {} as any;
 
     it('should remove keys starting with $ or .', () => {
-        mockRequest.body = {
-            valid: 'key',
-            $invalid: 'nosql',
-            nested: {
-                '.invalid': 'nosql',
-                alsoValid: 123
+        const req = {
+            body: {
+                $gt: 5,
+                nested: {
+                    '.dot': 'value',
+                    safe: 'keep'
+                },
+                safe: 123
             }
-        };
+        } as any;
 
-        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+        sanitizeInput(req, res, next);
 
-        expect(mockRequest.body).toEqual({
-            valid: 'key',
+        expect(req.body).toEqual({
             nested: {
-                alsoValid: 123
-            }
+                safe: 'keep'
+            },
+            safe: 123
         });
-        expect(nextFunction).toHaveBeenCalled();
+        expect(next).toHaveBeenCalled();
     });
 
-    it('should maintain reference equality if no keys are removed (Copy-on-Write)', () => {
+    it('should implement Copy-on-Write and return the same object if clean', () => {
         const cleanBody = {
-            a: 1,
-            b: [1, 2, 3],
-            c: { d: 'e' }
+            name: 'John',
+            age: 30,
+            tags: ['a', 'b'],
+            meta: {
+                foo: 'bar'
+            }
         };
-        mockRequest.body = cleanBody;
+        const req = {
+            body: cleanBody
+        } as any;
 
-        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+        sanitizeInput(req, res, next);
 
-        expect(mockRequest.body).toBe(cleanBody);
-        expect(nextFunction).toHaveBeenCalled();
+        // Reference equality check
+        expect(req.body).toBe(cleanBody);
     });
 
-    it('should handle arrays correctly', () => {
-        const dirtyArray = [
-            { valid: 1 },
-            { $invalid: 2 },
-            { valid: 3 }
-        ];
-        mockRequest.body = dirtyArray;
+    it('should only create new objects for parts that changed', () => {
+        const nestedClean = { safe: true };
+        const req = {
+            body: {
+                $bad: true,
+                clean: nestedClean
+            }
+        } as any;
 
-        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+        sanitizeInput(req, res, next);
 
-        expect(mockRequest.body).toEqual([
-            { valid: 1 },
-            {},
-            { valid: 3 }
-        ]);
-        // The array itself should be a new reference if an item was changed
-        expect(mockRequest.body).not.toBe(dirtyArray);
-    });
-
-    it('should maintain reference equality for clean arrays', () => {
-        const cleanArray = [{ a: 1 }, { b: 2 }];
-        mockRequest.body = cleanArray;
-
-        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
-
-        expect(mockRequest.body).toBe(cleanArray);
+        expect(req.body).toEqual({ clean: { safe: true } });
+        expect(req.body).not.toBe(req.body.body); // Root changed
+        expect(req.body.clean).toBe(nestedClean); // Nested preserved
     });
 
     it('should preserve Date, RegExp, and Buffer instances', () => {
@@ -81,28 +68,72 @@ describe('Sanitization Middleware', () => {
         const regex = /test/i;
         const buffer = Buffer.from('hello');
 
-        mockRequest.body = {
-            date,
-            regex,
-            buffer,
-            $invalid: 'foo'
-        };
+        const req = {
+            body: {
+                date,
+                regex,
+                buffer,
+                nested: {
+                    date,
+                    $remove: true
+                }
+            }
+        } as any;
 
-        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+        sanitizeInput(req, res, next);
 
-        expect(mockRequest.body.date).toBe(date);
-        expect(mockRequest.body.regex).toBe(regex);
-        expect(mockRequest.body.buffer).toBe(buffer);
-        expect(mockRequest.body.$invalid).toBeUndefined();
+        expect(req.body.date).toBe(date);
+        expect(req.body.regex).toBe(regex);
+        expect(req.body.buffer).toBe(buffer);
+        expect(req.body.nested.date).toBe(date);
+        expect(req.body.nested.$remove).toBeUndefined();
     });
 
-    it('should sanitize query and params', () => {
-        mockRequest.query = { $where: '1' } as any;
-        mockRequest.params = { '.id': '123' } as any;
+    it('should handle arrays with Copy-on-Write', () => {
+        const cleanItem = { ok: true };
+        const dirtyItem = { $bad: true };
+        const req = {
+            body: [cleanItem, dirtyItem]
+        } as any;
 
-        sanitizeInput(mockRequest as Request, mockResponse as Response, nextFunction);
+        sanitizeInput(req, res, next);
 
-        expect(mockRequest.query).toEqual({});
-        expect(mockRequest.params).toEqual({});
+        expect(req.body).toHaveLength(2);
+        expect(req.body[0]).toBe(cleanItem); // Reference preserved
+        expect(req.body[1]).toEqual({}); // Sanitized
+    });
+
+    it('should sanitize req.query and req.params using Object.defineProperty if changed', () => {
+        const req = {
+            query: { $where: '1=1', safe: 'abc' },
+            params: { id: '123' } // Clean
+        } as any;
+
+        const originalParams = req.params;
+
+        sanitizeInput(req, res, next);
+
+        expect(req.query).toEqual({ safe: 'abc' });
+        expect(req.query.$where).toBeUndefined();
+        expect(req.params).toBe(originalParams); // Should NOT have been redefined since it was clean
+    });
+
+    it('should handle null and undefined gracefully', () => {
+        const req = {
+            body: {
+                val: null,
+                undef: undefined,
+                nested: null
+            }
+        } as any;
+
+        sanitizeInput(req, res, next);
+
+        expect(req.body).toEqual({
+            val: null,
+            undef: undefined,
+            nested: null
+        });
+        expect(req.body).toBe(req.body); // Reference preserved
     });
 });

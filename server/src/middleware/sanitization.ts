@@ -4,119 +4,120 @@ import { Request, Response, NextFunction } from 'express';
  * Recursively removes any keys that start with '$' or '.',
  * which could be used to execute malicious queries (e.g. NoSQL injection).
  *
- * BOLT OPTIMIZATION:
- * - Implement copy-on-write (COW) to skip allocations for clean objects/arrays.
- * - Use Object.keys() for safe iteration.
- * - Use key[0] for O(1) character check instead of startsWith.
- * - Explicitly preserve Date, RegExp, and Buffer instances to prevent unnecessary recursion.
+ * Performance Optimizations:
+ * 1. Copy-on-Write: Skip allocations for clean objects/arrays to reduce GC pressure.
+ * 2. O(1) Checks: Use key[0] instead of startsWith() for faster character matching.
+ * 3. Type Preservation: Explicitly preserve Date, RegExp, and Buffer instances to avoid corruption.
+ * 4. Efficient Iteration: Use Object.keys() for faster traversal of plain objects.
  */
 function sanitize(obj: any): any {
-    if (obj === null || typeof obj !== 'object') {
-        return obj;
-    }
+    // Basic types or null/undefined
+    if (!obj || typeof obj !== 'object') return obj;
 
-    // Explicitly preserve certain types to avoid unnecessary recursion and potential issues
-    if (obj instanceof Date || obj instanceof RegExp || (typeof Buffer !== 'undefined' && Buffer.isBuffer(obj))) {
+    // Preserved instance types - don't recurse into these
+    if (obj instanceof Date || obj instanceof RegExp || Buffer.isBuffer(obj)) {
         return obj;
     }
 
     if (Array.isArray(obj)) {
         let newArr: any[] | null = null;
         for (let i = 0; i < obj.length; i++) {
-            const v = obj[i];
-            const t = sanitize(v);
-            if (t !== v && newArr === null) {
-                newArr = obj.slice(0, i);
-            }
-            if (newArr !== null) {
-                newArr.push(t);
+            const val = obj[i];
+            const sanitized = sanitize(val);
+
+            // If we already started building a new array, or this item changed
+            if (newArr || sanitized !== val) {
+                if (!newArr) {
+                    // Start building new array from unchanged items
+                    newArr = obj.slice(0, i);
+                }
+                newArr.push(sanitized);
             }
         }
-        return newArr !== null ? newArr : obj;
+        return newArr || obj;
     }
 
     let newObj: any = null;
     const keys = Object.keys(obj);
+
     for (let i = 0; i < keys.length; i++) {
         const key = keys[i];
 
-        // O(1) character check instead of startsWith for ~2-3% performance gain on high-frequency paths
+        // Fast character check for '$' and '.' (O(1))
         if (key[0] === '$' || key[0] === '.') {
-            if (newObj === null) {
+            if (!newObj) {
                 newObj = {};
+                // Copy all previous clean keys
                 for (let j = 0; j < i; j++) {
-                    const k = keys[j];
-                    newObj[k] = obj[k];
+                    const prevKey = keys[j];
+                    newObj[prevKey] = obj[prevKey];
                 }
             }
             continue;
         }
 
-        const v = obj[key];
-        const t = sanitize(v);
+        const val = obj[key];
+        const sanitized = sanitize(val);
 
-        if (newObj !== null) {
-            newObj[key] = t;
-        } else if (t !== v) {
-            newObj = {};
-            for (let j = 0; j < i; j++) {
-                const k = keys[j];
-                newObj[k] = obj[k];
+        if (newObj || sanitized !== val) {
+            if (!newObj) {
+                newObj = {};
+                // Copy all previous clean keys
+                for (let j = 0; j < i; j++) {
+                    const prevKey = keys[j];
+                    newObj[prevKey] = obj[prevKey];
+                }
             }
-            newObj[key] = t;
+            newObj[key] = sanitized;
         }
     }
 
-    return newObj !== null ? newObj : obj;
+    return newObj || obj;
 }
 
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
     if (process.env.DEBUG_TESTS) {
-        console.log('[Sanitization] Custom sanitizeInput middleware called for path:', req.path);
+        console.log('[Sanitization] sanitizeInput middleware called for path:', req.path);
     }
+
     if (req.body) {
         req.body = sanitize(req.body);
     }
 
     if (req.query) {
-        try {
-            const sanitizedQuery = sanitize(req.query);
-            // BOLT: Only call Object.defineProperty if the object was actually modified,
-            // leveraging the COW optimization to avoid redundant property re-definitions.
-            if (sanitizedQuery !== req.query) {
-                // In some environments (like Jest/Supertest), req.query might be read-only
-                // through a getter. We try to redefine it or safely update it.
+        const sanitizedQuery = sanitize(req.query);
+        // Only redefine if actually changed
+        if (sanitizedQuery !== req.query) {
+            try {
                 Object.defineProperty(req, 'query', {
                     value: sanitizedQuery,
                     writable: true,
                     configurable: true,
                     enumerable: true
                 });
-            }
-        } catch (err: any) {
-            // Fallback: if we can't redefine, we just skip it to avoid crashing
-            // but log it for visibility in tests.
-            if (process.env.DEBUG_TESTS) {
-                console.warn('[Sanitization] Warning: Could not sanitize req.query:', err.message);
+            } catch (err: any) {
+                if (process.env.DEBUG_TESTS) {
+                    console.warn('[Sanitization] Warning: Could not sanitize req.query:', err.message);
+                }
             }
         }
     }
 
     if (req.params) {
-        try {
-            const sanitizedParams = sanitize(req.params);
-            // BOLT: Only call Object.defineProperty if the object was actually modified.
-            if (sanitizedParams !== req.params) {
+        const sanitizedParams = sanitize(req.params);
+        // Only redefine if actually changed
+        if (sanitizedParams !== req.params) {
+            try {
                 Object.defineProperty(req, 'params', {
                     value: sanitizedParams,
                     writable: true,
                     configurable: true,
                     enumerable: true
                 });
-            }
-        } catch (err: any) {
-            if (process.env.DEBUG_TESTS) {
-                console.warn('[Sanitization] Warning: Could not sanitize req.params:', err.message);
+            } catch (err: any) {
+                if (process.env.DEBUG_TESTS) {
+                    console.warn('[Sanitization] Warning: Could not sanitize req.params:', err.message);
+                }
             }
         }
     }
