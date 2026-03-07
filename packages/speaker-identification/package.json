@@ -13,16 +13,16 @@
   },
   "dependencies": {
     "@intelgraph/audio-processing": "workspace:*",
-    "zod": "^4.1.12"
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "jest": "^30.2.0",
-    "@types/jest": "^30.0.0",
+    "typescript": "5.9.3",
+    "jest": "30.2.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "eslint": "^9.39.2",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4"
+    "eslint": "9.39.2",
+    "@typescript-eslint/eslint-plugin": "8.46.4",
+    "@typescript-eslint/parser": "8.46.4"
   },
   "type": "module",
   "exports": {

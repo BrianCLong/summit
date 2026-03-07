@@ -16,18 +16,18 @@
     "@intelgraph/cqrs": "workspace:*",
     "@intelgraph/messaging": "workspace:*",
     "@intelgraph/event-streaming": "workspace:*",
-    "express": "^5.2.0",
-    "ioredis": "^5.5.0",
-    "pino": "^9.0.0",
-    "pino-http": "^11.0.0",
-    "dotenv": "^17.2.3",
-    "cors": "^2.8.5"
+    "express": "5.2.0",
+    "ioredis": "5.5.0",
+    "pino": "9.0.0",
+    "pino-http": "11.0.0",
+    "dotenv": "17.2.3",
+    "cors": "2.8.5"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "@types/express": "^5.0.0",
-    "@types/cors": "^2.8.17",
-    "typescript": "^5.9.3",
-    "ts-node": "^10.9.2"
+    "@types/express": "5.0.0",
+    "@types/cors": "2.8.17",
+    "typescript": "5.9.3",
+    "ts-node": "10.9.2"
   }
 }

@@ -24,8 +24,8 @@
     "compile": "tsc -p ./"
   },
   "devDependencies": {
-    "@types/vscode": "^1.80.0",
+    "@types/vscode": "1.80.0",
     "@types/node": "18.x",
-    "typescript": "^5.1.3"
+    "typescript": "5.1.3"
   }
 }

@@ -13,8 +13,8 @@
     "@ga-graphai/cost-guard": "file:../cost-guard"
   },
   "devDependencies": {
-    "@types/node": "^20.12.7",
-    "typescript": "^5.4.5",
-    "vitest": "^1.6.1"
+    "@types/node": "20.12.7",
+    "typescript": "5.4.5",
+    "vitest": "1.6.1"
   }
 }

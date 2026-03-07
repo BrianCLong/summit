@@ -9,10 +9,10 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "zod": "^4.1.12"
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   }
 }

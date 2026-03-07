@@ -16,14 +16,14 @@
     "@intelgraph/metadata-discovery": "workspace:*",
     "@intelgraph/data-catalog": "workspace:*",
     "@intelgraph/common-types": "workspace:*",
-    "node-cron": "^3.0.3"
+    "node-cron": "3.0.3"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "@types/node-cron": "^3.0.11",
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
+    "typescript": "5.9.3",
+    "@types/node-cron": "3.0.11",
+    "@types/jest": "30.0.0",
+    "jest": "30.2.0",
     "@types/node": "20.19.27",
-    "tsx": "^4.7.0"
+    "tsx": "4.7.0"
   }
 }

@@ -19,11 +19,11 @@
   ],
   "dependencies": {
     "@intelgraph/common-types": "workspace:*",
-    "lodash": "^4.17.23"
+    "lodash": "4.17.23"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.195",
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "@types/lodash": "4.14.195",
+    "@types/node": "20.0.0",
+    "typescript": "5.0.0"
   }
 }

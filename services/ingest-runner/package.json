@@ -13,22 +13,22 @@
   },
   "dependencies": {
     "@intelgraph/ingest-connector-sdk": "workspace:*",
-    "bullmq": "^5.0.0",
-    "ioredis": "^5.0.0",
-    "nats": "^2.19.0",
-    "zod": "^3.0.0",
-    "pino": "^9.0.0",
-    "uuid": "^9.0.0",
-    "axios": "^1.7.9",
-    "rss-parser": "^3.13.0",
-    "avsc": "^5.7.7",
-    "csv-parse": "^5.5.0"
+    "bullmq": "5.0.0",
+    "ioredis": "5.0.0",
+    "nats": "2.19.0",
+    "zod": "3.0.0",
+    "pino": "9.0.0",
+    "uuid": "9.0.0",
+    "axios": "1.7.9",
+    "rss-parser": "3.13.0",
+    "avsc": "5.7.7",
+    "csv-parse": "5.5.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0",
-    "ts-node": "^10.9.0",
-    "@types/uuid": "^9.0.0",
-    "vitest": "^1.0.0"
+    "typescript": "5.0.0",
+    "@types/node": "20.0.0",
+    "ts-node": "10.9.0",
+    "@types/uuid": "9.0.0",
+    "vitest": "1.0.0"
   }
 }

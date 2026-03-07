@@ -15,16 +15,16 @@
   "dependencies": {
     "@intelgraph/audio-processing": "workspace:*",
     "@intelgraph/speech-recognition": "workspace:*",
-    "express": "^4.18.2",
-    "redis": "^5.8.1",
-    "dotenv": "^17.2.3",
-    "bull": "^4.12.0"
+    "express": "4.18.2",
+    "redis": "5.8.1",
+    "dotenv": "17.2.3",
+    "bull": "4.12.0"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "@types/node": "20.19.27",
-    "@types/express": "^4.17.21",
-    "@types/bull": "^4.10.0",
-    "ts-node": "^10.9.2"
+    "@types/express": "4.17.21",
+    "@types/bull": "4.10.0",
+    "ts-node": "10.9.2"
   }
 }

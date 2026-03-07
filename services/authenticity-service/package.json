@@ -12,13 +12,13 @@
   "dependencies": {
     "@intelgraph/content-verification": "workspace:*",
     "@intelgraph/media-manipulation": "workspace:*",
-    "express": "^5.2.0",
-    "cors": "^2.8.5"
+    "express": "5.2.0",
+    "cors": "2.8.5"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "@types/node": "20.19.27",
-    "@types/express": "^5.0.0",
-    "@types/cors": "^2.8.17"
+    "@types/express": "5.0.0",
+    "@types/cors": "2.8.17"
   }
 }

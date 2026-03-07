@@ -11,12 +11,12 @@
     "debug": "NODE_ENV=development DEBUG=* node synthetic-monitor.js"
   },
   "dependencies": {
-    "playwright": "^1.44.0",
-    "axios": "^1.7.9",
-    "prom-client": "^15.1.0"
+    "playwright": "1.44.0",
+    "axios": "1.7.9",
+    "prom-client": "15.1.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "20.0.0"
   },
   "engines": {
     "node": ">=18.0.0"

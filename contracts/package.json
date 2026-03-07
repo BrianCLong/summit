@@ -7,11 +7,11 @@
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
-    "nock": "^13.5.4",
-    "vitest": "^3.2.4",
-    "node-fetch": "^3.3.2"
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "nock": "13.5.4",
+    "vitest": "3.2.4",
+    "node-fetch": "3.3.2"
   },
   "version": "4.2.3"
 }

@@ -1,7 +1,7 @@
 {
   "name": "@summit/graph-sync-validator",
   "version": "0.1.0",
-  "description": "Graph↔PG sync validator",
+  "description": "Graph\u2194PG sync validator",
   "main": "src/compare/compare.mjs",
   "bin": {
     "graph-sync-validate": "dist/cli.js"
@@ -14,7 +14,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "@types/node": "20.0.0",
+    "typescript": "5.0.0"
   }
 }

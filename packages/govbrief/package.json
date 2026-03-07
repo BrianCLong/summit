@@ -21,11 +21,11 @@
   "author": "Summit Directorate J",
   "license": "MIT",
   "dependencies": {
-    "commander": "^14.0.1",
-    "node-html-parser": "^7.0.1"
+    "commander": "14.0.1",
+    "node-html-parser": "7.0.1"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "typescript": "^5.9.3"
+    "typescript": "5.9.3"
   }
 }

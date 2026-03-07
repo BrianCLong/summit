@@ -10,13 +10,13 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "uuid": "^11.0.3"
+    "uuid": "11.0.3"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
+    "@types/jest": "30.0.0",
     "@types/node": "20.19.27",
-    "ts-jest": "^29.2.5",
-    "typescript": "^5.9.3"
+    "ts-jest": "29.2.5",
+    "typescript": "5.9.3"
   },
   "license": "MIT"
 }

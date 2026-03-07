@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@intelgraph/audio-processing": "workspace:*",
-    "zod": "^4.1.12"
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "5.9.3",
     "@types/node": "20.19.27"
   },
   "type": "module",

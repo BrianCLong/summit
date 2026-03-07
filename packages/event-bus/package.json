@@ -21,17 +21,17 @@
     "distributed-systems"
   ],
   "dependencies": {
-    "ioredis": "^5.3.2",
-    "uuid": "^10.0.0",
-    "pino": "^9.0.0",
-    "kafkajs": "^2.2.4"
+    "ioredis": "5.3.2",
+    "uuid": "10.0.0",
+    "pino": "9.0.0",
+    "kafkajs": "2.2.4"
   },
   "devDependencies": {
     "@types/node": "20.19.27",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.9.3",
-    "jest": "^30.2.0",
-    "@types/jest": "^30.0.0",
-    "ts-jest": "^29.4.5"
+    "@types/uuid": "10.0.0",
+    "typescript": "5.9.3",
+    "jest": "30.2.0",
+    "@types/jest": "30.0.0",
+    "ts-jest": "29.4.5"
   }
 }

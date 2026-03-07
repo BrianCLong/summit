@@ -12,10 +12,10 @@
     "heatmap:build": "node ./scripts/emit-heatmap-snippet.mjs"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.0",
-    "@playwright/test": "^1.56.1",
-    "@types/node": "^25.0.3",
-    "axe-core": "^4.10.0",
-    "colord": "^2.9.3"
+    "@axe-core/playwright": "4.10.0",
+    "@playwright/test": "1.56.1",
+    "@types/node": "25.0.3",
+    "axe-core": "4.10.0",
+    "colord": "2.9.3"
   }
 }

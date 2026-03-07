@@ -8,11 +8,11 @@
     "test": "jest"
   },
   "dependencies": {
-    "express": "^5.2.0",
-    "uuid": "^13.0.0",
+    "express": "5.2.0",
+    "uuid": "13.0.0",
     "@intelgraph/synthdata-js": "file:../../packages/sdk/synthdata-js"
   },
   "devDependencies": {
-    "supertest": "^7.1.4"
+    "supertest": "7.1.4"
   }
 }

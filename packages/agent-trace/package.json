@@ -12,14 +12,14 @@
     "summarize": "npx tsx src/cli.ts summarize"
   },
   "dependencies": {
-    "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
-    "commander": "^12.1.0",
-    "uuid": "^11.0.0"
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "commander": "12.1.0",
+    "uuid": "11.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "@types/uuid": "^10.0.0",
-    "typescript": "^5.7.3"
+    "@types/node": "22.0.0",
+    "@types/uuid": "10.0.0",
+    "typescript": "5.7.3"
   }
 }

@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "@intelgraph/deep-learning-core": "workspace:*",
-    "zod": "^4.1.12"
+    "zod": "4.1.12"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
-    "jest": "^30.2.0",
-    "eslint": "^9.39.2"
+    "typescript": "5.9.3",
+    "jest": "30.2.0",
+    "eslint": "9.39.2"
   },
   "type": "module"
 }

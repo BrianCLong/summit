@@ -17,23 +17,23 @@
     "orchestrator-replay": "dist/cli/replay.js"
   },
   "dependencies": {
-    "@open-policy-agent/opa-wasm": "^1.10.0",
-    "eventemitter3": "^5.0.1",
-    "ioredis": "^5.3.2",
-    "uuid": "^9.0.1",
-    "zod": "^3.22.4"
+    "@open-policy-agent/opa-wasm": "1.10.0",
+    "eventemitter3": "5.0.1",
+    "ioredis": "5.3.2",
+    "uuid": "9.0.1",
+    "zod": "3.22.4"
   },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "@types/node": "^20.19.25",
-    "@types/uuid": "^9.0.7",
-    "@vitest/coverage-v8": "^1.0.0",
-    "typescript": "^5.3.3",
-    "vitest": "^1.0.0"
+    "@types/jest": "30.0.0",
+    "@types/node": "20.19.25",
+    "@types/uuid": "9.0.7",
+    "@vitest/coverage-v8": "1.0.0",
+    "typescript": "5.3.3",
+    "vitest": "1.0.0"
   },
   "peerDependencies": {
-    "@anthropic-ai/sdk": "^0.20.0",
-    "openai": "^4.0.0"
+    "@anthropic-ai/sdk": "0.20.0",
+    "openai": "4.0.0"
   },
   "files": [
     "dist",
