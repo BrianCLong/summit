@@ -90,6 +90,9 @@ const SearchHome = React.lazy(() => import('./pages/Search/SearchHome'));
 const SearchResultDetail = React.lazy(() =>
   import('./pages/Search/SearchResultDetail')
 );
+const EpistemicImmuneDashboard = React.lazy(() =>
+  import('./pages/EpistemicImmuneDashboard')
+);
 
 // Loading fallback component for lazy-loaded routes
 function PageLoadingFallback() {
@@ -123,6 +126,7 @@ const navigationItems = [
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
+  { path: '/epistemic-immune', label: 'Epistemic Immune', icon: <Security /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
@@ -689,6 +693,7 @@ function MainLayout() {
             <Route path="/access-intel" element={<Suspense fallback={<PageLoadingFallback />}><AccessIntelPage /></Suspense>} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
+            <Route path="/epistemic-immune" element={<Suspense fallback={<PageLoadingFallback />}><EpistemicImmuneDashboard /></Suspense>} />
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
               <Route path="/admin/osint-feeds" element={<Suspense fallback={<PageLoadingFallback />}><OsintFeedConfig /></Suspense>} />
