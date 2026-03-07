@@ -1,0 +1,11 @@
+name: AI Stack Drift Monitoring
+on:
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Detect Drift
+        run: npx tsx scripts/monitoring/ai-stack-drift.ts
