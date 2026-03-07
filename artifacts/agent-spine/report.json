@@ -1,0 +1,18 @@
+{
+  "schema_version": "1",
+  "suite": "graphrag-mini",
+  "case_id": "001",
+  "score": 1,
+  "passed": true,
+  "evidence_ids": [
+    "EVID:graphrag-mini:001:step:1:doc-1",
+    "EVID:graphrag-mini:001:step:2:doc-2"
+  ],
+  "trace": [
+    {
+      "step": 1,
+      "tool": "graphrag.lookup",
+      "output_ref": "ref-1"
+    }
+  ]
+}
