@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "updated_at": "2026-03-05T00:00:00Z",
+  "owner": "release-engineering",
+  "policy": {
+    "goal": "single-required-pr-gate",
+    "description": "Require only one stable check context on pull_request to prevent required-check drift while preserving full validation on merge queue/nightly lanes."
+  },
+  "branches": {
+    "main": {
+      "merge_strategy": "pull_request_only",
+      "require_merge_queue": false,
+      "required_checks": [
+        "pr-gate / gate"
+      ]
+    },
+    "release/v4-ga": {
+      "merge_strategy": "merge_queue_only",
+      "require_merge_queue": true,
+      "required_checks": [
+        "pr-gate / gate"
+      ]
+    }
+  },
+  "validation_contract": {
+    "forbidden_required_contexts": [
+      "ci",
+      "build-and-test",
+      "nightly-full-ci"
+    ],
+    "rule": "If required checks differ from this manifest, branch protection drift is treated as a release-blocking defect."
+  }
+}

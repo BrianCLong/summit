@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-07T02:15:27Z",
+  "revision_note": "Added GA launch machine-readable enforcement artifacts (required checks manifest, CI trigger matrix, and validator) and updated launch playbook.",
   "initiatives": [
+    {
+      "id": "ga-launch-conversion-playbook",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Expanded with machine-readable release controls: required-check manifest, CI trigger matrix, and deterministic validator for drift detection."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",

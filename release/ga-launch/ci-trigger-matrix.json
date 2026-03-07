@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "updated_at": "2026-03-05T00:00:00Z",
+  "workflow_classes": [
+    {
+      "name": "pr-gate",
+      "purpose": "Fast deterministic validation for pull requests",
+      "required_for_merge": true,
+      "events": [
+        "pull_request",
+        "merge_group"
+      ],
+      "checks": [
+        "lint",
+        "typecheck",
+        "unit",
+        "evidence-validation"
+      ],
+      "concurrency": {
+        "group": "pr-gate-${{ github.event.pull_request.number || github.ref }}",
+        "cancel_in_progress": true
+      }
+    },
+    {
+      "name": "full-ci",
+      "purpose": "Comprehensive validation lane",
+      "required_for_merge": false,
+      "events": [
+        "merge_group",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "checks": [
+        "integration",
+        "e2e",
+        "security-scan",
+        "compliance",
+        "soak"
+      ],
+      "concurrency": {
+        "group": "full-ci-${{ github.ref }}",
+        "cancel_in_progress": false
+      }
+    }
+  ],
+  "rules": [
+    "Only pr-gate may be required on pull_request merges.",
+    "Full-ci must not run on direct pull_request events.",
+    "All workflows must define concurrency groups."
+  ]
+}
