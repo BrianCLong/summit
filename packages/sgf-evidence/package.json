@@ -1,6 +1,6 @@
 {
   "name": "@summit/sgf-evidence",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "description": "Deterministic evidence bundle generator for Summit Governance Fabric",
   "main": "dist/index.js",

@@ -1,12 +1,12 @@
-name: Assurance Policy Drift Detection
+name: Assurance Posture Drift Monitor
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Weekly on Sunday
+    - cron: '0 0 * * 1' # Weekly on Mondays
   workflow_dispatch:
 
 jobs:
-  drift-detection:
+  drift-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

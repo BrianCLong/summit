@@ -1,6 +1,6 @@
 {
   "name": "integration-gateway",
-  "version": "4.2.3",
+  "version": "0.0.1",
   "description": "Integration Gateway Service",
   "main": "dist/index.js",
   "scripts": {

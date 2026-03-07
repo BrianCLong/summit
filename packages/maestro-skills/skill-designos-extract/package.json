@@ -1,6 +1,6 @@
 {
   "name": "@maestro/skill-designos-extract",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Extracts design tokens and components into a DESIGN.md and Knowledge Graph.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

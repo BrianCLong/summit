@@ -1,7 +1,4 @@
 package maestro.deploy
-import future.keywords.contains
-import future.keywords.if
-import future.keywords.in
 
 import data.maestro.deploy.allow
 import data.maestro.deploy.deny

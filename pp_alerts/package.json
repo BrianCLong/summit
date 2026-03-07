@@ -1,6 +1,6 @@
 {
   "name": "pp_alerts",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
     "test": "jest"
@@ -15,9 +15,6 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/tests",
-      "<rootDir>/src"
-    ]
+    "roots": ["<rootDir>/tests", "<rootDir>/src"]
   }
 }

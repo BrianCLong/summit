@@ -1,6 +1,6 @@
 {
   "name": "@summit/factcert",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Shared Provenance Module for FactCert",
   "type": "module",
   "main": "index.js",

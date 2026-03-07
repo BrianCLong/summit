@@ -1,6 +1,6 @@
 {
   "name": "companyos-sdk-quickstart",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Quickstart example for CompanyOS SDK",
   "type": "module",
   "scripts": {

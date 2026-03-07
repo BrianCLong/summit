@@ -2,71 +2,45 @@
 set -euo pipefail
 
 # Summit Provenance Generator
-# Records build artifacts and their digests in a deterministic format
+# Records build context and digests for OMB M-26-05
 
 OUTPUT_DIR=${1:-"dist/assurance/provenance"}
 mkdir -p "$OUTPUT_DIR"
 
-SBOM_FILE="dist/assurance/sbom/summit.spdx.json"
-DIGEST_FILE="$OUTPUT_DIR/digests.json"
-PROVENANCE_FILE="$OUTPUT_DIR/slsa.intoto.jsonl"
+echo "Generating build provenance..."
 
-echo "Generating provenance..."
+# Record git context
+GIT_SHA=$(git rev-parse HEAD)
+GIT_REF=$(git rev-parse --abbrev-ref HEAD)
 
-if [ ! -f "$SBOM_FILE" ]; then
-  echo "Error: SBOM file not found at $SBOM_FILE. Run generate_sbom.sh first."
-  exit 1
-fi
-
-# Calculate digests
-SBOM_SHA=$(sha256sum "$SBOM_FILE" | awk '{print $1}')
-
-# Create digests.json (deterministic)
-cat <<EOF > "$DIGEST_FILE"
-{
-  "artifacts": [
-    {
-      "name": "summit.spdx.json",
-      "sha256": "$SBOM_SHA"
-    }
-  ]
-}
-EOF
-
-# Create SLSA-ish in-toto statement
-# Note: In a real CI, we'd use OIDC tokens and actual build metadata.
-# Here we use deterministic values.
-BUILD_DATE="2026-01-23T00:00:00Z"
-
-cat <<EOF > "$PROVENANCE_FILE"
+cat <<EOF > "$OUTPUT_DIR/slsa.intoto.jsonl"
 {
   "_type": "https://in-toto.io/Statement/v0.1",
   "subject": [
     {
-      "name": "summit.spdx.json",
+      "name": "summit-platform",
       "digest": {
-        "sha256": "$SBOM_SHA"
+        "sha256": "$(find dist -type f -exec sha256sum {} + | sha256sum | cut -d' ' -f1)"
       }
     }
   ],
   "predicateType": "https://slsa.dev/provenance/v0.2",
   "predicate": {
-    "builder": { "id": "https://github.com/intelgraph/summit/.github/workflows/assurance-sbom.yml" },
-    "buildType": "https://intelgraph.io/build/v1",
+    "builder": { "id": "https://github.com/IntelGraph/summit/actions" },
+    "buildType": "https://intelgraph.io/summit-build-v1",
     "invocation": {
       "configSource": {
-        "uri": "git+https://github.com/intelgraph/summit",
-        "digest": { "sha1": "0000000000000000000000000000000000000000" },
-        "entryPoint": "assurance-sbom.yml"
+        "uri": "git+https://github.com/IntelGraph/summit",
+        "digest": { "sha1": "$GIT_SHA" },
+        "entryPoint": ".github/workflows/assurance-evidence.yml"
       }
     },
     "metadata": {
-      "buildFinishedOn": "$BUILD_DATE",
-      "completeness": { "parameters": true, "environment": false, "materials": false },
+      "buildStartedOn": "2026-01-23T00:00:00Z",
       "reproducible": true
     }
   }
 }
 EOF
 
-echo "Provenance generated at $OUTPUT_DIR"
+echo "Provenance generated: $OUTPUT_DIR/slsa.intoto.jsonl"

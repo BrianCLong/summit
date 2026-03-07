@@ -1,6 +1,6 @@
 {
   "name": "golden-path-e2e",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "test": "playwright test",

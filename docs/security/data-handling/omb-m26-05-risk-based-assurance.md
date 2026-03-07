@@ -1,18 +1,17 @@
 # Data Handling: OMB M-26-05 Evidence Packs
 
 ## Classification
-Evidence Packs are classified as **Controlled – Vendor Deliverable**.
+Assurance Evidence Packs are classified as **Controlled – Vendor Deliverable**. They contain component inventories and vulnerability status but should not contain secrets or customer data.
 
-## Sensitive Information Guardrails
-The following information **must never** be included in an evidence pack:
-- Secrets (API keys, tokens, signing keys).
-- Raw environment variable dumps.
-- Internal infrastructure URLs or IPs.
-- Customer-specific identifiers.
+## Retention Policy
+- **CI Artifacts:** Retained for 90 days (standard GitHub policy).
+- **Release Assets:** Retained for the duration of the software version lifecycle.
+- **Drift Logs:** Retained for 30 days.
 
-## Redaction
-Vulnerability reports should be aggregated and summarized. Do not include raw logs that might contain sensitive paths or stack traces unless explicitly required by a specific risk profile.
+## Redaction Requirements
+- No tokens or API keys.
+- No internal environment variables (except version/build metadata).
+- No raw vulnerability tool authentication headers.
 
-## Storage and Retention
-- Artifacts are stored in the CI/CD system with a standard retention of 90 days.
-- Released packs are stored as release assets and retained indefinitely or per the release lifecycle policy.
+## Disclosure
+Packs are intended for authorized agency reviewers and designated risk assessors. Public disclosure should only include the high-level SBOM unless otherwise contracted.

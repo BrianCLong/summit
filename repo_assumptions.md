@@ -1,21 +1,15 @@
-# Repo Reality Check (OMB M-26-05)
+# Repo Assumptions (OMB M-26-05 Implementation)
 
-## Verified Structure
-- ✅ `docs/security/`: Exists
-- ✅ `docs/ci/REQUIRED_CHECKS_POLICY.yml`: Exists
-- ✅ `.github/workflows/`: Exists
-- ✅ `package.json` / `pnpm-lock.yaml`: Node.js environment verified.
-- ✅ Existing scanners: Trivy, Gitleaks, Semgrep, CodeQL found in `ci-security.yml`.
+## Verified Paths
+- `docs/security/`: Exists for security documentation.
+- `docs/ci/REQUIRED_CHECKS_POLICY.yml`: Authoritative registry of CI gates.
 
 ## Assumptions
-- ⚠️ CI environment has access to OIDC for provenance (assumed for GitHub Actions).
-- ⚠️ Release process uses `dist/` as the primary artifact staging area.
+- `.github/workflows/`: Exists for GitHub Actions.
+- Node.js/pnpm: Primary runtime and package manager.
+- GitHub OIDC: Available for provenance signing/attestation.
 
-## Must-not-touch
-- Production infrastructure files (Terraform, K8s manifests) unless explicitly required.
-- Core required checks in `docs/ci/REQUIRED_CHECKS_POLICY.yml` (only add new ones via established process).
-
-## Performance Budgets (Enforced)
-- SBOM generation: p95 ≤ 2 min
-- Evidence verification: ≤ 30 sec
-- Drift job: ≤ 5 min
+## Constraints
+- **Determinism:** No timestamps allowed in `report.json` or `metrics.json`.
+- **Hard Stop:** Maximum 6 PRs for implementation.
+- **Feature Flags:** Risky changes must be gated.

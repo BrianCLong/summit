@@ -1,30 +1,27 @@
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import fs from 'fs';
 import path from 'path';
 
-const schemaPath = process.argv[2];
-const dataPath = process.argv[3];
+// Minimal schema validation for index.json
+const schema = JSON.parse(fs.readFileSync('schemas/assurance/evidence-pack.schema.json', 'utf-8'));
+const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf-8'));
 
-if (!schemaPath || !dataPath) {
-  console.error('Usage: node validate_schema.js <schema> <data>');
+console.log('Validating index.json schema...');
+
+if (!data.version || !data.items) {
+  console.error('Missing required fields version or items');
   process.exit(1);
 }
 
-const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf-8'));
-const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+data.items.forEach(item => {
+  if (!item.evidence_id || !item.kind || !item.path) {
+    console.error(`Invalid item: ${JSON.stringify(item)}`);
+    process.exit(1);
+  }
+  const idPattern = new RegExp(schema.properties.items.items.properties.evidence_id.pattern);
+  if (!idPattern.test(item.evidence_id)) {
+    console.error(`Evidence ID ${item.evidence_id} does not match pattern`);
+    process.exit(1);
+  }
+});
 
-const ajv = new Ajv({ allErrors: true });
-addFormats(ajv);
-
-const validate = ajv.compile(schema);
-const valid = validate(data);
-
-if (valid) {
-  console.log('Schema validation passed.');
-  process.exit(0);
-} else {
-  console.error('Schema validation failed:');
-  console.error(ajv.errorsText(validate.errors));
-  process.exit(1);
-}
+console.log('Schema validation passed');

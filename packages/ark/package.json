@@ -1,6 +1,6 @@
 {
   "name": "@summit/ark",
-  "version": "4.2.3",
+  "version": "0.0.1",
   "description": "Agentic Reasoning Kernel (ARK) for Summit - Runtime, Governance, and Orchestration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

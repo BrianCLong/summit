@@ -5,7 +5,7 @@ const packageJsonPath = path.resolve(process.cwd(), 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 
 const generateSPDX = () => {
-  const date = '2026-01-23T00:00:00Z';
+  const date = '2026-01-23T00:00:00Z'; // Deterministic date for OMB compliance
   const name = packageJson.name || 'summit';
   const version = packageJson.version || '0.0.0';
 
@@ -40,7 +40,6 @@ const generateSPDX = () => {
     ],
   };
 
-  // Add dependencies from package.json
   const dependencies = {
     ...packageJson.dependencies,
     ...packageJson.devDependencies,

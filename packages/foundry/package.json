@@ -1,6 +1,6 @@
 {
   "name": "@summit/foundry",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Summit Foundry - Loop Runner and Change Grammar",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

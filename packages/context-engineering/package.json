@@ -1,6 +1,6 @@
 {
   "name": "@summit/context-engineering",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Context Engineering Platform core primitives for Maestro.",
   "type": "module",
   "main": "dist/index.js",

@@ -2,10 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "summit evidence index",
   "type": "object",
-  "required": ["items"],
+  "required": ["mappings"],
   "properties": {
+<<<<<<< HEAD
     "version": {
-      "type": "integer"
+      "type": "string"
     },
     "items": {
       "type": "object",
@@ -14,18 +15,33 @@
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
-            "type": "object",
-            "required": ["report", "metrics", "stamp"],
-            "properties": {
-              "report": { "type": "string" },
-              "metrics": { "type": "string" },
-              "stamp": { "type": "string" }
-            }
+            "type": "array",
+            "items": { "type": "string" }
           },
           "title": { "type": "string" },
-          "category": { "type": "string" }
+          "category": { "type": "string" },
+          "artifacts": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
         },
-        "required": ["files"]
+        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
+        "additionalProperties": true
+      }
+    },
+    "map": {
+=======
+    "mappings": {
+>>>>>>> origin/main
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["report", "metrics", "stamp"],
+        "properties": {
+          "report": { "type": "string" },
+          "metrics": { "type": "string" },
+          "stamp": { "type": "string" }
+        }
       }
     }
   },

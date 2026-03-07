@@ -1,6 +1,6 @@
 {
   "name": "@summit/specflow",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Summit SpecFlow - The Autonomous Change Workflow",
   "type": "module",
   "bin": {

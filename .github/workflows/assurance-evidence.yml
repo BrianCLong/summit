@@ -1,35 +1,31 @@
 name: Assurance Evidence Generation
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
 jobs:
-  build-assurance-pack:
+  build-evidence-pack:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
-
+          node-version: 20
+      - name: Generate SBOM
+        run: ./scripts/assurance/generate_sbom.sh
+      - name: Generate Provenance
+        run: ./scripts/assurance/generate_provenance.sh
+      - name: Collect Vuln Status
+        run: ./scripts/assurance/collect_vuln_status.sh
       - name: Build Evidence Pack
         run: ./scripts/assurance/build_evidence_pack.sh
-
       - name: Verify Evidence Pack
-        run: ./scripts/assurance/verify_evidence_pack.sh
-
+        run: ./scripts/assurance/verify_evidence_pack.sh dist/assurance/evidence-pack.tgz
       - name: Upload Evidence Pack
         uses: actions/upload-artifact@v4
         with:
-          name: summit-evidence-pack
+          name: software-assurance-evidence-pack
           path: dist/assurance/evidence-pack.tgz
-          retention-days: 90

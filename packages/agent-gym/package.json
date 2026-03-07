@@ -1,6 +1,6 @@
 {
   "name": "@summit/agent-gym",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "type": "module",
   "description": "Environment for multimodal agents in Summit",
   "main": "dist/index.js",

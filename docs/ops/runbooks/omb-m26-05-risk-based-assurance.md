@@ -1,29 +1,28 @@
-# Runbook: OMB M-26-05 Risk-Based Assurance
+# Runbook: OMB M-26-05 Risk-based Assurance
 
-## Overview
-This runbook describes how to manage the evidence pack generation and verification for federal procurement requests.
+## Generating Evidence Pack Locally
+To generate a full assurance bundle locally for testing or audit response:
 
-## Manual Generation
-To generate an evidence pack locally:
 ```bash
+mkdir -p dist/assurance/sbom dist/assurance/provenance dist/assurance/vuln
+./scripts/assurance/generate_sbom.sh
+./scripts/assurance/generate_provenance.sh
+./scripts/assurance/collect_vuln_status.sh
 ./scripts/assurance/build_evidence_pack.sh
 ```
-The output will be at `dist/assurance/evidence-pack.tgz`.
 
-## Manual Verification
-To verify an existing pack:
+## Verifying a Pack
+If you have received an `evidence-pack.tgz` from CI or a vendor:
+
 ```bash
-./scripts/assurance/verify_evidence_pack.sh path/to/evidence-pack.tgz
+./scripts/assurance/verify_evidence_pack.sh dist/assurance/evidence-pack.tgz
 ```
 
-## CI/CD Workflow
-The pack is automatically generated on releases via `.github/workflows/assurance-sbom.yml` and related workflows.
+## Troubleshooting CI Failures
+If the `Assurance Evidence Generation` workflow fails:
+1. **SBOM Generation:** Check `package.json` for syntax errors.
+2. **Provenance:** Ensure the git environment is available.
+3. **Verification:** Check `index.json` against the schema in `schemas/assurance/`.
 
-## Troubleshooting
-### Hash Mismatch
-If `verify_evidence_pack.sh` fails with a hash mismatch:
-1. Ensure artifacts haven't been modified after the index was built.
-2. Re-run `build_evidence_pack.sh` to refresh the index.
-
-### Missing Artifacts
-Ensure `generate_sbom.sh` and `generate_provenance.sh` completed successfully before building the pack.
+## Manual Overrides
+Under M-26-05, some agencies may require additional enrichments. Use the optional flags in `generate_sbom.sh` to include license hashes if requested.

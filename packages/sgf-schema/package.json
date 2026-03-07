@@ -1,6 +1,6 @@
 {
   "name": "@summit/sgf-schema",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "type": "module",
   "description": "Canonical schemas for Summit Governance Fabric",
   "exports": {

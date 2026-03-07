@@ -1,6 +1,6 @@
 {
   "name": "pkg-a",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "dependencies": {
     "pkg-b": "1.0.0"
   }

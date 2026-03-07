@@ -1,6 +1,6 @@
 {
   "name": "@maestro/skills-tooling",
-  "version": "4.2.3",
+  "version": "0.0.1",
   "private": true,
   "description": "Tooling and validation for Summit Skills",
   "scripts": {

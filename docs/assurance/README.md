@@ -1,21 +1,20 @@
-# Summit Assurance & Evidence Packs
+# Software Assurance Evidence Packs
 
-## Posture: Evidence-Pack-First
-Summit has transitioned to an **Evidence-Pack-First** posture in alignment with OMB M-26-05. We prioritize the generation of machine-readable, verifiable evidence over static, universal attestations.
+## Overview
+In accordance with OMB M-26-05, Summit provides "Assurance Evidence Packs" for risk-based procurement diligence. These packs contain machine-readable evidence of software security, provenance, and vulnerability status.
 
-## Evidence Pack Components
-An Evidence Pack (`evidence-pack.tgz`) is a deterministic bundle containing:
+## Contents
+- `sbom/`: SPDX 2.3 JSON manifests.
+- `provenance/`: SLSA build attestations and digests.
+- `vuln/`: Linked vulnerability scan results.
+- `index.json`: Root evidence index with stable Evidence IDs.
 
-1. **SBOM**: Machine-readable Software Bill of Materials in SPDX or CycloneDX format.
-2. **Provenance**: Verifiable build traceability (SLSA-aligned).
-3. **Vulnerability Linkage**: Current vulnerability status linked to SBOM components.
-4. **Index**: A stable index file with unique Evidence IDs.
+## Usage for Diligence
+Vendors or agency reviewers can use the `verify_evidence_pack.sh` script to validate the integrity and completeness of a pack against the defined schema.
 
-## Workflow
-1. **Generation**: CI/CD pipelines generate artifacts on every release or on-demand.
-2. **Verification**: `scripts/assurance/verify_evidence_pack.sh` validates the integrity and schema of the pack.
-3. **Delivery**: Provided to agencies "upon request" as machine-readable data.
+```bash
+./scripts/assurance/verify_evidence_pack.sh dist/assurance/evidence-pack.tgz
+```
 
-## Relevant Documents
-- [OMB M-26-05 Standards Mapping](../standards/omb-m26-05-risk-based-assurance.md)
-- [Evidence Pack Schema](../../schemas/assurance/evidence-pack.schema.json)
+## Generation in CI
+The evidence pack is generated on every release and can be triggered on-demand via the "Assurance Evidence Generation" workflow.

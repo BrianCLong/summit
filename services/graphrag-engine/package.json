@@ -1,6 +1,6 @@
 {
   "name": "@summit/graphrag-engine",
-  "version": "4.2.3",
+  "version": "1.0.0",
   "description": "Summit Phase-Aware GraphRAG Engine",
   "main": "dist/index.js",
   "type": "module",

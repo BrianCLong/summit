@@ -1,6 +1,6 @@
 {
   "name": "@maestro/skill-ui-components",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Generates UI components with built-in validation (AST, Types, A11y).",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

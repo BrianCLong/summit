@@ -1,10 +1,8 @@
 {
   "name": "@summit/flows-summit-platform",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "private": true,
-  "files": [
-    "manifest.json"
-  ],
+  "files": ["manifest.json"],
   "dependencies": {
     "@summit/flows-ig": "workspace:*",
     "@summit/flows-mc": "workspace:*",

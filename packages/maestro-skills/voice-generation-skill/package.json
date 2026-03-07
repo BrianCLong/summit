@@ -1,6 +1,6 @@
 {
   "name": "@maestro/skill-voice-generation",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "description": "Voice Generation Skill for Maestro",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

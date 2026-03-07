@@ -1,6 +1,6 @@
 {
   "name": "@summit/agent-gym-metrics",
-  "version": "4.2.3",
+  "version": "0.1.0",
   "type": "module",
   "description": "Metrics for agent-gym",
   "main": "dist/index.js",

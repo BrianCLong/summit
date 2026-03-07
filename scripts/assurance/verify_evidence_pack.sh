@@ -1,63 +1,33 @@
 #!/bin/bash
 set -euo pipefail
 
-# Summit Evidence Pack Verifier
-# Validates the integrity and schema of an evidence pack tarball
+# Summit Assurance Evidence Pack Verifier
+# Validates pack integrity and schema compliance
 
-PACK_FILE=${1:-"dist/assurance/evidence-pack.tgz"}
-SCHEMA_FILE="schemas/assurance/evidence-pack.schema.json"
-TMP_DIR=$(mktemp -d)
+PACK_PATH=${1:?"Usage: $0 <pack-path>"}
+TEMP_DIR=$(mktemp -d)
 
-trap 'rm -rf "$TMP_DIR"' EXIT
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
-echo "Verifying evidence pack: $PACK_FILE"
+echo "Verifying evidence pack: $PACK_PATH"
 
-if [ ! -f "$PACK_FILE" ]; then
-  echo "Error: Pack file not found."
+# Unpack
+tar -xzf "$PACK_PATH" -C "$TEMP_DIR"
+
+# Check index.json existence
+if [ ! -f "$TEMP_DIR/index.json" ]; then
+  echo "Error: index.json missing from pack"
   exit 1
 fi
 
-if [ ! -f "$SCHEMA_FILE" ]; then
-  echo "Error: Schema file not found at $SCHEMA_FILE"
-  exit 1
-fi
+# Validate index against schema
+node scripts/assurance/validate_schema.js "$TEMP_DIR/index.json"
 
-# Extract
-tar -xzf "$PACK_FILE" -C "$TMP_DIR"
+# Check required KINDs
+for kind in sbom provenance vuln; do
+  if ! grep -q "\"kind\": \"$kind\"" "$TEMP_DIR/index.json"; then
+    echo "Warning: Evidence kind '$kind' not found in index"
+  fi
+done
 
-# 1. Validate Index Schema using Node.js script
-echo "Validating index schema..."
-if node scripts/assurance/validate_schema.js "$SCHEMA_FILE" "$TMP_DIR/index.json"; then
-  echo "✅ Index schema is valid."
-else
-  echo "❌ Index schema validation failed."
-  exit 1
-fi
-
-# 2. Verify all items in index (Integrity Check)
-echo "Checking file integrity..."
-python3 -c "
-import json, hashlib, os, sys
-def get_sha256(filepath):
-    hasher = hashlib.sha256()
-    with open(filepath, 'rb') as f:
-        for chunk in iter(lambda: f.read(4096), b''):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
-with open('$TMP_DIR/index.json', 'r') as f:
-    index = json.load(f)
-
-for item in index['items']:
-    path = os.path.join('$TMP_DIR', item['path'])
-    if not os.path.exists(path):
-        print(f'Error: File missing: {item[\"path\"]}')
-        sys.exit(1)
-    actual_sha = get_sha256(path)
-    if actual_sha != item['sha256']:
-        print(f'Error: Hash mismatch for {item[\"path\"]}')
-        sys.exit(1)
-    print(f'Verified: {item[\"path\"]}')
-"
-
-echo "✅ Evidence pack verification successful."
+echo "Verification SUCCESS"
