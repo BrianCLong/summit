@@ -1,0 +1,17 @@
+name: agent-capability-graph-drift
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Detect drift
+        run: npx tsx scripts/monitoring/agent-capability-graph-drift.ts
