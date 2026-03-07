@@ -1,0 +1,23 @@
+{
+  "$id": "https://summit.com/schemas/ai-factory/architecture-review.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture Review",
+  "type": "object",
+  "properties": {
+    "passed": { "type": "boolean" },
+    "violations": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "touched_paths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "blast_radius": { "type": "string" }
+  },
+  "required": ["passed", "violations", "warnings", "touched_paths", "blast_radius"]
+}

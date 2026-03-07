@@ -1,0 +1,13 @@
+{
+  "$id": "https://summit.com/schemas/ai-factory/self-heal.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Self Heal Report",
+  "type": "object",
+  "properties": {
+    "attempted": { "type": "boolean" },
+    "success": { "type": "boolean" },
+    "failureClass": { "type": "string" },
+    "rationale": { "type": "string" }
+  },
+  "required": ["attempted", "success", "failureClass", "rationale"]
+}
