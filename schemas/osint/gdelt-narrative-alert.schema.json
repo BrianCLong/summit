@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/osint/gdelt-narrative-alert.schema.json",
+  "title": "GDELTNarrativeAlert",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alert_id",
+    "batch_id",
+    "slice_id",
+    "alert_type",
+    "magnitude",
+    "baseline_window",
+    "created_at"
+  ],
+  "properties": {
+    "alert_id": { "type": "string", "minLength": 1 },
+    "batch_id": { "type": "string", "minLength": 1 },
+    "slice_id": { "type": "string", "minLength": 1 },
+    "alert_type": {
+      "type": "string",
+      "enum": ["volume", "emotion", "network"]
+    },
+    "magnitude": { "type": "number" },
+    "baseline_window": { "type": "string", "minLength": 1 },
+    "supporting_doc_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "graph_snapshot_ref": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  }
+}

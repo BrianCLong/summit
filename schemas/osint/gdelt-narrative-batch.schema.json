@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/osint/gdelt-narrative-batch.schema.json",
+  "title": "GDELTNarrativeBatch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "batch_id",
+    "slice_id",
+    "window_start",
+    "window_end",
+    "doc_ids",
+    "batch_manifest_sha256"
+  ],
+  "properties": {
+    "batch_id": { "type": "string", "minLength": 1 },
+    "slice_id": { "type": "string", "minLength": 1 },
+    "window_start": { "type": "string", "format": "date-time" },
+    "window_end": { "type": "string", "format": "date-time" },
+    "doc_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "theme_terms": { "type": "array", "items": { "type": "string" } },
+    "person_terms": { "type": "array", "items": { "type": "string" } },
+    "org_terms": { "type": "array", "items": { "type": "string" } },
+    "location_terms": { "type": "array", "items": { "type": "string" } },
+    "emotion_aggregate": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "batch_manifest_sha256": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{64}$"
+    }
+  }
+}
