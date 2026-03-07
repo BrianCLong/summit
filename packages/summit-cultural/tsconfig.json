@@ -10,10 +10,13 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
     "types": []
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.tsx",
     "src/**/*.json"
   ],
   "exclude": [
