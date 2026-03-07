@@ -1,5 +1,6 @@
 
 package ontology
+import future.keywords.if
 
 default allow = false
 

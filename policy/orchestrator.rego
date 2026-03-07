@@ -3,6 +3,7 @@
 # Version: 1.0.0
 
 package orchestrator
+import future.keywords.if
 
 import future.keywords.every
 import future.keywords.in

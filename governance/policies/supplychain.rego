@@ -1,4 +1,5 @@
 package supplychain.policy
+import future.keywords.if
 
 deny["missing_spdx_sbom"] {
   not input.artifact.sbom_spdx

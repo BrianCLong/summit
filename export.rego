@@ -1,4 +1,5 @@
 package export
+import future.keywords.if
 
 # Decision entrypoint
 # Returns an object: {"effect": "allow"|"deny"|"step_up"|"allow_with_redactions", "redact_fields": [..], "reasons": [..], "simulated": bool, "note": string}

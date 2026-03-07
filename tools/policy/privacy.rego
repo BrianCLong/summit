@@ -1,4 +1,5 @@
 package repo.privacy
+import future.keywords.if
 
 deny[msg] {
   input.diff.added_files[_] == file

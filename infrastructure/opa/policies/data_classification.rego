@@ -1,4 +1,6 @@
 package intelgraph.data_classification
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

@@ -1,4 +1,6 @@
 package kubernetes.admission
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

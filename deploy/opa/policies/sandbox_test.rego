@@ -3,6 +3,7 @@
 # Unit tests for sandbox tenant policy enforcement
 
 package intelgraph.sandbox
+import future.keywords.in
 
 import future.keywords.if
 

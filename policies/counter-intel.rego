@@ -3,6 +3,7 @@
 # the automated aspects of the counter-intelligence framework.
 
 package counter_intelligence
+import future.keywords.if
 
 default allow = false
 

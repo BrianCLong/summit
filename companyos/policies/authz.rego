@@ -8,6 +8,8 @@
 # - Administrative operations
 
 package companyos.authz
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

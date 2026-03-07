@@ -2,6 +2,8 @@
 # Enforces strict tenant boundaries and data access controls
 
 package conductor.tenant_isolation
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

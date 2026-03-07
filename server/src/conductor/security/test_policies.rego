@@ -1,4 +1,5 @@
 package conductor.security
+import future.keywords.if
 
 import rego.v1
 

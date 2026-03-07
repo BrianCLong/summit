@@ -2,6 +2,8 @@
 # Governs inter-tenant data sharing and collaborative operations
 
 package conductor.cross_tenant
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

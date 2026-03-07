@@ -1,5 +1,7 @@
 # Unit tests for approval policies
 package intelgraph.approvals_test
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 import data.intelgraph.approvals

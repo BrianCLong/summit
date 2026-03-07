@@ -2,6 +2,8 @@
 # Implements foundational attribute-based access control for core platform operations
 
 package baseline_abac
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

@@ -5,6 +5,8 @@
 # service based on SPIFFE identity, communication matrix, and contextual attributes.
 
 package zerotrust.service_authz
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

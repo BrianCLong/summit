@@ -1,4 +1,6 @@
 package helmsecurity
+import future.keywords.in
+import future.keywords.if
 
 # Deny deployments without security context
 deny contains msg if {

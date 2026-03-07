@@ -1,4 +1,5 @@
 package antigravity.merge
+import future.keywords.if
 
 default allow_automerge := false
 default require_human_countersign := true

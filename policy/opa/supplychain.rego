@@ -1,4 +1,5 @@
 package supplychain
+import future.keywords.if
 
 import rego.v1
 

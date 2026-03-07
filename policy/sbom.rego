@@ -1,4 +1,6 @@
 package summit.sbom
+import future.keywords.in
+import future.keywords.if
 
 default acceptable := false
 

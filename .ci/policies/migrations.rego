@@ -1,4 +1,5 @@
 package migrations
+import future.keywords.in
 
 default allow = false
 

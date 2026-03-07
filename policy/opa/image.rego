@@ -1,4 +1,5 @@
 package kubernetes.admission
+import future.keywords.if
 
 deny contains msg if {
   input.request.kind.kind == "Pod"

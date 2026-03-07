@@ -1,4 +1,6 @@
 package companyos.rbac
+import future.keywords.in
+import future.keywords.if
 
 # OPA v1 imports - keywords are built-in
 import rego.v1

@@ -1,4 +1,5 @@
 package summit.abac.v1
+import future.keywords.if
 
 default allow = false
 default reason = "policy_default_deny"

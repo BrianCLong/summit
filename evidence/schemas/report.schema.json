@@ -5,7 +5,7 @@
     "evidence_id": { "type": "string" },
     "summary": { "type": "string" },
     "scenarios": { "type": "integer" },
-    "status": { "type": "string" },
+    "details": { "type": "string" },
     "item": { "type": "string" }
   },
   "required": [],

@@ -9,6 +9,8 @@
 # - Tenant context (isolation, quotas, features)
 
 package companyos.authz.abac
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

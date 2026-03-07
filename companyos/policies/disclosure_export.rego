@@ -1,4 +1,5 @@
 package companyos.authz.disclosure_export
+import future.keywords.if
 
 default decision := {
   "allow": false,

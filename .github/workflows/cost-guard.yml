@@ -10,10 +10,6 @@ on:
       - '.github/workflows/cost-guard.yml'
       - 'scripts/ci/cost_guard.py'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   actions: read

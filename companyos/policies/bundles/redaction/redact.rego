@@ -8,6 +8,8 @@
 # - Classification-based redaction
 
 package companyos.authz.redaction
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

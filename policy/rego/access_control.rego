@@ -1,4 +1,5 @@
 package rego.intelgraph.authz
+import future.keywords.if
 
 default allow := false
 

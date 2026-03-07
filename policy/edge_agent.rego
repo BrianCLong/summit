@@ -1,4 +1,6 @@
 package edge_ops
+import future.keywords.in
+import future.keywords.if
 
 default allow_deployment := false
 default allow_action := false

@@ -1,4 +1,5 @@
 package rego.conductor.authz
+import future.keywords.if
 
 default allow := false
 

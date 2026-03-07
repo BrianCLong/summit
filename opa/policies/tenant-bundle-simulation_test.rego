@@ -1,4 +1,5 @@
 package tenant.bundle
+import future.keywords.if
 
 import rego.v1
 

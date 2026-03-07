@@ -1,4 +1,6 @@
 package maestro.admission
+import future.keywords.in
+import future.keywords.if
 
 # Stub function for admission decision
 decision_for(req) := "require-human" if {

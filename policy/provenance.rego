@@ -1,4 +1,5 @@
 package summit.provenance
+import future.keywords.if
 
 default valid := false
 

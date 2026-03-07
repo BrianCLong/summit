@@ -1,4 +1,6 @@
 package dockersecurity
+import future.keywords.in
+import future.keywords.if
 
 # Deny final images running as root
 deny contains msg if {

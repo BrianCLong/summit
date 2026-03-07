@@ -1,4 +1,5 @@
 package cicd
+import future.keywords.if
 
 default allow = false
 

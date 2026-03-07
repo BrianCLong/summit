@@ -2,6 +2,8 @@
 # Comprehensive authorization and governance policies
 
 package intelgraph.conductor
+import future.keywords.in
+import future.keywords.if
 
 import rego.v1
 

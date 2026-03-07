@@ -14,6 +14,7 @@
 # - Time-based restrictions
 
 package chatops.risk
+import future.keywords.if
 
 import future.keywords.in
 

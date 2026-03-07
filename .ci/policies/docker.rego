@@ -1,4 +1,5 @@
 package policy.container
+import future.keywords.in
 
 approved_runtime_bases := {
   "gcr.io/distroless/nodejs20-debian12",
