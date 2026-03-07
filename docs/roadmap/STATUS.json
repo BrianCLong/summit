@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-07T02:07:32Z",
+  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register. Added PR #16 report separation gate contract (deterministic claim-bound reporting + CI gate). Hardened PR #16 with schema validation utility, deterministic section normalization, and gate regression tests.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",

@@ -63,6 +63,9 @@ jobs:
       - name: Timestamp scan
         run: node scripts/scan_timestamp_keys.mjs
 
+      - name: Report separation gate
+        run: pnpm gate:report
+
 
       - name: Detect governance policy changes
         id: governance_changes
