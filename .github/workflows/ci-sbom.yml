@@ -100,7 +100,7 @@ jobs:
           # GitHub stores attestation as a linked artifact; fetch bundle path
           gh attestation download --artifact-path ./cyclonedx.xml --bundle bundle.json
           # Verify signature + cert + Rekor inclusion from bundle (keyless OIDC)
-          cosign verify-blob --bundle bundle.json ./cyclonedx.xml
+          cosign verify-blob --use-signed-timestamps --bundle bundle.json ./cyclonedx.xml
 
       - name: Enforce attestation TTL/recency (<= 24h)
         run: |
