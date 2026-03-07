@@ -1,0 +1,62 @@
+{
+  "artifact": "summit-development-roadmap-todo-standup",
+  "version": "2",
+  "generated_at": "2026-02-10T12:00:00Z",
+  "classification_rule": {
+    "todo_event": "moved this to Todo in Summit Development Roadmap",
+    "excluded_followup_events": [
+      "moved this from Todo to In Progress in Summit Development Roadmap",
+      "moved this from Todo to Done in Summit Development Roadmap"
+    ],
+    "scope": "public GitHub issue activity feed"
+  },
+  "todo_issues": [
+    {
+      "number": 9791,
+      "title": "IG Oct25",
+      "url": "https://github.com/BrianCLong/summit/issues/9791"
+    },
+    {
+      "number": 10132,
+      "title": "Policy & Security Hardening",
+      "url": "https://github.com/BrianCLong/summit/issues/10132"
+    },
+    {
+      "number": 11176,
+      "title": "Create Playwright test: Investigation creation → Entity addition",
+      "url": "https://github.com/BrianCLong/summit/issues/11176"
+    },
+    {
+      "number": 11349,
+      "title": "Accessibility/UX",
+      "url": "https://github.com/BrianCLong/summit/issues/11349"
+    },
+    {
+      "number": 11025,
+      "title": "Unit tests",
+      "url": "https://github.com/BrianCLong/summit/issues/11025"
+    },
+    {
+      "number": 11170,
+      "title": "Test golden path in consolidated frontend",
+      "url": "https://github.com/BrianCLong/summit/issues/11170"
+    },
+    {
+      "number": 11635,
+      "title": "HTTP/CSV reference connector",
+      "url": "https://github.com/BrianCLong/summit/issues/11635"
+    }
+  ],
+  "out_of_todo_issues": [
+    {
+      "number": 189,
+      "title": "Load testing and optimization",
+      "url": "https://github.com/BrianCLong/summit/issues/189",
+      "transition": "Todo -> Done"
+    }
+  ],
+  "known_constraints": [
+    "Public activity feed is not a complete source of truth for private project metadata.",
+    "Board-level throughput metrics require project API export."
+  ]
+}

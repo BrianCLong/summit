@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T01:05:00Z",
-  "revision_note": "Added saas-crash-2026 positioning pack initiative and refreshed repo validation checklist.",
+  "last_updated": "2026-02-10T12:05:00Z",
+  "revision_note": "Hardened Todo standup artifact with machine-readable snapshot, validation checklist, and status tracking.",
   "initiatives": [
     {
       "id": "saas-crash-2026-positioning-pack",
@@ -217,6 +217,18 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "summit-development-roadmap-todo-standup-snapshot",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Published public-visibility Todo standup snapshot with Today/Next/Blockers framing and governance constraints."
+    },
+    {
+      "id": "summit-development-roadmap-todo-standup-snapshot-v2",
+      "status": "completed",
+      "owner": "codex",
+      "notes": "Added machine-readable Todo snapshot JSON and validation checklist for deterministic standup artifact consumption."
     }
   ],
   "summary": {
@@ -224,7 +236,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 26,
     "ga_blockers": []
   }
 }
