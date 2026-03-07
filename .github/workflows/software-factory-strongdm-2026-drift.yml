@@ -1,0 +1,30 @@
+name: software-factory-strongdm-2026-drift
+
+on:
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run drift detector
+        run: python3 scripts/monitoring/software-factory-strongdm-2026-drift.py
+
+      - name: Upload drift report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: software-factory-strongdm-2026-drift-report
+          path: artifacts/drift/report.json
+          if-no-files-found: error
