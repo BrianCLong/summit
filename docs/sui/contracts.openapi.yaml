@@ -1,0 +1,178 @@
+openapi: 3.1.0
+info:
+  title: Summit Underwriting Intelligence API
+  version: 0.1.0
+  description: |
+    Deterministic underwriting intelligence API for score, explain, and portfolio drift workflows.
+servers:
+  - url: https://api.summit.local/sui
+paths:
+  /score:
+    post:
+      summary: Score an insured snapshot
+      operationId: postScore
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScoreRequest"
+      responses:
+        "200":
+          description: Successful score response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScoreResponse"
+  /explain:
+    post:
+      summary: Explain a scoring decision
+      operationId: postExplain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExplainRequest"
+      responses:
+        "200":
+          description: Explanation payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExplainResponse"
+  /portfolio/drift:
+    post:
+      summary: Detect posture drift between snapshots
+      operationId: postPortfolioDrift
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PortfolioDriftRequest"
+      responses:
+        "200":
+          description: Drift findings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PortfolioDriftResponse"
+components:
+  schemas:
+    TenantScopedRequest:
+      type: object
+      properties:
+        tenantId:
+          type: string
+          minLength: 1
+      required: [tenantId]
+    ScoreRequest:
+      allOf:
+        - $ref: "#/components/schemas/TenantScopedRequest"
+        - type: object
+          properties:
+            insuredId:
+              type: string
+            snapshotId:
+              type: string
+            modelVersion:
+              type: string
+            seed:
+              type: integer
+              minimum: 0
+          required: [insuredId, snapshotId, modelVersion, seed]
+    ScoreResponse:
+      type: object
+      properties:
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 1
+        riskQuintile:
+          type: string
+          enum: [A, B, C, D, E]
+        calibratedProbability:
+          type: number
+          minimum: 0
+          maximum: 1
+        evidenceId:
+          type: string
+      required: [riskScore, riskQuintile, calibratedProbability, evidenceId]
+    ExplainRequest:
+      allOf:
+        - $ref: "#/components/schemas/TenantScopedRequest"
+        - type: object
+          properties:
+            insuredId:
+              type: string
+            snapshotId:
+              type: string
+            scoreRunId:
+              type: string
+          required: [insuredId, snapshotId, scoreRunId]
+    ExplainResponse:
+      type: object
+      properties:
+        topContributors:
+          type: array
+          items:
+            type: object
+            properties:
+              feature:
+                type: string
+              weight:
+                type: number
+            required: [feature, weight]
+        controlStrengths:
+          type: array
+          items:
+            type: string
+        recommendedActions:
+          type: array
+          items:
+            type: string
+        explanationHash:
+          type: string
+      required: [topContributors, controlStrengths, recommendedActions, explanationHash]
+    PortfolioDriftRequest:
+      allOf:
+        - $ref: "#/components/schemas/TenantScopedRequest"
+        - type: object
+          properties:
+            portfolioId:
+              type: string
+            baselineSnapshotId:
+              type: string
+            currentSnapshotId:
+              type: string
+          required: [portfolioId, baselineSnapshotId, currentSnapshotId]
+    PortfolioDriftFinding:
+      type: object
+      properties:
+        category:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        summary:
+          type: string
+        remediationHint:
+          type: string
+      required: [category, severity, summary]
+    PortfolioDriftResponse:
+      type: object
+      properties:
+        driftDetected:
+          type: boolean
+        driftFindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/PortfolioDriftFinding"
+        actionQueue:
+          type: array
+          items:
+            type: string
+        evidenceId:
+          type: string
+      required: [driftDetected, driftFindings, actionQueue, evidenceId]

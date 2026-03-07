@@ -1,0 +1,119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schemas/sui/evidence-schemas.json",
+  "title": "SUI Evidence Bundle Schemas",
+  "type": "object",
+  "properties": {
+    "report": {
+      "$ref": "#/$defs/report"
+    },
+    "metrics": {
+      "$ref": "#/$defs/metrics"
+    },
+    "stamp": {
+      "$ref": "#/$defs/stamp"
+    }
+  },
+  "required": ["report", "metrics", "stamp"],
+  "$defs": {
+    "report": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "policy_checks": { "type": "array", "items": { "type": "string" } },
+        "security_checks": { "type": "array", "items": { "type": "string" } },
+        "determinism_checks": { "type": "array", "items": { "type": "string" } },
+        "failure_details": { "type": "array", "items": { "type": "string" } },
+        "approval_recommendation": {
+          "type": "string",
+          "enum": ["approve", "hold", "reject"]
+        }
+      },
+      "required": [
+        "summary",
+        "policy_checks",
+        "security_checks",
+        "determinism_checks",
+        "failure_details",
+        "approval_recommendation"
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "run_id": { "type": "string" },
+        "dataset_id": { "type": "string" },
+        "model_version": { "type": "string" },
+        "seed": { "type": "integer", "minimum": 0 },
+        "claims_metrics": {
+          "type": "object",
+          "properties": {
+            "auc": { "type": "number", "minimum": 0, "maximum": 1 },
+            "pr_auc": { "type": "number", "minimum": 0, "maximum": 1 },
+            "brier": { "type": "number", "minimum": 0, "maximum": 1 },
+            "ece": { "type": "number", "minimum": 0, "maximum": 1 }
+          },
+          "required": ["auc", "pr_auc", "brier", "ece"]
+        },
+        "lift_metrics": {
+          "type": "object",
+          "properties": {
+            "quintiles": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "bucket": { "type": "string", "enum": ["A", "B", "C", "D", "E"] },
+                  "claim_rate": { "type": "number", "minimum": 0, "maximum": 1 }
+                },
+                "required": ["bucket", "claim_rate"]
+              },
+              "minItems": 5,
+              "maxItems": 5
+            },
+            "lift_ratio_e_over_a": { "type": "number", "minimum": 0 }
+          },
+          "required": ["quintiles", "lift_ratio_e_over_a"]
+        },
+        "workflow_metrics": {
+          "type": "object",
+          "properties": {
+            "packet_completion_minutes": { "type": "number", "minimum": 0 },
+            "drift_alert_precision": { "type": "number", "minimum": 0, "maximum": 1 },
+            "analyst_touch_minutes": { "type": "number", "minimum": 0 }
+          },
+          "required": [
+            "packet_completion_minutes",
+            "drift_alert_precision",
+            "analyst_touch_minutes"
+          ]
+        },
+        "udr_ac_score": { "type": "number", "minimum": 0, "maximum": 1 }
+      },
+      "required": [
+        "run_id",
+        "dataset_id",
+        "model_version",
+        "seed",
+        "claims_metrics",
+        "lift_metrics",
+        "workflow_metrics",
+        "udr_ac_score"
+      ]
+    },
+    "stamp": {
+      "type": "object",
+      "properties": {
+        "git_sha": { "type": "string" },
+        "toolchain_versions": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "data_hash": { "type": "string" },
+        "model_hash": { "type": "string" },
+        "generated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["git_sha", "toolchain_versions", "data_hash", "model_hash", "generated_at"]
+    }
+  }
+}
