@@ -95,6 +95,21 @@
     "description": "Security/compliance"
   },
   {
+    "name": "lane:security",
+    "color": "0b7285",
+    "description": "Security program lane"
+  },
+  {
+    "name": "lane:bizdev",
+    "color": "6f42c1",
+    "description": "Business development lane"
+  },
+  {
+    "name": "lane:infra",
+    "color": "1d76db",
+    "description": "Infrastructure lane"
+  },
+  {
     "name": "area:release",
     "color": "f9d0c4",
     "description": "Release management"

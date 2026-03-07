@@ -40,6 +40,18 @@ For ready-to-use templates that keep issues and PRs crisp, copy the relevant pla
   - `fix/graph/node-expansion-crash`
   - `docs/api/update-schema`
 
+#### Lane Labels & Definitions of Done
+
+We use lane labels to keep workstreams explicit and to enforce lane-specific definitions of done.
+
+- **`lane:security`**: Security batch sprints, dashboard triage, CIS benchmark checks, and
+  remediation planning.
+  - **Done**: Security dashboard reviewed, CIS run ≤ 7 days old, follow-on issues filed, CI green.
+- **`lane:bizdev`**: Business development commitments, partner enablement, and GTM collateral.
+  - **Done**: Stakeholder signoff and artifacts delivered (proposal, deck, or contract).
+- **`lane:infra`**: Infrastructure readiness, environments, and deployment automation.
+  - **Done**: Change validated in target environment with rollback evidence.
+
 ### 2. Making Changes
 
 - **Atomic PRs**: One feature or fix per PR. Avoid "kitchen sink" PRs.
