@@ -1,0 +1,22 @@
+{
+  "name": "@intelgraph/summit-cultural",
+  "version": "0.1.1",
+  "description": "Cultural-Demographic-Linguistic Reality Modeling primitives for Summit",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "pnpm run build && node --test test/*.test.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
