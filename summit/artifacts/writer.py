@@ -5,8 +5,12 @@ from summit.schemas.explanation import ExplanationReport, ExplainMetrics, Stamp
 
 def write_explain_bundle(path: str, report: ExplanationReport, metrics: ExplainMetrics) -> None:
     # Deterministic relative path for artifact storage
-    rel_path = os.path.basename(path)
-    base_dir = Path(f"artifacts/summit/explain/{rel_path}")
+    # Use basename to avoid directory traversal
+    safe_name = os.path.basename(path)
+    if not safe_name:
+        raise ValueError("Invalid path for writing artifact bundle.")
+
+    base_dir = Path("artifacts/summit/explain") / safe_name
     base_dir.mkdir(parents=True, exist_ok=True)
 
     with open(base_dir / "report.json", "w", encoding="utf-8") as f:

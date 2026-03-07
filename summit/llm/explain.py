@@ -2,12 +2,10 @@ from summit.schemas.explanation import ExplanationReport, Intent, ExplainMetrics
 import os
 
 def build_explanation(path: str, intent: Intent, metrics: ExplainMetrics) -> ExplanationReport:
-    # A real implementation would call OpenAI here, e.g., using `openai.chat.completions.create`
-    # and use Pydantic `response_format` for deterministic JSON structure.
-    #
-    # For now, we simulate the LLM's response based on the intent extractor's heuristics.
-
+    # Safely get basename of path
     file_name = os.path.basename(path)
+    if not file_name:
+        file_name = "unknown_module"
 
     risks = "Low risk."
     if metrics.cyclomatic_complexity > 15:

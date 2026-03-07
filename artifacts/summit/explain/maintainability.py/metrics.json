@@ -1,6 +1,6 @@
 {
-  "cyclomatic_complexity": 4,
+  "cyclomatic_complexity": 5,
   "function_count": 1,
-  "loc": 55,
+  "loc": 64,
   "evidence_id": "SUMMIT:TRUST:METRICS:0001"
 }

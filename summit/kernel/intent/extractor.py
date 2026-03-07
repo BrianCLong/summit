@@ -7,7 +7,11 @@ from summit.kernel.intent.rules import match_intent_layer, match_intent_componen
 
 def extract_intent(path: str) -> Dict[str, Any]:
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        abs_path = os.path.abspath(path)
+        if not os.path.isfile(abs_path):
+            raise FileNotFoundError(f"File not found: {path}")
+
+        with open(abs_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         PY_LANGUAGE = Language(tspython.language())
@@ -25,7 +29,6 @@ def extract_intent(path: str) -> Dict[str, Any]:
 
         imports = []
         for match in matches:
-            # match is (pattern_index, {"capture_name": [Node, Node]})
             capture_dict = match[1]
             for capture_list in capture_dict.values():
                 for node in capture_list:

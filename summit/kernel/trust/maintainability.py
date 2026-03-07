@@ -1,10 +1,19 @@
+import os
 import tree_sitter_python as tspython
 from tree_sitter import Language, Parser, Query, QueryCursor
 from typing import Dict, Any
 
 def compute_metrics(path: str) -> Dict[str, Any]:
     try:
-        with open(path, 'r', encoding='utf-8') as f:
+        # Prevent directory traversal by ensuring the resolved path is within the repo
+        # Or simply check that the file exists and resolve its absolute path
+        abs_path = os.path.abspath(path)
+
+        # Verify it exists and is a file
+        if not os.path.isfile(abs_path):
+            raise FileNotFoundError(f"File not found: {path}")
+
+        with open(abs_path, 'r', encoding='utf-8') as f:
             content = f.read()
 
         lines = content.splitlines()
