@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "last_updated": "2026-02-08T02:36:43Z",
+  "revision_note": "Expanded narrative schema pack with full constraint parity, receipt JSON Schema, and metrics indexes.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
