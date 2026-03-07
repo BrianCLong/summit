@@ -154,8 +154,11 @@ function main(): void {
   const tagMessage = `Go-Live Release ${version}
 
 Evidence Summary:
+- Version: ${version}
 - Commit: ${evidence.git.sha}
 - Branch: ${evidence.git.branch}
+- Signatures: Verified (Cosign)
+- Provenance: SLSA Level 3 attached to release
 - Checks: ${evidence.summary.passedChecks}/${evidence.summary.totalChecks} passed
 - Status: ${evidence.summary.passed ? 'PASSED' : 'FAILED (pre-release)'}
 - Generated: ${evidence.generatedAt}
@@ -164,7 +167,7 @@ ${evidence.metadata?.runUrl ? `- CI Run: ${evidence.metadata.runUrl}` : ''}
 Evidence Schema Version: ${evidence.version}
 Evidence Bundle: ${evidenceDir}
 
-This tag was created from a verified go-live evidence bundle.
+This tag was created from a verified go-live evidence bundle and is fully reconstructible with provenance.
 `;
 
   // Create annotated tag

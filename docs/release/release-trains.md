@@ -11,7 +11,7 @@ We utilize four distinct release trains, each with increasing stability guarante
 | **Canary** | `vX.Y.Z-canary.N` | Continuous | `canary` | Immediate feedback, dogfooding. |
 | **Integration** | `vX.Y.Z-rc.N` | Daily (Auto) | `staging` | Integration testing, performance baselining. |
 | **Stable** | `vX.Y.Z` | Weekly | `prod` (Internal/SaaS) | General availability for standard users. |
-| **GA** | `vX.Y.Z-ga` | On-Demand | `prod` (Enterprise/Airgap) | Hardened, long-term support releases. |
+| **GA** | `vX.Y.Z` | On-Demand | `prod` (Enterprise/Airgap) | Hardened, long-term support releases. |
 
 ## 2. Release Flow & Promotion
 
@@ -69,7 +69,26 @@ graph LR
 
 We follow [SemVer 2.0.0](https://semver.org/).
 
+**Tag Strategy Redefinition**:
+To avoid redundancy, date-based and environment-specific tags (`vYYYY.MM.DD-buildN`, `vX.Y.Z-ga`, etc.) have been collapsed into a strict SemVer format.
+
 *   **Major**: Breaking changes (requires migration plan).
 *   **Minor**: New features (backward compatible).
 *   **Patch**: Bug fixes.
 *   **Pre-release labels**: Used for Canary and Integration (`-canary`, `-rc`).
+
+**Release Metadata and Provenance**:
+All tags **MUST** be annotated and correspond to signed releases. To ensure each tag is reconstructible with provenance, tag annotations must include the following metadata:
+- **Version**: The semantic version.
+- **Commit**: The underlying commit SHA.
+- **Signatures**: Proof of signing (GPG/Cosign).
+- **Provenance**: A reference or link to the SLSA provenance and SBOM artifacts.
+- **Evidence Bundle**: Link to the evidence directory containing test results and audits.
+
+**Release Cadence Calendar**:
+| Event | Cadence | Schedule |
+|-------|---------|----------|
+| **Canary** | Continuous | On every merge to main |
+| **Release Candidate (RC)** | Daily | Monday-Thursday 10:00 UTC |
+| **Stable Release** | Weekly | Tuesday 13:00 UTC |
+| **General Availability (GA)** | Quarterly | First Tuesday of Quarter |

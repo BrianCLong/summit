@@ -108,7 +108,7 @@ One request shows same `X-Correlation-Id` in ingress log, app log, and trace spa
 
 ### 2.9. Release Process Hygiene
 
-Tag strategy: `vYYYY.MM.DD-buildN` (immutable), promote via image digest, not tag.
+Tag strategy: `vX.Y.Z` (immutable, semantic versioning). Promote via image digest, not tag. Ensure tags are annotated, signed, and include metadata (version, commit, signature, provenance, evidence bundle) so they are fully reconstructible.
 Protected branches & required checks already set—add “Change ticket / rollout plan” fields to PR template.
 
 ## 3. Day-1 Developer Acceleration (fast wins)
