@@ -1,0 +1,8 @@
+{
+  "institution_count": 0,
+  "forecast_events": 0,
+  "precision_at_10": 0,
+  "recall_at_30d": 0,
+  "median_lead_time_days": 0,
+  "false_positive_rate": 0
+}
