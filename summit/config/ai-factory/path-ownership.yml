@@ -1,0 +1,11 @@
+allowlists:
+  factory-core:
+    - agents/factory/
+    - cli/factory/
+    - schemas/ai-factory/
+  factory-docs:
+    - docs/standards/
+    - docs/security/
+    - docs/ops/
+  factory-ci:
+    - .github/workflows/ai-factory-*.yml

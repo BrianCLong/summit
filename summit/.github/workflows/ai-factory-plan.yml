@@ -1,0 +1,22 @@
+name: AI Factory Plan
+on:
+  workflow_dispatch:
+    inputs:
+      issueId:
+        description: 'Issue ID to plan for'
+        required: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g pnpm && pnpm install
+      - run: pnpm exec tsx cli/factory/plan.ts ${{ github.event.inputs.issueId }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ai-factory-plan
+          path: artifacts/ai-factory/
