@@ -1,0 +1,11 @@
+{
+  "$id": "summit.epistemic.policy",
+  "type": "object",
+  "required": ["policy_id", "min_independent_sources", "max_conflict_score", "min_support_score"],
+  "properties": {
+    "policy_id": { "type": "string" },
+    "min_independent_sources": { "type": "integer", "minimum": 0 },
+    "max_conflict_score": { "type": "number", "minimum": 0, "maximum": 1 },
+    "min_support_score": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

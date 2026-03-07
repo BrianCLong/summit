@@ -1,0 +1,16 @@
+{
+  "policies": [
+    {
+      "policy_id": "pol-osint-01",
+      "min_independent_sources": 2,
+      "max_conflict_score": 0.2,
+      "min_support_score": 0.8
+    },
+    {
+      "policy_id": "pol-osint-relaxed",
+      "min_independent_sources": 1,
+      "max_conflict_score": 0.5,
+      "min_support_score": 0.5
+    }
+  ]
+}
