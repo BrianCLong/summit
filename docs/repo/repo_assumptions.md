@@ -1,9 +1,9 @@
-# Repo Assumptions
+# Repository Assumptions
 
-| Assumption | Verified? | Notes |
-| :--- | :--- | :--- |
-| Node/TS or Python modules for agents | Yes | Repo contains Node/TS files (src/) and Python files. |
-| Evaluation runner paths exist | Yes | `src/evals` exists. |
-| Artifacts are stored in `artifacts/` | Yes | `artifacts` directory exists. |
-| Existing GraphRAG schema location | Yes | `src/graph` or `src/summit` likely contain it. |
-| CI workflows | Yes | `.github/workflows` exists. |
+**Validated:**
+- TypeScript + Node monorepo using pnpm.
+- Workspace dependencies mapped via `package.json`.
+
+**Assumptions (pending exact CI naming validation):**
+- Gateway and existing API integrations use a standard proxy route layer.
+- OPA ABAC policies are enforced at the top level, mapped to `policies/mcp`.
