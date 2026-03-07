@@ -33,3 +33,12 @@
 - Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
 - Confirm logging/telemetry stack (to wire MCP audit + drift detector).
 - Confirm test runner + assertion libs (`pnpm test:*`).
+
+# AI Civilization Stack Assumptions
+Verified: current governance surfaces, CI policy surfaces, existing top-level folders above.
+Assumed: exact ownership of simulation/graph/governance modules, exact test harness naming, exact report artifact conventions.
+Must-not-touch files:
+- docs/ci/REQUIRED_CHECKS_POLICY.yml
+- scripts/release/reconcile_branch_protection.sh
+- .github/workflows/** (unless CI-gate PR)
+- .opa/policy/** (unless policy-gate PR)
