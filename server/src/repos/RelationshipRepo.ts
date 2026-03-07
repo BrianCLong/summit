@@ -8,7 +8,6 @@ import { Pool, PoolClient } from 'pg';
 import { Driver, Session } from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
-import { getNeo4jBatchWriter } from '../db/neo4jBatchWriter.js';
 
 const repoLogger = logger.child({ name: 'RelationshipRepo' });
 
@@ -119,24 +118,20 @@ export class RelationshipRepo {
 
       await client.query('COMMIT');
 
-      // 4. Queue Neo4j write (batched)
+      // 4. Best effort Neo4j write
       try {
-        getNeo4jBatchWriter().queueCreateRelationship(
-          relationship.src_id,
-          relationship.dst_id,
-          relationship.type,
-          {
-            id: relationship.id,
-            props: relationship.props,
-            createdAt: relationship.created_at.toISOString(),
-            updatedAt: relationship.updated_at.toISOString(),
-          },
-          relationship.tenant_id,
-        );
+        await this.upsertNeo4jRelationship({
+          id: relationship.id,
+          tenantId: relationship.tenant_id,
+          srcId: relationship.src_id,
+          dstId: relationship.dst_id,
+          type: relationship.type,
+          props: relationship.props,
+        });
       } catch (neo4jError) {
         repoLogger.warn(
           { relationshipId: id, error: neo4jError },
-          'Neo4j batch write queue failed, will retry via outbox',
+          'Neo4j relationship write failed, will retry via outbox',
         );
       }
 
@@ -158,14 +153,12 @@ export class RelationshipRepo {
     try {
       await client.query('BEGIN');
 
-      const { rows } = (await client.query(
-        `DELETE FROM relationships WHERE id = $1 RETURNING *`,
+      const { rowCount } = await client.query(
+        `DELETE FROM relationships WHERE id = $1`,
         [id],
-      )) as { rows: RelationshipRow[] };
+      );
 
-      if (rows.length > 0) {
-        const deletedRel = rows[0];
-
+      if (rowCount && rowCount > 0) {
         // Outbox event for Neo4j cleanup
         await client.query(
           `INSERT INTO outbox_events (id, topic, payload)
@@ -175,18 +168,13 @@ export class RelationshipRepo {
 
         await client.query('COMMIT');
 
-        // Queue Neo4j delete (batched)
+        // Best effort Neo4j delete
         try {
-          getNeo4jBatchWriter().queueDeleteRelationship(
-            deletedRel.src_id,
-            deletedRel.dst_id,
-            deletedRel.type,
-            deletedRel.tenant_id,
-          );
+          await this.deleteNeo4jRelationship(id);
         } catch (neo4jError) {
           repoLogger.warn(
             { relationshipId: id, error: neo4jError },
-            'Neo4j batch delete queue failed, will retry via outbox',
+            'Neo4j relationship delete failed, will retry via outbox',
           );
         }
 
