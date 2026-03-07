@@ -1,0 +1,8 @@
+{
+  "id": "EVID:graphrag:003:ijkl",
+  "content": "Parallel subagents are strictly governed by the deny-by-default execution policy.",
+  "metadata": {
+    "source": "Summit Governance Handbook",
+    "classification": "internal"
+  }
+}

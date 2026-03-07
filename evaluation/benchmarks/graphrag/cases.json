@@ -1,0 +1,19 @@
+[
+  {
+    "id": "graphrag_001",
+    "task": "Explain the relationship between the Summit OS execution harness and the GraphRAG framework based on the provided corporate OSINT documents.",
+    "required_evidence": [
+      "EVID:graphrag:001:abcd",
+      "EVID:graphrag:002:efgh"
+    ],
+    "optimal_steps": 2
+  },
+  {
+    "id": "graphrag_002",
+    "task": "Identify the primary governance policy applied to parallel subagents according to the enterprise reference manual.",
+    "required_evidence": [
+      "EVID:graphrag:003:ijkl"
+    ],
+    "optimal_steps": 1
+  }
+]
