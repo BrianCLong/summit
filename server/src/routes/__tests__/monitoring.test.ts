@@ -16,6 +16,7 @@ jest.unstable_mockModule('../../monitoring/metrics', () => ({
   maestroChangeFailureRate: { set: mockSet },
   maestroMttrHours: { observe: mockObserve },
   uiErrorBoundaryCatchTotal: { inc: mockInc },
+  evidenceTrailPeekEventsTotal: { inc: mockInc },
   register: {
     contentType: 'text/plain',
     metrics: mockMetrics,
@@ -32,6 +33,7 @@ const {
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   uiErrorBoundaryCatchTotal,
+  evidenceTrailPeekEventsTotal,
 } = await import('../../monitoring/metrics.js');
 
 const app = express();
@@ -95,6 +97,29 @@ describe('Monitoring Routes', () => {
     expect(uiErrorBoundaryCatchTotal.inc).toHaveBeenCalledWith({
       component: 'TestComponent',
       tenant_id: 'tenant-123',
+    });
+  });
+
+
+  it('should route evidence trail peek telemetry to metrics', async () => {
+    const payload = {
+      event: 'evidence_trail_peek',
+      labels: {
+        metric: 'badge_click',
+        badge_kind: 'Test',
+      },
+    };
+
+    const response = await request(app)
+      .post('/telemetry/events')
+      .set('x-tenant-id', 'tenant-xyz')
+      .send(payload);
+
+    expect(response.status).toBe(202);
+    expect(evidenceTrailPeekEventsTotal.inc).toHaveBeenCalledWith({
+      metric: 'badge_click',
+      badge_kind: 'Test',
+      tenant_id: 'tenant-xyz',
     });
   });
 

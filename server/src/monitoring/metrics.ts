@@ -586,6 +586,14 @@ export const uiErrorBoundaryCatchTotal = createCounter({
   labelNames: ['component', 'tenant_id'],
 });
 
+
+export const evidenceTrailPeekEventsTotal = createCounter({
+  registers: [],
+  name: 'evidence_trail_peek_events_total',
+  help: 'Evidence Trail Peek telemetry events by metric and badge kind',
+  labelNames: ['metric', 'badge_kind', 'tenant_id'],
+});
+
 export const breakerState = createGauge({
   registers: [],
   name: 'circuit_breaker_state',
@@ -666,6 +674,7 @@ try {
   register.registerMetric(serviceAutoRemediationsTotal);
   register.registerMetric(goldenPathStepTotal);
   register.registerMetric(uiErrorBoundaryCatchTotal);
+  register.registerMetric(evidenceTrailPeekEventsTotal);
   register.registerMetric(maestroDeploymentsTotal);
   register.registerMetric(maestroPrLeadTimeHours);
   register.registerMetric(maestroChangeFailureRate);
@@ -1152,6 +1161,7 @@ export const metrics = {
   serviceAutoRemediationsTotal,
   goldenPathStepTotal,
   uiErrorBoundaryCatchTotal,
+  evidenceTrailPeekEventsTotal,
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,

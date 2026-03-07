@@ -8,6 +8,7 @@ import {
   webVitalValue,
   goldenPathStepTotal,
   uiErrorBoundaryCatchTotal,
+  evidenceTrailPeekEventsTotal,
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
@@ -502,6 +503,12 @@ router.post('/telemetry/events', (req: Request, res: Response) => {
         message: labels?.message,
         stack: labels?.stack,
         tenantId,
+      });
+    } else if (event === 'evidence_trail_peek') {
+      evidenceTrailPeekEventsTotal.inc({
+        metric: labels?.metric || 'unknown',
+        badge_kind: labels?.badge_kind || 'none',
+        tenant_id: tenantId,
       });
     }
 

@@ -9,6 +9,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Play, RotateCcw, AlertTriangle, CheckCircle, Code, BookOpen } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { EvidenceTrailPeek } from '@/components/EvidenceTrailPeek';
 
 // Define types locally if not available globally
 interface TranslationResult {
@@ -20,6 +21,7 @@ interface TranslationResult {
   validationError?: string;
   // GraphRAG extensions
   citations?: { id: string; source: string; url?: string; confidence: number }[];
+  answerId?: string;
 }
 
 export function CopilotPanel() {
@@ -281,6 +283,7 @@ export function CopilotPanel() {
             {/* GraphRAG Evidence/Citations Tab */}
             <TabsContent value="citations" className="flex-1 pt-4 overflow-auto">
               <div className="grid grid-cols-1 gap-4">
+                {result?.answerId && <EvidenceTrailPeek answerId={result.answerId} />}
                 {result?.citations?.map((cit, i) => (
                   <Card key={i}>
                     <CardHeader className="py-2">

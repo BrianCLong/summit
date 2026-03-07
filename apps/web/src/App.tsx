@@ -55,6 +55,7 @@ const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboa
 const TrustDashboard = React.lazy(() => import('@/pages/TrustDashboard'))
 const CopilotPage = React.lazy(() => import('@/components/CopilotPanel').then(m => ({ default: m.CopilotPanel })))
 const InvestigationCanvas = React.lazy(() => import('@/pages/InvestigationCanvas'))
+const DebugAnswerPage = React.lazy(() => import('@/pages/DebugAnswerPage'))
 
 // Workbench
 import { WorkbenchShell } from '@/workbench/shell/WorkbenchLayout'
@@ -149,6 +150,7 @@ function App() {
                       {/* Workbench Route */}
                       <Route path="/workbench" element={<WorkbenchShell />} />
                       <Route path="/copilot" element={<CopilotPage />} />
+                      <Route path="/debug/answer/:answerId" element={<DebugAnswerPage />} />
 
                       {/* Protected routes with layout */}
                       <Route path="/" element={<Layout />}>

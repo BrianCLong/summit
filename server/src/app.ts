@@ -125,6 +125,7 @@ import demoRouter from './routes/demo.js';
 import claimsRouter from './routes/claims.js';
 import opsRouter from './routes/ops.js';
 import featureFlagsRouter from './routes/feature-flags.js';
+import evidenceTrailPeekRouter from './routes/evidence-trail-peek.js';
 import mlReviewRouter from './routes/ml_review.js';
 import adminFlagsRouter from './routes/admin-flags.js';
 import auditEventsRouter from './routes/audit-events.js';
@@ -470,6 +471,7 @@ export const createApp = async () => {
   app.use('/api/policy-profiles', policyProfilesRouter);
   app.use('/api/policy-proposals', authenticateToken, policyProposalsRouter);
   app.use('/api/evidence', evidenceRouter);
+  app.use('/api', evidenceTrailPeekRouter);
   app.use('/dr', drRouter);
   app.use('/', opsRouter);
   app.use('/api/reporting', reportingRouter);

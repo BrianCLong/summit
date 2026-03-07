@@ -1,0 +1,104 @@
+.evidence-peek {
+  border: 1px solid currentColor;
+  border-radius: 12px;
+  padding: 12px;
+  max-width: 420px;
+  background: var(--color-surface, transparent);
+}
+
+.evidence-peek-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.evidence-peek-toggle {
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background: transparent;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.timeline {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.timeline .tick {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.badges {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+
+.badge {
+  border: 1px solid currentColor;
+  padding: 0 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.top-artifacts {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.top-artifacts .artifact {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.minimized {
+  margin-top: 12px;
+  display: grid;
+  gap: 10px;
+}
+
+.minimized .claim {
+  border-top: 1px solid currentColor;
+  padding-top: 8px;
+}
+
+.waterfall {
+  margin-top: 6px;
+}
+
+.waterfall [data-delta] {
+  display: block;
+  height: 6px;
+  width: calc(2px * var(--abs));
+  opacity: 0.7;
+}
+
+.delta-pos {
+  background: currentColor;
+}
+
+.delta-neg {
+  background: currentColor;
+  transform: scaleX(-1);
+}
+
+.evidence-peek-error {
+  margin-top: 8px;
+  color: #b91c1c;
+}
+
+.evidence-peek-loading {
+  margin-top: 8px;
+  font-size: 12px;
+}

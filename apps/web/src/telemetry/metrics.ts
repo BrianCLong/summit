@@ -195,6 +195,34 @@ export const reportError = async (
   }
 };
 
+export const trackEvidenceTrailPeekEvent = async (
+  metric: 'time_to_first_confident_verdict_ms' | 'answer_surface_claim_count' | 'badge_click',
+  value: number,
+  labels: Record<string, string | number> = {}
+) => {
+  try {
+    recordAudit('evidence_trail_peek', { metric, value, labels });
+    await fetch('/api/monitoring/telemetry/events', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-correlation-id': getSessionId(),
+      },
+      body: JSON.stringify({
+        event: 'evidence_trail_peek',
+        labels: { metric, ...labels },
+        payload: { value },
+        context: {
+          sessionId: getSessionId(),
+          deviceId: getDeviceId(),
+        },
+      }),
+    });
+  } catch (error) {
+    console.error('Failed to track evidence trail peek telemetry:', error);
+  }
+};
+
 export const getTelemetryContext = () => ({
     sessionId: getSessionId(),
     deviceId: getDeviceId(),
