@@ -10,7 +10,7 @@ on:
       - 'src/graphrag/trajectory/**'
 jobs:
   evaluate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

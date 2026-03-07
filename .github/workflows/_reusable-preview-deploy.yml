@@ -13,7 +13,7 @@ permissions:
 jobs:
   preview_deploy:
     name: preview_deploy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       PREVIEW_NAMESPACE: pr-${{ github.event.number || github.run_number }}
     steps:

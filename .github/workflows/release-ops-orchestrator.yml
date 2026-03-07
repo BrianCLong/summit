@@ -36,7 +36,7 @@ jobs:
   # Check if we should skip (avoid infinite loops from state commits)
   pre-check:
     name: Pre-flight Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       should_run: ${{ steps.check.outputs.should_run }}
     steps:
@@ -83,7 +83,7 @@ jobs:
 
   orchestrate:
     name: Release Ops Cycle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: pre-check
     if: needs.pre-check.outputs.should_run == 'true'
     timeout-minutes: 30
@@ -109,7 +109,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          # jq is pre-installed on ubuntu-latest
+          # jq is pre-installed on ubuntu-22.04
           which jq || sudo apt-get install -y jq
 
           # Install yq for YAML processing

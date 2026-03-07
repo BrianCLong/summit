@@ -7,7 +7,7 @@ on:
 
 jobs:
   media_list_validation:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python

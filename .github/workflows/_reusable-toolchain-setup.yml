@@ -33,7 +33,7 @@ permissions:
 jobs:
   toolchain:
     name: Detect and Setup Toolchain
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       node: ${{ steps.detect.outputs.version }}
       pnpm: ${{ steps.resolve-pnpm.outputs.pnpm }}

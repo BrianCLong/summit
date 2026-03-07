@@ -4,7 +4,7 @@ on:
     - cron: '0 * * * *'
 jobs:
   drift-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Run Drift Script

@@ -43,7 +43,7 @@ permissions:
 jobs:
   collect-metrics:
     name: Collect CI Metrics
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Run even if previous jobs failed
     if: ${{ always() }}
     timeout-minutes: 5

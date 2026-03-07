@@ -32,7 +32,7 @@ permissions:
 jobs:
   identify-stale:
     name: Identify Stale PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       stale_count: ${{ steps.analyze.outputs.stale_count }}
       critical_count: ${{ steps.analyze.outputs.critical_count }}
@@ -92,7 +92,7 @@ jobs:
 
   warn-stale:
     name: Warn Stale PRs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: identify-stale
     if: needs.identify-stale.outputs.stale_count > 0
 
@@ -148,7 +148,7 @@ PRs inactive for 180+ days will be automatically closed with a 7-day warning.
 
   schedule-closure:
     name: Schedule Critical Stale Closure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: identify-stale
     if: needs.identify-stale.outputs.critical_count > 0
 
@@ -211,7 +211,7 @@ If closed, it can be reopened at any time.
 
   execute-closure:
     name: Execute Scheduled Closures
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: identify-stale
 
     steps:
@@ -258,7 +258,7 @@ Automated closure prevents backlog accumulation and CI resource exhaustion (see 
 
   report:
     name: Generate Report
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [identify-stale, warn-stale, schedule-closure, execute-closure]
     if: always()
 

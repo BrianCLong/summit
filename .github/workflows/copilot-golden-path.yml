@@ -14,7 +14,7 @@ jobs:
   # DISABLED: Reusable workflows in subdirectories are not supported by GitHub Actions
   # The referenced workflows need to be moved to the top-level workflows directory
   placeholder:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Placeholder
         run: echo "This workflow is disabled pending refactoring of reusable workflow locations"

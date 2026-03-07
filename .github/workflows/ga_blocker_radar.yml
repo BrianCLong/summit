@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   radar:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       selected_blocker: ${{ steps.select.outputs.selected_blocker }}
       rationale: ${{ steps.select.outputs.rationale }}

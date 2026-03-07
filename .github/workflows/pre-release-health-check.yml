@@ -53,7 +53,7 @@ permissions:
 jobs:
   run-fresh-audits:
     name: Run Fresh Audits
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: inputs.run_fresh == true
 
     steps:
@@ -83,7 +83,7 @@ jobs:
 
   health-check:
     name: Aggregate Health Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [run-fresh-audits]
     if: always()
     outputs:
@@ -172,7 +172,7 @@ jobs:
 
   block-release:
     name: Block Release on Failure
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: health-check
     if: |
       github.event_name == 'push' &&

@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   auto-approve:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.actor == 'BrianCLong'
     permissions:
       pull-requests: write

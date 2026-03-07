@@ -27,7 +27,7 @@ permissions:
 jobs:
   gate:
     name: Verify signatures, SBOM, provenance, and policy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       COSIGN_EXPERIMENTAL: "1"
       EXPECTED_OIDC_ISSUER: https://token.actions.githubusercontent.com

@@ -27,7 +27,7 @@ permissions:
 jobs:
   monitor:
     name: Queue Health Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
 
     steps:

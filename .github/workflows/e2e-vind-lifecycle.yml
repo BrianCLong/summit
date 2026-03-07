@@ -14,7 +14,7 @@ concurrency:
 jobs:
   lifecycle-test:
     name: pause->resume
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: vars.SUMMIT_VIND_CI == '1' && vars.SUMMIT_VIND_LIFECYCLE == '1'
 
     steps:

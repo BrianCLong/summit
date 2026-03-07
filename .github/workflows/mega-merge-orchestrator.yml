@@ -33,7 +33,7 @@ jobs:
   # Job 1: Fast analysis
   analyze:
     name: Lightning PR Analysis
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 10
     outputs:
       total_prs: ${{ steps.count.outputs.total }}
@@ -59,7 +59,7 @@ jobs:
   process-batch-1:
     name: Batch 1 (PRs 1-100)
     needs: analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +78,7 @@ jobs:
   process-batch-2:
     name: Batch 2 (PRs 101-180)
     needs: analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -97,7 +97,7 @@ jobs:
   process-batch-3:
     name: Batch 3 (PRs 181-300)
     needs: analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -114,7 +114,7 @@ jobs:
   process-batch-4:
     name: Batch 4 (PRs 301-400)
     needs: analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -131,7 +131,7 @@ jobs:
   process-batch-5:
     name: Batch 5 (PRs 401-500)
     needs: analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -149,7 +149,7 @@ jobs:
   merge:
     name: Mass Merge Execution
     needs: [process-batch-1, process-batch-2, process-batch-3, process-batch-4, process-batch-5]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
 
     steps:
@@ -203,7 +203,7 @@ jobs:
     name: Generate Metrics
     needs: merge
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Generate report

@@ -29,7 +29,7 @@ permissions:
 jobs:
   build-test:
     name: ${{ matrix.name }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -74,7 +74,7 @@ jobs:
 
   config-guard:
     name: Config Guard
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -86,7 +86,7 @@ jobs:
 
   integration-tests:
     name: Integration Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-guard] # fast fail
     steps:
       - uses: actions/checkout@v4
@@ -130,7 +130,7 @@ jobs:
 
   verification-suite:
     name: Verification Suite
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
@@ -145,7 +145,7 @@ jobs:
 
   deterministic-build:
     name: Deterministic Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build-test] # Run after standard build/test matrix
     steps:
       - uses: actions/checkout@v4
@@ -184,7 +184,7 @@ jobs:
 
   golden-path:
     name: Golden Path Smoke Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [integration-tests, build-test]
     steps:
       - uses: actions/checkout@v4
@@ -211,7 +211,7 @@ jobs:
 
   e2e-tests:
     name: E2E Tests (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [integration-tests]
     timeout-minutes: 20
     steps:
@@ -246,7 +246,7 @@ jobs:
 
   governance:
     name: Governance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
@@ -263,7 +263,7 @@ jobs:
 
   soc-controls:
     name: SOC Controls (ci-pr)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [config-guard]
     steps:
       - uses: actions/checkout@v4
@@ -290,7 +290,7 @@ jobs:
 
   mcp-pack-gates:
     name: MCP & Pack Gates
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [build-test]
     steps:
       - uses: actions/checkout@v4

@@ -13,7 +13,7 @@ concurrency:
 jobs:
   repro-check:
     name: Reproducibility Sanity Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4

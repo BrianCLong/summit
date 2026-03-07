@@ -52,7 +52,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   validate:
     name: "Validate Tag"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     outputs:
       tag_valid: ${{ steps.validate.outputs.tag_valid }}
@@ -109,7 +109,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   verify-evidence:
     name: "Verify Evidence"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: validate
     if: needs.validate.outputs.tag_valid == 'true'
 
@@ -182,7 +182,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   generate-notes:
     name: "Generate Release Notes"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [validate, verify-evidence]
     if: needs.verify-evidence.outputs.evidence_valid == 'true'
 
@@ -247,7 +247,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════════════════════
   create-release:
     name: "Create GitHub Release"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [validate, verify-evidence, generate-notes]
     if: needs.generate-notes.outputs.notes_generated == 'true'
 

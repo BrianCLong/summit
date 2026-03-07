@@ -42,7 +42,7 @@ permissions:
 jobs:
   regression-guard:
     name: Governance Regression Guard
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       status: ${{ steps.compliance.outputs.status }}
       score: ${{ steps.compliance.outputs.score }}

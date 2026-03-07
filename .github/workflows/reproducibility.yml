@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   check-determinism:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -22,7 +22,7 @@ permissions:
 jobs:
   sbom:
     name: Generate SBOM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       sbom-path: ${{ steps.generate.outputs.sbom-path }}
     steps:

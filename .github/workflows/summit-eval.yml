@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   validate-schemas:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -34,7 +34,7 @@ jobs:
             --jsonl
 
   run-eval-harness:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: validate-schemas
     steps:
       - uses: actions/checkout@v3

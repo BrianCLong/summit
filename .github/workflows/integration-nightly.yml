@@ -17,7 +17,7 @@ permissions:
 jobs:
   docker-integration:
     if: github.repository == 'BrianCLong/summit'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     env:
       DOCKER_AVAILABLE: "1"

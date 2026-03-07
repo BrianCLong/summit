@@ -17,7 +17,7 @@ concurrency:
 jobs:
   governance-bundle:
     name: governance-bundle
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
@@ -29,7 +29,7 @@ jobs:
 
   branch-protection-drift:
     name: branch-protection-drift
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check if token is available
         id: check-token

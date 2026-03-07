@@ -59,7 +59,7 @@ permissions:
 jobs:
   collect:
     name: Collect Evidence
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     outputs:
       run_id: ${{ steps.collect.outputs.run_id }}
       status: ${{ steps.collect.outputs.status }}
@@ -171,7 +171,7 @@ jobs:
 
   archive:
     name: Archive Evidence
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: collect
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
 

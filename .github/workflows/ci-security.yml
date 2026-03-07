@@ -235,7 +235,7 @@ jobs:
       - name: Build client image for scanning
         run: docker build -t security-suite/client ./client
       - name: Scan server image
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.1
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           image-ref: security-suite/server
           format: sarif
@@ -248,7 +248,7 @@ jobs:
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
       - name: Scan client image
-        uses: aquasecurity/trivy-action@22438a435773de8c97dc0958cc0b823c45b064ac # 0.16.1
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           image-ref: security-suite/client
           format: sarif
@@ -584,7 +584,7 @@ jobs:
 
   sigstore-verify:
     name: Sigstore bundle verification
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
     permissions:
       contents: read
@@ -615,7 +615,7 @@ jobs:
 
   security-pass:
     name: Security Pass
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [secret-scan, sast, semgrep, dependency-scan, filesystem-scan, container-scan, license-compliance, iac-scan, opa-policy, cis-benchmark, baseline, dast, sigstore-verify]
     if: always()
     steps:

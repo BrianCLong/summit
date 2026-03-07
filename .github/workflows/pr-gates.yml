@@ -23,7 +23,7 @@ permissions:
 jobs:
   compliance-security:
     name: Compliance & Security
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -84,7 +84,7 @@ jobs:
 
   build-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -112,7 +112,7 @@ jobs:
 
   infrastructure:
     name: Infrastructure Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v4 # v6
@@ -138,7 +138,7 @@ jobs:
   preview-env:
     name: Preview Environment
     needs: [build-test, infrastructure]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       pull-requests: write
     steps:

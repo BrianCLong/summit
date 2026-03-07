@@ -11,7 +11,7 @@ concurrency:
 jobs:
   verify-release:
     name: Verify Release Integrity
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4 # v6
       - uses: pnpm/action-setup@v4 # v4
@@ -26,7 +26,7 @@ jobs:
 
   check-changelog:
     name: Check Changelog Update
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changelog') }}
     steps:
       - uses: actions/checkout@v4 # v6

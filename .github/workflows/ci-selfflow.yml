@@ -2,7 +2,7 @@ name: ci-selfflow
 on: [push]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - run: pnpm test:selfflow
       - run: pnpm eval:selfflow
