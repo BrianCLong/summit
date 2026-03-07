@@ -134,16 +134,25 @@ describe('IngestService', () => {
         ],
       };
 
-      // Mock database responses
+      // Mock database responses for batched upserts
       mockClient.query
         .mockResolvedValueOnce({ rows: [], rowCount: 0 }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // INSERT provenance
-        .mockResolvedValueOnce({ rows: [] }) // Check existing entity
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-id-1' }] }) // INSERT entity 1
-        .mockResolvedValueOnce({ rows: [] }) // Check existing entity
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-id-2' }] }) // INSERT entity 2
-        .mockResolvedValueOnce({ rows: [] }) // Check existing relationship
-        .mockResolvedValueOnce({ rows: [{ id: 'rel-1' }] }) // INSERT relationship
+        .mockResolvedValueOnce({ rows: [] }) // SAVEPOINT entity_batch_0
+        .mockResolvedValueOnce({
+          rows: [
+            { inserted: true }, // entity 1
+            { inserted: true }  // entity 2
+          ]
+        }) // BATCH INSERT entities
+        .mockResolvedValueOnce({ rows: [] }) // RELEASE SAVEPOINT entity_batch_0
+        .mockResolvedValueOnce({ rows: [] }) // SAVEPOINT rel_batch_0
+        .mockResolvedValueOnce({
+          rows: [
+            { inserted: true } // relationship 1
+          ]
+        }) // BATCH INSERT relationships
+        .mockResolvedValueOnce({ rows: [] }) // RELEASE SAVEPOINT rel_batch_0
         .mockResolvedValueOnce({ rows: [] }) // COMMIT
         .mockResolvedValueOnce({
           rows: [
@@ -247,10 +256,14 @@ describe('IngestService', () => {
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // Provenance
-        .mockResolvedValueOnce({ rows: [] }) // Check entity 1
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Insert entity 1
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Check entity 2 (found)
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] }) // Update entity 2
+        .mockResolvedValueOnce({ rows: [] }) // SAVEPOINT entity_batch_0
+        .mockResolvedValueOnce({
+          rows: [
+            { inserted: true },  // Alice Smith
+            { inserted: false }  // Alice Smith (duplicate)
+          ]
+        }) // BATCH INSERT entities
+        .mockResolvedValueOnce({ rows: [] }) // RELEASE SAVEPOINT entity_batch_0
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);
@@ -278,7 +291,11 @@ describe('IngestService', () => {
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
         .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // Provenance
-        .mockRejectedValueOnce(new Error('Database error')); // Simulate error
+        .mockResolvedValueOnce({ rows: [] }) // SAVEPOINT entity_batch_0
+        .mockRejectedValueOnce(new Error('Database error')) // Simulate batch error
+        .mockResolvedValueOnce({ rows: [] }) // ROLLBACK TO SAVEPOINT entity_batch_0
+        .mockResolvedValueOnce({ rows: [] }) // SAVEPOINT entity_individual
+        .mockRejectedValueOnce(new Error('Database error')); // Simulate individual error
 
       // Service handles errors gracefully and returns a result with success: false
       const result = await ingestService.ingest(input);
@@ -313,9 +330,12 @@ describe('IngestService', () => {
 
       mockClient.query
         .mockResolvedValueOnce({ rows: [] }) // BEGIN
-        .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] })
-        .mockResolvedValueOnce({ rows: [] })
-        .mockResolvedValueOnce({ rows: [{ id: 'stable-1' }] })
+        .mockResolvedValueOnce({ rows: [{ id: 'prov-123' }] }) // Provenance
+        .mockResolvedValueOnce({ rows: [] }) // SAVEPOINT entity_batch_0
+        .mockResolvedValueOnce({ rows: [{ inserted: true }] }) // Entity 1
+        .mockResolvedValueOnce({ rows: [] }) // RELEASE SAVEPOINT entity_batch_0
+        // Relationship step sees fromId=person-1 but toId=undefined because org-MISSING wasn't in idMap
+        // It records an error and continues. No batch query is executed because values.length == 0.
         .mockResolvedValueOnce({ rows: [] }); // COMMIT
 
       const result = await ingestService.ingest(input);

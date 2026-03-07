@@ -90,61 +90,127 @@ export class IngestService {
         const idMap = new Map<string, string>();
 
         // 3. Upsert entities in batches for performance
-        const BATCH_SIZE = 1000;
+        // BOLT: Using batched upserts with ON CONFLICT reduces database round-trips from O(N) to O(N/batchSize).
+        const PG_BATCH_SIZE = 100;
         await getTracer().withSpan('IngestService.processEntities', async (entitySpan) => {
-          for (let i = 0; i < input.entities.length; i += BATCH_SIZE) {
-            const batch = input.entities.slice(i, i + BATCH_SIZE);
+          for (let i = 0; i < input.entities.length; i += PG_BATCH_SIZE) {
+            const batch = input.entities.slice(i, i + PG_BATCH_SIZE);
+            const values: any[] = [];
+            const placeholders: string[] = [];
+            let paramIndex = 1;
 
             for (const entityInput of batch) {
+              const stableId = this.generateStableId(
+                input.tenantId,
+                entityInput.kind,
+                entityInput.properties,
+              );
+
+              if (entityInput.externalId) {
+                idMap.set(entityInput.externalId, stableId);
+              }
+
+              values.push(
+                stableId,
+                input.tenantId,
+                entityInput.kind,
+                entityInput.labels,
+                JSON.stringify(entityInput.properties),
+                input.userId,
+                provenanceId,
+              );
+
+              placeholders.push(`($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6})`);
+              paramIndex += 7;
+            }
+
+            if (values.length > 0) {
               try {
-                const stableId = this.generateStableId(
-                  input.tenantId,
-                  entityInput.kind,
-                  entityInput.properties,
-                );
+                // Use SAVEPOINT to allow recovery from batch failure within transaction
+                await client.query(`SAVEPOINT entity_batch_${i}`);
+                const sql = `
+                  INSERT INTO entities (
+                    id, tenant_id, kind, labels, props, created_by, provenance_id
+                  ) VALUES ${placeholders.join(', ')}
+                  ON CONFLICT (id) DO UPDATE SET
+                    labels = EXCLUDED.labels,
+                    props = EXCLUDED.props,
+                    updated_at = NOW(),
+                    provenance_id = EXCLUDED.provenance_id
+                  RETURNING (xmax = 0) AS inserted`;
 
-                // Map external ID to stable ID
-                if (entityInput.externalId) {
-                  idMap.set(entityInput.externalId, stableId);
+                const { rows } = await client.query(sql, values);
+                for (const row of rows) {
+                  if (row.inserted) {
+                    entitiesCreated++;
+                  } else {
+                    entitiesUpdated++;
+                  }
                 }
+                await client.query(`RELEASE SAVEPOINT entity_batch_${i}`);
+              } catch (batchError: any) {
+                await client.query(`ROLLBACK TO SAVEPOINT entity_batch_${i}`);
+                ingestLogger.warn({ error: batchError }, 'Batch entity upsert failed, falling back to individual inserts');
 
-                const existing = await this.findEntityByStableId(client, stableId);
+                // Fallback to individual inserts for the failing batch
+                for (const entityInput of batch) {
+                  try {
+                    await client.query('SAVEPOINT entity_individual');
+                    const stableId = this.generateStableId(
+                      input.tenantId,
+                      entityInput.kind,
+                      entityInput.properties,
+                    );
 
-                if (existing) {
-                  // Update existing entity
-                  await this.updateEntity(client, {
-                    id: existing.id,
-                    labels: entityInput.labels,
-                    properties: entityInput.properties,
-                    provenanceId,
-                  });
-                  entitiesUpdated++;
-                } else {
-                  // Create new entity
-                  await this.createEntity(client, {
-                    id: stableId,
-                    tenantId: input.tenantId,
-                    kind: entityInput.kind,
-                    labels: entityInput.labels,
-                    properties: entityInput.properties,
-                    userId: input.userId,
-                    provenanceId,
-                  });
-                  entitiesCreated++;
+                    const { rows } = await client.query(
+                      `INSERT INTO entities (
+                        id, tenant_id, kind, labels, props, created_by, provenance_id
+                      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+                      ON CONFLICT (id) DO UPDATE SET
+                        labels = EXCLUDED.labels,
+                        props = EXCLUDED.props,
+                        updated_at = NOW(),
+                        provenance_id = EXCLUDED.provenance_id
+                      RETURNING (xmax = 0) AS inserted`,
+                      [
+                        stableId,
+                        input.tenantId,
+                        entityInput.kind,
+                        entityInput.labels,
+                        JSON.stringify(entityInput.properties),
+                        input.userId,
+                        provenanceId
+                      ]
+                    );
+
+                    if (rows[0].inserted) {
+                      entitiesCreated++;
+                    } else {
+                      entitiesUpdated++;
+                    }
+                    await client.query('RELEASE SAVEPOINT entity_individual');
+                  } catch (err: any) {
+                    await client.query('ROLLBACK TO SAVEPOINT entity_individual');
+                    const errorMessage = err instanceof Error ? err.message : String(err);
+                    errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
+                    ingestLogger.warn({ error: err, entityInput }, 'Failed to ingest individual entity');
+                  }
                 }
-              } catch (error: any) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                errors.push(`Entity ${entityInput.externalId}: ${errorMessage}`);
-                ingestLogger.warn({ error, entityInput }, 'Failed to ingest entity');
               }
             }
           }
         });
 
         // 4. Upsert relationships
+        // BOLT: Batching relationships significantly improves throughput for connected data.
         await getTracer().withSpan('IngestService.processRelationships', async (relSpan) => {
-          for (const relInput of input.relationships) {
-            try {
+          for (let i = 0; i < input.relationships.length; i += PG_BATCH_SIZE) {
+            const batch = input.relationships.slice(i, i + PG_BATCH_SIZE);
+            const values: any[] = [];
+            const placeholders: string[] = [];
+            let paramIndex = 1;
+
+            for (const relInput of batch) {
               const fromId = idMap.get(relInput.fromExternalId);
               const toId = idMap.get(relInput.toExternalId);
 
@@ -161,36 +227,100 @@ export class IngestService {
                 relInput.relationshipType,
               );
 
-              const existing = await this.findRelationshipById(client, relId);
-
-              if (existing) {
-                await this.updateRelationship(client, {
-                  id: relId,
-                  properties: relInput.properties,
-                  confidence: relInput.confidence,
-                  provenanceId,
-                });
-                relationshipsUpdated++;
-              } else {
-                await this.createRelationship(client, {
-                  id: relId,
-                  tenantId: input.tenantId,
-                  fromEntityId: fromId,
-                  toEntityId: toId,
-                  relationshipType: relInput.relationshipType,
-                  properties: relInput.properties || {},
-                  confidence: relInput.confidence,
-                  source: relInput.source || input.sourceType,
-                  provenanceId,
-                });
-                relationshipsCreated++;
-              }
-            } catch (error: any) {
-              const errorMessage = error instanceof Error ? error.message : String(error);
-              errors.push(
-                `Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`,
+              values.push(
+                relId,
+                input.tenantId,
+                fromId,
+                toId,
+                relInput.relationshipType,
+                JSON.stringify(relInput.properties || {}),
+                relInput.confidence,
+                relInput.source || input.sourceType,
+                provenanceId,
               );
-              ingestLogger.warn({ error, relInput }, 'Failed to ingest relationship');
+
+              placeholders.push(`($${paramIndex}, $${paramIndex + 1}, $${paramIndex + 2}, $${paramIndex + 3}, $${paramIndex + 4}, $${paramIndex + 5}, $${paramIndex + 6}, $${paramIndex + 7}, $${paramIndex + 8}, NOW())`);
+              paramIndex += 9;
+            }
+
+            if (values.length > 0) {
+              try {
+                await client.query(`SAVEPOINT rel_batch_${i}`);
+                const sql = `
+                  INSERT INTO relationships (
+                    id, tenant_id, from_entity_id, to_entity_id, relationship_type,
+                    props, confidence, source, provenance_id, first_seen
+                  ) VALUES ${placeholders.join(', ')}
+                  ON CONFLICT (id) DO UPDATE SET
+                    props = EXCLUDED.props,
+                    confidence = EXCLUDED.confidence,
+                    provenance_id = EXCLUDED.provenance_id,
+                    last_seen = NOW()
+                  RETURNING (xmax = 0) AS inserted`;
+
+                const { rows } = await client.query(sql, values);
+                for (const row of rows) {
+                  if (row.inserted) {
+                    relationshipsCreated++;
+                  } else {
+                    relationshipsUpdated++;
+                  }
+                }
+                await client.query(`RELEASE SAVEPOINT rel_batch_${i}`);
+              } catch (batchError: any) {
+                await client.query(`ROLLBACK TO SAVEPOINT rel_batch_${i}`);
+                ingestLogger.warn({ error: batchError }, 'Batch relationship upsert failed, falling back to individual inserts');
+
+                for (const relInput of batch) {
+                  try {
+                    await client.query('SAVEPOINT rel_individual');
+                    const fromId = idMap.get(relInput.fromExternalId);
+                    const toId = idMap.get(relInput.toExternalId);
+
+                    if (!fromId || !toId) {
+                      throw new Error('Entity not found');
+                    }
+
+                    const relId = this.generateRelationshipId(fromId, toId, relInput.relationshipType);
+
+                    const { rows } = await client.query(
+                      `INSERT INTO relationships (
+                        id, tenant_id, from_entity_id, to_entity_id, relationship_type,
+                        props, confidence, source, provenance_id, first_seen
+                      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+                      ON CONFLICT (id) DO UPDATE SET
+                        props = EXCLUDED.props,
+                        confidence = EXCLUDED.confidence,
+                        provenance_id = EXCLUDED.provenance_id,
+                        last_seen = NOW()
+                      RETURNING (xmax = 0) AS inserted`,
+                      [
+                        relId,
+                        input.tenantId,
+                        fromId,
+                        toId,
+                        relInput.relationshipType,
+                        JSON.stringify(relInput.properties || {}),
+                        relInput.confidence,
+                        relInput.source || input.sourceType,
+                        provenanceId
+                      ]
+                    );
+
+                    if (rows[0].inserted) {
+                      relationshipsCreated++;
+                    } else {
+                      relationshipsUpdated++;
+                    }
+                    await client.query('RELEASE SAVEPOINT rel_individual');
+                  } catch (err: any) {
+                    await client.query('ROLLBACK TO SAVEPOINT rel_individual');
+                    const errorMessage = err instanceof Error ? err.message : String(err);
+                    errors.push(`Relationship ${relInput.fromExternalId}->${relInput.toExternalId}: ${errorMessage}`);
+                    ingestLogger.warn({ error: err, relInput }, 'Failed to ingest individual relationship');
+                  }
+                }
+              }
             }
           }
         });
