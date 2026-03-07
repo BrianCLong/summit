@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.io/schemas/execution/plan/v1",
+  "title": "Execution Plan",
+  "description": "The approved execution plan issued by the Summit control plane to the local runner.",
+  "type": "object",
+  "required": [
+    "plan_id",
+    "decision_id",
+    "runtime_profile"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string"
+    },
+    "decision_id": {
+      "type": "string"
+    },
+    "runtime_profile": {
+      "type": "string"
+    },
+    "tool_session_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "memory_scope": {
+      "type": "string"
+    },
+    "retry_policy": {
+      "type": "string"
+    },
+    "observability_profile": {
+      "type": "string"
+    }
+  }
+}
