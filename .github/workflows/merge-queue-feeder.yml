@@ -1,0 +1,54 @@
+name: Merge Queue Feeder
+
+on:
+  schedule:
+    - cron: "*/2 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  feed-queue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install GitHub CLI
+        uses: cli/cli-action@v2
+
+      - name: Fetch eligible PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list \
+            --label "queue:merge-now" \
+            --state open \
+            --json number \
+            > mergeable.json
+
+      - name: Determine queue depth
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr list \
+            --search "is:queued" \
+            --json number \
+            > queue.json
+
+      - name: Feed merge queue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TARGET=20
+          CURRENT=$(jq length queue.json)
+
+          if [ "$CURRENT" -lt "$TARGET" ]; then
+            NEEDED=$((TARGET-CURRENT))
+            jq -r '.[].number' mergeable.json | head -n $NEEDED | while read pr; do
+              gh pr merge $pr --auto --squash
+            done
+          fi
