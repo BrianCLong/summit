@@ -1,5 +1,38 @@
 version: 1
 prompts:
+  - id: osint-hallucination-mitigation
+    version: v1
+    path: prompts/osint/osint-hallucination-mitigation@v1.md
+    sha256: 9d6a71f809270db4fc2c78ef7741f3517a60cac3e92488d811a3e6b0cac9a49b
+    description: Establish provenance-required OSINT facts, deterministic evidence IDs, verifier gates, and supporting docs.
+    scope:
+      paths:
+        - packages/osint/src/hallucination/
+        - tests/test_provenance_required.py
+        - tests/test_unknown_degradation.py
+        - tests/test_verifier_flags_unsupported.py
+        - tests/test_two_source_promotion.py
+        - tests/test_deterministic_evidence_ids.py
+        - docs/standards/osint-hallucination-mitigation.md
+        - docs/security/data-handling/osint-hallucination-mitigation.md
+        - docs/ops/runbooks/osint-hallucination-mitigation.md
+        - docs/roadmap/STATUS.json
+        - prompts/osint/osint-hallucination-mitigation@v1.md
+        - prompts/registry.yaml
+      domains:
+        - osint
+        - governance
+        - documentation
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: io-cogwar-radar-brief
     version: v1
     path: prompts/briefs/io-cogwar-radar-brief@v1.md

@@ -1,7 +1,13 @@
 {
   "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "revision_note": "Added OSINT hallucination mitigation standards, policies, and scaffolding.",
   "initiatives": [
+    {
+      "id": "osint-hallucination-mitigation",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Established provenance-required facts, deterministic evidence IDs, verifier policy gates, and OSINT runbook guidance."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
