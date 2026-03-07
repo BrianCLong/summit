@@ -308,3 +308,25 @@ security:
       - '**/*.spec.*'
       - 'evidence/**'
       - 'artifacts/**'
+
+area:intelgraph:
+  - "packages/intelgraph/**"
+
+area:maestro:
+  - "packages/maestro/**"
+
+area:memory:
+  - "packages/summit-memory/**"
+
+area:agents:
+  - "packages/summit-agents/**"
+  - ".github/summit/agents/**"
+
+area:ci:
+  - ".github/**"
+
+area:docs:
+  - "docs/**"
+
+area:security:
+  - "policies/**"

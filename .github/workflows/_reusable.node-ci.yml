@@ -1,0 +1,35 @@
+name: reusable-node-ci
+
+on:
+  workflow_call:
+    inputs:
+      run_tests:
+        required: false
+        type: boolean
+        default: true
+      run_build:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  node-ci:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: ./.github/actions/setup-node-monorepo
+
+      - name: Lint
+        run: pnpm run --if-present lint
+
+      - name: Typecheck
+        run: pnpm run --if-present typecheck
+
+      - name: Build
+        if: ${{ inputs.run_build }}
+        run: pnpm run --if-present build
+
+      - name: Test
+        if: ${{ inputs.run_tests }}
+        run: pnpm test --if-present

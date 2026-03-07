@@ -1,0 +1,24 @@
+name: "Setup Node Monorepo"
+description: "Checkout, setup Node, cache deps, install"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+        cache: "pnpm"
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Ensure tsx is available
+      shell: bash
+      run: |
+        npx --yes tsx --version

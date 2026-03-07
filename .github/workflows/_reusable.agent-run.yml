@@ -1,0 +1,60 @@
+name: reusable-agent-run
+
+on:
+  workflow_call:
+    inputs:
+      agent_name:
+        required: true
+        type: string
+      event_name:
+        required: true
+        type: string
+      emit_issue:
+        required: false
+        type: boolean
+        default: false
+      emit_pr_comment:
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      checks: write
+      statuses: write
+      actions: read
+      security-events: read
+    steps:
+      - uses: ./.github/actions/setup-node-monorepo
+
+      - name: Run agent router
+        env:
+          GITHUB_EVENT_NAME: ${{ inputs.event_name }}
+          SUMMIT_AGENT_NAME: ${{ inputs.agent_name }}
+          SUMMIT_EMIT_ISSUE: ${{ inputs.emit_issue }}
+          SUMMIT_EMIT_PR_COMMENT: ${{ inputs.emit_pr_comment }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          npx tsx .github/summit/event-router/routeEvent.ts \
+            --agent "${{ inputs.agent_name }}" \
+            --event "${{ inputs.event_name }}"
+
+      - name: Upload agent artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-${{ inputs.agent_name }}-${{ github.run_id }}
+          path: .summit-out/
+          if-no-files-found: warn
+
+      - name: Append summary
+        if: always()
+        run: |
+          if [ -f .summit-out/summary.md ]; then
+            cat .summit-out/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi

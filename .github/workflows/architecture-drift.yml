@@ -1,0 +1,16 @@
+name: architecture-drift
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+jobs:
+  drift:
+    uses: ./.github/workflows/_reusable.agent-run.yml
+    with:
+      agent_name: architectureDriftAgent
+      event_name: architecture_drift
+      emit_pr_comment: true

@@ -88,3 +88,10 @@
 }
 
 <!-- AGENT-METADATA:END -->
+
+## Summit Agent Governance
+- [ ] Atomic PR
+- [ ] Docs updated
+- [ ] Tests added/updated
+- [ ] No sensitive secrets included
+- [ ] No architecture boundary violations
