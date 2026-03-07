@@ -1,3 +1,5 @@
+# Trust Provenance Metadata Layer
+
 Proposal: Define a universal trust/provenance ontology across all intelligence types—HUMINT, SIGINT, GEOINT, OSINT—with time-decay, source lineage, and corroboration status.
 
 Deliverables:
