@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Multi-Agent Runtime Artifact Schema",
+  "type": "object",
+  "properties": {
+    "goalId": { "type": "string" },
+    "planHash": { "type": "string" },
+    "deterministic": { "type": "boolean" },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "taskId": { "type": "string" },
+          "ok": { "type": "boolean" },
+          "rc": { "type": "integer" },
+          "stdout": { "type": "string" },
+          "stderr": { "type": "string" },
+          "durationMs": { "type": "number" },
+          "workerId": { "type": "string" },
+          "attempt": { "type": "integer" }
+        },
+        "required": ["taskId", "ok", "rc", "stdout", "stderr", "durationMs", "workerId", "attempt"]
+      }
+    }
+  },
+  "required": ["goalId", "planHash", "deterministic", "tasks"]
+}

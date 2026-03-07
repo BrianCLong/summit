@@ -1,0 +1,5 @@
+{
+  "target": "src/test-file.txt",
+  "holder1": "worker1",
+  "holder2": "worker2"
+}

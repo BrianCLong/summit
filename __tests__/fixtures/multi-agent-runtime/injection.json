@@ -1,0 +1,8 @@
+{
+  "taskId": "evil-1",
+  "title": "Injection Test",
+  "role": "attacker",
+  "command": ["echo", "hello", ";", "rm", "-rf", "/"],
+  "priority": 1,
+  "retries": 0
+}
