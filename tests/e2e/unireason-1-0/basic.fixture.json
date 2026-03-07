@@ -1,1 +1,4 @@
-{"id":"fixture-basic-science","input":{"instruction":"A photorealistic image of a DNA double helix in a futuristic lab.","domain":"science"},"config":{"enabled":true,"verifyDimensions":["presence","accuracy","realism"]}}
+{
+  "instruction": "E2E test instruction",
+  "domain": "logic"
+}

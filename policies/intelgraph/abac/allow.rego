@@ -7,7 +7,6 @@ package intelgraph.abac
 
 import future.keywords.if
 import future.keywords.in
-import future.keywords.contains
 
 # ============================================================================
 # MAIN AUTHORIZATION DECISION

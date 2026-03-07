@@ -19,6 +19,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -141,13 +147,14 @@ jobs:
           NODE
 
       - name: Upload coverage gap analysis
-        if: ((always()) && (github.event_name == 'pull_request')) && (github.event_name == 'pull_request')
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coverage-gap-analysis
           path: coverage/gap-analysis.md
 
       - name: Post coverage comment on PR
+        if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
@@ -175,6 +182,7 @@ jobs:
   coverage-diff:
     name: Coverage Diff Check
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - name: Checkout PR
         uses: actions/checkout@v4

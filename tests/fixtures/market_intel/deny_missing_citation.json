@@ -1,0 +1,18 @@
+{
+  "evidence_id": "FIXTURE-DENY-MISSING-CITATION",
+  "summary": "This should fail because numeric claim lacks citation.",
+  "claims": [
+    {
+      "type": "numeric",
+      "value": 1000000000,
+      "field": "amount",
+      "citations": []
+    }
+  ],
+  "sources": [
+    {
+      "publisher": "Reuters",
+      "url": "https://reuters.com/some-news"
+    }
+  ]
+}

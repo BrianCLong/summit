@@ -10,7 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node 18
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0      - name: Use Node 18
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'

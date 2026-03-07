@@ -15,6 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -32,7 +38,7 @@ jobs:
         run: npx ts-node scripts/synthetic/run-journey.ts
 
       - name: Upload Results
-        if: (always()) && (failure())
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: synthetic-results
@@ -41,6 +47,7 @@ jobs:
             synthetic-latency-histogram.json
 
       - name: Alert on Failure
+        if: failure()
         run: |
           echo "Synthetic monitoring failed! Check logs."
           # Integration with Slack/PagerDuty could go here

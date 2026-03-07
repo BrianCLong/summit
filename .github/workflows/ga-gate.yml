@@ -17,8 +17,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ga-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   gate:
@@ -41,7 +41,11 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4 # v4
+        uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
 
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

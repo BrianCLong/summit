@@ -21,6 +21,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -53,7 +59,7 @@ jobs:
           ENFORCE_AUDIT_EXIT: false
 
       - name: Upload vulnerability artifacts
-        if: ((always()) && (always())) && (always())
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vuln-report-${{ env.SERVICE_NAME }}
@@ -62,6 +68,7 @@ jobs:
             artifacts/security/${{ env.SERVICE_NAME }}/
 
       - name: Upload audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: dependency-audit-report
@@ -149,6 +156,7 @@ jobs:
     name: Generate Security Report
     needs: [dependency-scan, secret-scan, security-linting]
     runs-on: ubuntu-latest
+    if: always()
 
     steps:
       - name: Checkout code

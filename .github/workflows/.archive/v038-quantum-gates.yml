@@ -37,6 +37,12 @@ jobs:
         with:
           fetch-depth: 0
 
+
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -437,7 +443,7 @@ jobs:
     name: Deployment Readiness Assessment
     runs-on: ubuntu-latest
     needs: quantum-ready-validation
-    if: ((always()) && (steps.assessment.outputs.ready == 'true')) && (steps.assessment.outputs.ready == 'true')
+    if: always()
 
     steps:
       - name: Assess Deployment Readiness
@@ -513,6 +519,7 @@ jobs:
           fi
 
       - name: Generate Deployment Certification
+        if: steps.assessment.outputs.ready == 'true'
         run: |
           cat > QUANTUM_READY_CERTIFICATION.md << 'EOF'
           # MC Platform v0.3.8 - Quantum-Ready Equilibrium Certification
@@ -561,6 +568,7 @@ jobs:
           EOF
 
       - name: Upload Certification
+        if: steps.assessment.outputs.ready == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: quantum-ready-certification

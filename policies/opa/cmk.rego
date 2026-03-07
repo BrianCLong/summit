@@ -19,7 +19,7 @@ allow {
 }
 
 # Wrapper decision
-# package composer.decision_cmk
+package composer.decision_cmk
 
 decision_cmk := {
   "policy": "cmk",

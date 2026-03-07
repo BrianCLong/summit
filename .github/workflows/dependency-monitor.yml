@@ -102,6 +102,10 @@ jobs:
           node-version-file: .nvmrc
       # Note: pnpm version is read from package.json "packageManager" field
       - name: Install pnpm
-        uses: pnpm/action-setup@v4 # v4.1.0
+        uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Check Drift
         run: ./scripts/check-lockfile-drift.sh

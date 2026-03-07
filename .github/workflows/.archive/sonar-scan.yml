@@ -24,6 +24,12 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
+
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:

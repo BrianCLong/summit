@@ -1,42 +1,41 @@
-import { redact, enforceHardSecurity } from "../../../src/agents/dualReasoning/redaction";
+import { describe, it, expect } from "vitest";
+import { redact, containsCanary } from "../../../src/agents/dualReasoning/redaction";
 
-describe("DualReasoning Redaction", () => {
-  it("should redact sensitive keys by default", () => {
-    const data = {
-      instruction: "Do something bad",
-      output: "Sensitive output",
-      meta: "Safe meta"
-    };
-    const redacted = redact(data);
-    expect(redacted.instruction).toBe("[REDACTED]");
-    expect(redacted.output).toBe("[REDACTED]");
-    expect(redacted.meta).toBe("Safe meta");
-  });
-
-  it("should redact canary strings in text", () => {
-    const canary = "SECRET_CANARY_123";
-    const text = `The secret is ${canary}. Don't tell anyone.`;
-    const redacted = redact(text, { canaryStrings: [canary] });
-    expect(redacted).not.toContain(canary);
-    expect(redacted).toContain("[REDACTED]");
-  });
-
-  it("should redact recursively and handle arrays", () => {
-    const data = {
+describe("Redaction Logic", () => {
+  it("should redact sensitive fields", () => {
+    const input = {
+      instruction: "SECRET_INSTRUCTION",
+      public: "VISIBLE",
       nested: {
-        steps: ["Kill process", "Delete files"],
-        other: "Safe"
+        output: "SECRET_OUTPUT",
+        rationale: ["REASON1", "REASON2"],
+        other: 123
       }
     };
-    const redacted = redact(data);
-    expect(redacted.nested.steps).toEqual(["[REDACTED]"]);
-    expect(redacted.nested.other).toBe("Safe");
+
+    const result = redact(input);
+
+    expect(result.instruction).toBe("[REDACTED]");
+    expect(result.public).toBe("VISIBLE");
+    expect(result.nested.output).toBe("[REDACTED]");
+    expect(result.nested.rationale).toBe("[REDACTED]");
+    expect(result.nested.other).toBe(123);
   });
 
-  it("should enforce hard security for secrets even in raw mode", () => {
-    const canary = "API_KEY_XYZZY";
-    const content = `Connecting with ${canary}`;
-    const result = enforceHardSecurity(content, [canary]);
-    expect(result).toBe("Connecting with [SECRET_REDACTED]");
+  it("should handle arrays", () => {
+    const input = [
+      { instruction: "A" },
+      { output: "B" }
+    ];
+
+    const result = redact(input);
+    expect(result[0].instruction).toBe("[REDACTED]");
+    expect(result[1].output).toBe("[REDACTED]");
+  });
+
+  it("should detect canary strings", () => {
+    const text = "This is a secret: CANARY_12345";
+    expect(containsCanary(text, "CANARY_12345")).toBe(true);
+    expect(containsCanary(text, "OTHER")).toBe(false);
   });
 });

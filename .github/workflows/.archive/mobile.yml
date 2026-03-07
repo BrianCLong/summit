@@ -18,6 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+
+      - uses: pnpm/action-setup@v4
+
+        with:
+
+          version: 9.12.0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -50,7 +56,7 @@ jobs:
   build-android:
     needs: validate
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/main') && (github.ref == 'refs/heads/main')
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -83,6 +89,7 @@ jobs:
   build-ios:
     needs: validate
     runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 

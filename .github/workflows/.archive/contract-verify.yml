@@ -5,7 +5,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node & deps
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0      - name: Setup Node & deps
         uses: actions/setup-node@v4
         with: { node-version: '20' , cache: 'pnpm' }
       - run: npm i -g graphql-cli graphql-schema-linter @redhat-developer/depcheck@latest @playwright/test

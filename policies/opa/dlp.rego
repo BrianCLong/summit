@@ -9,7 +9,7 @@ block {
 }
 
 # Shadow-able wrapper decision
-# package composer.decision_dlp
+package composer.decision_dlp
 
 decision_dlp := {
   "policy": "dlp",

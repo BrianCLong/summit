@@ -1,6 +1,6 @@
 # (same as in sprint doc)
-package abac.authz
 import future.keywords.in
+package abac.authz
 
 default allow = false
 

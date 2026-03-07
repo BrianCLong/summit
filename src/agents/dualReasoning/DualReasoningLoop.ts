@@ -1,46 +1,38 @@
 import { buildEvidenceId, canonicalJson } from "./evidence";
-import { DualReasoningConfig, DualReasoningInput, DualReasoningResult, DualReasoningReport } from "./types";
+import { DualReasoningConfig, DualReasoningInput, DualReasoningResult } from "./types";
 
-/**
- * UniReason 1.0: Dual Reasoning Loop
- * Integrates text-to-image generation and image editing through a dual reasoning paradigm.
- *
- * 1. PLAN: World-knowledge enhanced planning (CLAIM-02/05)
- * 2. DRAFT: Initial generation
- * 3. VERIFY: Structured feedback/diagnosis (CLAIM-07)
- * 4. REFINE: Editing-like refinement (CLAIM-03/07)
- * 5. JUDGE: Final quality comparison (CLAIM-07)
- */
 export async function runDualReasoningLoop(
   input: DualReasoningInput,
   cfg: DualReasoningConfig
 ): Promise<DualReasoningResult> {
-  if (!cfg.enabled) {
-    return { skipped: true, reason: "feature_flag_off" };
-  }
+  if (!cfg.enabled) return { skipped: true, reason: "feature_flag_off" };
 
   // PLAN (world-knowledge enhanced) — CLAIM-02/05
   const plan = {
     domain: input.domain ?? "unspecified",
-    steps: ["Injecting implicit constraints for domain: " + (input.domain ?? "unspecified")]
+    steps: [
+      "Initial state analysis",
+      `Injecting world knowledge for ${input.domain ?? "general"} domain`,
+      "Constraints injection"
+    ]
   };
 
   // DRAFT
-  const draft = { output: "Initial draft based on instruction: " + input.instruction };
+  const draft = { output: `Initial draft for: ${input.instruction}` };
 
   // VERIFY (structured feedback) — CLAIM-07
   const verify = {
     issues: [],
-    dimensions: cfg.verifyDimensions ?? ["presence", "accuracy", "consistency", "realism", "aesthetic"]
+    dimensions: cfg.verifyDimensions ?? ["object presence", "attribute accuracy", "style consistency"]
   };
 
   // REFINE
-  const refine = { output: "Refined output correcting potential issues." };
+  const refine = { output: `Refined output for: ${input.instruction}` };
 
   // JUDGE
-  const judge = { better: "refine" as const, rationale: ["Refined output satisfies all world-knowledge constraints."] };
+  const judge = { better: "refine", rationale: ["Refined output addressed all identified dimensions"] };
 
-  const report: DualReasoningReport = { plan, draft, verify, refine, judge };
+  const report = { plan, draft, verify, refine, judge };
   const evidenceId = buildEvidenceId(input, report);
 
   return {

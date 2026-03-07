@@ -1,6 +1,6 @@
 
-package maestro.governance
 import future.keywords.in
+package maestro.governance
 
 # Deny public S3 buckets
 deny[msg] {
