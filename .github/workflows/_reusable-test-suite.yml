@@ -50,6 +50,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4 # v6
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Setup toolchain
         uses: ./.github/actions/setup-toolchain
         with:

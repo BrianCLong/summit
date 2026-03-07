@@ -412,6 +412,9 @@ jobs:
       - ga-evidence-completeness
     if: always()
     steps:
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
       - name: Check critical gates passed
         run: |
           echo "=== CI Verify Gate Status ==="
