@@ -1,0 +1,8 @@
+flowchart TD
+    A[Cloud Infrastructure Facts] --> B[L1 HPC Ingestion]
+    B --> C[L2 Cross-cloud HPC Graph]
+    C --> D[L3 Compute Market Intelligence]
+    D --> E[L4 Early Warning Signals]
+    E --> F[L5 Operator/Agent Dashboard]
+    D --> F
+    C --> F
