@@ -1,0 +1,29 @@
+{
+  "writeset_id": "ws-invalid",
+  "system_time": "2026-03-01T00:00:00Z",
+  "source": "ingest.telegram",
+  "ops": [
+    {
+      "op": "UPSERT_CLAIM",
+      "graph": "NG",
+      "claim": {
+        "claim_id": "claim-invalid-1",
+        "subject": "actor-a",
+        "predicate": "controls",
+        "object": "company-b",
+        "confidence": 0.5,
+        "time": { "valid_from": "2026-02-01T00:00:00Z", "valid_to": null },
+        "evidence_ids": ["artifact-missing"]
+      }
+    }
+  ],
+  "provenance": {
+    "artifacts": [
+      {
+        "artifact_id": "artifact-001",
+        "type": "document",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ]
+  }
+}

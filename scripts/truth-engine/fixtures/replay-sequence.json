@@ -1,0 +1,120 @@
+[
+  {
+    "writeset_id": "ws-001",
+    "system_time": "2026-03-01T00:00:00Z",
+    "source": "ingest.telegram",
+    "ops": [
+      {
+        "op": "UPSERT_CLAIM",
+        "graph": "NG",
+        "claim": {
+          "claim_id": "claim-ng-1",
+          "subject": "channel-x",
+          "predicate": "promotes",
+          "object": "narrative-y",
+          "confidence": 0.62,
+          "time": { "valid_from": "2026-02-28T00:00:00Z", "valid_to": null },
+          "evidence_ids": ["artifact-001"]
+        }
+      }
+    ],
+    "provenance": {
+      "artifacts": [
+        {
+          "artifact_id": "artifact-001",
+          "type": "post",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ]
+    }
+  },
+  {
+    "writeset_id": "ws-002",
+    "system_time": "2026-03-01T00:03:00Z",
+    "source": "belief.service",
+    "ops": [
+      {
+        "op": "UPSERT_CLAIM",
+        "graph": "BG",
+        "claim": {
+          "claim_id": "claim-bg-1",
+          "subject": "community-z",
+          "predicate": "believes",
+          "object": "narrative-y",
+          "confidence": 0.71,
+          "time": { "valid_from": "2026-03-01T00:02:00Z", "valid_to": null },
+          "evidence_ids": ["artifact-001", "artifact-002"]
+        }
+      }
+    ],
+    "provenance": {
+      "artifacts": [
+        {
+          "artifact_id": "artifact-001",
+          "type": "post",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "artifact_id": "artifact-002",
+          "type": "analyst_note",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ]
+    }
+  },
+  {
+    "writeset_id": "ws-003",
+    "system_time": "2026-03-01T00:05:00Z",
+    "source": "promotion.gate",
+    "ops": [
+      {
+        "op": "PROPOSE_PROMOTION",
+        "promotion": {
+          "promotion_id": "promotion-001",
+          "claim_id": "claim-ng-1",
+          "from_graph": "NG",
+          "to_graph": "RG"
+        }
+      }
+    ],
+    "provenance": {
+      "artifacts": [
+        {
+          "artifact_id": "artifact-001",
+          "type": "post",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      ]
+    }
+  },
+  {
+    "writeset_id": "ws-004",
+    "system_time": "2026-03-01T00:07:00Z",
+    "source": "promotion.gate",
+    "ops": [
+      {
+        "op": "PROPOSE_PROMOTION",
+        "promotion": {
+          "promotion_id": "promotion-002",
+          "claim_id": "claim-bg-1",
+          "from_graph": "BG",
+          "to_graph": "RG"
+        }
+      }
+    ],
+    "provenance": {
+      "artifacts": [
+        {
+          "artifact_id": "artifact-001",
+          "type": "post",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "artifact_id": "artifact-002",
+          "type": "analyst_note",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        }
+      ]
+    }
+  }
+]

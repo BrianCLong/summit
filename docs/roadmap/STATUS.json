@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-07T00:00:00Z",
+  "revision_note": "Added executable Truth Engine Phase 0 artifacts (WriteSet schema, validator firewall, tri-graph materializer, and golden determinism/quarantine tests).",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -205,6 +205,12 @@
       "status": "completed",
       "owner": "codex",
       "notes": "Published Summit Architecture Brief with module boundaries, data flow, and acceptance criteria."
+    },
+    {
+      "id": "summit-truth-engine-ledger-priority",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented Phase 0 executable scaffolding: schema-validated writesets, evidence integrity checks, deterministic tri-graph materialization, and golden tests for replay_as_known + promotion_quarantine."
     }
   ],
   "summary": {
