@@ -2,16 +2,70 @@
  * Switchboard Commands
  */
 
+import * as path from 'path';
+import * as fs from 'fs';
 import { Command } from 'commander';
 import { detectRepoRoot } from '../lib/sandbox.js';
 import { runCapsule } from '../lib/switchboard-runner.js';
 import { generateEvidenceBundle } from '../lib/switchboard-evidence.js';
 import { replayCapsule } from '../lib/switchboard-replay.js';
+import { runSwitchboardDemo } from '../lib/switchboard-demo.js';
+import {
+  validateSwitchboardRegistry,
+} from '../lib/switchboard-registry.js';
+
+function resolveSwitchboardRepoRoot(startDir: string): string {
+  let current = detectRepoRoot(startDir);
+  const demoFixture = path.join('fixtures', 'registry.demo.json');
+  while (true) {
+    if (fs.existsSync(path.join(current, demoFixture))) {
+      return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current) {
+      return detectRepoRoot(startDir);
+    }
+    current = parent;
+  }
+}
 
 export function registerSwitchboardCommands(program: Command): void {
   const switchboard = program
     .command('switchboard')
     .description('Switchboard capsule operations');
+
+  const registry = switchboard
+    .command('registry')
+    .description('Registry inspection utilities');
+
+  registry
+    .command('validate')
+    .description('Validate a switchboard registry file')
+    .requiredOption('--registry <path>', 'Path to registry JSON')
+    .action((options: { registry: string }) => {
+      try {
+        const repoRoot = resolveSwitchboardRepoRoot(process.cwd());
+        const registryPath = path.resolve(repoRoot, options.registry);
+        const validation = validateSwitchboardRegistry(registryPath);
+        console.log(validation.marker);
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
+    });
+
+  switchboard
+    .command('demo')
+    .description('Run the local switchboard demo')
+    .action(() => {
+      try {
+        const repoRoot = resolveSwitchboardRepoRoot(process.cwd());
+        runSwitchboardDemo(repoRoot);
+      } catch (error) {
+        console.error(error instanceof Error ? error.message : String(error));
+        process.exit(1);
+      }
+    });
 
   switchboard
     .command('run')

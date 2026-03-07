@@ -896,3 +896,39 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: switchboard-demo-quickstart
+    version: v1
+    path: prompts/switchboard/switchboard-demo-quickstart@v1.md
+    sha256: eba25fdd495fac2d0faaeda97c78766a73955009644afde177216b9e95448fe1
+    description: One-command Switchboard demo, fixtures, README quickstart, and smoke test coverage.
+    scope:
+      paths:
+        - cli/src/lib/switchboard-registry.ts
+        - cli/src/lib/switchboard-demo.ts
+        - cli/src/commands/switchboard.ts
+        - cli/__tests__/switchboard-demo.test.ts
+        - fixtures/registry.demo.json
+        - fixtures/policy.deny-all.json
+        - fixtures/policy.allow-demo.json
+        - README.md
+        - package.json
+        - cli/package.json
+        - docs/roadmap/STATUS.json
+        - agents/examples/SWITCHBOARD_PR3_ONE_COMMAND_DEMO.task.json
+        - prompts/switchboard/switchboard-demo-quickstart@v1.md
+        - prompts/registry.yaml
+      domains:
+        - cli
+        - switchboard
+        - documentation
+        - governance
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

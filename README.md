@@ -17,6 +17,23 @@
 
 ## 🚀 Quickstart
 
+## ⏱ Getting started in 3 minutes
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run the Switchboard demo (registry + routing + policy + receipts)
+pnpm demo:switchboard
+
+# List receipts and show the latest receipt payload
+ls .switchboard/demo/receipts
+cat .switchboard/demo/receipts/demo-receipt.json
+
+# Validate the demo registry directly
+pnpm validate:switchboard:registry
+```
+
 ### Prerequisites
 
 - Node.js 18+

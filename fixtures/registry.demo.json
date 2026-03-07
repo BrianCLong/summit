@@ -1,0 +1,21 @@
+{
+  "version": "v1",
+  "servers": [
+    {
+      "id": "local-demo",
+      "name": "Local Demo Server",
+      "tools": [
+        {
+          "id": "demo.echo",
+          "capability": "echo",
+          "description": "Return a fixed demo payload."
+        },
+        {
+          "id": "demo.ping",
+          "capability": "ping",
+          "description": "Return a fixed demo pong."
+        }
+      ]
+    }
+  ]
+}

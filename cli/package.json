@@ -14,6 +14,7 @@
   "scripts": {
     "build": "tsc && chmod +x dist/cli.js dist/summit.js dist/bin/run.js",
     "dev": "tsx watch src/cli.ts",
+    "demo:switchboard": "tsx src/cli.ts switchboard demo",
     "start": "node dist/cli.js",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -27,7 +28,8 @@
     "pkg:macos": "pkg dist/cli.js -t node18-macos-x64 -o bin/intelgraph-macos",
     "pkg:macos-arm": "pkg dist/cli.js -t node18-macos-arm64 -o bin/intelgraph-macos-arm64",
     "pkg:windows": "pkg dist/cli.js -t node18-win-x64 -o bin/intelgraph-win.exe",
-    "pkg:all": "npm run pkg:linux && npm run pkg:macos && npm run pkg:macos-arm && npm run pkg:windows"
+    "pkg:all": "npm run pkg:linux && npm run pkg:macos && npm run pkg:macos-arm && npm run pkg:windows",
+    "switchboard:registry:validate:demo": "tsx src/cli.ts switchboard registry validate --registry fixtures/registry.demo.json"
   },
   "dependencies": {
     "@intelgraph/adapter-sdk": "workspace:*",
