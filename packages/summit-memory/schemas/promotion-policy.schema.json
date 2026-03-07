@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit/promotion-policy.schema.json",
+  "type": "object",
+  "required": ["minConfidence", "minProvenanceCount", "promotionTarget"],
+  "properties": {
+    "minConfidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "minProvenanceCount": { "type": "integer", "minimum": 0 },
+    "allowTags": { "type": "array", "items": { "type": "string" } },
+    "denyTags": { "type": "array", "items": { "type": "string" } },
+    "promotionTarget": {
+      "enum": [
+        "candidate",
+        "linked",
+        "validated",
+        "promoted",
+        "demoted",
+        "quarantined",
+        "archived"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

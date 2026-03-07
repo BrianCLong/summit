@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit/memory-object.schema.json",
+  "type": "object",
+  "required": [
+    "memoryObjectId",
+    "entityId",
+    "graphKind",
+    "tier",
+    "state",
+    "eventTime",
+    "ingestTime",
+    "claimRefs",
+    "lineage"
+  ],
+  "properties": {
+    "memoryObjectId": { "type": "string" },
+    "entityId": { "type": "string" },
+    "graphKind": { "enum": ["RG", "BG", "NG"] },
+    "tier": { "enum": ["episode", "entity", "pattern", "doctrine"] },
+    "state": {
+      "enum": [
+        "candidate",
+        "linked",
+        "validated",
+        "promoted",
+        "demoted",
+        "quarantined",
+        "archived"
+      ]
+    },
+    "eventTime": { "type": "string", "format": "date-time" },
+    "ingestTime": { "type": "string", "format": "date-time" },
+    "validityStart": { "type": "string", "format": "date-time" },
+    "validityEnd": {
+      "anyOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "null" }
+      ]
+    },
+    "claimRefs": { "type": "array", "items": { "type": "string" } },
+    "lineage": {
+      "type": "object",
+      "required": ["supersedes", "supersededBy", "conflictsWith"],
+      "properties": {
+        "supersedes": { "type": "array", "items": { "type": "string" } },
+        "supersededBy": { "type": "array", "items": { "type": "string" } },
+        "conflictsWith": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "score": { "type": "number" },
+    "why": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}

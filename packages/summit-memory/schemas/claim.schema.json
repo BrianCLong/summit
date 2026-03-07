@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "summit/claim.schema.json",
+  "type": "object",
+  "required": [
+    "claimId",
+    "entityId",
+    "predicate",
+    "object",
+    "confidence",
+    "eventTime",
+    "ingestTime",
+    "provenance",
+    "policyTags"
+  ],
+  "properties": {
+    "claimId": { "type": "string", "minLength": 1 },
+    "entityId": { "type": "string", "minLength": 1 },
+    "predicate": { "type": "string", "minLength": 1 },
+    "object": { "type": "string", "minLength": 1 },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "eventTime": { "type": "string", "format": "date-time" },
+    "ingestTime": { "type": "string", "format": "date-time" },
+    "validityStart": { "type": "string", "format": "date-time" },
+    "validityEnd": {
+      "anyOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "null" }
+      ]
+    },
+    "provenance": {
+      "type": "array",
+      "items": { "$ref": "summit/provenance.schema.json" }
+    },
+    "policyTags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
