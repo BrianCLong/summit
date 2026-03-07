@@ -1,7 +1,13 @@
 {
-  "last_updated": "2026-02-08T00:15:00Z",
-  "revision_note": "Added Summit Architecture Brief reference; Summit Ops & Incident Console runbook guidance; CI/CD high-signal delta action register.",
+  "last_updated": "2026-03-07T02:20:00Z",
+  "revision_note": "Hardened Tri-Graph Cognitive Battlespace v0: deterministic extraction/linking pipeline, package exports/import cleanup, typed write firewall, and docs/tests uplift.",
   "initiatives": [
+    {
+      "id": "cognitive-battlespace-trigraph-v0",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Hardened implementation: rule-based narrative extraction and belief estimation, lexical claim linking, strict typed NG/BG writeset firewall, and package READMEs with MAESTRO/security posture."
+    },
     {
       "id": "adenhq-hive-subsumption-lane1",
       "status": "in_progress",
