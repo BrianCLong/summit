@@ -1,0 +1,6 @@
+{
+  "claim_id": "invalid-claim-001",
+  "statement": "Missing subject and status.",
+  "confidence": 0.9,
+  "domain": "osint"
+}

@@ -1,0 +1,7 @@
+{
+  "policy": {
+    "min_support_score": 0.8,
+    "max_epistemic_uncertainty": 0.3,
+    "min_independent_sources": 2
+  }
+}
