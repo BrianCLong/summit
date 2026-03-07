@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
-import sys
+import datetime
 import json
 import logging
-import datetime
-from pathlib import Path
+import sys
 from collections import Counter
+from pathlib import Path
 
 # Add root to python path to import evidence module
 root_dir = Path(__file__).resolve().parents[2]
 sys.path.append(str(root_dir))
 
 from evidence.causality_ledger import CausalityLedger
+
 
 def check_drift():
     # Ensure ledger looks for logs in the correct place relative to root

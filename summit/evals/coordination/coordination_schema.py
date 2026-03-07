@@ -15,7 +15,7 @@ class CoordinationEvent:
     conflict_resolved_ms: int = 0
 
     @classmethod
-    def from_mapping(cls, payload: Mapping[str, Any]) -> "CoordinationEvent":
+    def from_mapping(cls, payload: Mapping[str, Any]) -> CoordinationEvent:
         required = ("evidence_id", "from_agent", "to_agent", "context_hash", "timestamp")
         missing = [key for key in required if key not in payload or payload[key] in (None, "")]
         if missing:

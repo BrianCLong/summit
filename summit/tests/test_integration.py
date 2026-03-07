@@ -1,6 +1,7 @@
-from fastapi.testclient import TestClient
-from summit.main import app
 import pytest
+from fastapi.testclient import TestClient
+
+from summit.main import app
 
 client = TestClient(app)
 

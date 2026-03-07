@@ -2,8 +2,8 @@
 
 from .client import CopilotMetricsClient
 from .config import CopilotMetricsConfig
-from .redaction import strip_signed_urls
 from .pr_metrics import fetch_copilot_pr_metrics, normalize_copilot_pr_metrics
+from .redaction import strip_signed_urls
 
 __all__ = [
     "CopilotMetricsClient",

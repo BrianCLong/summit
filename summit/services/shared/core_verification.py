@@ -1,7 +1,9 @@
-from typing import Optional, Dict, Any
-import time
 import hashlib
+import time
+from typing import Any, Dict, Optional
+
 from prometheus_client import Counter, Histogram
+
 from summit.services.cache import CacheService
 from summit.services.vector_search import VectorSearch
 
@@ -38,7 +40,7 @@ class CoreVerificationService:
         claim: str,
         context: Optional[str] = None,
         product: str = "generic"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Universal verification method
         Returns: {verdict, confidence, evidence, reasoning}

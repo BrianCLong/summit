@@ -1,7 +1,7 @@
 import os
 
 filepath = "apps/web/src/components/Navigation.tsx"
-with open(filepath, "r") as f:
+with open(filepath) as f:
     content = f.read()
 
 # Import Activity
