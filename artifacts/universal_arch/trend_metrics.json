@@ -1,0 +1,11 @@
+{
+  "architecture_score_drift": 0.05,
+  "approval_rate_drift": -0.02,
+  "schema_failure_drift": 0.01,
+  "protected_eval_failure_drift": 0,
+  "operation_mix_drift": {
+    "ask": 0.1,
+    "edit": -0.05,
+    "agent": 0.05
+  }
+}

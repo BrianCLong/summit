@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.com/schemas/operation-plan.schema.json",
+  "title": "Operation Plan Schema",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["ask", "edit", "agent"]
+    },
+    "scope": {
+      "type": "object",
+      "description": "The bounded context allowed for this plan."
+    },
+    "operations": {
+      "type": "array",
+      "items": {
+        "$ref": "diff-operation.schema.json"
+      }
+    }
+  },
+  "required": ["mode", "scope", "operations"]
+}
