@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/supply-chain/report.schema.json",
+  "title": "Summit Supply Chain Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact",
+    "mode",
+    "summary",
+    "findings",
+    "policy_decisions",
+    "trust_paths",
+    "evidence_index"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.0\\.0$"
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["subject_ref", "subject_type"],
+      "properties": {
+        "subject_ref": { "type": "string", "minLength": 1 },
+        "subject_type": {
+          "type": "string",
+          "enum": ["image", "package", "sbom_document", "attestation_bundle"]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^(sha256|sha512):[a-f0-9]{32,128}$"
+        },
+        "display_name": { "type": "string" }
+      }
+    },
+    "mode": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "deny_by_default"],
+      "properties": {
+        "stage": {
+          "type": "string",
+          "enum": ["pr1-schema", "pr2-ingestion", "pr3-policy"]
+        },
+        "deny_by_default": { "type": "boolean" },
+        "advisory_only": { "type": "boolean", "default": true }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "reason_codes", "finding_counts"],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "warn", "deny", "unknown"]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "uniqueItems": true
+        },
+        "finding_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["critical", "high", "medium", "low", "info"],
+          "properties": {
+            "critical": { "type": "integer", "minimum": 0 },
+            "high": { "type": "integer", "minimum": 0 },
+            "medium": { "type": "integer", "minimum": 0 },
+            "low": { "type": "integer", "minimum": 0 },
+            "info": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      }
+    },
+    "policy_decisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/policyDecision"
+      }
+    },
+    "trust_paths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/trustPath"
+      }
+    },
+    "evidence_index": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidenceIndexEntry"
+      }
+    },
+    "normalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sbom_documents": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/documentRef" }
+        },
+        "attestation_documents": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/documentRef" }
+        },
+        "signature_documents": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/documentRef" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "evidenceId": {
+      "type": "string",
+      "pattern": "^EVID:(sbom|attestation|signature|policy|scan|graph):[a-f0-9]{8,64}$"
+    },
+    "documentRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref", "kind"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": ["sbom", "attestation", "signature"]
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^(sha256|sha512):[a-f0-9]{32,128}$"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "severity",
+        "category",
+        "title",
+        "subject",
+        "evidence_ids"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^FND:[A-Z0-9_:-]+$"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low", "info"]
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "missing_provenance",
+            "signature_verification",
+            "digest_mismatch",
+            "untrusted_builder",
+            "sbom_gap",
+            "policy_violation",
+            "normalization_notice"
+          ]
+        },
+        "title": { "type": "string", "minLength": 1 },
+        "subject": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["ref", "type"],
+          "properties": {
+            "ref": { "type": "string", "minLength": 1 },
+            "type": {
+              "type": "string",
+              "enum": ["image", "package", "builder", "identity", "document"]
+            }
+          }
+        },
+        "reason_code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9_]+$"
+        },
+        "message": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceId" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "policyDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "decision",
+        "reason_codes",
+        "evidence_ids"
+      ],
+      "properties": {
+        "policy_id": {
+          "type": "string",
+          "pattern": "^POL:[A-Z0-9_:-]+$"
+        },
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "warn", "deny", "not_applicable"]
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "message": { "type": "string" },
+        "evidence_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidenceId" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "trustPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path_id", "subject_ref", "decision", "steps"],
+      "properties": {
+        "path_id": {
+          "type": "string",
+          "pattern": "^PATH:[A-Z0-9_:-]+$"
+        },
+        "subject_ref": { "type": "string", "minLength": 1 },
+        "decision": {
+          "type": "string",
+          "enum": ["allow", "warn", "deny", "unknown"]
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["from", "relation", "to", "evidence_ids"],
+            "properties": {
+              "from": { "type": "string", "minLength": 1 },
+              "relation": {
+                "type": "string",
+                "enum": [
+                  "DESCRIBED_BY",
+                  "ATTESTED_BY",
+                  "ISSUED_BY",
+                  "ASSERTS",
+                  "BUILT",
+                  "DERIVES_FROM",
+                  "SUPPORTED_BY"
+                ]
+              },
+              "to": { "type": "string", "minLength": 1 },
+              "evidence_ids": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/evidenceId" },
+                "minItems": 1,
+                "uniqueItems": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidenceIndexEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["evidence_id", "source_type", "source_ref"],
+      "properties": {
+        "evidence_id": { "$ref": "#/$defs/evidenceId" },
+        "source_type": {
+          "type": "string",
+          "enum": ["sbom", "attestation", "signature", "policy", "scan", "graph"]
+        },
+        "source_ref": { "type": "string", "minLength": 1 },
+        "digest": {
+          "type": "string",
+          "pattern": "^(sha256|sha512):[a-f0-9]{32,128}$"
+        }
+      }
+    }
+  }
+}

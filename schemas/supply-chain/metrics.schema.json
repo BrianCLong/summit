@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.dev/schemas/supply-chain/metrics.schema.json",
+  "title": "Summit Supply Chain Metrics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "subject_ref",
+    "stage",
+    "counts",
+    "coverage",
+    "performance"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "pattern": "^1\\.0\\.0$"
+    },
+    "subject_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["pr1-schema", "pr2-ingestion", "pr3-policy"]
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "graph_nodes",
+        "graph_edges",
+        "sbom_documents",
+        "attestation_documents",
+        "signature_documents",
+        "findings",
+        "policy_decisions",
+        "trust_paths"
+      ],
+      "properties": {
+        "graph_nodes": { "type": "integer", "minimum": 0 },
+        "graph_edges": { "type": "integer", "minimum": 0 },
+        "sbom_documents": { "type": "integer", "minimum": 0 },
+        "attestation_documents": { "type": "integer", "minimum": 0 },
+        "signature_documents": { "type": "integer", "minimum": 0 },
+        "findings": { "type": "integer", "minimum": 0 },
+        "policy_decisions": { "type": "integer", "minimum": 0 },
+        "trust_paths": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "has_digest",
+        "has_sbom",
+        "has_attestation",
+        "has_signature",
+        "provenance_completeness"
+      ],
+      "properties": {
+        "has_digest": { "type": "boolean" },
+        "has_sbom": { "type": "boolean" },
+        "has_attestation": { "type": "boolean" },
+        "has_signature": { "type": "boolean" },
+        "provenance_completeness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "normalize_ms",
+        "graph_build_ms",
+        "policy_eval_ms",
+        "total_ms"
+      ],
+      "properties": {
+        "normalize_ms": { "type": "integer", "minimum": 0 },
+        "graph_build_ms": { "type": "integer", "minimum": 0 },
+        "policy_eval_ms": { "type": "integer", "minimum": 0 },
+        "total_ms": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "missing_evidence_edges": { "type": "integer", "minimum": 0 },
+        "digest_mismatches": { "type": "integer", "minimum": 0 },
+        "untrusted_issuers": { "type": "integer", "minimum": 0 },
+        "normalization_warnings": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}
