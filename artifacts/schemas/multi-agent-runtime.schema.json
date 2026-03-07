@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "goal": { "type": "string" },
+    "mode": { "type": "string" },
+    "taskCount": { "type": "number" },
+    "okCount": { "type": "number" },
+    "failedCount": { "type": "number" },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "taskId": { "type": "string" },
+          "workerId": { "type": "string" },
+          "ok": { "type": "boolean" },
+          "attempt": { "type": "number" },
+          "stdout": { "type": "string" },
+          "stderr": { "type": "string" },
+          "durationSec": { "type": "number" }
+        },
+        "required": ["taskId", "workerId", "ok", "attempt"]
+      }
+    }
+  },
+  "required": ["goal", "mode", "taskCount", "okCount", "failedCount", "results"]
+}

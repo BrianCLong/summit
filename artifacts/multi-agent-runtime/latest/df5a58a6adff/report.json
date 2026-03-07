@@ -1,0 +1,45 @@
+{
+  "failedCount": 4,
+  "goal": "test prompt",
+  "mode": "tmux",
+  "okCount": 0,
+  "results": [
+    {
+      "attempt": 1,
+      "durationSec": 0,
+      "ok": false,
+      "stderr": "/bin/sh: 1: Syntax error: \"(\" unexpected\n",
+      "stdout": "",
+      "taskId": "cb2fea287ffb-t1",
+      "workerId": "worker0"
+    },
+    {
+      "attempt": 1,
+      "durationSec": 0,
+      "ok": false,
+      "stderr": "/bin/sh: 1: Syntax error: \"(\" unexpected\n",
+      "stdout": "",
+      "taskId": "cb2fea287ffb-t2",
+      "workerId": "worker1"
+    },
+    {
+      "attempt": 1,
+      "durationSec": 0,
+      "ok": false,
+      "stderr": "/bin/sh: 1: Syntax error: \"(\" unexpected\n",
+      "stdout": "",
+      "taskId": "cb2fea287ffb-t3",
+      "workerId": "worker2"
+    },
+    {
+      "attempt": 1,
+      "durationSec": 0,
+      "ok": false,
+      "stderr": "/bin/sh: 1: Syntax error: \"(\" unexpected\n",
+      "stdout": "",
+      "taskId": "cb2fea287ffb-t4",
+      "workerId": "worker3"
+    }
+  ],
+  "taskCount": 4
+}
