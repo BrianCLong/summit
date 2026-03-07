@@ -1,0 +1,60 @@
+{
+  "run_id": "run:whois.v1:cff2f6690797c1a2",
+  "connector_id": "whois.v1",
+  "input": {
+    "domain": "example.com"
+  },
+  "raw_ref": "fixtures/raw.json",
+  "entities": [
+    {
+      "entity_id": "eid:domain:example.com",
+      "entity_type": "domain",
+      "canonical_value": "example.com",
+      "display_name": "example.com",
+      "confidence": 1,
+      "source_refs": [
+        "src:run:whois.v1:cff2f6690797c1a2:whois"
+      ],
+      "attributes": {
+        "registrar": "Example Registrar LLC"
+      }
+    },
+    {
+      "entity_id": "eid:email:admin@example.com",
+      "entity_type": "email",
+      "canonical_value": "admin@example.com",
+      "display_name": "admin@example.com",
+      "confidence": 0.95,
+      "source_refs": [
+        "src:run:whois.v1:cff2f6690797c1a2:whois"
+      ],
+      "attributes": {}
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "edge:registered_to:eid:domain:example.com:eid:email:admin@example.com",
+      "edge_type": "registered_to",
+      "from": "eid:domain:example.com",
+      "to": "eid:email:admin@example.com",
+      "confidence": 0.95,
+      "source_refs": [
+        "src:run:whois.v1:cff2f6690797c1a2:whois"
+      ],
+      "attributes": {}
+    }
+  ],
+  "observations": [
+    {
+      "type": "whois_registration",
+      "domain": "example.com",
+      "registrant_email": "admin@example.com"
+    }
+  ],
+  "source_metadata": {
+    "provider": "whois",
+    "license_class": "public"
+  },
+  "transform_hash": "sha256:85a0fbeb0c53eaeef438c98650ff9a9aad011b0ab02d013e7450ec722b0caaa9",
+  "policy_verdict": "allow"
+}

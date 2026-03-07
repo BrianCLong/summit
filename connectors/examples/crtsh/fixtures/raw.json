@@ -1,0 +1,6 @@
+{
+  "query": "example.com",
+  "common_name": "example.com",
+  "san": ["example.com", "www.example.com"],
+  "issuer_name": "Example CA"
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit/schemas/connectors/connector-output.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "run_id",
+    "connector_id",
+    "input",
+    "raw_ref",
+    "entities",
+    "edges",
+    "observations",
+    "source_metadata",
+    "transform_hash",
+    "policy_verdict"
+  ],
+  "properties": {
+    "run_id": { "type": "string", "minLength": 1 },
+    "connector_id": { "type": "string", "minLength": 1 },
+    "input": { "type": "object" },
+    "raw_ref": { "type": "string", "minLength": 1 },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "entity_id",
+          "entity_type",
+          "canonical_value",
+          "display_name",
+          "confidence",
+          "source_refs"
+        ],
+        "properties": {
+          "entity_id": { "type": "string" },
+          "entity_type": { "type": "string" },
+          "canonical_value": { "type": "string" },
+          "display_name": { "type": "string" },
+          "confidence": { "type": "number" },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "attributes": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "edge_id",
+          "edge_type",
+          "from",
+          "to",
+          "confidence",
+          "source_refs"
+        ],
+        "properties": {
+          "edge_id": { "type": "string" },
+          "edge_type": { "type": "string" },
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "confidence": { "type": "number" },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "attributes": { "type": "object" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "source_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "license_class"],
+      "properties": {
+        "provider": { "type": "string" },
+        "license_class": { "enum": ["public", "commercial", "restricted"] }
+      }
+    },
+    "transform_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "policy_verdict": { "enum": ["allow", "deny"] }
+  }
+}

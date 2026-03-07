@@ -1,0 +1,25 @@
+id: crtsh.v1
+name: crt.sh Certificate Transparency Connector
+version: 1.0.0
+kind: osint-connector
+owner: summit
+license_class: public
+collection_mode: api
+deterministic: true
+input_schema: domain.lookup.v1
+output_schema: connector-output.v1
+rate_limit:
+  rps: 1
+  burst: 5
+policy_refs:
+  - policies/collection/CONNECTOR_COLLECTION_POLICY.yaml
+  - policies/licensing/CONNECTOR_LICENSE_POLICY.yaml
+entity_mappings:
+  - from: raw.common_name
+    to: entity/domain
+  - from: raw.san
+    to: entity/domain
+evidence:
+  capture_raw: true
+  capture_transform_hash: true
+  capture_source_metadata: true

@@ -1,0 +1,9 @@
+{
+  "connector_id": "whois.v1",
+  "run_id": "run:whois.v1:cff2f6690797c1a2",
+  "input_hash": "sha256:b9e2a80fa92f8d5059ab90188e0691ad6730871a209cc337c7565593597fbd58",
+  "raw_hash": "sha256:ee7934a627608a070ab80054891ed3e442a0fff6b0ce254538bf762794c3120b",
+  "output_hash": "sha256:370c4ef2d8664e88f5b9427b525d604402eccb4b435f61954e632acdca23737b",
+  "transform_hash": "sha256:85a0fbeb0c53eaeef438c98650ff9a9aad011b0ab02d013e7450ec722b0caaa9",
+  "policy_verdict": "allow"
+}
