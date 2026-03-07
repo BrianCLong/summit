@@ -3,7 +3,32 @@ import { gql } from 'apollo-server';
 export const schema = gql`
   extend type Query {
     activeMeasuresPortfolio(query: String, tuners: TunersInput): [MeasureOption]
+
+    # Iran Narrative Ext
+    persianNarratives(status: String): [CogSecNarrative]
   }
+
+  extend type CogSecNarrative {
+    canonicalLabel: String
+    intendedAudiences: [String]
+    evidenceIds: [String]
+    languages: [String]
+  }
+
+  type MediaObject {
+    id: ID!
+    sha256: String
+    reuseAsNew: Boolean
+    evidenceIds: [String]
+  }
+
+  type ConnectivityState {
+    region: String!
+    platform: String!
+    state: String!
+    evidenceIds: [String]
+  }
+
   extend type Mutation {
     combineMeasures(ids: [ID]!, tuners: TunersInput): OperationPlan
     approveOperation(id: ID!, approver: String): ApprovalStatus
@@ -22,7 +47,7 @@ export const schema = gql`
     novelFeatures: [String]
   }
   type OperationPlan {
-    graph: String # Using String instead of JSON for now
+    graph: String
     predictedEffects: [EffectMetric]
     auditTrail: [AuditEntry]
   }
@@ -38,6 +63,6 @@ export const schema = gql`
     timestamp: String
     actor: String
     action: String
-    details: String # Using String instead of JSON for now
+    details: String
   }
 `;
