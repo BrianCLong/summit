@@ -1,0 +1,6 @@
+# Evidence Map
+# Maps governance controls to evidence artifacts
+evidence_map:
+  - control: "SEC-001"
+    artifact: "security-report"
+    description: "Security scanning results"
