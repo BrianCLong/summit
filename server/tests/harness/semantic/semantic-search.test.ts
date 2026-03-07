@@ -1,11 +1,11 @@
 import { describe, it, expect, jest } from '@jest/globals';
 
 const loadSemanticSearchService = async () => {
-  (jest as any).unstable_mockModule('../services/SynonymService.js', () => ({
+  (jest as any).unstable_mockModule('../../../src/services/SynonymService.js', () => ({
     synonymService: { expandQuery: (query: string) => query },
   }));
 
-  const module = await import('../services/SemanticSearchService.js');
+  const module = await import('../../../src/services/SemanticSearchService.js');
   return module.default;
 };
 
