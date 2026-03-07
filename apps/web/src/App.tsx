@@ -50,6 +50,7 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 const MissionControlPage = React.lazy(() => import('@/features/mission-control/MissionControlPage'))
+const PRTriagePage = React.lazy(() => import('@/features/pr-triage/PRTriagePage'))
 const DemoControlPage = React.lazy(() => import('@/pages/DemoControlPage'))
 // const OnboardingWizard = React.lazy(() => import('@/pages/Onboarding/OnboardingWizard').then(module => ({ default: module.OnboardingWizard })))
 const MaestroDashboard = React.lazy(() => import('@/pages/maestro/MaestroDashboard'))
@@ -262,6 +263,14 @@ function App() {
                           }
                         />
                         <Route
+                          path="pr-triage"
+                          element={
+                            <DataFetchErrorBoundary dataSourceName="PR Triage">
+                              <PRTriagePage />
+                            </DataFetchErrorBoundary>
+                          }
+                        />
+                                                <Route
                           path="mission-control"
                           element={
                             <DataFetchErrorBoundary dataSourceName="Mission Control">
