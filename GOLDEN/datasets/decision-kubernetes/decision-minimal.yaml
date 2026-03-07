@@ -1,0 +1,17 @@
+apiVersion: summit.io/v1alpha1
+kind: Decision
+metadata:
+  name: test-decision-001
+spec:
+  decisionId: DEC-test-001
+  intent: "test minimal decision admission"
+  evidenceIds:
+    - EVID:decision-kubernetes:metric:001
+  riskTier: low
+  policyProfile: default
+status:
+  phase: Pending
+  allowed: false
+  trustScore: 0
+  riskScore: 0
+  conditions: []
