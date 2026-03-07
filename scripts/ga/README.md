@@ -124,3 +124,44 @@ Validates GA hardening requirements against the verification map and documentati
 ```bash
 node scripts/ga/verify-ga-surface.mjs
 ```
+
+## run-ga-hardening-audit.mjs
+
+Runs a deterministic GA hardening check suite that aligns security, dependency, quality, and reliability gates into one machine-readable report.
+
+### Usage
+
+```bash
+# Run baseline checks and write JSON report
+pnpm ga:hardening:audit
+
+# Write report to a custom location
+node scripts/ga/run-ga-hardening-audit.mjs --out artifacts/custom-hardening.json
+
+# Include truncated command stdout/stderr in the report
+node scripts/ga/run-ga-hardening-audit.mjs --include-output --max-output-chars 12000
+
+# Fail when warnings are present
+node scripts/ga/run-ga-hardening-audit.mjs --fail-on-warning
+```
+
+### Options
+
+| Option                   | Description                                                              |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `--out <path>`           | Output JSON artifact path (default: `artifacts/ga-hardening-audit.json`) |
+| `--include-output`       | Persist truncated stdout/stderr for each check in the report             |
+| `--max-output-chars <n>` | Maximum stored output characters per stream (default: `6000`)            |
+| `--timeout-ms <n>`       | Per-check timeout in milliseconds (default: `900000`)                    |
+| `--fail-on-warning`      | Exit non-zero when warnings are detected                                 |
+
+### Included checks
+
+1. `pnpm security:check`
+2. `pnpm audit --prod --json`
+3. `pnpm outdated --recursive`
+4. `pnpm lint`
+5. `pnpm typecheck`
+6. `pnpm test`
+
+The generated report includes `schemaVersion`, run options, per-check status, and aggregate summary counts. Environment failures (for example npm audit registry `403`) are classified as warnings to preserve triage signal in restricted environments.
