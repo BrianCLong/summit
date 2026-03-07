@@ -27,7 +27,9 @@ const FREQUENCY_BANDS: Record<FrequencyBand, { min: number; max: number; color: 
   EHF: { min: 30000000000, max: 300000000000, color: '#e599f7' },
 };
 
-export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
+// ⚡ Bolt: Wrapped SpectrumAnalyzer with React.memo to prevent unnecessary re-renders
+// that cause canvas reset and performance drops when parent dashboard updates unrelated state.
+export const SpectrumAnalyzer = React.memo(({
   samples,
   fftSize = 2048,
   minDecibels = -90,
@@ -36,7 +38,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
   showPeaks = true,
   frequencyRange,
   className,
-}) => {
+}: SpectrumAnalyzerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>(0);
   const prevSpectrumRef = useRef<Float32Array | null>(null);
@@ -270,7 +272,9 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
       </div>
     </div>
   );
-};
+});
+
+SpectrumAnalyzer.displayName = 'SpectrumAnalyzer';
 
 function formatFreq(hz: number): string {
   if (hz >= 1000000) return `${(hz / 1000000).toFixed(1)}MHz`;

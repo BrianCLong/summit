@@ -35,13 +35,15 @@ const STATUS_COLORS: Record<MASINTOverlay['status'], string> = {
   OFFLINE: 'bg-red-500',
 };
 
-export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
+// ⚡ Bolt: Wrapped MASINTOverlayPanel with React.memo to prevent unnecessary re-renders
+// when parent dashboard state (like active streams or demod tasks) changes.
+export const MASINTOverlayPanel = React.memo(({
   overlays,
   onSelectOverlay,
   onSelectDetection,
   selectedOverlayId,
   className,
-}) => {
+}: MASINTOverlayPanelProps) => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Group overlays by sensor type
@@ -250,6 +252,8 @@ export const MASINTOverlayPanel: React.FC<MASINTOverlayPanelProps> = ({
       </div>
     </div>
   );
-};
+});
+
+MASINTOverlayPanel.displayName = 'MASINTOverlayPanel';
 
 export default MASINTOverlayPanel;

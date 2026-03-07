@@ -126,12 +126,14 @@ function createProgram(
   return program;
 }
 
-export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
+// ⚡ Bolt: Wrapped WaveformRenderer with React.memo to ensure WebGL context isn't unnecessarily
+// recreated or disrupted when sibling components update in the main dashboard.
+export const WaveformRenderer = React.memo(({
   samples,
   config: configOverrides,
   onMetrics,
   className,
-}) => {
+}: WaveformRendererProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const glRef = useRef<WebGLRenderingContext | null>(null);
   const programRef = useRef<WebGLProgram | null>(null);
@@ -415,7 +417,9 @@ export const WaveformRenderer: React.FC<WaveformRendererProps> = ({
       </div>
     </div>
   );
-};
+});
+
+WaveformRenderer.displayName = 'WaveformRenderer';
 
 // Utility: Convert hex color to RGB (0-1 range)
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
