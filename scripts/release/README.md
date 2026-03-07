@@ -38,3 +38,19 @@ try {
     }
 }
 ```
+
+## `validate-release-artifacts.mjs`
+
+Validates release artifacts (SBOM, evidence bundle, provenance bundle) to ensure:
+1. **Completeness**: All required files are present.
+2. **Schema validity**: The files are valid JSON.
+3. **Signatures**: The artifacts are accompanied by signatures (`.sig`).
+4. **Timestamps**: Ensure non-deterministic timestamps are properly separated (e.g. into `stamp.json`).
+5. **Reproducibility**: File contents match their expected SHA-256 hashes.
+
+Produces a **release-readiness** badge output. If the validation fails, it lists the reasons and exits with a non-zero status code.
+
+### Usage
+```bash
+node validate-release-artifacts.mjs --dir path/to/artifacts
+```
