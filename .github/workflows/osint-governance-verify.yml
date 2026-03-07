@@ -1,0 +1,38 @@
+name: osint-governance-verify
+
+on:
+  pull_request:
+    paths:
+      - 'config/osint/**'
+      - 'schemas/osint/**'
+      - '.github/policies/osint/**'
+      - 'evidence/**'
+      - '.github/workflows/osint-governance-verify.yml'
+  workflow_dispatch:
+
+jobs:
+  osint-governance-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Run OSINT policy tests
+        run: opa test .github/policies/osint
+
+      - name: Schema presence checks
+        run: |
+          set -euo pipefail
+          test -s config/osint/sources.yml
+          test -s config/osint/risk_envelopes.yml
+          test -s config/osint/retention.yml
+          test -s schemas/osint/source_registry.schema.json
+          test -s schemas/osint/risk_envelopes.schema.json
+          test -s schemas/osint/provenance_receipt.schema.json
+          test -s schemas/osint/collection_event.schema.json
+          test -s schemas/osint/redaction_report.schema.json

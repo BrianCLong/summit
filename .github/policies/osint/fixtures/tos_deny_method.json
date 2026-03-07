@@ -1,0 +1,18 @@
+{
+  "collection": {
+    "source_id": "summit-news-api",
+    "method": "web_fetch"
+  },
+  "risk_envelope": "conservative",
+  "risk_envelopes": {
+    "conservative": {
+      "allowed_methods": ["api"]
+    }
+  },
+  "source_registry": {
+    "summit-news-api": {
+      "allowed_methods": ["api"],
+      "disallowed_methods": ["paywall_bypass"]
+    }
+  }
+}

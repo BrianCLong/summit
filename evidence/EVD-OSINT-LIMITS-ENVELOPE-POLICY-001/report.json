@@ -1,0 +1,13 @@
+{
+  "evidence_id": "EVD-OSINT-LIMITS-ENVELOPE-POLICY-001",
+  "title": "OSINT policy gate scaffolding",
+  "summary": "Deny-by-default OSINT policy gates and fixtures committed for ToS, privacy, provenance, and alert budget enforcement.",
+  "status": "scaffolded",
+  "artifacts": [
+    ".github/policies/osint/tos.rego",
+    ".github/policies/osint/privacy.rego",
+    ".github/policies/osint/provenance.rego",
+    ".github/policies/osint/alert_budget.rego"
+  ],
+  "generated_by": "osint-governance-verify"
+}

@@ -1,0 +1,11 @@
+{
+  "risk_envelope": "balanced",
+  "risk_envelopes": {
+    "balanced": {
+      "max_alerts_per_run": 75
+    }
+  },
+  "collection": {
+    "alert_count": 50
+  }
+}

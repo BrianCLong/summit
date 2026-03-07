@@ -1,0 +1,33 @@
+version: 1
+classification:
+  public:
+    raw_capture_ttl_days: 14
+    metadata_ttl_days: 365
+  internal:
+    raw_capture_ttl_days: 7
+    metadata_ttl_days: 365
+  restricted:
+    raw_capture_ttl_days: 3
+    metadata_ttl_days: 180
+  sensitive_personal:
+    raw_capture_ttl_days: 1
+    metadata_ttl_days: 90
+never_log_fields:
+  - tokens
+  - session_cookies
+  - full_html
+  - personal_identifiers
+  - raw_credentials
+redaction:
+  pii_fields:
+    - email
+    - phone
+    - ssn
+    - passport_number
+    - national_id
+  strategy: "mask"
+retention_overrides:
+  - source_id: summit-open-web
+    classification: restricted
+    raw_capture_ttl_days: 1
+    metadata_ttl_days: 90

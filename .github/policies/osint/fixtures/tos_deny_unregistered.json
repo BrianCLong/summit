@@ -1,0 +1,13 @@
+{
+  "collection": {
+    "source_id": "unknown-source",
+    "method": "api"
+  },
+  "risk_envelope": "conservative",
+  "risk_envelopes": {
+    "conservative": {
+      "allowed_methods": ["api"]
+    }
+  },
+  "source_registry": {}
+}

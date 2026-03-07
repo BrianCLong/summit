@@ -1,0 +1,11 @@
+{
+  "risk_envelope": "conservative",
+  "risk_envelopes": {
+    "conservative": {
+      "max_alerts_per_run": 25
+    }
+  },
+  "collection": {
+    "alert_count": 30
+  }
+}
