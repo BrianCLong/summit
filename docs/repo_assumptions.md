@@ -1,35 +1,21 @@
-# Repo Assumptions — ai-platform-daily-2026-02-07
+# Repository Assumptions & Validations
 
-**Status:** Intentionally constrained pending in-repo validation.
-**Item Slug:** ai-platform-daily-2026-02-07
+## Verified
+- **Host shell path**: The frontend app seems to be located at `client/` (not `apps/web/`). There is a `client` workspace in `package.json`.
+- **Backend path**: `server/`.
+- **Frontend framework**: React (inferred from `package.json` devDependencies like `eslint-plugin-react`).
+- **Test runner**: `jest` and `vitest` are present in `package.json`. Playwright is used for E2E tests (`@playwright/test`).
+- **Artifact directory conventions**: `artifacts/` or `dist/evidence/` based on `ci:soc-report` script in `package.json`.
+- **Evidence schema location**: Not entirely found yet, but we will use the `APS-<slug>-<nnn>` pattern as specified.
+- **Must-not-touch files**: Existing `.github/workflows/*security*`, existing DB migrations, auth middlewares.
+- **Package structure**: It's a `pnpm` workspace with `packages/*`, `client`, and `server`.
 
-## Verified (from provided path map)
+## Assumed (To be mapped or created)
+- `packages/surfaces/` for generated dashboard surfaces
+- `packages/design-ingestion/` for Figma MCP normalization
+- `packages/graphrag-ui/` for graph → UI planning
+- `scripts/surfaces/` for deterministic generation / drift / deploy tasks
+- Telemetry event sink: Needs to be implemented or hooked into an existing logging sink.
+- GraphRAG read APIs: We assume we'll use a `GraphSnapshot` mock or interface until we integrate with the actual backend.
 
-- Runtime: **Node 18+**, **TypeScript**, **pnpm**, GitHub Actions.
-- Canonical paths:
-  - `.github/workflows/{ci-core.yml,ci-pr.yml,ci-security.yml,ci-verify.yml,codeql.yml,agent-guardrails.yml,agentic-plan-gate.yml,_reusable-*.yml}`
-  - `.github/{actions/,scripts/,policies/,MILESTONES/}`
-  - `src/{api/graphql,api/rest,agents,connectors,graphrag}`
-  - `tests/<module>/...`, `tests/e2e/...` (via pnpm scripts)
-- Docs layout: `docs/{architecture,api,security}` with suggested extensions `docs/{governance,operations,ga}`.
-
-## Assumed (must validate in repo)
-
-- Actual existing agent runtime entrypoints under `src/agents/` (names, interfaces).
-- Existing policy engine format under `.github/policies/` (OPA vs custom).
-- Evidence schema conventions (filenames, JSON structure).
-- Current CI job names inside the workflows (exact `name:` fields).
-
-## Must-not-touch list (until validated)
-
-- `.github/workflows/codeql.yml`
-- Any production deployment workflows (if present)
-- DB migration directories (if present)
-- Secrets / encrypted configs
-
-## Validation checklist (before PRs merge)
-
-- Confirm `.github/workflows/*` filenames + required checks in branch protection.
-- Confirm `src/agents` architecture (planner/executor/observer?) and how tools are defined today.
-- Confirm logging/telemetry stack (to wire MCP audit + drift detector).
-- Confirm test runner + assertion libs (`pnpm test:*`).
+We will proceed with creating the skeletons under `packages/graphrag-ui/`, `packages/surfaces/`, `packages/ui-refactor-agent/`, `scripts/surfaces/`, etc., as per the plan. For the host shell, we will target `client/src/` instead of `apps/web/src/`.
