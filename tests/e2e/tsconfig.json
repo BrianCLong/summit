@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "../../",
+    "paths": {
+      "@intelgraph/governance-kernel": ["platform/governance-kernel/src/index.ts"],
+      "@intelgraph/core": ["platform/intelgraph-core/src/index.ts"],
+      "@intelgraph/maestro-core": ["platform/maestro-core/src/index.ts"],
+      "@intelgraph/securiteyes": ["platform/securiteyes/src/index.ts"],
+      "@intelgraph/aurelius": ["platform/aurelius/src/index.ts"],
+      "@intelgraph/summitsight": ["platform/summitsight/src/index.ts"],
+      "@intelgraph/maas": ["platform/maas/src/index.ts"]
+    },
+    "types": ["jest", "node"]
+  },
+  "include": ["./**/*"]
+}
