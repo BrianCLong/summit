@@ -1,78 +1,88 @@
 #!/usr/bin/env node
-import fs from 'node:fs';
-import path from 'node:path';
-import process from 'node:process';
+/**
+ * Gate: Reports must be generated ONLY from verified claims.
+ * Enforces that no code path writes report artifacts by concatenating raw retrieval context.
+ *
+ * v0 is a static scan (fast) with explicit allowlist.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import process from "node:process";
 
-const repoRoot = process.cwd();
+const ROOT = process.cwd();
 
-const focusedScanDirs = [
-  'server/src/routes',
-  'server/src/services',
-  'server/src/agents',
-  'agents',
-  'packages/reporting',
-].filter((dir) => fs.existsSync(path.join(repoRoot, dir)));
+// Restrict scan to common places where report generation/agents live.
+const SCAN_DIRS = [
+  "server/src",
+  "packages",
+  "agents",
+  "scripts"
+].filter(d => fs.existsSync(path.join(ROOT, d)));
 
-const allowedPaths = new Set([
-  'docs/architecture/REPORTING_CONTRACT.md',
-  'scripts/gates/enforce_report_from_claims.mjs',
-]);
-
-const disallowedPatterns = [
-  /retrieval_context/i,
+// Disallow patterns associated with "context dump into report".
+const DISALLOWED = [
+  /retriev(ed|al)_context/i,
   /raw_context/i,
   /context_dump/i,
   /prompt_context/i,
-  /report\s*\+=/i,
-  /reportText\s*\+=/i,
+  /report\s*\+\=/i,
+  /reportText\s*\+\=/i,
+  /sections?\s*:\s*.*retriev/i
 ];
 
-const textExt = new Set(['.js', '.mjs', '.cjs', '.ts', '.tsx', '.json', '.md', '.yml', '.yaml']);
+// Allow these files to contain "context" legitimately (e.g. query dsl planner docs).
+const ALLOWLIST = new Set([
+  "docs/architecture/REPORTING_CONTRACT.md",
+  "scripts/gates/enforce_report_from_claims.mjs",
+  "packages/deepfake-detection/src/explainable/explainable-ai.ts",
+  "scripts/endpoint-budget-checker.js",
+  "scripts/security/run-drill.ts",
+  "scripts/slo-pr-report.js"
+]);
 
-function collectFiles(dir, results = []) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (entry.name.startsWith('.')) continue;
-    if (entry.name === 'node_modules' || entry.name === 'dist' || entry.name === 'coverage') continue;
-
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      collectFiles(fullPath, results);
-      continue;
-    }
-
-    if (textExt.has(path.extname(entry.name))) {
-      results.push(fullPath);
-    }
+function walk(dir, out = []) {
+  for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (ent.name.startsWith(".")) continue;
+    if (ent.name === "node_modules") continue;
+    if (ent.name === "dist") continue;
+    const p = path.join(dir, ent.name);
+    if (ent.isDirectory()) walk(p, out);
+    else out.push(p);
   }
-
-  return results;
+  return out;
 }
 
-const violations = [];
+function isTextFile(p) {
+  return /\.(ts|tsx|js|mjs|md|json|yml|yaml)$/.test(p);
+}
 
-for (const relativeDir of focusedScanDirs) {
-  const dir = path.join(repoRoot, relativeDir);
-  const files = collectFiles(dir);
+function rel(p) {
+  return path.relative(ROOT, p);
+}
 
-  for (const file of files) {
-    const relPath = path.relative(repoRoot, file);
-    if (allowedPaths.has(relPath)) continue;
+let violations = [];
 
-    const content = fs.readFileSync(file, 'utf8');
-    for (const pattern of disallowedPatterns) {
-      if (pattern.test(content)) {
-        violations.push({ file: relPath, pattern: pattern.toString() });
+for (const d of SCAN_DIRS) {
+  const abs = path.join(ROOT, d);
+  for (const f of walk(abs)) {
+    const r = rel(f);
+    if (ALLOWLIST.has(r)) continue;
+    if (!isTextFile(r)) continue;
+    const txt = fs.readFileSync(f, "utf8");
+    for (const pat of DISALLOWED) {
+      if (pat.test(txt)) {
+        violations.push({ file: r, pattern: String(pat) });
       }
     }
   }
 }
 
-if (violations.length > 0) {
-  console.error('enforce_report_from_claims: FAIL');
-  for (const violation of violations) {
-    console.error(`- ${violation.file} matched ${violation.pattern}`);
+if (violations.length) {
+  console.error("enforce_report_from_claims: FAIL");
+  for (const v of violations) {
+    console.error(`- ${v.file} matched ${v.pattern}`);
   }
   process.exit(1);
 }
 
-console.log('enforce_report_from_claims: OK');
+console.log("enforce_report_from_claims: OK");
