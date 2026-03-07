@@ -1,0 +1,67 @@
+name: Omni-Recovery & Predictive Rebase
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: omni-rebase-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      # AI keys for automated conflict resolution
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "summit-recovery-agent[bot]"
+          git config --global user.email "summit-recovery-agent[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies for lockfile resolution
+        run: |
+          npm install -g pnpm yarn
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh -y
+
+      - name: Run Omni-Recovery Rebase & Conflict Resolver
+        run: node scripts/orchestrator/omni_rebase_recovery.mjs
+
+      - name: Upload recovery artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-requests
+          path: artifacts/recovery_requests.json
+          
+      - name: Append job summary
+        if: always()
+        run: |
+          if [ -f artifacts/omni-recovery-summary.md ]; then
+            cat artifacts/omni-recovery-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi

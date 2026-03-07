@@ -1,0 +1,40 @@
+name: AI Tech Lead Dispatcher
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Runs hourly
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  tech-lead-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Run AI Tech Lead
+        run: node scripts/orchestrator/ai_tech_lead.mjs
+        
+      - name: Upload Dispatched Tasks
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-tech-lead-dispatch
+          path: artifacts/recovery_requests.json

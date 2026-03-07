@@ -1,0 +1,75 @@
+name: AI Sentinel & Autodidactic Learning
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Run hourly for the learning engine
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: ai-sentinel-learning-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  architectural-sentinel:
+    # Only run the sentinel on integration-pass PRs
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'integration-pass') || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Run Semantic Architecture Sentinel
+        run: node scripts/orchestrator/semantic_architecture_sentinel.mjs
+
+  autodidactic-feedback:
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Git
+        run: |
+          git config --global user.name "summit-meta-cognitive-engine[bot]"
+          git config --global user.email "summit-meta-cognitive-engine[bot]@users.noreply.github.com"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+
+      - name: Run Autodidactic Feedback Engine (SAFE)
+        run: node scripts/orchestrator/autodidactic_feedback_engine.mjs
+
+      - name: Run Meta-Librarian Context Compression
+        run: node scripts/orchestrator/meta_librarian.mjs

@@ -1,0 +1,57 @@
+name: Summit Phase 6 (Economics & Epistemics)
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Hourly for FinOps
+    - cron: "0 0 * * 0" # Weekly for Entropy Hunter
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: summit-phase6-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  finops-governor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh -y
+      - name: Run FinOps Governor
+        run: node scripts/orchestrator/finops_governor.mjs
+
+  entropy-hunter:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 0 * * 0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run Entropy Hunter
+        run: node scripts/orchestrator/entropy_hunter.mjs
+      - name: Upload Dispatches
+        uses: actions/upload-artifact@v4
+        with:
+          name: proactive-refactor-requests
+          path: artifacts/recovery_requests.json

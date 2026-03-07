@@ -1,0 +1,44 @@
+name: PR MMS Playbook
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  playbook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install gh jq -y
+
+      - name: Fetch PR metadata
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p artifacts/pr-planner
+          gh pr list \
+            --repo BrianCLong/summit \
+            --limit 1000 \
+            --json number,title,author,headRefName,baseRefName,updatedAt,mergeable,mergeStateStatus,files \
+            > artifacts/pr-planner/prs.json
+
+      - name: Build graph and playbook
+        run: |
+          node scripts/orchestrator/build-pr-graph.js
+          node scripts/orchestrator/compute-mms.js
+          node scripts/orchestrator/build-merge-playbook.js
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-mms-playbook
+          path: artifacts/pr-planner/
