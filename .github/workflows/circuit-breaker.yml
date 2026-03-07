@@ -1,0 +1,53 @@
+name: ⚡ Circuit Breaker - Auto Revert
+
+on:
+  # Trigger when main branch CI fails
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  circuit-break:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 10  # Need history for revert
+          ref: main
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Summit Circuit Breaker"
+          git config --global user.email "circuit-breaker@summit.ai"
+
+      - name: Run Circuit Breaker
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          chmod +x scripts/orchestrator/circuit_breaker.mjs
+          node scripts/orchestrator/circuit_breaker.mjs
+
+      - name: Notify on Revert
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Circuit breaker activated - breaking commit reverted"
+          # Could post to Slack/Discord here

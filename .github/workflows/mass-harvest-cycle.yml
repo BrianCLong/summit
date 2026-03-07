@@ -1,0 +1,60 @@
+name: 🚂 Mass Harvest Train
+
+on:
+  schedule:
+    # Run every 4 hours
+    - cron: '30 */4 * * *'
+
+  workflow_dispatch:
+    inputs:
+      max_batch_size:
+        description: 'Maximum batch size'
+        required: false
+        default: '50'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  harvest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Summit Harvest Bot"
+          git config --global user.email "harvest@summit.ai"
+
+      - name: Run Mass Harvest Train
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HARVEST_MAX_BATCH_SIZE: ${{ inputs.max_batch_size || '50' }}
+        run: |
+          chmod +x scripts/orchestrator/mass_harvest_train.mjs
+          node scripts/orchestrator/mass_harvest_train.mjs
+
+      - name: Upload Harvest Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: harvest-results-${{ github.run_number }}
+          path: |
+            artifacts/harvest/

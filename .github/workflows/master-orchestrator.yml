@@ -1,0 +1,86 @@
+name: 🤖 Master Orchestrator - Autonomous Cycle
+
+on:
+  schedule:
+    # Run every 2 hours
+    - cron: '0 */2 * * *'
+
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run mode (no actual changes)'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for rebasing
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "Summit Orchestrator Bot"
+          git config --global user.email "orchestrator@summit.ai"
+
+      - name: Run Master Orchestrator
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          chmod +x scripts/orchestrator/*.mjs
+          node scripts/orchestrator/master_orchestrator.mjs
+
+      - name: Upload Orchestration Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: orchestration-cycle-${{ github.run_number }}
+          path: |
+            artifacts/orchestration-cycle.json
+            artifacts/omni-recovery-summary.md
+            artifacts/harvest/harvest-summary.md
+            artifacts/recovery_requests.json
+            .learnings/
+
+      - name: Comment Summary on Recent PRs
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f artifacts/orchestration-cycle.json ]; then
+            echo "Orchestration cycle completed successfully!"
+            # Add logic here to post summary to a tracking issue or PR
+          fi
+
+      - name: Notify on Failure
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "::error::Master Orchestrator failed. Check logs for details."
