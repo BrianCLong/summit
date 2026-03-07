@@ -1,75 +1,109 @@
 const fs = require('fs');
+const path = require('path');
 
-const path = '.github/workflows/parity-check.yml';
-let content = fs.readFileSync(path, 'utf8');
+const orchestratorPath = path.join('summit', 'agents', 'orchestrator', 'agent-orchestrator.ts');
+let content = fs.readFileSync(orchestratorPath, 'utf8');
 
+const importsToAdd = `
+import { globalRegistry } from './uncertainty/registry.js';
+import { UncertaintySensorRunner } from './uncertainty/sensors.js';
+import { globalPolicyEngine } from './uncertainty/policy-engine.js';
+`;
+
+// Add imports
 content = content.replace(
-  `    steps:
-      - name: Checkout
-        uses: actions/checkout@v4`,
-  `    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Check if secret exists
-        id: check_secret
-        env:
-          AWS_OIDC_ROLE_ARN: \${{ secrets.AWS_OIDC_ROLE_ARN }}
-          GCP_WORKLOAD_POOL: \${{ secrets.GCP_WORKLOAD_POOL }}
-          AZURE_CLIENT_ID: \${{ secrets.AZURE_CLIENT_ID }}
-        run: |
-          if [ "\${{ matrix.cloud }}" = "aws" ] && [ -z "\$AWS_OIDC_ROLE_ARN" ]; then
-            echo "missing_secret=true" >> $GITHUB_OUTPUT
-          elif [ "\${{ matrix.cloud }}" = "gcp" ] && [ -z "\$GCP_WORKLOAD_POOL" ]; then
-            echo "missing_secret=true" >> $GITHUB_OUTPUT
-          elif [ "\${{ matrix.cloud }}" = "azure" ] && [ -z "\$AZURE_CLIENT_ID" ]; then
-            echo "missing_secret=true" >> $GITHUB_OUTPUT
-          else
-            echo "missing_secret=false" >> $GITHUB_OUTPUT
-          fi`
+  "import { randomUUID } from 'node:crypto';",
+  "import { randomUUID } from 'node:crypto';" + importsToAdd
 );
 
+// Add sensor runner property
 content = content.replace(
-  `      - name: Configure AWS Credentials
-        if: matrix.cloud == 'aws'
-        uses: aws-actions/configure-aws-credentials@v4`,
-  `      - name: Configure AWS Credentials
-        if: matrix.cloud == 'aws' && steps.check_secret.outputs.missing_secret == 'false'
-        uses: aws-actions/configure-aws-credentials@v4`
+  "private readonly eventLog = new EventLogWriter(),\n  ) {}",
+  "private readonly eventLog = new EventLogWriter(),\n    private readonly sensorRunner = new UncertaintySensorRunner(),\n  ) {}"
 );
 
-content = content.replace(
-  `      - name: Setup gcloud
-        if: matrix.cloud == 'gcp'
-        uses: google-github-actions/setup-gcloud@v3`,
-  `      - name: Setup gcloud
-        if: matrix.cloud == 'gcp' && steps.check_secret.outputs.missing_secret == 'false'
-        uses: google-github-actions/setup-gcloud@v3`
-);
+// Add uncertainty logic in run loop
+const beforeTaskLogic = `
+      this.emit({
+        run_id,
+        task_id: task.id,
+        agent_name: null,
+        ts: new Date().toISOString(),
+        type: 'TASK_DEQUEUED',
+        inputs_hash: inputsHash,
+        outputs_hash: null,
+        attempt: 1,
+        status: 'started',
+        metadata: {},
+      });
+`;
 
-content = content.replace(
-  `      - name: Setup Azure CLI
-        if: matrix.cloud == 'azure'
-        uses: azure/login@v2`,
-  `      - name: Setup Azure CLI
-        if: matrix.cloud == 'azure' && steps.check_secret.outputs.missing_secret == 'false'
-        uses: azure/login@v2`
-);
+const afterTaskLogic = beforeTaskLogic + `
+      // --- UNCERTAINTY REPRESENTATION & IDENTIFICATION ---
+      // Ensure we have a baseline record for this task
+      const existingRecords = globalRegistry.findByEntity(task.id);
+      if (existingRecords.length === 0) {
+        globalRegistry.createRecord(task.id, {}, { source_agent: 'orchestrator' });
+      }
 
-content = content.replace(
-  `      - name: Run parity check`,
-  `      - name: Run parity check
-        if: steps.check_secret.outputs.missing_secret == 'false'`
-);
+      // --- UNCERTAINTY ADAPTATION (POLICY CHECK) ---
+      const policyActions = globalPolicyEngine.evaluatePlan(task.metadata || {}, globalRegistry.findByEntity(task.id));
+      let shouldBlock = false;
+      let policyAdaptationReason = '';
 
-content = content.replace(
-  `      - name: Upload parity artifact
-        uses: actions/upload-artifact@v4`,
-  `      - name: Fake success if secret missing
-        if: steps.check_secret.outputs.missing_secret == 'true'
-        run: echo "Secrets missing on fork/branch. Skipping checks." > parity_result.json
+      for (const action of policyActions) {
+        if (action.action_type === 'block_and_route') {
+          shouldBlock = true;
+          policyAdaptationReason = \`Blocked by uncertainty policy: \${action.parameters.reason}\`;
+        } else if (action.action_type === 'add_step' || action.action_type === 'adjust_sampling') {
+           // We might adapt the task here if needed
+           console.log(\`Adapting task \${task.id} due to policy action: \${action.action_type}\`);
+        }
+      }
 
-      - name: Upload parity artifact
-        uses: actions/upload-artifact@v4`
-);
+      if (shouldBlock) {
+        this.emit({
+          run_id,
+          task_id: task.id,
+          agent_name: null,
+          ts: new Date().toISOString(),
+          type: 'TASK_FAILED',
+          inputs_hash: inputsHash,
+          outputs_hash: null,
+          attempt: 1,
+          status: 'failed',
+          metadata: { reason: policyAdaptationReason },
+        });
+        results.push({
+          task_id: task.id,
+          status: 'failed',
+          outputs: {},
+          error: policyAdaptationReason,
+          attempt: 1,
+          started_at: new Date().toISOString(),
+          finished_at: new Date().toISOString(),
+        });
+        continue;
+      }
+`;
 
-fs.writeFileSync(path, content);
+content = content.replace(beforeTaskLogic, afterTaskLogic);
+
+const afterAgentSuccess = `
+          if (result.status === 'success') {
+            break;
+          }
+`;
+
+const afterAgentSuccessUpdated = `
+          if (result.status === 'success') {
+             // Run sensors on output to identify any new uncertainty
+             this.sensorRunner.runAll(task.id, result.outputs, globalRegistry);
+            break;
+          }
+`;
+
+content = content.replace(afterAgentSuccess, afterAgentSuccessUpdated);
+
+fs.writeFileSync(orchestratorPath, content, 'utf8');
+console.log("Orchestrator updated successfully.");
