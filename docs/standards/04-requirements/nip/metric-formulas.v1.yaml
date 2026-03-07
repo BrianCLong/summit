@@ -1,0 +1,55 @@
+version: 1
+metrics:
+  narrative_resilience_score:
+    description: Stable assumptions despite claim churn under refutation.
+    range: [0, 1]
+    formula: |
+      clamp01(
+        0.45 * assumption_core_similarity_7d
+        + 0.30 * claim_rotation_rate_7d
+        + 0.25 * counter_absorption_rate_7d
+      )
+    thresholds:
+      enhanced_monitoring: 0.72
+      priority_escalation: 0.84
+  seeding_density_index:
+    description: Independent early origin points that converge downstream.
+    range: [0, 1]
+    formula: |
+      clamp01(
+        0.50 * distinct_originators_delta_t_norm
+        + 0.20 * (1 - originator_connectivity_t0)
+        + 0.30 * convergence_velocity_norm
+      )
+    thresholds:
+      review: 0.60
+      alert: 0.75
+  handoff_detection_score:
+    description: Credibility tier migration with register shift and citation laundering.
+    range: [0, 1]
+    formula: |
+      clamp01(
+        0.35 * tier_jump_score
+        + 0.25 * register_shift_score
+        + 0.20 * hedging_delta
+        + 0.20 * citation_circularity_score
+      )
+    thresholds:
+      watch: 0.55
+      handoff_event: 0.70
+  narrative_compression_ratio:
+    description: Internalized narrative requiring less explanation.
+    range: [0, 1]
+    formula: |
+      clamp01(
+        0.40 * normalized_length_drop
+        + 0.35 * implied_reference_rate
+        + 0.25 * external_link_suppression
+      )
+    thresholds:
+      normalized_likely: 0.65
+      institutionalization_risk: 0.80
+global_settings:
+  deterministic_rounding: 6
+  missing_signal_policy: fail_closed
+  min_artifacts_per_window: 25

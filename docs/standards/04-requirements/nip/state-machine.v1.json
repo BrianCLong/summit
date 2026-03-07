@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.intelgraph/standards/nip/state-machine.v1.json",
+  "title": "Narrative State Machine",
+  "initial_state": "Seeded",
+  "states": [
+    "Seeded",
+    "Contested",
+    "Normalized",
+    "Institutionalized",
+    "Exhausted",
+    "Dormant",
+    "Reactivated"
+  ],
+  "terminal_states": [
+    "Institutionalized"
+  ],
+  "transitions": [
+    {
+      "from": "Seeded",
+      "to": "Contested",
+      "predicate": "rebuttal_rate_24h >= 0.15 && cross_community_overlap >= 0.20",
+      "required_signals": [
+        "rebuttal_rate_24h",
+        "quote_reply_ratio",
+        "cross_community_overlap"
+      ]
+    },
+    {
+      "from": "Contested",
+      "to": "Normalized",
+      "predicate": "shorthand_rate_7d >= 0.35 && citation_density_drop >= 0.20",
+      "required_signals": [
+        "shorthand_rate_7d",
+        "citation_density_drop",
+        "external_link_rate"
+      ]
+    },
+    {
+      "from": "Normalized",
+      "to": "Institutionalized",
+      "predicate": "tier_handoff_score >= 0.70 && high_credibility_share >= 0.30",
+      "required_signals": [
+        "tier_handoff_score",
+        "high_credibility_share",
+        "register_formality_delta"
+      ]
+    },
+    {
+      "from": "Normalized",
+      "to": "Exhausted",
+      "predicate": "fatigue_lexicon_share >= 0.25 && persuasion_intent_delta <= -0.20",
+      "required_signals": [
+        "fatigue_lexicon_share",
+        "persuasion_intent_delta",
+        "nihilism_marker_rate"
+      ]
+    },
+    {
+      "from": "Exhausted",
+      "to": "Dormant",
+      "predicate": "volume_decay_14d >= 0.75",
+      "required_signals": [
+        "volume_decay_14d"
+      ]
+    },
+    {
+      "from": "Dormant",
+      "to": "Reactivated",
+      "predicate": "event_similarity >= 0.80 && assumption_core_similarity >= 0.85",
+      "required_signals": [
+        "event_similarity",
+        "assumption_core_similarity",
+        "frame_reappearance_rate"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+version: 1
+pipeline:
+  nightly_narrative_ci:
+    schedule: "0 2 * * *"
+    required_steps:
+      - name: schema_validation
+        command: "node scripts/ci/narrative/schema-validate.mjs --schema docs/standards/04-requirements/nip/node-edge-schema.v1.json --input artifacts/narratives/current/nodes_edges.json"
+        fail_mode: hard
+      - name: state_machine_validation
+        command: "node scripts/ci/narrative/state-machine-check.mjs --machine docs/standards/04-requirements/nip/state-machine.v1.json --input artifacts/narratives/current/state_signals.json"
+        fail_mode: hard
+      - name: metric_recalculation
+        command: "node scripts/ci/narrative/score-metrics.mjs --config docs/standards/04-requirements/nip/metric-formulas.v1.yaml --input artifacts/narratives/current/metric_signals.json"
+        fail_mode: hard
+      - name: assumption_breakpoint_test
+        command: "node scripts/ci/narrative/run-test.mjs --test assumption-breakpoint --input artifacts/narratives/current/test_inputs.json"
+        fail_mode: hard
+      - name: mutation_test
+        command: "node scripts/ci/narrative/run-test.mjs --test mutation --input artifacts/narratives/current/test_inputs.json"
+        fail_mode: hard
+      - name: handoff_test
+        command: "node scripts/ci/narrative/run-test.mjs --test handoff --input artifacts/narratives/current/test_inputs.json"
+        fail_mode: hard
+      - name: counter_absorption_test
+        command: "node scripts/ci/narrative/run-test.mjs --test counter-absorption --input artifacts/narratives/current/test_inputs.json"
+        fail_mode: hard
+      - name: provenance_completeness_gate
+        command: "node scripts/ci/narrative/provenance-gate.mjs --input artifacts/narratives/current/nodes_edges.json"
+        fail_mode: hard
+      - name: deterministic_artifact_gate
+        command: "node scripts/ci/narrative/determinism-gate.mjs --manifest artifacts/narratives/current/manifest.json"
+        fail_mode: hard
+outputs:
+  required:
+    - "artifacts/narratives/current/stamp.json"
+    - "artifacts/narratives/current/narratives/*/assumptions.json"
+    - "artifacts/narratives/current/narratives/*/frames.json"
+    - "artifacts/narratives/current/narratives/*/state_transitions.json"
+    - "artifacts/narratives/current/tests/*/results.json"
+  retention_days: 90

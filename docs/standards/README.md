@@ -25,7 +25,8 @@ This repository (`docs/standards/`) contains the authoritative specifications, s
     *Defines requirements for JSDoc, READMEs, ADRs, and this repository.*
 
 ### 04 - Requirements & Specifications
-*(Coming Soon)*
+*   [**STD-004: Narrative Intelligence Pipeline (NIP)**](./04-requirements/STD-004-Narrative-Intelligence-Pipeline.md)
+    *Defines the schema, state machine, metrics, tests, evidence outputs, and machine-readable NIP contracts for narrative analysis.*
 
 ## How to Use
 

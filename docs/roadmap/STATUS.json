@@ -1,6 +1,6 @@
 {
   "last_updated": "2026-02-07T00:00:00Z",
-  "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
+  "revision_note": "Expanded STD-004 with machine-readable schemas, formulas, CI gates, and deterministic pipeline architecture artifacts.",
   "initiatives": [
     {
       "id": "adenhq-hive-subsumption-lane1",
@@ -150,7 +150,7 @@
       "id": "narrative-ops-governed-docs",
       "status": "in_progress",
       "owner": "codex",
-      "notes": "Governed narrative risk ops documentation: standards, data handling, and runbook. Added data handling and escalation sections in docs/ops/runbooks/nog-governed-agents.md."
+      "notes": "Governed narrative risk ops documentation: expanded STD-004 with machine-readable schema pack, scoring formulas, CI gate contract, and evidence bundle schema in docs/standards/04-requirements/nip/."
     },
     {
       "id": "ru-ua-cogwar-lab",

@@ -496,6 +496,37 @@ prompts:
     allowed_operations:
       - create
       - edit
+  - id: narrative-intelligence-pipeline-standard
+    version: v1
+    path: prompts/docs/narrative-intelligence-pipeline-standard@v1.md
+    sha256: 3301ed1fa96f8bb4bac0b1f310658965e2470b423d5d6853f73b5f77d46b4e6a
+    description: Define the narrative intelligence pipeline standard (schema, metrics, tests, evidence, and controls).
+    scope:
+      paths:
+        - docs/standards/04-requirements/STD-004-Narrative-Intelligence-Pipeline.md
+        - docs/standards/04-requirements/nip/node-edge-schema.v1.json
+        - docs/standards/04-requirements/nip/state-machine.v1.json
+        - docs/standards/04-requirements/nip/metric-formulas.v1.yaml
+        - docs/standards/04-requirements/nip/ci-gates.v1.yaml
+        - docs/standards/04-requirements/nip/evidence-bundle.schema.json
+        - docs/standards/README.md
+        - docs/roadmap/STATUS.json
+        - agents/examples/NARRATIVE_INTELLIGENCE_PIPELINE_STD004.json
+        - prompts/docs/narrative-intelligence-pipeline-standard@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - analytics
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
   - id: companyos-sprint-04
     version: v1
     path: prompts/companyos/sprint-04-residency-seams-canary-tenant-onboarding.md
