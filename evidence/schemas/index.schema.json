@@ -1,32 +1,27 @@
 {
-  "$schema": "https://json-schema.org/draft-2020-12/schema",
-  "title": "summit evidence index",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evidence Index",
   "type": "object",
-  "required": ["mappings"],
   "properties": {
-    "version": {
-      "type": "string"
-    },
+    "version": { "type": "string" },
     "items": {
-      "type": "object",
-      "additionalProperties": {
-        "type": "object",
-        "properties": {
-          "evidence_id": { "type": "string" },
-          "files": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "path": { "type": "string" }
+            },
+            "required": ["id", "path"]
           }
         },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
-        "additionalProperties": true
-      }
+        {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      ]
     },
     "mappings": {
       "type": "object",
@@ -41,5 +36,5 @@
       }
     }
   },
-  "additionalProperties": false
+  "required": ["version", "items"]
 }
