@@ -52,7 +52,7 @@ jobs:
     services:
       # Start test server if running scheduled check
       server:
-        image: node:20
+        image: node:22
         options: --workdir /app
         ports:
           - 3000:3000
