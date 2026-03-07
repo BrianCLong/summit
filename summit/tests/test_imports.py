@@ -1,7 +1,10 @@
-import pytest
-import pkgutil
 import importlib
+import pkgutil
+
+import pytest
+
 import summit
+
 
 def test_imports():
     """

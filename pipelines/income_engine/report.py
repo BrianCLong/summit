@@ -6,7 +6,6 @@ import hashlib
 import json
 from pathlib import Path
 
-
 PROHIBITED_CLAIMS = (
     "guaranteed income",
     "risk free",

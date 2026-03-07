@@ -1,8 +1,11 @@
-import pytest
 from unittest.mock import MagicMock, patch
-from summit.observability import add_open_telemetry_spans
+
+import pytest
 from opentelemetry import trace
 from opentelemetry.trace import SpanContext, TraceFlags
+
+from summit.observability import add_open_telemetry_spans
+
 
 def test_add_open_telemetry_spans_no_span():
     # Test case when no span is active

@@ -1,10 +1,12 @@
-import os
 import json
+import os
 import uuid
-from datetime import datetime, timezone
-from typing import Optional, List, Dict, Any
-from .schemas import SystemQualityReport, SystemQualityMetrics
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List, Optional
+
 from .metrics import calculate_defect_density, calculate_rework_rate, calculate_variance_score
+from .schemas import SystemQualityMetrics, SystemQualityReport
+
 
 class SystemsQualityEvaluator:
     def __init__(self):
@@ -14,8 +16,8 @@ class SystemsQualityEvaluator:
             repo_path: str,
             commit_range: str,
             agent_id: str,
-            test_results: Dict[str, Any],
-            previous_scores: Optional[List[float]] = None,
+            test_results: dict[str, Any],
+            previous_scores: Optional[list[float]] = None,
             escape_rate: float = 0.0) -> SystemQualityReport:
 
         failing_tests = test_results.get("failed", 0)
@@ -36,7 +38,7 @@ class SystemsQualityEvaluator:
         # Use UTC explicitly
         report = SystemQualityReport(
             evidence_id=evidence_id,
-            timestamp=datetime.now(timezone.utc),
+            timestamp=datetime.now(UTC),
             agent_id=agent_id,
             repo_path=repo_path,
             commit_range=commit_range,
