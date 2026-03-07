@@ -1,0 +1,6 @@
+{
+  "evidence_id": "EVD-QWEN3CODERNEXT-PROV-001",
+  "item": "Local LM Studio provider contract",
+  "summary": "Provider returns OpenAI-compatible chat completion content.",
+  "artifacts": ["evidence/EVD-QWEN3CODERNEXT-PROV-001/report.json"]
+}
