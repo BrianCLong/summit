@@ -1,0 +1,25 @@
+name: Architecture Map Validation
+
+on:
+  push:
+    paths:
+      - 'architecture/**'
+  pull_request:
+    paths:
+      - 'architecture/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Mermaid
+        run: |
+          npm install -g @mermaid-js/mermaid-cli
+          mmdc -i architecture/diagrams/summit-architecture-map.mmd -o architecture/diagrams/summit-architecture-map.svg
+      - name: Ensure Artifacts Contract
+        run: |
+          test -f "artifacts/architecture-map/report.json" || (echo "Missing report.json" && false)
+          test -f "artifacts/architecture-map/metrics.json" || (echo "Missing metrics.json" && false)
+          test -f "artifacts/architecture-map/stamp.json" || (echo "Missing stamp.json" && false)
+          grep -q "EVID-ARCHITECTURE-MAP" artifacts/architecture-map/report.json || (echo "Missing EVID" && false)
