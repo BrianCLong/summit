@@ -1,0 +1,12 @@
+{
+  "minimumReadinessScore": 0.9,
+  "preferredMaxFilesChanged": 25,
+  "preferredMaxLocDelta": 1500,
+  "requiredChecks": [
+    "ci",
+    "pr-readiness"
+  ],
+  "warningChecks": [
+    "architecture-drift"
+  ]
+}

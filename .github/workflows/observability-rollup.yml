@@ -1,0 +1,13 @@
+name: observability-rollup
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+jobs:
+  rollup:
+    uses: ./.github/workflows/_reusable.agent-run.yml
+    with:
+      agent_name: observabilityRollupAgent
+      event_name: schedule

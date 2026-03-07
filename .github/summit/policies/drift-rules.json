@@ -1,0 +1,9 @@
+{
+  "rules": [
+    {
+      "id": "ui-must-not-import-intelgraph-core",
+      "fromGlob": "apps/summit-ui/**",
+      "forbidImportGlob": "packages/intelgraph/**"
+    }
+  ]
+}

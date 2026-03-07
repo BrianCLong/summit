@@ -1,0 +1,15 @@
+name: security-posture
+
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  posture:
+    uses: ./.github/workflows/_reusable.agent-run.yml
+    with:
+      agent_name: securityPostureAgent
+      event_name: security_posture

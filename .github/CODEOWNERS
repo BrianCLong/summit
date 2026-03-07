@@ -57,3 +57,19 @@
 /docs/releases/     @BrianCLong
 /.github/workflows/release*  @BrianCLong
 /scripts/release/   @BrianCLong
+
+# Global defaults
+* @BrianCLong
+
+# Architecture / platform
+/docs/architecture/ @BrianCLong
+/packages/intelgraph/ @BrianCLong
+/packages/maestro/ @BrianCLong
+/packages/summit-memory/ @BrianCLong
+/packages/summit-agents/ @BrianCLong
+
+# CI / governance
+/.github/ @BrianCLong
+
+# Security-sensitive areas
+/policies/ @BrianCLong

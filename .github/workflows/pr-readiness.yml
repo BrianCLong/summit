@@ -1,0 +1,13 @@
+name: pr-readiness
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  readiness:
+    uses: ./.github/workflows/_reusable.agent-run.yml
+    with:
+      agent_name: readinessAgent
+      event_name: pull_request
+      emit_pr_comment: true

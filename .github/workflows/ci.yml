@@ -199,3 +199,6 @@ jobs:
         with:
           name: verification-artifacts
           path: artifacts/**
+
+  summit-agent-run:
+    uses: ./.github/workflows/_reusable.node-ci.yml
