@@ -1,0 +1,8 @@
+{
+  "modelName": "example-model",
+  "modelDigest": "WRONG_DIGEST",
+  "user": "10001",
+  "readOnlyRootfs": true,
+  "networkEnabled": false,
+  "mounts": ["/app/weights:ro"]
+}

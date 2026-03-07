@@ -1,12 +1,15 @@
+# .github/policies/model-sandbox/data-classification.yml
 version: 1
 classifications:
   public:
-    description: "Freely available data."
-    sandbox_requirements: "Standard"
+    allowed: true
+    description: "Open source data, public datasets."
   internal:
-    description: "Data for company use only."
-    sandbox_requirements: "Hardened"
+    allowed: true
+    requires_approval: true
+    description: "Summit-internal non-sensitive data."
   restricted:
-    description: "Highly sensitive data."
-    sandbox_requirements: "Ultra-Hardened"
+    allowed: false
+    requires_hardenend_sandbox: true
+    description: "Customer data, PII, secrets, or sensitive IP."
 default_classification: restricted

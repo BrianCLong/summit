@@ -1,4 +1,4 @@
-name: "[info] AI Copilot Canary"
+name: AI Copilot Canary
 
 on:
   schedule:
@@ -10,10 +10,6 @@ on:
       - "RUNBOOKS/ai-copilot-service.md"
       - "services/ai-copilot/**"
       - ".github/workflows/ai-copilot-canary.yml"
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   canary:

@@ -97,7 +97,6 @@ jobs:
 
           echo "valid=true" >> $GITHUB_OUTPUT
           echo "All validations passed"
-
   approval:
     name: Request Approval
     runs-on: ubuntu-latest

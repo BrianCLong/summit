@@ -1,7 +1,8 @@
 {
+  "modelName": "example-model",
+  "modelDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "user": "root",
-  "readOnly": true,
-  "seccomp": ".github/policies/model-sandbox/security-profile.json",
-  "modelPath": "tools/model-sandbox/fixtures/dummy-weights.bin",
-  "network": "none"
+  "readOnlyRootfs": true,
+  "networkEnabled": false,
+  "mounts": ["/app/weights:ro"]
 }

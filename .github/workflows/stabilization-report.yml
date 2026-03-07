@@ -28,10 +28,6 @@ on:
       - "docs/releases/_state/*.json"
     branches: [main]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
   issues: read
@@ -106,7 +102,6 @@ jobs:
             echo "---" >> $GITHUB_STEP_SUMMARY
             cat artifacts/reports/stabilization-report.md >> $GITHUB_STEP_SUMMARY
           fi
-
   notify:
     name: Send Notifications
     runs-on: ubuntu-latest

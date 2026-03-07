@@ -86,7 +86,6 @@ jobs:
           name: security-reports
           path: results.sarif
           if-no-files-found: ignore
-
   sast:
     name: Static application security testing (CodeQL)
     runs-on: ubuntu-22.04
@@ -112,7 +111,6 @@ jobs:
         uses: github/codeql-action/analyze@cdefb33c0f6224e58673d9004f47f7cb3e328b89 # v3.25.10
         with:
           category: "/language:${{ matrix.language }}"
-
   semgrep:
     name: Semgrep policy-as-code (SAST)
     runs-on: ubuntu-22.04
@@ -395,7 +393,6 @@ jobs:
           retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/trivy-cis.json
-
   baseline:
     name: Security baseline verification
     runs-on: ubuntu-22.04
@@ -413,7 +410,6 @@ jobs:
           retention-days: 14
           name: security-reports
           path: ${{ env.REPORT_DIR }}/baseline-report.json
-
   dast:
     name: Dynamic application security testing (OWASP ZAP)
     runs-on: ubuntu-22.04
@@ -484,7 +480,7 @@ jobs:
       dashboard_url: ${{ steps.dashboard.outputs.dashboard_url }}
     steps:
       - name: Download all security reports
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
           name: security-reports
           path: aggregated-security
@@ -581,34 +577,3 @@ jobs:
           DASHBOARD_URL: ${{ needs.security-summary.outputs.dashboard_url }}
         run: |
           echo "All security controls succeeded. Approvers can review ${DASHBOARD_URL} before promoting to production."
-
-  sigstore-verify:
-    name: Sigstore bundle verification
-    runs-on: ubuntu-latest
-    if: vars.SIGSTORE_VERIFY_ENABLED == 'true'
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      # Demo: Verify cosign itself (if we could download it)
-      # For now, we just download a dummy or use the action to verify a test artifact
-      - name: Download test artifact
-        run: |
-          echo "test artifact" > artifact.bin
-          echo "{}" > bundle.sigstore.json # Dummy bundle
-
-      - name: Run Sigstore Verification
-        uses: ./.github/actions/sigstore-verify
-        with:
-          cosign_version: "3.0.4"
-          artifact: "artifact.bin"
-          bundle: "bundle.sigstore.json"
-          evidence_id: "EVD-SIGSTORE-BUNDLEFIRST-CI-001"
-
-      - name: Upload Evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence
-          path: evidence/

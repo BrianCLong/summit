@@ -99,7 +99,6 @@ jobs:
         run: |
           echo "Running Base Selection Unit Tests..."
           ./scripts/release/tests/base_selection.test.sh
-
   summary:
     name: Test Summary
     runs-on: ubuntu-latest

@@ -85,7 +85,6 @@ jobs:
 
           echo "valid=true" >> $GITHUB_OUTPUT
           echo "previous_tag=$PREVIOUS" >> $GITHUB_OUTPUT
-
   approve:
     name: Rollback Approval
     runs-on: ubuntu-latest
@@ -99,7 +98,6 @@ jobs:
           echo "Rollback approved by: ${{ github.actor }}"
           echo "Tag: ${{ inputs.tag }}"
           echo "Reason: ${{ inputs.reason }}"
-
   rollback:
     name: Execute Rollback
     runs-on: ubuntu-latest
@@ -189,7 +187,6 @@ jobs:
             echo "3. Create fix PR" >> $GITHUB_STEP_SUMMARY
             echo "4. Schedule new release" >> $GITHUB_STEP_SUMMARY
           fi
-
   notify:
     name: Send Notifications
     runs-on: ubuntu-latest

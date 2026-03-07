@@ -51,7 +51,6 @@ async function createSampleEntities(): Promise<void> {
           email: 'john.smith@example.com',
           phone: '+1-555-0101',
           location: 'New York, NY',
-          tenantId: 'tenant_1',
         },
       },
       {
@@ -62,7 +61,6 @@ async function createSampleEntities(): Promise<void> {
           industry: 'Technology',
           headquarters: 'San Francisco, CA',
           website: 'https://techcorp.example.com',
-          tenantId: 'tenant_1',
         },
       },
       {
@@ -73,7 +71,6 @@ async function createSampleEntities(): Promise<void> {
           date: '2024-08-01',
           severity: 'HIGH',
           status: 'INVESTIGATING',
-          tenantId: 'tenant_1',
         },
       },
       {
@@ -82,9 +79,7 @@ async function createSampleEntities(): Promise<void> {
         props: {
           name: 'Corporate Headquarters',
           address: '100 Market Street, San Francisco, CA 94105',
-          latitude: 37.7749,
-          longitude: -122.4194,
-          tenantId: 'tenant_1',
+          coordinates: { lat: 37.7749, lng: -122.4194 },
         },
       },
       {
@@ -95,31 +90,25 @@ async function createSampleEntities(): Promise<void> {
           type: 'SERVER',
           ip_address: '192.168.1.100',
           status: 'ACTIVE',
-          tenantId: 'tenant_1',
         },
       },
     ];
 
     for (const entity of entities) {
-      try {
-        await session.run(
-          `
-          MERGE (e:Entity:${entity.type} {id: $id})
-          SET e.type = $type,
-              e += $props,
-              e.createdAt = datetime(),
-              e.updatedAt = datetime()
-        `,
-          {
-            id: entity.id,
-            type: entity.type,
-            props: entity.props,
-          },
-        );
-      } catch (err: any) {
-        logger.error({ err, entity }, 'Failed to create sample entity');
-        throw err;
-      }
+      await session.run(
+        `
+        MERGE (e:Entity:${entity.type} {id: $id})
+        SET e.type = $type,
+            e.props = $props,
+            e.createdAt = datetime(),
+            e.updatedAt = datetime()
+      `,
+        {
+          id: entity.id,
+          type: entity.type,
+          props: entity.props,
+        },
+      );
     }
 
     logger.info(`Created ${entities.length} sample entities`);
@@ -157,7 +146,6 @@ async function createSampleRelationships(): Promise<void> {
           props: {
             position: 'Senior Developer',
             start_date: '2023-01-15',
-            tenantId: 'tenant_1',
           },
         },
         {
@@ -168,31 +156,25 @@ async function createSampleRelationships(): Promise<void> {
           props: {
             role: 'Primary Suspect',
             confidence: 0.85,
-            tenantId: 'tenant_1',
           },
         },
       ];
 
       for (const rel of relationships) {
-        try {
-          await session.run(
-            `
-            MATCH (from:Entity {id: $from}), (to:Entity {id: $to})
-            MERGE (from)-[r:${rel.type} {id: $id}]->(to)
-            SET r += $props,
-                r.createdAt = datetime()
-          `,
-            {
-              id: rel.id,
-              from: rel.from,
-              to: rel.to,
-              props: rel.props,
-            },
-          );
-        } catch (err: any) {
-          logger.error({ err, rel }, 'Failed to create sample relationship');
-          throw err;
-        }
+        await session.run(
+          `
+          MATCH (from:Entity {id: $from}), (to:Entity {id: $to})
+          MERGE (from)-[r:${rel.type} {id: $id}]->(to)
+          SET r.props = $props,
+              r.createdAt = datetime()
+        `,
+          {
+            id: rel.id,
+            from: rel.from,
+            to: rel.to,
+            props: rel.props,
+          },
+        );
       }
 
       logger.info(`Created ${relationships.length} sample relationships`);

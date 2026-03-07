@@ -1,43 +1,36 @@
 import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
-import { resolve } from 'node:path';
+import { access } from 'node:fs/promises';
 
-async function hashFile(path) {
-  const hash = createHash('sha256');
-  const stream = createReadStream(path);
+/**
+ * Computes the SHA256 hash of a file deterministically.
+ */
+export async function computeFileHash(filepath) {
+  try {
+    await access(filepath);
+  } catch {
+    throw new Error(`File not found: ${filepath}`);
+  }
+
   return new Promise((resolve, reject) => {
-    stream.on('data', (data) => hash.update(data));
+    const hash = createHash('sha256');
+    const stream = createReadStream(filepath);
+    stream.on('data', (chunk) => hash.update(chunk));
     stream.on('end', () => resolve(hash.digest('hex')));
-    stream.on('error', (err) => {
-        if (err.code === 'ENOENT') {
-            resolve(null);
-        } else {
-            reject(err);
-        }
-    });
+    stream.on('error', (err) => reject(err));
   });
 }
 
-if (process.argv[1].endsWith('hash_weights.mjs')) {
-    const filePath = process.argv[2];
-    if (!filePath) {
-      console.error("Usage: node hash_weights.mjs <file_path>");
+if (process.argv[1] === import.meta.url.slice(7)) {
+  const filepath = process.argv[2];
+  if (!filepath) {
+    console.error('Usage: node hash_weights.mjs <filepath>');
+    process.exit(1);
+  }
+  computeFileHash(filepath)
+    .then((hash) => console.log(hash))
+    .catch((err) => {
+      console.error(err.message);
       process.exit(1);
-    }
-
-    hashFile(resolve(filePath))
-      .then((hash) => {
-        if (hash) {
-            console.log(hash);
-        } else {
-            console.error(`File not found: ${filePath}`);
-            process.exit(1);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-        process.exit(1);
-      });
+    });
 }
-
-export { hashFile };

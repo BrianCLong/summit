@@ -7,12 +7,13 @@ on:
 
 jobs:
   drift-check:
+    name: Detect Security Drift
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-
-      - name: Run Drift Detector
-        run: node .github/scripts/monitoring/safe-local-model-exec-drift.mjs
+          node-version: 20
+      - name: Run drift detector
+        run: node .github/scripts/model-sandbox/drift_detector.mjs

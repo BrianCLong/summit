@@ -10,10 +10,6 @@ on:
       - "evidence/**"
       - "tests/fixtures/**"
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   verify:
     name: ci/verify-subsump-bundle
@@ -24,7 +20,6 @@ jobs:
         with:
           node-version: "20"
       - run: node scripts/ci/verify_subsumption_bundle.mjs subsumption/ingress-nginx-retirement/manifest.yaml
-
   deny:
     name: ci/deny-ingress-nginx
     runs-on: ubuntu-latest

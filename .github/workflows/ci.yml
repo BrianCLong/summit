@@ -6,11 +6,10 @@ on:
     branches: [ main ]
     paths-ignore:
       - "**/*.md"
-  merge_group:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 # Global environment for all jobs - prevents V8 heap exhaustion
 env:
@@ -25,28 +24,26 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Validate Jest & pnpm Configuration
-        run: pnpm -w check:jest-config
-
-  lint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           cache: 'pnpm'
           node-version-file: .nvmrc
+      - name: Validate Jest & pnpm Configuration
+        run: pnpm -w check:jest-config
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v4                - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
-
   typecheck:
     name: Typecheck
     needs: lint
@@ -54,28 +51,26 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Node
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: 'pnpm'
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm typecheck
 
   unit-tests:
-    name: Unit Tests (CI)
+    name: Unit Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
@@ -108,11 +103,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-      - name: Setup Node
+        uses: pnpm/action-setup@v4                - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: 'pnpm'
           node-version-file: .nvmrc
       - name: Verify TSConfig Exclusions Frozen
         run: node scripts/ci/verify_tsconfig_excludes_frozen.mjs
@@ -127,7 +120,7 @@ jobs:
       strict: true
 
   soc-controls:
-    name: SOC Controls (CI)
+    name: SOC Controls
     runs-on: ubuntu-latest
     timeout-minutes: 10
     needs: [config-guard]
@@ -157,13 +150,11 @@ jobs:
           - 7687:7687
     steps:
       - uses: actions/checkout@v4
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
+          cache: 'pnpm'
           node-version-file: .nvmrc
-          cache: "pnpm"
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: SOC Control Unit Tests

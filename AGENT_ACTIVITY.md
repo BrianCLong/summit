@@ -14,6 +14,7 @@ This ledger tracks recent agent activity so humans can spot thrash, stalls, or c
 | TB-03   | main                           | n/a       | Agent | done             | Created HUMAN_STEERING.md.                                | 2026-02-01 |
 | TB-01   | main                           | n/a       | Agent | done             | Hardened agent-contract.json.                             | 2026-02-01 |
 | TB-08   | main                           | n/a       | Agent | done             | Integrated Email & Multimodal Vision/Signal services.     | 2026-02-02 |
+| MSBX-01 | feat/model-sandbox-hardening   | (pending) | Jules | ready-for-review | Safe Local Model Execution Runner + Policy Gates.         | 2026-03-02 |
 
 ## How to update
 

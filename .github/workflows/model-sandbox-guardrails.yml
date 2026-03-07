@@ -1,32 +1,76 @@
 name: Model Sandbox Guardrails
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - '.github/policies/model-sandbox/**'
-      - '.github/scripts/model-sandbox/**'
-      - 'tools/model-sandbox/**'
   pull_request:
-    branches: [ main ]
     paths:
-      - '.github/policies/model-sandbox/**'
-      - '.github/scripts/model-sandbox/**'
       - 'tools/model-sandbox/**'
+      - '.github/scripts/model-sandbox/**'
+      - '.github/policies/model-sandbox/**'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/model-sandbox/**'
+      - '.github/scripts/model-sandbox/**'
+      - '.github/policies/model-sandbox/**'
 
 jobs:
-  policy-tests:
+  policy-verification:
+    name: Verify Model Sandbox Policies
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: 20
 
-      - name: Install Dependencies
-        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Run Fixture Tests
-        run: node .github/scripts/model-sandbox/fixtures_test.mjs
+      - name: Run good configuration check
+        run: |
+          node .github/scripts/model-sandbox/run_policy_check.mjs \
+            .github/policies/model-sandbox/model-allowlist.yml \
+            '$(cat tools/model-sandbox/fixtures/good-config.json)'
+
+      - name: Verify failure on bad digest
+        run: |
+          if node .github/scripts/model-sandbox/run_policy_check.mjs \
+            .github/policies/model-sandbox/model-allowlist.yml \
+            '$(cat tools/model-sandbox/fixtures/bad-digest.json)'; then
+            echo "Expected failure on bad digest, but it passed."
+            exit 1
+          else
+            echo "Correctly failed on bad digest."
+          fi
+
+      - name: Verify failure on root user
+        run: |
+          if node .github/scripts/model-sandbox/run_policy_check.mjs \
+            .github/policies/model-sandbox/model-allowlist.yml \
+            '$(cat tools/model-sandbox/fixtures/bad-user.json)'; then
+            echo "Expected failure on root user, but it passed."
+            exit 1
+          else
+            echo "Correctly failed on root user."
+          fi
+
+  dry-run-validation:
+    name: Runner Dry-Run Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Execute dry-run
+        run: |
+          DRY_RUN=1 bash tools/model-sandbox/run.sh example-model alpine:latest tools/model-sandbox/fixtures/dummy-weights.bin
+      - name: Verify receipt existence
+        run: |
+          ls runtime/receipts/example-model/run.json
+          ls runtime/receipts/example-model/stamp.json

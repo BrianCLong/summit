@@ -1,10 +1,9 @@
--- NO_TRANSACTION
 -- Ensure tenant metadata is available for per-tenant hot embedding queries
 ALTER TABLE IF EXISTS entity_embeddings
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(255);
 
 -- Index to accelerate recency-filtered scans by tenant
-CREATE INDEX  IF NOT EXISTS idx_entity_embeddings_tenant_updated
+CREATE INDEX IF NOT EXISTS idx_entity_embeddings_tenant_updated
 ON entity_embeddings (tenant_id, updated_at DESC);
 
 -- Materialized view capturing the most recent embeddings per tenant for fast lookups
@@ -26,11 +25,11 @@ FROM (
 WHERE rn <= 500;
 
 -- Unique index required for concurrent refreshes
-CREATE UNIQUE INDEX  IF NOT EXISTS idx_tenant_hot_entity_embeddings_pk
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tenant_hot_entity_embeddings_pk
 ON tenant_hot_entity_embeddings (tenant_id, entity_id);
 
 -- Vector index to keep nearest-neighbor queries fast within the hot window
-CREATE INDEX  IF NOT EXISTS tenant_hot_entity_embeddings_hnsw
+CREATE INDEX IF NOT EXISTS tenant_hot_entity_embeddings_hnsw
 ON tenant_hot_entity_embeddings
 USING hnsw (embedding vector_cosine_ops)
 WITH (m = 16, ef_construction = 200);
@@ -41,6 +40,6 @@ RETURNS void
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  REFRESH MATERIALIZED VIEW  tenant_hot_entity_embeddings;
+  REFRESH MATERIALIZED VIEW CONCURRENTLY tenant_hot_entity_embeddings;
 END;
 $$;

@@ -1,68 +1,69 @@
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
+import { writeFile, mkdir } from 'node:fs/promises';
+import { join } from 'node:path';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const REPO_ROOT = resolve(__dirname, '../../../');
+/**
+ * Generates deterministic receipts for a model run.
+ */
+export async function generateReceipts(outputDir, runData) {
+  const { modelName, modelDigest, inputHash, outputHash, exitCode, egressAttempts } = runData;
 
-function generateReceipt(config, results) {
-  // Deterministic run ID based on config and result hashes
-  const runId = createHash('sha256')
-    .update(JSON.stringify(config))
-    .update(results.stdoutHash || '')
-    .update(results.stderrHash || '')
-    .digest('hex')
-    .substring(0, 12);
-
-  const receipt = {
-    evidence_id: `MSBX-${runId}`,
-    config: config,
-    results: {
-        exit_code: results.exitCode,
-        stdout_sha256: results.stdoutHash,
-        stderr_sha256: results.stderrHash
+  // run.json: Deterministic, no timestamps
+  const runReceipt = {
+    version: 1,
+    model: {
+      name: modelName,
+      digest: modelDigest,
+    },
+    inputs: {
+      hash: inputHash,
+    },
+    outputs: {
+      hash: outputHash,
+      exitCode,
+    },
+    security: {
+      egressAttempts: egressAttempts || [],
     }
   };
 
-  const stamp = {
-    evidence_id: `MSBX-${runId}`,
+  // stamp.json: Temporal metadata allowed
+  const stampReceipt = {
+    version: 1,
     timestamp: new Date().toISOString(),
-    user: process.env.USER || 'unknown',
-    node_version: process.version
+    environment: {
+      node: process.version,
+      platform: process.platform,
+    }
   };
 
-  const outputDir = join(REPO_ROOT, 'runtime/receipts');
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-  }
+  await mkdir(outputDir, { recursive: true });
 
-  writeFileSync(join(outputDir, `${runId}.run.json`), JSON.stringify(receipt, null, 2));
-  writeFileSync(join(outputDir, `${runId}.stamp.json`), JSON.stringify(stamp, null, 2));
+  await writeFile(
+    join(outputDir, 'run.json'),
+    JSON.stringify(runReceipt, null, 2),
+    'utf-8'
+  );
 
-  return runId;
+  await writeFile(
+    join(outputDir, 'stamp.json'),
+    JSON.stringify(stampReceipt, null, 2),
+    'utf-8'
+  );
+
+  return { runPath: join(outputDir, 'run.json'), stampPath: join(outputDir, 'stamp.json') };
 }
 
-if (process.argv[1].endsWith('receipt.mjs')) {
-    const [,, configJson, resultsJson] = process.argv;
-    if (configJson && resultsJson) {
-        try {
-            const config = JSON.parse(configJson);
-            const results = JSON.parse(resultsJson);
-            const runId = generateReceipt(config, results);
-            console.log(runId);
-        } catch (e) {
-            console.error("Failed to parse JSON arguments:", e);
-            process.exit(1);
-        }
-    } else {
-        const runId = generateReceipt(
-            { model: "example" },
-            { exitCode: 0, stdoutHash: "abc", stderrHash: "def" }
-        );
-        console.log(`Test receipt generated: ${runId}`);
-    }
+if (process.argv[1] === import.meta.url.slice(7)) {
+  // CLI usage for testing
+  const outputDir = process.argv[2] || './runtime/receipts/test';
+  const data = {
+    modelName: 'test-model',
+    modelDigest: 'sha256:abc',
+    inputHash: 'sha256:123',
+    outputHash: 'sha256:456',
+    exitCode: 0
+  };
+  generateReceipts(outputDir, data)
+    .then((paths) => console.log(`Receipts generated: ${paths.runPath}, ${paths.stampPath}`))
+    .catch(console.error);
 }
-
-export { generateReceipt };
