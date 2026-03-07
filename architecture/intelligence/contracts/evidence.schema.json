@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^(ITEM|SUMMIT|ACD):[A-Z]+-[0-9]{3,}$"
+    },
+    "source": {
+      "type": "string"
+    },
+    "text": {
+      "type": "string"
+    }
+  },
+  "required": ["evidence_id", "source", "text"]
+}
