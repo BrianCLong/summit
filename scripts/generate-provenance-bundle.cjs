@@ -31,12 +31,19 @@ class ProvenanceBundleGenerator {
 
   getTimestamp() {
       if (process.env.DETERMINISTIC_BUILD === 'true') {
+          if (process.env.SOURCE_DATE_EPOCH) {
+              return new Date(parseInt(process.env.SOURCE_DATE_EPOCH) * 1000).toISOString();
+          }
           return '1970-01-01T00:00:00.000Z';
       }
       return new Date().toISOString();
   }
 
   getCommitSHA() {
+      if (process.env.DETERMINISTIC_BUILD === 'true') {
+          if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
+          if (process.env.GIT_COMMIT_SHA) return process.env.GIT_COMMIT_SHA;
+      }
       try {
           return execSync('git rev-parse HEAD', { encoding: 'utf8' }).trim();
       } catch (e) {
@@ -46,6 +53,9 @@ class ProvenanceBundleGenerator {
   }
 
   getBranch() {
+      if (process.env.DETERMINISTIC_BUILD === 'true') {
+          if (process.env.GITHUB_REF_NAME) return process.env.GITHUB_REF_NAME;
+      }
       try {
           return execSync('git rev-parse --abbrev-ref HEAD', { encoding: 'utf8' }).trim();
       } catch (e) {
