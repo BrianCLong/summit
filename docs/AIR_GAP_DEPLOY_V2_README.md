@@ -1,4 +1,9 @@
-# Air-Gap Deploy v1 - Offline Deployment Package
+# Air-Gap Deploy v2 - Offline Deployment Package
+
+**New in v2**:
+- **Disconnected Graph Intelligence**: Full OSINT analysis, entity resolution, and risk scoring in SCIF/classified environments.
+- **Offline Provenance**: Cryptographic proof bundles that sync when reconnected.
+- **Security Additions**: Signed image digests, offline SBOM verification, portable Evidence Bundles with checksums, and zero-trust architecture for intermittent connectivity.
 
 **Issue**: #10076
 **Owner**: Platform + Infra
@@ -7,7 +12,7 @@
 
 ## Overview
 
-Air-Gap Deploy v1 provides a complete offline deployment package for IntelGraph in secure, disconnected environments. The package includes all Docker images with cryptographic digests, deployment automation, configuration injection, and comprehensive verification.
+Air-Gap Deploy v2 provides a complete offline deployment package for IntelGraph in secure, disconnected environments. The package includes all Docker images with cryptographic digests, deployment automation, configuration injection, and comprehensive verification, now with offline SBOM and Evidence Bundles for disconnected graph intelligence.
 
 ## Components Delivered
 
@@ -15,6 +20,8 @@ Air-Gap Deploy v1 provides a complete offline deployment package for IntelGraph 
 
 Automated script that creates complete air-gap deployment bundle with:
 
+- Offline SBOM (`sbom.json`)
+- Evidence Bundle (`evidence-bundle.json`)
 - Docker image list with digests
 - Image export to tar files
 - SHA256 checksum manifest
@@ -26,6 +33,7 @@ Automated script that creates complete air-gap deployment bundle with:
 
 - Pulls all required Docker images
 - Extracts cryptographic digests (SHA256)
+- Generates offline SBOM and Evidence Bundles
 - Saves images to transferable tar files
 - Generates comprehensive checksums
 - Creates deployment scripts
@@ -35,6 +43,8 @@ Automated script that creates complete air-gap deployment bundle with:
 
 ```
 airgap-bundle/
+├── sbom.json               # Offline SBOM for verification
+├── evidence-bundle.json    # Cryptographic proof bundle
 ├── images/
 │   ├── image-list.txt          # List of all required images
 │   ├── image-digests.txt       # Cryptographic digests
@@ -48,6 +58,7 @@ airgap-bundle/
 │   └── rollback.sh                  # Rollback procedure
 ├── checksums/
 │   ├── images.sha256           # Image checksums
+│   ├── sbom.sha256             # SBOM checksums
 │   └── manifest.sha256         # Overall manifest
 ├── docs/
 │   └── AIR_GAP_DEPLOYMENT_GUIDE.md  # Deployment guide
@@ -115,6 +126,7 @@ SHA256 verification for:
 - All Docker image tar files
 - Configuration files
 - Deployment scripts
+- Offline SBOM and Evidence Bundles
 - Documentation
 - Overall bundle integrity
 
@@ -202,6 +214,7 @@ cd airgap-bundle
 # 1. Verify checksums
 cd checksums
 sha256sum -c images.sha256
+sha256sum -c sbom.sha256
 sha256sum -c manifest.sha256
 cd ..
 
@@ -255,6 +268,9 @@ All images include SHA256 digests:
 ```bash
 # Verify individual image
 sha256sum -c checksums/images.sha256
+
+# Verify offline SBOM
+sha256sum -c checksums/sbom.sha256
 
 # Verify entire bundle
 sha256sum -c checksums/manifest.sha256
@@ -350,17 +366,19 @@ sha256sum -c images.sha256 && echo "✅ All checksums match"
 ## Files Delivered
 
 1. `scripts/airgap/create-offline-bundle.sh` (410 lines) - Bundle creator
-2. `docs/AIR_GAP_DEPLOY_V1_README.md` (this file) - Documentation
+2. `docs/AIR_GAP_DEPLOY_V2_README.md` (this file) - Documentation
 
 **Generated Bundle Structure**:
 
 - 4 deployment scripts (setup, deploy, verify, rollback)
-- 2 checksum files (images, manifest)
+- 3 checksum files (images, sbom, manifest)
 - 1 configuration template
 - 1 deployment guide
 - 1 dry-run transcript
+- 1 offline sbom
+- 1 evidence bundle
 
-**Total**: 2 source files + 9 generated files
+**Total**: 2 source files + 11 generated files
 
 ## Next Steps
 
