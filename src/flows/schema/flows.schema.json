@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.example.com/flows/flows.schema.json",
+  "title": "Living Architecture Flows",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "flows"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "flows": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/flow" }
+    }
+  },
+  "definitions": {
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "entrypoints", "edges"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "entrypoints": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entrypoint" }
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/edge" }
+        }
+      }
+    },
+    "entrypoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uiPath": { "type": "string" },
+        "httpPath": { "type": "string" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "from", "to", "kind", "evidence", "confidence"],
+      "properties": {
+        "id": { "type": "string" },
+        "from": { "type": "string" },
+        "to": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": ["http", "event", "db", "workflow", "unknown"]
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        }
+      }
+    }
+  }
+}

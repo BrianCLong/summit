@@ -896,3 +896,65 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: living-architecture-flows-pr1
+    version: v1
+    path: prompts/flows/living-architecture-flows-pr1@v1.md
+    sha256: 70b0ff6064a2ce4414e123f4c7c797d7c6e95b36f0b1d63d6a718838094a4edc
+    description: Define Living Architecture Flows schemas, types, and documentation contract.
+    scope:
+      paths:
+        - src/flows/
+        - docs/architecture/flows/
+        - docs/repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/flows/living-architecture-flows-pr1@v1.md
+        - prompts/registry.yaml
+        - agents/examples/LIVING_ARCH_FLOWS_PR1.task.json
+      domains:
+        - architecture
+        - documentation
+        - governance
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: living-architecture-flows-pr2
+    version: v1
+    path: prompts/flows/living-architecture-flows-pr2@v1.md
+    sha256: 17d5a06586067a6152e8b20bc5c2b8f9a10c833a48e4d8d24bfe605a7670039d
+    description: Implement Living Architecture Flows generate/verify/pack CLI and drift controls.
+    scope:
+      paths:
+        - src/flows/
+        - src/cli/summit.ts
+        - src/cli/commands/flows.ts
+        - src/agents/context/flowsPack.ts
+        - scripts/monitoring/claude-code-arch-reverse-drift.ts
+        - docs/architecture/flows/
+        - docs/standards/claude-code-arch-reverse.md
+        - docs/security/data-handling/claude-code-arch-reverse.md
+        - docs/ops/runbooks/claude-code-arch-reverse.md
+        - .github/workflows/flows.yml
+        - docs/roadmap/STATUS.json
+        - prompts/flows/living-architecture-flows-pr2@v1.md
+        - prompts/registry.yaml
+        - agents/examples/LIVING_ARCH_FLOWS_PR2.task.json
+      domains:
+        - architecture
+        - cli
+        - governance
+        - security
+    verification:
+      tiers_required:
+        - B
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

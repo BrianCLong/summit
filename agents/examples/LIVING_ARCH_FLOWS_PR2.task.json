@@ -1,0 +1,48 @@
+{
+  "task_id": "LIVING_ARCH_FLOWS_PR2",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "living-architecture-flows-pr2",
+    "version": "v1",
+    "sha256": "17d5a06586067a6152e8b20bc5c2b8f9a10c833a48e4d8d24bfe605a7670039d",
+    "path": "prompts/flows/living-architecture-flows-pr2@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/flows/",
+      "src/cli/summit.ts",
+      "src/cli/commands/flows.ts",
+      "src/agents/context/flowsPack.ts",
+      "scripts/monitoring/claude-code-arch-reverse-drift.ts",
+      "docs/architecture/flows/",
+      "docs/standards/claude-code-arch-reverse.md",
+      "docs/security/data-handling/claude-code-arch-reverse.md",
+      "docs/ops/runbooks/claude-code-arch-reverse.md",
+      ".github/workflows/flows.yml",
+      "docs/roadmap/STATUS.json",
+      "prompts/flows/living-architecture-flows-pr2@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/LIVING_ARCH_FLOWS_PR2.task.json"
+    ],
+    "domains": ["architecture", "cli", "governance", "security"]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "B",
+    "artifacts": ["flow-artifacts", "verification-output", "context-pack", "drift-report"]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Generate command writes index, flows.json, and per-flow Mermaid docs.",
+    "Verify command writes verification.json with endpoint/event/workflow sections.",
+    "Pack command writes .summit/context/flows.pack.json.",
+    "Optional CI workflow exists behind ENABLE_FLOWS_GATES flag."
+  ],
+  "stop_conditions": [
+    "Any deterministic output requirement is violated.",
+    "Any command requires network access for repository scanning."
+  ]
+}

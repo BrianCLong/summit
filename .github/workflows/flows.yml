@@ -1,0 +1,39 @@
+name: flows-governance
+
+on:
+  pull_request:
+    paths:
+      - 'src/flows/**'
+      - 'src/agents/context/flowsPack.ts'
+      - 'docs/architecture/flows/**'
+      - 'scripts/monitoring/claude-code-arch-reverse-drift.ts'
+      - 'docs/ops/runbooks/claude-code-arch-reverse.md'
+      - 'docs/security/data-handling/claude-code-arch-reverse.md'
+      - 'docs/standards/claude-code-arch-reverse.md'
+      - 'src/cli/summit.ts'
+      - 'src/cli/commands/flows.ts'
+      - 'package.json'
+  workflow_dispatch:
+
+jobs:
+  flows:
+    if: ${{ vars.ENABLE_FLOWS_GATES == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: flows-generate
+        run: pnpm summit flows generate --workspace . --out docs/architecture/flows
+      - name: flows-verify
+        run: pnpm summit flows verify --workspace . --out docs/architecture/flows
+      - name: flows-pack
+        run: pnpm summit flows pack --flows-out docs/architecture/flows --out .summit/context/flows.pack.json
+      - name: flows-determinism
+        run: pnpm exec tsx scripts/monitoring/claude-code-arch-reverse-drift.ts
