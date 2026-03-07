@@ -1,0 +1,22 @@
+{
+  "evidence": [
+    {
+      "id": "EVD-AFCP-ARCH-001",
+      "files": [
+        "docs/architecture/agent-control-plane-2027.md"
+      ]
+    },
+    {
+      "id": "EVD-AFCP-KG-003",
+      "files": [
+        "docs/architecture/knowledge-graph-orchestration-engine.md"
+      ]
+    },
+    {
+      "id": "EVD-AFCP-POLICY-004",
+      "files": [
+        ".github/policies/agent-policy.yaml"
+      ]
+    }
+  ]
+}

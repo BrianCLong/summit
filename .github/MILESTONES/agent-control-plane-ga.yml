@@ -1,0 +1,8 @@
+milestone: agent-control-plane-ga
+status: proposed
+exit_criteria:
+  - deterministic-routing-replay
+  - deny-fixtures-pass
+  - evidence-bundle-valid
+  - policy-check-pass
+  - connector-smoke-pass
