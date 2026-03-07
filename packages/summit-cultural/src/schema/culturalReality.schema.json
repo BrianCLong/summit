@@ -1,84 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://intelgraph.dev/schemas/cultural-reality.schema.json",
-  "title": "Cultural Reality Graph Seed Schema",
+  "$id": "https://summit.local/schema/culturalReality.schema.json",
+  "title": "PopulationGroup",
   "type": "object",
-  "required": ["populationGroup", "narrative", "signal"],
+  "required": ["id", "name", "regionId", "h3Cells", "languages"],
   "properties": {
-    "populationGroup": {
-      "type": "object",
-      "required": ["id", "region", "languages", "mediaConsumption"],
-      "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "region": { "type": "string", "minLength": 1 },
-        "languages": {
-          "type": "array",
-          "items": { "type": "string" },
-          "minItems": 1
-        },
-        "religion": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "educationDistribution": {
-          "type": "object",
-          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
-        },
-        "economicProfile": { "type": "string" },
-        "historicalMemories": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "valueSignals": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "mediaConsumption": {
-          "type": "array",
-          "items": { "type": "string" },
-          "minItems": 1
-        }
-      }
-    },
-    "narrative": {
-      "type": "object",
-      "required": ["id", "theme", "targetLanguages", "frameValues"],
-      "properties": {
-        "id": { "type": "string" },
-        "theme": { "type": "string" },
-        "targetLanguages": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "frameValues": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "historicalReferences": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "mediaVectors": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
-      }
-    },
-    "signal": {
-      "type": "object",
-      "required": ["detectedPhrases", "register", "sourceLanguage"],
-      "properties": {
-        "detectedPhrases": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "register": {
-          "type": "string",
-          "enum": ["formal", "informal", "activist", "bureaucratic", "mixed"]
-        },
-        "sourceLanguage": { "type": "string" },
-        "suspectedTranslation": { "type": "boolean" }
-      }
-    }
-  }
+    "id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "regionId": { "type": "string", "minLength": 1 },
+    "h3Cells": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "languages": { "type": "array", "items": { "type": "string" } },
+    "dialects": { "type": "array", "items": { "type": "string" } },
+    "religions": { "type": "array", "items": { "type": "string" } },
+    "ageBands": { "type": "object", "additionalProperties": { "type": "number" } },
+    "educationDistribution": { "type": "object", "additionalProperties": { "type": "number" } },
+    "economicProfile": { "type": "string" },
+    "mediaConsumption": { "type": "array", "items": { "type": "string" } },
+    "historicalMemories": { "type": "array", "items": { "type": "string" } },
+    "valueSignals": { "type": "array", "items": { "type": "string" } },
+    "trustProfiles": { "type": "object", "additionalProperties": { "type": "number" } },
+    "metadata": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false
 }

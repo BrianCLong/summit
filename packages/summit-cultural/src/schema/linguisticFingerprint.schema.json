@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://summit.local/schema/linguisticFingerprint.schema.json",
+  "title": "LinguisticFingerprint",
+  "type": "object",
+  "required": [
+    "id", "narrativeId", "expectedLanguage", "detectedLanguage",
+    "dialectFitScore", "idiomFitScore", "syntaxNaturalnessScore",
+    "translationArtifactScore", "propagandaPhraseScore", "anomalyScore", "reasons"
+  ],
+  "properties": {
+    "id": { "type": "string" },
+    "narrativeId": { "type": "string" },
+    "expectedLanguage": { "type": "string" },
+    "detectedLanguage": { "type": "string" },
+    "dialectFitScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "idiomFitScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "syntaxNaturalnessScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "translationArtifactScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "propagandaPhraseScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "anomalyScore": { "type": "number", "minimum": 0, "maximum": 1 },
+    "reasons": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
