@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0.0",
+  "stack": {
+    "ui": "react+vite",
+    "api": "node+graphql",
+    "data": "postgres+neo4j+redis",
+    "auth": "oidc+opa",
+    "observability": "opentelemetry+prometheus+grafana",
+    "testing": "jest+vitest+playwright",
+    "deployment": "docker+kubernetes"
+  },
+  "allowlist": {
+    "tools": [
+      "typescript",
+      "react",
+      "vite",
+      "jest",
+      "vitest",
+      "playwright",
+      "graphql",
+      "postgres",
+      "neo4j",
+      "redis",
+      "opa",
+      "prometheus",
+      "grafana",
+      "opentelemetry"
+    ]
+  },
+  "constraints": {
+    "determinism": {
+      "disallowTimestamps": true,
+      "stableOrdering": true
+    },
+    "security": {
+      "denyByDefault": true,
+      "neverLogSecrets": true
+    }
+  }
+}
