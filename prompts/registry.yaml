@@ -896,3 +896,58 @@ prompts:
         retirement_target: 0
     allowed_operations:
       - edit
+  - id: nonpublic-data-access-standards
+    version: v1
+    path: prompts/standards/nonpublic-data-access@v1.md
+    sha256: cde11a8ac62de3c4b235c96a26d9a4658bf674e5580be4ca0032e3903c4f42f3
+    description: Define non-public data access standards, data handling guidance, and runbook with roadmap update.
+    scope:
+      paths:
+        - docs/standards/nonpublic-data-access.md
+        - docs/security/data-handling/nonpublic-data-access.md
+        - docs/ops/runbooks/nonpublic-data-access.md
+        - repo_assumptions.md
+        - docs/roadmap/STATUS.json
+        - prompts/standards/nonpublic-data-access@v1.md
+        - prompts/registry.yaml
+      domains:
+        - documentation
+        - governance
+        - security
+        - operations
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit
+  - id: nonpublic-tool-harness
+    version: v1
+    path: prompts/hooks/nonpublic-tool-harness@v1.md
+    sha256: 0fdd66f1ad4fead06e37f306f64190314e95e1c9557a5ea814516b4dd46927a8
+    description: Implement deterministic non-public policy gate, HITL approval validation, and artifact tests.
+    scope:
+      paths:
+        - src/hooks/nonpublic.ts
+        - src/hooks/__tests__/nonpublic-data-access.test.ts
+        - docs/roadmap/STATUS.json
+        - prompts/hooks/nonpublic-tool-harness@v1.md
+        - prompts/registry.yaml
+        - agents/examples/NONPUBLIC_TOOL_HARNESS_TASK.json
+      domains:
+        - hooks
+        - security
+        - governance
+        - testing
+    verification:
+      tiers_required:
+        - C
+      debt_budget:
+        permitted: 0
+        retirement_target: 0
+    allowed_operations:
+      - create
+      - edit

@@ -1,0 +1,52 @@
+{
+  "task_id": "NONPUBLIC_DATA_ACCESS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "nonpublic-data-access-standards",
+    "version": "v1",
+    "sha256": "cde11a8ac62de3c4b235c96a26d9a4658bf674e5580be4ca0032e3903c4f42f3",
+    "path": "prompts/standards/nonpublic-data-access@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "docs/standards/nonpublic-data-access.md",
+      "docs/security/data-handling/nonpublic-data-access.md",
+      "docs/ops/runbooks/nonpublic-data-access.md",
+      "repo_assumptions.md",
+      "docs/roadmap/STATUS.json",
+      "prompts/standards/nonpublic-data-access@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NONPUBLIC_DATA_ACCESS_TASK.json"
+    ],
+    "domains": ["documentation", "governance", "security", "operations"],
+    "exclusions": [
+      ".github/workflows/release-*.yml",
+      "LICENSE",
+      "NOTICE",
+      "OSS-MIT-LICENSE",
+      "THIRD_PARTY_NOTICES*"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "docs/standards/nonpublic-data-access.md",
+      "docs/security/data-handling/nonpublic-data-access.md",
+      "docs/ops/runbooks/nonpublic-data-access.md"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Non-public data access standards, data handling guidance, and runbook are published.",
+    "Prompt registry entry and task spec are in place for auditability.",
+    "Roadmap status updated to track the nonpublic-data-access initiative."
+  ],
+  "stop_conditions": [
+    "Policy-as-code or evidence schema locations change from declared scope.",
+    "Request requires non-doc implementation work outside the declared scope."
+  ]
+}

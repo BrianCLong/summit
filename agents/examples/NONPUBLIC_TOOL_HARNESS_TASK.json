@@ -1,0 +1,46 @@
+{
+  "task_id": "NONPUBLIC_TOOL_HARNESS",
+  "agent_id": "codex",
+  "prompt_ref": {
+    "id": "nonpublic-tool-harness",
+    "version": "v1",
+    "sha256": "0fdd66f1ad4fead06e37f306f64190314e95e1c9557a5ea814516b4dd46927a8",
+    "path": "prompts/hooks/nonpublic-tool-harness@v1.md"
+  },
+  "declared_scope": {
+    "paths": [
+      "src/hooks/nonpublic.ts",
+      "src/hooks/__tests__/nonpublic-data-access.test.ts",
+      "docs/roadmap/STATUS.json",
+      "prompts/hooks/nonpublic-tool-harness@v1.md",
+      "prompts/registry.yaml",
+      "agents/examples/NONPUBLIC_TOOL_HARNESS_TASK.json"
+    ],
+    "domains": ["hooks", "security", "governance", "testing"],
+    "exclusions": [
+      "server/**",
+      "apps/web/**",
+      ".github/workflows/release-*.yml"
+    ]
+  },
+  "allowed_operations": ["create", "edit"],
+  "verification_requirements": {
+    "tier": "C",
+    "artifacts": [
+      "src/hooks/__tests__/nonpublic-data-access.test.ts"
+    ]
+  },
+  "debt_budget": {
+    "permitted": 0,
+    "retirement_target": 0
+  },
+  "success_criteria": [
+    "Non-public request policy is deny-by-default and approval-aware.",
+    "Deterministic policy/audit/provenance and approval artifacts are emitted.",
+    "Automated tests cover deny, allow, artifacts, and approval nonce/signature validation."
+  ],
+  "stop_conditions": [
+    "Changes require cross-zone refactors outside hooks scope.",
+    "Prompt registry hash or scope mismatch cannot be resolved in scope."
+  ]
+}

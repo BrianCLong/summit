@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-02-07T00:00:00Z",
+  "last_updated": "2026-03-07T02:16:35Z",
   "revision_note": "Added Summit PR Stack Sequencer skill scaffolding.",
   "initiatives": [
     {
@@ -193,6 +193,12 @@
       "status": "in_progress",
       "owner": "codex",
       "notes": "Documented CI/CD high-signal deltas with enforced action register and evidence targets."
+    },
+    {
+      "id": "nonpublic-data-access",
+      "status": "in_progress",
+      "owner": "codex",
+      "notes": "Implemented hooks-level non-public policy harness with deterministic artifacts and HITL approval tests."
     }
   ],
   "summary": {
@@ -200,7 +206,7 @@
     "partial": 2,
     "incomplete": 0,
     "not_started": 5,
-    "total": 17,
+    "total": 18,
     "ga_blockers": []
   }
 }
