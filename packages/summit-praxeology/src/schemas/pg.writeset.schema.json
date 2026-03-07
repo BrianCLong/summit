@@ -1,0 +1,66 @@
+{
+  "$id": "https://summit.dev/schemas/pg.writeset.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PG WriteSet Envelope (Quarantined)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "graph",
+    "mode",
+    "batchSignature",
+    "ops",
+    "provenance",
+    "safety"
+  ],
+  "properties": {
+    "id": { "type": "string", "minLength": 3 },
+    "graph": { "type": "string", "const": "PG" },
+    "mode": { "type": "string", "const": "quarantine" },
+    "batchSignature": { "type": "string", "minLength": 8 },
+    "ops": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["op", "entityType", "entityId", "payload"],
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "upsert_action_signature",
+              "upsert_playbook",
+              "upsert_hypothesis"
+            ]
+          },
+          "entityType": {
+            "type": "string",
+            "enum": ["ActionSignature", "Playbook", "Hypothesis"]
+          },
+          "entityId": { "type": "string", "minLength": 3 },
+          "payload": { "type": "object" }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "createdAt", "curator"],
+      "properties": {
+        "source": { "type": "string", "minLength": 3 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "curator": { "type": "string", "minLength": 2 }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["analyticOnly", "neverPromoteToReality"],
+      "properties": {
+        "analyticOnly": { "type": "boolean", "const": true },
+        "neverPromoteToReality": { "type": "boolean", "const": true }
+      }
+    }
+  }
+}

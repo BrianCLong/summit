@@ -1,0 +1,24 @@
+{
+  "id": "pg.action.sig.cross-platform-amplification.v1",
+  "label": "Cross-platform amplification signature",
+  "description": "Observed signal pattern where related messages appear across multiple platforms in compressed time windows.",
+  "indicators": [
+    {
+      "id": "ind2",
+      "signal": "cross-platform amplification",
+      "weight": 0.3,
+      "evidenceKinds": ["report"]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "c1",
+      "description": "Analytic indicator only."
+    }
+  ],
+  "provenance": {
+    "source": "internal-analytic-seed",
+    "createdAt": "2026-03-05T00:00:00Z",
+    "curator": "summit.seed"
+  }
+}
