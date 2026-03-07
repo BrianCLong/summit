@@ -1,0 +1,19 @@
+{
+  "name": "@summit/summit-intelgraph",
+  "version": "1.0.0",
+  "description": "High-level graph API over ontology objects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@summit/summit-ontology": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}

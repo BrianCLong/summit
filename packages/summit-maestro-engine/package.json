@@ -1,0 +1,19 @@
+{
+  "name": "@summit/summit-maestro-engine",
+  "version": "1.0.0",
+  "description": "The orchestrator that routes events across planes and merges outcomes",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@summit/summit-maestro-events": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}
