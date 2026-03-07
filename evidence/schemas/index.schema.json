@@ -1,38 +1,44 @@
 {
+  "$id": "https://summit/evidence/index.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "summit evidence index",
+  "title": "Summit Evidence Index",
   "type": "object",
-  "required": ["mappings"],
   "properties": {
-<<<<<<< HEAD
-    "version": {
-      "type": "string"
-    },
+    "version": { "type": ["integer", "string"] },
     "items": {
-      "type": "object",
-      "additionalProperties": {
+      "type": "array",
+      "items": {
         "type": "object",
+        "required": ["evidence_id", "files"],
         "properties": {
           "evidence_id": { "type": "string" },
           "files": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "title": { "type": "string" },
-          "category": { "type": "string" },
-          "artifacts": {
-            "type": "array",
-            "items": { "type": "string" }
+            "type": "object",
+            "required": ["report", "metrics", "stamp"],
+            "properties": {
+              "report": { "type": "string" },
+              "metrics": { "type": "string" },
+              "stamp": { "type": "string" }
+            },
+            "additionalProperties": true
           }
         },
-        "anyOf": [{ "required": ["files"] }, { "required": ["artifacts"] }],
         "additionalProperties": true
       }
     },
-    "map": {
-=======
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["evidence_id", "paths"],
+        "properties": {
+          "evidence_id": { "type": "string" },
+          "paths": { "type": "array", "items": { "type": "string" } }
+        },
+        "additionalProperties": false
+      }
+    },
     "mappings": {
->>>>>>> origin/main
       "type": "object",
       "additionalProperties": {
         "type": "object",
@@ -41,9 +47,15 @@
           "report": { "type": "string" },
           "metrics": { "type": "string" },
           "stamp": { "type": "string" }
-        }
+        },
+        "additionalProperties": false
       }
     }
   },
+  "anyOf": [
+    { "required": ["items"] },
+    { "required": ["entries"] },
+    { "required": ["mappings"] }
+  ],
   "additionalProperties": false
 }

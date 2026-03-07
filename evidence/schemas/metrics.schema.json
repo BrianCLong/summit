@@ -1,22 +1,27 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "evidence_id": { "type": "string" },
-    "avg_latency_ms": { "type": "number" },
-    "avg_fanout": { "type": "number" }
-  },
-  "required": [],
-  "additionalProperties": true
-  "$id": "https://summit.local/schemas/metrics.schema.json",
-  "type": "object",
-  "required": ["version", "counters"],
-  "properties": {
-    "version": { "type": "integer" },
-    "counters": {
+  "$id": "https://summit/evidence/metrics.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Summit Evidence Metrics",
+  "oneOf": [
+    {
       "type": "object",
-      "additionalProperties": { "type": "number" }
+      "properties": {
+        "evidence_id": { "type": "string" },
+        "avg_latency_ms": { "type": "number" },
+        "avg_fanout": { "type": "number" }
+      },
+      "required": ["avg_latency_ms", "avg_fanout"],
+      "additionalProperties": true
+    },
+    {
+      "type": "object",
+      "required": ["satisfaction", "scenarios_total", "scenarios_passed"],
+      "properties": {
+        "satisfaction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "scenarios_total": { "type": "integer", "minimum": 0 },
+        "scenarios_passed": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
     }
-  },
-  "additionalProperties": false
+  ]
 }
