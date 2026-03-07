@@ -53,6 +53,20 @@ export interface Tenant {
   updatedAt: Date;
 }
 
+export interface TenantSensitiveRequest {
+  id: string;
+  action: 'export' | 'delete';
+  tenantId: string;
+  reason: string;
+  createdBy: string;
+  createdAt: string;
+  approvals: Array<{
+    user_id: string;
+    role?: string;
+    reason?: string;
+  }>;
+}
+
 const SETTINGS_HISTORY_KEY = 'settings_history';
 const SETTINGS_HISTORY_LIMIT = 10;
 
@@ -416,6 +430,156 @@ export class TenantService {
     } catch (error: any) {
       await client.query('ROLLBACK');
       logger.error('Failed to disable tenant', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateStatus(
+    tenantId: string,
+    status: 'active' | 'suspended',
+    actorId: string,
+    reason?: string,
+  ): Promise<Tenant> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const current = this.mapRowToTenant(existing.rows[0]);
+      if (current.status === 'disabled') {
+        throw new Error('Disabled tenants require dedicated reactivation workflow');
+      }
+
+      if (!['active', 'suspended'].includes(current.status)) {
+        throw new Error(`Unsupported current status transition from '${current.status}'`);
+      }
+
+      if (current.status === status) {
+        await client.query('ROLLBACK');
+        return current;
+      }
+
+      const statusHistory = Array.isArray(current.config?.lifecycle?.statusHistory)
+        ? current.config.lifecycle.statusHistory
+        : [];
+
+      const nextConfig = {
+        ...(current.config || {}),
+        lifecycle: {
+          ...(current.config?.lifecycle || {}),
+          statusHistory: [
+            {
+              previousStatus: current.status,
+              nextStatus: status,
+              actorId,
+              reason,
+              changedAt: new Date().toISOString(),
+            },
+            ...statusHistory,
+          ].slice(0, 10),
+        },
+      };
+
+      const result = await client.query(
+        'UPDATE tenants SET status = $1, config = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+        [status, nextConfig, tenantId],
+      );
+
+      const tenant = this.mapRowToTenant(result.rows[0]);
+
+      await provenanceLedger.appendEntry({
+        action: 'TENANT_STATUS_UPDATED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          previousStatus: current.status,
+          nextStatus: status,
+          reason,
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return tenant;
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to update tenant status', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async createSensitiveOperationRequest(
+    tenantId: string,
+    action: 'export' | 'delete',
+    reason: string,
+    actorId: string,
+    approvals: Array<{ user_id: string; role?: string; reason?: string }>,
+    requestId?: string,
+  ): Promise<TenantSensitiveRequest> {
+    const pool = getPostgresPool();
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+      const existing = await client.query('SELECT * FROM tenants WHERE id = $1', [tenantId]);
+      if (!existing.rowCount) {
+        throw new Error('Tenant not found');
+      }
+
+      const current = this.mapRowToTenant(existing.rows[0]);
+      const request: TenantSensitiveRequest = {
+        id: requestId || randomUUID(),
+        action,
+        tenantId,
+        reason,
+        createdBy: actorId,
+        createdAt: new Date().toISOString(),
+        approvals,
+      };
+
+      const governance = Array.isArray((current.config as any)?.governance?.requests)
+        ? (current.config as any).governance.requests
+        : [];
+
+      const config = {
+        ...(current.config || {}),
+        governance: {
+          ...((current.config as any)?.governance || {}),
+          requests: [request, ...governance].slice(0, 20),
+        },
+      };
+
+      await client.query(
+        'UPDATE tenants SET config = $1, updated_at = NOW() WHERE id = $2',
+        [config, tenantId],
+      );
+
+      await provenanceLedger.appendEntry({
+        action: action === 'export' ? 'TENANT_EXPORT_REQUESTED' : 'TENANT_DELETE_REQUESTED',
+        actor: { id: actorId, role: 'admin' },
+        metadata: {
+          tenantId,
+          requestId: request.id,
+          reason,
+          approvals: approvals.map((approval) => ({ user_id: approval.user_id, role: approval.role })),
+        },
+        artifacts: [],
+      });
+
+      await client.query('COMMIT');
+      return request;
+    } catch (error: any) {
+      await client.query('ROLLBACK');
+      logger.error('Failed to create sensitive tenant request', error);
       throw error;
     } finally {
       client.release();

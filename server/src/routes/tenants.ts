@@ -11,6 +11,7 @@ import archiver from 'archiver';
 import { createHash, randomUUID } from 'crypto';
 import provisionRouter from './tenants/provision.js';
 import { tenantUsageService } from '../services/TenantUsageService.js';
+import { normalizeApprovalActors, validateDualControlRequirement } from '../middleware/dual-control.js';
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -31,6 +32,11 @@ const disableSchema = z.object({
   reason: z.string().min(3).optional(),
 });
 
+const statusSchema = z.object({
+  status: z.enum(['active', 'suspended']),
+  reason: z.string().min(3).optional(),
+});
+
 const auditQuerySchema = z.object({
   limit: z.coerce.number().min(1).max(200).default(50),
   offset: z.coerce.number().min(0).default(0),
@@ -38,6 +44,19 @@ const auditQuerySchema = z.object({
 
 const usageQuerySchema = z.object({
   range: z.string().optional(),
+});
+
+const approvalActorSchema = z.object({
+  user_id: z.string().min(1),
+  role: z.string().optional(),
+  reason: z.string().min(3).optional(),
+  tenant_id: z.string().optional(),
+});
+
+const sensitiveOperationSchema = z.object({
+  reason: z.string().min(3),
+  requestId: z.string().optional(),
+  approvals: z.array(z.union([z.string(), approvalActorSchema])).min(2),
 });
 
 router.use('/provision', provisionRouter);
@@ -244,6 +263,164 @@ router.post(
         return res.status(404).json({ success: false, error: error.message });
       }
       logger.error('Error in POST /api/tenants/:id/disable:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.patch(
+  '/:id',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('update', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const { status, reason } = statusSchema.parse(req.body);
+      const tenantId = req.params.id;
+      const actorId = authReq.user?.id || 'unknown';
+      const updated = await tenantService.updateStatus(tenantId, status, actorId, reason);
+      return res.json({
+        success: true,
+        data: updated,
+        receipt: buildReceipt('TENANT_STATUS_UPDATED', tenantId, actorId),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      if (
+        error instanceof Error
+        && (
+          error.message.includes('Disabled tenants require dedicated reactivation workflow')
+          || error.message.includes('Unsupported current status transition')
+        )
+      ) {
+        return res.status(409).json({ success: false, error: error.message });
+      }
+      logger.error('Error in PATCH /api/tenants/:id:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.post(
+  '/:id/export-requests',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('export', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const tenantId = req.params.id;
+      const actorId = authReq.user?.id || 'unknown';
+      const parsed = sensitiveOperationSchema.parse(req.body);
+      const approvals = normalizeApprovalActors(parsed.approvals);
+
+      const dualControl = await validateDualControlRequirement({
+        requestId: parsed.requestId || randomUUID(),
+        action: 'tenant_export_request',
+        tenantId,
+        requesterId: actorId,
+        requiredApprovals: 2,
+        requiredRoles: ['compliance-officer'],
+        approvals,
+      });
+
+      if (!dualControl.satisfied) {
+        return res.status(403).json({
+          success: false,
+          error: 'Dual-control requirement not satisfied',
+          violations: dualControl.violations,
+        });
+      }
+
+      const requestRecord = await tenantService.createSensitiveOperationRequest(
+        tenantId,
+        'export',
+        parsed.reason,
+        actorId,
+        approvals,
+        parsed.requestId,
+      );
+
+      return res.status(202).json({
+        success: true,
+        data: requestRecord,
+        receipt: buildReceipt('TENANT_EXPORT_REQUESTED', tenantId, actorId),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      logger.error('Error in POST /api/tenants/:id/export-requests:', error);
+      return res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+  },
+);
+
+router.post(
+  '/:id/delete-requests',
+  ensureAuthenticated,
+  ensureTenantScope,
+  policyGate(),
+  ensurePolicy('delete', 'tenant'),
+  async (req: Request, res: Response) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const tenantId = req.params.id;
+      const actorId = authReq.user?.id || 'unknown';
+      const parsed = sensitiveOperationSchema.parse(req.body);
+      const approvals = normalizeApprovalActors(parsed.approvals);
+
+      const dualControl = await validateDualControlRequirement({
+        requestId: parsed.requestId || randomUUID(),
+        action: 'tenant_delete_request',
+        tenantId,
+        requesterId: actorId,
+        requiredApprovals: 2,
+        requiredRoles: ['compliance-officer', 'security-admin'],
+        approvals,
+      });
+
+      if (!dualControl.satisfied) {
+        return res.status(403).json({
+          success: false,
+          error: 'Dual-control requirement not satisfied',
+          violations: dualControl.violations,
+        });
+      }
+
+      const requestRecord = await tenantService.createSensitiveOperationRequest(
+        tenantId,
+        'delete',
+        parsed.reason,
+        actorId,
+        approvals,
+        parsed.requestId,
+      );
+
+      return res.status(202).json({
+        success: true,
+        data: requestRecord,
+        receipt: buildReceipt('TENANT_DELETE_REQUESTED', tenantId, actorId),
+      });
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ success: false, error: 'Validation Error', details: error.errors });
+      }
+      if (error instanceof Error && error.message === 'Tenant not found') {
+        return res.status(404).json({ success: false, error: error.message });
+      }
+      logger.error('Error in POST /api/tenants/:id/delete-requests:', error);
       return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   },
